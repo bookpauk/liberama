@@ -15,6 +15,7 @@
   "scripts": {
     "lint": "eslint --ext=.js,.vue client server",
     "build:linux": "pkg -t latest-linux-x64 -o dist/linux/liberama server/index.js",
+    "build:win": "pkg -t latest-win-x64 -o dist/win/liberama server/index.js",
     "start": "node server/index.js"
   },
   "dependencies": {
