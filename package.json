@@ -5,13 +5,16 @@
     "node": ">=10.0.0"
   },
   "devDependencies": {
-    "babel-eslint": "^6.0.0",
+    "babel-eslint": "^7.2.2",
     "eslint": "^5.4.0",
     "eslint-plugin-html": "^1.4.0",
-    "eslint-plugin-node": "^8.0.0"
+    "eslint-plugin-node": "^8.0.0",
+    "eslint-plugin-vue": "^5.0.0"
   },
   "scripts": {
-    "lint": "eslint *.js"
+    "lint": "eslint --ext=.js,.vue client server",
+    "build": "webpack --progress --colors --config build/webpack.prod.config.js",
+    "start": "cross-env NODE_ENV=production node server/index.js"
   },
   "dependencies": {
     "bluebird": "^3.5.3",
