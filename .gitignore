@@ -1,3 +1,4 @@
 /server/application_env
 /node_modules
-
+/dist/win
+/dist/linux

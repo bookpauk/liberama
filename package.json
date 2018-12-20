@@ -9,12 +9,13 @@
     "eslint": "^5.4.0",
     "eslint-plugin-html": "^1.4.0",
     "eslint-plugin-node": "^8.0.0",
-    "eslint-plugin-vue": "^5.0.0"
+    "eslint-plugin-vue": "^5.0.0",
+    "pkg": "^4.3.5"
   },
   "scripts": {
     "lint": "eslint --ext=.js,.vue client server",
-    "build": "webpack --progress --colors --config build/webpack.prod.config.js",
-    "start": "cross-env NODE_ENV=production node server/index.js"
+    "build:linux": "pkg -t latest-linux-x64 -o dist/linux/liberama server/index.js",
+    "start": "node server/index.js"
   },
   "dependencies": {
     "bluebird": "^3.5.3",
