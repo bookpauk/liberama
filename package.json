@@ -1,0 +1,20 @@
+{
+  "name": "Liberama",
+  "version": "0.1.0",
+  "engines": {
+    "node": ">=10.0.0"
+  },
+  "devDependencies": {
+    "babel-eslint": "^6.0.0",
+    "eslint": "^5.4.0",
+    "eslint-plugin-html": "^1.4.0",
+    "eslint-plugin-node": "^8.0.0"
+  },
+  "scripts": {
+    "lint": "eslint *.js"
+  },
+  "dependencies": {
+    "bluebird": "^3.5.3",
+    "express": "^4.16.4"
+  }
+}
