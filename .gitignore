@@ -1,4 +1,5 @@
-/server/application_env
 /node_modules
+/server/config/application_env
+/server/data
 /dist/win
 /dist/linux
