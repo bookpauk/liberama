@@ -10,8 +10,8 @@ async function main() {
     const connPool = new SqliteConnectionPool(20, logger, config);
     await connPool.init();
 
+    app.use(express.static('public'));
     app.use(express.json());
-    express.static('public');
 
     require('./routes')(app, connPool, logger, config);
 
