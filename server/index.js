@@ -7,7 +7,9 @@ const logger = require('./core/loggerInit')(config);
 const SqliteConnectionPool = require('./core/SqliteConnectionPool');
 
 async function main() {
-    const connPool = new SqliteConnectionPool(20, logger, config);
+    const connPool = new SqliteConnectionPool(20, config);
+    
+    logger.log('Opening database');
     await connPool.init();
 
     app.use(express.static('public'));

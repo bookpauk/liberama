@@ -5,15 +5,12 @@ const sqlite = require('sqlite');
 const waitingDelay = 100; //ms
 
 class SqliteConnectionPool {
-    constructor(connCount, logger, config) {
+    constructor(connCount, config) {
         this.connCount = connCount;
-        this.logger = logger;
         this.config = config;
     }
 
     async init() {
-        this.logger.log('Opening database');
-
         utils.mkDirIfNotExistsSync(this.config.dataDir);
         const dbFileName = this.config.dataDir + '/' + this.config.dbFileName;
 
