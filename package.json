@@ -21,6 +21,7 @@
   "dependencies": {
     "bluebird": "^3.5.3",
     "express": "^4.16.4",
+    "sql-template-strings": "^2.2.2",
     "sqlite": "^3.0.0"
   }
 }
