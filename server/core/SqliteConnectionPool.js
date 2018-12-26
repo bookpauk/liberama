@@ -6,15 +6,16 @@ const waitingDelay = 100; //ms
 
 class SqliteConnectionPool {
     constructor(connCount, logger, config) {
-        this.config = config;
         this.connCount = connCount;
+        this.logger = logger;
+        this.config = config;
     }
 
     async init() {
         this.logger.log('Opening database');
 
-        utils.mkDirIfNotExistsSync(config.dataDir);
-        const dbFileName = config.dataDir + '/' + config.dbFileName;
+        utils.mkDirIfNotExistsSync(this.config.dataDir);
+        const dbFileName = this.config.dataDir + '/' + this.config.dbFileName;
 
         this.connections = [];
         this.taken = new Set();

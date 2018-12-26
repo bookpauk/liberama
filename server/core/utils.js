@@ -13,7 +13,6 @@ function statPathSync(path) {
 }
 
 function mkDirIfNotExistsSync(path) {
-    console.log(path);
     let exists = statPathSync(path);
     if (!exists) {
         fs.mkdirSync(path, {recursive: true, mode: 0o755});

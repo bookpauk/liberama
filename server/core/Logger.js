@@ -153,11 +153,11 @@ class FileLog extends BaseLog {
             }, LOG_ROTATE_FILE_CHECK_INTERVAL);
         };
 
-        await fs.writeAsync(this.fd, new Buffer(data.join('')));
+        await fs.writeAsync(this.fd, Buffer.from(data.join('')));
     }
 
     flushImplSync(data) {
-        fs.writeSync(this.fd, new Buffer(data.join('')));
+        fs.writeSync(this.fd, Buffer.from(data.join('')));
     }
 
 }
