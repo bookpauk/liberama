@@ -1,6 +1,6 @@
 const fs = require('fs');
 
-const branchFilename = __dirname + '/../application_env';
+const branchFilename = __dirname + '/application_env';
 
 let branch = 'production';
 try {

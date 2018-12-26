@@ -1,12 +1,9 @@
-const path = require('path');
-const fs = require('fs');
-
-const packageObj = JSON.parse(fs.readFileSync(__dirname + '/../../package.json', 'utf8'));
-const execPath = path.dirname(process.execPath);
+const pckg = require('../../package.json');
+const execPath = __dirname + '/..';
 
 module.exports = {
     branch: 'base',
-    tempDir: execPath +'/tmp',
+    tempDir: execPath + '/tmp',
     logDir: execPath + '/log',
     dataDir: execPath + '/data',
     dbFileName: 'db.sqlite',
@@ -15,7 +12,7 @@ module.exports = {
     port: '33080',
     ip: '127.0.0.1',
 
-    version: packageObj.version,
-    name: packageObj.name,
+    version: pckg.version,
+    name: pckg.name,
 };
 
