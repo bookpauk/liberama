@@ -45,8 +45,7 @@
 	"node/prefer-global/text-decoder": "off",
 	"node/prefer-global/text-encoder": "off",
 	"node/prefer-global/url-search-params": "off",
-	"node/prefer-global/url": "off",
-	"node/shebang": "error"
+	"node/prefer-global/url": "off"
 
   }
 }
