@@ -4,6 +4,10 @@
   "engines": {
     "node": ">=10.0.0"
   },
+  "bin": "server/index.js",
+  "pkg": {
+    "scripts": "server/config/*.js"
+  },
   "devDependencies": {
     "babel-eslint": "^7.2.2",
     "eslint": "^5.4.0",
@@ -14,8 +18,8 @@
   },
   "scripts": {
     "lint": "eslint --ext=.js,.vue client server",
-    "build:linux": "pkg -t latest-linux-x64 -o dist/linux/liberama server/index.js",
-    "build:win": "pkg -t latest-win-x64 -o dist/win/liberama server/index.js",
+    "build:linux": "pkg -t latest-linux-x64 -o dist/linux/liberama .",
+    "build:win": "pkg -t latest-win-x64 -o dist/win/liberama .",
     "start": "node server/index.js"
   },
   "dependencies": {
