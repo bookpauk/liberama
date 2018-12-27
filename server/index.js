@@ -16,20 +16,8 @@ async function main() {
     await connPool.init();
 
     if (config.branch == 'development') {
-        const webpack  = require('webpack');
-        const wpConfig = require('../build/webpack.dev.config');
-
-        const compiler = webpack(wpConfig);
-        const devMiddleware = require('webpack-dev-middleware');
-        app.use(devMiddleware(compiler, {
-            publicPath: wpConfig.output.publicPath,
-            stats: {colors: true}
-        }));
-
-        let hotMiddleware = require('webpack-hot-middleware');
-        app.use(hotMiddleware(compiler, {
-            log: log
-        }));
+        const devFileName = './dev.js'; //ignored by pkg
+        require(devFileName).webpackDevMiddleware(app);
     }
 
     app.use(express.static(config.publicDir));
