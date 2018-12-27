@@ -5,9 +5,7 @@ function initRoutes(app, connPool, config) {
     const misc = new c.MiscController(connPool, config);
 
     const routes = [
-        ['POST', '/api/config/:name', misc, 'configValue', {}],
-
-        ['GET', '/api/config/:name', misc, 'configValue', {}],
+        ['POST', '/api/config', misc, 'getConfig', {}],
     ];
 
     for (route of routes) {
