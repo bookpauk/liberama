@@ -11,12 +11,13 @@
     "build:win": "npm run build:client && pkg -t latest-win-x64 -o dist/win/liberama .",
     "lint": "eslint --ext=.js,.vue client server"
   },
-  "bin": "server/index.js",
+  "bin": "server/index-prod.js",
   "pkg": {
     "scripts": "server/config/*.js"
   },
   "devDependencies": {
     "babel-core": "^6.22.1",
+    "babel-eslint": "^10.0.1",
     "babel-loader": "^7.1.1",
     "babel-preset-env": "^1.3.2",
     "css-loader": "^1.0.0",
