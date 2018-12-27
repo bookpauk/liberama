@@ -7,6 +7,7 @@ module.exports = {
     tempDir: execPath + '/tmp',
     logDir: execPath + '/log',
     dataDir: execPath + '/data',
+    publicDir: execPath + '/public',
     dbFileName: 'db.sqlite',
     loggingEnabled: true,
 

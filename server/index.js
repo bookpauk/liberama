@@ -32,7 +32,7 @@ async function main() {
         }));
     }
 
-    app.use(express.static('public'));
+    app.use(express.static(config.publicDir));
     app.use(express.json());
 
     require('./routes').initRoutes(app, connPool, config);

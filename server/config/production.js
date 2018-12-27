@@ -8,5 +8,6 @@ module.exports = Object.assign({}, base, {
         tempDir: execPath + '/tmp',
         logDir: execPath + '/log',
         dataDir: execPath + '/data',
+        publicDir: execPath + '/public',
     }
 );
