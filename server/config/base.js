@@ -1,5 +1,6 @@
+const path = require('path');
 const pckg = require('../../package.json');
-const execPath = __dirname + '/..';
+const execPath = path.resolve(__dirname + '/..');
 
 module.exports = {
     branch: 'base',
