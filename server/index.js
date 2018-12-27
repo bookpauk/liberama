@@ -15,6 +15,23 @@ async function main() {
     log('Opening database');
     await connPool.init();
 
+    if (config.branch == 'development') {
+        const webpack  = require('webpack');
+        const wpConfig = require('../build/webpack.dev.config');
+
+        const compiler = webpack(wpConfig);
+        const devMiddleware = require('webpack-dev-middleware');
+        app.use(devMiddleware(compiler, {
+            publicPath: wpConfig.output.publicPath,
+            stats: {colors: true}
+        }));
+
+        let hotMiddleware = require('webpack-hot-middleware');
+        app.use(hotMiddleware(compiler, {
+            log: log
+        }));
+    }
+
     app.use(express.static('public'));
     app.use(express.json());
 
