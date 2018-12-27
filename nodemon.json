@@ -1,0 +1,5 @@
+{
+	"ignore": ["node_modules", ".git", "client/**/*.*"],
+
+	"__exec": "node server"
+}
