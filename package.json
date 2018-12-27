@@ -11,7 +11,7 @@
     "build:win": "npm run build:client && pkg -t latest-win-x64 -o dist/win/liberama .",
     "lint": "eslint --ext=.js,.vue client server"
   },
-  "bin": "server/index-prod.js",
+  "bin": "server/index.js",
   "pkg": {
     "scripts": "server/config/*.js"
   },
