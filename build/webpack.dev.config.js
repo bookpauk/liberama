@@ -1,8 +1,8 @@
-let path = require("path");
-let webpack = require("webpack");
+const path = require("path");
+const webpack = require("webpack");
 
-let merge = require("webpack-merge");
-let baseWpConfig = require("./webpack.base.config");
+const merge = require("webpack-merge");
+const baseWpConfig = require("./webpack.base.config");
 
 baseWpConfig.entry.unshift("webpack-hot-middleware/client");
 

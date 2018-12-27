@@ -1,5 +1,5 @@
-let path = require("path");
-let webpack = require("webpack");
+const path = require("path");
+const webpack = require("webpack");
 const VueLoaderPlugin = require('vue-loader/lib/plugin');
 
 module.exports = {
@@ -7,8 +7,7 @@ module.exports = {
     output: {
         path: path.resolve(__dirname, "..", "server", "public"),
         publicPath: "/",
-        filename: "[name].js",
-        chunkFilename: "[chunkhash].js"
+        filename: "bundle.js"
     },
 
     module: {
