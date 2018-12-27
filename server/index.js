@@ -1,4 +1,5 @@
-const config = require('./config/config');
+const config = require('./config');
+
 const {initLogger, getLog} = require('./core/getLogger');
 initLogger(config);
 const log = getLog();
