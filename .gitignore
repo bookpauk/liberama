@@ -1,6 +1,6 @@
 /node_modules
 /server/data
 /server/log
-/server/public/bundle.js
+/server/public/app
 /dist/win
 /dist/linux
