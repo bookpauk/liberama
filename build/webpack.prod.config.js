@@ -28,9 +28,6 @@ module.exports = merge(baseWpConfig, {
                 "NODE_ENV": JSON.stringify("production")
             }
         }),
-        new webpack.LoaderOptionsPlugin({
-            minimize: true
-        }),
         new MiniCssExtractPlugin({
             filename: "[name].css"
         })
