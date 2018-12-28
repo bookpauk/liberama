@@ -15,7 +15,16 @@ module.exports = merge(baseWpConfig, {
             {
                 test: /\.vue$/,
                 loader: "vue-loader"
-            }
+            },
+            // это будет применяться к файлам `.css`
+            // А ТАКЖЕ к секциям `<style>` внутри файлов `.vue`
+            {
+                test: /\.css$/,
+                use: [
+                  'vue-style-loader',
+                  'css-loader'
+                ]
+            },
         ]
     },
 
