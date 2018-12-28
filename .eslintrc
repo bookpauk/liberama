@@ -1,9 +1,14 @@
 {
-  "parser": "babel-eslint",
+  "parserOptions": {
+    "parser": "babel-eslint"
+  },
+  "extends": [
+    "plugin:vue/essential"
+  ],
   "plugins": [
+    "vue",
     "html",
-    "node",
-    "vue"
+    "node"
   ],
   "env": {
     "browser": true,
@@ -26,25 +31,5 @@
       "ignoreComments": true,
       "ignoreUrls": true
     }],
-
-	"node/exports-style": "off",
-	"node/no-deprecated-api": "error",
-	"node/no-extraneous-import": "off",
-	"node/no-extraneous-require": "error",
-	"node/no-missing-import": "off",
-	"node/no-missing-require": "error",
-	"node/no-unpublished-bin": "error",
-	"node/no-unpublished-import": "off",
-	"node/no-unsupported-features/es-builtins": "error",
-	"node/no-unsupported-features/es-syntax": "error",
-	"node/no-unsupported-features/node-builtins": "error",
-	"node/prefer-global/buffer": "off",
-	"node/prefer-global/console": "off",
-	"node/prefer-global/process": "off",
-	"node/prefer-global/text-decoder": "off",
-	"node/prefer-global/text-encoder": "off",
-	"node/prefer-global/url-search-params": "off",
-	"node/prefer-global/url": "off"
-
   }
 }
