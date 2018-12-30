@@ -1,11 +1,11 @@
 const log = require('../core/getLogger').getLog();
 const BaseController = require('./BaseController');
-const Lazy = require('lazy.js');
+const _ = require('lodash');
 
 class MiscController extends BaseController {
     async getConfig(req, res) {
         if (Array.isArray(req.body.params))
-            return Lazy(this.config).pick(req.body.params).toObject();
+            return _.pick(this.config, req.body.params);
         //bad request
         res.status(400).send({error: 'params is not an array'});
         return false;
