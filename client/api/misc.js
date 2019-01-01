@@ -1,12 +1,15 @@
 import axios from 'axios';
 
-async function test() {
-  try {
-    const response = await axios.post('/api/config', {params: ['version']});
-    console.log(response);
-  } catch (error) {
-    console.error(error.response.data);
-  }
+class Misc {
+    async getConfig() {
+        const response = await axios.post('/api/config', {params: ['name', 'version']});
+        return response.data;
+    }
 }
-test();
 
+let misc = null;
+if (!misc) {
+    misc = new Misc();
+}
+
+export default misc;

@@ -42,23 +42,36 @@ export default @Component({
     },
 })
 class App extends Vue {
-    isCollapse = false;
-    asideWidth = '170px';
-    buttonCollapseIcon = 'el-icon-d-arrow-left';
+    created() {
+        this.commit = this.$store.commit;
+        this.uistate = this.$store.state.uistate;        
+    }
 
     handleSelect(key, keyPath) {
         console.log(key, keyPath);
     }
 
     toggleCollapse() {
-        this.isCollapse = !this.isCollapse;
-        if (this.isCollapse) {
-            this.asideWidth = '64px';
-            this.buttonCollapseIcon = 'el-icon-d-arrow-right';
+        this.commit('uistate/setAsideBarCollapse', !this.uistate.asideBarCollapse);
+    }
+
+    get isCollapse() {
+        return this.uistate.asideBarCollapse;
+    }
+
+    get asideWidth() {
+        if (this.uistate.asideBarCollapse) {
+            return '64px';
+        } else {
+            return '170px';
         }
-        else {
-            this.asideWidth = '170px';
-            this.buttonCollapseIcon = 'el-icon-d-arrow-left';
+    }
+
+    get buttonCollapseIcon() {
+        if (this.uistate.asideBarCollapse) {
+            return 'el-icon-d-arrow-right';
+        } else {
+            return 'el-icon-d-arrow-left';
         }
     }
 }
