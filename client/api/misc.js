@@ -1,8 +1,8 @@
 import axios from 'axios';
 
 class Misc {
-    async getConfig() {
-        const response = await axios.post('/api/config', {params: ['name', 'version']});
+    async loadConfig() {
+        const response = await axios.post('/api/config1', {params: ['name', 'version']});
         return response.data;
     }
 }

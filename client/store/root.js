@@ -1,6 +1,6 @@
 // initial state
 const state = {
-    asideBarCollapse: false,
+    apiError: null,
 };
 
 // getters
@@ -11,8 +11,8 @@ const actions = {};
 
 // mutations
 const mutations = {
-    setAsideBarCollapse(state, value) {
-        state.asideBarCollapse = value;
+    setApiError(state, value) {
+        state.apiError = value;
     },
 };
 

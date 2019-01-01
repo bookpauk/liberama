@@ -1,6 +1,7 @@
 <template>
     <el-container>
         <el-aside :width="asideWidth">
+            {{ appName }}
             <el-button class="el-button-collapse" @click="toggleCollapse" :icon="buttonCollapseIcon"></el-button>
             <el-menu default-active="1" class="el-menu-vertical" @select="handleSelect" :collapse="isCollapse">
               <el-menu-item index="1">
@@ -27,7 +28,7 @@
         </el-aside>
 
         <el-main>
-            Main
+            <pre>{{ apiError }}</pre>
         </el-main>
     </el-container>
 </template>
@@ -44,7 +45,23 @@ export default @Component({
 class App extends Vue {
     created() {
         this.commit = this.$store.commit;
-        this.uistate = this.$store.state.uistate;        
+        this.dispatch = this.$store.dispatch;
+        this.state = this.$store.state;
+        this.uistate = this.$store.state.uistate;
+        this.config = this.$store.state.config;
+    }
+
+    mounted() {
+        this.dispatch('config/loadConfig');
+        this.$watch('apiError', function(newError, oldError) {
+            if (newError) {
+                this.$notify.error({
+                    title: 'Error',
+                    dangerouslyUseHTMLString: true,
+                    message: newError.response.config.url + '<br>' + newError.response.statusText
+                });
+            }
+        });
     }
 
     handleSelect(key, keyPath) {
@@ -73,6 +90,14 @@ class App extends Vue {
         } else {
             return 'el-icon-d-arrow-left';
         }
+    }
+
+    get appName() {
+        return `${this.config.name} v${this.config.version}`;
+    }
+
+    get apiError() {
+        return this.state.apiError;
     }
 }
 </script>
