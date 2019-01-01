@@ -42,6 +42,13 @@ module.exports = {
                     name: "images/[name]-[hash:6].[ext]"
                 }
             },
+            {
+                test: /\.(ttf|eot|woff)$/,
+                loader: "file-loader",
+                options: {
+                    prefix: "font/"
+                }
+            },
         ]
     },
 
