@@ -8,6 +8,7 @@ import Income from './components/Income/Income.vue';
 import Sources from './components/Sources/Sources.vue';
 import Settings from './components/Settings/Settings.vue';
 import Help from './components/Help/Help.vue';
+import NotFound404 from './components/NotFound404/NotFound404.vue';
 
 Vue.use(VueRouter);
 
@@ -19,6 +20,7 @@ let routes = [
     { path: '/sources', component: Sources },
     { path: '/settings', component: Settings },
     { path: '/help', component: Help },
+    { path: '*', component: NotFound404 },
 ];
 
 export default new VueRouter({

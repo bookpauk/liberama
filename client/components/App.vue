@@ -3,32 +3,32 @@
         <el-aside :width="asideWidth">
             <div class="app-name"><span v-html="appName"></span></div>
             <el-button class="el-button-collapse" @click="toggleCollapse" :icon="buttonCollapseIcon"></el-button>
-            <el-menu class="el-menu-vertical" @select="handleSelect" :collapse="isCollapse" router>
-              <el-menu-item index="cardindex">
+            <el-menu class="el-menu-vertical" :default-active="rootRoute" :collapse="isCollapse" router>
+              <el-menu-item index="/cardindex">
                 <i class="el-icon-search"></i>
-                <span slot="title">Картотека</span>
+                <span style="font-weight: bold" slot="title">Картотека</span>
               </el-menu-item>
-              <el-menu-item index="reader">
+              <el-menu-item index="/reader">
                 <i class="el-icon-tickets"></i>
                 <span slot="title">Читалка</span>
               </el-menu-item>
-              <el-menu-item index="forum" disabled>
+              <el-menu-item index="/forum" disabled>
                 <i class="el-icon-message"></i>
                 <span slot="title">Форум-чат</span>
               </el-menu-item>
-              <el-menu-item index="income">
+              <el-menu-item index="/income">
                 <i class="el-icon-upload"></i>
                 <span slot="title">Поступления</span>
               </el-menu-item>
-              <el-menu-item index="sources">
+              <el-menu-item index="/sources">
                 <i class="el-icon-menu"></i>
                 <span slot="title">Источники</span>
               </el-menu-item>
-              <el-menu-item index="settings">
+              <el-menu-item index="/settings">
                 <i class="el-icon-setting"></i>
                 <span slot="title">Параметры</span>
               </el-menu-item>
-              <el-menu-item index="help">
+              <el-menu-item index="/help">
                 <i class="el-icon-question"></i>
                 <span slot="title">Справка</span>
               </el-menu-item>
@@ -70,10 +70,6 @@ class App extends Vue {
         });
     }
 
-    handleSelect(key, keyPath) {
-        console.log(key, keyPath);
-    }
-
     toggleCollapse() {
         this.commit('uistate/setAsideBarCollapse', !this.uistate.asideBarCollapse);
     }
@@ -107,6 +103,14 @@ class App extends Vue {
 
     get apiError() {
         return this.state.apiError;
+    }
+
+    get rootRoute() {
+        const m = this.$route.path.match(/^(\/[^\/]*).*$/i);
+        if (m) 
+            return m[1];
+        else
+            return this.$route.path;
     }
 }
 //-----------------------------------------------------------------------------
