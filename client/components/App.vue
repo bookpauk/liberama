@@ -3,7 +3,7 @@
         <el-aside :width="asideWidth">
             <div class="app-name"><span v-html="appName"></span></div>
             <el-button class="el-button-collapse" @click="toggleCollapse" :icon="buttonCollapseIcon"></el-button>
-            <el-menu class="el-menu-vertical" @select="handleSelect" :collapse="isCollapse">
+            <el-menu class="el-menu-vertical" @select="handleSelect" :collapse="isCollapse" router>
               <el-menu-item index="cardindex">
                 <i class="el-icon-search"></i>
                 <span slot="title">Картотека</span>
@@ -36,19 +36,17 @@
         </el-aside>
 
         <el-main>
-            <pre>{{ apiError }}</pre>
+            <pre></pre>
         </el-main>
     </el-container>
 </template>
 
 <script>
+//-----------------------------------------------------------------------------
 import Vue from 'vue';
 import Component from 'vue-class-component';
 
 export default @Component({
-    props: {
-        test: String
-    },
 })
 class App extends Vue {
     created() {
@@ -111,6 +109,7 @@ class App extends Vue {
         return this.state.apiError;
     }
 }
+//-----------------------------------------------------------------------------
 </script>
 
 <style scoped>
