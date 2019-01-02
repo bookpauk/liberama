@@ -1,7 +1,6 @@
 <template>
-    <el-container direction="vertical">
-        <el-header height="50px">Header</el-header>
-        <router-view></router-view>
+    <el-container>
+        Раздел Search в разработке
     </el-container>
 </template>
 
@@ -12,16 +11,10 @@ import Component from 'vue-class-component';
 
 export default @Component({
 })
-class CardIndex extends Vue {
+class Search extends Vue {
     created() {
     }
 
 }
 //-----------------------------------------------------------------------------
 </script>
-
-<style scoped>
-.el-header {
-    border: 1px solid black;
-}
-</style>

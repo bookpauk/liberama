@@ -141,6 +141,7 @@ class App extends Vue {
 }
   
 .el-main {
+    padding: 5px;
     background-color: #E6EDF4;
     color: #000;
 }
