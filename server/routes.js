@@ -8,7 +8,7 @@ function initRoutes(app, connPool, config) {
         ['POST', '/api/config', misc, 'getConfig', {}],
     ];
 
-    for (route of routes) {
+    for (let route of routes) {
         const [httpMethod, path, controller, handler, options] = route;
 
         const callback = async function(req, res) {
