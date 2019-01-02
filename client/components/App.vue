@@ -16,7 +16,7 @@
                 <i class="el-icon-message"></i>
                 <span slot="title">Форум-чат</span>
               </el-menu-item>
-              <el-menu-item index="newbooks">
+              <el-menu-item index="income">
                 <i class="el-icon-upload"></i>
                 <span slot="title">Поступления</span>
               </el-menu-item>
@@ -36,7 +36,7 @@
         </el-aside>
 
         <el-main>
-            <pre></pre>
+            <router-view></router-view>
         </el-main>
     </el-container>
 </template>
