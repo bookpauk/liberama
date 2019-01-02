@@ -64,7 +64,7 @@ class App extends Vue {
         this.$watch('apiError', function(newError, oldError) {
             if (newError) {
                 this.$notify.error({
-                    title: 'Error',
+                    title: 'Ошибка API',
                     dangerouslyUseHTMLString: true,
                     message: newError.response.config.url + '<br>' + newError.response.statusText
                 });
@@ -127,13 +127,13 @@ class App extends Vue {
 
 .el-aside {
     line-height: 1;
-    background-color: #ddd;
+    background-color: #ccc;
     color: #000;
 }
   
 .el-main {
-    background-color: #E9EEF3;
-    color: #333;
+    background-color: #E6EDF4;
+    color: #000;
 }
 
 .el-menu-vertical:not(.el-menu--collapse) {
@@ -158,7 +158,7 @@ class App extends Vue {
     border: 0;
 }
 .el-menu-item {
-    font-size: 80%;
+    font-size: 85%;
 }
 </style>
 
