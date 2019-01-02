@@ -6,31 +6,31 @@
             <el-menu class="el-menu-vertical" :default-active="rootRoute" :collapse="isCollapse" router>
               <el-menu-item index="/cardindex">
                 <i class="el-icon-search"></i>
-                <span style="font-weight: bold" slot="title">Картотека</span>
+                <span :class="itemTitleClass('/cardindex')" slot="title">Картотека</span>
               </el-menu-item>
               <el-menu-item index="/reader">
                 <i class="el-icon-tickets"></i>
-                <span slot="title">Читалка</span>
+                <span :class="itemTitleClass('/reader')" slot="title">Читалка</span>
               </el-menu-item>
               <el-menu-item index="/forum" disabled>
                 <i class="el-icon-message"></i>
-                <span slot="title">Форум-чат</span>
+                <span :class="itemTitleClass('/forum')" slot="title">Форум-чат</span>
               </el-menu-item>
               <el-menu-item index="/income">
                 <i class="el-icon-upload"></i>
-                <span slot="title">Поступления</span>
+                <span :class="itemTitleClass('/income')" slot="title">Поступления</span>
               </el-menu-item>
               <el-menu-item index="/sources">
                 <i class="el-icon-menu"></i>
-                <span slot="title">Источники</span>
+                <span :class="itemTitleClass('/sources')" slot="title">Источники</span>
               </el-menu-item>
               <el-menu-item index="/settings">
                 <i class="el-icon-setting"></i>
-                <span slot="title">Параметры</span>
+                <span :class="itemTitleClass('/settings')" slot="title">Параметры</span>
               </el-menu-item>
               <el-menu-item index="/help">
                 <i class="el-icon-question"></i>
-                <span slot="title">Справка</span>
+                <span :class="itemTitleClass('/help')" slot="title">Справка</span>
               </el-menu-item>
             </el-menu>
         </el-aside>
@@ -82,7 +82,7 @@ class App extends Vue {
         if (this.uistate.asideBarCollapse) {
             return '64px';
         } else {
-            return '160px';
+            return '170px';
         }
     }
 
@@ -107,10 +107,11 @@ class App extends Vue {
 
     get rootRoute() {
         const m = this.$route.path.match(/^(\/[^\/]*).*$/i);
-        if (m) 
-            return m[1];
-        else
-            return this.$route.path;
+        return (m ? m[1] : this.$route.path);
+    }
+
+    itemTitleClass(path) {
+        return (this.rootRoute == path ? {'bold-font': true} : {});
     }
 }
 //-----------------------------------------------------------------------------
@@ -124,6 +125,11 @@ class App extends Vue {
     line-height: 140%;
     font-weight: bold;
 }
+
+.bold-font {
+    font-weight: bold;
+}
+
 .el-container {
     height: 100%;
 }
