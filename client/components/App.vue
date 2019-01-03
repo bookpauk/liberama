@@ -165,6 +165,7 @@ class App extends Vue {
     color: inherit;
     margin-top: 5px;
     width: 100%;
+    height: 64px;
     border: 0;
 }
 .el-menu-item {
