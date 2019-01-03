@@ -7,7 +7,6 @@
             <el-tab-pane label="История"></el-tab-pane>
             <router-view></router-view>
         </el-tabs>
-        {{ curRoute }}
     </el-container>
 </template>
 
