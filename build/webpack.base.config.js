@@ -22,7 +22,8 @@ module.exports = {
                     plugins: [
                         'syntax-dynamic-import',
                         'transform-decorators-legacy',
-                        'transform-class-properties'
+                        'transform-class-properties',
+                        ["component", { "libraryName": "element-ui", "styleLibraryName": "~client/theme" } ]
                     ]
                 }
             },
