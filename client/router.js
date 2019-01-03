@@ -15,9 +15,14 @@ import NotFound404 from './components/NotFound404/NotFound404.vue';
 
 const myRoutes = [
     ['/', null, null, '/cardindex'],
-    ['/cardindex', CardIndex, null, '/cardindex/search' ],
-    ['/cardindex~search', Search ],
-    //['/cardindex~card/:authorId', CardIndex ],
+    ['/cardindex', CardIndex ],
+    ['/cardindex/search', CardIndex ],
+    ['/cardindex/card', CardIndex ],
+    ['/cardindex/card/:authorId', CardIndex ],
+    ['/cardindex/book', CardIndex ],
+    ['/cardindex/book/:bookId', CardIndex ],
+    ['/cardindex/history', CardIndex ],
+    
     ['/reader', Reader ],
     ['/income', Income ],
     ['/sources', Sources ],
