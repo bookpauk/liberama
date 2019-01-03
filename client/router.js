@@ -3,8 +3,13 @@ import VueRouter from 'vue-router';
 import _ from 'lodash';
 
 import App from './components/App.vue';
+
 import CardIndex from './components/CardIndex/CardIndex.vue';
 import Search from  './components/CardIndex/Search/Search.vue';
+import Card from  './components/CardIndex/Card/Card.vue';
+import Book from  './components/CardIndex/Book/Book.vue';
+import History from  './components/CardIndex/History/History.vue';
+
 import Reader from './components/Reader/Reader.vue';
 //import Forum from './components/Forum/Forum.vue';
 import Income from './components/Income/Income.vue';
@@ -15,14 +20,14 @@ import NotFound404 from './components/NotFound404/NotFound404.vue';
 
 const myRoutes = [
     ['/', null, null, '/cardindex'],
-    ['/cardindex', CardIndex ],
-    ['/cardindex/search', CardIndex ],
-    ['/cardindex/card', CardIndex ],
-    ['/cardindex/card/:authorId', CardIndex ],
-    ['/cardindex/book', CardIndex ],
-    ['/cardindex/book/:bookId', CardIndex ],
-    ['/cardindex/history', CardIndex ],
-    
+    ['/cardindex', CardIndex, null, '/cardindex/search' ],
+    ['/cardindex~search', Search ],
+    ['/cardindex~card', Card ],
+    ['/cardindex~card/:authorId', Card ],
+    ['/cardindex~book', Book ],
+    ['/cardindex~book/:bookId', Book ],
+    ['/cardindex~history', History ],
+
     ['/reader', Reader ],
     ['/income', Income ],
     ['/sources', Sources ],

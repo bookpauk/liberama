@@ -1,20 +1,13 @@
 <template>
     <el-container direction="vertical">
         <el-tabs type="border-card" style="height: 100%;" v-model="selectedTab">
-            <el-tab-pane label="Поиск">
-                <Search></Search>
-            </el-tab-pane>
-            <el-tab-pane label="Автор">
-                <Card></Card>
-            </el-tab-pane>
-            <el-tab-pane label="Книга">
-                <Book></Book>
-            </el-tab-pane>
-            <el-tab-pane label="История">
-                <History></History>
-            </el-tab-pane>
-            {{ this.$route.path }}
+            <el-tab-pane label="Поиск"></el-tab-pane>
+            <el-tab-pane label="Автор"></el-tab-pane>
+            <el-tab-pane label="Книга"></el-tab-pane>
+            <el-tab-pane label="История"></el-tab-pane>
+            <router-view></router-view>
         </el-tabs>
+        {{ curRoute }}
     </el-container>
 </template>
 
@@ -22,30 +15,49 @@
 //-----------------------------------------------------------------------------
 import Vue from 'vue';
 import Component from 'vue-class-component';
-import Search from './Search/Search.vue';
-import Card from './Card/Card.vue';
-import Book from './Book/Book.vue';
-import History from './History/History.vue';
+import _ from 'lodash';
+
+const tab2Route = [
+    '/cardindex/search',
+    '/cardindex/card',
+    '/cardindex/book',
+    '/cardindex/history',
+];
+let lastActiveTab = null;
 
 export default @Component({
-    components: {
-        Search, Card, Book, History
-    },
     watch: {
         selectedTab: function(newValue, oldValue) {
-            switch (newValue) {
-                case '0': this.$router.push('/cardindex/search'); break;
-                case '1': this.$router.push('/cardindex/card'); break;
-                case '2': this.$router.push('/cardindex/book'); break;
-                case '3': this.$router.push('/cardindex/history'); break;
+            lastActiveTab = newValue;
+            const t = Number(newValue);
+            if (tab2Route[t] !== this.curRoute) {
+                this.$router.replace(tab2Route[t]);
             }
-        },        
+        },
+        curRoute: function(newValue, oldValue) {
+            this.setTabByRoute(newValue);
+        },
     },
 })
 class CardIndex extends Vue {
     selectedTab = null;
 
-    created() {
+    mounted() {
+        this.setTabByRoute(this.curRoute);
+        if (lastActiveTab !== null)
+            this.selectedTab = lastActiveTab;
+    }
+
+    setTabByRoute(route) {
+        const t = _.indexOf(tab2Route, route);
+        if (t >= 0 && t !== this.selectedTab) {
+            this.selectedTab = t.toString();
+        }
+    }
+
+    get curRoute() {
+        const m = this.$route.path.match(/^(\/[^\/]*\/[^\/]*).*$/i);
+        return (m ? m[1] : this.$route.path);
     }
 
 }
