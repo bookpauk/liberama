@@ -12,7 +12,7 @@ module.exports = {
     loggingEnabled: true,
 
     port: '33080',
-    ip: '127.0.0.1',
+    ip: '0.0.0.0',
 
     version: pckg.version,
     name: pckg.name,
