@@ -3,6 +3,8 @@ const webpack = require("webpack");
 
 const merge = require("webpack-merge");
 const baseWpConfig = require("./webpack.base.config");
+const TerserPlugin = require('terser-webpack-plugin');
+const OptimizeCSSAssetsPlugin = require("optimize-css-assets-webpack-plugin");
 const MiniCssExtractPlugin = require("mini-css-extract-plugin");
 const CleanWebpackPlugin = require('clean-webpack-plugin');
 
@@ -21,6 +23,12 @@ module.exports = merge(baseWpConfig, {
                   'css-loader'
                 ]
             }
+        ]
+    },
+    optimization: {
+        minimizer: [
+            new TerserPlugin(),
+            new OptimizeCSSAssetsPlugin()
         ]
     },
     plugins: [
