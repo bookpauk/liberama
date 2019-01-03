@@ -5,6 +5,7 @@ initLogger(config);
 const log = getLog();
 
 const express = require('express');
+const compression = require('compression');
 const app = express();
 
 const SqliteConnectionPool = require('./core/SqliteConnectionPool');
@@ -20,7 +21,8 @@ async function main() {
         require(devFileName).webpackDevMiddleware(app);
     }
 
-    app.use(express.static(config.publicDir));
+    app.use(compression({ level: 1 }));
+    app.use(express.static(config.publicDir, { maxAge: '1d' }));
     app.use(express.json());
 
     require('./routes').initRoutes(app, connPool, config);
