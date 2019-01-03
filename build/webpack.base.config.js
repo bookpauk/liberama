@@ -3,11 +3,11 @@ const webpack = require("webpack");
 const VueLoaderPlugin = require('vue-loader/lib/plugin');
 
 module.exports = {
-    entry: [path.resolve(__dirname, "../client/main.js")],
+    entry: [path.resolve(__dirname, '../client/main.js')],
     output: {
-        path: path.resolve(__dirname, "../server/public/app"),
-        publicPath: "/app/",
-        filename: "bundle.js"
+        path: path.resolve(__dirname, '../server/public/app'),
+        publicPath: '/app/',
+        filename: 'bundle.js'
     },
 
     module: {
