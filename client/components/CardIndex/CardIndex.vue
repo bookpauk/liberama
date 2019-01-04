@@ -5,7 +5,9 @@
             <el-tab-pane label="Автор"></el-tab-pane>
             <el-tab-pane label="Книга"></el-tab-pane>
             <el-tab-pane label="История"></el-tab-pane>
-            <router-view></router-view>
+            <keep-alive>
+                <router-view></router-view>
+            </keep-alive>
         </el-tabs>
     </el-container>
 </template>
