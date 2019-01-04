@@ -1,6 +1,4 @@
 /node_modules
 /server/data
-/server/log
-/server/public/app
-/dist/win
-/dist/linux
+/server/public
+/dist
