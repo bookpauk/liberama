@@ -15,6 +15,16 @@ function webpackDevMiddleware(app) {
     app.use(hotMiddleware(compiler, {
         log: log
     }));
+
+    app.use(function(req, res, next) {
+        const start = Date.now();
+        const params = (req.body ? req.body.params : '');
+        log(`${req.method} ${req.originalUrl} ${req.body.params}`);
+        res.once('finish', () => {
+            log(`${Date.now() - start}ms`);
+        });
+        next();
+    });    
 }
 
 module.exports = {
