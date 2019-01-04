@@ -15,7 +15,7 @@ function statPathSync(path) {
 function mkDirIfNotExistsSync(path) {
     let exists = statPathSync(path);
     if (!exists) {
-        fs.mkdirSync(path, {recursive: true, mode: 0o755});
+        fs.mkdirSync(path, {recursive: true});
     } else if (!exists.isDirectory()) {
         throw new Error(`Not a directory: ${path}`);
     }

@@ -1,4 +1,5 @@
 const fs = require('fs');
+const utils = require('../core/utils');
 
 const branchFilename = __dirname + '/application_env';
 
@@ -15,4 +16,8 @@ const confFilename = __dirname + `/${branch}.js`;
 
 fs.accessSync(confFilename);
 
-module.exports = require(confFilename);
+const config = require(confFilename);
+
+utils.mkDirIfNotExistsSync(config.dataDir);
+
+module.exports = config;
