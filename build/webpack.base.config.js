@@ -25,7 +25,7 @@ module.exports = {
                         'syntax-dynamic-import',
                         'transform-decorators-legacy',
                         'transform-class-properties',
-                        ["component", { "libraryName": "element-ui", "styleLibraryName": `~${clientDir}/theme` } ]
+//                        ["component", { "libraryName": "element-ui", "styleLibraryName": `~${clientDir}/theme` } ]
                     ]
                 }
             },
