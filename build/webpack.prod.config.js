@@ -36,7 +36,7 @@ module.exports = merge(baseWpConfig, {
         ]
     },
     plugins: [
-        new CleanWebpackPlugin([`${publicDir}`], {root: path.resolve(__dirname, '..')}),
+        new CleanWebpackPlugin([publicDir], {root: path.resolve(__dirname, '..')}),
         new MiniCssExtractPlugin({
             filename: "[name].[contenthash].css"
         }),
