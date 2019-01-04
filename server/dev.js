@@ -15,18 +15,28 @@ function webpackDevMiddleware(app) {
     app.use(hotMiddleware(compiler, {
         log: log
     }));
+}
 
+function logQueries(app) {
     app.use(function(req, res, next) {
         const start = Date.now();
-        const params = (req.body ? req.body.params : '');
-        log(`${req.method} ${req.originalUrl} ${req.body.params}`);
+        log(`${req.method} ${req.originalUrl} ${JSON.stringify(req.body)}`);
         res.once('finish', () => {
             log(`${Date.now() - start}ms`);
         });
         next();
+    });
+}
+
+function logErrors(app) {
+    app.use(function(err, req, res, next) {
+        log(LM_ERR, err.stack);
+        res.status(500).send(err.stack);
     });    
 }
 
 module.exports = {
-    webpackDevMiddleware
+    webpackDevMiddleware,
+    logQueries,
+    logErrors
 };
