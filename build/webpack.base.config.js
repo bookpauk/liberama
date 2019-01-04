@@ -2,12 +2,12 @@ const path = require("path");
 const webpack = require("webpack");
 const VueLoaderPlugin = require('vue-loader/lib/plugin');
 
+const clientDir = path.resolve(__dirname, '../client');
+
 module.exports = {
-    entry: [path.resolve(__dirname, '../client/main.js')],
+    entry: [`${clientDir}/main.js`],
     output: {
-        path: path.resolve(__dirname, '../server/public/app'),
         publicPath: '/app/',
-        filename: 'bundle.js'
     },
 
     module: {
@@ -23,7 +23,7 @@ module.exports = {
                         'syntax-dynamic-import',
                         'transform-decorators-legacy',
                         'transform-class-properties',
-                        ["component", { "libraryName": "element-ui", "styleLibraryName": "~client/theme" } ]
+                        ["component", { "libraryName": "element-ui", "styleLibraryName": `~${clientDir}/theme` } ]
                     ]
                 }
             },
@@ -61,6 +61,6 @@ module.exports = {
     },
 
     plugins: [
-        new VueLoaderPlugin()
+        new VueLoaderPlugin(),
     ]
 };
