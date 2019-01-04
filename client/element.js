@@ -1,6 +1,5 @@
 import Vue from 'vue';
 
-
 /*
 import ElementUI from 'element-ui';
 import './theme/index.css';
@@ -24,10 +23,10 @@ import './theme/menu-item.css';
 import ElButton from 'element-ui/lib/button';
 import './theme/button.css';
 
-const ElTabs = () => import('element-ui/lib/tabs');
+import ElTabs from 'element-ui/lib/tabs';
 import './theme/tabs.css';
 
-const ElTabPane = () => import('element-ui/lib/tab-pane');
+import ElTabPane from 'element-ui/lib/tab-pane';
 import './theme/tab-pane.css';
 
 import ElContainer from 'element-ui/lib/container';
@@ -63,4 +62,4 @@ Vue.prototype.$notify = Notification;
 //Vue.prototype.$message = Message;
 
 import locale from 'element-ui/lib/locale/lang/ru-RU';
-Vue.prototype.$ELEMENT = { locale }; 
+Vue.prototype.$ELEMENT = { locale };
