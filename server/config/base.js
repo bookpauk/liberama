@@ -1,13 +1,15 @@
 const path = require('path');
 const pckg = require('../../package.json');
-const execPath = path.resolve(__dirname, '..');
+
+const execDir = path.resolve(__dirname, '..');
+const dataDir = `${execDir}/data`;
 
 module.exports = {
     branch: 'base',
-    tempDir: execPath + '/tmp',
-    logDir: execPath + '/log',
-    dataDir: execPath + '/data',
-    publicDir: execPath + '/public',
+    dataDir: dataDir,
+    tempDir: `${dataDir}/tmp`,
+    logDir: `${dataDir}/log`,
+    publicDir: `${execDir}/public`,
     dbFileName: 'db.sqlite',
     loggingEnabled: true,
 
