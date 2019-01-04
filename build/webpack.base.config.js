@@ -12,8 +12,10 @@ module.exports = {
 
     module: {
         rules: [
-            // это будет применяться к файлам `.js`
-            // А ТАКЖЕ к секциям `<script>` внутри файлов `.vue`
+            {
+                test: /\.vue$/,
+                loader: "vue-loader"
+            },
             {
                 test: /\.js$/,
                 loader: 'babel-loader',

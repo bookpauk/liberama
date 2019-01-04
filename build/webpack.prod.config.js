@@ -21,10 +21,6 @@ module.exports = merge(baseWpConfig, {
     module: {
         rules: [
             {
-                test: /\.vue$/,
-                loader: "vue-loader",
-            },
-            {
                 test: /\.css$/,
                 use: [
                   MiniCssExtractPlugin.loader,
