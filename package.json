@@ -11,7 +11,7 @@
     "build:win": "npm run build:client && webpack --config build/webpack.win.config.js && pkg -t latest-win-x64 -o dist/win/liberama .",
     "lint": "eslint --ext=.js,.vue client server",
     "build:client-dev": "webpack --config build/webpack.dev.config.js",
-    "postinstall": "npm run build:client-dev && build:linux"
+    "postinstall": "npm run build:client-dev && npm run build:linux"
   },
   "bin": "server/index.js",
   "pkg": {
