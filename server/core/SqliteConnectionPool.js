@@ -1,4 +1,3 @@
-const Promise = require('bluebird');
 const fs = require('fs-extra');
 const utils = require('./utils');
 const sqlite = require('sqlite');

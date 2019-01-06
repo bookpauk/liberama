@@ -57,7 +57,6 @@
   },
   "dependencies": {
     "axios": "^0.18.0",
-    "bluebird": "^3.5.3",
     "compression": "^1.7.3",
     "decompress": "^4.2.0",
     "download": "^7.1.0",
