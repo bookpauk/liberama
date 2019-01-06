@@ -1,5 +1,5 @@
-const path = require("path");
-const webpack = require("webpack");
+const path = require('path');
+const webpack = require('webpack');
 const VueLoaderPlugin = require('vue-loader/lib/plugin');
 
 const clientDir = path.resolve(__dirname, '../client');
