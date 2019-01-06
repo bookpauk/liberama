@@ -1,5 +1,8 @@
-const path = require('path');
 const fs = require('fs-extra');
+const path = require('path');
+const util = require('util');
+const stream = require('stream');
+const pipeline = util.promisify(stream.pipeline);
 
 const download = require('download');
 const decompress = require('decompress');
@@ -18,13 +21,14 @@ async function main() {
         await fs.move(publicDir, `${outDir}/public`);
 
     await fs.ensureDir(tempDownloadDir);
+
+
     const sqliteRemoteUrl = 'https://mapbox-node-binary.s3.amazonaws.com/sqlite3/v4.0.4/node-v64-win32-x64.tar.gz';
     const sqliteDecompressedFilename = `${tempDownloadDir}/node-v64-win32-x64/node_sqlite3.node`;
 
-    // Скачиваем node_sqlite3.node для винды, т.к. pkg не включает его в сборку
-    let d = download(sqliteRemoteUrl);
-    d.pipe(fs.createWriteStream(`${tempDownloadDir}/sqlite.tar.gz`));
-    d.on('end', async() => {
+    if (!await fs.pathExists(sqliteDecompressedFilename)) {
+        // Скачиваем node_sqlite3.node для винды, т.к. pkg не включает его в сборку
+        await pipeline(download(sqliteRemoteUrl), fs.createWriteStream(`${tempDownloadDir}/sqlite.tar.gz`));
         console.log(`done downloading ${sqliteRemoteUrl}`);
 
         //распаковываем
@@ -34,26 +38,26 @@ async function main() {
             ]
         });
         console.log('files decompressed');
-        // копируем в дистрибутив
-        await fs.copy(sqliteDecompressedFilename, `${outDir}/node_sqlite3.node`);
-        console.log(`copied ${sqliteDecompressedFilename} to ${outDir}/node_sqlite3.node`);
-    });
+    }
+    // копируем в дистрибутив
+    await fs.copy(sqliteDecompressedFilename, `${outDir}/node_sqlite3.node`);
+    console.log(`copied ${sqliteDecompressedFilename} to ${outDir}/node_sqlite3.node`);
 
-    // Скачиваем ipfs
-    const ipfsRemoteUrl = 'https://dist.ipfs.io/go-ipfs/v0.4.18/go-ipfs_v0.4.18_windows-amd64.zip';
+    const ipfsDecompressedFilename = `${tempDownloadDir}/go-ipfs/ipfs.exe`;
+    if (!await fs.pathExists(ipfsDecompressedFilename)) {
+        // Скачиваем ipfs
+        const ipfsRemoteUrl = 'https://dist.ipfs.io/go-ipfs/v0.4.18/go-ipfs_v0.4.18_windows-amd64.zip';
 
-    d = download(ipfsRemoteUrl);
-    d.pipe(fs.createWriteStream(`${tempDownloadDir}/ipfs.zip`));
-    d.on('end', async() => {
+        await pipeline(download(ipfsRemoteUrl), fs.createWriteStream(`${tempDownloadDir}/ipfs.zip`));
         console.log(`done downloading ${ipfsRemoteUrl}`);
 
         //распаковываем
         await decompress(`${tempDownloadDir}/ipfs.zip`, `${tempDownloadDir}`);
         console.log('files decompressed');
-        // копируем в дистрибутив
-        await fs.copy(`${tempDownloadDir}/go-ipfs/ipfs.exe`, `${outDir}/ipfs.exe`);
-        console.log(`copied ${tempDownloadDir}/go-ipfs/ipfs.exe to ${outDir}/ipfs.exe`);
-    });
+    }
+    // копируем в дистрибутив
+    await fs.copy(ipfsDecompressedFilename, `${outDir}/ipfs.exe`);
+    console.log(`copied ${ipfsDecompressedFilename} to ${outDir}/ipfs.exe`);
 }
 
 main();
