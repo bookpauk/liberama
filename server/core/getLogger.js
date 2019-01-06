@@ -1,4 +1,4 @@
-const utils = require('./utils');
+const fs = require('fs-extra');
 const Logger = require('./Logger');
 
 let logger = null;
@@ -10,7 +10,7 @@ function initLogger(config) {
     let loggerParams = null;
 
     if (config.loggingEnabled) {
-        utils.mkDirIfNotExistsSync(config.logDir);
+        fs.ensureDirSync(config.logDir);
         loggerParams = [
             {log: 'ConsoleLog'},
             {log: 'FileLog', fileName: `${config.logDir}/${config.name}.log`},

@@ -1,9 +1,7 @@
 /*
   Журналирование с буферизацией вывода
 */
-
-const Promise = require('bluebird');
-const fs = Promise.promisifyAll(require('fs'));
+const fs = require('fs-extra');
 
 global.LM_OK = 0;
 global.LM_INFO = 1;
@@ -120,25 +118,25 @@ class FileLog extends BaseLog {
         if (i > 0)
             fn += `.${i}`;
         let tn = fileName + '.' + (i + 1);
-        let exists = await fs.accessAsync(tn).then(() => true).catch(() => false);
+        let exists = await fs.access(tn).then(() => true).catch(() => false);
         if (exists) {
             if (i >= LOG_ROTATE_FILE_DEPTH - 1) {
-                await fs.unlinkAsync(tn);
+                await fs.unlink(tn);
             } else {
                 await this.rotateFile(fileName, i + 1);
             }
         }
-        await fs.renameAsync(fn, tn);
+        await fs.rename(fn, tn);
     }
 
     async doFileRotationIfNeeded() {
         this.rcid = 0;
 
-        let stat = await fs.fstatAsync(this.fd);
+        let stat = await fs.fstat(this.fd);
         if (stat.size > LOG_ROTATE_FILE_LENGTH) {
-            await fs.closeAsync(this.fd);
+            await fs.close(this.fd);
             await this.rotateFile(this.fileName, 0);
-            this.fd = await fs.openAsync(this.fileName, "a");
+            this.fd = await fs.open(this.fileName, "a");
         }
     }
 
@@ -153,7 +151,7 @@ class FileLog extends BaseLog {
             }, LOG_ROTATE_FILE_CHECK_INTERVAL);
         };
 
-        await fs.writeAsync(this.fd, Buffer.from(data.join('')));
+        await fs.write(this.fd, Buffer.from(data.join('')));
     }
 
     flushImplSync(data) {

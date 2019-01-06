@@ -1,4 +1,4 @@
-const fs = require('fs');
+const fs = require('fs-extra');
 const utils = require('../core/utils');
 
 const branchFilename = __dirname + '/application_env';
@@ -18,6 +18,6 @@ fs.accessSync(confFilename);
 
 const config = require(confFilename);
 
-utils.mkDirIfNotExistsSync(config.dataDir);
+//fs.ensureDirSync(config.dataDir);
 
 module.exports = config;

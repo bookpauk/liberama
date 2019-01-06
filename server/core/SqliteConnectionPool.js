@@ -1,4 +1,5 @@
 const Promise = require('bluebird');
+const fs = require('fs-extra');
 const utils = require('./utils');
 const sqlite = require('sqlite');
 
@@ -11,7 +12,7 @@ class SqliteConnectionPool {
     }
 
     async init() {
-        utils.mkDirIfNotExistsSync(this.config.dataDir);
+        fs.ensureDirSync(this.config.dataDir);
         const dbFileName = this.config.dataDir + '/' + this.config.dbFileName;
 
         this.connections = [];
