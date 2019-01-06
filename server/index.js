@@ -34,15 +34,19 @@ async function main() {
     if (devModule) {
         devModule.logErrors(app);
     } else {
-        app.use(function(err, req, res, next) {
+        app.use(function(err, req, res, next) {// eslint-disable-line no-unused-vars
             log(LM_ERR, err.stack);
             res.sendStatus(500);
         });
     }
 
-    app.listen(config.port, config.ip, function() {
-        log('Server is ready');
-    });
+    for (let server of config.servers) {
+        if (server.mode !== 'none') {
+            app.listen(server.port, server.ip, function() {
+                log(`Server-${server.name} is ready on ${server.ip}:${server.port}, mode: ${server.mode}`);
+            });
+        }
+    }
 }
 
 main();

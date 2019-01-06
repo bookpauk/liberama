@@ -5,7 +5,10 @@ const execDir = path.resolve(__dirname, '..');
 const dataDir = `${execDir}/data`;
 
 module.exports = {
-    branch: 'base',
+    branch: 'unknown',
+    version: pckg.version,
+    name: pckg.name,
+
     dataDir: dataDir,
     tempDir: `${dataDir}/tmp`,
     logDir: `${dataDir}/log`,
@@ -13,10 +16,20 @@ module.exports = {
     dbFileName: 'db.sqlite',
     loggingEnabled: true,
 
-    port: '33080',
-    ip: '0.0.0.0',
+    servers: [
+        {
+            name: '1',
+            mode: 'normal', //none, normal, site, reader, omnireader
+            ip: '127.0.0.1',
+            port: '33080',
+        },
+        {
+            name: '2',
+            mode: 'omnireader', //none, normal, site, reader, omnireader
+            ip: '0.0.0.0',
+            port: '33081',
+        },
+    ],
 
-    version: pckg.version,
-    name: pckg.name,
 };
 
