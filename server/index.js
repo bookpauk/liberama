@@ -19,10 +19,10 @@ async function main() {
     for (let server of config.servers) {
         if (server.mode !== 'none') {
             const app = express();
-            app.serverConfig = server;
+            const serverConfig = Object.assign({}, config, server);
 
             let devModule = undefined;
-            if (config.branch == 'development') {
+            if (serverConfig.branch == 'development') {
                 const devFileName = './dev.js'; //ignored by pkg -50Mb executable size
                 devModule = require(devFileName);
                 devModule.webpackDevMiddleware(app);
@@ -32,9 +32,9 @@ async function main() {
             app.use(express.json());
             if (devModule)
                 devModule.logQueries(app);
-            app.use(express.static(config.publicDir, { maxAge: '30d' }));
+            app.use(express.static(serverConfig.publicDir, { maxAge: '30d' }));
 
-            require('./routes').initRoutes(app, connPool, config);
+            require('./routes').initRoutes(app, connPool, serverConfig);
 
             if (devModule) {
                 devModule.logErrors(app);
@@ -45,8 +45,8 @@ async function main() {
                 });
             }
 
-            app.listen(server.port, server.ip, function() {
-                log(`Server-${server.name} is ready on ${server.ip}:${server.port}, mode: ${server.mode}`);
+            app.listen(serverConfig.port, serverConfig.ip, function() {
+                log(`Server-${serverConfig.serverName} is ready on ${serverConfig.ip}:${serverConfig.port}, mode: ${serverConfig.mode}`);
             });
         }
     }

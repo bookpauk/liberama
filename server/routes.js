@@ -4,9 +4,8 @@ function initRoutes(app, connPool, config) {
     const misc = new c.MiscController(connPool, config);
 
     //access
-    const serverMode = app.serverConfig.mode;
     const [all, normal, site, reader, omnireader] = // eslint-disable-line no-unused-vars
-        [serverMode, 'normal', 'site', 'reader', 'omnireader'];
+        [config.mode, 'normal', 'site', 'reader', 'omnireader'];
 
     //routes
     const routes = [
@@ -19,7 +18,7 @@ function initRoutes(app, connPool, config) {
         access = new Set(access);
 
         let callback = () => {};
-        if (access.has(serverMode)) {//allowed
+        if (access.has(config.mode)) {//allowed
             callback = async function(req, res) {
                 try {
                     const result = await controller(req, res, options);

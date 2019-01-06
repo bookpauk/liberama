@@ -18,13 +18,13 @@ module.exports = {
 
     servers: [
         {
-            name: '1',
-            mode: 'normal', //none, normal, site, reader, omnireader
+            serverName: '1',
+            mode: 'normal',
             ip: '127.0.0.1',
             port: '33080',
         },
         {
-            name: '2',
+            serverName: '2',
             mode: 'omnireader',
             ip: '0.0.0.0',
             port: '33081',
