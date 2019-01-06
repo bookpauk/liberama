@@ -149,7 +149,7 @@ class FileLog extends BaseLog {
             this.rcid = setTimeout(() => {
                 this.rcid = 0;
             }, LOG_ROTATE_FILE_CHECK_INTERVAL);
-        };
+        }
 
         await fs.write(this.fd, Buffer.from(data.join('')));
     }
@@ -186,10 +186,7 @@ class Logger {
                 let loggerClass = factory[className];
                 this.handlers.push(new loggerClass(logParams));
             });
-        } else {
-            this.handlers.push(new DummyLog);
         }
-
         cleanupCallback = cleanupCallback || (() => {});
         this.cleanup(cleanupCallback);
     }
