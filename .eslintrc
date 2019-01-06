@@ -3,6 +3,7 @@
     "parser": "babel-eslint"
   },
   "extends": [
+    "eslint:recommended",
     "plugin:vue/essential"
   ],
   "plugins": [
@@ -13,6 +14,14 @@
   "env": {
     "browser": true,
     "node": true
+  },
+  "globals": {
+    "LM_OK": false,
+    "LM_INFO": false,
+    "LM_WARN": false,
+    "LM_ERR": false,
+    "LM_FATAL": false,
+    "LM_TOTAL": false
   },
   "rules": {
     "strict": 0,
@@ -31,5 +40,6 @@
       "ignoreComments": true,
       "ignoreUrls": true
     }],
+    "no-console": off
   }
 }
