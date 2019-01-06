@@ -25,7 +25,7 @@ module.exports = {
         },
         {
             name: '2',
-            mode: 'omnireader', //none, normal, site, reader, omnireader
+            mode: 'omnireader',
             ip: '0.0.0.0',
             port: '33081',
         },

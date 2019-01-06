@@ -3,23 +3,38 @@ const c = require('./controllers');
 function initRoutes(app, connPool, config) {
     const misc = new c.MiscController(connPool, config);
 
+    //access
+    const serverMode = app.serverConfig.mode;
+    const [all, normal, site, reader, omnireader] = // eslint-disable-line no-unused-vars
+        [serverMode, 'normal', 'site', 'reader', 'omnireader'];
+
+    //routes
     const routes = [
-        ['POST', '/api/config', misc, 'getConfig', {}],
+        ['POST', '/api/config', misc.getConfig.bind(misc), [all], {}],
     ];
 
+    //to app
     for (let route of routes) {
-        const [httpMethod, path, controller, handler, options] = route;
+        let [httpMethod, path, controller, access, options] = route;
+        access = new Set(access);
 
-        const callback = async function(req, res) {
-            try {
-                const result = await controller[handler](req, res, options);
+        let callback = () => {};
+        if (access.has(serverMode)) {//allowed
+            callback = async function(req, res) {
+                try {
+                    const result = await controller(req, res, options);
 
-                if (result !== false)
-                    res.send(result);
-            } catch (e) {
-                res.status(500).send({error: e.message});
-            }
-        };
+                    if (result !== false)
+                        res.send(result);
+                } catch (e) {
+                    res.status(500).send({error: e.message});
+                }
+            };
+        } else {//forbidden
+            callback = async function(req, res) {
+                res.status(403);
+            };
+        }
 
         switch (httpMethod) {
             case 'GET' :
