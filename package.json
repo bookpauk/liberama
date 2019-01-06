@@ -7,11 +7,12 @@
   "scripts": {
     "dev": "nodemon --inspect server",
     "build:client": "webpack --config build/webpack.prod.config.js",
-    "build:linux": "npm run build:client && webpack --config build/webpack.linux.config.js && pkg -t latest-linux-x64 -o dist/linux/liberama .",
+    "build:linux": "npm run build:client && node build/linux && pkg -t latest-linux-x64 -o dist/linux/liberama .",
     "build:win": "npm run build:client && webpack --config build/webpack.win.config.js && pkg -t latest-win-x64 -o dist/win/liberama .",
     "lint": "eslint --ext=.js,.vue client server",
     "build:client-dev": "webpack --config build/webpack.dev.config.js",
-    "postinstall": "npm run build:client-dev && npm run build:linux"
+    "postinstall": "npm run build:client-dev && npm run build:linux",
+    "test": "node build/win"
   },
   "bin": "server/index.js",
   "pkg": {
@@ -63,6 +64,7 @@
     "download": "^7.1.0",
     "element-ui": "^2.4.11",
     "express": "^4.16.4",
+    "fs-extra": "^7.0.1",
     "lodash": "^4.17.11",
     "sql-template-strings": "^2.2.2",
     "sqlite": "^3.0.0",
