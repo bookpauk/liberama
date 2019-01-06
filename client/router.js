@@ -4,13 +4,13 @@ import _ from 'lodash';
 
 import App from './components/App.vue';
 
-import CardIndex from './components/CardIndex/CardIndex.vue';
-import Search from  './components/CardIndex/Search/Search.vue';
-import Card from  './components/CardIndex/Card/Card.vue';
-import Book from  './components/CardIndex/Book/Book.vue';
-import History from  './components/CardIndex/History/History.vue';
+const CardIndex = () => import('./components/CardIndex/CardIndex.vue');
+const Search = () => import('./components/CardIndex/Search/Search.vue');
+const Card = () => import('./components/CardIndex/Card/Card.vue');
+const Book = () => import('./components/CardIndex/Book/Book.vue');
+const History = () => import('./components/CardIndex/History/History.vue');
 
-import Reader from './components/Reader/Reader.vue';
+const Reader = () => import('./components/Reader/Reader.vue');
 //const Forum = () => import('./components/Forum/Forum.vue');
 const Income = () => import('./components/Income/Income.vue');
 const Sources = () => import('./components/Sources/Sources.vue');
@@ -20,7 +20,7 @@ const NotFound404 = () => import('./components/NotFound404/NotFound404.vue');
 
 const myRoutes = [
     ['/', null, null, '/cardindex'],
-    ['/cardindex', CardIndex, null, '/cardindex/search' ],
+    ['/cardindex', CardIndex ],
     ['/cardindex~search', Search ],
     ['/cardindex~card', Card ],
     ['/cardindex~card/:authorId', Card ],
