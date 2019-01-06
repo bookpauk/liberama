@@ -40,6 +40,7 @@ async function main() {
         });
     }
 
+    //servers
     for (let server of config.servers) {
         if (server.mode !== 'none') {
             app.listen(server.port, server.ip, function() {

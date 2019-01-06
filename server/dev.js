@@ -29,7 +29,7 @@ function logQueries(app) {
 }
 
 function logErrors(app) {
-    app.use(function(err, req, res, next) {
+    app.use(function(err, req, res, next) {// eslint-disable-line no-unused-vars
         log(LM_ERR, err.stack);
         res.status(500).send(err.stack);
     });    

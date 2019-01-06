@@ -1,4 +1,3 @@
-const log = require('./core/getLogger').getLog();
 const c = require('./controllers');
 
 function initRoutes(app, connPool, config) {
@@ -33,7 +32,7 @@ function initRoutes(app, connPool, config) {
                 throw new Error(`initRoutes error: unknown httpMethod: ${httpMethod}`);
         }
     }
-};
+}
 
 module.exports = {
     initRoutes
