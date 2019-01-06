@@ -12,10 +12,10 @@ const outDir = `${distDir}/linux`;
 const tempDownloadDir = `${distDir}/tmp/download`;
 
 async function main() {
-    // перемещаем public на место
     await fs.emptyDir(outDir);
-    await fs.ensureDir(publicDir); // чтобы не ругался в postinstall
-    await fs.move(publicDir, `${outDir}/public`);
+    // перемещаем public на место
+    if (await fs.pathExists(publicDir))
+        await fs.move(publicDir, `${outDir}/public`);
 
     await fs.ensureDir(tempDownloadDir);
     // Скачиваем ipfs

@@ -12,9 +12,10 @@ const outDir = `${distDir}/win`;
 const tempDownloadDir = `${distDir}/tmp/download`;
 
 async function main() {
-    // перемещаем public на место
     await fs.emptyDir(outDir);
-    await fs.move(publicDir, `${outDir}/public`);
+    // перемещаем public на место
+    if (await fs.pathExists(publicDir))
+        await fs.move(publicDir, `${outDir}/public`);
 
     await fs.ensureDir(tempDownloadDir);
     const sqliteRemoteUrl = 'https://mapbox-node-binary.s3.amazonaws.com/sqlite3/v4.0.4/node-v64-win32-x64.tar.gz';
