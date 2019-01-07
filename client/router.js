@@ -33,7 +33,7 @@ const myRoutes = [
     ['/sources', Sources ],
     ['/settings', Settings ],
     ['/help', Help ],
-    ['*', NotFound404 ],
+    ['*', null, null, '/cardindex' ],
 ];
 
 let routes = {};

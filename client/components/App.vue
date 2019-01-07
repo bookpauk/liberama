@@ -1,6 +1,6 @@
 <template>
     <el-container>
-        <el-aside :width="asideWidth">
+        <el-aside v-if="showAsideBar" :width="asideWidth">
             <div class="app-name"><span v-html="appName"></span></div>
             <el-button class="el-button-collapse" @click="toggleCollapse" :icon="buttonCollapseIcon"></el-button>
             <el-menu class="el-menu-vertical" :default-active="rootRoute" :collapse="isCollapse" router>
@@ -35,7 +35,7 @@
             </el-menu>
         </el-aside>
 
-        <el-main>
+        <el-main v-if="showMain">
             <keep-alive>
                 <router-view></router-view>
             </keep-alive>
@@ -49,6 +49,14 @@ import Vue from 'vue';
 import Component from 'vue-class-component';
 
 export default @Component({
+    watch: {
+        rootRoute: function(newValue, oldValue) {
+            if ((this.mode == 'reader' || this.mode == 'omnireader') && (newValue != '/reader')) {
+                this.$router.replace('/reader');
+            }
+        },
+    },
+
 })
 class App extends Vue {
     created() {
@@ -114,6 +122,18 @@ class App extends Vue {
 
     itemTitleClass(path) {
         return (this.rootRoute == path ? {'bold-font': true} : {});
+    }
+
+    get mode() {
+        return this.config.mode;
+    }
+
+    get showAsideBar() {
+        return (this.mode != 'reader' && this.mode != 'omnireader');
+    }
+
+    get showMain() {
+        return (this.showAsideBar || this.rootRoute == '/reader');
     }
 }
 //-----------------------------------------------------------------------------
