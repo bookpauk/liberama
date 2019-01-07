@@ -19,8 +19,8 @@ module.exports = {
     servers: [
         {
             serverName: '1',
-            mode: 'normal',
-            ip: '127.0.0.1',
+            mode: 'normal', //'none', 'normal', 'site', 'reader', 'omnireader'
+            ip: '0.0.0.0',
             port: '33080',
         },
         {
