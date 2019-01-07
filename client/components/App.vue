@@ -35,7 +35,7 @@
             </el-menu>
         </el-aside>
 
-        <el-main v-if="showMain">
+        <el-main v-if="showMain" :style="{padding: (isReaderActive ? 0 : '5px')}">
             <keep-alive>
                 <router-view></router-view>
             </keep-alive>
@@ -132,8 +132,12 @@ class App extends Vue {
         return (this.mode != 'reader' && this.mode != 'omnireader');
     }
 
+    get isReaderActive() {
+        return this.rootRoute == '/reader';
+    }
+
     get showMain() {
-        return (this.showAsideBar || this.rootRoute == '/reader');
+        return (this.showAsideBar || this.isReaderActive);
     }
 }
 //-----------------------------------------------------------------------------
@@ -161,9 +165,9 @@ class App extends Vue {
     background-color: #ccc;
     color: #000;
 }
-  
+
 .el-main {
-    padding: 5px;
+    padding: 0;
     background-color: #E6EDF4;
     color: #000;
 }

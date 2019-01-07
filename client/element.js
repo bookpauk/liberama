@@ -23,6 +23,9 @@ import './theme/menu-item.css';
 import ElButton from 'element-ui/lib/button';
 import './theme/button.css';
 
+import ElCheckbox from 'element-ui/lib/checkbox';
+import './theme/checkbox.css';
+
 import ElTabs from 'element-ui/lib/tabs';
 import './theme/tabs.css';
 
@@ -35,6 +38,9 @@ import './theme/container.css';
 import ElAside from 'element-ui/lib/aside';
 import './theme/aside.css';
 
+import ElHeader from 'element-ui/lib/header';
+import './theme/header.css';
+
 import ElMain from 'element-ui/lib/main';
 import './theme/main.css';
 
@@ -42,8 +48,8 @@ const ElNotification = () => import('element-ui/lib/notification');
 import './theme/notification.css';
 
 const components = {
-    ElMenu, ElMenuItem, ElButton, ElTabs, ElTabPane,
-    ElContainer, ElAside, ElMain,
+    ElMenu, ElMenuItem, ElButton, ElCheckbox, ElTabs, ElTabPane,
+    ElContainer, ElAside, ElMain, ElHeader,
     ElNotification
 };
 
