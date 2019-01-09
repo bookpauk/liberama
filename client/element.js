@@ -32,6 +32,9 @@ import './theme/tabs.css';
 import ElTabPane from 'element-ui/lib/tab-pane';
 import './theme/tab-pane.css';
 
+import ElTooltip from 'element-ui/lib/tooltip';
+import './theme/tooltip.css';
+
 import ElContainer from 'element-ui/lib/container';
 import './theme/container.css';
 
@@ -48,7 +51,7 @@ const ElNotification = () => import('element-ui/lib/notification');
 import './theme/notification.css';
 
 const components = {
-    ElMenu, ElMenuItem, ElButton, ElCheckbox, ElTabs, ElTabPane,
+    ElMenu, ElMenuItem, ElButton, ElCheckbox, ElTabs, ElTabPane, ElTooltip,
     ElContainer, ElAside, ElMain, ElHeader,
     ElNotification
 };
