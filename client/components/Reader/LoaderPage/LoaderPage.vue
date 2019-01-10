@@ -32,11 +32,6 @@ class LoaderPage extends Vue {
     }
 
     mounted() {
-        //недостатки сторонних ui
-        this.$refs.input.$refs.input.addEventListener('keyup', (event) => {
-            if (event.key == 'Enter')
-                this.submitUrl();
-        });
     }
 
     activated() {
@@ -54,6 +49,12 @@ class LoaderPage extends Vue {
         if (this.bookUrl)
             //loadUrl()
         ;
+    }
+
+    keyHook(event) {
+        //недостатки сторонних ui
+        if (document.activeElement == this.$refs.input.$refs.input && event.type == 'keyup' && event.key == 'Enter')
+            this.submitUrl();
     }
 }
 //-----------------------------------------------------------------------------

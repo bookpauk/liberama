@@ -142,7 +142,8 @@ class App extends Vue {
 
     get rootRoute() {
         const m = this.$route.path.match(/^(\/[^/]*).*$/i);
-        return (m ? m[1] : this.$route.path);
+        this.$root.rootRoute = (m ? m[1] : this.$route.path);
+        return this.$root.rootRoute;
     }
 
     itemTitleClass(path) {

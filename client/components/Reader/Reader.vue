@@ -43,7 +43,7 @@
 
         <el-main>
             <keep-alive>
-                <component :is="componentActive"></component>
+                <component ref="page" :is="pageActive"></component>
             </keep-alive>
         </el-main>
     </el-container>
@@ -93,7 +93,7 @@ class Reader extends Vue {
         return {};
     }
 
-    get componentActive() {
+    get pageActive() {
         let result = '';
 
         if (this.loaderActive)
@@ -107,7 +107,10 @@ class Reader extends Vue {
     }
 
     keyHook(event) {
-        //console.log(this.componentActive);
+        if (this.$root.rootRoute == '/reader') {
+            if (this.$refs.page && this.$refs.page.keyHook)
+                this.$refs.page.keyHook(event);
+        }
     }
 }
 //-----------------------------------------------------------------------------
