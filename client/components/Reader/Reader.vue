@@ -65,6 +65,8 @@ class Reader extends Vue {
         this.commit = this.$store.commit;
         this.dispatch = this.$store.dispatch;
         this.reader = this.$store.state.reader;
+
+        this.$root.addKeyHook(this.keyHook);
     }
 
     get loaderActive() {
@@ -98,10 +100,14 @@ class Reader extends Vue {
             result = 'LoaderPage';
 
         if (!result) {
-            this.commit('reader/setLoaderActive', true);
-            result = 'LoaderPage';
+            //this.commit('reader/setLoaderActive', true);
+            //result = 'LoaderPage';
         }
         return result;
+    }
+
+    keyHook(event) {
+        //console.log(this.componentActive);
     }
 }
 //-----------------------------------------------------------------------------

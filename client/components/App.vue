@@ -50,7 +50,7 @@ import Component from 'vue-class-component';
 
 export default @Component({
     watch: {
-        rootRoute: function(newValue, oldValue) {
+        rootRoute: function(newValue) {
             if ((this.mode == 'reader' || this.mode == 'omnireader') && (newValue != '/reader')) {
                 this.$router.replace('/reader');
             }
@@ -65,11 +65,36 @@ class App extends Vue {
         this.state = this.$store.state;
         this.uistate = this.$store.state.uistate;
         this.config = this.$store.state.config;
+
+        //global keyHooks
+        this.keyHooks = [];
+        this.keyHook = (event) => {
+            for (const hook of this.keyHooks)
+                hook(event);
+        }
+
+        this.$root.addKeyHook = (hook) => {
+            if (this.keyHooks.indexOf(hook) < 0)
+                this.keyHooks.push(hook);
+        }
+
+        this.$root.removeKeyHook = (hook) => {
+            const i = this.keyHooks.indexOf(hook);
+            if (i >= 0)
+                this.keyHooks.splice(i, 1);
+        }
+
+        document.addEventListener('keyup', (event) => {
+            this.keyHook(event);
+        });        
+        document.addEventListener('keydown', (event) => {
+            this.keyHook(event);
+        });        
     }
 
     mounted() {
         this.dispatch('config/loadConfig');
-        this.$watch('apiError', function(newError, oldError) {
+        this.$watch('apiError', function(newError) {
             if (newError) {
                 this.$notify.error({
                     title: 'Ошибка API',
@@ -116,7 +141,7 @@ class App extends Vue {
     }
 
     get rootRoute() {
-        const m = this.$route.path.match(/^(\/[^\/]*).*$/i);
+        const m = this.$route.path.match(/^(\/[^/]*).*$/i);
         return (m ? m[1] : this.$route.path);
     }
 
