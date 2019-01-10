@@ -47,12 +47,16 @@ import './theme/header.css';
 import ElMain from 'element-ui/lib/main';
 import './theme/main.css';
 
+import ElInput from 'element-ui/lib/input';
+import './theme/input.css';
+
 const ElNotification = () => import('element-ui/lib/notification');
 import './theme/notification.css';
 
 const components = {
     ElMenu, ElMenuItem, ElButton, ElCheckbox, ElTabs, ElTabPane, ElTooltip,
     ElContainer, ElAside, ElMain, ElHeader,
+    ElInput,
     ElNotification
 };
 

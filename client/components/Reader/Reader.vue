@@ -94,6 +94,9 @@ class Reader extends Vue {
     get componentActive() {
         let result = '';
 
+        if (this.loaderActive)
+            result = 'LoaderPage';
+
         if (!result) {
             this.commit('reader/setLoaderActive', true);
             result = 'LoaderPage';
