@@ -3,6 +3,7 @@ import miscApi from '../../api/misc';
 const state = {
     name: null,
     version: null,
+    mode: null,
 };
 
 // getters
