@@ -7,10 +7,16 @@
         </div>
         <div class="part center">
             <el-input ref="input" placeholder="URL книги" v-model="bookUrl">
-                <el-button slot="append" icon="el-icon-search" @click="submitUrl"></el-button>
+                <el-button slot="append" icon="el-icon-check" @click="submitUrl"></el-button>
             </el-input>
+            <div class="space"></div>
+            <el-button size="mini" @click="loadFle">
+                Загрузить файл
+            </el-button>
         </div>
         <div class="part bottom">
+            <span class="bottom-span clickable" @click="openHelp">Справка</span>
+            <span class="bottom-span">{{ version }}</span>
         </div>
     </div>
 </template>
@@ -31,9 +37,6 @@ class LoaderPage extends Vue {
         this.config = this.$store.state.config;
     }
 
-    mounted() {
-    }
-
     activated() {
         this.$refs.input.focus();
     }
@@ -45,10 +48,20 @@ class LoaderPage extends Vue {
 
     }
 
+    get version() {
+        return `v${this.config.version}`;
+    }
+
     submitUrl() {
         if (this.bookUrl)
             //loadUrl()
         ;
+    }
+
+    loadFle() {
+    }
+
+    openHelp() {
     }
 
     keyHook(event) {
@@ -83,6 +96,12 @@ class LoaderPage extends Vue {
     font-weight: bold;
 }
 
+.clickable {
+    color: blue;
+    text-decoration: underline;
+    cursor: pointer;
+}
+
 .center {
     justify-content: flex-start;
     padding: 0 5px 0 5px;
@@ -92,7 +111,16 @@ class LoaderPage extends Vue {
     justify-content: flex-end;
 }
 
+.bottom-span {
+    font-size: 70%;
+    margin-bottom: 10px;
+}
+
 .el-input {
     max-width: 600px;
+}
+
+.space {
+    height: 20px;
 }
 </style>
