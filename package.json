@@ -69,7 +69,6 @@
     "vue": "^2.5.21",
     "vue-router": "^3.0.2",
     "vuex": "^3.0.1",
-    "vuex-persistedstate": "^2.5.4",
-    "worker-threads-pool": "^2.0.0"
+    "vuex-persistedstate": "^2.5.4"
   }
 }
