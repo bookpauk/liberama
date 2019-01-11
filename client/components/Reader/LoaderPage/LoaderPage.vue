@@ -104,7 +104,7 @@ class LoaderPage extends Vue {
 
 .center {
     justify-content: flex-start;
-    padding: 0 5px 0 5px;
+    padding: 0 10px 0 10px;
 }
 
 .bottom {
@@ -117,7 +117,7 @@ class LoaderPage extends Vue {
 }
 
 .el-input {
-    max-width: 600px;
+    max-width: 700px;
 }
 
 .space {
