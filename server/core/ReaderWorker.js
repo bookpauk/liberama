@@ -15,6 +15,8 @@ class ReaderWorker {
     }
 
     async loadBook(wState, url) {
+        const maxDownloadSize = 10*1024*1024;
+        let errMes = '';
         try {
             wState.set({state: 'download', step: 1, totalSteps: 3, url});
 
@@ -22,13 +24,16 @@ class ReaderWorker {
             const d = download(url);
             d.on('downloadProgress', progress => {
                 wState.set({progress:  Math.round(progress.percent*100)});
-            })
-
+                if (progress.transferred > maxDownloadSize) {
+                    errMes = 'file too big';
+                    d.destroy();
+                }
+            });
             await pipeline(d, fs.createWriteStream(`${this.tempDownloadDir}/${tempFilename}`));
             
             wState.finish({step: 3, file: tempFilename});
         } catch (e) {
-            wState.set({state: 'error', error: e.message});
+            wState.set({state: 'error', error: (errMes ? errMes : e.message)});
         }
     }
 
