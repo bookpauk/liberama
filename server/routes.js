@@ -2,14 +2,18 @@ const c = require('./controllers');
 
 function initRoutes(app, connPool, config) {
     const misc = new c.MiscController(connPool, config);
+    const reader = new c.ReaderController(connPool, config);
+    const worker = new c.WorkerController(connPool, config);
 
     //access
-    const [all, normal, site, reader, omnireader] = // eslint-disable-line no-unused-vars
+    const [aAll, aNormal, aSite, aReader, aOmnireader] = // eslint-disable-line no-unused-vars
         [config.mode, 'normal', 'site', 'reader', 'omnireader'];
 
     //routes
     const routes = [
-        ['POST', '/api/config', misc.getConfig.bind(misc), [all], {}],
+        ['POST', '/api/config', misc.getConfig.bind(misc), [aAll], {}],
+        ['POST', '/api/reader/load-book', reader.loadBook.bind(reader), [aAll], {}],
+        ['POST', '/api/worker/get-state', worker.getState.bind(worker), [aAll], {}],
     ];
 
     //to app
