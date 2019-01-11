@@ -1,40 +1,18 @@
 const workerState = require('./workerState');
-const utils = require('./utils');
-
 const fs = require('fs-extra');
-const util = require('util');
-const stream = require('stream');
-const pipeline = util.promisify(stream.pipeline);
-const download = require('download');
 
 class ReaderWorker {
     constructor(config) {
-        this.config = config;
-        this.tempDownloadDir = `${config.tempDir}/download`;
-        fs.ensureDirSync(this.tempDownloadDir);
+        this.config = Object.assign({}, config);
+        this.config.tempDownloadDir = `${config.tempDir}/download`;
+        fs.ensureDirSync(this.config.tempDownloadDir);
     }
 
-    async loadBook(wState, url) {
-        const maxDownloadSize = 10*1024*1024;
-        let errMes = '';
-        try {
-            wState.set({state: 'download', step: 1, totalSteps: 3, url});
-
-            const tempFilename = utils.randomHexString(30);
-            const d = download(url);
-            d.on('downloadProgress', progress => {
-                wState.set({progress:  Math.round(progress.percent*100)});
-                if (progress.transferred > maxDownloadSize) {
-                    errMes = 'file too big';
-                    d.destroy();
-                }
-            });
-            await pipeline(d, fs.createWriteStream(`${this.tempDownloadDir}/${tempFilename}`));
-            
-            wState.finish({step: 3, file: tempFilename});
-        } catch (e) {
-            wState.set({state: 'error', error: (errMes ? errMes : e.message)});
-        }
+    async loadBook(url, wState) {
+        const loader = require('./readerLoader');
+        loader(url, this.config, (state) => {
+            wState.set(state)
+        });
     }
 
     loadBookUrl(url) {
@@ -42,7 +20,7 @@ class ReaderWorker {
         const wState = workerState.getControl(workerId);
         wState.set({state: 'start'});
 
-        this.loadBook(wState, url);
+        this.loadBook(url, wState);
 
         return workerId;
     }
