@@ -5,7 +5,7 @@
     "node": ">=10.0.0"
   },
   "scripts": {
-    "dev": "nodemon --inspect --exec 'node --experimental-worker server'",
+    "dev": "nodemon --inspect --exec 'node server'",
     "build:client": "webpack --config build/webpack.prod.config.js",
     "build:linux": "npm run build:client && node build/linux && pkg -t latest-linux-x64 -o dist/linux/liberama .",
     "build:win": "npm run build:client && node build/win && pkg -t latest-win-x64 -o dist/win/liberama .",
