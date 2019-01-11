@@ -4,14 +4,23 @@ const {initLogger, getLog} = require('./core/getLogger');
 initLogger(config);
 const log = getLog();
 
+const fs = require('fs-extra');
 const express = require('express');
 const compression = require('compression');
 
 const SqliteConnectionPool = require('./core/SqliteConnectionPool');
 
+async function init() {
+    await fs.ensureDir(config.dataDir);
+    await fs.ensureDir(config.tempDir);
+}
+
 async function main() {
     const connPool = new SqliteConnectionPool(20, config);
     
+    log('Initializing');
+    await init();
+
     log('Opening database');
     await connPool.init();
 

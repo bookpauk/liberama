@@ -1,4 +1,3 @@
-const fs = require('fs-extra');
 const utils = require('./utils');
 const sqlite = require('sqlite');
 
@@ -11,7 +10,6 @@ class SqliteConnectionPool {
     }
 
     async init() {
-        fs.ensureDirSync(this.config.dataDir);
         const dbFileName = this.config.dataDir + '/' + this.config.dbFileName;
 
         this.connections = [];
