@@ -40,14 +40,16 @@ class ReaderWorker {
             //download
             const d = download(url);
             d.on('downloadProgress', progress => {
-                wState.set({progress:  Math.round(progress.percent*100)});
                 if (progress.transferred > maxDownloadSize) {
                     errMes = 'file too big';
                     d.destroy();
                 }
+                const prog = Math.round(progress.transferred/10000);
+                wState.set({progress: (prog > 100 ? 100 : prog) });
             });
             downloadedFilename = `${this.config.tempDownloadDir}/${tempFilename}`;
             await pipeline(d, fs.createWriteStream(downloadedFilename));
+            wState.set({progress: 100});
 
             //decompress
             wState.set({state: 'decompress', step: 2, progress: 0});
