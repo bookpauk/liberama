@@ -54,10 +54,12 @@
 import Vue from 'vue';
 import Component from 'vue-class-component';
 import LoaderPage from './LoaderPage/LoaderPage.vue';
+import TextPage from './TextPage/TextPage.vue';
 
 export default @Component({
     components: {
-        LoaderPage
+        LoaderPage,
+        TextPage
     },
 })
 class Reader extends Vue {
@@ -75,6 +77,10 @@ class Reader extends Vue {
 
     get fullScreenActive() {
         return this.reader.fullScreenActive;
+    }
+
+    get lastOpenedBook() {
+        return this.$store.getters['reader/lastOpenedBook'];
     }
 
     buttonClick(button) {
@@ -96,6 +102,8 @@ class Reader extends Vue {
     get pageActive() {
         let result = '';
 
+        if (this.lastOpenedBook)
+            result = 'TextPage';
         if (this.loaderActive)
             result = 'LoaderPage';
 

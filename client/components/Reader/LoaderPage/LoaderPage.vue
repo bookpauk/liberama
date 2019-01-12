@@ -11,8 +11,9 @@
             </el-input>
             <div class="space"></div>
             <el-button size="mini" @click="loadFle">
-                Загрузить файл
+                Загрузить файл с диска
             </el-button>
+            <span class="bottom-span"><pre>{{ loadState }}</pre></span>
         </div>
         <div class="part bottom">
             <span v-if="config.mode == 'omnireader'" class="bottom-span clickable" @click="openComments">Комментарии</span>
@@ -27,10 +28,13 @@
 import Vue from 'vue';
 import Component from 'vue-class-component';
 
+import readerApi from '../../../api/reader';
+
 export default @Component({
 })
 class LoaderPage extends Vue {
     bookUrl = null;
+    loadState = null;
 
     created() {
         this.commit = this.$store.commit;
@@ -53,10 +57,18 @@ class LoaderPage extends Vue {
         return `v${this.config.version}`;
     }
 
-    submitUrl() {
-        if (this.bookUrl)
-            //loadUrl()
-        ;
+    async submitUrl() {
+        if (this.bookUrl) {
+            try {
+                const book = await readerApi.loadBook(this.bookUrl, (state) => {
+                    this.loadState = state;
+                });
+
+                this.loadState = book;
+            } catch (e) {
+                this.loadState = e.message;
+            }
+        }
     }
 
     loadFle() {
