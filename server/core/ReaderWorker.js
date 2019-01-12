@@ -13,10 +13,13 @@ const download = require('download');
 class ReaderWorker {
     constructor(config) {
         this.config = Object.assign({}, config);
+        
         this.config.tempDownloadDir = `${config.tempDir}/download`;
         fs.ensureDirSync(this.config.tempDownloadDir);
+
         this.config.tempPublicDir = `${config.publicDir}/tmp`;
         fs.ensureDirSync(this.config.tempPublicDir);
+
         this.detector = new FileDetector();
         this.decomp = new FileDecompressor();
         this.bookConverter = new BookConverter();
@@ -62,9 +65,12 @@ class ReaderWorker {
             });
             wState.set({progress: 100});
 
-            wState.finish({file: `/tmp/${tempFilename2}`});
+            //finish
+            wState.finish({path: `/tmp/${tempFilename2}`});
+
         } catch (e) {
             wState.set({state: 'error', error: (errMes ? errMes : e.message)});
+
         } finally {
             //clean
             if (decompDir)
