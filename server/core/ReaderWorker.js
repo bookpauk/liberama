@@ -5,9 +5,6 @@ const BookConverter = require('./BookConverter');
 const utils = require('./utils');
 
 const fs = require('fs-extra');
-const util = require('util');
-const stream = require('stream');
-const pipeline = util.promisify(stream.pipeline);
 const download = require('download');
 
 class ReaderWorker {
@@ -39,7 +36,7 @@ class ReaderWorker {
 
             //download
             const d = download(url);
-            d.on('downloadProgress', progress => {
+            const downdata = await d.on('downloadProgress', progress => {
                 if (progress.transferred > maxDownloadSize) {
                     errMes = 'file too big';
                     d.destroy();
@@ -48,7 +45,7 @@ class ReaderWorker {
                 wState.set({progress: (prog > 100 ? 100 : prog) });
             });
             downloadedFilename = `${this.config.tempDownloadDir}/${tempFilename}`;
-            await pipeline(d, fs.createWriteStream(downloadedFilename));
+            await fs.writeFile(downloadedFilename, downdata);
             wState.set({progress: 100});
 
             //decompress
