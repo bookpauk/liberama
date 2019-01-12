@@ -56,6 +56,9 @@ import './theme/notification.css';
 import Loading from 'element-ui/lib/loading';
 import './theme/loading.css';
 
+import MessageBox from 'element-ui/lib/message-box';
+import './theme/message-box.css';
+
 const components = {
     ElMenu, ElMenuItem, ElButton, ElCheckbox, ElTabs, ElTabPane, ElTooltip,
     ElContainer, ElAside, ElMain, ElHeader,
@@ -69,12 +72,13 @@ for (let [name, comp] of Object.entries(components)) {
 //Vue.use(Loading.directive);
 
 Vue.prototype.$loading = Loading.service;
-//Vue.prototype.$msgbox = MessageBox;
-//Vue.prototype.$alert = MessageBox.alert;
-//Vue.prototype.$confirm = MessageBox.confirm;
-//Vue.prototype.$prompt = MessageBox.prompt;
+Vue.prototype.$msgbox = MessageBox;
+Vue.prototype.$alert = MessageBox.alert;
+Vue.prototype.$confirm = MessageBox.confirm;
+Vue.prototype.$prompt = MessageBox.prompt;
 Vue.prototype.$notify = Notification;
 //Vue.prototype.$message = Message;
 
-import locale from 'element-ui/lib/locale/lang/ru-RU';
-Vue.prototype.$ELEMENT = { locale };
+import lang from 'element-ui/lib/locale/lang/ru-RU';
+import locale from 'element-ui/lib/locale';
+locale.use(lang);
