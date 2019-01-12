@@ -23,8 +23,18 @@ class Reader {
         while (1) {// eslint-disable-line no-constant-condition
             if (callback)
                 callback(response.data);
-            if (response.data.state == 'finish') {
-                const book = await axios.get(response.data.path, {});
+            if (response.data.state == 'finish') {//воркер закончил работу, можно скачивать
+                const options = {
+                    onDownloadProgress: progress => {
+                        if (callback)
+                            callback(Object.assign({}, 
+                                response.data, 
+                                {state: 'loading', stage: 4, progress: Math.round((progress.loaded*100)/progress.total)}
+                            ));
+                    }
+                }
+                //загрузка
+                const book = await axios.get(response.data.path, options);
                 return Object.assign({}, response.data, {data: book.data});
             }
             if (response.data.state == 'error') {
@@ -42,6 +52,7 @@ class Reader {
             if (i > 30*1000/refreshPause) {
                 throw new Error('Слишком долгое время ожидания');
             }
+            //проверка воркера
             response = await workerApi.post('/get-state', {workerId});
         }
     }
