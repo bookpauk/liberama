@@ -28,7 +28,12 @@ class Reader {
                 return Object.assign({}, response.data, {data: book.data});
             }
             if (response.data.state == 'error') {
-                throw new Error(response.data.error);
+                let errMes = response.data.error;
+                if (errMes.indexOf('getaddrinfo') >= 0 || 
+                    errMes.indexOf('ECONNRESET') >= 0 ||
+                    errMes.indexOf('404') >= 0)
+                    errMes = `Ресурс не найден по адресу: ${response.data.url}`;
+                throw new Error(errMes);
             }
             if (i > 0)
                 await sleep(refreshPause);
