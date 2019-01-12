@@ -24,7 +24,7 @@ class Reader {
             if (callback)
                 callback(response.data);
             if (response.data.state == 'finish') {
-                let book = await axios.get(response.data.path, {});
+                const book = await axios.get(response.data.path, {});
                 return Object.assign({}, response.data, {data: book.data});
             }
             if (response.data.state == 'error') {
