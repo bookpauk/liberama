@@ -1,4 +1,3 @@
-const fs = require('fs-extra');
 const decompress = require('decompress');
 const FileDetector = require('./FileDetector');
 
@@ -17,13 +16,12 @@ class FileDecompressor {
 
         let result = filename;
         let max = 0;
-        if (!files.length) {
+        if (files.length) {
             //ищем файл с максимальным размером
             for (let file of files) {
-                const stats = await fs.stat(file);
-                if (stats.size > max) {
-                    result = file;
-                    max = stats.size;
+                if (file.data.length > max) {
+                    result = `${outputDir}/${file.path}`;
+                    max = file.data.length;
                 }
             }
         }

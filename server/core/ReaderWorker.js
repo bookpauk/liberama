@@ -1,7 +1,7 @@
 const workerState = require('./workerState');
 const FileDetector = require('./FileDetector');
 const FileDecompressor = require('./FileDecompressor');
-//const BookParser = require('./BookParser');
+const BookConverter = require('./BookConverter');
 const utils = require('./utils');
 
 const fs = require('fs-extra');
@@ -15,13 +15,18 @@ class ReaderWorker {
         this.config = Object.assign({}, config);
         this.config.tempDownloadDir = `${config.tempDir}/download`;
         fs.ensureDirSync(this.config.tempDownloadDir);
+        this.config.tempPublicDir = `${config.publicDir}/tmp`;
+        fs.ensureDirSync(this.config.tempPublicDir);
         this.detector = new FileDetector();
         this.decomp = new FileDecompressor();
+        this.bookConverter = new BookConverter();
     }
 
     async loadBook(url, wState) {
         const maxDownloadSize = 10*1024*1024;
         let errMes = '';
+        let decompDir = '';
+        let downloadedFilename = '';
         try {
             wState.set({state: 'download', step: 1, totalSteps: 3, url});
 
@@ -38,28 +43,34 @@ class ReaderWorker {
                     d.destroy();
                 }
             });
-            const downloadedFilename = `${this.config.tempDownloadDir}/${tempFilename}`;
+            downloadedFilename = `${this.config.tempDownloadDir}/${tempFilename}`;
             await pipeline(d, fs.createWriteStream(downloadedFilename));
 
             //decompress
             wState.set({state: 'decompress', step: 2, progress: 0});
-            const decompDir = `${this.config.tempDownloadDir}/${decompDirname}`;
+            decompDir = `${this.config.tempDownloadDir}/${decompDirname}`;
             const decompFilename = await this.decomp.decompressFile(downloadedFilename, decompDir);
             wState.set({progress: 100});
             
             //parse book
+            wState.set({state: 'parse', step: 3, progress: 0});
             const fileType = await this.detector.detectFile(decompFilename);
-            if (fileType.ext == 'html' || fileType.ext == 'xml') {
-                //parse
-            }
+            fileType.url = url;
+            let resultFilename = `${this.config.tempPublicDir}/${tempFilename2}`;
+            await this.bookConverter.convertToFb2(decompFilename, resultFilename, fileType, progress => {
+                wState.set({progress});
+            });
+            wState.set({progress: 100});
 
-            //clean
-            await fs.remove(decompDir);
-            await fs.remove(downloadedFilename);
-
-            wState.finish({step: 3, file: tempFilename, fileType: fileType});
+            wState.finish({file: `/tmp/${tempFilename2}`});
         } catch (e) {
             wState.set({state: 'error', error: (errMes ? errMes : e.message)});
+        } finally {
+            //clean
+            if (decompDir)
+                await fs.remove(decompDir);
+            if (downloadedFilename)
+                await fs.remove(downloadedFilename);
         }
     }
 
