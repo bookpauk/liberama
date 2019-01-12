@@ -1,5 +1,5 @@
 <template>
-    <div class="main">
+    <div ref="main" class="main">
         <div class="part">
             <span class="greeting bold-font">{{ title }}</span>
             <span class="greeting">Добро пожаловать!</span>
@@ -59,14 +59,16 @@ class LoaderPage extends Vue {
 
     async submitUrl() {
         if (this.bookUrl) {
+            const loading = this.$loading({ target: this.$refs.main, customClass: 'loading'});
             try {
                 const book = await readerApi.loadBook(this.bookUrl, (state) => {
-                    this.loadState = state;
+                    const progress = state.progress || 0;
+                    loading.text = `${state.state} ${progress}%`;
                 });
-
-                this.loadState = book;
+                loading.close();
             } catch (e) {
                 this.loadState = e.message;
+                loading.close();
             }
         }
     }
@@ -89,6 +91,14 @@ class LoaderPage extends Vue {
 }
 //-----------------------------------------------------------------------------
 </script>
+<style>
+.loading {
+    background-color: rgba(0, 0, 0, 0.8);
+}
+.el-loading-text {
+    color: #ffffff !important;
+}
+</style>
 <style scoped>
 .main {
     flex: 1;

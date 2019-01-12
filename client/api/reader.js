@@ -11,6 +11,8 @@ const workerApi = axios.create({
 
 class Reader {
     async loadBook(url, callback) {
+        const refreshPause = 100;
+
         let response = await api.post('/load-book', {type: 'url', url});
 
         const workerId = response.data.workerId;
@@ -29,10 +31,10 @@ class Reader {
                 throw new Error(response.data.error);
             }
             if (i > 0)
-                await sleep(500);
+                await sleep(refreshPause);
 
             i++;
-            if (i > 60) {
+            if (i > 30*1000/refreshPause) {
                 throw new Error('Слишком долгое время ожидания');
             }
             response = await workerApi.post('/get-state', {workerId});

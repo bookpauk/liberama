@@ -50,14 +50,16 @@ import './theme/main.css';
 import ElInput from 'element-ui/lib/input';
 import './theme/input.css';
 
-const ElNotification = () => import('element-ui/lib/notification');
+import Notification from 'element-ui/lib/notification';
 import './theme/notification.css';
+
+import Loading from 'element-ui/lib/loading';
+import './theme/loading.css';
 
 const components = {
     ElMenu, ElMenuItem, ElButton, ElCheckbox, ElTabs, ElTabPane, ElTooltip,
     ElContainer, ElAside, ElMain, ElHeader,
-    ElInput,
-    ElNotification
+    ElInput
 };
 
 for (let [name, comp] of Object.entries(components)) {
@@ -66,7 +68,7 @@ for (let [name, comp] of Object.entries(components)) {
 
 //Vue.use(Loading.directive);
 
-//Vue.prototype.$loading = Loading.service;
+Vue.prototype.$loading = Loading.service;
 //Vue.prototype.$msgbox = MessageBox;
 //Vue.prototype.$alert = MessageBox.alert;
 //Vue.prototype.$confirm = MessageBox.confirm;
