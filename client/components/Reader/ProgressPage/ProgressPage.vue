@@ -1,7 +1,7 @@
 <template>
     <div v-show="visible" class="main">
         <div class="center">
-            <el-progress type="circle" :width="100" :stroke-width="5" color="green" :percentage="percentage"></el-progress>
+            <el-progress type="circle" :width="100" :stroke-width="5" color="#5800FA" :percentage="percentage"></el-progress>
             <p class="text">{{ text }}</p>
         </div>
     </div>
@@ -13,8 +13,8 @@ import Vue from 'vue';
 import Component from 'vue-class-component';
 
 const ruMessage = {
-    'start': '',
-    'fninish': '',
+    'start': ' ',
+    'finish': ' ',
     'download': 'скачивание',
     'decompress': 'распаковка',
     'convert': 'конвертирование',
@@ -43,7 +43,9 @@ class ProgressPage extends Vue {
     }
 
     hide() {
-        this.visible = false;
+        setTimeout(() => {
+            this.visible = false;
+        }, 350);
     }
 
     setState(state) {
