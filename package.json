@@ -66,6 +66,7 @@
     "got": "^9.5.1",
     "localforage": "^1.7.3",
     "lodash": "^4.17.11",
+    "path-browserify": "^1.0.0",
     "sql-template-strings": "^2.2.2",
     "sqlite": "^3.0.0",
     "vue": "^2.5.21",
