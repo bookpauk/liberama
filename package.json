@@ -64,6 +64,7 @@
     "express": "^4.16.4",
     "fs-extra": "^7.0.1",
     "got": "^9.5.1",
+    "localforage": "^1.7.3",
     "lodash": "^4.17.11",
     "sql-template-strings": "^2.2.2",
     "sqlite": "^3.0.0",
