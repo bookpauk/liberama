@@ -48,7 +48,7 @@ class ReaderWorker {
             wState.set({progress: 100});
             
             //parse book
-            wState.set({state: 'parse', step: 3, progress: 0});
+            wState.set({state: 'convert', step: 3, progress: 0});
             let resultFilename = `${this.config.tempPublicDir}/${tempFilename2}`;
             await this.bookConverter.convertToFb2(decompFilename, resultFilename, url, progress => {
                 wState.set({progress});
