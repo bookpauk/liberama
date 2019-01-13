@@ -53,7 +53,8 @@ class ProgressPage extends Vue {
     }
 
     setState(state) {
-        this.text = (ruMessage[state.state] ? ruMessage[state.state] : state.state);
+        if (state.state)
+            this.text = (ruMessage[state.state] ? ruMessage[state.state] : state.state);
         this.step = (state.step ? state.step : this.step);
         this.totalSteps = (state.totalSteps > this.totalSteps ? state.totalSteps : this.totalSteps);
         this.progress = (state.progress ? state.progress : this.progress);

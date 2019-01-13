@@ -1,6 +1,6 @@
 <template>
     <div class="main">
-        Text page 
+        <pre>{{ lastOpenedBook }}</pre>
     </div>
 </template>
 
@@ -8,6 +8,7 @@
 //-----------------------------------------------------------------------------
 import Vue from 'vue';
 import Component from 'vue-class-component';
+import bookManager from '../share/bookManager';
 
 export default @Component({
 })
@@ -16,6 +17,11 @@ class TextPage extends Vue {
         this.commit = this.$store.commit;
         this.dispatch = this.$store.dispatch;
         this.config = this.$store.state.config;
+        this.reader = this.$store.state.reader;
+    }
+
+    get lastOpenedBook() {
+        return this.$store.getters['reader/lastOpenedBook'];
     }
 
     keyHook(event) {

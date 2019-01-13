@@ -128,13 +128,20 @@ class Reader extends Vue {
         this.$nextTick(async() => {
             const progress = this.$refs.page;
             await progress.show();
-            progress.setState({totalSteps: 4});
+            progress.setState({totalSteps: 5});
+
             try {
                 const book = await readerApi.loadBook(url, (state) => {
                     progress.setState(state);
                 });
 
-                await bookManager.add(book);
+                progress.setState({state: 'parse', step: 5, progress: 0});
+                const meta = await bookManager.addBook(book, (prog) => {
+                    progress.setState({progress: prog});
+                });
+
+                this.commit('reader/addOpenedBook', meta);
+                this.commit('reader/setLoaderActive', false);
 
                 this.progressActive = await progress.hide();
             } catch (e) {
