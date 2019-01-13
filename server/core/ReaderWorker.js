@@ -63,10 +63,10 @@ class ReaderWorker {
 
         } finally {
             //clean
-            /*if (decompDir)
+            if (decompDir)
                 await fs.remove(decompDir);
             if (downloadedFilename)
-                await fs.remove(downloadedFilename);*/
+                await fs.remove(downloadedFilename);
         }
     }
 
