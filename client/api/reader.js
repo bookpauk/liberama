@@ -53,7 +53,9 @@ class Reader {
                 throw new Error('Слишком долгое время ожидания');
             }
             //проверка воркера
+            const prevProgress = response.data.progress;
             response = await workerApi.post('/get-state', {workerId});
+            i = (prevProgress != response.data.progress ? 1 : i);
         }
     }
 }
