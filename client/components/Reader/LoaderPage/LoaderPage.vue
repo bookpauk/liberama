@@ -76,7 +76,7 @@ class LoaderPage extends Vue {
 
     keyHook(event) {
         //недостатки сторонних ui
-        if (document.activeElement === this.$refs.input.$refs.input && event.type == 'keyup' && event.key == 'Enter') {
+        if (document.activeElement === this.$refs.input.$refs.input && event.type == 'keydown' && event.key == 'Enter') {
             this.submitUrl();
         }
     }
