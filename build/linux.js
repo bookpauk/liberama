@@ -4,7 +4,7 @@ const util = require('util');
 const stream = require('stream');
 const pipeline = util.promisify(stream.pipeline);
 
-const download = require('download');
+const got = require('got');
 const decompress = require('decompress');
 const decompressTargz = require('decompress-targz');
 
@@ -27,7 +27,7 @@ async function main() {
         // Скачиваем ipfs
         const ipfsRemoteUrl = 'https://dist.ipfs.io/go-ipfs/v0.4.18/go-ipfs_v0.4.18_linux-amd64.tar.gz';
 
-        await pipeline(download(ipfsRemoteUrl), fs.createWriteStream(`${tempDownloadDir}/ipfs.tar.gz`));
+        await pipeline(got.stream(ipfsRemoteUrl), fs.createWriteStream(`${tempDownloadDir}/ipfs.tar.gz`));
         console.log(`done downloading ${ipfsRemoteUrl}`);
 
         //распаковываем

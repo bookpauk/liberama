@@ -9,7 +9,7 @@ class FileDecompressor {
     async decompressFile(filename, outputDir) {
         const fileType = await this.detector.detectFile(filename);
 
-        if (!(fileType.ext == 'zip' || fileType.ext == 'bz2'))
+        if (!fileType || !(fileType.ext == 'zip' || fileType.ext == 'bz2'))
             return filename;
 
         const files = await decompress(filename, outputDir);

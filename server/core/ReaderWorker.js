@@ -1,11 +1,10 @@
 const workerState = require('./workerState');
-const FileDetector = require('./FileDetector');
 const FileDecompressor = require('./FileDecompressor');
 const BookConverter = require('./BookConverter');
 const utils = require('./utils');
 
 const fs = require('fs-extra');
-const download = require('download');
+const got = require('got');
 
 class ReaderWorker {
     constructor(config) {
@@ -17,7 +16,6 @@ class ReaderWorker {
         this.config.tempPublicDir = `${config.publicDir}/tmp`;
         fs.ensureDirSync(this.config.tempPublicDir);
 
-        this.detector = new FileDetector();
         this.decomp = new FileDecompressor();
         this.bookConverter = new BookConverter();
     }
@@ -35,17 +33,19 @@ class ReaderWorker {
             const decompDirname = utils.randomHexString(30);
 
             //download
-            const d = download(url);
-            const downdata = await d.on('downloadProgress', progress => {
+            let estSize = 100000;//
+            const downdata = await got(url).on('downloadProgress', progress => {
                 if (progress.transferred > maxDownloadSize) {
                     errMes = 'file too big';
                     d.destroy();
                 }
-                const prog = Math.round(progress.transferred/10000);
+                const prog = Math.round(progress.transferred/estSize*100);
+                if (prog > 100)
+                    estSize *= 1.5;
                 wState.set({progress: (prog > 100 ? 100 : prog) });
             });
             downloadedFilename = `${this.config.tempDownloadDir}/${tempFilename}`;
-            await fs.writeFile(downloadedFilename, downdata);
+            await fs.writeFile(downloadedFilename, downdata.body);
             wState.set({progress: 100});
 
             //decompress
@@ -56,10 +56,8 @@ class ReaderWorker {
             
             //parse book
             wState.set({state: 'parse', step: 3, progress: 0});
-            const fileType = await this.detector.detectFile(decompFilename);
-            fileType.url = url;
             let resultFilename = `${this.config.tempPublicDir}/${tempFilename2}`;
-            await this.bookConverter.convertToFb2(decompFilename, resultFilename, fileType, progress => {
+            await this.bookConverter.convertToFb2(decompFilename, resultFilename, url, progress => {
                 wState.set({progress});
             });
             wState.set({progress: 100});
@@ -72,10 +70,10 @@ class ReaderWorker {
 
         } finally {
             //clean
-            if (decompDir)
+            /*if (decompDir)
                 await fs.remove(decompDir);
             if (downloadedFilename)
-                await fs.remove(downloadedFilename);
+                await fs.remove(downloadedFilename);*/
         }
     }
 

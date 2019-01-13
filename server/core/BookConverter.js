@@ -1,11 +1,15 @@
 const fs = require('fs-extra');
+const FileDetector = require('./FileDetector');
 
 class BookConverter {
     constructor() {
+        this.detector = new FileDetector();
     }
 
-    async convertToFb2(inputFile, outputFile, fileType, callback) {
-        if (fileType.ext == 'html' || fileType.ext == 'xml') {
+    async convertToFb2(inputFile, outputFile, url, callback) {
+        const fileType = await this.detector.detectFile(inputFile);
+        
+        if (fileType && (fileType.ext == 'html' || fileType.ext == 'xml')) {
             const data = await fs.readFile(inputFile, 'utf8');
 
             if (data.indexOf('FictionBook') >= 0) {            
@@ -17,7 +21,10 @@ class BookConverter {
             await fs.writeFile(outputFile, data);
             callback(100);
         } else {
-            throw new Error(`unknown file format: ${fileType.mime}`);
+            if (fileType)
+                throw new Error(`unknown file format: ${fileType.mime}`);
+            else
+                throw new Error(`unsupported file format: ${url}`);
         }
     }
 }
