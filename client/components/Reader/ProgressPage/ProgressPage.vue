@@ -15,6 +15,7 @@ import Component from 'vue-class-component';
 const ruMessage = {
     'start': ' ',
     'finish': ' ',
+    'error': ' ',
     'download': 'скачивание',
     'decompress': 'распаковка',
     'convert': 'конвертирование',

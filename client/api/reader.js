@@ -11,7 +11,7 @@ const workerApi = axios.create({
 
 class Reader {
     async loadBook(url, callback) {
-        const refreshPause = 100;
+        const refreshPause = 200;
 
         let response = await api.post('/load-book', {type: 'url', url});
 
@@ -41,6 +41,7 @@ class Reader {
                 let errMes = response.data.error;
                 if (errMes.indexOf('getaddrinfo') >= 0 || 
                     errMes.indexOf('ECONNRESET') >= 0 ||
+                    errMes.indexOf('EINVAL') >= 0 ||
                     errMes.indexOf('404') >= 0)
                     errMes = `Ресурс не найден по адресу: ${response.data.url}`;
                 throw new Error(errMes);

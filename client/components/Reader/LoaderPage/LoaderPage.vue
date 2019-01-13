@@ -76,6 +76,7 @@ class LoaderPage extends Vue {
                 this.progress.hide();
             } catch (e) {
                 this.progress.hide();
+                this.$refs.input.blur();
                 this.$alert(e.message, 'Ошибка', {type: 'error'});
             }
         }
@@ -93,8 +94,9 @@ class LoaderPage extends Vue {
 
     keyHook(event) {
         //недостатки сторонних ui
-        if (document.activeElement == this.$refs.input.$refs.input && event.type == 'keyup' && event.key == 'Enter')
+        if (document.activeElement === this.$refs.input.$refs.input && event.type == 'keyup' && event.key == 'Enter') {
             this.submitUrl();
+        }
     }
 }
 //-----------------------------------------------------------------------------
