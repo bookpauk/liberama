@@ -1,10 +1,10 @@
+const fs = require('fs-extra');
+
 const workerState = require('./workerState');
+const FileDownloader = require('./FileDownloader');
 const FileDecompressor = require('./FileDecompressor');
 const BookConverter = require('./BookConverter');
 const utils = require('./utils');
-
-const fs = require('fs-extra');
-const got = require('got');
 
 class ReaderWorker {
     constructor(config) {
@@ -16,12 +16,12 @@ class ReaderWorker {
         this.config.tempPublicDir = `${config.publicDir}/tmp`;
         fs.ensureDirSync(this.config.tempPublicDir);
 
+        this.down = new FileDownloader();
         this.decomp = new FileDecompressor();
         this.bookConverter = new BookConverter();
     }
 
     async loadBook(url, wState) {
-        const maxDownloadSize = 10*1024*1024;
         let errMes = '';
         let decompDir = '';
         let downloadedFilename = '';
@@ -33,19 +33,12 @@ class ReaderWorker {
             const decompDirname = utils.randomHexString(30);
 
             //download
-            let estSize = 100000;//
-            const downdata = await got(url).on('downloadProgress', progress => {
-                if (progress.transferred > maxDownloadSize) {
-                    errMes = 'file too big';
-                    d.destroy();
-                }
-                const prog = Math.round(progress.transferred/estSize*100);
-                if (prog > 100)
-                    estSize *= 1.5;
-                wState.set({progress: (prog > 100 ? 100 : prog) });
+            const downdata = await this.down.load(url, (progress) => {
+                wState.set({progress});
             });
+
             downloadedFilename = `${this.config.tempDownloadDir}/${tempFilename}`;
-            await fs.writeFile(downloadedFilename, downdata.body);
+            await fs.writeFile(downloadedFilename, downdata);
             wState.set({progress: 100});
 
             //decompress
