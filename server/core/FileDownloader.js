@@ -10,21 +10,27 @@ class FileDownloader {
 
         const response = await got(url, {method: 'HEAD'});
 
-        let estSize = 100000;
+        let estSize = 0;
         if (response.headers['content-length']) {
             estSize = response.headers['content-length'];
         }
 
+        let prevProg = 0;
         const request = got(url, {encoding: null}).on('downloadProgress', progress => {
             if (progress.transferred > maxDownloadSize) {
                 errMes = 'file too big';
                 request.cancel();
             }
-            const prog = Math.round(progress.transferred/estSize*100);
-            if (callback)
-                callback((prog > 100 ? 100 : prog));
-            if (prog > 100)
-                estSize *= 1.5;
+
+            let prog = 0;
+            if (estSize)
+                prog = Math.round(progress.transferred/estSize*100);
+            else if (progress.transferred)
+                prog = Math.round(progress.transferred/(progress.transferred + 100000)*100);
+
+            if (prog != prevProg && callback)
+                callback(prog);
+            prevProg = prog;
         });
 
 
