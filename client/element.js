@@ -68,8 +68,8 @@ const components = {
     ElInput, ElProgress
 };
 
-for (let [name, comp] of Object.entries(components)) {
-    Vue.component(name, comp);
+for (let name in components) {
+    Vue.component(name, components[name]);
 }
 
 //Vue.use(Loading.directive);
