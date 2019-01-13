@@ -43,7 +43,7 @@
 
         <el-main>
             <keep-alive>
-                <component ref="page" :is="pageActive"></component>
+                <component ref="page" :is="pageActive" @load-book="loadBook"></component>
             </keep-alive>
         </el-main>
     </el-container>
@@ -55,14 +55,21 @@ import Vue from 'vue';
 import Component from 'vue-class-component';
 import LoaderPage from './LoaderPage/LoaderPage.vue';
 import TextPage from './TextPage/TextPage.vue';
+import ProgressPage from './ProgressPage/ProgressPage.vue';
+
+import bookManager from './share/bookManager';
+import readerApi from '../../api/reader';
 
 export default @Component({
     components: {
         LoaderPage,
-        TextPage
+        TextPage,
+        ProgressPage
     },
 })
 class Reader extends Vue {
+    progressActive = false;
+
     created() {
         this.commit = this.$store.commit;
         this.dispatch = this.$store.dispatch;
@@ -102,16 +109,39 @@ class Reader extends Vue {
     get pageActive() {
         let result = '';
 
-        if (this.lastOpenedBook)
-            result = 'TextPage';
-        if (this.loaderActive)
+        if (this.progressActive)
+            result = 'ProgressPage';
+        else if (this.loaderActive)
             result = 'LoaderPage';
+        else if (this.lastOpenedBook)
+            result = 'TextPage';
 
         if (!result) {
             //this.commit('reader/setLoaderActive', true);
             //result = 'LoaderPage';
         }
         return result;
+    }
+
+    loadBook(url) {
+        this.progressActive = true;
+        this.$nextTick(async() => {
+            const progress = this.$refs.page;
+            await progress.show();
+            progress.setState({totalSteps: 4});
+            try {
+                const book = await readerApi.loadBook(url, (state) => {
+                    progress.setState(state);
+                });
+
+                await bookManager.add(book);
+
+                this.progressActive = await progress.hide();
+            } catch (e) {
+                this.progressActive = await progress.hide();
+                this.$alert(e.message, 'Ошибка', {type: 'error'});
+            }
+        });
     }
 
     keyHook(event) {

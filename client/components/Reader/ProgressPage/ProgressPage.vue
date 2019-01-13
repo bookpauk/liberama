@@ -11,6 +11,7 @@
 //-----------------------------------------------------------------------------
 import Vue from 'vue';
 import Component from 'vue-class-component';
+import {sleep} from '../../../share/utils';
 
 const ruMessage = {
     'start': ' ',
@@ -32,7 +33,7 @@ class ProgressPage extends Vue {
     progress = 0;
     visible = false;
 
-    show() {
+    async show() {
         this.$el.style.width = this.$parent.$el.offsetWidth + 'px';
         this.$el.style.height = this.$parent.$el.offsetHeight + 'px';
         this.text = '';
@@ -41,12 +42,14 @@ class ProgressPage extends Vue {
         this.progress = 0;
 
         this.visible = true;
+        await sleep(1);
+        return true;
     }
 
-    hide() {
-        setTimeout(() => {
-            this.visible = false;
-        }, 350);
+    async hide() {
+        await sleep(350);
+        this.visible = false;
+        return false;
     }
 
     setState(state) {

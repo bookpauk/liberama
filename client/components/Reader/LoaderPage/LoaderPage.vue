@@ -19,7 +19,6 @@
             <span class="bottom-span clickable" @click="openHelp">Справка</span>
             <span class="bottom-span">{{ version }}</span>
         </div>
-        <ProgressPage ref="progress"></ProgressPage>
     </div>
 </template>
 
@@ -28,13 +27,7 @@
 import Vue from 'vue';
 import Component from 'vue-class-component';
 
-import ProgressPage from '../ProgressPage/ProgressPage.vue';
-import readerApi from '../../../api/reader';
-
 export default @Component({
-    components: {
-        ProgressPage
-    }
 })
 class LoaderPage extends Vue {
     bookUrl = null;
@@ -67,18 +60,7 @@ class LoaderPage extends Vue {
 
     async submitUrl() {
         if (this.bookUrl) {
-            this.progress.show();
-            this.progress.setState({totalSteps: 4});
-            try {
-                const book = await readerApi.loadBook(this.bookUrl, (state) => {
-                    this.progress.setState(state);
-                });
-                this.progress.hide();
-            } catch (e) {
-                this.progress.hide();
-                this.$refs.input.blur();
-                this.$alert(e.message, 'Ошибка', {type: 'error'});
-            }
+            this.$emit('load-book', this.bookUrl);
         }
     }
 
