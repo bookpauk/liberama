@@ -123,7 +123,7 @@ class Reader extends Vue {
         return result;
     }
 
-    loadBook(url) {
+    loadBook(opts) {
         this.progressActive = true;
         this.$nextTick(async() => {
             const progress = this.$refs.page;
@@ -131,16 +131,16 @@ class Reader extends Vue {
             progress.setState({totalSteps: 5});
 
             try {
-                const book = await readerApi.loadBook(url, (state) => {
+                const book = await readerApi.loadBook(opts.url, (state) => {
                     progress.setState(state);
                 });
 
                 progress.setState({state: 'parse', step: 5, progress: 0});
-                const meta = await bookManager.addBook(book, (prog) => {
+                let addedBook = await bookManager.addBook(book, (prog) => {
                     progress.setState({progress: prog});
                 });
 
-                this.commit('reader/addOpenedBook', meta);
+                this.commit('reader/addOpenedBook', bookManager.metaOnly(addedBook));
                 this.commit('reader/setLoaderActive', false);
 
                 this.progressActive = await progress.hide();
