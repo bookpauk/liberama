@@ -1,7 +1,7 @@
 <template>
     <div v-show="visible" class="main">
         <div class="center">
-            <el-progress type="circle" :width="100" :stroke-width="5" color="#5800FA" :percentage="percentage"></el-progress>
+            <el-progress type="circle" :width="100" :stroke-width="5" color="#0F9900" :percentage="percentage"></el-progress>
             <p class="text">{{ text }}</p>
         </div>
     </div>
