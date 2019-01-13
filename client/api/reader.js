@@ -29,7 +29,7 @@ class Reader {
                         if (callback)
                             callback(Object.assign({}, 
                                 response.data, 
-                                {state: 'loading', stage: 4, progress: Math.round((progress.loaded*100)/progress.total)}
+                                {state: 'loading', step: 4, progress: Math.round((progress.loaded*100)/progress.total)}
                             ));
                     }
                 }

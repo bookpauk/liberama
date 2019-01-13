@@ -19,6 +19,7 @@
             <span class="bottom-span clickable" @click="openHelp">Справка</span>
             <span class="bottom-span">{{ version }}</span>
         </div>
+        <ProgressPage ref="progress"></ProgressPage>
     </div>
 </template>
 
@@ -27,17 +28,26 @@
 import Vue from 'vue';
 import Component from 'vue-class-component';
 
+import ProgressPage from '../ProgressPage/ProgressPage.vue';
 import readerApi from '../../../api/reader';
 
 export default @Component({
+    components: {
+        ProgressPage
+    }
 })
 class LoaderPage extends Vue {
     bookUrl = null;
+    loadPercent = 0;
 
     created() {
         this.commit = this.$store.commit;
         this.dispatch = this.$store.dispatch;
         this.config = this.$store.state.config;
+    }
+
+    mounted() {
+        this.progress = this.$refs.progress;
     }
 
     activated() {
@@ -57,15 +67,15 @@ class LoaderPage extends Vue {
 
     async submitUrl() {
         if (this.bookUrl) {
-            const loading = this.$loading({target: this.$refs.main, customClass: 'loading'});
+            this.progress.show();
+            this.progress.setState({totalSteps: 4});
             try {
                 const book = await readerApi.loadBook(this.bookUrl, (state) => {
-                    const progress = state.progress || 0;
-                    loading.text = `${state.state} ${progress}%`;
+                    this.progress.setState(state);
                 });
-                loading.close();
+                this.progress.hide();
             } catch (e) {
-                loading.close();
+                this.progress.hide();
                 this.$alert(e.message, 'Ошибка', {type: 'error'});
             }
         }
@@ -89,14 +99,6 @@ class LoaderPage extends Vue {
 }
 //-----------------------------------------------------------------------------
 </script>
-<style>
-.loading {
-    background-color: rgba(0, 0, 0, 0.8);
-}
-.el-loading-text {
-    color: #ffffff !important;
-}
-</style>
 <style scoped>
 .main {
     flex: 1;

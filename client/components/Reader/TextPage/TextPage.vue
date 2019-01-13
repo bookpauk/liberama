@@ -12,8 +12,6 @@ import Component from 'vue-class-component';
 export default @Component({
 })
 class TextPage extends Vue {
-    bookUrl = null;
-
     created() {
         this.commit = this.$store.commit;
         this.dispatch = this.$store.dispatch;
