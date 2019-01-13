@@ -1,38 +1,64 @@
 import localForage from 'localforage';
-import path from 'path';
 
+import * as utils from '../../../share/utils';
 import BookParser from './BookParser';
+
+const maxDataSize = 100*1024*1024;//chars, not bytes
 
 class BookManager {
     async init() {
         this.books = {};
 
         const len = await localForage.length();
-        for (let i = 0; i < len; i++){
+        for (let i = 0; i < len; i++) {
             const key = await localForage.key(i);
             const keySplit = key.split('-');
-            if (keySplit.length == 2 && keySplit[1] == 'meta') {
+
+            if (keySplit.length == 2 && keySplit[0] == 'bmMeta') {
                 let meta = await localForage.getItem(key);
-                meta.data = await localForage.getItem(keySplit[0]);
+                meta.data = await localForage.getItem(`bmData-${keySplit[1]}`);
 
                 this.books[meta.key] = meta;
-                this.books[meta.url] = meta;
             }
         }
 
-        console.log(this.books);
+        await this.cleanBooks();
+    }
+
+    async cleanBooks() {
+        while (1) {// eslint-disable-line no-constant-condition
+            let size = 0;
+            let min = Date.now();
+            let toDel = null;
+            for (let key in this.books) {
+                let book = this.books[key];
+                size += book.data.length;
+
+                if (book.addTime < min) {
+                    toDel = book;
+                    min = book.addTime;
+                }
+            }
+
+            if (size > maxDataSize && toDel) {
+                await this.delBook(toDel);
+            } else {
+                break;
+            }
+        }
     }
 
     async addBook(newBook, callback) {
         if (!this.books) 
             await this.init();
         let meta = {url: newBook.url, path: newBook.path};
-        meta.key = path.basename(newBook.path);
+        meta.key = this.keyFromUrl(meta.url);
+        meta.addTime = Date.now();
 
         const result = await this.parseBook(meta, newBook.data, callback);
 
-        await localForage.setItem(meta.key, result.data);
-        await localForage.setItem(`${meta.key}-meta`, meta);
+        await localForage.setItem(`bmMeta-${meta.key}`, this.metaOnly(result));
+        await localForage.setItem(`bmData-${meta.key}`, result.data);
 
         return result;
     }
@@ -41,10 +67,9 @@ class BookManager {
         if (!this.books) 
             await this.init();
         let result = undefined;
-        if (meta.key)
-            result = this.books[meta.key];
-        else
-            result = this.books[meta.url];
+        if (!meta.key)
+            meta.key = this.keyFromUrl(meta.url);
+        result = this.books[meta.key];
 
         if (result && !result.parsed) {
             result = await this.parseBook(result, result.data, callback);
@@ -56,19 +81,11 @@ class BookManager {
     async delBook(meta) {
         if (!this.books) 
             await this.init();
-        let book = undefined;
-        if (meta.key)
-            book = this.books[meta.key];
-        else
-            book = this.books[meta.url];
 
-        if (book) {
-            await localForage.removeItem(book.key);
-            await localForage.removeItem(`${book.key}-meta`);
+        await localForage.removeItem(`bmMeta-${meta.key}`);
+        await localForage.removeItem(`bmData-${meta.key}`);
 
-            delete this.books[book.key];
-            delete this.books[book.url];
-        }
+        delete this.books[meta.key];
     }
 
     async parseBook(meta, data, callback) {
@@ -80,7 +97,6 @@ class BookManager {
         const result = Object.assign({}, meta, parsedMeta, {data, parsed});
 
         this.books[meta.key] = result;
-        this.books[meta.url] = result;
 
         return result;
     }
@@ -91,6 +107,11 @@ class BookManager {
         delete result.parsed;
         return result;
     }
+
+    keyFromUrl(url) {
+        return utils.stringToHex(url);
+    }
+
 }
 
 export default new BookManager();
