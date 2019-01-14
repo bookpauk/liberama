@@ -82,6 +82,21 @@ class Reader extends Vue {
         /*while (this.lastOpenedBook) {
             this.commit('reader/delOpenedBook', this.lastOpenedBook);
         }*/
+        if (this.$root.rootRoute == '/reader' && this.routeParamUrl && this.routeParamUrl != this.lastOpenedBook.url) {
+            this.commit('reader/setLoaderActive', true);
+            this.loadBook({url: this.routeParamUrl});
+        }        
+    }
+
+    get routeParamUrl() {
+        let result = '';
+        const path = this.$route.fullPath;
+        const i = path.indexOf('url=');
+        if (i >= 0) {
+            result = path.substr(i + 4);
+        }
+        
+        return decodeURIComponent(result);
     }
 
     get loaderActive() {
@@ -130,6 +145,11 @@ class Reader extends Vue {
         if (result != 'TextPage') {
             this.$root.$emit('set-app-title');
         }
+
+        if (result == 'LoaderPage') {
+            this.$router.replace('/reader');
+        }
+        
         return result;
     }
 
