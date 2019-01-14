@@ -43,7 +43,7 @@
 
         <el-main>
             <keep-alive>
-                <component ref="page" :is="pageActive" @load-book="loadBook"></component>
+                <component ref="page" :is="pageActive" @load-book="loadBook" @parse-book="parseBook"></component>
             </keep-alive>
         </el-main>
     </el-container>
@@ -150,6 +150,34 @@ class Reader extends Vue {
                 this.commit('reader/setLoaderActive', false);
 
                 progress.hide(); this.progressActive = false;
+            } catch (e) {
+                progress.hide(); this.progressActive = false;
+                this.$alert(e.message, 'Ошибка', {type: 'error'});
+            }
+        });
+    }
+
+    parseBook(meta) {
+        this.progressActive = true;
+        this.$nextTick(async() => {
+            if (await bookManager.hasBookParsed(meta)) {
+                this.progressActive = false;
+                return;
+            }
+            
+            const progress = this.$refs.page;
+            progress.show();
+            progress.setState({state: 'parse'});
+            try {
+                const isParsed = await bookManager.getBook(meta, (prog) => {
+                    progress.setState({progress: prog});
+                });
+
+                progress.hide(); this.progressActive = false;
+
+                if (!isParsed) {
+                    this.loadBook({url: meta.url});
+                }
             } catch (e) {
                 progress.hide(); this.progressActive = false;
                 this.$alert(e.message, 'Ошибка', {type: 'error'});

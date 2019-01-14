@@ -172,6 +172,8 @@ export default class BookParser {
         this.para = para;
 
         callback(100);
+        await sleep(10);
+
         return {fb2};
     }
 }

@@ -43,7 +43,7 @@ class ProgressPage extends Vue {
         this.visible = true;
     }
 
-    async hide() {
+    hide() {
         this.visible = false;
     }
 

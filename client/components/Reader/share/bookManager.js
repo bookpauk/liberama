@@ -64,6 +64,17 @@ class BookManager {
         return result;
     }
 
+    hasBookParsed(meta) {
+        if (!this.books) 
+            return false;
+        if (!meta.url)
+            return false;
+        if (!meta.key)
+            meta.key = this.keyFromUrl(meta.url);
+        let book = this.books[meta.key];
+        return (book && book.parsed);
+    }
+
     async getBook(meta, callback) {
         if (!this.books) 
             await this.init();
