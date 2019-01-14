@@ -31,7 +31,7 @@ class BookManager {
             let toDel = null;
             for (let key in this.books) {
                 let book = this.books[key];
-                size += book.data.length;
+                size += (book.length ? book.length : 0);
 
                 if (book.addTime < min) {
                     toDel = book;
@@ -97,7 +97,7 @@ class BookManager {
         const parsed = new BookParser();
 
         const parsedMeta = await parsed.parse(data, callback);
-        const result = Object.assign({}, meta, parsedMeta, {data, parsed});
+        const result = Object.assign({}, meta, parsedMeta, {length: data.length, data, parsed});
 
         this.books[meta.key] = result;
 
