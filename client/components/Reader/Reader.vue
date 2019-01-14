@@ -126,6 +126,10 @@ class Reader extends Vue {
             //this.commit('reader/setLoaderActive', true);
             //result = 'LoaderPage';
         }
+
+        if (result != 'TextPage') {
+            this.$root.$emit('set-app-title');
+        }
         return result;
     }
 

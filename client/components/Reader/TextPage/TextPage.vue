@@ -1,5 +1,6 @@
 <template>
     <div class="main">
+        <pre>{{ meta }}</pre>
         <p v-for="item in items" :key="item.id">
             {{ item.text }}
         </p>
@@ -10,11 +11,14 @@
 //-----------------------------------------------------------------------------
 import Vue from 'vue';
 import Component from 'vue-class-component';
+import _ from 'lodash';
+
 import bookManager from '../share/bookManager';
 
 export default @Component({
 })
 class TextPage extends Vue {
+    meta = null;
     items = null;
 
     created() {
@@ -32,18 +36,30 @@ class TextPage extends Vue {
             (async() => {
                 const isParsed = await bookManager.hasBookParsed(last);
                 if (!isParsed) {
+                    this.$root.$emit('set-app-title');
                     this.$emit('parse-book', last);
                     return;
                 }
-                const book = await bookManager.getBook(last);
-                this.book = book.parsed;
-
+                this.book = await bookManager.getBook(last);
+                this.meta = bookManager.metaOnly(this.book);
+                const fb2 = this.meta.fb2;
+                this.$root.$emit('set-app-title', _.compact([
+                    fb2.lastName,
+                    fb2.middleName,
+                    fb2.firstName,
+                    '-',
+                    fb2.bookTitle
+                ]).join(' '));
+//
                 let lines = [];
-                const len = (this.book.para.length > 50 ? 50 : this.book.para.length);
+                let para = this.book.parsed.para;
+                const len = (para.length > 50 ? 50 : para.length);
                 for (let i = 0; i < len; i++) {
-                    lines.push({key: i, text: this.book.para[i].text});
+                    lines.push({key: i, text: para[i].text});
                 }
                 this.items = lines;
+//
+
             })();
         }
     }

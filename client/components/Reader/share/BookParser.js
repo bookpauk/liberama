@@ -17,6 +17,14 @@ export default class BookParser {
             throw new Error('Неверный формат файла');
         }
 
+        //defaults
+        let fb2 = {
+            firstName: '',
+            middleName: '',
+            lastName: '',
+            bookTitle: '',
+        };
+
         let path = '';
         let tag = '';
         let nextPerc = 0;
@@ -66,8 +74,6 @@ export default class BookParser {
             paraOffset += p.length;
         };
 
-        let fb2 = {};
-
         const parser = this.parser;
 
         parser.on('error', (msgError) => {// eslint-disable-line no-unused-vars
@@ -100,6 +106,9 @@ export default class BookParser {
             switch (path) {
                 case '/FictionBook/description/title-info/author/first-name':
                     fb2.firstName = text;
+                    break;
+                case '/FictionBook/description/title-info/author/middle-name':
+                    fb2.middleName = text;
                     break;
                 case '/FictionBook/description/title-info/author/last-name':
                     fb2.lastName = text;

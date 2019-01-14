@@ -6,31 +6,31 @@
             <el-menu class="el-menu-vertical" :default-active="rootRoute" :collapse="isCollapse" router>
               <el-menu-item index="/cardindex">
                 <i class="el-icon-search"></i>
-                <span :class="itemTitleClass('/cardindex')" slot="title">Картотека</span>
+                <span :class="itemTitleClass('/cardindex')" slot="title">{{ this.itemRuText['/cardindex'] }}</span>
               </el-menu-item>
               <el-menu-item index="/reader">
                 <i class="el-icon-tickets"></i>
-                <span :class="itemTitleClass('/reader')" slot="title">Читалка</span>
+                <span :class="itemTitleClass('/reader')" slot="title">{{ this.itemRuText['/reader'] }}</span>
               </el-menu-item>
               <el-menu-item index="/forum" disabled>
                 <i class="el-icon-message"></i>
-                <span :class="itemTitleClass('/forum')" slot="title">Форум-чат</span>
+                <span :class="itemTitleClass('/forum')" slot="title">{{ this.itemRuText['/forum'] }}</span>
               </el-menu-item>
               <el-menu-item index="/income">
                 <i class="el-icon-upload"></i>
-                <span :class="itemTitleClass('/income')" slot="title">Поступления</span>
+                <span :class="itemTitleClass('/income')" slot="title">{{ this.itemRuText['/income'] }}</span>
               </el-menu-item>
               <el-menu-item index="/sources">
                 <i class="el-icon-menu"></i>
-                <span :class="itemTitleClass('/sources')" slot="title">Источники</span>
+                <span :class="itemTitleClass('/sources')" slot="title">{{ this.itemRuText['/sources'] }}</span>
               </el-menu-item>
               <el-menu-item index="/settings">
                 <i class="el-icon-setting"></i>
-                <span :class="itemTitleClass('/settings')" slot="title">Параметры</span>
+                <span :class="itemTitleClass('/settings')" slot="title">{{ this.itemRuText['/settings'] }}</span>
               </el-menu-item>
               <el-menu-item index="/help">
                 <i class="el-icon-question"></i>
-                <span :class="itemTitleClass('/help')" slot="title">Справка</span>
+                <span :class="itemTitleClass('/help')" slot="title">{{ this.itemRuText['/help'] }}</span>
               </el-menu-item>
             </el-menu>
         </el-aside>
@@ -59,12 +59,24 @@ export default @Component({
 
 })
 class App extends Vue {
+    itemRuText = {
+        '/cardindex': 'Картотека',
+        '/reader': 'Читалка',
+        '/forum': 'Форум-чат',
+        '/income': 'Поступления',
+        '/sources': 'Источники',
+        '/settings': 'Параметры',
+        '/help': 'Справка',
+    }
     created() {
         this.commit = this.$store.commit;
         this.dispatch = this.$store.dispatch;
         this.state = this.$store.state;
         this.uistate = this.$store.state.uistate;
         this.config = this.$store.state.config;
+
+        // set-app-title
+        this.$root.$on('set-app-title', this.setAppTitle);
 
         //global keyHooks
         this.keyHooks = [];
@@ -143,7 +155,19 @@ class App extends Vue {
     get rootRoute() {
         const m = this.$route.path.match(/^(\/[^/]*).*$/i);
         this.$root.rootRoute = (m ? m[1] : this.$route.path);
+
+        this.setAppTitle();
         return this.$root.rootRoute;
+    }
+
+    setAppTitle(title) {
+        if (!title) {
+            if (this.config) {
+                document.title = `${this.config.name} - ${this.itemRuText[this.$root.rootRoute]}`;
+            }
+        } else {
+            document.title = title;
+        }
     }
 
     itemTitleClass(path) {
