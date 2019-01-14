@@ -1,5 +1,5 @@
 const path = require('path');
-const webpack = require('webpack');
+//const webpack = require('webpack');
 
 const merge = require('webpack-merge');
 const baseWpConfig = require('./webpack.base.config');
@@ -8,6 +8,7 @@ const OptimizeCSSAssetsPlugin = require('optimize-css-assets-webpack-plugin');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const CleanWebpackPlugin = require('clean-webpack-plugin');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
+const CopyWebpackPlugin = require('copy-webpack-plugin');
 
 const publicDir = path.resolve(__dirname, '../dist/tmp/public');
 const clientDir = path.resolve(__dirname, '../client');
@@ -43,6 +44,7 @@ module.exports = merge(baseWpConfig, {
         new HtmlWebpackPlugin({
             template: `${clientDir}/index.html.template`,
             filename: `${publicDir}/index.html`
-        })
+        }),
+        new CopyWebpackPlugin([{from: `${clientDir}/assets/*`, to: `${publicDir}/`, flatten: true}])
     ]
 });

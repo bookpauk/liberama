@@ -6,6 +6,7 @@ const baseWpConfig = require('./webpack.base.config');
 
 baseWpConfig.entry.unshift('webpack-hot-middleware/client');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
+const CopyWebpackPlugin = require('copy-webpack-plugin');
 
 const publicDir = path.resolve(__dirname, '../server/public');
 const clientDir = path.resolve(__dirname, '../client');
@@ -36,6 +37,7 @@ module.exports = merge(baseWpConfig, {
         new HtmlWebpackPlugin({
             template: `${clientDir}/index.html.template`,
             filename: `${publicDir}/index.html`
-        })
+        }),
+        new CopyWebpackPlugin([{from: `${clientDir}/assets/*`, to: `${publicDir}/`, flatten: true}])
     ]
 });
