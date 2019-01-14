@@ -19,6 +19,8 @@ export default @Component({
 })
 class TextPage extends Vue {
     meta = null;
+    fb2 = null;
+
     items = null;
 
     created() {
@@ -42,14 +44,14 @@ class TextPage extends Vue {
                 }
                 this.book = await bookManager.getBook(last);
                 this.meta = bookManager.metaOnly(this.book);
-                const fb2 = this.meta.fb2;
+                this.fb2 = this.meta.fb2;
                 this.$root.$emit('set-app-title', _.compact([
-                    fb2.lastName,
-                    fb2.middleName,
-                    fb2.firstName,
+                    this.fb2.lastName,
+                    this.fb2.middleName,
+                    this.fb2.firstName,
                     '-',
-                    fb2.bookTitle
-                ]).join(' '));
+                    this.fb2.bookTitle
+                ]).join(' '));                
 //
                 let lines = [];
                 let para = this.book.parsed.para;

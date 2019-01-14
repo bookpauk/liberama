@@ -123,8 +123,8 @@ class Reader extends Vue {
             result = 'TextPage';
 
         if (!result) {
-            //this.commit('reader/setLoaderActive', true);
-            //result = 'LoaderPage';
+            this.commit('reader/setLoaderActive', true);
+            result = 'LoaderPage';
         }
 
         if (result != 'TextPage') {
