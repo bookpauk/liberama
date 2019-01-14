@@ -1,6 +1,8 @@
 <template>
     <div class="main">
-        <pre>{{ parsedBook }}</pre>
+        <p v-for="item in items" :key="item.id">
+            {{ item.text }}
+        </p>
     </div>
 </template>
 
@@ -13,7 +15,7 @@ import bookManager from '../share/bookManager';
 export default @Component({
 })
 class TextPage extends Vue {
-    parsedBook = null;
+    items = null;
 
     created() {
         this.commit = this.$store.commit;
@@ -35,6 +37,13 @@ class TextPage extends Vue {
                 }
                 const book = await bookManager.getBook(last);
                 this.book = book.parsed;
+
+                let lines = [];
+                const len = (this.book.para.length > 50 ? 50 : this.book.para.length);
+                for (let i = 0; i < len; i++) {
+                    lines.push({key: i, text: this.book.para[i].text});
+                }
+                this.items = lines;
             })();
         }
     }
@@ -53,5 +62,11 @@ class TextPage extends Vue {
     flex: 1;
     display: flex;
     flex-direction: column;
+}
+
+p {
+    margin: 0;
+    padding: 0;
+    text-indent: 3%;
 }
 </style>
