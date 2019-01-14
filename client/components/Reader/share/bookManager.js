@@ -16,7 +16,6 @@ class BookManager {
 
             if (keySplit.length == 2 && keySplit[0] == 'bmMeta') {
                 let meta = await localForage.getItem(key);
-                meta.data = await localForage.getItem(`bmData-${keySplit[1]}`);
 
                 this.books[meta.key] = meta;
             }
@@ -70,6 +69,10 @@ class BookManager {
         if (!meta.key)
             meta.key = this.keyFromUrl(meta.url);
         result = this.books[meta.key];
+
+        if (result && !result.data) {
+            result.data = await localForage.getItem(`bmData-${meta.key}`);
+        }
 
         if (result && !result.parsed) {
             result = await this.parseBook(result, result.data, callback);
