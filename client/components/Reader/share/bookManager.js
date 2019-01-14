@@ -56,6 +56,8 @@ class BookManager {
 
         const result = await this.parseBook(meta, newBook.data, callback);
 
+        this.books[meta.key] = result;
+
         await localForage.setItem(`bmMeta-${meta.key}`, this.metaOnly(result));
         await localForage.setItem(`bmData-${meta.key}`, result.data);
 
@@ -72,10 +74,12 @@ class BookManager {
 
         if (result && !result.data) {
             result.data = await localForage.getItem(`bmData-${meta.key}`);
+            this.books[meta.key] = result;
         }
 
         if (result && !result.parsed) {
             result = await this.parseBook(result, result.data, callback);
+            this.books[meta.key] = result;
         }
 
         return result;
@@ -98,8 +102,6 @@ class BookManager {
 
         const parsedMeta = await parsed.parse(data, callback);
         const result = Object.assign({}, meta, parsedMeta, {length: data.length, data, parsed});
-
-        this.books[meta.key] = result;
 
         return result;
     }
