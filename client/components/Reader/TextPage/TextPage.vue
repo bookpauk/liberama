@@ -1,9 +1,6 @@
 <template>
     <div class="main">
         <pre>{{ meta }}</pre>
-        <p v-for="item in items" :key="item.id">
-            {{ item.text }}
-        </p>
     </div>
 </template>
 
@@ -21,25 +18,30 @@ class TextPage extends Vue {
     meta = null;
     fb2 = null;
 
-    items = null;
-
     created() {
         this.commit = this.$store.commit;
         this.dispatch = this.$store.dispatch;
         this.config = this.$store.state.config;
         this.reader = this.$store.state.reader;
 
-        this.book = null;
+        this.openFailed = false;
     }
 
     activated() {
+        this.book = null;
+        this.meta = null;
+        this.fb2 = null;
+
         const last = this.lastOpenedBook;
         if (last) {
             (async() => {
                 const isParsed = await bookManager.hasBookParsed(last);
                 if (!isParsed) {
                     this.$root.$emit('set-app-title');
-                    this.$emit('parse-book', last);
+                    if (!this.openFailed) {
+                        this.$emit('parse-book', last);
+                        this.openFailed = true;
+                    }
                     return;
                 }
                 this.book = await bookManager.getBook(last);
@@ -51,23 +53,18 @@ class TextPage extends Vue {
                     this.fb2.firstName,
                     '-',
                     this.fb2.bookTitle
-                ]).join(' '));                
-//
-                let lines = [];
-                let para = this.book.parsed.para;
-                const len = (para.length > 50 ? 50 : para.length);
-                for (let i = 0; i < len; i++) {
-                    lines.push({key: i, text: para[i].text});
-                }
-                this.items = lines;
-//
-
+                ]).join(' '));
             })();
         }
     }
 
     get lastOpenedBook() {
         return this.$store.getters['reader/lastOpenedBook'];
+    }
+
+    showPage() {
+        if (!this.book)
+            return;
     }
 
     keyHook(event) {

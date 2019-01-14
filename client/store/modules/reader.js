@@ -34,7 +34,7 @@ const mutations = {
     setFullScreenActive(state, value) {
         state.fullScreenActive = value;
     },
-    addOpenedBook(state, value) {
+    setOpenedBook(state, value) {
         Vue.set(state.openedBook, value.key, Object.assign({}, value, {touchTime: Date.now()}));
     },
     delOpenedBook(state, value) {

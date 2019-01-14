@@ -150,12 +150,13 @@ class Reader extends Vue {
                     progress.setState({progress: prog});
                 });
 
-                this.commit('reader/addOpenedBook', bookManager.metaOnly(addedBook));
+                this.commit('reader/setOpenedBook', bookManager.metaOnly(addedBook));
                 this.commit('reader/setLoaderActive', false);
 
                 progress.hide(); this.progressActive = false;
             } catch (e) {
                 progress.hide(); this.progressActive = false;
+                this.commit('reader/setLoaderActive', true);
                 this.$alert(e.message, 'Ошибка', {type: 'error'});
             }
         });
@@ -164,7 +165,7 @@ class Reader extends Vue {
     parseBook(meta) {
         this.progressActive = true;
         this.$nextTick(async() => {
-            if (await bookManager.hasBookParsed(meta)) {
+            if (bookManager.hasBookParsed(meta)) {
                 this.progressActive = false;
                 return;
             }
@@ -184,6 +185,7 @@ class Reader extends Vue {
                 }
             } catch (e) {
                 progress.hide(); this.progressActive = false;
+                this.commit('reader/setLoaderActive', true);
                 this.$alert(e.message, 'Ошибка', {type: 'error'});
             }
         });
