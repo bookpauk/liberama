@@ -136,7 +136,7 @@ class Reader extends Vue {
                 });
 
                 progress.setState({state: 'parse', step: 5, progress: 0});
-                let addedBook = await bookManager.addBook(book, (prog) => {
+                const addedBook = await bookManager.addBook(book, (prog) => {
                     progress.setState({progress: prog});
                 });
 
@@ -159,7 +159,6 @@ class Reader extends Vue {
     }
 }
 //-----------------------------------------------------------------------------
-//, .tool-button:focus, .tool-button:active, .tool-button:hover
 </script>
 
 <style scoped>
