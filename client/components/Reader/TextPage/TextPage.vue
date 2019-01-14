@@ -54,6 +54,8 @@ class TextPage extends Vue {
                     '-',
                     this.fb2.bookTitle
                 ]).join(' '));
+
+                this.drawPage();
             })();
         }
     }
@@ -62,9 +64,17 @@ class TextPage extends Vue {
         return this.$store.getters['reader/lastOpenedBook'];
     }
 
-    showPage() {
+    drawPage() {
+        const last = this.lastOpenedBook;
+        if (!last)
+            return;
+
+        //пустой канвас
+
         if (!this.book)
             return;
+
+
     }
 
     keyHook(event) {
@@ -77,11 +87,5 @@ class TextPage extends Vue {
     flex: 1;
     display: flex;
     flex-direction: column;
-}
-
-p {
-    margin: 0;
-    padding: 0;
-    text-indent: 3%;
 }
 </style>
