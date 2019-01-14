@@ -1,6 +1,7 @@
 <template>
     <div class="main">
         <pre>{{ lastOpenedBook }}</pre>
+        <pre>{{this.$store.state.reader.openedBook}}</pre>
     </div>
 </template>
 

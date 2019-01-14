@@ -11,7 +11,6 @@
 //-----------------------------------------------------------------------------
 import Vue from 'vue';
 import Component from 'vue-class-component';
-import {sleep} from '../../../share/utils';
 
 const ruMessage = {
     'start': ' ',
@@ -33,7 +32,7 @@ class ProgressPage extends Vue {
     progress = 0;
     visible = false;
 
-    async show() {
+    show() {
         this.$el.style.width = this.$parent.$el.offsetWidth + 'px';
         this.$el.style.height = this.$parent.$el.offsetHeight + 'px';
         this.text = '';
@@ -42,14 +41,10 @@ class ProgressPage extends Vue {
         this.progress = 0;
 
         this.visible = true;
-        await sleep(1);
-        return true;
     }
 
     async hide() {
-        await sleep(350);
         this.visible = false;
-        return false;
     }
 
     setState(state) {
@@ -57,10 +52,13 @@ class ProgressPage extends Vue {
             this.text = (ruMessage[state.state] ? ruMessage[state.state] : state.state);
         this.step = (state.step ? state.step : this.step);
         this.totalSteps = (state.totalSteps > this.totalSteps ? state.totalSteps : this.totalSteps);
-        this.progress = (state.progress ? state.progress : this.progress);
+        this.progress = state.progress || 0;
     }
 
     get percentage() {
+        let circle = document.querySelector('path[class="el-progress-circle__path"]');
+        if (circle)
+            circle.style.transition = '';
         return Math.round(((this.step - 1)/this.totalSteps + this.progress/(100*this.totalSteps))*100);
     }
 }

@@ -127,7 +127,7 @@ class Reader extends Vue {
         this.progressActive = true;
         this.$nextTick(async() => {
             const progress = this.$refs.page;
-            await progress.show();
+            progress.show();
             progress.setState({totalSteps: 5});
 
             try {
@@ -135,7 +135,7 @@ class Reader extends Vue {
                     progress.setState(state);
                 });
 
-                progress.setState({state: 'parse', step: 5, progress: 0});
+                progress.setState({state: 'parse', step: 5});
                 const addedBook = await bookManager.addBook(book, (prog) => {
                     progress.setState({progress: prog});
                 });
@@ -143,9 +143,9 @@ class Reader extends Vue {
                 this.commit('reader/addOpenedBook', bookManager.metaOnly(addedBook));
                 this.commit('reader/setLoaderActive', false);
 
-                this.progressActive = await progress.hide();
+                progress.hide(); this.progressActive = false;
             } catch (e) {
-                this.progressActive = await progress.hide();
+                progress.hide(); this.progressActive = false;
                 this.$alert(e.message, 'Ошибка', {type: 'error'});
             }
         });

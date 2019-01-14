@@ -52,12 +52,12 @@ export default EasySAXParser;
 
 var stringFromCharCode = String.fromCharCode;
 var objectCreate = Object.create;
-function NULL_FUNC() {};
+function NULL_FUNC() {}
 
 function entity2char(x) {
     if (x === 'amp') {
         return '&';
-    };
+    }
 
     switch(x.toLocaleLowerCase()) {
         case 'quot': return '"';
@@ -77,25 +77,25 @@ function entity2char(x) {
         case 'reg': return '\u00AE';
         case 'deg': return '\u00B0';
         case 'apos': return '\'';
-    };
+    }
 
     return '&' + x + ';';
-};
+}
 
 function replaceEntities(s, d, x, z) {
     if (z) {
         return entity2char(z);
-    };
+    }
 
     if (d) {
         return stringFromCharCode(d);
-    };
+    }
 
     return stringFromCharCode(parseInt(x, 16));
-};
+}
 
 function xmlEntityDecode(s) {
-    var s = ('' + s);
+    s = ('' + s);
 
     if (s.length > 3 && s.indexOf('&') !== -1) {
         if (s.indexOf('&lt;') !== -1) {s = s.replace(/&lt;/g, '<');}
@@ -104,28 +104,29 @@ function xmlEntityDecode(s) {
 
         if (s.indexOf('&') !== -1) {
             s = s.replace(/&#(\d+);|&#x([0123456789abcdef]+);|&(\w+);/ig, replaceEntities);
-        };
-    };
+        }
+    }
 
     return s;
-};
+}
 
 function cloneMatrixNS(nsmatrix) {
     var nn = objectCreate(null);
     for (var n in nsmatrix) {
         nn[n] = nsmatrix[n];
-    };
+    }
     return nn;
-};
+}
 
 
 function EasySAXParser(config) {
     if (!this) {
         return null;
-    };
+    }
 
-    var onTextNode = NULL_FUNC, onStartNode = NULL_FUNC, onEndNode = NULL_FUNC, onCDATA = NULL_FUNC, onError = NULL_FUNC, onComment, onQuestion, onAttention, onUnknownNS;
-    var is_onComment = false, is_onQuestion = false, is_onAttention = false, is_onUnknownNS = false;
+    var onTextNode = NULL_FUNC, onStartNode = NULL_FUNC, onEndNode = NULL_FUNC, onCDATA = NULL_FUNC, onError = NULL_FUNC,
+        onComment, onQuestion, onAttention, onUnknownNS, onProgress;
+    var is_onComment = false, is_onQuestion = false, is_onAttention = false, is_onUnknownNS = false, is_onProgress = false;
 
     var isAutoEntity = true; // делать "EntityDecode" всегда
     var entityDecode = xmlEntityDecode;
@@ -139,7 +140,7 @@ function EasySAXParser(config) {
     var xml = ''; // string
 
 
-    this.setup = function (op) {
+    this.setup = function(op) {
         for (var name in op) {
             switch(name) {
                 case 'entityDecode': entityDecode = op.entityDecode || entityDecode; break;
@@ -150,18 +151,18 @@ function EasySAXParser(config) {
                     var listeners = op.on;
                     for (var ev in listeners) {
                         this.on(ev, listeners[ev]);
-                    };
+                    }
                 break;
-            };
-        };
+            }
+        }
     };
 
     this.on = function(name, cb) {
         if (typeof cb !== 'function') {
             if (cb !== null) {
-                throw error('required args on(string, function||null)');
-            };
-        };
+                throw Error('required args on(string, function||null)');
+            }
+        }
 
         switch(name) {
             case 'startNode': onStartNode = cb || NULL_FUNC; break;
@@ -174,7 +175,8 @@ function EasySAXParser(config) {
             case 'attention': onAttention = cb; is_onAttention = !!cb; break; // <!XXXXX zzzz="eeee">
             case 'question': onQuestion = cb; is_onQuestion = !!cb; break; // <? ....  ?>
             case 'comment': onComment = cb; is_onComment = !!cb; break;
-        };
+            case 'progress': onProgress = cb; is_onProgress = !!cb; break;
+        }
     };
 
     this.ns = function(root, ns) {
@@ -183,11 +185,11 @@ function EasySAXParser(config) {
             defaultNS = null;
             useNS = null;
             return this;
-        };
+        }
 
         if (!ns || typeof root !== 'string') {
-            throw error('required args ns(string, object)');
-        };
+            throw Error('required args ns(string, object)');
+        }
 
         isNamespace = !!(useNS = ns || null);
         defaultNS = root || null;
@@ -195,10 +197,10 @@ function EasySAXParser(config) {
         return this;
     };
 
-    this.parse = function(_xml) {
+    this.parse = async function(_xml) {
         if (typeof _xml !== 'string') {
             return 'required args parser(string)'; // error
-        };
+        }
 
         returnError = null;
         xml = _xml;
@@ -207,13 +209,13 @@ function EasySAXParser(config) {
             nsmatrix = objectCreate(null);
             nsmatrix.xmlns = defaultNS;
 
-            parse();
+            await parse();
 
             nsmatrix = null;
 
         } else {
-            parse();
-        };
+            await parse();
+        }
 
         parseStop = false;
         attrRes = true;
@@ -228,7 +230,7 @@ function EasySAXParser(config) {
 
     if (config) {
         this.setup(config);
-    };
+    }
 
     // -----------------------------------------------------
 
@@ -250,7 +252,7 @@ function EasySAXParser(config) {
     function getAttrs() {
         if (attrRes !== null) {
             return attrRes;
-        };
+        }
 
         var xmlnsAlias;
         var nsAttrName;
@@ -274,34 +276,34 @@ function EasySAXParser(config) {
 
             if (w === 32 || (w < 14 && w > 8) ) { // \f\n\r\t\v
                 continue
-            };
+            }
 
             if (w < 65 || w > 122 || (w > 90 && w < 97) ) { // недопустимые первые символы
                 if (w !== 95 && w !== 58) { // char 95"_" 58":"
                     return attrRes = false; // error. invalid first char
-                };
-            };
+                }
+            }
 
             for(j = i + 1; j < l; j++) { // проверяем все символы имени атрибута
                 w = s.charCodeAt(j);
 
                 if ( w > 96 && w < 123 || w > 64 && w < 91 || w > 47 && w < 59 || w === 45 || w === 95) {
                     continue;
-                };
+                }
 
                 if (w !== 61) { // "=" == 61
                     return attrRes = false; // error. invalid char "="
-                };
+                }
 
                 break;
-            };
+            }
 
             name = s.substring(i, j);
             ok = true;
 
             if (name === 'xmlns:xmlns') {
                 return attrRes = false; // error. invalid name
-            };
+            }
 
             w = s.charCodeAt(j + 1);
 
@@ -311,14 +313,14 @@ function EasySAXParser(config) {
             } else {
                 if (w !== 39) { // "'"
                     return attrRes = false; // error. invalid char
-                };
+                }
 
                 j = s.indexOf('\'', i = j + 2 );
-            };
+            }
 
             if (j === -1) {
                 return attrRes = false; // error. invalid char
-            };
+            }
 
             if (j + 1 < l) {
                 w = s.charCodeAt(j + 1);
@@ -326,8 +328,8 @@ function EasySAXParser(config) {
                 if (w > 32 || w < 9 || (w < 32 && w > 13)) {
                     // error. invalid char
                     return attrRes = false;
-                };
-            };
+                }
+            }
 
 
             value = s.substring(i, j);
@@ -335,12 +337,12 @@ function EasySAXParser(config) {
 
             if (isAutoEntity) {
                 value = entityDecode(value);
-            };
+            }
 
             if (!isNamespace) { //
                 res[name] = value;
                 continue;
-            };
+            }
 
             if (hasSurmiseNS) {
                 // есть подозрение что в атрибутах присутствует xmlns
@@ -353,52 +355,53 @@ function EasySAXParser(config) {
                     alias = useNS[entityDecode(value)];
                     if (is_onUnknownNS && !alias) {
                         alias = onUnknownNS(value);
-                    };
+                    }
 
                     if (alias) {
                         if (nsmatrix[newalias] !== alias) {
                             if (!hasNewMatrix) {
                                 nsmatrix = cloneMatrixNS(nsmatrix);
                                 hasNewMatrix = true;
-                            };
+                            }
 
                             nsmatrix[newalias] = alias;
-                        };
+                        }
                     } else {
                         if (nsmatrix[newalias]) {
                             if (!hasNewMatrix) {
                                 nsmatrix = cloneMatrixNS(nsmatrix);
                                 hasNewMatrix = true;
-                            };
+                            }
 
                             nsmatrix[newalias] = false;
-                        };
-                    };
+                        }
+                    }
 
                     res[name] = value;
                     continue;
-                };
+                }
 
                 attrList.push(name, value);
                 continue;
-            };
+            }
 
             w = name.indexOf(':');
             if (w === -1) {
                 res[name] = value;
                 continue;
-            };
+            }
 
-            if (nsAttrName = nsmatrix[name.substring(0, w)]) {
+            nsAttrName = nsmatrix[name.substring(0, w)];
+            if (nsAttrName) {
                 nsAttrName = nsmatrix['xmlns'] === nsAttrName ? name.substr(w + 1) : nsAttrName + name.substr(w);
                 res[nsAttrName + name.substr(w)] = value;
-            };
-        };
+            }
+        }
 
 
         if (!ok) {
             return attrRes = true;  // атрибутов нет, ошибок тоже нет
-        };
+        }
 
         if (hasSurmiseNS)  {
             xmlnsAlias = nsmatrix['xmlns'];
@@ -408,25 +411,26 @@ function EasySAXParser(config) {
 
                 w = name.indexOf(':');
                 if (w !== -1) {
-                    if (nsAttrName = nsmatrix[name.substring(0, w)]) {
+                    nsAttrName = nsmatrix[name.substring(0, w)];
+                    if (nsAttrName) {
                         nsAttrName = xmlnsAlias === nsAttrName ? name.substr(w + 1) : nsAttrName + name.substr(w);
                         res[nsAttrName] = attrList[i];
-                    };
+                    }
                     continue;
-                };
+                }
                 res[name] = attrList[i];
-            };
-        };
+            }
+        }
 
         return attrRes = res;
-    };
+    }
 
     function getStringNode() {
         return xml.substring(stringNodePosStart, stringNodePosEnd + 1);
-    };
+    }
 
 
-    function parse() {
+    async function parse() {
         var stacknsmatrix = [];
         var nodestack = [];
         var stopIndex = 0;
@@ -439,7 +443,9 @@ function EasySAXParser(config) {
         var xmlns;
         var elem;
         var stop; // используется при разборе "namespace" . если встретился неизвестное пространство то события не генерируются
-
+        var xmlLength = xml.length;
+        var progStep = xmlLength/100;
+        var progCur = 0;
 
         while(j !== -1) {
             stop = stopIndex > 0;
@@ -448,28 +454,28 @@ function EasySAXParser(config) {
                 i = j;
             } else {
                 i = xml.indexOf('<', j);
-            };
+            }
 
             if (i === -1) { // конец разбора
                 if (nodestack.length) {
                     onError(returnError = 'unexpected end parse');
                     return;
-                };
+                }
 
                 if (j === 0) {
                     onError(returnError = 'missing first tag');
                     return;
-                };
+                }
 
                 return;
-            };
+            }
 
             if (j !== i && !stop) {
                 onTextNode(isAutoEntity ? entityDecode(xml.substring(j, i)) : xml.substring(j, i));
                 if (parseStop) {
                     return;
-                };
-            };
+                }
+            }
 
             w = xml.charCodeAt(i+1);
 
@@ -480,18 +486,18 @@ function EasySAXParser(config) {
                     if (j === -1) {
                         onError(returnError = 'cdata');
                         return;
-                    };
+                    }
 
                     if (!stop) {
                         onCDATA(xml.substring(i + 9, j));
                         if (parseStop) {
                             return;
-                        };
-                    };
+                        }
+                    }
 
                     j += 3;
                     continue;
-                };
+                }
 
 
                 if (w === 45 && xml.charCodeAt(i + 3) === 45) { // 45 == "-"
@@ -499,61 +505,61 @@ function EasySAXParser(config) {
                     if (j === -1) {
                         onError(returnError = 'expected -->');
                         return;
-                    };
+                    }
 
 
                     if (is_onComment && !stop) {
                         onComment(isAutoEntity ? entityDecode(xml.substring(i + 4, j)) : xml.substring(i + 4, j));
                         if (parseStop) {
                             return;
-                        };
-                    };
+                        }
+                    }
 
                     j += 3;
                     continue;
-                };
+                }
 
                 j = xml.indexOf('>', i + 1);
                 if (j === -1) {
                     onError(returnError = 'expected ">"');
                     return;
-                };
+                }
 
                 if (is_onAttention && !stop) {
                     onAttention(xml.substring(i, j + 1));
                     if (parseStop) {
                         return;
-                    };
-                };
+                    }
+                }
 
                 j += 1;
                 continue;
-            };
+            }
 
             if (w === 63) { // "?"
                 j = xml.indexOf('?>', i);
                 if (j === -1) { // error
                     onError(returnError = '...?>');
                     return;
-                };
+                }
 
                 if (is_onQuestion) {
                     onQuestion(xml.substring(i, j + 2));
                     if (parseStop) {
                         return;
-                    };
-                };
+                    }
+                }
 
                 j += 2;
                 continue;
-            };
+            }
 
             j = xml.indexOf('>', i + 1);
 
             if (j == -1) { // error
                 onError(returnError = 'unclosed tag'); // ...>
                 return;
-            };
+            }
 
             attrRes = true; // атрибутов нет
 
@@ -566,7 +572,7 @@ function EasySAXParser(config) {
                 if (!nodestack.length) {
                     onError(returnError = 'close tag, requires open tag');
                     return;
-                };
+                }
 
                 x = elem = nodestack.pop();
                 q = i + 2 + elem.length;
@@ -574,7 +580,7 @@ function EasySAXParser(config) {
                 if (elem !== xml.substring(i + 2, q)) {
                     onError(returnError = 'close tag, not equal to the open tag');
                     return;
-                };
+                }
 
                 // проверим что в закрываюшем теге нет лишнего
                 for(; q < j; q++) {
@@ -582,11 +588,11 @@ function EasySAXParser(config) {
 
                     if (w === 32 || (w > 8 && w < 14)) {  // \f\n\r\t\v пробел
                         continue;
-                    };
+                    }
 
                     onError(returnError = 'close tag');
                     return;
-                };
+                }
 
             } else {
                 if (xml.charCodeAt(j - 1) ===  47) { // .../>
@@ -600,34 +606,34 @@ function EasySAXParser(config) {
 
                     isTagStart = true;
                     isTagEnd = false;
-                };
+                }
 
                 if (!(w > 96  && w < 123 || w > 64 && w < 91 || w === 95 || w === 58)) { // char 95"_" 58":"
                     onError(returnError = 'first char nodeName');
                     return;
-                };
+                }
 
                 for (q = 1, y = x.length; q < y; q++) {
                     w = x.charCodeAt(q);
 
                     if (w > 96 && w < 123 || w > 64 && w < 91 || w > 47 && w < 59 || w === 45 || w === 95) {
                         continue;
-                    };
+                    }
 
                     if (w === 32 || (w < 14 && w > 8)) { // \f\n\r\t\v пробел
                         attrRes = null; // возможно есть атирибуты
                         elem = x.substring(0, q)
                         break;
-                    };
+                    }
 
                     onError(returnError = 'invalid nodeName');
                     return;
-                };
+                }
 
                 if (!isTagEnd) {
                     nodestack.push(elem);
-                };
-            };
+                }
+            }
 
 
             if (isNamespace) {
@@ -636,33 +642,34 @@ function EasySAXParser(config) {
                         if (!isTagStart) {
                             if (--stopIndex === 0) {
                                 nsmatrix = stacknsmatrix.pop();
-                            };
-                        };
+                            }
+                        }
 
                     } else {
                         stopIndex += 1;
-                    };
+                    }
 
                     j += 1;
                     continue;
-                };
+                }
 
                 // добавляем в stacknsmatrix только если !isTagEnd, иначе сохраняем контекст пространств в переменной
                 _nsmatrix = nsmatrix;
                 if (!isTagEnd) {
                     stacknsmatrix.push(nsmatrix);
-                };
+                }
 
                 if (isTagStart && (attrRes === null)) {
-                    if (hasSurmiseNS = x.indexOf('xmlns', q) !== -1) { // есть подозрение на xmlns
+                    hasSurmiseNS = x.indexOf('xmlns', q) !== -1;
+                    if (hasSurmiseNS) { // есть подозрение на xmlns
                         attrStartPos = q;
                         attrString = x;
 
                         getAttrs();
 
                         hasSurmiseNS = false;
-                    };
-                };
+                    }
+                }
 
                 w = elem.indexOf(':');
                 if (w !== -1) {
@@ -671,7 +678,7 @@ function EasySAXParser(config) {
 
                 } else {
                     xmlns = nsmatrix.xmlns;
-                };
+                }
 
 
                 if (!xmlns) {
@@ -680,14 +687,14 @@ function EasySAXParser(config) {
                         nsmatrix = _nsmatrix; // так как тут всегда isTagStart
                     } else {
                         stopIndex = 1; // первый элемент для которого не определено пространство имен
-                    };
+                    }
 
                     j += 1;
                     continue;
-                };
+                }
 
                 elem = xmlns + ':' + elem;
-            };
+            }
 
             stringNodePosStart = i;
             stringNodePosEnd = j;
@@ -699,25 +706,31 @@ function EasySAXParser(config) {
                 onStartNode(elem, getAttrs, isTagEnd, getStringNode);
                 if (parseStop) {
                     return;
-                };
-            };
+                }
+            }
 
             if (isTagEnd) {
                 onEndNode(elem, isTagStart, getStringNode);
                 if (parseStop) {
                     return;
-                };
+                }
 
                 if (isNamespace) {
                     if (isTagStart) {
                         nsmatrix = _nsmatrix;
                     } else {
                         nsmatrix = stacknsmatrix.pop();
-                    };
-                };
-            };
+                    }
+                }
+            }
 
             j += 1;
-        };
-    };
-};
+            
+            if (j > progCur) {
+                if (is_onProgress)
+                    await onProgress(Math.round(j*100/xmlLength));
+                progCur += progStep;
+            }
+        }
+    }
+}

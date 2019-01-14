@@ -12,7 +12,7 @@ class BookConverter {
         if (fileType && (fileType.ext == 'html' || fileType.ext == 'xml')) {
             const data = await fs.readFile(inputFile, 'utf8');
 
-            if (data.indexOf('FictionBook') >= 0) {            
+            if (data.indexOf('<FictionBook') >= 0) {            
                 await fs.writeFile(outputFile, data);
                 return;
             }
