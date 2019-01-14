@@ -78,6 +78,12 @@ class Reader extends Vue {
         this.$root.addKeyHook(this.keyHook);
     }
 
+    mounted() {
+        /*while (this.lastOpenedBook) {
+            this.commit('reader/delOpenedBook', this.lastOpenedBook);
+        }*/
+    }
+
     get loaderActive() {
         return this.reader.loaderActive;
     }
