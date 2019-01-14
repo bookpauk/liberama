@@ -51,6 +51,7 @@ import Component from 'vue-class-component';
 export default @Component({
     watch: {
         rootRoute: function(newValue) {
+            this.setAppTitle();
             if ((this.mode == 'reader' || this.mode == 'omnireader') && (newValue != '/reader')) {
                 this.$router.replace('/reader');
             }
@@ -156,13 +157,14 @@ class App extends Vue {
         const m = this.$route.path.match(/^(\/[^/]*).*$/i);
         this.$root.rootRoute = (m ? m[1] : this.$route.path);
 
-        this.setAppTitle();
         return this.$root.rootRoute;
     }
 
     setAppTitle(title) {
         if (!title) {
-            if (this.config) {
+            if (this.mode == 'omnireader') {
+                document.title = `Omni Reader - всегда с вами`;
+            } else if (this.config) {
                 document.title = `${this.config.name} - ${this.itemRuText[this.$root.rootRoute]}`;
             }
         } else {

@@ -1,5 +1,6 @@
 <template>
-    <div class="main">
+    <div ref="main" class="main">
+        <pre>{{ this.lastOpenedBook }}</pre>
         <pre>{{ meta }}</pre>
         <pre>{{ bookPos }}</pre>
         <pre>{{ $route.query }}</pre>
@@ -18,6 +19,7 @@ export default @Component({
     watch: {
         bookPos: function(newValue) {
             this.updateRoute(newValue);
+            this.commit('reader/setOpenedBook', Object.assign({}, this.lastOpenedBook, {bookPos: newValue}));
             this.drawPage();
         },
         routeParamPos: function(newValue) {
@@ -42,6 +44,7 @@ class TextPage extends Vue {
     }
 
     activated() {
+        this.$refs.main.focus();
         this.book = null;
         this.meta = null;
         this.fb2 = null;
@@ -61,6 +64,7 @@ class TextPage extends Vue {
                 this.book = await bookManager.getBook(last);
                 this.meta = bookManager.metaOnly(this.book);
                 this.fb2 = this.meta.fb2;
+
                 this.$root.$emit('set-app-title', _.compact([
                     this.fb2.lastName,
                     this.fb2.middleName,

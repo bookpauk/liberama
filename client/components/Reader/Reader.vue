@@ -113,9 +113,14 @@ class Reader extends Vue {
 
     buttonClick(button) {
         switch (button) {
-            case 'loader': this.commit('reader/setLoaderActive', !this.loaderActive); break;
+            case 'loader': this.commit('reader/setLoaderActive', !this.loaderActive); this.resetRoute(); break;
             case 'fullscreen': this.commit('reader/setFullScreenActive', !this.fullScreenActive); break;
         }
+    }
+
+    resetRoute() {
+        if (this.loaderActive)
+            this.$router.replace('/reader');
     }
 
     buttonActiveClass(button) {
@@ -146,10 +151,6 @@ class Reader extends Vue {
             this.$root.$emit('set-app-title');
         }
 
-        if (result == 'LoaderPage') {
-            this.$router.replace('/reader');
-        }
-        
         return result;
     }
 
@@ -177,6 +178,7 @@ class Reader extends Vue {
             } catch (e) {
                 progress.hide(); this.progressActive = false;
                 this.commit('reader/setLoaderActive', true);
+                this.resetRoute();
                 this.$alert(e.message, 'Ошибка', {type: 'error'});
             }
         });
@@ -206,6 +208,7 @@ class Reader extends Vue {
             } catch (e) {
                 progress.hide(); this.progressActive = false;
                 this.commit('reader/setLoaderActive', true);
+                this.resetRoute();
                 this.$alert(e.message, 'Ошибка', {type: 'error'});
             }
         });
