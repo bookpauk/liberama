@@ -50,14 +50,15 @@ class TextPage extends Vue {
         this.fb2 = null;
 
         let last = this.lastOpenedBook;
-        if (last) {
+
+        if (last && !(this.routeParamUrl && this.routeParamUrl != last.url)) {
             (async() => {
                 const isParsed = await bookManager.hasBookParsed(last);
                 if (!isParsed) {
                     this.$root.$emit('set-app-title');
-                    if (this.lastOpenTry != last) {
+                    if (this.lastOpenTry != last.url) {
                         this.$emit('parse-book', last);
-                        this.lastOpenTry = last;
+                        this.lastOpenTry = last.url;
                     }
                     return;
                 }
@@ -82,6 +83,17 @@ class TextPage extends Vue {
 
     get lastOpenedBook() {
         return this.$store.getters['reader/lastOpenedBook'];
+    }
+
+    get routeParamUrl() {
+        let result = '';
+        const path = this.$route.fullPath;
+        const i = path.indexOf('url=');
+        if (i >= 0) {
+            result = path.substr(i + 4);
+        }
+        
+        return decodeURIComponent(result);
     }
 
     get routeParamPos() {
