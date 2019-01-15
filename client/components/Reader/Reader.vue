@@ -236,13 +236,13 @@ class Reader extends Vue {
                 const key = bookManager.keyFromUrl(opts.url);
                 let wasOpened = this.reader.openedBook[key];
                 wasOpened = (wasOpened ? wasOpened : {});
+                const bookPos = (opts.bookPos !== undefined ? opts.bookPos : wasOpened.bookPos);
 
                 const bookParsed = await bookManager.getBook({url: opts.url}, (prog) => {
                     progress.setState({progress: prog});
                 });
 
                 if (bookParsed) {
-                    const bookPos = (opts.bookPos !== undefined ? opts.bookPos : wasOpened.bookPos);
                     this.commit('reader/setOpenedBook', Object.assign({bookPos}, bookManager.metaOnly(bookParsed)));
                     this.loaderActive = false;
                     progress.hide(); this.progressActive = false;
@@ -260,7 +260,6 @@ class Reader extends Vue {
                     progress.setState({progress: prog});
                 });
 
-                const bookPos = (opts.bookPos !== undefined ? opts.bookPos : wasOpened.bookPos);
                 this.commit('reader/setOpenedBook', Object.assign({bookPos}, bookManager.metaOnly(addedBook)));
                 this.updateRoute(true);
 
