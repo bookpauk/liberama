@@ -15,7 +15,7 @@
                     </el-tooltip>
                     <div class="space"></div>
                     <el-tooltip content="На весь экран" :open-delay="1000" effect="light">
-                        <el-button class="tool-button" :class="buttonActiveClass('fullscreen')" @click="buttonClick('fullscreen')"><i class="el-icon-rank"></i></el-button>
+                        <el-button class="tool-button" :class="buttonActiveClass('fullScreen')" @click="buttonClick('fullScreen')"><i class="el-icon-rank"></i></el-button>
                     </el-tooltip>
                     <el-tooltip content="Прокрутка книги" :open-delay="1000" effect="light">
                         <el-button class="tool-button" @click="buttonClick('setPosition')"><i class="el-icon-d-arrow-right"></i></el-button>
@@ -166,7 +166,12 @@ class Reader extends Vue {
     buttonClick(button) {
         switch (button) {
             case 'loader': this.loaderActive = !this.loaderActive; break;
-            case 'fullscreen': this.commit('reader/setFullScreenActive', !this.fullScreenActive); break;
+            case 'fullScreen': this.commit('reader/setFullScreenActive', !this.fullScreenActive); break;
+            case 'refresh': 
+                if (this.lastOpenedBook) {
+                    this.loadBook({url: this.lastOpenedBook.url, force: true});
+                }
+                break;
         }
     }
 
@@ -174,7 +179,7 @@ class Reader extends Vue {
         const classActive = { 'tool-button-active': true, 'tool-button-active:hover': true };
         switch (button) {
             case 'loader': return (this.loaderActive ? classActive : {});
-            case 'fullscreen': return (this.fullScreenActive ? classActive : {});
+            case 'fullScreen': return (this.fullScreenActive ? classActive : {});
         }
         return {};
     }
