@@ -197,7 +197,7 @@ class Reader extends Vue {
                 const isParsed = await bookManager.hasBookParsed(last);
                 if (!isParsed) {
                     this.$root.$emit('set-app-title');
-                    this.loadBook({url: last.url, bookPos: last.bookPos});
+                    this.loadBook({url: last.url});
                     return;
                 } else {
                     this.bookPos = last.bookPos;
@@ -205,11 +205,12 @@ class Reader extends Vue {
 
                 this.updateRoute();
                 const textPage = this.$refs.page;
+                if (textPage.showBook) {
+                    textPage.lastBook = last;
+                    textPage.bookPos = (this.bookPos !== undefined ? this.bookPos : 0);
 
-                textPage.lastBook = last;
-                textPage.bookPos = (this.bookPos !== undefined ? this.bookPos : 0);
-
-                textPage.showBook();
+                    textPage.showBook();
+                }
             });
         }
 
@@ -226,15 +227,17 @@ class Reader extends Vue {
                 progress.show();
                 progress.setState({state: 'parse'});
 
+                const key = bookManager.keyFromUrl(opts.url);
+                let wasOpened = this.reader.openedBook[key];
+                wasOpened = (wasOpened ? wasOpened : {});
+
                 const bookParsed = await bookManager.getBook({url: opts.url}, (prog) => {
                     progress.setState({progress: prog});
                 });
 
                 if (bookParsed) {
-                    let isOpened = this.reader.openedBook[bookParsed.key];
-                    isOpened = (isOpened ? isOpened : {});
 
-                    const bookPos = (opts.bookPos !== undefined ? opts.bookPos : isOpened.bookPos);
+                    const bookPos = (opts.bookPos !== undefined ? opts.bookPos : wasOpened.bookPos);
                     this.commit('reader/setOpenedBook', Object.assign({bookPos}, bookManager.metaOnly(bookParsed)));
                     
                     this.loaderActive = false;
@@ -253,10 +256,7 @@ class Reader extends Vue {
                     progress.setState({progress: prog});
                 });
 
-                let isOpened = this.reader.openedBook[addedBook.key];
-                isOpened = (isOpened ? isOpened : {});
-
-                const bookPos = (opts.bookPos !== undefined ? opts.bookPos : isOpened.bookPos);
+                const bookPos = (opts.bookPos !== undefined ? opts.bookPos : wasOpened.bookPos);
                 this.commit('reader/setOpenedBook', Object.assign({bookPos}, bookManager.metaOnly(addedBook)));
 
                 this.loaderActive = false;
