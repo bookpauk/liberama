@@ -18,7 +18,7 @@ import bookManager from '../share/bookManager';
 export default @Component({
     watch: {
         bookPos: function(newValue) {
-            this.$emit('book-pos-changed', {bookPos: newValue});
+            this.debouncedEmitPosChange(newValue);
             this.drawPage();
         },
     },
@@ -36,6 +36,10 @@ class TextPage extends Vue {
         this.dispatch = this.$store.dispatch;
         this.config = this.$store.state.config;
         this.reader = this.$store.state.reader;
+
+        this.debouncedEmitPosChange = _.debounce((newValue) => {
+            this.$emit('book-pos-changed', {bookPos: newValue});
+        }, 100);
     }
 
     showBook() {
