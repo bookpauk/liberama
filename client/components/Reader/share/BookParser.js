@@ -3,8 +3,6 @@ import {sleep} from '../../../share/utils';
 
 export default class BookParser {
     constructor() {
-        this.parser = new EasySAXParser();
-
         // defaults
         this.p = 30;// px, отступ параграфа
         this.w = 300;// px, ширина страницы
@@ -87,7 +85,7 @@ export default class BookParser {
             paraOffset += p.length;
         };
 
-        const parser = this.parser;
+        const parser = new EasySAXParser();
 
         parser.on('error', (msgError) => {// eslint-disable-line no-unused-vars
         });
@@ -222,6 +220,20 @@ export default class BookParser {
         return result;
     }
 
+    removeTags(s) {
+        let result = '';
+
+        const parser = new EasySAXParser();
+
+        parser.on('textNode', (text) => {
+            result += text;
+        });
+
+        parser.parse(s);
+
+        return result;
+    }
+
     parsePara(paraIndex) {
         const para = this.para[paraIndex];
 
@@ -250,7 +262,25 @@ export default class BookParser {
             }
         }*/
         
-        //
+        // тут начинается самый замес, перенос и выравниване по ширине
+        const text = this.removeTags(para.text);
+        const words = text.split(' ');
+        let line = {begin: para.offset, parts: []};
+        let part = '';
+        for (let i = 0; i < words.length; i++) {
+            const word = words[i];
+            if (i > 0) 
+                part += ' ';
+            part += word;
+
+            if (this.measureText(part) >= parsed.w) {
+                line.parts.push(part);
+                line.end = line.begin + part.length - 1;
+                lines.push(line);
+                part = '';
+                line = {begin: line.end + 1, parts: []};
+            }
+        }        
 
         parsed.lines = lines;
         para.parsed = parsed;
