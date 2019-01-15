@@ -42,7 +42,6 @@
         </el-header>
 
         <el-main>
-            {{ bookPos }}
             <keep-alive>
                 <component ref="page" :is="pageActive" @load-book="loadBook" @book-pos-changed="bookPosChanged"></component>
             </keep-alive>
@@ -77,11 +76,16 @@ export default @Component({
                 }
             }
         },
-        routeParamPos: function(newValue) {            
+        routeParamPos: function(newValue) {
             if (newValue !== undefined && newValue != this.bookPos) {
                 this.bookPos = newValue;
             }
         },
+        routeParamUrl: function(newValue) {
+            if (newValue !== '' && newValue !== this.lastOpenedBook.url) {
+                this.loadBook({url: newValue});
+            }
+        }
     },
 })
 class Reader extends Vue {
@@ -199,6 +203,7 @@ class Reader extends Vue {
                     this.bookPos = last.bookPos;
                 }
 
+                this.updateRoute();
                 const textPage = this.$refs.page;
 
                 textPage.lastBook = last;
@@ -226,9 +231,12 @@ class Reader extends Vue {
                 });
 
                 if (bookParsed) {
-                    this.commit('reader/setOpenedBook', bookManager.metaOnly(bookParsed));
-                    this.bookPos = bookParsed.bookPos;
-                    this.updateRoute();
+                    let isOpened = this.reader.openedBook[bookParsed.key];
+                    isOpened = (isOpened ? isOpened : {});
+
+                    const bookPos = (opts.bookPos !== undefined ? opts.bookPos : isOpened.bookPos);
+                    this.commit('reader/setOpenedBook', Object.assign({bookPos}, bookManager.metaOnly(bookParsed)));
+                    
                     this.loaderActive = false;
                     progress.hide(); this.progressActive = false;
                     return;
@@ -245,12 +253,13 @@ class Reader extends Vue {
                     progress.setState({progress: prog});
                 });
 
-                this.commit('reader/setOpenedBook', bookManager.metaOnly(addedBook));
-                this.bookPos = opts.bookPos;
-                this.updateRoute();
+                let isOpened = this.reader.openedBook[addedBook.key];
+                isOpened = (isOpened ? isOpened : {});
+
+                const bookPos = (opts.bookPos !== undefined ? opts.bookPos : isOpened.bookPos);
+                this.commit('reader/setOpenedBook', Object.assign({bookPos}, bookManager.metaOnly(addedBook)));
 
                 this.loaderActive = false;
-
                 progress.hide(); this.progressActive = false;
             } catch (e) {
                 progress.hide(); this.progressActive = false;
