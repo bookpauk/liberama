@@ -1,7 +1,6 @@
 <template>
     <div ref="main" class="main">
         <pre>{{ bookPos }}</pre>
-        <pre>{{ lastBook }}</pre>
         <pre>{{ meta }}</pre>
     </div>
 </template>
