@@ -4,6 +4,19 @@ import {sleep} from '../../../share/utils';
 export default class BookParser {
     constructor() {
         this.parser = new EasySAXParser();
+
+        // defaults
+        this.p = 30;// px, отступ параграфа
+        this.w = 300;// px, ширина страницы
+        this.textAlignJustify = false;// выравнивание по ширине
+        this.wordWrap = false;// перенос по слогам, если textAlignJustify = true
+
+        // заглушка
+        this.measureText = (text, style) => {// eslint-disable-line no-unused-vars
+            return text.length*10;
+        };
+
+        // stuff
     }
 
     async parse(data, callback) {
@@ -177,12 +190,148 @@ export default class BookParser {
 
         await parser.parse(data);
 
-        this.meta = fb2;
+        this.fb2 = fb2;
         this.para = para;
 
         callback(100);
         await sleep(10);
 
         return {fb2};
+    }
+
+    findParaIndex(bookPos) {
+        let result = undefined;
+ 
+        //дихотомия
+        let first = 0;
+        let last = this.para.length - 1;
+        while (first < last) {
+            let mid = first + Math.floor((last - first)/2);
+            if (bookPos >= this.para[mid].offset)
+                last = mid;
+            else
+                first = mid + 1;
+        }
+
+        if (last >= 0) {
+            const ofs = this.para[last].offset;
+            if (bookPos >= ofs && bookPos < ofs + this.para[last].length)
+                result = last; 
+        }
+
+        return result;
+    }
+
+    parsePara(paraIndex) {
+        const para = this.para[paraIndex];
+
+        if (para.parsed && 
+            para.parsed.w === this.w &&
+            para.parsed.p === this.p &&
+            para.parsed.textAlignJustify === this.textAlignJustify &&
+            para.parsed.wordWrap === this.wordWrap)
+            return para.parsed;
+
+        const parsed = {
+            w: this.w,
+            p: this.p,
+            textAlignJustify: this.textAlignJustify,
+            wordWrap: this.wordWrap
+        };
+
+        const lines = [];
+        /* array of
+        {
+            begin: Number,
+            end: Number,
+            parts: array of {
+                style: 'bold'|'italic',
+                text: String,
+            }
+        }*/
+        
+        //
+
+        parsed.lines = lines;
+        para.parsed = parsed;
+
+        return parsed;
+    }
+
+    findLineIndex(bookPos, lines) {
+        let result = undefined;
+
+        //дихотомия
+        let first = 0;
+        let last = lines.length - 1;
+        while (first < last) {
+            let mid = first + Math.floor((last - first)/2);
+            if (bookPos >= lines[mid].begin)
+                last = mid;
+            else
+                first = mid + 1;
+        }
+
+        if (last >= 0) {
+            if (bookPos >= lines[last].begin && bookPos <= lines[last].end)
+                result = last; 
+        }
+
+        return result;
+    }
+
+    getLines(bookPos, n) {
+        const result = [];
+        let paraIndex = this.findParaIndex(bookPos);
+
+        if (paraIndex === undefined)
+            return result;
+        
+        if (n > 0) {
+            let parsed = this.parsePara(paraIndex);
+            let i = this.findLineIndex(bookPos, parsed.lines);
+            if (i === undefined)
+                return result;
+
+            while (n > 0) {
+                result.push(parsed.lines[i]);
+                i++;
+
+                if (i >= parsed.lines.length) {
+                    paraIndex++;
+                    if (paraIndex < this.para.length)
+                        parsed = this.parsePara(paraIndex);
+                    else
+                        return result;
+                    i = 0;
+                }
+
+                n--;
+            }
+        } else if (n < 0) {
+            n = -n;
+            let parsed = this.parsePara(paraIndex);
+            let i = this.findLineIndex(bookPos, parsed.lines);
+            if (i === undefined)
+                return result;
+
+            while (n > 0) {
+                result.push(parsed.lines[i]);
+                i--;
+
+                if (i > 0) {
+                    paraIndex--;
+                    if (paraIndex >= this.para.length)
+                        parsed = this.parsePara(paraIndex);
+                    else
+                        return result;
+                    i = parsed.lines.length - 1;
+                }
+                
+                n--;
+            }
+        }
+
+        return result;
     }
 }

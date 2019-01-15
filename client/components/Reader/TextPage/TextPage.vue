@@ -1,7 +1,8 @@
 <template>
     <div ref="main" class="main">
-        <pre>{{ bookPos }}</pre>
-        <pre>{{ meta }}</pre>
+        <p v-for="item in items" :key="item.id">
+            {{ item.text }}
+        </p>        
     </div>
 </template>
 
@@ -23,9 +24,9 @@ export default @Component({
 })
 class TextPage extends Vue {
     lastBook = null;
-    meta = null;
-    fb2 = null;
-    bookPos = 0;    
+    bookPos = 0;
+
+    items = null;
 
     created() {
         this.commit = this.$store.commit;
@@ -39,6 +40,7 @@ class TextPage extends Vue {
         this.book = null;
         this.meta = null;
         this.fb2 = null;
+        this.parsed = null;
 
         this.drawPage();//пока не загрузили, очистим канвас
 
@@ -60,6 +62,17 @@ class TextPage extends Vue {
                     this.fb2.bookTitle
                 ]).join(' '));
 
+                const parsed = this.book.parsed;
+                parsed.p = 30;//px, отступ параграфа
+                parsed.w = 300;//px, ширина страницы
+                parsed.measureText = (text, style) => {
+                    if (style == 'bold')
+                        return text.length*12;
+                    else
+                        return text.length*10;
+                };                
+
+                this.parsed = parsed;
                 this.drawPage();
             })();
         }
@@ -70,11 +83,33 @@ class TextPage extends Vue {
             return;
 
         //пустой канвас
+        this.items = [];
 
         if (!this.book)
             return;
 
+        const lines = this.parsed.getLines(this.bookPos, 30);
 
+        let newItems = [];
+        for (const line of lines) {
+            /* line:
+            {
+                begin: Number,
+                end: Number,
+                parts: array of {
+                    style: 'bold'|'italic',
+                    text: String,
+                }
+            }*/
+
+            const item = {text: '', id: line.begin};
+            for (const part of line.parts) {
+                item.text += part.text;
+            }
+            newItems.push(item);
+        }
+
+        this.items = newItems;
     }
 
     keyHook(event) {
@@ -87,5 +122,10 @@ class TextPage extends Vue {
     flex: 1;
     display: flex;
     flex-direction: column;
+}
+
+p {
+    margin: 0;
+    padding: 0;
 }
 </style>
