@@ -93,7 +93,7 @@ class TextPage extends Vue {
 
         let newItems = [];
         for (const line of lines) {
-console.log(line);
+//console.log(line);
             /* line:
             {
                 begin: Number,

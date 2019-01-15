@@ -204,7 +204,7 @@ export default class BookParser {
         let last = this.para.length - 1;
         while (first < last) {
             let mid = first + Math.floor((last - first)/2);
-            if (bookPos <= this.para[mid].offset)
+            if (bookPos <= this.para[mid].offset + this.para[mid].length - 1)
                 last = mid;
             else
                 first = mid + 1;
@@ -296,7 +296,7 @@ export default class BookParser {
         let last = lines.length - 1;
         while (first < last) {
             let mid = first + Math.floor((last - first)/2);
-            if (bookPos <= lines[mid].begin)
+            if (bookPos <= lines[mid].end)
                 last = mid;
             else
                 first = mid + 1;
