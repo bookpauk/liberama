@@ -199,13 +199,12 @@ export default class BookParser {
 
     findParaIndex(bookPos) {
         let result = undefined;
- 
         //дихотомия
         let first = 0;
         let last = this.para.length - 1;
         while (first < last) {
             let mid = first + Math.floor((last - first)/2);
-            if (bookPos >= this.para[mid].offset)
+            if (bookPos <= this.para[mid].offset)
                 last = mid;
             else
                 first = mid + 1;
@@ -229,7 +228,7 @@ export default class BookParser {
             result += text;
         });
 
-        parser.parse(s);
+        parser.parse(`<p>${s}</p>`);
 
         return result;
     }
@@ -264,6 +263,7 @@ export default class BookParser {
         
         // тут начинается самый замес, перенос и выравниване по ширине
         const text = this.removeTags(para.text);
+
         const words = text.split(' ');
         let line = {begin: para.offset, parts: []};
         let part = '';
@@ -273,8 +273,8 @@ export default class BookParser {
                 part += ' ';
             part += word;
 
-            if (this.measureText(part) >= parsed.w) {
-                line.parts.push(part);
+            if (this.measureText(part) >= parsed.w || i == words.length - 1) {
+                line.parts.push({style: '', text: part});
                 line.end = line.begin + part.length - 1;
                 lines.push(line);
                 part = '';
@@ -296,7 +296,7 @@ export default class BookParser {
         let last = lines.length - 1;
         while (first < last) {
             let mid = first + Math.floor((last - first)/2);
-            if (bookPos >= lines[mid].begin)
+            if (bookPos <= lines[mid].begin)
                 last = mid;
             else
                 first = mid + 1;

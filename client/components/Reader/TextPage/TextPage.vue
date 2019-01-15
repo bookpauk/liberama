@@ -1,5 +1,6 @@
 <template>
     <div ref="main" class="main">
+        <!--pre>{{ meta }}</pre-->
         <p v-for="item in items" :key="item.id">
             {{ item.text }}
         </p>        
@@ -23,6 +24,7 @@ export default @Component({
     },
 })
 class TextPage extends Vue {
+    meta = null;
     lastBook = null;
     bookPos = 0;
 
@@ -69,7 +71,7 @@ class TextPage extends Vue {
                     if (style == 'bold')
                         return text.length*12;
                     else
-                        return text.length*10;
+                        return text.length*3;
                 };                
 
                 this.parsed = parsed;
@@ -87,11 +89,11 @@ class TextPage extends Vue {
 
         if (!this.book)
             return;
-
         const lines = this.parsed.getLines(this.bookPos, 30);
 
         let newItems = [];
         for (const line of lines) {
+console.log(line);
             /* line:
             {
                 begin: Number,
@@ -108,7 +110,6 @@ class TextPage extends Vue {
             }
             newItems.push(item);
         }
-
         this.items = newItems;
     }
 
