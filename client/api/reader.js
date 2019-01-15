@@ -27,6 +27,7 @@ class Reader {
             callback(response.data);
 
             if (response.data.state == 'finish') {//воркер закончил работу, можно скачивать кешированный на сервере файл
+                callback({step: 4});
                 const book = await this.loadCachedBook(response.data.path, callback);
                 return Object.assign({}, response.data, {data: book.data});
             }
@@ -57,7 +58,7 @@ class Reader {
         const options = {
             onDownloadProgress: progress => {
                 if (callback)
-                    callback({state: 'loading', step: 4, progress: Math.round((progress.loaded*100)/progress.total)});
+                    callback({state: 'loading', progress: Math.round((progress.loaded*100)/progress.total)});
             }
         }
         //загрузка
