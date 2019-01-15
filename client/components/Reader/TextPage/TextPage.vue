@@ -24,10 +24,11 @@ export default @Component({
     },
 })
 class TextPage extends Vue {
-    meta = null;
     lastBook = null;
     bookPos = 0;
 
+    //убрать
+    meta = null;
     items = null;
 
     created() {
@@ -43,6 +44,10 @@ class TextPage extends Vue {
         this.meta = null;
         this.fb2 = null;
         this.parsed = null;
+
+        this.linesUp = null;
+        this.linesDown = null;
+        this.pageLineCount = 0;
 
         this.drawPage();//пока не загрузили, очистим канвас
 
@@ -63,6 +68,8 @@ class TextPage extends Vue {
                     '-',
                     this.fb2.bookTitle
                 ]).join(' '));
+
+                this.pageLineCount = 30;
 
                 const parsed = this.book.parsed;
                 parsed.p = 30;//px, отступ параграфа
@@ -89,11 +96,13 @@ class TextPage extends Vue {
 
         if (!this.book)
             return;
-        const lines = this.parsed.getLines(this.bookPos, 30);
+        const lines = this.parsed.getLines(this.bookPos, this.pageLineCount + 1);
 
         let newItems = [];
-        for (const line of lines) {
-//console.log(line);
+        let len = lines.length;
+        len = (len > this.pageLineCount ? len = this.pageLineCount : len);
+        for (let i = 0; i < len; i++) {
+            const line = lines[i];
             /* line:
             {
                 begin: Number,
@@ -111,9 +120,39 @@ class TextPage extends Vue {
             newItems.push(item);
         }
         this.items = newItems;
+
+        this.linesUp = this.parsed.getLines(this.bookPos, -(this.pageLineCount + 1));
+        this.linesDown = lines;
+    }
+    
+    pageDown() {
+        let i = this.pageLineCount;
+        i--;
+        if (this.linesDown && this.linesDown.length > i) {
+            this.bookPos = this.linesDown[i].begin;
+        }
+    }
+
+    pageUp() {
+        let i = this.pageLineCount;
+        i--;
+        i = (i > this.linesUp.length - 1 ? this.linesUp.length - 1 : i);
+        if (this.linesUp && this.linesUp.length > i) {
+            this.bookPos = this.linesUp[i].begin;
+        }
     }
 
     keyHook(event) {
+        if (event.type == 'keydown') {
+            switch (event.key) {
+                case 'PageDown': 
+                    this.pageDown();
+                    break;
+                case 'PageUp':
+                    this.pageUp();
+                    break;
+            }
+        }
     }
 }
 //-----------------------------------------------------------------------------

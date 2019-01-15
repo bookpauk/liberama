@@ -13,8 +13,6 @@ export default class BookParser {
         this.measureText = (text, style) => {// eslint-disable-line no-unused-vars
             return text.length*10;
         };
-
-        // stuff
     }
 
     async parse(data, callback) {
@@ -349,9 +347,9 @@ export default class BookParser {
                 result.push(parsed.lines[i]);
                 i--;
 
-                if (i > 0) {
+                if (i < 0) {
                     paraIndex--;
-                    if (paraIndex >= this.para.length)
+                    if (paraIndex >= 0)
                         parsed = this.parsePara(paraIndex);
                     else
                         return result;
