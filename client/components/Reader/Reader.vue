@@ -233,15 +233,18 @@ class Reader extends Vue {
                 progress.show();
                 progress.setState({state: 'parse'});
 
+                // есть ли среди истории OpenedBook
                 const key = bookManager.keyFromUrl(opts.url);
                 let wasOpened = this.reader.openedBook[key];
                 wasOpened = (wasOpened ? wasOpened : {});
                 const bookPos = (opts.bookPos !== undefined ? opts.bookPos : wasOpened.bookPos);
 
+                // пытаемся загрузить и распарсить книгу в менеджере из локального кеша
                 const bookParsed = await bookManager.getBook({url: opts.url}, (prog) => {
                     progress.setState({progress: prog});
                 });
 
+                // если есть в локальном кеше
                 if (bookParsed) {
                     this.commit('reader/setOpenedBook', Object.assign({bookPos}, bookManager.metaOnly(bookParsed)));
                     this.loaderActive = false;
@@ -249,17 +252,36 @@ class Reader extends Vue {
                     return;
                 }
 
+                // иначе идем на сервер
+                let book = null;
                 progress.setState({totalSteps: 5});
 
-                const book = await readerApi.loadBook(opts.url, (state) => {
-                    progress.setState(state);
-                });
+                // пытаемся загрузить готовый файл с сервера
+                if (wasOpened.path) {
+                    try {
+                        const resp = await readerApi.loadCachedBook(wasOpened.path, (state) => {
+                            progress.setState(state);
+                        });
+                        book = Object.assign({}, wasOpened, {data: resp.data});
+                    } catch (e) {
+                        //молчим
+                    }
+                }
 
+                // не удалось, скачиваем книгу полностью с конвертацией
+                if (!book) {
+                    book = await readerApi.loadBook(opts.url, (state) => {
+                        progress.setState(state);
+                    });
+                }
+
+                // добавляем в bookManager
                 progress.setState({state: 'parse', step: 5});
                 const addedBook = await bookManager.addBook(book, (prog) => {
                     progress.setState({progress: prog});
                 });
 
+                // добавляем в историю
                 this.commit('reader/setOpenedBook', Object.assign({bookPos}, bookManager.metaOnly(addedBook)));
                 this.updateRoute(true);
 
