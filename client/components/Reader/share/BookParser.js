@@ -259,24 +259,30 @@ export default class BookParser {
             }
         }*/
         
-        // тут начинается самый замес, перенос и выравниване по ширине
         const text = this.removeTags(para.text);
 
         const words = text.split(' ');
         let line = {begin: para.offset, parts: []};
         let part = '';
+        let j = 0;
+        let k = 0;
+        // тут начинается самый замес, перенос и выравниване по ширине
         for (let i = 0; i < words.length; i++) {
             const word = words[i];
-            if (i > 0) 
+            if (j > 0) 
                 part += ' ';
+            j++;
             part += word;
 
             if (this.measureText(part) >= parsed.w || i == words.length - 1) {
-                line.parts.push({style: '', text: part});
+                line.parts.push({style: '', text: (k == 0 ? '   ' : '') + part});
                 line.end = line.begin + part.length - 1;
                 lines.push(line);
-                part = '';
+
                 line = {begin: line.end + 1, parts: []};
+                part = '';
+                j = 0;
+                k++;
             }
         }        
 

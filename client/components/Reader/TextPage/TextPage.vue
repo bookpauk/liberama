@@ -2,7 +2,7 @@
     <div ref="main" class="main">
         <!--pre>{{ meta }}</pre-->
         <p v-for="item in items" :key="item.id">
-            {{ item.text }}
+            <pre>{{ item.text }}</pre>
         </p>        
     </div>
 </template>
@@ -168,6 +168,10 @@ class TextPage extends Vue {
     flex-direction: column;
 }
 
+pre {
+    margin: 0;
+    padding: 0;
+}
 p {
     margin: 0;
     padding: 0;
