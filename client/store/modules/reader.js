@@ -2,7 +2,6 @@ import Vue from 'vue';
 
 // initial state
 const state = {
-    loaderActive: false,
     fullScreenActive: false,
     openedBook: {},
 };
@@ -28,9 +27,6 @@ const actions = {};
 
 // mutations
 const mutations = {
-    setLoaderActive(state, value) {
-        state.loaderActive = value;
-    },
     setFullScreenActive(state, value) {
         state.fullScreenActive = value;
     },

@@ -42,8 +42,9 @@
         </el-header>
 
         <el-main>
+            {{ bookPos }}
             <keep-alive>
-                <component ref="page" :is="pageActive" @load-book="loadBook" @parse-book="parseBook"></component>
+                <component ref="page" :is="pageActive" @load-book="loadBook" @book-pos-changed="bookPosChanged"></component>
             </keep-alive>
         </el-main>
     </el-container>
@@ -66,9 +67,27 @@ export default @Component({
         TextPage,
         ProgressPage
     },
+    watch: {
+        bookPos: function(newValue) {
+            if (newValue !== undefined && this.pageActive == 'TextPage') {
+                const textPage = this.$refs.page;
+                if (textPage.bookPos != newValue) {
+                    textPage.bookPos = newValue;
+                    this.commit('reader/setOpenedBook', Object.assign({}, this.lastOpenedBook, {bookPos: newValue}));
+                }
+            }
+        },
+        routeParamPos: function(newValue) {            
+            if (newValue !== undefined && newValue != this.bookPos) {
+                this.bookPos = newValue;
+            }
+        },
+    },
 })
 class Reader extends Vue {
+    loaderActive = false;
     progressActive = false;
+    bookPos = null;
 
     created() {
         this.commit = this.$store.commit;
@@ -76,16 +95,36 @@ class Reader extends Vue {
         this.reader = this.$store.state.reader;
 
         this.$root.addKeyHook(this.keyHook);
+
+        this.lastActivePage = false;
     }
 
     mounted() {
         /*while (this.lastOpenedBook) {
             this.commit('reader/delOpenedBook', this.lastOpenedBook);
         }*/
-        if (this.$root.rootRoute == '/reader' && this.routeParamUrl && this.routeParamUrl != this.lastOpenedBook.url) {
-            this.commit('reader/setLoaderActive', true);
-            this.loadBook({url: this.routeParamUrl});
+        const lastUrl = (this.lastOpenedBook ? this.lastOpenedBook.url : '');
+        if (this.$root.rootRoute == '/reader' && this.routeParamUrl && this.routeParamUrl != lastUrl) {
+            this.loaderActive = true;
+            this.loadBook({url: this.routeParamUrl, bookPos: this.routeParamPos});
         }        
+    }
+
+    get routeParamPos() {
+        let result = undefined;
+        const q = this.$route.query;
+        if (q['__p']) {
+            result = q['__p'];
+            if (Array.isArray(result))
+                result = result[0];
+        }
+        
+        return (result ? parseInt(result, 10) || 0 : result);
+    }
+
+    updateRoute() {
+        const pos = (this.bookPos != undefined ? `__p=${this.bookPos}&` : '');
+        this.$router.replace(`/reader?${pos}url=${this.lastOpenedBook.url}`);
     }
 
     get routeParamUrl() {
@@ -99,8 +138,9 @@ class Reader extends Vue {
         return decodeURIComponent(result);
     }
 
-    get loaderActive() {
-        return this.reader.loaderActive;
+    bookPosChanged(event) {
+        this.bookPos = event.bookPos;
+        this.updateRoute();
     }
 
     get fullScreenActive() {
@@ -113,14 +153,9 @@ class Reader extends Vue {
 
     buttonClick(button) {
         switch (button) {
-            case 'loader': this.commit('reader/setLoaderActive', !this.loaderActive); this.resetRoute(); break;
+            case 'loader': this.loaderActive = !this.loaderActive; break;
             case 'fullscreen': this.commit('reader/setFullScreenActive', !this.fullScreenActive); break;
         }
-    }
-
-    resetRoute() {
-        if (this.loaderActive)
-            this.$router.replace('/reader');
     }
 
     buttonActiveClass(button) {
@@ -143,7 +178,7 @@ class Reader extends Vue {
             result = 'TextPage';
 
         if (!result) {
-            this.commit('reader/setLoaderActive', true);
+            this.loaderActive = true;
             result = 'LoaderPage';
         }
 
@@ -151,6 +186,29 @@ class Reader extends Vue {
             this.$root.$emit('set-app-title');
         }
 
+        if (this.lastActivePage != result && result == 'TextPage') {
+            //акивируем страницу с текстом
+            this.$nextTick(async() => {
+                const last = this.lastOpenedBook;
+                const isParsed = await bookManager.hasBookParsed(last);
+                if (!isParsed) {
+                    this.$root.$emit('set-app-title');
+                    this.loadBook({url: last.url, bookPos: last.bookPos});
+                    return;
+                } else {
+                    this.bookPos = last.bookPos;
+                }
+
+                const textPage = this.$refs.page;
+
+                textPage.lastBook = last;
+                textPage.bookPos = (this.bookPos !== undefined ? this.bookPos : 0);
+
+                textPage.showBook();
+            });
+        }
+
+        this.lastActivePage = result;
         return result;
     }
 
@@ -158,10 +216,26 @@ class Reader extends Vue {
         this.progressActive = true;
         this.$nextTick(async() => {
             const progress = this.$refs.page;
-            progress.show();
-            progress.setState({totalSteps: 5});
 
             try {
+                progress.show();
+                progress.setState({state: 'parse'});
+
+                const bookParsed = await bookManager.getBook({url: opts.url}, (prog) => {
+                    progress.setState({progress: prog});
+                });
+
+                if (bookParsed) {
+                    this.commit('reader/setOpenedBook', bookManager.metaOnly(bookParsed));
+                    this.bookPos = bookParsed.bookPos;
+                    this.updateRoute();
+                    this.loaderActive = false;
+                    progress.hide(); this.progressActive = false;
+                    return;
+                }
+
+                progress.setState({totalSteps: 5});
+
                 const book = await readerApi.loadBook(opts.url, (state) => {
                     progress.setState(state);
                 });
@@ -172,43 +246,15 @@ class Reader extends Vue {
                 });
 
                 this.commit('reader/setOpenedBook', bookManager.metaOnly(addedBook));
-                this.commit('reader/setLoaderActive', false);
+                this.bookPos = opts.bookPos;
+                this.updateRoute();
+
+                this.loaderActive = false;
 
                 progress.hide(); this.progressActive = false;
             } catch (e) {
                 progress.hide(); this.progressActive = false;
-                this.commit('reader/setLoaderActive', true);
-                this.resetRoute();
-                this.$alert(e.message, 'Ошибка', {type: 'error'});
-            }
-        });
-    }
-
-    parseBook(meta) {
-        this.progressActive = true;
-        this.$nextTick(async() => {
-            if (bookManager.hasBookParsed(meta)) {
-                this.progressActive = false;
-                return;
-            }
-            
-            const progress = this.$refs.page;
-            progress.show();
-            progress.setState({state: 'parse'});
-            try {
-                const isParsed = await bookManager.getBook(meta, (prog) => {
-                    progress.setState({progress: prog});
-                });
-
-                progress.hide(); this.progressActive = false;
-
-                if (!isParsed) {
-                    this.loadBook({url: meta.url});
-                }
-            } catch (e) {
-                progress.hide(); this.progressActive = false;
-                this.commit('reader/setLoaderActive', true);
-                this.resetRoute();
+                this.loaderActive = true;
                 this.$alert(e.message, 'Ошибка', {type: 'error'});
             }
         });
