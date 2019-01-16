@@ -26,6 +26,9 @@
                     <el-tooltip content="Найти в тексте" :open-delay="1000" effect="light">
                         <el-button class="tool-button" @click="buttonClick('search')"><i class="el-icon-search"></i></el-button>
                     </el-tooltip>
+                    <el-tooltip content="Скопировать текст со страницы" :open-delay="1000" effect="light">
+                        <el-button class="tool-button" @click="buttonClick('copyText')"><i class="el-icon-edit-outline"></i></el-button>
+                    </el-tooltip>
                     <el-tooltip content="Принудительно обновить книгу в обход кеша" :open-delay="1000" effect="light">
                         <el-button class="tool-button" @click="buttonClick('refresh')"><i class="el-icon-refresh"></i></el-button>                
                     </el-tooltip>
