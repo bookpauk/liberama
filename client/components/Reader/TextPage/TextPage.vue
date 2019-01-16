@@ -54,12 +54,13 @@ class TextPage extends Vue {
         this.canvas.height = this.$refs.main.clientHeight;
         this.lineHeight = this.fontSize + this.lineInterval;
         this.pageLineCount = Math.floor(this.canvas.height/this.lineHeight);
-        this.w = this.canvas.width - 2*this.indent;
+        this.w = this.canvas.width - 2*this.indent - 200;
         
         if (this.parsed) {
             this.parsed.p = this.p;
             this.parsed.w = this.w;// px, ширина текста
             this.parsed.font = this.font;
+            this.parsed.wordWrap = this.wordWrap;
             this.measureText = (text, style) => {// eslint-disable-line no-unused-vars
                 return this.context.measureText(text).width;
             };
@@ -87,6 +88,7 @@ class TextPage extends Vue {
         this.textAlignJustify = true;// выравнивание по ширине
         this.p = 30;// px, отступ параграфа
         this.indent = 20;// px, отступ всего текста слева и справа
+        this.wordWrap = true;
 
         this.calcDrawProps();
         this.drawPage();// пока не загрузили, очистим канвас

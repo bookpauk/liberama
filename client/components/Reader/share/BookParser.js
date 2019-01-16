@@ -228,6 +228,42 @@ export default class BookParser {
         return result;
     }
 
+    splitToSlogi(word) {
+        let result = [];
+
+        const glas = new Set(['а', 'А', 'о', 'О', 'и', 'И', 'е', 'Е', 'ё', 'Ё', 'э', 'Э', 'ы', 'Ы', 'у', 'У', 'ю', 'Ю', 'я', 'Я']);
+        const soglas = new Set([
+            'б', 'в', 'г', 'д', 'ж', 'з', 'й', 'к', 'л', 'м', 'н', 'п', 'р', 'с', 'т', 'ф', 'х', 'ц', 'ч', 'ш', 'щ',
+            'Б', 'В', 'Г', 'Д', 'Ж', 'З', 'Й', 'К', 'Л', 'М', 'Н', 'П', 'Р', 'С', 'Т', 'Ф', 'Х', 'Ч', 'Ц', 'Ш', 'Щ'
+        ]);
+        const znak = new Set(['ь', 'Ь', 'ъ', 'Ъ', 'й', 'Й']);
+        const alpha = new Set(...glas, ...soglas, ...znak);
+
+        let slog = '';
+        let slogLen = 0;
+        const len = word.length;
+        word += '  ';
+        for (let i = 0; i < len; i++) {
+            slog += word[i];
+            if (alpha.has(word[i]))
+                slogLen++;
+
+            if (slogLen > 1 && i < len - 2 && (
+                    (glas.has(word[i]) && !(soglas.has(word[i + 1]) && soglas.has(word[i + 2]))) ||
+                    (soglas.has(word[i]) && soglas.has(word[i + 1]) && (glas.has(word[i + 2]) || soglas.has(word[i + 2]))) ||
+                    (znak.has(word[i]))
+                )) {
+                result.push(slog);
+                slog = '';
+                slogLen = 0;
+            }
+        }
+        if (slog)
+            result.push(slog);
+
+        return result;
+    }
+
     parsePara(paraIndex) {
         const para = this.para[paraIndex];
 
@@ -246,8 +282,8 @@ export default class BookParser {
             font: this.font,
         };
 
-        const lines = [];
-        /* array of
+
+        const lines = []; /* array of
         {
             begin: Number,
             end: Number,
@@ -274,6 +310,22 @@ export default class BookParser {
 
             let w = this.measureText(part) + (j == 0 ? parsed.p : 0);
             if (w > parsed.w) {
+                let wordTail;
+                if (parsed.wordWrap) {
+                    let slogi = this.splitToSlogi(word);
+                    /*for (let k = 0; k < slogi.length - 1; k++) {
+                    }*/
+                    if (slogi.length > 1) {
+                        prevPart += ' ' + slogi[0] + '-';
+                        slogi.shift();
+                        wordTail = slogi.join('');
+                    } else {
+                        wordTail = word;
+                    }
+                } else {
+                    wordTail = word;
+                }
+
                 line.parts.push({style: '', text: prevPart});
                 line.end = line.begin + prevPart.length;//нет -1 !!!
                 line.width = prevW;
@@ -282,7 +334,7 @@ export default class BookParser {
                 lines.push(line);
 
                 line = {begin: line.end + 1, parts: []};
-                part = word;
+                part = wordTail;
                 j++;
             }
             prevW = w;
