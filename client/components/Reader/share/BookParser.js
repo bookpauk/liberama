@@ -364,7 +364,7 @@ export default class BookParser {
                 }
 
                 line.parts.push({style: '', text: prevPart});
-                line.end = line.begin + prevPart.length;//нет -1 !!!
+                line.end = line.begin + prevPart.length - (wordTail != word ? 2 : 0);//это как, ы ? 2 и 0
                 line.width = prevW;
                 line.first = (j == 0);
                 line.last = false;
