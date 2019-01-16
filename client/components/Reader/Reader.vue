@@ -72,6 +72,8 @@ export default @Component({
                 const textPage = this.$refs.page;
                 if (textPage.bookPos != newValue) {
                     textPage.bookPos = newValue;
+                }
+                if (this.lastOpenedBook && this.lastOpenedBook.bookPos != newValue) {
                     this.commit('reader/setOpenedBook', Object.assign({}, this.lastOpenedBook, {bookPos: newValue}));
                 }
             }
