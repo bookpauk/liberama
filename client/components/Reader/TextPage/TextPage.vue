@@ -1,9 +1,6 @@
 <template>
     <div ref="main" class="main">
-        <!--pre>{{ meta }}</pre-->
-        <p v-for="item in items" :key="item.id">
-            <pre>{{ item.text }}</pre>
-        </p>        
+        <canvas ref="canvas" class="canvas"></canvas>
     </div>
 </template>
 
@@ -42,6 +39,19 @@ class TextPage extends Vue {
         }, 100);
     }
 
+    mounted() {
+        this.canvas = this.$refs.canvas;        
+        this.context = this.canvas.getContext('2d');
+        this.context.textAlign = 'left';
+    }
+
+    updateCanvasSize() {
+        this.canvas.width = this.$refs.main.clientWidth;
+        this.canvas.height = this.$refs.main.clientHeight;
+        this.lineHeight = this.fontSize + this.lineInterval;
+        this.pageLineCount = Math.floor(this.canvas.height/this.lineHeight);
+    }
+
     showBook() {
         this.$refs.main.focus();
         this.book = null;
@@ -53,6 +63,15 @@ class TextPage extends Vue {
         this.linesDown = null;
         this.pageLineCount = 0;
 
+        //canvas props
+        this.textColor = 'black';
+        this.backgroundColor = '#478355';
+        this.fontStyle = ''; //'bold','italic'
+        this.fontSize = 20; //px
+        this.fontName = 'arial';
+        this.lineInterval = 5; //px
+
+        this.updateCanvasSize();
         this.drawPage();//пока не загрузили, очистим канвас
 
         if (this.lastBook) {
@@ -73,16 +92,11 @@ class TextPage extends Vue {
                     this.fb2.bookTitle
                 ]).join(' '));
 
-                this.pageLineCount = 30;
-
                 const parsed = this.book.parsed;
                 parsed.p = 30;//px, отступ параграфа
                 parsed.w = 300;//px, ширина страницы
-                parsed.measureText = (text, style) => {
-                    if (style == 'bold')
-                        return text.length*12;
-                    else
-                        return text.length*3;
+                parsed.measureText = (text, style) => {// eslint-disable-line no-unused-vars
+                    return this.context.measureText(text).width;
                 };                
 
                 this.parsed = parsed;
@@ -96,15 +110,24 @@ class TextPage extends Vue {
             return;
 
         //пустой канвас
-        this.items = [];
+        const canvas = this.canvas;
+        const context = this.context;
+
+        context.font = `${this.fontStyle} ${this.fontSize}px ${this.fontName}`;
+
+        context.fillStyle = this.backgroundColor;
+        context.fillRect(0, 0, canvas.width, canvas.height);
 
         if (!this.book)
             return;
+
+        context.fillStyle = this.textColor;
+
         const lines = this.parsed.getLines(this.bookPos, this.pageLineCount + 1);
 
-        let newItems = [];
         let len = lines.length;
         len = (len > this.pageLineCount ? len = this.pageLineCount : len);
+        let y = 0;
         for (let i = 0; i < len; i++) {
             const line = lines[i];
             /* line:
@@ -117,19 +140,20 @@ class TextPage extends Vue {
                 }
             }*/
 
-            const item = {text: '', id: line.begin};
+            let text = '';
             for (const part of line.parts) {
-                item.text += part.text;
+                text += part.text;
             }
-            newItems.push(item);
+
+            y += this.lineHeight;
+            context.fillText(text, 0, y);
         }
-        this.items = newItems;
 
         this.linesUp = this.parsed.getLines(this.bookPos, -(this.pageLineCount + 1));
         this.linesDown = lines;
     }
     
-    pageDown() {
+    doPageDown() {
         if (this.linesDown) {
             let i = this.pageLineCount;
             i--;
@@ -139,7 +163,7 @@ class TextPage extends Vue {
         }
     }
 
-    pageUp() {
+    doPageUp() {
         if (this.linesUp) {
             let i = this.pageLineCount;
             i--;
@@ -150,14 +174,31 @@ class TextPage extends Vue {
         }
     }
 
+    doHome() {
+        this.bookPos = 0;
+    }
+
+    doEnd() {
+        if (this.parsed.para.length) {
+            const lastPara = this.parsed.para[this.parsed.para.length - 1];
+            this.bookPos = lastPara.offset + lastPara.length - 1;
+        }
+    }
+
     keyHook(event) {
         if (event.type == 'keydown') {
             switch (event.key) {
                 case 'PageDown': 
-                    this.pageDown();
+                    this.doPageDown();
                     break;
                 case 'PageUp':
-                    this.pageUp();
+                    this.doPageUp();
+                    break;
+                case 'Home':
+                    this.doHome();
+                    break;
+                case 'End':
+                    this.doEnd();
                     break;
             }
         }
@@ -170,6 +211,9 @@ class TextPage extends Vue {
     flex: 1;
     display: flex;
     flex-direction: column;
+}
+
+.canvas {
 }
 
 pre {
