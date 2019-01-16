@@ -87,7 +87,7 @@ class TextPage extends Vue {
         this.fontName = 'arial';
         this.lineInterval = 5;// px, межстрочный интервал
         this.textAlignJustify = true;// выравнивание по ширине
-        this.p = 30;// px, отступ параграфа
+        this.p = 60;// px, отступ параграфа
         this.indent = 20;// px, отступ всего текста слева и справа
         this.wordWrap = true;
 
@@ -199,6 +199,18 @@ class TextPage extends Vue {
         this.linesDown = lines;
     }
     
+    doDown() {
+        if (this.linesDown && this.linesDown.length > 1) {
+            this.bookPos = this.linesDown[1].begin;
+        }
+    }
+
+    doUp() {
+        if (this.linesUp && this.linesUp.length > 1) {
+            this.bookPos = this.linesUp[1].begin;
+        }
+    }
+
     doPageDown() {
         if (this.linesDown) {
             let i = this.pageLineCount;
@@ -234,6 +246,12 @@ class TextPage extends Vue {
     keyHook(event) {
         if (event.type == 'keydown') {
             switch (event.key) {
+                case 'ArrowDown':
+                    this.doDown();
+                    break;
+                case 'ArrowUp':
+                    this.doUp();
+                    break;
                 case 'PageDown': 
                     this.doPageDown();
                     break;
