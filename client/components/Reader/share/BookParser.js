@@ -237,7 +237,7 @@ export default class BookParser {
             'Б', 'В', 'Г', 'Д', 'Ж', 'З', 'Й', 'К', 'Л', 'М', 'Н', 'П', 'Р', 'С', 'Т', 'Ф', 'Х', 'Ч', 'Ц', 'Ш', 'Щ'
         ]);
         const znak = new Set(['ь', 'Ь', 'ъ', 'Ъ', 'й', 'Й']);
-        const alpha = new Set([...glas, ...soglas, ...znak, ' ']);
+        const alpha = new Set([...glas, ...soglas, ...znak]);
 
         let slog = '';
         let slogLen = 0;
@@ -260,13 +260,18 @@ export default class BookParser {
                         alpha.has(word[i + 1]) && alpha.has(word[i + 2])
                     ) ||
                     //мягкий или твердый знак или Й
-                    (znak.has(word[i]))
+                    (znak.has(word[i])) ||
+                    (word[i] == '-')
                 ) &&
                 //нельзя оставлять окончания на ь, ъ, й
                 !(znak.has(word[i + 2]) && !alpha.has(word[i + 3]))
 
                 ) {
-                result.push(slog);
+                if (word[i] != '-')
+                    result.push(slog);
+                else {
+                    result.push(slog.substr(0, slog.length - 1));
+                }
                 slog = '';
                 slogLen = 0;
             }
@@ -343,7 +348,7 @@ export default class BookParser {
                             pw = ww;
                             slogi.shift();
                         }
-                        
+
                         if (pw) {
                             prevW = pw;
                             prevPart = s + '-';

@@ -47,6 +47,7 @@ class TextPage extends Vue {
         this.canvas = this.$refs.canvas;        
         this.context = this.canvas.getContext('2d');
         this.context.textAlign = 'left';
+        this.context.textBaseline = 'bottom';
     }
 
     calcDrawProps() {
