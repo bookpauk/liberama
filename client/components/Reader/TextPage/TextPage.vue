@@ -37,6 +37,10 @@ class TextPage extends Vue {
         this.debouncedEmitPosChange = _.debounce((newValue) => {
             this.$emit('book-pos-changed', {bookPos: newValue});
         }, 100);
+
+        window.addEventListener('resize', () => {
+            this.onResize();
+        });
     }
 
     mounted() {
@@ -51,6 +55,16 @@ class TextPage extends Vue {
         this.lineHeight = this.fontSize + this.lineInterval;
         this.pageLineCount = Math.floor(this.canvas.height/this.lineHeight);
         this.w = this.canvas.width - 2*this.indent;
+        
+        if (this.parsed) {
+            this.parsed.p = this.p;
+            this.parsed.w = this.w;// px, ширина текста
+            this.parsed.font = this.font;
+            this.measureText = (text, style) => {// eslint-disable-line no-unused-vars
+                return this.context.measureText(text).width;
+            };
+            this.parsed.measureText = this.measureText;
+        }
     }
 
     showBook() {
@@ -62,7 +76,6 @@ class TextPage extends Vue {
 
         this.linesUp = null;
         this.linesDown = null;
-        this.pageLineCount = 0;
 
         //draw props
         this.textColor = 'black';
@@ -96,20 +109,18 @@ class TextPage extends Vue {
                     this.fb2.bookTitle
                 ]).join(' '));
 
-                this.calcDrawProps();
                 const parsed = this.book.parsed;
-                parsed.p = this.p;
-                parsed.w = this.w;// px, ширина текста
-                parsed.font = this.font;
-                parsed.measureText = (text, style) => {// eslint-disable-line no-unused-vars
-                    return this.context.measureText(text).width;
-                };
-                this.measureText = parsed.measureText;
-
                 this.parsed = parsed;
+                this.calcDrawProps();
+
                 this.drawPage();
             })();
         }
+    }
+
+    onResize() {
+        this.calcDrawProps();
+        this.drawPage();
     }
 
     get font() {
@@ -241,19 +252,14 @@ class TextPage extends Vue {
 <style scoped>
 .main {
     flex: 1;
-    display: flex;
-    flex-direction: column;
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
 }
 
 .canvas {
+    margin: 0;
+    padding: 0;
 }
 
-pre {
-    margin: 0;
-    padding: 0;
-}
-p {
-    margin: 0;
-    padding: 0;
-}
 </style>
