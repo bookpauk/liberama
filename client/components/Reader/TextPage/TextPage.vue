@@ -162,7 +162,7 @@ class TextPage extends Vue {
                 first: Boolean,
                 last: Boolean,
                 parts: array of {
-                    style: 'bold'|'italic',
+                    style: {bold: Boolean, italic: Boolean}
                     text: String,
                 }
             }*/

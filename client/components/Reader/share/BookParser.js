@@ -214,13 +214,34 @@ export default class BookParser {
         return result;
     }
 
-    removeTags(s) {
-        let result = '';
+    splitToStyle(s) {
+        let result = [];/*array of {
+            style: {bold: Boolean, italic: Boolean},
+            text: String,
+        }*/
 
         const parser = new EasySAXParser();
+        let style = {};
 
         parser.on('textNode', (text) => {
-            result += text;
+            result.push({
+                style: Object.assign({}, style),
+                text: text
+            });
+        });
+
+        parser.on('startNode', (elemName, getAttr, isTagEnd, getStrNode) => {// eslint-disable-line no-unused-vars
+            if (elemName == 'strong')
+                style.bold = true;
+            else if (elemName == 'emphasis')
+                style.italic = true;
+        });
+
+        parser.on('endNode', (elemName, isTagStart, getStrNode) => {// eslint-disable-line no-unused-vars
+            if (elemName == 'strong')
+                style.bold = false;
+            else if (elemName == 'emphasis')
+                style.italic = false;
         });
 
         parser.parse(`<p>${s}</p>`);
@@ -304,87 +325,102 @@ export default class BookParser {
             first: Boolean,
             last: Boolean,
             parts: array of {
-                style: 'bold'|'italic',
+                style: {bold: Boolean, italic: Boolean},
                 text: String,
             }
         }*/
         
-        let text = this.removeTags(para.text);
+        let parts = this.splitToStyle(para.text);
 
         let line = {begin: para.offset, parts: []};
-        let prevPart = '';
-        let part = '';
+        let prevStr = '';
+        let str = '';
         let prevW = 0;
-        let j = 0;
+        let j = 0;//номер строки
+        let ofs = -1;
         let word = '';
-        let newPara = true;
-        text += ' ';
-        // тут начинается самый замес, перенос и стилизация
-        for (let i = 0; i < text.length; i++) {
-            if (text[i] != ' ') {
-                word += text[i];
-                continue;
-            }
-            part += (newPara ? '' : ' ') + word;
-            newPara = false;
+        let isNewPara = true;
+        // тут начинается самый замес, перенос по слогам и стилизация
+        let text = '';
+        let style = {};
+        for (let part of parts) {
+            text = part.text;
+            style = part.style;
 
-            let p = (j == 0 ? parsed.p : 0);
-            let w = this.measureText(part) + p;
-            if (w > parsed.w) {
-                let wordTail;
+            for (let i = 0; i < text.length; i++) {
+                ofs++;
 
-                let pw;
-                if (parsed.wordWrap) {                    
-                    let slogi = this.splitToSlogi(word);
+                if (i < text.length - 1) {
+                    if (text[i] != ' ') {
+                        word += text[i];
+                        continue;
+                    }
+                } else {
+                    if (text[i] != ' ') {
+                        word += text[i];
+                    }
+                }
+                str += (isNewPara ? '' : ' ') + word;
+                isNewPara = false;
 
-                    if (slogi.length > 1) {
-                        let s = prevPart + ' ';
+                let p = (j == 0 ? parsed.p : 0);
+                let w = this.measureText(str) + p;
+                if (w > parsed.w) {
+                    let wordTail;
 
-                        const slogiLen = slogi.length;
-                        for (let k = 0; k < slogiLen - 1; k++) {
-                            let slog = slogi[0];
-                            if (slog[slog.length - 1] == '-') //убрать '-' в конце слога, добавим свой
-                                slog = slog.substr(0, slog.length - 1);
-                            let ww = this.measureText(s + slog + '-') + p;
-                            if (ww <= parsed.w) {
-                                s += slog;
-                            } else 
-                                break;
-                            pw = ww;
-                            slogi.shift();
-                        }
+                    if (parsed.wordWrap) {                    
+                        let slogi = this.splitToSlogi(word);
 
-                        if (pw) {
-                            prevW = pw;
-                            prevPart = s + '-';
-                            wordTail = slogi.join('');
+                        if (slogi.length > 1) {
+                            let s = prevStr + ' ';
+
+                            let pw;
+                            const slogiLen = slogi.length;
+                            for (let k = 0; k < slogiLen - 1; k++) {
+                                let slog = slogi[0];
+                                if (slog[slog.length - 1] == '-') //убрать '-' в конце слога, добавим свой
+                                    slog = slog.substr(0, slog.length - 1);
+                                let ww = this.measureText(s + slog + '-') + p;
+                                if (ww <= parsed.w) {
+                                    s += slog;
+                                } else 
+                                    break;
+                                pw = ww;
+                                slogi.shift();
+                            }
+
+                            if (pw) {
+                                prevW = pw;
+                                prevStr = s + '-';
+                                wordTail = slogi.join('');
+                            } else {
+                                wordTail = word;
+                            }
                         } else {
                             wordTail = word;
                         }
                     } else {
                         wordTail = word;
                     }
-                } else {
-                    wordTail = word;
+
+                    line.parts.push({style, text: prevStr});
+                    line.end = para.offset + ofs;
+                    line.width = prevW;
+                    line.first = (j == 0);
+                    line.last = false;
+                    lines.push(line);
+
+                    line = {begin: para.offset + ofs + 1, parts: []};
+                    str = wordTail;
+                    j++;
                 }
-
-                line.parts.push({style: '', text: prevPart});
-                line.end = para.offset + i;
-                line.width = prevW;
-                line.first = (j == 0);
-                line.last = false;
-                lines.push(line);
-
-                line = {begin: line.end + 1, parts: []};
-                part = wordTail;
-                j++;
+                prevW = w;
+                prevStr = str;
+                word = '';
             }
-            prevW = w;
-            prevPart = part;
-            word = '';
         }
 
-        line.parts.push({style: '', text: prevPart});
+        line.parts.push({style, text: prevStr});
         line.end = para.offset + para.length - 1;
         line.width = prevW;
         line.first = (j == 0);
