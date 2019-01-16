@@ -160,8 +160,8 @@ class TextPage extends Vue {
             if (this.textAlignJustify && !line.last) {
                 const words = text.split(' ');
                 if (words.length > 1) {
-                    let space = canvas.width - line.width + spaceWidth*(words.length - 1);
-                    space = space/(words.length - 1);
+                    const spaceCount = words.length - 1;
+                    const space = (canvas.width - line.width + spaceWidth*spaceCount)/spaceCount;
 
                     let x = 0;
                     for (const word of words) {

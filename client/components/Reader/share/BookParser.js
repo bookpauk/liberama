@@ -109,7 +109,11 @@ export default class BookParser {
         });
 
         parser.on('textNode', (text) => {
-            text = text.trim();
+            if (text != ' ' && text.trim() == '')
+                text = text.trim();
+
+            if (text == '')
+                return;
 
             switch (path) {
                 case '/FictionBook/description/title-info/author/first-name':
@@ -144,15 +148,9 @@ export default class BookParser {
                     fb2.annotation += text;
             }
 
-            if (text == '')
-                return;
-
             if (path.indexOf('/FictionBook/body/title') == 0) {
                 newParagraph(text, text.length);
             }
-
-            if (text == '')
-                return;
 
             if (path.indexOf('/FictionBook/body/section') == 0) {
                 switch (tag) {
