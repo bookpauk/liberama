@@ -50,6 +50,7 @@ class TextPage extends Vue {
         this.canvas.height = this.$refs.main.clientHeight;
         this.lineHeight = this.fontSize + this.lineInterval;
         this.pageLineCount = Math.floor(this.canvas.height/this.lineHeight);
+        this.w = this.canvas.width - 2*this.indent;
     }
 
     showBook() {
@@ -69,9 +70,10 @@ class TextPage extends Vue {
         this.fontStyle = '';// 'bold','italic'
         this.fontSize = 20;// px
         this.fontName = 'arial';
-        this.lineInterval = 5;// px
+        this.lineInterval = 5;// px, межстрочный интервал
         this.textAlignJustify = true;// выравнивание по ширине
         this.p = 30;// px, отступ параграфа
+        this.indent = 20;// px, отступ всего текста слева и справа
 
         this.calcDrawProps();
         this.drawPage();// пока не загрузили, очистим канвас
@@ -97,7 +99,7 @@ class TextPage extends Vue {
                 this.calcDrawProps();
                 const parsed = this.book.parsed;
                 parsed.p = this.p;
-                parsed.w = this.canvas.width;// px, ширина страницы
+                parsed.w = this.w;// px, ширина текста
                 parsed.font = this.font;
                 parsed.measureText = (text, style) => {// eslint-disable-line no-unused-vars
                     return this.context.measureText(text).width;
@@ -156,7 +158,7 @@ class TextPage extends Vue {
                 text += part.text;
             }
 
-            let indent = (line.first ? this.p : 0);
+            let indent = this.indent + (line.first ? this.p : 0);
             y += this.lineHeight;
 
             let filled = false;
@@ -164,7 +166,7 @@ class TextPage extends Vue {
                 const words = text.split(' ');
                 if (words.length > 1) {
                     const spaceCount = words.length - 1;
-                    const space = (canvas.width - line.width + spaceWidth*spaceCount)/spaceCount;
+                    const space = (this.w - line.width + spaceWidth*spaceCount)/spaceCount;
 
                     let x = indent;
                     for (const word of words) {
