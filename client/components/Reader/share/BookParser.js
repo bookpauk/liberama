@@ -253,8 +253,8 @@ export default class BookParser {
         {
             begin: Number,
             end: Number,
-            paraBegin: Boolean,
-            paraEnd: Boolean,
+            first: Boolean,
+            last: Boolean,
             parts: array of {
                 style: 'bold'|'italic',
                 text: String,
@@ -279,8 +279,8 @@ export default class BookParser {
                 line.parts.push({style: '', text: prevPart});
                 line.end = line.begin + prevPart.length;//нет -1 !!!
                 line.width = prevW;
-                line.paraBegin = (k == 0);
-                line.paraEnd = false;
+                line.first = (k == 0);
+                line.last = false;
                 lines.push(line);
 
                 line = {begin: line.end + 1, parts: []};
@@ -295,8 +295,8 @@ export default class BookParser {
         line.parts.push({style: '', text: prevPart});
         line.end = line.begin + prevPart.length - 1;
         line.width = prevW;
-        line.paraBegin = (k == 0);
-        line.paraEnd = true;
+        line.first = (k == 0);
+        line.last = true;
         lines.push(line);
 
         parsed.lines = lines;

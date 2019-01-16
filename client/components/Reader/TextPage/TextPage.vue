@@ -142,8 +142,8 @@ class TextPage extends Vue {
             {
                 begin: Number,
                 end: Number,
-                paraBegin: Boolean,
-                paraEnd: Boolean,
+                first: Boolean,
+                last: Boolean,
                 parts: array of {
                     style: 'bold'|'italic',
                     text: String,
@@ -157,7 +157,7 @@ class TextPage extends Vue {
 
             y += this.lineHeight;
             let filled = false;
-            if (this.textAlignJustify && !line.paraEnd) {
+            if (this.textAlignJustify && !line.last) {
                 const words = text.split(' ');
                 if (words.length > 1) {
                     let space = canvas.width - line.width + spaceWidth*(words.length - 1);
