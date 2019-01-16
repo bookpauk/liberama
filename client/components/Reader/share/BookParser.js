@@ -378,9 +378,7 @@ export default class BookParser {
                             const slogiLen = slogi.length;
                             for (let k = 0; k < slogiLen - 1; k++) {
                                 let slog = slogi[0];
-                                if (slog[slog.length - 1] == '-') //убрать '-' в конце слога, добавим свой
-                                    slog = slog.substr(0, slog.length - 1);
-                                let ww = this.measureText(s + slog + '-') + p;
+                                let ww = this.measureText(s + slog + (slog[slog.length - 1] == '-' ? '' : '-')) + p;
                                 if (ww <= parsed.w) {
                                     s += slog;
                                 } else 
@@ -391,7 +389,7 @@ export default class BookParser {
 
                             if (pw) {
                                 prevW = pw;
-                                prevStr = s + '-';
+                                prevStr = s + (s[s.length - 1] == '-' ? '' : '-');
                                 wordTail = slogi.join('');
                             } else {
                                 wordTail = word;
