@@ -309,30 +309,36 @@ export default class BookParser {
             }
         }*/
         
-        const text = this.removeTags(para.text);
+        let text = this.removeTags(para.text);
 
-        const words = text.split(' ');
         let line = {begin: para.offset, parts: []};
         let prevPart = '';
         let part = '';
         let prevW = 0;
         let j = 0;
+        let word = '';
+        let newPara = true;
+        text += ' ';
         // тут начинается самый замес, перенос и стилизация
-        for (let i = 0; i < words.length; i++) {
-            const word = words[i];
-            part += word;
+        for (let i = 0; i < text.length; i++) {
+            if (text[i] != ' ') {
+                word += text[i];
+                continue;
+            }
+            part += (newPara ? '' : ' ') + word;
+            newPara = false;
 
             let p = (j == 0 ? parsed.p : 0);
             let w = this.measureText(part) + p;
             if (w > parsed.w) {
                 let wordTail;
 
+                let pw;
                 if (parsed.wordWrap) {                    
                     let slogi = this.splitToSlogi(word);
 
                     if (slogi.length > 1) {
                         let s = prevPart + ' ';
-                        let pw;
 
                         const slogiLen = slogi.length;
                         for (let k = 0; k < slogiLen - 1; k++) {
@@ -363,7 +369,7 @@ export default class BookParser {
                 }
 
                 line.parts.push({style: '', text: prevPart});
-                line.end = line.begin + prevPart.length - (wordTail != word ? 2 : 0);//это как, ы ? 2 и 0
+                line.end = para.offset + i;
                 line.width = prevW;
                 line.first = (j == 0);
                 line.last = false;
@@ -375,11 +381,11 @@ export default class BookParser {
             }
             prevW = w;
             prevPart = part;
-            part += ' ';
+            word = '';
         }
 
         line.parts.push({style: '', text: prevPart});
-        line.end = line.begin + prevPart.length - 1;
+        line.end = para.offset + para.length - 1;
         line.width = prevW;
         line.first = (j == 0);
         line.last = true;
