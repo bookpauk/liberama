@@ -266,24 +266,24 @@ export default class BookParser {
         let prevPart = '';
         let part = '';
         let prevW = 0;
-        let k = 0;
+        let j = 0;
         // тут начинается самый замес, перенос и стилизация
         for (let i = 0; i < words.length; i++) {
             const word = words[i];
             part += word;
 
-            let w = this.measureText(part);
+            let w = this.measureText(part) + (j == 0 ? parsed.p : 0);
             if (w > parsed.w) {
                 line.parts.push({style: '', text: prevPart});
                 line.end = line.begin + prevPart.length;//нет -1 !!!
                 line.width = prevW;
-                line.first = (k == 0);
+                line.first = (j == 0);
                 line.last = false;
                 lines.push(line);
 
                 line = {begin: line.end + 1, parts: []};
                 part = word;
-                k++;
+                j++;
             }
             prevW = w;
             prevPart = part;
@@ -293,7 +293,7 @@ export default class BookParser {
         line.parts.push({style: '', text: prevPart});
         line.end = line.begin + prevPart.length - 1;
         line.width = prevW;
-        line.first = (k == 0);
+        line.first = (j == 0);
         line.last = true;
         lines.push(line);
 

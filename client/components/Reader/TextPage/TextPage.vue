@@ -70,7 +70,8 @@ class TextPage extends Vue {
         this.fontSize = 20;// px
         this.fontName = 'arial';
         this.lineInterval = 5;// px
-        this.textAlignJustify = true;
+        this.textAlignJustify = true;// выравнивание по ширине
+        this.p = 30;// px, отступ параграфа
 
         this.calcDrawProps();
         this.drawPage();// пока не загрузили, очистим канвас
@@ -95,7 +96,7 @@ class TextPage extends Vue {
 
                 this.calcDrawProps();
                 const parsed = this.book.parsed;
-                parsed.p = 30;// px, отступ параграфа
+                parsed.p = this.p;
                 parsed.w = this.canvas.width;// px, ширина страницы
                 parsed.font = this.font;
                 parsed.measureText = (text, style) => {// eslint-disable-line no-unused-vars
@@ -155,7 +156,9 @@ class TextPage extends Vue {
                 text += part.text;
             }
 
+            let indent = (line.first ? this.p : 0);
             y += this.lineHeight;
+
             let filled = false;
             if (this.textAlignJustify && !line.last) {
                 const words = text.split(' ');
@@ -163,7 +166,7 @@ class TextPage extends Vue {
                     const spaceCount = words.length - 1;
                     const space = (canvas.width - line.width + spaceWidth*spaceCount)/spaceCount;
 
-                    let x = 0;
+                    let x = indent;
                     for (const word of words) {
                         context.fillText(word, x, y);
                         x += this.measureText(word) + space;
@@ -173,8 +176,7 @@ class TextPage extends Vue {
             }
 
             if (!filled)
-                context.fillText(text, 0, y);
-            
+                context.fillText(text, indent, y);            
         }
 
         this.linesUp = this.parsed.getLines(this.bookPos, -(this.pageLineCount + 1));
