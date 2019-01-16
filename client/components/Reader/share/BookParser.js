@@ -267,11 +267,7 @@ export default class BookParser {
                 !(znak.has(word[i + 2]) && !alpha.has(word[i + 3]))
 
                 ) {
-                if (word[i] != '-')
-                    result.push(slog);
-                else {
-                    result.push(slog.substr(0, slog.length - 1));
-                }
+                result.push(slog);
                 slog = '';
                 slogLen = 0;
             }
@@ -340,9 +336,12 @@ export default class BookParser {
 
                         const slogiLen = slogi.length;
                         for (let k = 0; k < slogiLen - 1; k++) {
-                            let ww = this.measureText(s + slogi[0] + '-') + p;
+                            let slog = slogi[0];
+                            if (slog[slog.length - 1] == '-') //убрать '-' в конце слога, добавим свой
+                                slog = slog.substr(0, slog.length - 1);
+                            let ww = this.measureText(s + slog + '-') + p;
                             if (ww <= parsed.w) {
-                                s += slogi[0];
+                                s += slog;
                             } else 
                                 break;
                             pw = ww;
