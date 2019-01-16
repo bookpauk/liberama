@@ -245,17 +245,22 @@ class TextPage extends Vue {
 
     keyHook(event) {
         if (event.type == 'keydown') {
-            switch (event.key) {
+            switch (event.code) {
                 case 'ArrowDown':
                     this.doDown();
                     break;
                 case 'ArrowUp':
                     this.doUp();
                     break;
-                case 'PageDown': 
+                case 'PageDown':
+                case 'ArrowRight':
+                case 'Enter':
+                case 'Space':
                     this.doPageDown();
                     break;
                 case 'PageUp':
+                case 'ArrowLeft':
+                case 'Backspace':
                     this.doPageUp();
                     break;
                 case 'Home':
