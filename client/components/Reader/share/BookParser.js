@@ -236,15 +236,16 @@ export default class BookParser {
         if (para.parsed && 
             para.parsed.w === this.w &&
             para.parsed.p === this.p &&
-            para.parsed.textAlignJustify === this.textAlignJustify &&
-            para.parsed.wordWrap === this.wordWrap)
+            para.parsed.wordWrap === this.wordWrap &&
+            para.parsed.font === this.font
+            )
             return para.parsed;
 
         const parsed = {
             w: this.w,
             p: this.p,
-            textAlignJustify: this.textAlignJustify,
-            wordWrap: this.wordWrap
+            wordWrap: this.wordWrap,
+            font: this.font,
         };
 
         const lines = [];
@@ -252,7 +253,8 @@ export default class BookParser {
         {
             begin: Number,
             end: Number,
-            para: Boolean,
+            paraBegin: Boolean,
+            paraEnd: Boolean,
             parts: array of {
                 style: 'bold'|'italic',
                 text: String,
@@ -265,29 +267,36 @@ export default class BookParser {
         let line = {begin: para.offset, parts: []};
         let prevPart = '';
         let part = '';
+        let prevW = 0;
         let k = 0;
         // тут начинается самый замес, перенос и стилизация
         for (let i = 0; i < words.length; i++) {
             const word = words[i];
             part += word;
 
-            if (this.measureText(part) > parsed.w) {
+            let w = this.measureText(part);
+            if (w > parsed.w) {
                 line.parts.push({style: '', text: prevPart});
                 line.end = line.begin + prevPart.length;//нет -1 !!!
-                line.para = (k == 0);
+                line.width = prevW;
+                line.paraBegin = (k == 0);
+                line.paraEnd = false;
                 lines.push(line);
 
                 line = {begin: line.end + 1, parts: []};
                 part = word;
                 k++;
             }
+            prevW = w;
             prevPart = part;
             part += ' ';
         }
 
         line.parts.push({style: '', text: prevPart});
         line.end = line.begin + prevPart.length - 1;
-        line.para = (k == 0);
+        line.width = prevW;
+        line.paraBegin = (k == 0);
+        line.paraEnd = true;
         lines.push(line);
 
         parsed.lines = lines;

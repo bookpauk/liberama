@@ -45,7 +45,7 @@ class TextPage extends Vue {
         this.context.textAlign = 'left';
     }
 
-    updateCanvasSize() {
+    calcDrawProps() {
         this.canvas.width = this.$refs.main.clientWidth;
         this.canvas.height = this.$refs.main.clientHeight;
         this.lineHeight = this.fontSize + this.lineInterval;
@@ -63,15 +63,16 @@ class TextPage extends Vue {
         this.linesDown = null;
         this.pageLineCount = 0;
 
-        //canvas props
+        //draw props
         this.textColor = 'black';
         this.backgroundColor = '#478355';
         this.fontStyle = '';// 'bold','italic'
         this.fontSize = 20;// px
         this.fontName = 'arial';
         this.lineInterval = 5;// px
+        this.textAlignJustify = true;
 
-        this.updateCanvasSize();
+        this.calcDrawProps();
         this.drawPage();// пока не загрузили, очистим канвас
 
         if (this.lastBook) {
@@ -92,18 +93,24 @@ class TextPage extends Vue {
                     this.fb2.bookTitle
                 ]).join(' '));
 
-                this.updateCanvasSize();
+                this.calcDrawProps();
                 const parsed = this.book.parsed;
                 parsed.p = 30;// px, отступ параграфа
                 parsed.w = this.canvas.width;// px, ширина страницы
+                parsed.font = this.font;
                 parsed.measureText = (text, style) => {// eslint-disable-line no-unused-vars
                     return this.context.measureText(text).width;
-                };                
+                };
+                this.measureText = parsed.measureText;
 
                 this.parsed = parsed;
                 this.drawPage();
             })();
         }
+    }
+
+    get font() {
+        return `${this.fontStyle} ${this.fontSize}px ${this.fontName}`;
     }
 
     drawPage() {
@@ -114,15 +121,15 @@ class TextPage extends Vue {
         const canvas = this.canvas;
         const context = this.context;
 
-        context.font = `${this.fontStyle} ${this.fontSize}px ${this.fontName}`;
-
         context.fillStyle = this.backgroundColor;
         context.fillRect(0, 0, canvas.width, canvas.height);
 
         if (!this.book)
             return;
 
+        context.font = this.font;
         context.fillStyle = this.textColor;
+        const spaceWidth = this.context.measureText(' ').width;
 
         const lines = this.parsed.getLines(this.bookPos, this.pageLineCount + 1);
 
@@ -135,7 +142,8 @@ class TextPage extends Vue {
             {
                 begin: Number,
                 end: Number,
-                para: Boolean,
+                paraBegin: Boolean,
+                paraEnd: Boolean,
                 parts: array of {
                     style: 'bold'|'italic',
                     text: String,
@@ -148,7 +156,25 @@ class TextPage extends Vue {
             }
 
             y += this.lineHeight;
-            context.fillText(text, 0, y);
+            let filled = false;
+            if (this.textAlignJustify && !line.paraEnd) {
+                const words = text.split(' ');
+                if (words.length > 1) {
+                    let space = canvas.width - line.width + spaceWidth*(words.length - 1);
+                    space = space/(words.length - 1);
+
+                    let x = 0;
+                    for (const word of words) {
+                        context.fillText(word, x, y);
+                        x += this.measureText(word) + space;
+                    }
+                    filled = true;
+                }
+            }
+
+            if (!filled)
+                context.fillText(text, 0, y);
+            
         }
 
         this.linesUp = this.parsed.getLines(this.bookPos, -(this.pageLineCount + 1));
