@@ -85,7 +85,7 @@ class TextPage extends Vue {
         this.fontStyle = '';// 'bold','italic'
         this.fontSize = 40;// px
         this.fontName = 'arial';
-        this.lineInterval = 5;// px, межстрочный интервал
+        this.lineInterval = 15;// px, межстрочный интервал
         this.textAlignJustify = true;// выравнивание по ширине
         this.p = 60;// px, отступ параграфа
         this.indent = 20;// px, отступ всего текста слева и справа

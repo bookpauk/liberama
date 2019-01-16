@@ -260,7 +260,7 @@ export default class BookParser {
                         alpha.has(word[i + 1]) && alpha.has(word[i + 2])
                     ) ||
                     //мягкий или твердый знак или Й
-                    (znak.has(word[i])) ||
+                    (znak.has(word[i]) && alpha.has(word[i + 1]) && alpha.has(word[i + 2])) ||
                     (word[i] == '-')
                 ) &&
                 //нельзя оставлять окончания на ь, ъ, й
