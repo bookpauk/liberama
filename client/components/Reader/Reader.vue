@@ -3,7 +3,7 @@
         <el-header height='50px'>
             <div class="header">
                 <el-tooltip content="Загрузить книгу" :open-delay="1000" effect="light">
-                    <el-button class="tool-button" :class="buttonActiveClass('loader')" @click="buttonClick('loader')"><i class="el-icon-back"></i></el-button>
+                    <el-button class="tool-button" :class="buttonActiveClass('loader')" @click="buttonClick('loader', $event)"><i class="el-icon-back"></i></el-button>
                 </el-tooltip>
 
                 <div>
@@ -164,7 +164,7 @@ class Reader extends Vue {
         return this.$store.getters['reader/lastOpenedBook'];
     }
 
-    buttonClick(button) {
+    buttonClick(button, event) {
         switch (button) {
             case 'loader': this.loaderActive = !this.loaderActive; break;
             case 'fullScreen': this.commit('reader/setFullScreenActive', !this.fullScreenActive); break;
@@ -174,6 +174,7 @@ class Reader extends Vue {
                 }
                 break;
         }
+        event.view.blur();
     }
 
     buttonActiveClass(button) {
