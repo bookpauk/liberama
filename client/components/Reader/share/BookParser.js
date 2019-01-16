@@ -252,6 +252,7 @@ export default class BookParser {
         {
             begin: Number,
             end: Number,
+            para: Boolean,
             parts: array of {
                 style: 'bold'|'italic',
                 text: String,
@@ -262,28 +263,32 @@ export default class BookParser {
 
         const words = text.split(' ');
         let line = {begin: para.offset, parts: []};
+        let prevPart = '';
         let part = '';
-        let j = 0;
         let k = 0;
-        // тут начинается самый замес, перенос и выравниване по ширине
+        // тут начинается самый замес, перенос и стилизация
         for (let i = 0; i < words.length; i++) {
             const word = words[i];
-            if (j > 0) 
-                part += ' ';
-            j++;
             part += word;
 
-            if (this.measureText(part) >= parsed.w || i == words.length - 1) {
-                line.parts.push({style: '', text: (k == 0 ? '   ' : '') + part});
-                line.end = line.begin + part.length - 1;
+            if (this.measureText(part) > parsed.w) {
+                line.parts.push({style: '', text: prevPart});
+                line.end = line.begin + prevPart.length;//нет -1 !!!
+                line.para = (k == 0);
                 lines.push(line);
 
                 line = {begin: line.end + 1, parts: []};
-                part = '';
-                j = 0;
+                part = word;
                 k++;
             }
-        }        
+            prevPart = part;
+            part += ' ';
+        }
+
+        line.parts.push({style: '', text: prevPart});
+        line.end = line.begin + prevPart.length - 1;
+        line.para = (k == 0);
+        lines.push(line);
 
         parsed.lines = lines;
         para.parsed = parsed;

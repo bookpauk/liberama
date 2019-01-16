@@ -66,13 +66,13 @@ class TextPage extends Vue {
         //canvas props
         this.textColor = 'black';
         this.backgroundColor = '#478355';
-        this.fontStyle = ''; //'bold','italic'
-        this.fontSize = 20; //px
+        this.fontStyle = '';// 'bold','italic'
+        this.fontSize = 20;// px
         this.fontName = 'arial';
-        this.lineInterval = 5; //px
+        this.lineInterval = 5;// px
 
         this.updateCanvasSize();
-        this.drawPage();//пока не загрузили, очистим канвас
+        this.drawPage();// пока не загрузили, очистим канвас
 
         if (this.lastBook) {
             (async() => {
@@ -92,9 +92,10 @@ class TextPage extends Vue {
                     this.fb2.bookTitle
                 ]).join(' '));
 
+                this.updateCanvasSize();
                 const parsed = this.book.parsed;
-                parsed.p = 30;//px, отступ параграфа
-                parsed.w = 300;//px, ширина страницы
+                parsed.p = 30;// px, отступ параграфа
+                parsed.w = this.canvas.width;// px, ширина страницы
                 parsed.measureText = (text, style) => {// eslint-disable-line no-unused-vars
                     return this.context.measureText(text).width;
                 };                
@@ -134,6 +135,7 @@ class TextPage extends Vue {
             {
                 begin: Number,
                 end: Number,
+                para: Boolean,
                 parts: array of {
                     style: 'bold'|'italic',
                     text: String,
