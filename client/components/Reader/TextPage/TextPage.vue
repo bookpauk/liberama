@@ -54,7 +54,7 @@ class TextPage extends Vue {
         this.canvas.height = this.$refs.main.clientHeight;
         this.lineHeight = this.fontSize + this.lineInterval;
         this.pageLineCount = Math.floor(this.canvas.height/this.lineHeight);
-        this.w = this.canvas.width - 2*this.indent - 200;
+        this.w = this.canvas.width - 2*this.indent;
         
         if (this.parsed) {
             this.parsed.p = this.p;
@@ -82,7 +82,7 @@ class TextPage extends Vue {
         this.textColor = 'black';
         this.backgroundColor = '#478355';
         this.fontStyle = '';// 'bold','italic'
-        this.fontSize = 20;// px
+        this.fontSize = 40;// px
         this.fontName = 'arial';
         this.lineInterval = 5;// px, межстрочный интервал
         this.textAlignJustify = true;// выравнивание по ширине

@@ -237,22 +237,35 @@ export default class BookParser {
             'Б', 'В', 'Г', 'Д', 'Ж', 'З', 'Й', 'К', 'Л', 'М', 'Н', 'П', 'Р', 'С', 'Т', 'Ф', 'Х', 'Ч', 'Ц', 'Ш', 'Щ'
         ]);
         const znak = new Set(['ь', 'Ь', 'ъ', 'Ъ', 'й', 'Й']);
-        const alpha = new Set(...glas, ...soglas, ...znak);
+        const alpha = new Set([...glas, ...soglas, ...znak, ' ']);
 
         let slog = '';
         let slogLen = 0;
         const len = word.length;
-        word += '  ';
+        word += '   ';
         for (let i = 0; i < len; i++) {
             slog += word[i];
             if (alpha.has(word[i]))
                 slogLen++;
 
             if (slogLen > 1 && i < len - 2 && (
-                    (glas.has(word[i]) && !(soglas.has(word[i + 1]) && soglas.has(word[i + 2]))) ||
-                    (soglas.has(word[i]) && soglas.has(word[i + 1]) && (glas.has(word[i + 2]) || soglas.has(word[i + 2]))) ||
+                    //гласная, а следом не 2 согласные буквы
+                    (glas.has(word[i]) && !(soglas.has(word[i + 1]) && 
+                        soglas.has(word[i + 2])) && alpha.has(word[i + 1]) && alpha.has(word[i + 2])
+                    ) ||
+                    //предыдущая не согласная буква, текущая согласная, а следом согласная и согласная|гласная буквы
+                    (alpha.has(word[i - 1]) && !soglas.has(word[i - 1]) && 
+                        soglas.has(word[i]) && soglas.has(word[i + 1]) && 
+                        (glas.has(word[i + 2]) || soglas.has(word[i + 2])) && 
+                        alpha.has(word[i + 1]) && alpha.has(word[i + 2])
+                    ) ||
+                    //мягкий или твердый знак или Й
                     (znak.has(word[i]))
-                )) {
+                ) &&
+                //нельзя оставлять окончания на ь, ъ, й
+                !(znak.has(word[i + 2]) && !alpha.has(word[i + 3]))
+
+                ) {
                 result.push(slog);
                 slog = '';
                 slogLen = 0;
@@ -308,17 +321,36 @@ export default class BookParser {
             const word = words[i];
             part += word;
 
-            let w = this.measureText(part) + (j == 0 ? parsed.p : 0);
+            let p = (j == 0 ? parsed.p : 0);
+            let w = this.measureText(part) + p;
             if (w > parsed.w) {
                 let wordTail;
-                if (parsed.wordWrap) {
+
+                if (parsed.wordWrap) {                    
                     let slogi = this.splitToSlogi(word);
-                    /*for (let k = 0; k < slogi.length - 1; k++) {
-                    }*/
+
                     if (slogi.length > 1) {
-                        prevPart += ' ' + slogi[0] + '-';
-                        slogi.shift();
-                        wordTail = slogi.join('');
+                        let s = prevPart + ' ';
+                        let pw;
+
+                        const slogiLen = slogi.length;
+                        for (let k = 0; k < slogiLen - 1; k++) {
+                            let ww = this.measureText(s + slogi[0] + '-') + p;
+                            if (ww <= parsed.w) {
+                                s += slogi[0];
+                            } else 
+                                break;
+                            pw = ww;
+                            slogi.shift();
+                        }
+                        
+                        if (pw) {
+                            prevW = pw;
+                            prevPart = s + '-';
+                            wordTail = slogi.join('');
+                        } else {
+                            wordTail = word;
+                        }
                     } else {
                         wordTail = word;
                     }
