@@ -6,8 +6,7 @@ export default class BookParser {
         // defaults
         this.p = 30;// px, отступ параграфа
         this.w = 300;// px, ширина страницы
-        this.textAlignJustify = false;// выравнивание по ширине
-        this.wordWrap = false;// перенос по слогам, если textAlignJustify = true
+        this.wordWrap = false;// перенос по слогам
 
         // заглушка
         this.measureText = (text, style) => {// eslint-disable-line no-unused-vars

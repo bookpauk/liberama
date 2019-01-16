@@ -130,19 +130,23 @@ class TextPage extends Vue {
     }
     
     pageDown() {
-        let i = this.pageLineCount;
-        i--;
-        if (this.linesDown && this.linesDown.length > i) {
-            this.bookPos = this.linesDown[i].begin;
+        if (this.linesDown) {
+            let i = this.pageLineCount;
+            i--;
+            if (i >= 0 && this.linesDown.length > i) {
+                this.bookPos = this.linesDown[i].begin;
+            }
         }
     }
 
     pageUp() {
-        let i = this.pageLineCount;
-        i--;
-        i = (i > this.linesUp.length - 1 ? this.linesUp.length - 1 : i);
-        if (this.linesUp && this.linesUp.length > i) {
-            this.bookPos = this.linesUp[i].begin;
+        if (this.linesUp) {
+            let i = this.pageLineCount;
+            i--;
+            i = (i > this.linesUp.length - 1 ? this.linesUp.length - 1 : i);
+            if (i >= 0 && this.linesUp.length > i) {
+                this.bookPos = this.linesUp[i].begin;
+            }
         }
     }
 
