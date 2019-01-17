@@ -50,19 +50,20 @@ class TextPage extends Vue {
         this.realWidth = this.$refs.main.clientWidth;
         this.realHeight = this.$refs.main.clientHeight;
 
-        if (window.devicePixelRatio) {
-            this.canvas.width = this.realWidth*window.devicePixelRatio;
-            this.canvas.height = this.realHeight*window.devicePixelRatio;
+        let ratio = window.devicePixelRatio;
+        if (ratio) {
+            this.canvas.width = this.realWidth*ratio;
+            this.canvas.height = this.realHeight*ratio;
             this.canvas.style.width = this.$refs.main.clientWidth + 'px';
             this.canvas.style.height = this.$refs.main.clientHeight + 'px';
-            this.context.scale(window.devicePixelRatio, window.devicePixelRatio);
+            this.context.scale(ratio, ratio);
         } else {
             this.canvas.width = this.realWidth;
             this.canvas.height = this.realHeight;
         }
 
         this.lineHeight = this.fontSize + this.lineInterval;
-        this.pageLineCount = Math.floor(this.canvas.height/this.lineHeight);
+        this.pageLineCount = Math.floor(this.realHeight/this.lineHeight);
         this.w = this.realWidth - 2*this.indent;
         this.h = this.realHeight;
 
@@ -110,12 +111,12 @@ class TextPage extends Vue {
         this.textColor = 'black';
         this.backgroundColor = '#478355';
         this.fontStyle = '';// 'bold','italic'
-        this.fontSize = 33;// px
+        this.fontSize = 34;// px
         this.fontName = 'Arial';
-        this.lineInterval = 10;// px, межстрочный интервал
+        this.lineInterval = 7;// px, межстрочный интервал
         this.textAlignJustify = true;// выравнивание по ширине
         this.p = 50;// px, отступ параграфа
-        this.indent = 10;// px, отступ всего текста слева и справа
+        this.indent = 15;// px, отступ всего текста слева и справа
         this.wordWrap = true;
 
         this.calcDrawProps();
