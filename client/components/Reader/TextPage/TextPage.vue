@@ -44,8 +44,6 @@ class TextPage extends Vue {
     mounted() {
         this.canvas = this.$refs.canvas;        
         this.context = this.canvas.getContext('2d');
-        this.context.textAlign = 'left';
-        this.context.textBaseline = 'bottom';
     }
 
     async calcDrawProps() {
@@ -54,6 +52,10 @@ class TextPage extends Vue {
         this.lineHeight = this.fontSize + this.lineInterval;
         this.pageLineCount = Math.floor(this.canvas.height/this.lineHeight);
         this.w = this.canvas.width - 2*this.indent;
+        this.h = this.canvas.height;
+
+        this.context.textAlign = 'left';
+        this.context.textBaseline = 'bottom';
         
         if (this.parsed) {
             this.parsed.p = this.p;
@@ -130,6 +132,7 @@ class TextPage extends Vue {
                 this.calcDrawProps();
 
                 await this.loadFonts();
+
                 this.drawPage();
             })();
         }
@@ -170,7 +173,8 @@ class TextPage extends Vue {
 
         let len = lines.length;
         len = (len > this.pageLineCount ? len = this.pageLineCount : len);
-        let y = 0;
+        
+        let y = -this.lineInterval/2 + (this.h - this.pageLineCount*this.lineHeight)/2;
         for (let i = 0; i < len; i++) {
             const line = lines[i];
             /* line:
