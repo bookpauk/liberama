@@ -123,6 +123,7 @@ class App extends Vue {
 
     toggleCollapse() {
         this.commit('uistate/setAsideBarCollapse', !this.uistate.asideBarCollapse);
+        this.$root.$emit('resize');
     }
 
     get isCollapse() {
