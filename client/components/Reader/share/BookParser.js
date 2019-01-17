@@ -333,46 +333,46 @@ export default class BookParser {
         let parts = this.splitToStyle(para.text);
 
         let line = {begin: para.offset, parts: []};
+        let partText = '';//накапливаемый кусок со стилем
+
+        let str = '';//измеряемая строка
         let prevStr = '';
-        let str = '';
         let prevW = 0;
         let j = 0;//номер строки
         let ofs = -1;
         let word = '';
-        let isNewPara = true;
-        // тут начинается самый замес, перенос по слогам и стилизация
+        let sp1 = '';
+
         let text = '';
         let style = {};
+
+        // тут начинается самый замес, перенос по слогам и стилизация
         for (let part of parts) {
-            text = part.text;
+            text = part.text + ' ';
             style = part.style;
 
+            let sp2 = '';
             for (let i = 0; i < text.length; i++) {
-                ofs++;
+                if (i < text.length - 1)
+                    ofs++;
 
-                if (i < text.length - 1) {
-                    if (text[i] != ' ') {
-                        word += text[i];
-                        continue;
-                    }
-                } else {
-                    if (text[i] != ' ') {
-                        word += text[i];
-                    }
+                if (text[i] != ' ') {
+                    word += text[i];
+                    continue;
                 }
-                str += (isNewPara ? '' : ' ') + word;
-                isNewPara = false;
+                str += sp1 + word;
+                sp1 = ' ';
 
                 let p = (j == 0 ? parsed.p : 0);
                 let w = this.measureText(str) + p;
+                let wordTail = word;
                 if (w > parsed.w) {
-                    let wordTail;
-
                     if (parsed.wordWrap) {                    
                         let slogi = this.splitToSlogi(word);
 
                         if (slogi.length > 1) {
                             let s = prevStr + ' ';
+                            let ss = ' ';
 
                             let pw;
                             const slogiLen = slogi.length;
@@ -381,6 +381,7 @@ export default class BookParser {
                                 let ww = this.measureText(s + slog + (slog[slog.length - 1] == '-' ? '' : '-')) + p;
                                 if (ww <= parsed.w) {
                                     s += slog;
+                                    ss += slog;
                                 } else 
                                     break;
                                 pw = ww;
@@ -389,19 +390,13 @@ export default class BookParser {
 
                             if (pw) {
                                 prevW = pw;
-                                prevStr = s + (s[s.length - 1] == '-' ? '' : '-');
+                                partText += ss + (ss[ss.length - 1] == '-' ? '' : '-');
                                 wordTail = slogi.join('');
-                            } else {
-                                wordTail = word;
                             }
-                        } else {
-                            wordTail = word;
                         }
-                    } else {
-                        wordTail = word;
                     }
 
-                    line.parts.push({style, text: prevStr});
+                    line.parts.push({style, text: partText});
                     line.end = para.offset + ofs;
                     line.width = prevW;
                     line.first = (j == 0);
@@ -409,16 +404,23 @@ export default class BookParser {
                     lines.push(line);
 
                     line = {begin: para.offset + ofs + 1, parts: []};
+                    partText = '';
+                    sp2 = '';
                     str = wordTail;
                     j++;
                 }
-                prevW = w;
+
                 prevStr = str;
+                partText += sp2 + wordTail;
+                sp2 = ' ';
                 word = '';
+                prevW = w;
             }
+
+            line.parts.push({style, text: partText});
+            partText = '';
         }
 
-        line.parts.push({style, text: prevStr});
         line.end = para.offset + para.length - 1;
         line.width = prevW;
         line.first = (j == 0);

@@ -155,6 +155,7 @@ class TextPage extends Vue {
         let y = 0;
         for (let i = 0; i < len; i++) {
             const line = lines[i];
+console.log(line.parts);
             /* line:
             {
                 begin: Number,
@@ -167,15 +168,10 @@ class TextPage extends Vue {
                 }
             }*/
 
-            let text = '';
-            for (const part of line.parts) {
-                text += part.text;
-            }
-
             let indent = this.indent + (line.first ? this.p : 0);
             y += this.lineHeight;
 
-            let filled = false;
+            /*let filled = false;
             if (this.textAlignJustify && !line.last) {
                 const words = text.split(' ');
                 if (words.length > 1) {
@@ -192,7 +188,21 @@ class TextPage extends Vue {
             }
 
             if (!filled)
-                context.fillText(text, indent, y);            
+                context.fillText(text, indent, y);
+            */
+            /*let text = '';
+            for (const part of line.parts) {
+                text += part.text;
+            }
+            context.fillText(text, indent, y);
+            */
+            let x = indent;
+            for (const part of line.parts) {
+                let text = part.text;
+                context.font = `${part.style.italic ? 'italic' : ''} ${part.style.bold ? 'bold' : ''} ${this.fontSize}px ${this.fontName}`;
+                context.fillText(text, x, y);
+                x += this.measureText(text);
+            }
         }
 
         this.linesUp = this.parsed.getLines(this.bookPos, -(this.pageLineCount + 1));
