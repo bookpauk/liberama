@@ -3,6 +3,7 @@ import Vue from 'vue';
 // initial state
 const state = {
     fullScreenActive: false,
+    toolBarActive: true,
     openedBook: {},
 };
 
@@ -29,6 +30,9 @@ const actions = {};
 const mutations = {
     setFullScreenActive(state, value) {
         state.fullScreenActive = value;
+    },
+    setToolBarActive(state, value) {
+        state.toolBarActive = value;
     },
     setOpenedBook(state, value) {
         Vue.set(state.openedBook, value.key, Object.assign({}, value, {touchTime: Date.now()}));

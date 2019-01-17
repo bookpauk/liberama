@@ -1,6 +1,6 @@
 <template>
     <div ref="main" class="main">
-        <canvas ref="canvas" class="canvas"></canvas>
+        <canvas ref="canvas" class="canvas" @click="canvasClick"></canvas>
     </div>
 </template>
 
@@ -305,6 +305,11 @@ class TextPage extends Vue {
                     break;
             }
         }
+    }
+
+    canvasClick(event) {
+        console.log(event);
+        this.$emit('tool-bar-toggle');
     }
 }
 //-----------------------------------------------------------------------------

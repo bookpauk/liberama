@@ -1,6 +1,6 @@
 <template>
     <el-container>
-        <el-header height='50px'>
+        <el-header v-show="toolBarActive" height='50px'>
             <div class="header">
                 <el-tooltip content="Загрузить книгу" :open-delay="1000" effect="light">
                     <el-button ref="loader" class="tool-button" :class="buttonActiveClass('loader')" @click="buttonClick('loader')"><i class="el-icon-back"></i></el-button>
@@ -46,7 +46,7 @@
 
         <el-main>
             <keep-alive>
-                <component ref="page" :is="pageActive" @load-book="loadBook" @book-pos-changed="bookPosChanged"></component>
+                <component ref="page" :is="pageActive" @load-book="loadBook" @book-pos-changed="bookPosChanged" @tool-bar-toggle="toolBarToggle"></component>
             </keep-alive>
         </el-main>
     </el-container>
@@ -163,8 +163,16 @@ class Reader extends Vue {
         return this.reader.fullScreenActive;
     }
 
+    get toolBarActive() {
+        return this.reader.toolBarActive;
+    }
+
     get lastOpenedBook() {
         return this.$store.getters['reader/lastOpenedBook'];
+    }
+
+    toolBarToggle() {
+        this.commit('reader/setToolBarActive', !this.toolBarActive);
     }
 
     buttonClick(button) {
