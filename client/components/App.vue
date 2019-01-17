@@ -258,4 +258,11 @@ body, html, #app {
     height: 100%;
     font: normal 12pt Arial, Verdana, Sans-serif;
 }
+
+@font-face {
+  font-family: 'ReaderDefaultFont';
+  src: 
+       url('fonts/reader-default-font.ttf') format('truetype');
+}
+/*url('fonts/myfont.woff') format('woff'),*/
 </style>

@@ -50,7 +50,7 @@ class TextPage extends Vue {
         this.context.textBaseline = 'bottom';
     }
 
-    calcDrawProps() {
+    async calcDrawProps() {
         this.canvas.width = this.$refs.main.clientWidth;
         this.canvas.height = this.$refs.main.clientHeight;
         this.lineHeight = this.fontSize + this.lineInterval;
@@ -70,6 +70,15 @@ class TextPage extends Vue {
         }
     }
 
+    async loadFonts() {
+        let loaded = await Promise.all(this.fontList.map(font => document.fonts.check(font)));
+        if (loaded.some(r => !r)) {
+            loaded = await Promise.all(this.fontList.map(font => document.fonts.load(font)));
+            if (loaded.some(r => !r.length))
+                throw new Error('some font not loaded');
+        }
+    }
+
     showBook() {
         this.$refs.main.focus();
         this.book = null;
@@ -80,12 +89,15 @@ class TextPage extends Vue {
         this.linesUp = null;
         this.linesDown = null;
 
+        //preloaded fonts
+        this.fontList = ['10px ReaderDefaultFont'];
+
         //draw props
         this.textColor = 'black';
         this.backgroundColor = '#478355';
         this.fontStyle = '';// 'bold','italic'
         this.fontSize = 40;// px
-        this.fontName = 'arial';
+        this.fontName = 'ReaderDefaultFont';
         this.lineInterval = 15;// px, межстрочный интервал
         this.textAlignJustify = true;// выравнивание по ширине
         this.p = 60;// px, отступ параграфа
@@ -117,6 +129,7 @@ class TextPage extends Vue {
                 this.parsed = parsed;
                 this.calcDrawProps();
 
+                await this.loadFonts();
                 this.drawPage();
             })();
         }
@@ -306,5 +319,4 @@ class TextPage extends Vue {
     margin: 0;
     padding: 0;
 }
-
 </style>
