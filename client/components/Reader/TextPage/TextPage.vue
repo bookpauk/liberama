@@ -38,9 +38,7 @@ class TextPage extends Vue {
             this.$emit('book-pos-changed', {bookPos: newValue});
         }, 100);
 
-        window.addEventListener('resize', () => {
-            this.onResize();
-        });
+        this.$root.$on('resize', () => {this.$nextTick(this.onResize)});
     }
 
     mounted() {

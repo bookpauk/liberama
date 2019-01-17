@@ -173,6 +173,7 @@ class Reader extends Vue {
 
     toolBarToggle() {
         this.commit('reader/setToolBarActive', !this.toolBarActive);
+        this.$root.$emit('resize');
     }
 
     buttonClick(button) {
