@@ -337,7 +337,7 @@ class Reader extends Vue {
 .header {
     display: flex;
     justify-content: space-between;
-    min-width: 500px;
+    min-width: 550px;
 }
 
 .el-main {
