@@ -1,6 +1,6 @@
 <template>
     <div ref="main" class="main">
-        <canvas ref="canvas" class="canvas" @click="canvasClick"></canvas>
+        <canvas ref="canvas" class="canvas" @mousedown.prevent="onMouseDown" @touchstart.prevent="onTouchStart"></canvas>
     </div>
 </template>
 
@@ -279,6 +279,10 @@ class TextPage extends Vue {
         }
     }
 
+    doToolBarToggle() {
+        this.$emit('tool-bar-toggle');
+    }
+
     keyHook(event) {
         if (event.type == 'keydown') {
             switch (event.code) {
@@ -309,9 +313,55 @@ class TextPage extends Vue {
         }
     }
 
-    canvasClick(event) {
-        console.log(event);
-        this.$emit('tool-bar-toggle');
+    onTouchStart(event) {
+        if (event.touches.length == 1) {
+            this.onMouseDown(event.touches[0]);
+        }
+    }
+
+
+    onMouseDown(event) {
+        const mouseLegend = {
+            40: {30: 'PgUp', 100: 'PgDown'},
+            60: {40: 'Up', 60: 'Menu', 100: 'Down'},
+            100: {30: 'PgUp', 100: 'PgDown'}
+        };
+
+        const w = event.clientX/this.canvas.width*100;
+        const h = event.clientY/this.canvas.height*100;
+
+        let action = '';
+        loops: {
+            for (const x in mouseLegend) {
+                for (const y in mouseLegend[x]) {
+                    if (w < x && h < y) {
+                        action = mouseLegend[x][y];
+                        break loops;
+                    }
+                }
+            }
+        }
+
+        switch (action) {
+            case 'Down' ://Down
+                this.doDown();
+                break;
+            case 'Up' ://Up
+                this.doUp();
+                break;
+            case 'PgDown' ://PgDown
+                this.doPageDown();
+                break;
+            case 'PgUp' ://PgUp
+                this.doPageUp();
+                break;
+            case 'Menu' :
+                this.doToolBarToggle();
+                break;
+            default :
+                // Nothing
+        }
+
     }
 }
 //-----------------------------------------------------------------------------
