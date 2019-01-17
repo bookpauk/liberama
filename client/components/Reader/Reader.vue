@@ -3,43 +3,43 @@
         <el-header height='50px'>
             <div class="header">
                 <el-tooltip content="Загрузить книгу" :open-delay="1000" effect="light">
-                    <el-button class="tool-button" :class="buttonActiveClass('loader')" @click="buttonClick('loader', $event)"><i class="el-icon-back"></i></el-button>
+                    <el-button ref="loader" class="tool-button" :class="buttonActiveClass('loader')" @click="buttonClick('loader')"><i class="el-icon-back"></i></el-button>
                 </el-tooltip>
 
                 <div>
                     <el-tooltip content="Действие назад" :open-delay="1000" effect="light">
-                        <el-button class="tool-button" @click="buttonClick('undoAction')" ><i class="el-icon-arrow-left"></i></el-button>
+                        <el-button ref="undoAction" class="tool-button" @click="buttonClick('undoAction')" ><i class="el-icon-arrow-left"></i></el-button>
                     </el-tooltip>
                     <el-tooltip content="Действие вперед" :open-delay="1000" effect="light">
-                        <el-button class="tool-button" @click="buttonClick('redoAction')" ><i class="el-icon-arrow-right"></i></el-button>
+                        <el-button ref="redoAction" class="tool-button" @click="buttonClick('redoAction')" ><i class="el-icon-arrow-right"></i></el-button>
                     </el-tooltip>
                     <div class="space"></div>
                     <el-tooltip content="На весь экран" :open-delay="1000" effect="light">
-                        <el-button class="tool-button" :class="buttonActiveClass('fullScreen')" @click="buttonClick('fullScreen')"><i class="el-icon-rank"></i></el-button>
+                        <el-button ref="fullScreen" class="tool-button" :class="buttonActiveClass('fullScreen')" @click="buttonClick('fullScreen')"><i class="el-icon-rank"></i></el-button>
                     </el-tooltip>
                     <el-tooltip content="Прокрутка книги" :open-delay="1000" effect="light">
-                        <el-button class="tool-button" @click="buttonClick('setPosition')"><i class="el-icon-d-arrow-right"></i></el-button>
+                        <el-button ref="setPosition" class="tool-button" @click="buttonClick('setPosition')"><i class="el-icon-d-arrow-right"></i></el-button>
                     </el-tooltip>
                     <el-tooltip content="Плавный скроллинг" :open-delay="1000" effect="light">
-                        <el-button class="tool-button" @click="buttonClick('scrolling')"><i class="el-icon-sort"></i></el-button>
+                        <el-button ref="scrolling" class="tool-button" @click="buttonClick('scrolling')"><i class="el-icon-sort"></i></el-button>
                     </el-tooltip>
                     <el-tooltip content="Найти в тексте" :open-delay="1000" effect="light">
-                        <el-button class="tool-button" @click="buttonClick('search')"><i class="el-icon-search"></i></el-button>
+                        <el-button ref="search" class="tool-button" @click="buttonClick('search')"><i class="el-icon-search"></i></el-button>
                     </el-tooltip>
                     <el-tooltip content="Скопировать текст со страницы" :open-delay="1000" effect="light">
-                        <el-button class="tool-button" @click="buttonClick('copyText')"><i class="el-icon-edit-outline"></i></el-button>
+                        <el-button ref="copyText" class="tool-button" @click="buttonClick('copyText')"><i class="el-icon-edit-outline"></i></el-button>
                     </el-tooltip>
                     <el-tooltip content="Принудительно обновить книгу в обход кеша" :open-delay="1000" effect="light">
-                        <el-button class="tool-button" @click="buttonClick('refresh')"><i class="el-icon-refresh"></i></el-button>                
+                        <el-button ref="refresh" class="tool-button" @click="buttonClick('refresh')"><i class="el-icon-refresh"></i></el-button>                
                     </el-tooltip>
                     <div class="space"></div>
                     <el-tooltip content="История" :open-delay="1000" effect="light">
-                        <el-button class="tool-button" @click="buttonClick('history')"><i class="el-icon-document"></i></el-button>
+                        <el-button ref="history" class="tool-button" @click="buttonClick('history')"><i class="el-icon-document"></i></el-button>
                     </el-tooltip>
                 </div>
 
                 <el-tooltip content="Настроить" :open-delay="1000" effect="light">
-                    <el-button class="tool-button" @click="buttonClick('settings')"><i class="el-icon-setting"></i></el-button>            
+                    <el-button ref="settings" class="tool-button" @click="buttonClick('settings')"><i class="el-icon-setting"></i></el-button>            
                 </el-tooltip>
             </div>
         </el-header>
@@ -167,7 +167,7 @@ class Reader extends Vue {
         return this.$store.getters['reader/lastOpenedBook'];
     }
 
-    buttonClick(button, event) {
+    buttonClick(button) {
         switch (button) {
             case 'loader': this.loaderActive = !this.loaderActive; break;
             case 'fullScreen': this.commit('reader/setFullScreenActive', !this.fullScreenActive); break;
@@ -177,7 +177,7 @@ class Reader extends Vue {
                 }
                 break;
         }
-        event.view.blur();
+        this.$refs[button].$el.blur();
     }
 
     buttonActiveClass(button) {
