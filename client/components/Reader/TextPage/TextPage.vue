@@ -90,14 +90,15 @@ class TextPage extends Vue {
         this.linesDown = null;
 
         //preloaded fonts
-        this.fontList = ['10px ReaderDefaultFont'];
+        this.fontList = ['12px ReaderDefault', '12px Arial', '12px ComicSansMS', '12px OpenSans', '12px Roboto', '12px ArialNarrow',
+            '12px Georgia', '12px Tahoma', '12px Helvetica', '12px CenturySchoolbook'];
 
         //draw props
         this.textColor = 'black';
         this.backgroundColor = '#478355';
         this.fontStyle = '';// 'bold','italic'
         this.fontSize = 40;// px
-        this.fontName = 'ReaderDefaultFont';
+        this.fontName = 'Arial';
         this.lineInterval = 15;// px, межстрочный интервал
         this.textAlignJustify = true;// выравнивание по ширине
         this.p = 60;// px, отступ параграфа
