@@ -396,7 +396,16 @@ export default class BookParser {
                         }
                     }
 
-                    line.parts.push({style, text: partText});
+                    if (partText != '')
+                        line.parts.push({style, text: partText});
+
+                    if (line.parts.length) {//корявенько, коррекция при переносе
+                        let t = line.parts[line.parts.length - 1].text;
+                        if (t.trimRight() != t) {
+                            line.parts[line.parts.length - 1].text = t.trimRight();
+                            prevW -= this.measureText(' ');
+                        }
+                    }
                     line.end = para.offset + ofs;
                     line.width = prevW;
                     line.first = (j == 0);
@@ -417,10 +426,18 @@ export default class BookParser {
                 prevW = w;
             }
 
-            line.parts.push({style, text: partText});
+            if (partText != '')
+                line.parts.push({style, text: partText});
             partText = '';
         }
 
+        if (line.parts.length) {//корявенько, коррекция при переносе
+            let t = line.parts[line.parts.length - 1].text;
+            if (t.trimRight() != t) {
+                line.parts[line.parts.length - 1].text = t.trimRight();
+                prevW -= this.measureText(' ');
+            }
+        }
         line.end = para.offset + para.length - 1;
         line.width = prevW;
         line.first = (j == 0);

@@ -63,7 +63,8 @@ class TextPage extends Vue {
             this.parsed.font = this.font;
             this.parsed.wordWrap = this.wordWrap;
             this.measureText = (text, style) => {// eslint-disable-line no-unused-vars
-                this.context.font = this.fontByStyle(style);
+                if (style)
+                    this.context.font = this.fontByStyle(style);
                 return this.context.measureText(text).width;
             };
             this.parsed.measureText = this.measureText;
