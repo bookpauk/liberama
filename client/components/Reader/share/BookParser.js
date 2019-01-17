@@ -341,7 +341,6 @@ export default class BookParser {
         let j = 0;//номер строки
         let ofs = -1;
         let word = '';
-        let sp1 = '';
 
         let text = '';
         let style = {};
@@ -351,6 +350,7 @@ export default class BookParser {
             text = part.text + ' ';
             style = part.style;
 
+            let sp1 = '';
             let sp2 = '';
             for (let i = 0; i < text.length; i++) {
                 if (i < text.length - 1)
@@ -364,10 +364,10 @@ export default class BookParser {
                 sp1 = ' ';
 
                 let p = (j == 0 ? parsed.p : 0);
-                let w = this.measureText(str) + p;
+                let w = this.measureText(str, style) + p;
                 let wordTail = word;
                 if (w > parsed.w) {
-                    if (parsed.wordWrap) {                    
+                    if (parsed.wordWrap) {//по слогам
                         let slogi = this.splitToSlogi(word);
 
                         if (slogi.length > 1) {
@@ -378,7 +378,7 @@ export default class BookParser {
                             const slogiLen = slogi.length;
                             for (let k = 0; k < slogiLen - 1; k++) {
                                 let slog = slogi[0];
-                                let ww = this.measureText(s + slog + (slog[slog.length - 1] == '-' ? '' : '-')) + p;
+                                let ww = this.measureText(s + slog + (slog[slog.length - 1] == '-' ? '' : '-'), style) + p;
                                 if (ww <= parsed.w) {
                                     s += slog;
                                     ss += slog;

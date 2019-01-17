@@ -63,6 +63,7 @@ class TextPage extends Vue {
             this.parsed.font = this.font;
             this.parsed.wordWrap = this.wordWrap;
             this.measureText = (text, style) => {// eslint-disable-line no-unused-vars
+                this.context.font = this.fontByStyle(style);
                 return this.context.measureText(text).width;
             };
             this.parsed.measureText = this.measureText;
@@ -130,6 +131,10 @@ class TextPage extends Vue {
         return `${this.fontStyle} ${this.fontSize}px ${this.fontName}`;
     }
 
+    fontByStyle(style) {
+        return `${style.italic ? 'italic' : ''} ${style.bold ? 'bold' : ''} ${this.fontSize}px ${this.fontName}`;
+    }
+
     drawPage() {
         if (!this.lastBook)
             return;
@@ -155,7 +160,6 @@ class TextPage extends Vue {
         let y = 0;
         for (let i = 0; i < len; i++) {
             const line = lines[i];
-console.log(line.parts);
             /* line:
             {
                 begin: Number,
@@ -171,37 +175,42 @@ console.log(line.parts);
             let indent = this.indent + (line.first ? this.p : 0);
             y += this.lineHeight;
 
-            /*let filled = false;
+            let filled = false;
             if (this.textAlignJustify && !line.last) {
-                const words = text.split(' ');
+                let lineText = '';
+                for (const part of line.parts) {
+                    lineText += part.text;
+                }
+                const words = lineText.split(' ');
+
                 if (words.length > 1) {
                     const spaceCount = words.length - 1;
+
                     const space = (this.w - line.width + spaceWidth*spaceCount)/spaceCount;
 
                     let x = indent;
-                    for (const word of words) {
-                        context.fillText(word, x, y);
-                        x += this.measureText(word) + space;
+                    for (const part of line.parts) {
+                        context.font = this.fontByStyle(part.style);
+                        let partWords = part.text.split(' ');
+
+                        for (let i = 0; i < partWords.length; i++) {
+                            let word = partWords[i];
+                            context.fillText(word, x, y);
+                            x += this.measureText(word, part.style) + (i < partWords.length - 1 ? space : 0);
+                        }
                     }
                     filled = true;
                 }
             }
 
-            if (!filled)
-                context.fillText(text, indent, y);
-            */
-            /*let text = '';
-            for (const part of line.parts) {
-                text += part.text;
-            }
-            context.fillText(text, indent, y);
-            */
-            let x = indent;
-            for (const part of line.parts) {
-                let text = part.text;
-                context.font = `${part.style.italic ? 'italic' : ''} ${part.style.bold ? 'bold' : ''} ${this.fontSize}px ${this.fontName}`;
-                context.fillText(text, x, y);
-                x += this.measureText(text);
+            if (!filled) {
+                let x = indent;
+                for (const part of line.parts) {
+                    let text = part.text;
+                    context.font = this.fontByStyle(part.style);
+                    context.fillText(text, x, y);
+                    x += this.measureText(text, part.style);
+                }
             }
         }
 
