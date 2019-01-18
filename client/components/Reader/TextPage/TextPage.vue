@@ -366,6 +366,7 @@ class TextPage extends Vue {
     endClickRepeat() {
         this.repStart = false;
         this.repDoing = false;
+        this.debouncedRepStart = false;
     }
 
     onTouchStart(event) {
