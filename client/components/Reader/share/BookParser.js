@@ -406,13 +406,13 @@ export default class BookParser {
                             prevW -= this.measureText(' ');
                         }
                     }
-                    line.end = para.offset + ofs;
+                    line.end = para.offset + ofs - wordTail.length - 1;
                     line.width = prevW;
                     line.first = (j == 0);
                     line.last = false;
                     lines.push(line);
 
-                    line = {begin: para.offset + ofs + 1, parts: []};
+                    line = {begin: line.end + 1, parts: []};
                     partText = '';
                     sp2 = '';
                     str = wordTail;
