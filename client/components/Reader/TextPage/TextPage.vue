@@ -1,6 +1,6 @@
 <template>
     <div ref="main" class="main">
-        <canvas ref="canvas" class="canvas" @mousedown.prevent="onMouseDown" @touchstart.prevent="onTouchStart"></canvas>
+        <canvas ref="canvas" class="canvas" @mousedown.prevent="onMouseDown" @touchstart.prevent="onTouchStart" oncontextmenu="return false;"></canvas>
     </div>
 </template>
 
@@ -328,20 +328,41 @@ class TextPage extends Vue {
 
     onTouchStart(event) {
         if (event.touches.length == 1) {
-            this.onMouseDown(event.touches[0]);
+            const touch = event.touches[0];
+            const result = this.handleClick(touch.clientX, touch.clientY)
+
+            if (result) {
+                event.stopPropagation();
+                event.preventDefault();
+            }
         }
     }
 
 
     onMouseDown(event) {
+        let result = false;
+        if (event.button == 0) {
+            result = this.handleClick(event.clientX, event.clientY);
+        } else if (event.button == 2) {
+            this.doToolBarToggle();
+            result = true;
+        }
+
+        if (result) {
+            event.stopPropagation();
+            event.preventDefault();
+        }
+    }
+
+    handleClick(pointX, pointY) {
         const mouseLegend = {
             40: {30: 'PgUp', 100: 'PgDown'},
             60: {40: 'Up', 60: 'Menu', 100: 'Down'},
             100: {30: 'PgUp', 100: 'PgDown'}
         };
 
-        const w = event.clientX/this.realWidth*100;
-        const h = event.clientY/this.realHeight*100;
+        const w = pointX/this.realWidth*100;
+        const h = pointY/this.realHeight*100;
 
         let action = '';
         loops: {
@@ -375,7 +396,9 @@ class TextPage extends Vue {
                 // Nothing
         }
 
-    }
+        return !!action;
+   }
+
 }
 //-----------------------------------------------------------------------------
 </script>
