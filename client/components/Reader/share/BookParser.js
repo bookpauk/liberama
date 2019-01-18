@@ -185,6 +185,7 @@ export default class BookParser {
 
         this.fb2 = fb2;
         this.para = para;
+        this.textLength = paraOffset;
 
         callback(100);
         await sleep(10);

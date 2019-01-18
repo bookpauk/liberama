@@ -50,6 +50,11 @@ class TextPage extends Vue {
         this.context = this.canvas.getContext('2d');
     }
 
+    hex2rgba(hex, alpha = 1) {
+        const [r, g, b] = hex.match(/\w\w/g).map(x => parseInt(x, 16));
+        return `rgba(${r},${g},${b},${alpha})`;
+    }
+
     async calcDrawProps() {
         this.realWidth = this.$refs.main.clientWidth;
         this.realHeight = this.$refs.main.clientHeight;
@@ -66,13 +71,14 @@ class TextPage extends Vue {
             this.canvas.height = this.realHeight;
         }
 
-        this.lineHeight = this.fontSize + this.lineInterval;
-        this.pageLineCount = Math.floor(this.realHeight/this.lineHeight);
         this.w = this.realWidth - 2*this.indent;
-        this.h = this.realHeight;
+        this.h = this.realHeight - (this.showStatusBar ? this.statusBarHeight : 0);
+        this.lineHeight = this.fontSize + this.lineInterval;
+        this.pageLineCount = Math.floor(this.h/this.lineHeight);
 
         this.context.textAlign = 'left';
         this.context.textBaseline = 'bottom';
+        this.statusBarColor = this.hex2rgba(this.textColor, 0.5);
 
         if (this.parsed) {
             this.parsed.p = this.p;
@@ -112,7 +118,7 @@ class TextPage extends Vue {
             '12px Georgia', '12px Tahoma', '12px Helvetica', '12px CenturySchoolbook'];
 
         //draw props
-        this.textColor = 'black';
+        this.textColor = '#000000';
         this.backgroundColor = '#478355';
         this.fontStyle = '';// 'bold','italic'
         this.fontSize = 34;// px
@@ -122,7 +128,10 @@ class TextPage extends Vue {
         this.p = 50;// px, отступ параграфа
         this.indent = 15;// px, отступ всего текста слева и справа
         this.wordWrap = true;
-        this.statusBar = 'none'; //'none', 'top', 'bottom'
+
+        this.showStatusBar = true;
+        this.statusBarTop = true;//top, bottom
+        this.statusBarHeight = 20;// px
 
         this.calcDrawProps();
         this.drawPage();// пока не загрузили, очистим канвас
@@ -169,6 +178,50 @@ class TextPage extends Vue {
         return `${style.italic ? 'italic' : ''} ${style.bold ? 'bold' : ''} ${this.fontSize}px ${this.fontName}`;
     }
 
+    fontBySize(size) {
+        return `${size}px ${this.fontName}`;
+    }
+
+    drawPercentBar(x, y, w, h) {
+        const context = this.context;
+
+        const pad = 3;
+        const fh = h - 2*pad;
+        context.font = 'bold ' + this.fontBySize(fh);
+
+        const t1 = `${Math.floor(this.bookPos/1000)}k/${Math.floor(this.parsed.textLength/1000)}k`;
+        const w1 = this.measureText(t1) + fh/2;
+        const read = this.bookPos/this.parsed.textLength;
+        const t2 = (read*100).toFixed(2) + '%';
+        const w2 = this.measureText(t2);
+        let w3 = w - w1 - w2;
+
+        if (w1 + w2 <= w)
+            context.fillText(t1, x, y + h - 1);
+        
+        if (w3 > 20 && w1 + w2 + w3 <= w) {
+            const barWidth = w - w1 - w2 - fh/2;
+            context.strokeRect(x + w1, y + pad, barWidth, fh);
+            context.fillRect(x + w1 + 3, y + pad + 3, (barWidth - 6)*read, fh - 6);
+        }
+
+        if (w1 <= w)
+            context.fillText(t2, x + w1 + w3, y + h - 1);
+    }
+
+    drawStatusBar() {
+        const context = this.context;
+        context.fillStyle = this.statusBarColor;
+        context.strokeStyle = this.statusBarColor;
+
+        const h = (this.statusBarTop ? 0 : this.realHeight - this.statusBarHeight);
+        const lh = (this.statusBarTop ? this.statusBarHeight : h);
+
+        context.fillRect(0, lh, this.realWidth, 1);
+
+        this.drawPercentBar(this.w/2, h, this.w/2, this.statusBarHeight);
+    }
+
     drawPage() {
         if (!this.lastBook)
             return;
@@ -180,19 +233,25 @@ class TextPage extends Vue {
         context.fillStyle = this.backgroundColor;
         context.fillRect(0, 0, canvas.width, canvas.height);
 
-        if (!this.book)
+        if (!this.book || !this.parsed.textLength)
             return;
+
+        if (this.showStatusBar) {
+            this.drawStatusBar();
+        }
 
         context.font = this.font;
         context.fillStyle = this.textColor;
         const spaceWidth = this.context.measureText(' ').width;
 
         const lines = this.parsed.getLines(this.bookPos, this.pageLineCount + 1);
+        
+        let y = -this.lineInterval/2 + (this.h - this.pageLineCount*this.lineHeight)/2;
+        if (this.showStatusBar)
+            y += this.statusBarHeight*(this.statusBarTop ? 1 : -1);
 
         let len = lines.length;
         len = (len > this.pageLineCount ? len = this.pageLineCount : len);
-        
-        let y = -this.lineInterval/2 + (this.h - this.pageLineCount*this.lineHeight)/2;
         for (let i = 0; i < len; i++) {
             const line = lines[i];
             /* line:
