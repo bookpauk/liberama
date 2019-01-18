@@ -340,26 +340,18 @@ export default class BookParser {
         let prevW = 0;
         let j = 0;//номер строки
         let ofs = -1;
-        let word = '';
-
-        let text = '';
-        let style = {};
 
         // тут начинается самый замес, перенос по слогам и стилизация
-        for (let part of parts) {
-            text = part.text + ' ';
-            style = part.style;
+        for (const part of parts) {
+            const words = part.text.split(' ');
+            const style = part.style;
 
             let sp1 = '';
             let sp2 = '';
-            for (let i = 0; i < text.length; i++) {
-                if (i < text.length - 1)
-                    ofs++;
+            for (let i = 0; i < words.length; i++) {
+                const word = words[i];
+                ofs += word.length + (i < words.length - 1 ? 1 : 0);
 
-                if (text[i] != ' ') {
-                    word += text[i];
-                    continue;
-                }
                 str += sp1 + word;
                 sp1 = ' ';
 
@@ -422,7 +414,6 @@ export default class BookParser {
                 prevStr = str;
                 partText += sp2 + wordTail;
                 sp2 = ' ';
-                word = '';
                 prevW = w;
             }
 
