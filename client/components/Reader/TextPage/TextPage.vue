@@ -1,6 +1,7 @@
 <template>
     <div ref="main" class="main">
-        <canvas ref="canvas" class="canvas" @mousedown.prevent="onMouseDown" @touchstart.prevent="onTouchStart" oncontextmenu="return false;"></canvas>
+        <canvas ref="canvas" class="canvas" @mousedown.prevent.stop="onMouseDown" @wheel.prevent.stop="onMouseWheel"
+            @touchstart.prevent.stop="onTouchStart" oncontextmenu="return false;"></canvas>
     </div>
 </template>
 
@@ -329,28 +330,24 @@ class TextPage extends Vue {
     onTouchStart(event) {
         if (event.touches.length == 1) {
             const touch = event.touches[0];
-            const result = this.handleClick(touch.clientX, touch.clientY)
-
-            if (result) {
-                event.stopPropagation();
-                event.preventDefault();
-            }
+            this.handleClick(touch.clientX, touch.clientY)
         }
     }
 
 
     onMouseDown(event) {
-        let result = false;
         if (event.button == 0) {
-            result = this.handleClick(event.clientX, event.clientY);
+            this.handleClick(event.clientX, event.clientY);
         } else if (event.button == 2) {
             this.doToolBarToggle();
-            result = true;
         }
+    }
 
-        if (result) {
-            event.stopPropagation();
-            event.preventDefault();
+    onMouseWheel(event) {
+        if (event.deltaY > 0) {
+            this.doDown();
+        } else if (event.deltaY < 0) {
+            this.doUp();
         }
     }
 
