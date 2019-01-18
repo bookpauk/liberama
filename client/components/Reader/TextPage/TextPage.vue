@@ -121,7 +121,7 @@ class TextPage extends Vue {
         this.textColor = '#000000';
         this.backgroundColor = '#478355';
         this.fontStyle = '';// 'bold','italic'
-        this.fontSize = 34;// px
+        this.fontSize = 33;// px
         this.fontName = 'Arial';
         this.lineInterval = 7;// px, межстрочный интервал
         this.textAlignJustify = true;// выравнивание по ширине
@@ -130,7 +130,7 @@ class TextPage extends Vue {
         this.wordWrap = true;
 
         this.showStatusBar = true;
-        this.statusBarTop = true;//top, bottom
+        this.statusBarTop = false;//top, bottom
         this.statusBarHeight = 20;// px
 
         this.calcDrawProps();
