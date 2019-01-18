@@ -211,6 +211,7 @@ class TextPage extends Vue {
             y += this.lineHeight;
 
             let filled = false;
+            // если выравнивание по ширине включено
             if (this.textAlignJustify && !line.last) {
                 let lineText = '';
                 for (const part of line.parts) {
@@ -231,20 +232,21 @@ class TextPage extends Vue {
                         for (let i = 0; i < partWords.length; i++) {
                             let word = partWords[i];
                             context.fillText(word, x, y);
-                            x += this.measureText(word, part.style) + (i < partWords.length - 1 ? space : 0);
+                            x += this.measureText(word) + (i < partWords.length - 1 ? space : 0);
                         }
                     }
                     filled = true;
                 }
             }
 
+            // просто выводим текст
             if (!filled) {
                 let x = indent;
                 for (const part of line.parts) {
                     let text = part.text;
                     context.font = this.fontByStyle(part.style);
                     context.fillText(text, x, y);
-                    x += this.measureText(text, part.style);
+                    x += this.measureText(text);
                 }
             }
         }
