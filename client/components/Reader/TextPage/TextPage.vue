@@ -233,12 +233,16 @@ class TextPage extends Vue {
             return;
 
         const context = this.context;
-        context.font = 'bold ' + this.fontBySize(this.statusBarHeight - 6);
-        context.fillStyle = this.statusBarColor;
-        context.strokeStyle = this.statusBarColor;
 
         const h = (this.statusBarTop ? 1 : this.realHeight - this.statusBarHeight);
         const lh = (this.statusBarTop ? this.statusBarHeight : h);
+
+        context.fillStyle = this.backgroundColor;
+        context.fillRect(0, h, this.realWidth, lh);
+
+        context.font = 'bold ' + this.fontBySize(this.statusBarHeight - 6);
+        context.fillStyle = this.statusBarColor;
+        context.strokeStyle = this.statusBarColor;
 
         context.fillRect(0, lh, this.realWidth, 1);
 
@@ -252,20 +256,22 @@ class TextPage extends Vue {
 
         this.drawPercentBar(this.realWidth/2, h, this.realWidth/2 - timeW, this.statusBarHeight);
 
-        await sleep(60*1000);
-        this.drawStatusBar();
+        if (!this.timeRefreshing) {
+            this.timeRefreshing = true;
+            await sleep(60*1000);
+            this.timeRefreshing = false;
+            this.drawStatusBar();
+        }
     }
 
     drawPage() {
         if (!this.lastBook)
             return;
 
-        //пустой канвас
-        const canvas = this.canvas;
         const context = this.context;
 
         context.fillStyle = this.backgroundColor;
-        context.fillRect(0, 0, canvas.width, canvas.height);
+        context.fillRect(0, 0, this.realWidth, this.realHeight);
 
         if (!this.book || !this.parsed.textLength)
             return;
