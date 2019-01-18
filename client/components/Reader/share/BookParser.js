@@ -391,9 +391,9 @@ export default class BookParser {
                     if (partText != '')
                         line.parts.push({style, text: partText});
 
-                    if (line.parts.length) {//корявенько, коррекция при переносе
+                    if (line.parts.length) {//корявенько, коррекция при переносе, отрефакторить не вышло
                         let t = line.parts[line.parts.length - 1].text;
-                        if (t.trimRight() != t) {
+                        if (t[t.length - 1] == ' ') {
                             line.parts[line.parts.length - 1].text = t.trimRight();
                             prevW -= this.measureText(' ');
                         }
