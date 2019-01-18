@@ -187,39 +187,48 @@ class TextPage extends Vue {
 
         const pad = 3;
         const fh = h - 2*pad;
-        context.font = 'bold ' + this.fontBySize(fh);
+        const fh2 = fh/2;
 
         const t1 = `${Math.floor(this.bookPos/1000)}k/${Math.floor(this.parsed.textLength/1000)}k`;
-        const w1 = this.measureText(t1) + fh/2;
+        const w1 = this.measureText(t1) + fh2;
         const read = this.bookPos/this.parsed.textLength;
-        const t2 = (read*100).toFixed(2) + '%';
+        const t2 = `${(read*100).toFixed(2)}%`;
         const w2 = this.measureText(t2);
         let w3 = w - w1 - w2;
 
         if (w1 + w2 <= w)
-            context.fillText(t1, x, y + h - 1);
+            context.fillText(t1, x, y + h - 2);
         
-        if (w3 > 20 && w1 + w2 + w3 <= w) {
-            const barWidth = w - w1 - w2 - fh/2;
-            context.strokeRect(x + w1, y + pad, barWidth, fh);
-            context.fillRect(x + w1 + 3, y + pad + 3, (barWidth - 6)*read, fh - 6);
+        if (w1 + w2 + w3 <= w && w3 > (10 + fh2)) {
+            const barWidth = w - w1 - w2 - fh2;
+            context.strokeRect(x + w1, y + pad + 1, barWidth, fh - 2);
+            context.fillRect(x + w1 + 2, y + pad + 3, (barWidth - 4)*read, fh - 6);
         }
 
         if (w1 <= w)
-            context.fillText(t2, x + w1 + w3, y + h - 1);
+            context.fillText(t2, x + w1 + w3, y + h - 2);
     }
 
     drawStatusBar() {
+        if (!this.showStatusBar)
+            return;
+
         const context = this.context;
+        context.font = 'bold ' + this.fontBySize(this.statusBarHeight - 6);
         context.fillStyle = this.statusBarColor;
         context.strokeStyle = this.statusBarColor;
 
-        const h = (this.statusBarTop ? 0 : this.realHeight - this.statusBarHeight);
+        const h = (this.statusBarTop ? 1 : this.realHeight - this.statusBarHeight);
         const lh = (this.statusBarTop ? this.statusBarHeight : h);
 
         context.fillRect(0, lh, this.realWidth, 1);
 
-        this.drawPercentBar(this.w/2, h, this.w/2, this.statusBarHeight);
+        const date = new Date();
+        const time = `  ${date.getHours().toString().padStart(2, '0')}:${date.getMinutes().toString().padStart(2, '0')}  `;
+        const timeW = this.measureText(time);
+
+        this.drawPercentBar(this.realWidth/2, h, this.realWidth/2 - timeW, this.statusBarHeight);
+        context.fillText(time, this.realWidth - timeW, h + this.statusBarHeight - 2);
     }
 
     drawPage() {
@@ -236,9 +245,7 @@ class TextPage extends Vue {
         if (!this.book || !this.parsed.textLength)
             return;
 
-        if (this.showStatusBar) {
-            this.drawStatusBar();
-        }
+        this.drawStatusBar();
 
         context.font = this.font;
         context.fillStyle = this.textColor;
@@ -248,7 +255,7 @@ class TextPage extends Vue {
         
         let y = -this.lineInterval/2 + (this.h - this.pageLineCount*this.lineHeight)/2;
         if (this.showStatusBar)
-            y += this.statusBarHeight*(this.statusBarTop ? 1 : -1);
+            y += this.statusBarHeight*(this.statusBarTop ? 1 : 0);
 
         let len = lines.length;
         len = (len > this.pageLineCount ? len = this.pageLineCount : len);
