@@ -146,13 +146,15 @@ class TextPage extends Vue {
                 this.meta = bookManager.metaOnly(this.book);
                 this.fb2 = this.meta.fb2;
 
-                this.$root.$emit('set-app-title', _.compact([
+                this.title = _.compact([
                     this.fb2.lastName,
                     this.fb2.middleName,
                     this.fb2.firstName,
                     '-',
                     this.fb2.bookTitle
-                ]).join(' '));
+                ]).join(' ');
+
+                this.$root.$emit('set-app-title', this.title);
 
                 const parsed = this.book.parsed;
                 this.parsed = parsed;
@@ -209,8 +211,25 @@ class TextPage extends Vue {
             context.fillText(t2, x + w1 + w3, y + h - 2);
     }
 
-    drawStatusBar() {
-        if (!this.showStatusBar)
+    fittingString(str, maxWidth) {
+        const context = this.context;
+        let w = context.measureText(str).width;
+        const ellipsis = '…';
+        const ellipsisWidth = context.measureText(ellipsis).width;
+        if (w <= maxWidth || w <= ellipsisWidth) {
+            return str;
+        } else {
+            let len = str.length;
+            while (w >= maxWidth - ellipsisWidth && len-- > 0) {
+                str = str.substring(0, len);
+                w = context.measureText(str).width;
+            }
+            return str + ellipsis;
+        }
+    }
+
+    async drawStatusBar() {
+        if (!this.showStatusBar || !this.book)
             return;
 
         const context = this.context;
@@ -226,9 +245,15 @@ class TextPage extends Vue {
         const date = new Date();
         const time = `  ${date.getHours().toString().padStart(2, '0')}:${date.getMinutes().toString().padStart(2, '0')}  `;
         const timeW = this.measureText(time);
+        context.fillText(time, this.realWidth - timeW, h + this.statusBarHeight - 2);
+
+        const title = '  ' + this.title;
+        context.fillText(this.fittingString(title, this.realWidth/2 - 3), 0, h + this.statusBarHeight - 2);
 
         this.drawPercentBar(this.realWidth/2, h, this.realWidth/2 - timeW, this.statusBarHeight);
-        context.fillText(time, this.realWidth - timeW, h + this.statusBarHeight - 2);
+
+        await sleep(60*1000);
+        this.drawStatusBar();
     }
 
     drawPage() {
@@ -252,7 +277,9 @@ class TextPage extends Vue {
         const spaceWidth = this.context.measureText(' ').width;
 
         const lines = this.parsed.getLines(this.bookPos, this.pageLineCount + 1);
-        
+        this.linesUp = this.parsed.getLines(this.bookPos, -(this.pageLineCount + 1));
+        this.linesDown = lines;
+
         let y = -this.lineInterval/2 + (this.h - this.pageLineCount*this.lineHeight)/2;
         if (this.showStatusBar)
             y += this.statusBarHeight*(this.statusBarTop ? 1 : 0);
@@ -316,9 +343,6 @@ class TextPage extends Vue {
                 }
             }
         }
-
-        this.linesUp = this.parsed.getLines(this.bookPos, -(this.pageLineCount + 1));
-        this.linesDown = lines;
     }
     
     doDown() {
@@ -420,7 +444,7 @@ class TextPage extends Vue {
                 while (this.repDoing) {
                     this.handleClick(pointX, pointY);
                     await sleep(delay);
-                    if (delay > 20)
+                    if (delay > 15)
                         delay *= 0.7;
                 }
             }
