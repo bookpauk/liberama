@@ -1,7 +1,9 @@
 <template>
     <div ref="main" class="main">
-        <canvas ref="canvas" class="canvas" @mousedown.prevent.stop="onMouseDown" @wheel.prevent.stop="onMouseWheel"
-            @touchstart.prevent.stop="onTouchStart" oncontextmenu="return false;"></canvas>
+        <canvas ref="canvas" class="canvas" @mousedown.prevent.stop="onMouseDown" @mouseup.prevent.stop="onMouseUp"
+            @wheel.prevent.stop="onMouseWheel"
+            @touchstart.prevent.stop="onTouchStart" @touchend.prevent.stop="onTouchEnd"
+            oncontextmenu="return false;"></canvas>
     </div>
 </template>
 
@@ -10,6 +12,7 @@
 import Vue from 'vue';
 import Component from 'vue-class-component';
 import _ from 'lodash';
+import {sleep} from '../../../share/utils';
 
 import bookManager from '../share/bookManager';
 
@@ -119,6 +122,7 @@ class TextPage extends Vue {
         this.p = 50;// px, отступ параграфа
         this.indent = 15;// px, отступ всего текста слева и справа
         this.wordWrap = true;
+        this.statusBar = 'none'; //'none', 'top', 'bottom'
 
         this.calcDrawProps();
         this.drawPage();// пока не загрузили, очистим канвас
@@ -327,20 +331,68 @@ class TextPage extends Vue {
         }
     }
 
-    onTouchStart(event) {
-        if (event.touches.length == 1) {
-            const touch = event.touches[0];
-            this.handleClick(touch.clientX, touch.clientY)
+    async startClickRepeat(pointX, pointY) {
+        if (!this.repInit) {
+            this.repInit = true;
+
+            this.repStart = true;
+            
+            await sleep(1000);
+
+            if (this.debouncedRepStart) {
+                this.debouncedRepStart = false;
+                this.repInit = false;
+                await this.startClickRepeat(pointX, pointY);
+            }
+
+            if (this.repStart) {
+                this.repDoing = true;
+
+                let delay = 500;
+                while (this.repDoing) {
+                    this.handleClick(pointX, pointY);
+                    await sleep(delay);
+                    if (delay > 20)
+                        delay *= 0.7;
+                }
+            }
+
+            this.repInit = false;
+        } else {
+            this.debouncedRepStart = true;
         }
     }
 
+    endClickRepeat() {
+        this.repStart = false;
+        this.repDoing = false;
+    }
+
+    onTouchStart(event) {
+        this.endClickRepeat();
+        if (event.touches.length == 1) {
+            const touch = event.touches[0];
+            this.handleClick(touch.clientX, touch.clientY);
+            this.startClickRepeat(touch.clientX, touch.clientY);
+        }
+    }
+
+    onTouchEnd() {
+        this.endClickRepeat();
+    }
 
     onMouseDown(event) {
+        this.endClickRepeat();
         if (event.button == 0) {
             this.handleClick(event.clientX, event.clientY);
+            this.startClickRepeat(event.clientX, event.clientY);
         } else if (event.button == 2) {
             this.doToolBarToggle();
         }
+    }
+
+    onMouseUp() {
+        this.endClickRepeat();
     }
 
     onMouseWheel(event) {
