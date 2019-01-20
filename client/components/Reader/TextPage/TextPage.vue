@@ -1,11 +1,11 @@
 <template>
     <div ref="main" class="main">
-        <canvas v-show="canvasShow" ref="canvasPrev" class="canvas" @mousedown.prevent.stop="onMouseDown" @mouseup.prevent.stop="onMouseUp"
+        <canvas v-show="canvasShowFirst" ref="canvasPrev" class="canvas" @mousedown.prevent.stop="onMouseDown" @mouseup.prevent.stop="onMouseUp"
             @wheel.prevent.stop="onMouseWheel"
             @touchstart.prevent.stop="onTouchStart" @touchend.prevent.stop="onTouchEnd"
             oncontextmenu="return false;">
         </canvas>
-        <canvas v-show="!canvasShow" ref="canvasNext" class="canvas" @mousedown.prevent.stop="onMouseDown" @mouseup.prevent.stop="onMouseUp"
+        <canvas v-show="!canvasShowFirst" ref="canvasNext" class="canvas" @mousedown.prevent.stop="onMouseDown" @mouseup.prevent.stop="onMouseUp"
             @wheel.prevent.stop="onMouseWheel"
             @touchstart.prevent.stop="onTouchStart" @touchend.prevent.stop="onTouchEnd"
             oncontextmenu="return false;">
@@ -32,7 +32,7 @@ export default @Component({
     },
 })
 class TextPage extends Vue {
-    canvasShow = false;
+    canvasShowFirst = false;
 
     lastBook = null;
     bookPos = 0;
@@ -97,7 +97,7 @@ class TextPage extends Vue {
         this.contextNext.textAlign = 'left';
         this.contextPrev.textBaseline = 'bottom';
         this.contextNext.textBaseline = 'bottom';
-        this.canvasShow = false;
+        this.canvasShowFirst = false;
 
         this.w = this.realWidth - 2*this.indent;
         this.h = this.realHeight - (this.showStatusBar ? this.statusBarHeight : 0);
@@ -217,23 +217,29 @@ class TextPage extends Vue {
     }
 
     get context() {
-        return (this.canvasShow ? this.contextPrev : this.contextNext);
+        return (this.canvasShowFirst ? this.contextPrev : this.contextNext);
     }
     
     get canvas() {
-        return (this.canvasShow ? this.canvasPrev : this.canvasNext);
+        return (this.canvasShowFirst ? this.canvasPrev : this.canvasNext);
     }
     
     draw(immediate) {
-        this.canvasShow = !this.canvasShow;
+        this.canvasShowFirst = !this.canvasShowFirst;
         const context = this.context;
 
         if (immediate) {
-            this.drawPage(context);
+            this.drawPage(context, this.bookPos);
         } else {
-            if (!(this.pageChangeDirectionDown && this.pagePrepared && this.bookPos == this.bookPosPrepared)) {
-                this.drawPage(context);
+            if (this.pageChangeDirectionDown && this.pagePrepared && this.bookPos == this.bookPosPrepared) {
+                this.linesDown = this.linesDownNext;
+                this.linesUp = this.linesUpNext;
+                this.prepareNextPage();
+            } else {
+                this.drawPage(context, this.bookPos);
+                this.prepareNextPage();
             }
+
             if (this.currentTransition) {
                 //this.currentTransition
                 //this.pageChangeTransitionSpeed
@@ -248,7 +254,7 @@ class TextPage extends Vue {
         }
     }
 
-    drawPage(context) {
+    drawPage(context, bookPos, nextChangeLines) {
         if (!this.lastBook)
             return;
 
@@ -260,7 +266,7 @@ class TextPage extends Vue {
 
         if (this.showStatusBar)
             this.drawHelper.drawStatusBar(context, this.statusBarTop, this.statusBarHeight, 
-                this.statusBarColor, this.bookPos, this.parsed.textLength, this.title);
+                this.statusBarColor, bookPos, this.parsed.textLength, this.title);
 /*        
         if (!this.timeRefreshing) {
             this.timeRefreshing = true;
@@ -273,9 +279,14 @@ class TextPage extends Vue {
         context.fillStyle = this.textColor;
         const spaceWidth = context.measureText(' ').width;
 
-        const lines = this.parsed.getLines(this.bookPos, this.pageLineCount + 1);
-        this.linesUp = this.parsed.getLines(this.bookPos, -(this.pageLineCount + 1));
-        this.linesDown = lines;
+        const lines = this.parsed.getLines(bookPos, this.pageLineCount + 1);
+        if (!nextChangeLines) {
+            this.linesDown = lines;
+            this.linesUp = this.parsed.getLines(bookPos, -(this.pageLineCount + 1));
+        } else {
+            this.linesDownNext = lines;
+            this.linesUpNext = this.parsed.getLines(bookPos, -(this.pageLineCount + 1));
+        }
 
         let y = -this.lineInterval/2 + (this.h - this.pageLineCount*this.lineHeight)/2;
         if (this.showStatusBar)
@@ -341,7 +352,41 @@ class TextPage extends Vue {
             }
         }
     }
-    
+
+    prepareNextPage() {
+        // подготовка следующей страницы заранее        
+        this.pagePrepared = false;
+        this.cancelPrepare = false;
+        if (!this.preparing) {
+            this.preparing = true;
+
+            this.pagePrepared = false;            
+            (async() => {
+                await sleep(100);
+                if (this.cancelPrepare) {
+                    this.preparing = false;
+                    return;
+                }
+
+                let i = this.pageLineCount;
+                if (this.keepLastToFirst)
+                    i--;
+                if (i >= 0 && this.linesDown.length > i) {
+                    this.bookPosPrepared = this.linesDown[i].begin;
+
+                    const ctx = (!this.canvasShowFirst ? this.contextPrev : this.contextNext);
+                    this.drawPage(ctx, this.bookPosPrepared, true);
+  
+                    this.pagePrepared = true;
+                }
+
+                this.preparing = false;
+            })();
+        } else {
+            this.cancelPrepare = true;
+        }
+    }    
+
     doDown() {
         if (this.linesDown && this.linesDown.length > 1) {
             this.bookPos = this.linesDown[1].begin;
