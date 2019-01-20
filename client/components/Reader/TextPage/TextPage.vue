@@ -21,7 +21,7 @@ export default @Component({
     watch: {
         bookPos: function(newValue) {
             this.debouncedEmitPosChange(newValue);
-            this.drawPage();
+            this.draw();
         },
     },
 })
@@ -50,7 +50,6 @@ class TextPage extends Vue {
 
     mounted() {
         this.canvas = this.$refs.canvas;        
-        this.context = this.canvas.getContext('2d');
     }
 
     hex2rgba(hex, alpha = 1) {
@@ -59,6 +58,8 @@ class TextPage extends Vue {
     }
 
     async calcDrawProps() {
+        this.contextMain = this.canvas.getContext('2d');
+
         this.realWidth = this.$refs.main.clientWidth;
         this.realHeight = this.$refs.main.clientHeight;
 
@@ -68,31 +69,28 @@ class TextPage extends Vue {
             this.canvas.height = this.realHeight*ratio;
             this.canvas.style.width = this.$refs.main.clientWidth + 'px';
             this.canvas.style.height = this.$refs.main.clientHeight + 'px';
-            this.context.scale(ratio, ratio);
+            this.contextMain.scale(ratio, ratio);
         } else {
             this.canvas.width = this.realWidth;
             this.canvas.height = this.realHeight;
         }
+
+        //this.offscreen = new OffscreenCanvas(256, 256);
+        this.contextMain.textAlign = 'left';
+        this.contextMain.textBaseline = 'bottom';
 
         this.w = this.realWidth - 2*this.indent;
         this.h = this.realHeight - (this.showStatusBar ? this.statusBarHeight : 0);
         this.lineHeight = this.fontSize + this.lineInterval;
         this.pageLineCount = Math.floor(this.h/this.lineHeight);
 
-        this.context.textAlign = 'left';
-        this.context.textBaseline = 'bottom';
-
         if (this.parsed) {
             this.parsed.p = this.p;
             this.parsed.w = this.w;// px, ширина текста
             this.parsed.font = this.font;
             this.parsed.wordWrap = this.wordWrap;
-            this.measureText = (text, style) => {// eslint-disable-line no-unused-vars
-                if (style)
-                    this.context.font = this.fontByStyle(style);
-                return this.context.measureText(text).width;
-            };
-            this.parsed.measureText = this.measureText;
+            this.parsed.context = this.contextMain;
+            this.parsed.fontByStyle = this.fontByStyle;
         }
 
         this.statusBarColor = this.hex2rgba(this.textColor, 0.5);
@@ -145,7 +143,7 @@ class TextPage extends Vue {
         this.statusBarHeight = 20;// px
 
         this.calcDrawProps();
-        this.drawPage();// пока не загрузили, очистим канвас
+        this.draw();// пока не загрузили, очистим канвас
 
         if (this.lastBook) {
             (async() => {
@@ -173,14 +171,14 @@ class TextPage extends Vue {
 
                 await this.loadFonts();
 
-                this.drawPage();
+                this.draw();
             })();
         }
     }
 
     onResize() {
         this.calcDrawProps();
-        this.drawPage();
+        this.draw(true);
     }
 
     get font() {
@@ -191,11 +189,13 @@ class TextPage extends Vue {
         return `${style.italic ? 'italic' : ''} ${style.bold ? 'bold' : ''} ${this.fontSize}px ${this.fontName}`;
     }
 
-    drawPage() {
+    draw(immediate) {
+        this.drawPage(this.contextMain);
+    }
+
+    drawPage(context) {
         if (!this.lastBook)
             return;
-
-        const context = this.context;
 
         context.fillStyle = this.backgroundColor;
         context.fillRect(0, 0, this.realWidth, this.realHeight);
@@ -216,7 +216,7 @@ class TextPage extends Vue {
 */
         context.font = this.font;
         context.fillStyle = this.textColor;
-        const spaceWidth = this.context.measureText(' ').width;
+        const spaceWidth = context.measureText(' ').width;
 
         const lines = this.parsed.getLines(this.bookPos, this.pageLineCount + 1);
         this.linesUp = this.parsed.getLines(this.bookPos, -(this.pageLineCount + 1));
@@ -267,7 +267,7 @@ class TextPage extends Vue {
                         for (let i = 0; i < partWords.length; i++) {
                             let word = partWords[i];
                             context.fillText(word, x, y);
-                            x += this.measureText(word) + (i < partWords.length - 1 ? space : 0);
+                            x += context.measureText(word).width + (i < partWords.length - 1 ? space : 0);
                         }
                     }
                     filled = true;
@@ -281,7 +281,7 @@ class TextPage extends Vue {
                     let text = part.text;
                     context.font = this.fontByStyle(part.style);
                     context.fillText(text, x, y);
-                    x += this.measureText(text);
+                    x += context.measureText(text).width;
                 }
             }
         }

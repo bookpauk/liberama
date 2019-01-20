@@ -8,9 +8,15 @@ export default class BookParser {
         this.w = 300;// px, ширина страницы
         this.wordWrap = false;// перенос по слогам
 
-        // заглушка
         this.measureText = (text, style) => {// eslint-disable-line no-unused-vars
-            return text.length*10;
+            if (this.context) {
+                this.context.save();
+                this.context.font = this.fontByStyle(style);
+                const w = this.context.measureText(text).width;
+                this.context.restore();
+                return w;
+            } else
+                return 0;
         };
     }
 
@@ -340,12 +346,12 @@ export default class BookParser {
         let prevStr = '';
         let prevW = 0;
         let j = 0;//номер строки
+        let style = {};
         let ofs = -1;
-
         // тут начинается самый замес, перенос по слогам и стилизация
         for (const part of parts) {
             const words = part.text.split(' ');
-            const style = part.style;
+            style = part.style;
 
             let sp1 = '';
             let sp2 = '';
@@ -396,7 +402,7 @@ export default class BookParser {
                         let t = line.parts[line.parts.length - 1].text;
                         if (t[t.length - 1] == ' ') {
                             line.parts[line.parts.length - 1].text = t.trimRight();
-                            prevW -= this.measureText(' ');
+                            prevW -= this.measureText(' ', style);
                         }
                     }
                     line.end = para.offset + ofs - wordTail.length - 1;
@@ -425,9 +431,9 @@ export default class BookParser {
 
         if (line.parts.length) {//корявенько, коррекция при переносе
             let t = line.parts[line.parts.length - 1].text;
-            if (t.trimRight() != t) {
+            if (t[t.length - 1] == ' ') {
                 line.parts[line.parts.length - 1].text = t.trimRight();
-                prevW -= this.measureText(' ');
+                prevW -= this.measureText(' ', style);
             }
         }
         line.end = para.offset + para.length - 1;
