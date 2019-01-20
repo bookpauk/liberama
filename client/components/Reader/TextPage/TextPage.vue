@@ -15,6 +15,7 @@ import _ from 'lodash';
 import {sleep} from '../../../share/utils';
 
 import bookManager from '../share/bookManager';
+import DrawHelper from './DrawHelper';
 
 export default @Component({
     watch: {
@@ -33,6 +34,8 @@ class TextPage extends Vue {
     items = null;
 
     created() {
+        this.drawHelper = new DrawHelper();
+
         this.commit = this.$store.commit;
         this.dispatch = this.$store.dispatch;
         this.config = this.$store.state.config;
@@ -78,7 +81,6 @@ class TextPage extends Vue {
 
         this.context.textAlign = 'left';
         this.context.textBaseline = 'bottom';
-        this.statusBarColor = this.hex2rgba(this.textColor, 0.5);
 
         if (this.parsed) {
             this.parsed.p = this.p;
@@ -92,6 +94,15 @@ class TextPage extends Vue {
             };
             this.parsed.measureText = this.measureText;
         }
+
+        this.statusBarColor = this.hex2rgba(this.textColor, 0.5);
+        //drawHelper
+        this.drawHelper.realWidth = this.realWidth;
+        this.drawHelper.realHeight = this.realHeight;
+
+        this.drawHelper.backgroundColor = this.backgroundColor;
+        this.drawHelper.statusBarColor = this.statusBarColor;
+        this.drawHelper.fontName = this.fontName;
     }
 
     async loadFonts() {
@@ -117,7 +128,7 @@ class TextPage extends Vue {
         this.fontList = ['12px ReaderDefault', '12px Arial', '12px ComicSansMS', '12px OpenSans', '12px Roboto', '12px ArialNarrow',
             '12px Georgia', '12px Tahoma', '12px Helvetica', '12px CenturySchoolbook'];
 
-        //draw props
+        //default draw props
         this.textColor = '#000000';
         this.backgroundColor = '#478355';
         this.fontStyle = '';// 'bold','italic'
@@ -180,90 +191,6 @@ class TextPage extends Vue {
         return `${style.italic ? 'italic' : ''} ${style.bold ? 'bold' : ''} ${this.fontSize}px ${this.fontName}`;
     }
 
-    fontBySize(size) {
-        return `${size}px ${this.fontName}`;
-    }
-
-    drawPercentBar(x, y, w, h) {
-        const context = this.context;
-
-        const pad = 3;
-        const fh = h - 2*pad;
-        const fh2 = fh/2;
-
-        const t1 = `${Math.floor(this.bookPos/1000)}k/${Math.floor(this.parsed.textLength/1000)}k`;
-        const w1 = this.measureText(t1) + fh2;
-        const read = this.bookPos/this.parsed.textLength;
-        const t2 = `${(read*100).toFixed(2)}%`;
-        const w2 = this.measureText(t2);
-        let w3 = w - w1 - w2;
-
-        if (w1 + w2 <= w)
-            context.fillText(t1, x, y + h - 2);
-        
-        if (w1 + w2 + w3 <= w && w3 > (10 + fh2)) {
-            const barWidth = w - w1 - w2 - fh2;
-            context.strokeRect(x + w1, y + pad + 1, barWidth, fh - 2);
-            context.fillRect(x + w1 + 2, y + pad + 3, (barWidth - 4)*read, fh - 6);
-        }
-
-        if (w1 <= w)
-            context.fillText(t2, x + w1 + w3, y + h - 2);
-    }
-
-    fittingString(str, maxWidth) {
-        const context = this.context;
-        let w = context.measureText(str).width;
-        const ellipsis = '…';
-        const ellipsisWidth = context.measureText(ellipsis).width;
-        if (w <= maxWidth || w <= ellipsisWidth) {
-            return str;
-        } else {
-            let len = str.length;
-            while (w >= maxWidth - ellipsisWidth && len-- > 0) {
-                str = str.substring(0, len);
-                w = context.measureText(str).width;
-            }
-            return str + ellipsis;
-        }
-    }
-
-    async drawStatusBar() {
-        if (!this.showStatusBar || !this.book)
-            return;
-
-        const context = this.context;
-
-        const h = (this.statusBarTop ? 1 : this.realHeight - this.statusBarHeight);
-        const lh = (this.statusBarTop ? this.statusBarHeight : h);
-
-        context.fillStyle = this.backgroundColor;
-        context.fillRect(0, h, this.realWidth, lh);
-
-        context.font = 'bold ' + this.fontBySize(this.statusBarHeight - 6);
-        context.fillStyle = this.statusBarColor;
-        context.strokeStyle = this.statusBarColor;
-
-        context.fillRect(0, lh, this.realWidth, 1);
-
-        const date = new Date();
-        const time = `  ${date.getHours().toString().padStart(2, '0')}:${date.getMinutes().toString().padStart(2, '0')}  `;
-        const timeW = this.measureText(time);
-        context.fillText(time, this.realWidth - timeW, h + this.statusBarHeight - 2);
-
-        const title = '  ' + this.title;
-        context.fillText(this.fittingString(title, this.realWidth/2 - 3), 0, h + this.statusBarHeight - 2);
-
-        this.drawPercentBar(this.realWidth/2, h, this.realWidth/2 - timeW, this.statusBarHeight);
-
-        if (!this.timeRefreshing) {
-            this.timeRefreshing = true;
-            await sleep(60*1000);
-            this.timeRefreshing = false;
-            this.drawStatusBar();
-        }
-    }
-
     drawPage() {
         if (!this.lastBook)
             return;
@@ -276,8 +203,17 @@ class TextPage extends Vue {
         if (!this.book || !this.parsed.textLength)
             return;
 
-        this.drawStatusBar();
-
+        if (this.showStatusBar)
+            this.drawHelper.drawStatusBar(context, this.statusBarTop, this.statusBarHeight, 
+                this.statusBarColor, this.bookPos, this.parsed.textLength, this.title);
+/*        
+        if (!this.timeRefreshing) {
+            this.timeRefreshing = true;
+            await sleep(60*1000);
+            this.timeRefreshing = false;
+            this.drawStatusBar();
+        }
+*/
         context.font = this.font;
         context.fillStyle = this.textColor;
         const spaceWidth = this.context.measureText(' ').width;
