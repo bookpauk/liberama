@@ -75,9 +75,15 @@ class TextPage extends Vue {
             this.canvas.height = this.realHeight;
         }
 
-        //this.offscreen = new OffscreenCanvas(256, 256);
+        this.canvasCurr = new OffscreenCanvas(this.realWidth, this.realHeight);
+        this.canvasNext = new OffscreenCanvas(this.realWidth, this.realHeight);
+        this.contextCurr = this.canvasCurr.getContext('2d');
+        this.contextNext = this.canvasNext.getContext('2d');
+
         this.contextMain.textAlign = 'left';
+        this.contextNext.textAlign = 'left';
         this.contextMain.textBaseline = 'bottom';
+        this.contextNext.textBaseline = 'bottom';
 
         this.w = this.realWidth - 2*this.indent;
         this.h = this.realHeight - (this.showStatusBar ? this.statusBarHeight : 0);
@@ -94,6 +100,8 @@ class TextPage extends Vue {
         }
 
         this.statusBarColor = this.hex2rgba(this.textColor, 0.5);
+        this.currentTransition = '';
+
         //drawHelper
         this.drawHelper.realWidth = this.realWidth;
         this.drawHelper.realHeight = this.realHeight;
@@ -137,13 +145,17 @@ class TextPage extends Vue {
         this.p = 50;// px, отступ параграфа
         this.indent = 15;// px, отступ всего текста слева и справа
         this.wordWrap = true;
+        this.keepLastToFirst = true;//перенос последней строки в первую при листании
 
         this.showStatusBar = true;
         this.statusBarTop = false;//top, bottom
         this.statusBarHeight = 20;// px
 
+        this.pageChangeTransition = '';//'' - нет, up-down, left-right, протаивание, мерцание
+        this.pageChangeTransitionSpeed = 50; //0-100%
+
         this.calcDrawProps();
-        this.draw();// пока не загрузили, очистим канвас
+        this.draw(true);// пока не загрузили, очистим канвас
 
         if (this.lastBook) {
             (async() => {
@@ -190,7 +202,19 @@ class TextPage extends Vue {
     }
 
     draw(immediate) {
-        this.drawPage(this.contextMain);
+        if (immediate) {
+            this.drawPage(this.contextMain);
+            this.drawPage(this.contextCurr);
+        } else {
+            this.contextCurr.drawImage(this.canvasNext, 0, 0);
+            this.drawPage(this.contextNext);
+            if (!this.currentTransition) {
+                this.contextMain.drawImage(this.canvasNext, 0, 0);
+            } else {
+                //make this.currentTransition
+            }
+            this.currentTransition = '';
+        }
     }
 
     drawPage(context) {
@@ -302,8 +326,10 @@ class TextPage extends Vue {
     doPageDown() {
         if (this.linesDown) {
             let i = this.pageLineCount;
-            i--;
+            if (this.keepLastToFirst)
+                i--;
             if (i >= 0 && this.linesDown.length > i) {
+                this.currentTransition = this.pageChangeTransition;
                 this.bookPos = this.linesDown[i].begin;
             }
         }
@@ -312,9 +338,11 @@ class TextPage extends Vue {
     doPageUp() {
         if (this.linesUp) {
             let i = this.pageLineCount;
-            i--;
+            if (this.keepLastToFirst)
+                i--;
             i = (i > this.linesUp.length - 1 ? this.linesUp.length - 1 : i);
             if (i >= 0 && this.linesUp.length > i) {
+                this.currentTransition = this.pageChangeTransition;
                 this.bookPos = this.linesUp[i].begin;
             }
         }
