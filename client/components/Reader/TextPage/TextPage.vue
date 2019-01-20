@@ -166,7 +166,7 @@ class TextPage extends Vue {
         this.statusBarTop = false;// top, bottom
         this.statusBarHeight = 20;// px
 
-        this.pageChangeTransition = '';// '' - нет, upDown, leftRight, thawing - протаивание, blink - мерцание
+        this.pageChangeTransition = '';// '' - нет, downShift, rightShift, thaw - протаивание, blink - мерцание
         this.pageChangeTransitionSpeed = 50; //0-100%
 
         this.calcDrawProps();
@@ -199,6 +199,7 @@ class TextPage extends Vue {
                 await this.loadFonts();
 
                 this.draw();
+                this.refreshTime();
             })();
         }
     }
@@ -267,14 +268,7 @@ class TextPage extends Vue {
         if (this.showStatusBar)
             this.drawHelper.drawStatusBar(context, this.statusBarTop, this.statusBarHeight, 
                 this.statusBarColor, bookPos, this.parsed.textLength, this.title);
-/*        
-        if (!this.timeRefreshing) {
-            this.timeRefreshing = true;
-            await sleep(60*1000);
-            this.timeRefreshing = false;
-            this.drawStatusBar();
-        }
-*/
+        
         context.font = this.font;
         context.fillStyle = this.textColor;
         const spaceWidth = context.measureText(' ').width;
@@ -353,6 +347,20 @@ class TextPage extends Vue {
         }
     }
 
+    async refreshTime() {
+        if (!this.timeRefreshing) {
+            this.timeRefreshing = true;
+            await sleep(60*1000);
+
+            if (this.book && this.parsed.textLength) {
+                this.drawHelper.drawStatusBar(this.context, this.statusBarTop, this.statusBarHeight, 
+                    this.statusBarColor, this.bookPos, this.parsed.textLength, this.title);
+            }
+            this.timeRefreshing = false;
+            this.refreshTime();
+        }
+    }
+
     prepareNextPage() {
         // подготовка следующей страницы заранее        
         this.pagePrepared = false;
@@ -385,7 +393,7 @@ class TextPage extends Vue {
         } else {
             this.cancelPrepare = true;
         }
-    }    
+    }
 
     doDown() {
         if (this.linesDown && this.linesDown.length > 1) {
