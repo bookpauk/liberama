@@ -471,8 +471,10 @@ class TextPage extends Vue {
         this.endClickRepeat();
         if (event.touches.length == 1) {
             const touch = event.touches[0];
-            this.handleClick(touch.clientX, touch.clientY);
-            this.startClickRepeat(touch.clientX, touch.clientY);
+            const x = touch.pageX - this.canvas.offsetLeft;
+            const y = touch.pageY - this.canvas.offsetTop;
+            this.handleClick(x, y);
+            this.startClickRepeat(x, y);
         }
     }
 
@@ -483,8 +485,10 @@ class TextPage extends Vue {
     onMouseDown(event) {
         this.endClickRepeat();
         if (event.button == 0) {
-            this.handleClick(event.clientX, event.clientY);
-            this.startClickRepeat(event.clientX, event.clientY);
+            const x = event.pageX - this.canvas.offsetLeft;
+            const y = event.pageY - this.canvas.offsetTop;
+            this.handleClick(x, y);
+            this.startClickRepeat(x, y);
         } else if (event.button == 2) {
             this.doToolBarToggle();
         }
