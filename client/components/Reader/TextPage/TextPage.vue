@@ -1,9 +1,15 @@
 <template>
     <div ref="main" class="main">
-        <canvas ref="canvas" class="canvas" @mousedown.prevent.stop="onMouseDown" @mouseup.prevent.stop="onMouseUp"
+        <canvas v-show="canvasShow" ref="canvasPrev" class="canvas" @mousedown.prevent.stop="onMouseDown" @mouseup.prevent.stop="onMouseUp"
             @wheel.prevent.stop="onMouseWheel"
             @touchstart.prevent.stop="onTouchStart" @touchend.prevent.stop="onTouchEnd"
-            oncontextmenu="return false;"></canvas>
+            oncontextmenu="return false;">
+        </canvas>
+        <canvas v-show="!canvasShow" ref="canvasNext" class="canvas" @mousedown.prevent.stop="onMouseDown" @mouseup.prevent.stop="onMouseUp"
+            @wheel.prevent.stop="onMouseWheel"
+            @touchstart.prevent.stop="onTouchStart" @touchend.prevent.stop="onTouchEnd"
+            oncontextmenu="return false;">
+        </canvas>
     </div>
 </template>
 
@@ -26,12 +32,14 @@ export default @Component({
     },
 })
 class TextPage extends Vue {
+    canvasShow = false;
+
     lastBook = null;
     bookPos = 0;
 
-    //убрать
-    meta = null;
-    items = null;
+    fontStyle = null;
+    fontSize = null;
+    fontName = null;
 
     created() {
         this.drawHelper = new DrawHelper();
@@ -49,7 +57,8 @@ class TextPage extends Vue {
     }
 
     mounted() {
-        this.canvas = this.$refs.canvas;        
+        this.canvasPrev = this.$refs.canvasPrev;
+        this.canvasNext = this.$refs.canvasNext;
     }
 
     hex2rgba(hex, alpha = 1) {
@@ -58,32 +67,37 @@ class TextPage extends Vue {
     }
 
     async calcDrawProps() {
-        this.contextMain = this.canvas.getContext('2d');
+        this.contextPrev = this.canvasPrev.getContext('2d');
+        this.contextNext = this.canvasNext.getContext('2d');
 
         this.realWidth = this.$refs.main.clientWidth;
         this.realHeight = this.$refs.main.clientHeight;
 
         let ratio = window.devicePixelRatio;
         if (ratio) {
-            this.canvas.width = this.realWidth*ratio;
-            this.canvas.height = this.realHeight*ratio;
-            this.canvas.style.width = this.$refs.main.clientWidth + 'px';
-            this.canvas.style.height = this.$refs.main.clientHeight + 'px';
-            this.contextMain.scale(ratio, ratio);
+            this.canvasPrev.width = this.realWidth*ratio;
+            this.canvasPrev.height = this.realHeight*ratio;
+            this.canvasPrev.style.width = this.$refs.main.clientWidth + 'px';
+            this.canvasPrev.style.height = this.$refs.main.clientHeight + 'px';
+            this.contextPrev.scale(ratio, ratio);
+
+            this.canvasNext.width = this.realWidth*ratio;
+            this.canvasNext.height = this.realHeight*ratio;
+            this.canvasNext.style.width = this.$refs.main.clientWidth + 'px';
+            this.canvasNext.style.height = this.$refs.main.clientHeight + 'px';            
+            this.contextNext.scale(ratio, ratio);
         } else {
-            this.canvas.width = this.realWidth;
-            this.canvas.height = this.realHeight;
+            this.canvasPrev.width = this.realWidth;
+            this.canvasPrev.height = this.realHeight;
+            this.canvasNext.width = this.realWidth;
+            this.canvasNext.height = this.realHeight;
         }
 
-        this.canvasCurr = new OffscreenCanvas(this.realWidth, this.realHeight);
-        this.canvasNext = new OffscreenCanvas(this.realWidth, this.realHeight);
-        this.contextCurr = this.canvasCurr.getContext('2d');
-        this.contextNext = this.canvasNext.getContext('2d');
-
-        this.contextMain.textAlign = 'left';
+        this.contextPrev.textAlign = 'left';
         this.contextNext.textAlign = 'left';
-        this.contextMain.textBaseline = 'bottom';
+        this.contextPrev.textBaseline = 'bottom';
         this.contextNext.textBaseline = 'bottom';
+        this.canvasShow = false;
 
         this.w = this.realWidth - 2*this.indent;
         this.h = this.realHeight - (this.showStatusBar ? this.statusBarHeight : 0);
@@ -95,7 +109,7 @@ class TextPage extends Vue {
             this.parsed.w = this.w;// px, ширина текста
             this.parsed.font = this.font;
             this.parsed.wordWrap = this.wordWrap;
-            this.parsed.context = this.contextMain;
+            this.parsed.context = this.contextPrev;
             this.parsed.fontByStyle = this.fontByStyle;
         }
 
@@ -202,34 +216,33 @@ class TextPage extends Vue {
         return `${style.italic ? 'italic' : ''} ${style.bold ? 'bold' : ''} ${this.fontSize}px ${this.fontName}`;
     }
 
+    get context() {
+        return (this.canvasShow ? this.contextPrev : this.contextNext);
+    }
+    
+    get canvas() {
+        return (this.canvasShow ? this.canvasPrev : this.canvasNext);
+    }
+    
     draw(immediate) {
+        this.canvasShow = !this.canvasShow;
+        const context = this.context;
+
         if (immediate) {
-            this.drawPage(this.contextMain);
-            this.drawPage(this.contextNext);
+            this.drawPage(context);
         } else {
-            if (!this.currentTransition) {
-                if (this.pageChangeDirectionDown && this.pagePrepared && this.bookPos == this.bookPosPrepared) {
-                    this.contextMain.drawImage(this.canvasPrepared, 0, 0);
-                } else {
-                    this.drawPage(this.contextNext);
-                    this.contextMain.drawImage(this.canvasNext, 0, 0);
-                }
-            } else {
-                this.contextCurr.drawImage(this.canvasNext, 0, 0);
-                if (this.pageChangeDirectionDown && this.pagePrepared && this.bookPos == this.bookPosPrepared) {
-                    this.contextNext.drawImage(this.canvasPrepared, 0, 0);
-                } else {
-                    this.drawPage(this.contextNext);
-                }
-                /*
-                this.currentTransition
-                this.pageChangeTransitionSpeed
-                this.pageChangeDirectionDown  
-                */
+            if (!(this.pageChangeDirectionDown && this.pagePrepared && this.bookPos == this.bookPosPrepared)) {
+                this.drawPage(context);
+            }
+            if (this.currentTransition) {
+                //this.currentTransition
+                //this.pageChangeTransitionSpeed
+                //this.pageChangeDirectionDown  
+                
                 //curr to next transition
                 //пока заглушка
-                this.contextMain.drawImage(this.canvasNext, 0, 0);
             }
+
             this.currentTransition = '';
             this.pageChangeDirectionDown = false;//true только если PgDown
         }
