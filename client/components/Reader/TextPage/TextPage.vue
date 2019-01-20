@@ -429,29 +429,33 @@ class TextPage extends Vue {
         }
     }
 
-    async startClickRepeat(pointX, pointY) {
+    async startClickRepeat(pointX, pointY, debounced) {
+        this.repX = pointX;
+        this.repY = pointY;
+
         if (!this.repInit) {
             this.repInit = true;
 
             this.repStart = true;
             
-            await sleep(1000);
+            if (!debounced)
+                await sleep(800);
 
             if (this.debouncedRepStart) {
                 this.debouncedRepStart = false;
                 this.repInit = false;
-                await this.startClickRepeat(pointX, pointY);
+                await this.startClickRepeat(this.repX, this.repY, true);
             }
 
             if (this.repStart) {
                 this.repDoing = true;
 
-                let delay = 500;
+                let delay = 400;
                 while (this.repDoing) {
                     this.handleClick(pointX, pointY);
                     await sleep(delay);
                     if (delay > 15)
-                        delay *= 0.7;
+                        delay *= 0.8;
                 }
             }
 
