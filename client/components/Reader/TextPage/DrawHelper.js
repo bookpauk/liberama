@@ -8,9 +8,9 @@ export default class DrawHelper {
         const fh = h - 2*pad;
         const fh2 = fh/2;
 
-        const t1 = `${Math.floor(bookPos/1000)}k/${Math.floor(textLength/1000)}k`;
+        const t1 = `${Math.floor((bookPos + 1)/1000)}k/${Math.floor(textLength/1000)}k`;
         const w1 = context.measureText(t1).width + fh2;
-        const read = bookPos/textLength;
+        const read = (bookPos + 1)/textLength;
         const t2 = `${(read*100).toFixed(2)}%`;
         const w2 = context.measureText(t2).width;
         let w3 = w - w1 - w2;

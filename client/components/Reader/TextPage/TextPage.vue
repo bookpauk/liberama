@@ -274,10 +274,6 @@ class TextPage extends Vue {
         if (!this.book || !this.parsed.textLength)
             return;
 
-        if (this.showStatusBar)
-            this.drawHelper.drawStatusBar(context, this.statusBarTop, this.statusBarHeight, 
-                this.statusBarColor, bookPos, this.parsed.textLength, this.title);
-        
         context.font = this.font;
         context.fillStyle = this.textColor;
         const spaceWidth = context.measureText(' ').width;
@@ -354,6 +350,23 @@ class TextPage extends Vue {
                 }
             }
         }
+
+        this.drawStatusBar(context, lines);
+    }
+
+    drawStatusBar(context, lines) {
+        if (!lines)
+            lines = this.linesDown;
+
+        if (this.showStatusBar) {
+            let i = this.pageLineCount;
+            if (this.keepLastToFirst)
+                i--;
+            i = (i > lines.length - 1 ? lines.length - 1 : i);
+
+            this.drawHelper.drawStatusBar(context, this.statusBarTop, this.statusBarHeight, 
+                this.statusBarColor, lines[i].end, this.parsed.textLength, this.title);
+        }
     }
 
     async refreshTime() {
@@ -362,8 +375,7 @@ class TextPage extends Vue {
             await sleep(60*1000);
 
             if (this.book && this.parsed.textLength) {
-                this.drawHelper.drawStatusBar(this.context, this.statusBarTop, this.statusBarHeight, 
-                    this.statusBarColor, this.bookPos, this.parsed.textLength, this.title);
+                this.drawStatusBar(this.context);
             }
             this.timeRefreshing = false;
             this.refreshTime();
