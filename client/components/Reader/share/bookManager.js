@@ -5,17 +5,26 @@ import BookParser from './BookParser';
 
 const maxDataSize = 100*1024*1024;//chars, not bytes
 
+const bmMetaStore = localForage.createInstance({
+    name: 'bmMetaStore'
+});
+
+const bmDataStore = localForage.createInstance({
+    name: 'bmDataStore'
+});
+
 class BookManager {
     async init() {
         this.books = {};
 
-        const len = await localForage.length();
+        const len = await bmMetaStore.length();
+
         for (let i = 0; i < len; i++) {
-            const key = await localForage.key(i);
+            const key = await bmMetaStore.key(i);
             const keySplit = key.split('-');
 
             if (keySplit.length == 2 && keySplit[0] == 'bmMeta') {
-                let meta = await localForage.getItem(key);
+                let meta = await bmMetaStore.getItem(key);
 
                 this.books[meta.key] = meta;
             }
@@ -58,8 +67,8 @@ class BookManager {
 
         this.books[meta.key] = result;
 
-        await localForage.setItem(`bmMeta-${meta.key}`, this.metaOnly(result));
-        await localForage.setItem(`bmData-${meta.key}`, result.data);
+        await bmMetaStore.setItem(`bmMeta-${meta.key}`, this.metaOnly(result));
+        await bmDataStore.setItem(`bmData-${meta.key}`, result.data);
 
         return result;
     }
@@ -84,7 +93,7 @@ class BookManager {
         result = this.books[meta.key];
 
         if (result && !result.data) {
-            result.data = await localForage.getItem(`bmData-${meta.key}`);
+            result.data = await bmDataStore.getItem(`bmData-${meta.key}`);
             this.books[meta.key] = result;
         }
 
@@ -100,8 +109,8 @@ class BookManager {
         if (!this.books) 
             await this.init();
 
-        await localForage.removeItem(`bmMeta-${meta.key}`);
-        await localForage.removeItem(`bmData-${meta.key}`);
+        await bmMetaStore.removeItem(`bmMeta-${meta.key}`);
+        await bmDataStore.removeItem(`bmData-${meta.key}`);
 
         delete this.books[meta.key];
     }
