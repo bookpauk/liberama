@@ -41,6 +41,8 @@ class TextPage extends Vue {
     fontSize = null;
     fontName = null;
 
+    //meta = null;
+
     created() {
         this.drawHelper = new DrawHelper();
 
@@ -182,13 +184,15 @@ class TextPage extends Vue {
                 this.meta = bookManager.metaOnly(this.book);
                 this.fb2 = this.meta.fb2;
 
-                this.title = _.compact([
+                const authorName = _.compact([
                     this.fb2.lastName,
-                    this.fb2.middleName,
                     this.fb2.firstName,
-                    '-',
-                    this.fb2.bookTitle
+                    this.fb2.middleName
                 ]).join(' ');
+                this.title = _.compact([
+                    authorName,
+                    this.fb2.bookTitle
+                ]).join(' - ');
 
                 this.$root.$emit('set-app-title', this.title);
 
