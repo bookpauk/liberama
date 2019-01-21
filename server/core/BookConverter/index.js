@@ -130,6 +130,11 @@ class BookConverter {
         });
 
         parser.on('comment', (text) => {// eslint-disable-line no-unused-vars
+            if (text == '--------- Собственно произведение -------------')
+                inText = true;
+
+            if (text == '-----------------------------------------------')
+                inText = false;
         });
 
         /*
@@ -163,7 +168,6 @@ class BookConverter {
         out += '<FictionBook xmlns="http://www.gribuser.ru/xml/fictionbook/2.0" xmlns:l="http://www.w3.org/1999/xlink">';
         out += this.formatFb2Node(fb2);
         out += '</FictionBook>';
-console.log(out);
         return out;
     }
 
