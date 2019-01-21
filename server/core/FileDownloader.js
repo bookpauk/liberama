@@ -26,7 +26,7 @@ class FileDownloader {
             if (estSize)
                 prog = Math.round(progress.transferred/estSize*100);
             else if (progress.transferred)
-                prog = Math.round(progress.transferred/(progress.transferred + 100000)*100);
+                prog = Math.round(progress.transferred/(progress.transferred + 200000)*100);
 
             if (prog != prevProg && callback)
                 callback(prog);

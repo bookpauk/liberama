@@ -57,8 +57,9 @@ class Reader {
     async loadCachedBook(url, callback){
         const options = {
             onDownloadProgress: progress => {
+                const total = (progress.total ? progress.total : progress.loaded + 200000);
                 if (callback)
-                    callback({state: 'loading', progress: Math.round((progress.loaded*100)/progress.total)});
+                    callback({state: 'loading', progress: Math.round((progress.loaded*100)/total)});
             }
         }
         //загрузка

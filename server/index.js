@@ -5,6 +5,7 @@ initLogger(config);
 const log = getLog();
 
 const fs = require('fs-extra');
+const path = require('path');
 const express = require('express');
 const compression = require('compression');
 
@@ -42,7 +43,16 @@ async function main() {
             app.use(express.json());
             if (devModule)
                 devModule.logQueries(app);
-            app.use(express.static(serverConfig.publicDir, { maxAge: '30d' }));
+
+            app.use(express.static(serverConfig.publicDir, {
+                maxAge: '30d',
+                setHeaders: (res, filePath) => {
+                    if (path.basename(path.dirname(filePath)) == 'tmp') {
+                        res.set('Content-Type', 'text/xml');
+                        res.set('Content-Encoding', 'gzip');
+                    }
+                }               
+            }));
 
             require('./routes').initRoutes(app, connPool, serverConfig);
 

@@ -1,4 +1,5 @@
 const fs = require('fs-extra');
+const path = require('path');
 
 const workerState = require('./workerState');
 const FileDownloader = require('./FileDownloader');
@@ -25,6 +26,7 @@ class ReaderWorker {
         let errMes = '';
         let decompDir = '';
         let downloadedFilename = '';
+        let convertFilename = '';
         try {
             wState.set({state: 'download', step: 1, totalSteps: 3, url});
 
@@ -49,14 +51,19 @@ class ReaderWorker {
             
             //parse book
             wState.set({state: 'convert', step: 3, progress: 0});
-            let resultFilename = `${this.config.tempPublicDir}/${tempFilename2}`;
-            await this.bookConverter.convertToFb2(decompFilename, resultFilename, url, progress => {
+            convertFilename = `${this.config.tempDownloadDir}/${tempFilename2}`;
+            await this.bookConverter.convertToFb2(decompFilename, convertFilename, url, progress => {
                 wState.set({progress});
             });
+
+            //compress file to tmp dir, if not exists with the same hashname
+            const compFilename = await this.decomp.gzipFileIfNotExists(convertFilename, `${this.config.tempPublicDir}`);
+
             wState.set({progress: 100});
 
             //finish
-            wState.finish({path: `/tmp/${tempFilename2}`});
+            const finishFilename = path.basename(compFilename);
+            wState.finish({path: `/tmp/${finishFilename}`});
 
         } catch (e) {
             wState.set({state: 'error', error: (errMes ? errMes : e.message)});
@@ -67,6 +74,8 @@ class ReaderWorker {
                 await fs.remove(decompDir);
             if (downloadedFilename)
                 await fs.remove(downloadedFilename);
+            if (convertFilename)
+                await fs.remove(convertFilename);
         }
     }
 
