@@ -596,6 +596,20 @@ class TextPage extends Vue {
             100: {30: 'PgUp', 100: 'PgDown'}
         };
 
+        if (this.showStatusBar && this.book) {
+            let titleBar = {x1: 0, y1: 0, x2: this.realWidth/2, y2: this.statusBarHeight + 1};
+            if (!this.statusBarTop) {
+                titleBar.y1 += this.realHeight - this.statusBarHeight + 1;
+                titleBar.y2 += this.realHeight - this.statusBarHeight + 1;
+            }
+
+            if (pointX >= titleBar.x1 && pointX <= titleBar.x2 &&
+                pointY >= titleBar.y1 && pointY <= titleBar.y2) {
+                window.open(this.meta.url, '_blank');
+                return;
+            }
+        }
+
         const w = pointX/this.realWidth*100;
         const h = pointY/this.realHeight*100;
 
