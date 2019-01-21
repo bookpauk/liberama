@@ -57,6 +57,7 @@
   },
   "dependencies": {
     "axios": "^0.18.0",
+    "chardet": "^0.7.0",
     "compression": "^1.7.3",
     "decompress": "^4.2.0",
     "detect-file-type": "^0.2.0",
@@ -64,6 +65,7 @@
     "express": "^4.16.4",
     "fs-extra": "^7.0.1",
     "got": "^9.5.1",
+    "iconv-lite": "^0.4.24",
     "localforage": "^1.7.3",
     "lodash": "^4.17.11",
     "path-browserify": "^1.0.0",
