@@ -277,13 +277,13 @@ class TextPage extends Vue {
         context.fillStyle = this.textColor;
         const spaceWidth = context.measureText(' ').width;
 
-        const lines = this.parsed.getLines(bookPos, this.pageLineCount + 1);
+        const lines = this.parsed.getLines(bookPos, 2*this.pageLineCount);
         if (!nextChangeLines) {
             this.linesDown = lines;
-            this.linesUp = this.parsed.getLines(bookPos, -(this.pageLineCount + 1));
+            this.linesUp = this.parsed.getLines(bookPos, -2*this.pageLineCount);
         } else {
             this.linesDownNext = lines;
-            this.linesUpNext = this.parsed.getLines(bookPos, -(this.pageLineCount + 1));
+            this.linesUpNext = this.parsed.getLines(bookPos, -2*this.pageLineCount);
         }
 
         let y = -this.lineInterval/2 + (this.h - this.pageLineCount*this.lineHeight)/2;
@@ -403,7 +403,7 @@ class TextPage extends Vue {
     }
 
     doDown() {
-        if (this.linesDown && this.linesDown.length > 1) {
+        if (this.linesDown && this.linesDown.length > this.pageLineCount) {
             this.bookPos = this.linesDown[1].begin;
         }
     }
@@ -419,11 +419,12 @@ class TextPage extends Vue {
             let i = this.pageLineCount;
             if (this.keepLastToFirst)
                 i--;
-            if (i >= 0 && this.linesDown.length > i) {
+            if (i >= 0 && this.linesDown.length >= 2*i) {
                 this.currentTransition = this.pageChangeTransition;
                 this.pageChangeDirectionDown = true;
                 this.bookPos = this.linesDown[i].begin;
-            }
+            } else 
+                this.doEnd();
         }
     }
 
@@ -447,8 +448,12 @@ class TextPage extends Vue {
 
     doEnd() {
         if (this.parsed.para.length) {
-            const lastPara = this.parsed.para[this.parsed.para.length - 1];
-            this.bookPos = lastPara.offset + lastPara.length - 1;
+            let i = this.parsed.para.length - 1;
+            let lastPos = this.parsed.para[i].offset + this.parsed.para[i].length - 1;
+            const lines = this.parsed.getLines(lastPos, -this.pageLineCount);
+            i = this.pageLineCount - 1;
+            i = (i > lines.length - 1 ? lines.length - 1 : i);
+            this.bookPos = lines[i].begin;
         }
     }
 
