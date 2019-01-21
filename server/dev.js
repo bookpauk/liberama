@@ -21,6 +21,7 @@ function logQueries(app) {
     app.use(function(req, res, next) {
         const start = Date.now();
         log(`${req.method} ${req.originalUrl} ${JSON.stringify(req.body)}`);
+        //log(`${JSON.stringify(req.headers, null, 2)}`)
         res.once('finish', () => {
             log(`${Date.now() - start}ms`);
         });
