@@ -230,6 +230,11 @@ class TextPage extends Vue {
     }
     
     draw(immediate) {
+        if (this.book && this.bookPos >= this.parsed.textLength) {
+            this.doEnd();
+            return;
+        }
+
         this.canvasShowFirst = !this.canvasShowFirst;
         const context = this.context;
 
