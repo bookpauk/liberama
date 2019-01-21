@@ -50,6 +50,9 @@ class FileDecompressor {
 
         if (!await fs.pathExists(outFilename)) {
             await fs.writeFile(outFilename, await this.gzipBuffer(buf))
+        } else {
+            const fd = await fs.open(outFilename, 'w');
+            await fs.close(fd);
         }
 
         return outFilename;
