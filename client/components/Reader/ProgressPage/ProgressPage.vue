@@ -53,7 +53,6 @@ class ProgressPage extends Vue {
         this.step = (state.step ? state.step : this.step);
         this.totalSteps = (state.totalSteps > this.totalSteps ? state.totalSteps : this.totalSteps);
         this.progress = state.progress || 0;
-console.log(state);        
     }
 
     get percentage() {
