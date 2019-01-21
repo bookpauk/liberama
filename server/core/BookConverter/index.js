@@ -72,9 +72,6 @@ class BookConverter {
         });
 
         parser.on('startNode', (elemName, getAttr, isTagEnd, getStrNode) => {// eslint-disable-line no-unused-vars
-            if (elemName == 'xxx7')
-                inText = !inText;
-
             if (!inText) {
                 path += '/' + elemName;
                 tag = elemName;
