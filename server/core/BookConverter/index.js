@@ -140,7 +140,17 @@ class BookConverter {
         });
         */
 
-        await parser.parse(iconv.decode(data, chardet.detect(data)));
+        const charsetAll = chardet.detectAll(data);
+
+        let selected = 'ISO-8859-1';
+        for (const charset of charsetAll) {
+            if (charset.name.indexOf('ISO-8859') < 0) {
+                selected = charset.name;
+                break;
+            }
+        }
+
+        await parser.parse(iconv.decode(data, selected));
 
         const title = (titleInfo['book-title'] ? titleInfo['book-title'] : '');
         let author = '';
