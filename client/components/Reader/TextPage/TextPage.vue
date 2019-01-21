@@ -363,6 +363,9 @@ class TextPage extends Vue {
 
     prepareNextPage() {
         // подготовка следующей страницы заранее        
+        if (!this.book || !this.parsed.textLength)
+            return;
+        
         this.pagePrepared = false;
         this.cancelPrepare = false;
         if (!this.preparing) {
