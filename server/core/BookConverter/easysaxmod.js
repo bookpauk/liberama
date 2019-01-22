@@ -433,6 +433,7 @@ function EasySAXParser(config) {
     async function parse() {
         var stacknsmatrix = [];
         var nodestack = [];
+        var nodestackCopy = [];
         var stopIndex = 0;
         var _nsmatrix;
         var isTagStart = false;
@@ -574,27 +575,22 @@ function EasySAXParser(config) {
                     //return;
                 }
 
-                let poped = [];
                 x = elem = nodestack.pop();
-                poped.push(elem);
                 q = i + 2 + elem.length;
 
                 while (nodestack.length && elem !== xml.substring(i + 2, q)) {
                     onError(returnError = 'close tag, not equal to the open tag');
                     //return;
                     x = elem = nodestack.pop();
-                    poped.push(elem);
                     q = i + 2 + elem.length;
                 }
 
-                if (elem === xml.substring(i + 2, q))
-                    poped.unshift();
-
                 if (nodestack.length == 0) {
-                    while (poped.length) {
-                        nodestack.push(poped.pop());
-                    }
+                    nodestack = nodestackCopy.slice();
                     isTagEnd = false;
+                } else {
+                    if (elem === xml.substring(i + 2, q))
+                        nodestackCopy = nodestack.slice();
                 }
 
                 // проверим что в закрываюшем теге нет лишнего
@@ -647,6 +643,7 @@ function EasySAXParser(config) {
 
                 if (!isTagEnd) {
                     nodestack.push(elem);
+                    nodestackCopy.push(elem);
                 }
             }
 

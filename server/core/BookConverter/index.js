@@ -89,7 +89,7 @@ class BookConverter {
                         growParagraph('<strong>');
                         break;
                     case 'div':
-                        const a = getAttr();
+                        var a = getAttr();
                         if (a && a.align == 'center')
                             center = true;
                         break;
@@ -177,7 +177,7 @@ class BookConverter {
         });
         */
 
-        const charsetAll = chardet.detectAll(data);
+        const charsetAll = chardet.detectAll(data.slice(0, 10000));
 
         let selected = 'ISO-8859-1';
         for (const charset of charsetAll) {
