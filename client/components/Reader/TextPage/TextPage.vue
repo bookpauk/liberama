@@ -1,5 +1,5 @@
 <template>
-    <div ref="main" class="main">
+    <div ref="main" class="main" @click="onMouseClick">
         <canvas v-show="canvasShowFirst" ref="canvasPrev" class="canvas" @mousedown.prevent.stop="onMouseDown" @mouseup.prevent.stop="onMouseUp"
             @wheel.prevent.stop="onMouseWheel"
             @touchstart.prevent.stop="onTouchStart" @touchend.prevent.stop="onTouchEnd"
@@ -589,6 +589,33 @@ class TextPage extends Vue {
         }
     }
 
+    checkPointInStatusBar(pointX, pointY) {
+        let titleBar = {x1: 0, y1: 0, x2: this.realWidth/2, y2: this.statusBarHeight + 1};
+        if (!this.statusBarTop) {
+            titleBar.y1 += this.realHeight - this.statusBarHeight + 1;
+            titleBar.y2 += this.realHeight - this.statusBarHeight + 1;
+        }
+
+        if (pointX >= titleBar.x1 && pointX <= titleBar.x2 &&
+            pointY >= titleBar.y1 && pointY <= titleBar.y2) {
+            return true;
+        }
+        return false;
+    }
+
+    onMouseClick(event) {
+        if (this.showStatusBar && this.book) {
+            const pointX = event.pageX - this.canvas.offsetLeft;
+            const pointY = event.pageY - this.canvas.offsetTop;
+
+            if (this.checkPointInStatusBar(pointX, pointY)) {
+                window.open(this.meta.url, '_blank');
+                return false;
+            }
+        }
+
+    }
+
     handleClick(pointX, pointY) {
         const mouseLegend = {
             40: {30: 'PgUp', 100: 'PgDown'},
@@ -597,19 +624,11 @@ class TextPage extends Vue {
         };
 
         if (this.showStatusBar && this.book) {
-            let titleBar = {x1: 0, y1: 0, x2: this.realWidth/2, y2: this.statusBarHeight + 1};
-            if (!this.statusBarTop) {
-                titleBar.y1 += this.realHeight - this.statusBarHeight + 1;
-                titleBar.y2 += this.realHeight - this.statusBarHeight + 1;
-            }
-
-            if (pointX >= titleBar.x1 && pointX <= titleBar.x2 &&
-                pointY >= titleBar.y1 && pointY <= titleBar.y2) {
-                window.open(this.meta.url, '_blank');
+            if (this.checkPointInStatusBar(pointX, pointY)) {
                 return false;
             }
         }
-
+        
         const w = pointX/this.realWidth*100;
         const h = pointY/this.realHeight*100;
 
