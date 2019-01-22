@@ -358,6 +358,8 @@ export default class BookParser {
             for (let i = 0; i < words.length; i++) {
                 const word = words[i];
                 ofs += word.length + (i < words.length - 1 ? 1 : 0);
+                if (word == '' && i > 0 && i < words.length - 1)
+                    continue;
 
                 str += sp1 + word;
                 sp1 = ' ';
