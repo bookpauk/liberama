@@ -26,12 +26,12 @@ class BookConverter {
             const parsedUrl = new URL(url);
             if (parsedUrl.hostname == 'samlib.ru' ||
                 parsedUrl.hostname == 'budclub.ru') {
-                await fs.writeFile(outputFile, await this.convertSamlib(data));
+                await fs.writeFile(outputFile, await this.convertHtml(data));
                 return;
             }
 
             //Заглушка
-            await fs.writeFile(outputFile, data);
+            await fs.writeFile(outputFile, await this.convertHtml(data));
             callback(100);
         } else {
             if (fileType)
@@ -53,6 +53,93 @@ class BookConverter {
         }
 
         return iconv.decode(data, selected);
+    }
+
+    async convertHtml(data) {
+        let titleInfo = {};
+        let desc = {_n: 'description', 'title-info': titleInfo};
+        let pars = [];
+        let body = {_n: 'body', section: {_a: [pars]}};
+        let fb2 = [desc, body];
+
+        let path = '';
+        let tag = '';// eslint-disable-line no-unused-vars
+
+        const newParagraph = () => {
+            pars.push({_n: 'p', _t: ''});
+        };
+
+        const growParagraph = (text) => {
+            const l = pars.length;
+            if (l) {
+                if (pars[l - 1]._t == '')
+                    text = text.trimLeft();
+                pars[l - 1]._t += text;
+            }
+        };
+
+        const parser = new EasySAXParser();
+
+        parser.on('error', (msgError) => {// eslint-disable-line no-unused-vars
+        });
+
+        parser.on('startNode', (elemName, getAttr, isTagEnd, getStrNode) => {// eslint-disable-line no-unused-vars
+            path += '/' + elemName;
+            tag = elemName;
+
+            if (elemName == 'p' || elemName == 'dd') {
+                newParagraph();
+            }
+        });
+
+        parser.on('endNode', (elemName, isTagStart, getStrNode) => {// eslint-disable-line no-unused-vars
+            const oldPath = path;
+            let t = '';
+            do  {
+                let i = path.lastIndexOf('/');
+                t = path.substr(i + 1);
+                path = path.substr(0, i);
+            } while (t != elemName && path);
+
+            if (t != elemName) {
+                path = oldPath;
+            }
+
+            let i = path.lastIndexOf('/');
+            tag = path.substr(i + 1);
+        });
+
+        parser.on('textNode', (text) => {// eslint-disable-line no-unused-vars
+            if (text != ' ' && text.trim() == '')
+                text = text.trim();
+
+            if (text == '')
+                return;
+
+            switch (path) {
+                case '/html/head/title':
+                    titleInfo['book-title'] = text;
+                    return;
+            }
+
+            growParagraph(text);
+        });
+
+        parser.on('cdata', (data) => {// eslint-disable-line no-unused-vars
+        });
+
+        parser.on('comment', (text) => {// eslint-disable-line no-unused-vars
+        });
+
+        /*
+        parser.on('progress', async(progress) => {
+            callback(...........);
+        });
+        */
+
+        await parser.parse(this.decode(data));
+
+        return this.formatFb2(fb2);
     }
 
     async convertSamlib(data) {
