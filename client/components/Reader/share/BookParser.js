@@ -54,14 +54,13 @@ export default class BookParser {
                 text: String //текст параграфа (или title или epigraph и т.д) с вложенными тегами
             }
         */
-        const newParagraph = (text, len, single) => {
+        const newParagraph = (text, len) => {
             paraIndex++;
             let p = {
                 index: paraIndex,
                 offset: paraOffset,
                 length: len,
                 text: text,
-                single: single
             };
 
             para[paraIndex] = p;
@@ -70,10 +69,6 @@ export default class BookParser {
         const growParagraph = (text, len) => {
             let p = para[paraIndex];
             if (p) {
-                if (p.single) {
-                    newParagraph(text, len);
-                    return;
-                }
                 paraOffset -= p.length;
                 if (p.length == 1 && p.text[0] == ' ' && len > 0) {
                     p.length = 0;
@@ -111,8 +106,10 @@ export default class BookParser {
                 growParagraph(`<${tag}>`, 0);
             }
 
-            if (tag == 'title' || tag == 'subtitle')
+            if (tag == 'title' || tag == 'subtitle') {
+                newParagraph(' ', 1);
                 center = true;
+            }
         });
 
         parser.on('endNode', (elemName, isTagStart, getStrNode) => {// eslint-disable-line no-unused-vars
@@ -174,8 +171,8 @@ export default class BookParser {
                     fb2.annotation += text;
             }
 
-            let cOpen = (center ? '<center>' : '');
-            let cClose = (center ? '</center>' : '');
+            let cOpen = (center ? '<center><strong>' : '');
+            let cClose = (center ? '</strong></center>' : '');
 
             if (path.indexOf('/FictionBook/body/title') == 0) {
                 newParagraph(`${cOpen}${text}${cClose}`, text.length, true);
@@ -185,10 +182,6 @@ export default class BookParser {
                 switch (tag) {
                     case 'p':
                         growParagraph(`${cOpen}${text}${cClose}`, text.length);
-                        break;
-                    //case 'section':
-                    case 'title':
-                        newParagraph(`${cOpen}${text}${cClose}`, text.length, center);
                         break;
                     default:
                         growParagraph(`${cOpen}${text}${cClose}`, text.length);

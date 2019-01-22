@@ -58,6 +58,10 @@ class BookConverter {
             pars.push({_n: 'p', _t: ''});
         };
 
+        const newSubTitle = () => {
+            pars.push({_n: 'subtitle', _t: ''});
+        };
+
         const growParagraph = (text) => {
             const l = pars.length;
             if (l) {
@@ -77,7 +81,7 @@ class BookConverter {
                 path += '/' + elemName;
                 tag = elemName;
             } else {
-                if (elemName == 'p' || elemName == 'dd') {
+                if (!center && (elemName == 'p' || elemName == 'dd')) {
                     newParagraph();
                 }
 
@@ -90,8 +94,10 @@ class BookConverter {
                         break;
                     case 'div':
                         var a = getAttr();
-                        if (a && a.align == 'center')
+                        if (a && a.align == 'center') {
                             center = true;
+                            newSubTitle();
+                        }
                         break;
                 }
             }
@@ -153,11 +159,8 @@ class BookConverter {
                     return;
             }
 
-            let cOpen = (center ? '<subtitle>' : '');
-            let cClose = (center ? '</subtitle>' : '');
-
             if (inText)
-                growParagraph(`${cOpen}${text}${cClose}`);
+                growParagraph(text);
         });
 
         parser.on('cdata', (data) => {// eslint-disable-line no-unused-vars
