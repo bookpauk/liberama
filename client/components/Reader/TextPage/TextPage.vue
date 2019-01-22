@@ -155,7 +155,7 @@ class TextPage extends Vue {
         this.textColor = '#000000';
         this.backgroundColor = '#478355';
         this.fontStyle = '';// 'bold','italic'
-        this.fontSize = 33;// px
+        this.fontSize = 35;// px
         this.fontName = 'Arial';
         this.lineInterval = 7;// px, межстрочный интервал
         this.textAlignJustify = true;// выравнивание по ширине
@@ -302,7 +302,7 @@ class TextPage extends Vue {
                 first: Boolean,
                 last: Boolean,
                 parts: array of {
-                    style: {bold: Boolean, italic: Boolean}
+                    style: {bold: Boolean, italic: Boolean, center: Boolean}
                     text: String,
                 }
             }*/
@@ -310,13 +310,16 @@ class TextPage extends Vue {
             let indent = this.indent + (line.first ? this.p : 0);
             y += this.lineHeight;
 
+            let lineText = '';
+            let center = false;
+            for (const part of line.parts) {
+                lineText += part.text;
+                center = center || part.style.center;
+            }
+
             let filled = false;
             // если выравнивание по ширине включено
-            if (this.textAlignJustify && !line.last) {
-                let lineText = '';
-                for (const part of line.parts) {
-                    lineText += part.text;
-                }
+            if (this.textAlignJustify && !line.last && !center) {
                 const words = lineText.split(' ');
 
                 if (words.length > 1) {
@@ -342,6 +345,7 @@ class TextPage extends Vue {
             // просто выводим текст
             if (!filled) {
                 let x = indent;
+                x = (center ? this.indent + (this.w - context.measureText(lineText).width)/2 : x);
                 for (const part of line.parts) {
                     let text = part.text;
                     context.font = this.fontByStyle(part.style);

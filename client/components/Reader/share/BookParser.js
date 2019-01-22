@@ -42,6 +42,7 @@ export default class BookParser {
         let path = '';
         let tag = '';
         let nextPerc = 0;
+        let center = false;
 
         let paraIndex = -1;
         let paraOffset = 0;
@@ -53,13 +54,14 @@ export default class BookParser {
                 text: String //текст параграфа (или title или epigraph и т.д) с вложенными тегами
             }
         */
-        const newParagraph = (text, len) => {
+        const newParagraph = (text, len, single) => {
             paraIndex++;
             let p = {
                 index: paraIndex,
                 offset: paraOffset,
                 length: len,
-                text: text
+                text: text,
+                single: single
             };
 
             para[paraIndex] = p;
@@ -68,10 +70,14 @@ export default class BookParser {
         const growParagraph = (text, len) => {
             let p = para[paraIndex];
             if (p) {
+                if (p.single) {
+                    newParagraph(text, len);
+                    return;
+                }
                 paraOffset -= p.length;
                 if (p.length == 1 && p.text[0] == ' ' && len > 0) {
                     p.length = 0;
-                    p.text = p.text.substr(1);;
+                    p.text = p.text.substr(1);
                 }
                 p.length += len;
                 p.text += text;
@@ -104,6 +110,9 @@ export default class BookParser {
             if (tag == 'emphasis' || tag == 'strong') {
                 growParagraph(`<${tag}>`, 0);
             }
+
+            if (tag == 'title')
+                center = true;
         });
 
         parser.on('endNode', (elemName, isTagStart, getStrNode) => {// eslint-disable-line no-unused-vars
@@ -111,6 +120,9 @@ export default class BookParser {
                 if (tag == 'emphasis' || tag == 'strong') {
                     growParagraph(`</${tag}>`, 0);
                 }
+
+                if (tag == 'title')
+                    center = false;
 
                 path = path.substr(0, path.length - tag.length - 1);
                 let i = path.lastIndexOf('/');
@@ -162,21 +174,24 @@ export default class BookParser {
                     fb2.annotation += text;
             }
 
+            let cOpen = (center ? '<center>' : '');
+            let cClose = (center ? '</center>' : '');
+
             if (path.indexOf('/FictionBook/body/title') == 0) {
-                newParagraph(text, text.length);
+                newParagraph(`${cOpen}${text}${cClose}`, text.length, true);
             }
 
             if (path.indexOf('/FictionBook/body/section') == 0) {
                 switch (tag) {
                     case 'p':
-                        growParagraph(text, text.length);
+                        growParagraph(`${cOpen}${text}${cClose}`, text.length);
                         break;
-                    case 'section':
+                    //case 'section':
                     case 'title':
-                        newParagraph(text, text.length);
+                        newParagraph(`${cOpen}${text}${cClose}`, text.length, center);
                         break;
                     default:
-                        growParagraph(text, text.length);
+                        growParagraph(`${cOpen}${text}${cClose}`, text.length);
                 }
             }
         });
@@ -231,10 +246,9 @@ export default class BookParser {
 
     splitToStyle(s) {
         let result = [];/*array of {
-            style: {bold: Boolean, italic: Boolean},
+            style: {bold: Boolean, italic: Boolean, center: Boolean},
             text: String,
         }*/
-
         const parser = new EasySAXParser();
         let style = {};
 
@@ -246,17 +260,31 @@ export default class BookParser {
         });
 
         parser.on('startNode', (elemName, getAttr, isTagEnd, getStrNode) => {// eslint-disable-line no-unused-vars
-            if (elemName == 'strong')
-                style.bold = true;
-            else if (elemName == 'emphasis')
-                style.italic = true;
+            switch (elemName) {
+                case 'strong':
+                    style.bold = true;
+                    break;
+                case 'emphasis':
+                    style.italic = true;
+                    break;
+                case 'center':
+                    style.center = true;
+                    break;
+            }
         });
 
         parser.on('endNode', (elemName, isTagStart, getStrNode) => {// eslint-disable-line no-unused-vars
-            if (elemName == 'strong')
-                style.bold = false;
-            else if (elemName == 'emphasis')
-                style.italic = false;
+            switch (elemName) {
+                case 'strong':
+                    style.bold = false;
+                    break;
+                case 'emphasis':
+                    style.italic = false;
+                    break;
+                case 'center':
+                    style.center = false;
+                    break;
+            }
         });
 
         parser.parse(`<p>${s}</p>`);
@@ -340,7 +368,7 @@ export default class BookParser {
             first: Boolean,
             last: Boolean,
             parts: array of {
-                style: {bold: Boolean, italic: Boolean},
+                style: {bold: Boolean, italic: Boolean, center: Boolean},
                 text: String,
             }
         }*/
