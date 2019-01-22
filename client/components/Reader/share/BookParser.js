@@ -111,7 +111,7 @@ export default class BookParser {
                 growParagraph(`<${tag}>`, 0);
             }
 
-            if (tag == 'title')
+            if (tag == 'title' || tag == 'subtitle')
                 center = true;
         });
 
@@ -121,7 +121,7 @@ export default class BookParser {
                     growParagraph(`</${tag}>`, 0);
                 }
 
-                if (tag == 'title')
+                if (tag == 'title' || tag == 'subtitle')
                     center = false;
 
                 path = path.substr(0, path.length - tag.length - 1);

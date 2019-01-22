@@ -52,6 +52,7 @@ class BookConverter {
         let tag = '';// eslint-disable-line no-unused-vars
 
         let inText = false;
+        let center = false;
 
         const newParagraph = () => {
             pars.push({_n: 'p', _t: ''});
@@ -87,6 +88,11 @@ class BookConverter {
                     case 'b':
                         growParagraph('<strong>');
                         break;
+                    case 'div':
+                        const a = getAttr();
+                        if (a && a.align == 'center')
+                            center = true;
+                        break;
                 }
             }
 
@@ -116,11 +122,20 @@ class BookConverter {
                     case 'b':
                         growParagraph('</strong>');
                         break;
+                    case 'div':
+                        center = false;
+                        break;
                 }
             }
         });
 
         parser.on('textNode', (text) => {// eslint-disable-line no-unused-vars
+            if (text != ' ' && text.trim() == '')
+                text = text.trim();
+
+            if (text == '')
+                return;
+
             switch (path) {
                 case '/html/body/center/h2':
                     titleInfo['book-title'] = text;
@@ -137,8 +152,12 @@ class BookConverter {
                         titleInfo.author['middle-name'] = text[2];
                     return;
             }
+
+            let cOpen = (center ? '<subtitle>' : '');
+            let cClose = (center ? '</subtitle>' : '');
+
             if (inText)
-                growParagraph(text);
+                growParagraph(`${cOpen}${text}${cClose}`);
         });
 
         parser.on('cdata', (data) => {// eslint-disable-line no-unused-vars
