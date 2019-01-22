@@ -62,9 +62,6 @@ class BookConverter {
         let body = {_n: 'body', section: {_a: [pars]}};
         let fb2 = [desc, body];
 
-        let path = '';
-        let tag = '';// eslint-disable-line no-unused-vars
-
         const newParagraph = () => {
             pars.push({_n: 'p', _t: ''});
         };
@@ -78,66 +75,64 @@ class BookConverter {
             }
         };
 
-        const parser = new EasySAXParser();
+        newParagraph();
 
-        parser.on('error', (msgError) => {// eslint-disable-line no-unused-vars
-        });
-
-        parser.on('startNode', (elemName, getAttr, isTagEnd, getStrNode) => {// eslint-disable-line no-unused-vars
-            path += '/' + elemName;
-            tag = elemName;
-
-            if (elemName == 'p' || elemName == 'dd') {
-                newParagraph();
+        const onNode = (elem) => {
+            switch (elem) {
+                case 'TR':
+                case 'BR':
+                case 'BR/':
+                case 'DD':
+                case 'P':
+                case 'TITLE':
+                case '/TITLE':
+                    newParagraph();
+                    break;
             }
-        });
+        };
 
-        parser.on('endNode', (elemName, isTagStart, getStrNode) => {// eslint-disable-line no-unused-vars
-            const oldPath = path;
-            let t = '';
-            do  {
-                let i = path.lastIndexOf('/');
-                t = path.substr(i + 1);
-                path = path.substr(0, i);
-            } while (t != elemName && path);
+        const innerCut = new Set(['HEAD', 'SCRIPT', 'STYLE']);
+        let buf = this.decode(data).toString();
 
-            if (t != elemName) {
-                path = oldPath;
-            }
+        let i = 0;
+        const len = buf.length;
+        let cutCounter = 0;
+        let cutTag = '';
+        while (i < len) {
+            let left = buf.indexOf('<', i);
+            if (left < 0)
+                break;
+            let right = buf.indexOf('>', left + 1);
+            if (right < 0)
+                break;
 
-            let i = path.lastIndexOf('/');
-            tag = path.substr(i + 1);
-        });
+            let tag = buf.substr(left + 1, right - left - 1).trim().toUpperCase();
+            const firstSpace = tag.indexOf(' ');
+            if (firstSpace >= 0)
+                tag = tag.substr(0, firstSpace);
 
-        parser.on('textNode', (text) => {// eslint-disable-line no-unused-vars
-            if (text != ' ' && text.trim() == '')
-                text = text.trim();
-
-            if (text == '')
-                return;
-
-            switch (path) {
-                case '/html/head/title':
-                    titleInfo['book-title'] = text;
-                    return;
+            if (!cutCounter) {
+                growParagraph(buf.substr(i, left - i));
+                onNode(tag);
             }
 
-            growParagraph(text);
-        });
+            if (innerCut.has(tag) && (!cutCounter || cutTag == tag)) {
+                if (!cutCounter)
+                    cutTag = tag;
+                cutCounter++;
+            }
 
-        parser.on('cdata', (data) => {// eslint-disable-line no-unused-vars
-        });
+            if (tag != '' && tag.charAt(0) == '/' && cutTag == tag.substr(1)) {
+                cutCounter = (cutCounter > 0 ? cutCounter - 1 : 0);
+                if (!cutCounter)
+                    cutTag = '';
+            }
 
-        parser.on('comment', (text) => {// eslint-disable-line no-unused-vars
-        });
+            i = right + 1;
+        }
 
-        /*
-        parser.on('progress', async(progress) => {
-            callback(...........);
-        });
-        */
-
-        await parser.parse(this.decode(data));
+        if (i < len && !cutCounter)
+            growParagraph(buf.substr(i, len - i));
 
         return this.formatFb2(fb2);
     }
