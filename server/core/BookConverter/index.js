@@ -62,6 +62,9 @@ class BookConverter {
         let body = {_n: 'body', section: {_a: [pars]}};
         let fb2 = [desc, body];
 
+        let title = '';
+        let inTitle = false;
+
         const newParagraph = () => {
             pars.push({_n: 'p', _t: ''});
         };
@@ -76,19 +79,18 @@ class BookConverter {
         };
 
         newParagraph();
+        const newPara = new Set(['TR', 'BR', 'BR/', 'DD', 'P', 'TITLE', '/TITLE']);
+
+        const onText = (text) => {
+            if (inTitle && !title)
+                title = text;
+        };
 
         const onNode = (elem) => {
-            switch (elem) {
-                case 'TR':
-                case 'BR':
-                case 'BR/':
-                case 'DD':
-                case 'P':
-                case 'TITLE':
-                case '/TITLE':
-                    newParagraph();
-                    break;
-            }
+            if (elem == 'TITLE')
+                inTitle = true;
+            else if (elem == '/TITLE')
+                inTitle = false;
         };
 
         const innerCut = new Set(['HEAD', 'SCRIPT', 'STYLE']);
@@ -111,10 +113,14 @@ class BookConverter {
             if (firstSpace >= 0)
                 tag = tag.substr(0, firstSpace);
 
+            const text = buf.substr(i, left - i);
             if (!cutCounter) {
-                growParagraph(buf.substr(i, left - i));
-                onNode(tag);
+                growParagraph(text);
+                if (newPara.has(tag))
+                    newParagraph();
             }
+            onText(text);
+            onNode(tag);
 
             if (innerCut.has(tag) && (!cutCounter || cutTag == tag)) {
                 if (!cutCounter)
@@ -133,6 +139,8 @@ class BookConverter {
 
         if (i < len && !cutCounter)
             growParagraph(buf.substr(i, len - i));
+
+        titleInfo['book-title'] = title;
 
         return this.formatFb2(fb2);
     }
