@@ -79,6 +79,15 @@ class BookConverter {
                 if (elemName == 'p' || elemName == 'dd') {
                     newParagraph();
                 }
+
+                switch (elemName) {
+                    case 'i':
+                        growParagraph('<emphasis>');
+                        break;
+                    case 'b':
+                        growParagraph('<strong>');
+                        break;
+                }
             }
 
         });
@@ -99,6 +108,15 @@ class BookConverter {
 
                 let i = path.lastIndexOf('/');
                 tag = path.substr(i + 1);
+            } else {
+                switch (elemName) {
+                    case 'i':
+                        growParagraph('</emphasis>');
+                        break;
+                    case 'b':
+                        growParagraph('</strong>');
+                        break;
+                }
             }
         });
 
