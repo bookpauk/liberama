@@ -26,7 +26,7 @@ class BookConverter {
             const parsedUrl = new URL(url);
             if (parsedUrl.hostname == 'samlib.ru' ||
                 parsedUrl.hostname == 'budclub.ru') {
-                await fs.writeFile(outputFile, await this.convertHtml(data));
+                await fs.writeFile(outputFile, await this.convertSamlib(data));
                 return;
             }
 
