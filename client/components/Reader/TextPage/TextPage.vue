@@ -230,7 +230,7 @@ class TextPage extends Vue {
     }
     
     draw(immediate) {
-        if (this.book && this.bookPos >= this.parsed.textLength) {
+        if (this.book && this.bookPos > 0 && this.bookPos >= this.parsed.textLength) {
             this.doEnd();
             return;
         }
