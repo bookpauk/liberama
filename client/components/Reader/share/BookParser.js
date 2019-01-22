@@ -43,6 +43,7 @@ export default class BookParser {
         let tag = '';
         let nextPerc = 0;
         let center = false;
+        let bold = false;
 
         let paraIndex = -1;
         let paraOffset = 0;
@@ -106,9 +107,15 @@ export default class BookParser {
                 growParagraph(`<${tag}>`, 0);
             }
 
-            if (tag == 'title' || tag == 'subtitle') {
+            if (tag == 'title') {
                 newParagraph(' ', 1);
+                bold = true;
                 center = true;
+            }
+
+            if (tag == 'subtitle') {
+                newParagraph(' ', 1);
+                bold = true;
             }
         });
 
@@ -118,8 +125,13 @@ export default class BookParser {
                     growParagraph(`</${tag}>`, 0);
                 }
 
-                if (tag == 'title' || tag == 'subtitle')
+                if (tag == 'title') {
+                    bold = false;
                     center = false;
+                }
+
+                if (tag == 'subtitle')
+                    bold = false;
 
                 path = path.substr(0, path.length - tag.length - 1);
                 let i = path.lastIndexOf('/');
@@ -171,8 +183,10 @@ export default class BookParser {
                     fb2.annotation += text;
             }
 
-            let cOpen = (center ? '<center><strong>' : '');
-            let cClose = (center ? '</strong></center>' : '');
+            let cOpen = (center ? '<center>' : '');
+            cOpen += (bold ? '<strong>' : '');
+            let cClose = (center ? '</center>' : '');
+            cClose += (bold ? '</strong>' : '');
 
             if (path.indexOf('/FictionBook/body/title') == 0) {
                 newParagraph(`${cOpen}${text}${cClose}`, text.length, true);
