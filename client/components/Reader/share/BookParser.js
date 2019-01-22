@@ -69,9 +69,9 @@ export default class BookParser {
             let p = para[paraIndex];
             if (p) {
                 paraOffset -= p.length;
-                if (p.text == ' ') {
+                if (p.length == 1 && p.text[0] == ' ' && len > 0) {
                     p.length = 0;
-                    p.text = '';
+                    p.text = p.text.substr(1);;
                 }
                 p.length += len;
                 p.text += text;
