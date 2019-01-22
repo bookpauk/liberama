@@ -55,15 +55,17 @@ class BookConverter {
         return iconv.decode(data, selected);
     }
 
-    async convertHtml(data) {
+    async convertHtml(data, isText) {
         let titleInfo = {};
         let desc = {_n: 'description', 'title-info': titleInfo};
         let pars = [];
-        let body = {_n: 'body', section: {_a: [pars]}};
+        let body = {_n: 'body', section: {_a: []}};
         let fb2 = [desc, body];
 
         let title = '';
         let inTitle = false;
+
+        let spaceCounter = [];
 
         const newParagraph = () => {
             pars.push({_n: 'p', _t: ''});
@@ -76,10 +78,23 @@ class BookConverter {
                     text = text.trimLeft();
                 pars[l - 1]._t += text;
             }
+
+            //посчитаем отступы у текста, чтобы выделить потом параграфы
+            const lines = text.split('\n');
+            for (const line of lines) {
+                const sp = line.split(' ');
+                let l = 0;
+                while (l < sp.length && sp[l].trim() == '') {
+                    l++;
+                }
+                if (!spaceCounter[l])
+                    spaceCounter[l] = 0;
+                spaceCounter[l]++;
+            }
         };
 
         newParagraph();
-        const newPara = new Set(['TR', 'BR', 'BR/', 'DD', 'P', 'TITLE', '/TITLE']);
+        const newPara = new Set(['TR', 'BR', 'BR/', 'DD', 'P', 'TITLE', '/TITLE', 'H1', 'H2', 'H3', '/H1', '/H2', '/H3']);
 
         const onText = (text) => {
             if (inTitle && !title)
@@ -141,6 +156,58 @@ class BookConverter {
             growParagraph(buf.substr(i, len - i));
 
         titleInfo['book-title'] = title;
+
+        //подозрение на чистый текст, надо разбить на параграфы
+        if ((isText || pars.length < buf.length/2000) && spaceCounter.length) {
+            let total = 0;
+            for (let i = 0; i < spaceCounter.length; i++) {
+                total += (spaceCounter[i] ? spaceCounter[i] : 0);
+            }
+            total /= 10;
+            let i = spaceCounter.length - 1;
+            while (i > 0 && (!spaceCounter[i] || spaceCounter[i] < total)) i--;
+
+            const parIndent = i;
+            if (parIndent > 0) {//нашли отступ параграфа
+
+                let newPars = [];
+                const newPar = () => {
+                    newPars.push({_n: 'p', _t: ''});
+                };
+
+                const growPar = (text) => {
+                    const l = newPars.length;
+                    if (l) {
+                        if (newPars[l - 1]._t == '')
+                            text = text.trimLeft();
+                        newPars[l - 1]._t += text;
+                    }
+                }
+
+                for (const par of pars) {
+                    newPar();
+
+                    const lines = par._t.split('\n');
+                    for (const line of lines) {
+                        const sp = line.split(' ');
+                        let l = 0;
+                        while (l < sp.length && sp[l].trim() == '') {
+                            l++;
+                        }
+                        if (l >= parIndent)
+                            newPar();
+                        growPar(line + ' ');
+                    }
+                }
+
+                body.section._a[0] = newPars;
+            } else {
+                body.section._a[0] = pars;
+            }
+        } else {
+            body.section._a[0] = pars;
+        }
+
 
         return this.formatFb2(fb2);
     }
