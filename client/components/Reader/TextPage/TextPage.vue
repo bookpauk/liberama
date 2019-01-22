@@ -556,8 +556,8 @@ class TextPage extends Vue {
             const touch = event.touches[0];
             const x = touch.pageX - this.canvas.offsetLeft;
             const y = touch.pageY - this.canvas.offsetTop;
-            this.handleClick(x, y);
-            this.startClickRepeat(x, y);
+            if (this.handleClick(x, y))
+                this.startClickRepeat(x, y);
         }
     }
 
@@ -570,8 +570,8 @@ class TextPage extends Vue {
         if (event.button == 0) {
             const x = event.pageX - this.canvas.offsetLeft;
             const y = event.pageY - this.canvas.offsetTop;
-            this.handleClick(x, y);
-            this.startClickRepeat(x, y);
+            if (this.handleClick(x, y))
+                this.startClickRepeat(x, y);
         } else if (event.button == 2) {
             this.doToolBarToggle();
         }
@@ -606,7 +606,7 @@ class TextPage extends Vue {
             if (pointX >= titleBar.x1 && pointX <= titleBar.x2 &&
                 pointY >= titleBar.y1 && pointY <= titleBar.y2) {
                 window.open(this.meta.url, '_blank');
-                return;
+                return false;
             }
         }
 
