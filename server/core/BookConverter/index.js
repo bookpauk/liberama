@@ -41,6 +41,20 @@ class BookConverter {
         }
     }
 
+    decode(data) {
+        const charsetAll = chardet.detectAll(data.slice(0, 10000));
+
+        let selected = 'ISO-8859-1';
+        for (const charset of charsetAll) {
+            if (charset.name.indexOf('ISO-8859') < 0) {
+                selected = charset.name;
+                break;
+            }
+        }
+
+        return iconv.decode(data, selected);
+    }
+
     async convertSamlib(data) {
         let titleInfo = {};
         let desc = {_n: 'description', 'title-info': titleInfo};
@@ -180,17 +194,7 @@ class BookConverter {
         });
         */
 
-        const charsetAll = chardet.detectAll(data.slice(0, 10000));
-
-        let selected = 'ISO-8859-1';
-        for (const charset of charsetAll) {
-            if (charset.name.indexOf('ISO-8859') < 0) {
-                selected = charset.name;
-                break;
-            }
-        }
-
-        await parser.parse(iconv.decode(data, selected));
+        await parser.parse(this.decode(data));
 
         const title = (titleInfo['book-title'] ? titleInfo['book-title'] : '');
         let author = '';
