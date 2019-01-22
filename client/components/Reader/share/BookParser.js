@@ -100,10 +100,18 @@ export default class BookParser {
             if ((tag == 'p' || tag == 'empty-line') && path.indexOf('/FictionBook/body/section') == 0) {
                 newParagraph(' ', 1);
             }
+
+            if (tag == 'emphasis' || tag == 'strong') {
+                growParagraph(`<${tag}>`, 0);
+            }
         });
 
         parser.on('endNode', (elemName, isTagStart, getStrNode) => {// eslint-disable-line no-unused-vars
             if (tag == elemName) {
+                if (tag == 'emphasis' || tag == 'strong') {
+                    growParagraph(`</${tag}>`, 0);
+                }
+
                 path = path.substr(0, path.length - tag.length - 1);
                 let i = path.lastIndexOf('/');
                 if (i >= 0) {
@@ -168,7 +176,7 @@ export default class BookParser {
                         newParagraph(text, text.length);
                         break;
                     default:
-                        growParagraph(`<${tag}>${text}</${tag}>`, text.length);
+                        growParagraph(text, text.length);
                 }
             }
         });

@@ -41,7 +41,7 @@ class TextPage extends Vue {
     fontSize = null;
     fontName = null;
 
-    //meta = null;
+    meta = null;
 
     created() {
         this.drawHelper = new DrawHelper();
