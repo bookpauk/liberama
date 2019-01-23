@@ -179,8 +179,6 @@ class BookConverter {
                 const growPar = (text) => {
                     const l = newPars.length;
                     if (l) {
-                        if (newPars[l - 1]._t == '')
-                            text = text.trimLeft();
                         newPars[l - 1]._t += text;
                     }
                 }
@@ -209,6 +207,10 @@ class BookConverter {
             body.section._a[0] = pars;
         }
 
+        //убрать лишнее
+        for (let p of body.section._a[0]) {
+            p._t = p._t.replace(/[\t\n\r]/g, ' ');
+        }
 
         return this.formatFb2(fb2);
     }
