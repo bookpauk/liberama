@@ -110,6 +110,7 @@ class BookConverter {
 
         const innerCut = new Set(['HEAD', 'SCRIPT', 'STYLE']);
         let buf = this.decode(data).toString();
+        buf = buf.replace(/&nbsp;/g, ' '); 
 
         let i = 0;
         const len = buf.length;
@@ -196,7 +197,7 @@ class BookConverter {
                         }
                         if (l >= parIndent)
                             newPar();
-                        growPar(line + ' ');
+                        growPar(line.trim() + ' ');
                     }
                 }
 
