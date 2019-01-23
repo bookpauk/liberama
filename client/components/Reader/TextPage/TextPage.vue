@@ -1,13 +1,13 @@
 <template>
-    <div ref="main" class="main" @click="onMouseClick">
-        <canvas v-show="canvasShowFirst" ref="canvasPrev" class="canvas" @mousedown.prevent.stop="onMouseDown" @mouseup.prevent.stop="onMouseUp"
+    <div ref="main" class="main" @click.capture="onMouseClick">
+        <canvas :style="canvasStyle1" ref="canvas1" class="canvas" @mousedown.prevent.stop="onMouseDown" @mouseup.prevent.stop="onMouseUp"
             @wheel.prevent.stop="onMouseWheel"
-            @touchstart.prevent.stop="onTouchStart" @touchend.prevent.stop="onTouchEnd"
+            @touchstart.stop="onTouchStart" @touchend.stop="onTouchEnd" @touchcancel.prevent.stop="onTouchCancel"
             oncontextmenu="return false;">
         </canvas>
-        <canvas v-show="!canvasShowFirst" ref="canvasNext" class="canvas" @mousedown.prevent.stop="onMouseDown" @mouseup.prevent.stop="onMouseUp"
+        <canvas :style="canvasStyle2" ref="canvas2" class="canvas" @mousedown.prevent.stop="onMouseDown" @mouseup.prevent.stop="onMouseUp"
             @wheel.prevent.stop="onMouseWheel"
-            @touchstart.prevent.stop="onTouchStart" @touchend.prevent.stop="onTouchEnd"
+            @touchstart.stop="onTouchStart" @touchend.stop="onTouchEnd" @touchcancel.prevent.stop="onTouchCancel"
             oncontextmenu="return false;">
         </canvas>
     </div>
@@ -32,7 +32,7 @@ export default @Component({
     },
 })
 class TextPage extends Vue {
-    canvasShowFirst = false;
+    activeCanvas = false;
 
     lastBook = null;
     bookPos = 0;
@@ -63,8 +63,8 @@ class TextPage extends Vue {
     }
 
     mounted() {
-        this.canvasPrev = this.$refs.canvasPrev;
-        this.canvasNext = this.$refs.canvasNext;
+        this.canvas1 = this.$refs.canvas1;
+        this.canvas2 = this.$refs.canvas2;
     }
 
     hex2rgba(hex, alpha = 1) {
@@ -73,37 +73,42 @@ class TextPage extends Vue {
     }
 
     async calcDrawProps() {
-        this.contextPrev = this.canvasPrev.getContext('2d');
-        this.contextNext = this.canvasNext.getContext('2d');
+/*        this.canvas1.style.left = '0px';
+        this.canvas1.style.top = '0px';
+        this.canvas2.style.left = '0px';
+        this.canvas2.style.top = '0px';
+*/
+        this.context1 = this.canvas1.getContext('2d');
+        this.context2 = this.canvas2.getContext('2d');
 
         this.realWidth = this.$refs.main.clientWidth;
         this.realHeight = this.$refs.main.clientHeight;
 
         let ratio = window.devicePixelRatio;
         if (ratio) {
-            this.canvasPrev.width = this.realWidth*ratio;
-            this.canvasPrev.height = this.realHeight*ratio;
-            this.canvasPrev.style.width = this.$refs.main.clientWidth + 'px';
-            this.canvasPrev.style.height = this.$refs.main.clientHeight + 'px';
-            this.contextPrev.scale(ratio, ratio);
+            this.canvas1.width = this.realWidth*ratio;
+            this.canvas1.height = this.realHeight*ratio;
+            this.canvas1.style.width = this.$refs.main.clientWidth + 'px';
+            this.canvas1.style.height = this.$refs.main.clientHeight + 'px';
+            this.context1.scale(ratio, ratio);
 
-            this.canvasNext.width = this.realWidth*ratio;
-            this.canvasNext.height = this.realHeight*ratio;
-            this.canvasNext.style.width = this.$refs.main.clientWidth + 'px';
-            this.canvasNext.style.height = this.$refs.main.clientHeight + 'px';            
-            this.contextNext.scale(ratio, ratio);
+            this.canvas2.width = this.realWidth*ratio;
+            this.canvas2.height = this.realHeight*ratio;
+            this.canvas2.style.width = this.$refs.main.clientWidth + 'px';
+            this.canvas2.style.height = this.$refs.main.clientHeight + 'px';            
+            this.context2.scale(ratio, ratio);
         } else {
-            this.canvasPrev.width = this.realWidth;
-            this.canvasPrev.height = this.realHeight;
-            this.canvasNext.width = this.realWidth;
-            this.canvasNext.height = this.realHeight;
+            this.canvas1.width = this.realWidth;
+            this.canvas1.height = this.realHeight;
+            this.canvas2.width = this.realWidth;
+            this.canvas2.height = this.realHeight;
         }
 
-        this.contextPrev.textAlign = 'left';
-        this.contextNext.textAlign = 'left';
-        this.contextPrev.textBaseline = 'bottom';
-        this.contextNext.textBaseline = 'bottom';
-        this.canvasShowFirst = false;
+        this.context1.textAlign = 'left';
+        this.context2.textAlign = 'left';
+        this.context1.textBaseline = 'bottom';
+        this.context2.textBaseline = 'bottom';
+        this.activeCanvas = false;
 
         this.w = this.realWidth - 2*this.indent;
         this.h = this.realHeight - (this.showStatusBar ? this.statusBarHeight : 0);
@@ -115,7 +120,7 @@ class TextPage extends Vue {
             this.parsed.w = this.w;// px, ширина текста
             this.parsed.font = this.font;
             this.parsed.wordWrap = this.wordWrap;
-            this.parsed.context = this.contextPrev;
+            this.parsed.context = this.context1;
             this.parsed.fontByStyle = this.fontByStyle;
         }
 
@@ -226,11 +231,19 @@ class TextPage extends Vue {
     }
 
     get context() {
-        return (this.canvasShowFirst ? this.contextPrev : this.contextNext);
+        return (this.activeCanvas ? this.context1 : this.context2);
     }
     
     get canvas() {
-        return (this.canvasShowFirst ? this.canvasPrev : this.canvasNext);
+        return (this.activeCanvas ? this.canvas1 : this.canvas2);
+    }
+
+    get canvasStyle1() {
+        return (this.activeCanvas ? {display: 'block'} : {display: 'none'});
+    }
+
+    get canvasStyle2() {
+        return (this.activeCanvas ? {display: 'none'} : {display: 'block'});
     }
     
     draw(immediate) {
@@ -239,7 +252,7 @@ class TextPage extends Vue {
             return;
         }
 
-        this.canvasShowFirst = !this.canvasShowFirst;
+        this.activeCanvas = !this.activeCanvas;
         const context = this.context;
 
         if (immediate) {
@@ -414,7 +427,7 @@ class TextPage extends Vue {
                 if (i >= 0 && this.linesDown.length > i) {
                     this.bookPosPrepared = this.linesDown[i].begin;
 
-                    const ctx = (!this.canvasShowFirst ? this.contextPrev : this.contextNext);
+                    const ctx = (!this.activeCanvas ? this.context1 : this.context2);
                     this.drawPage(ctx, this.bookPosPrepared, true);
   
                     this.pagePrepared = true;
@@ -520,8 +533,8 @@ class TextPage extends Vue {
         this.repX = pointX;
         this.repY = pointY;
 
-        if (!this.repDoing) {
-            this.repDoing = true;
+        if (!this.repInit && this.repDoing) {
+            this.repInit = true;
             let delay = 400;
             while (this.repDoing) {
                 this.handleClick(pointX, pointY);
@@ -529,7 +542,7 @@ class TextPage extends Vue {
                 if (delay > 15)
                     delay *= 0.8;
             }
-            this.repDoing = false;
+            this.repInit = false;
         }
     }
 
@@ -543,12 +556,18 @@ class TextPage extends Vue {
             const touch = event.touches[0];
             const x = touch.pageX - this.canvas.offsetLeft;
             const y = touch.pageY - this.canvas.offsetTop;
-            if (this.handleClick(x, y))
+            if (this.handleClick(x, y)) {
+                this.repDoing = true;
                 this.debouncedStartClickRepeat(x, y);
+            }
         }
     }
 
     onTouchEnd() {
+        this.endClickRepeat();
+    }
+
+    onTouchCancel() {
         this.endClickRepeat();
     }
 
@@ -557,8 +576,10 @@ class TextPage extends Vue {
         if (event.button == 0) {
             const x = event.pageX - this.canvas.offsetLeft;
             const y = event.pageY - this.canvas.offsetTop;
-            if (this.handleClick(x, y))
+            if (this.handleClick(x, y)) {
+                this.repDoing = true;
                 this.debouncedStartClickRepeat(x, y);
+            }
         } else if (event.button == 2) {
             this.doToolBarToggle();
         }
@@ -600,7 +621,6 @@ class TextPage extends Vue {
                 return false;
             }
         }
-
     }
 
     handleClick(pointX, pointY) {
@@ -651,7 +671,7 @@ class TextPage extends Vue {
                 // Nothing
         }
 
-        return !!action;
+        return (action && action != 'Menu');
    }
 
 }
