@@ -97,6 +97,7 @@ class Reader extends Vue {
     loaderActive = false;
     progressActive = false;
     bookPos = null;
+    allowUrlParamBookPos = true;
 
     created() {
         this.commit = this.$store.commit;
@@ -136,11 +137,12 @@ class Reader extends Vue {
     }
 
     updateRoute(isNewRoute) {
-        const pos = (this.bookPos != undefined ? `__p=${this.bookPos}&` : '');
+        const pos = (this.bookPos != undefined && this.allowUrlParamBookPos ? `__p=${this.bookPos}&` : '');
         if (isNewRoute)
             this.$router.push(`/reader?${pos}url=${this.lastOpenedBook.url}`);
         else
             this.$router.replace(`/reader?${pos}url=${this.lastOpenedBook.url}`);
+
     }
 
     get routeParamUrl() {
