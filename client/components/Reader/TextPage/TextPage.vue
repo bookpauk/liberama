@@ -55,6 +55,10 @@ class TextPage extends Vue {
             this.$emit('book-pos-changed', {bookPos: newValue});
         }, 1000);
 
+        this.debouncedStartClickRepeat = _.debounce((x, y) => {
+            this.startClickRepeat(x, y);
+        }, 800);
+
         this.$root.$on('resize', () => {this.$nextTick(this.onResize)});
     }
 
@@ -512,46 +516,25 @@ class TextPage extends Vue {
         }
     }
 
-    async startClickRepeat(pointX, pointY, debounced) {
+    async startClickRepeat(pointX, pointY) {
         this.repX = pointX;
         this.repY = pointY;
 
-        if (!this.repInit) {
-            this.repInit = true;
-
-            this.repStart = true;
-            
-            if (!debounced)
-                await sleep(800);
-
-            if (this.debouncedRepStart) {
-                this.debouncedRepStart = false;
-                this.repInit = false;
-                await this.startClickRepeat(this.repX, this.repY, true);
+        if (!this.repDoing) {
+            this.repDoing = true;
+            let delay = 400;
+            while (this.repDoing) {
+                this.handleClick(pointX, pointY);
+                await sleep(delay);
+                if (delay > 15)
+                    delay *= 0.8;
             }
-
-            if (this.repStart) {
-                this.repDoing = true;
-
-                let delay = 400;
-                while (this.repDoing) {
-                    this.handleClick(pointX, pointY);
-                    await sleep(delay);
-                    if (delay > 15)
-                        delay *= 0.8;
-                }
-            }
-
-            this.repInit = false;
-        } else {
-            this.debouncedRepStart = true;
+            this.repDoing = false;
         }
     }
 
     endClickRepeat() {
-        this.repStart = false;
         this.repDoing = false;
-        this.debouncedRepStart = false;
     }
 
     onTouchStart(event) {
@@ -561,7 +544,7 @@ class TextPage extends Vue {
             const x = touch.pageX - this.canvas.offsetLeft;
             const y = touch.pageY - this.canvas.offsetTop;
             if (this.handleClick(x, y))
-                this.startClickRepeat(x, y);
+                this.debouncedStartClickRepeat(x, y);
         }
     }
 
@@ -575,7 +558,7 @@ class TextPage extends Vue {
             const x = event.pageX - this.canvas.offsetLeft;
             const y = event.pageY - this.canvas.offsetTop;
             if (this.handleClick(x, y))
-                this.startClickRepeat(x, y);
+                this.debouncedStartClickRepeat(x, y);
         } else if (event.button == 2) {
             this.doToolBarToggle();
         }
