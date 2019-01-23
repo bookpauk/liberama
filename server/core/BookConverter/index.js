@@ -227,23 +227,43 @@ class BookConverter {
 
         let inText = false;
         let center = false;
+        //let italic = false;
+        //let bold = false;
+        let node = {};
 
         const newParagraph = () => {
-            pars.push({_n: 'p', _t: ''});
+            node = {_n: 'p', _t: ''};
+            pars.push(node);
         };
 
         const newSubTitle = () => {
-            pars.push({_n: 'subtitle', _t: ''});
+            node = {_n: 'subtitle', _t: ''};
+            pars.push(node);
+        };
+
+        const newItalic = () => {
+            let n = {_n: 'emphasis', _t: ''};
+            if (!node._a)
+                node._a = [];
+            node._a.push(n);
+            node = n;
+        };
+
+        const newBold = () => {
+            let n = {_n: 'strong', _t: ''};
+            if (!node._a)
+                node._a = [];
+            node._a.push(n);
+            node = n;
         };
 
         const growParagraph = (text) => {
-            const l = pars.length;
-            if (l) {
-                if (pars[l - 1]._t == '')
-                    text = text.trimLeft();
-                pars[l - 1]._t += text;
-            }
+            if (node._t == '')
+                text = text.trimLeft();
+            node._t += text;
         };
+
+        newParagraph();
 
         const parser = new EasySAXParser();
 
@@ -261,16 +281,18 @@ class BookConverter {
 
                 switch (elemName) {
                     case 'i':
-                        growParagraph('<emphasis>');
+                        newItalic();
+                        //italic = true;
                         break;
                     case 'b':
-                        growParagraph('<strong>');
+                        newBold();
+                        //bold = true;
                         break;
                     case 'div':
                         var a = getAttr();
                         if (a && a.align == 'center') {
-                            center = true;
                             newSubTitle();
+                            center = true;
                         }
                         break;
                 }
@@ -297,10 +319,10 @@ class BookConverter {
             } else {
                 switch (elemName) {
                     case 'i':
-                        growParagraph('</emphasis>');
+                        //italic = false;
                         break;
                     case 'b':
-                        growParagraph('</strong>');
+                        //bold = false;
                         break;
                     case 'div':
                         center = false;
@@ -397,17 +419,17 @@ class BookConverter {
                 throw new Error(`malformed fb2 object`);
 
             out += `<${name}>`;
-            if (node.hasOwnProperty('_t')) {
+            if (node.hasOwnProperty('_t'))
                 out += node._t;
-            } else {
-                for (let nodeName in node) {
-                    if (nodeName == '_n')
-                        continue;
 
-                    const n = node[nodeName];
-                    out += this.formatFb2Node(n, nodeName);
-                }
+            for (let nodeName in node) {
+                if (nodeName == '_n' || nodeName == '_t')
+                    continue;
+
+                const n = node[nodeName];
+                out += this.formatFb2Node(n, nodeName);
             }
+            
             out += `</${name}>`;
         }
         return out;
