@@ -240,11 +240,11 @@ class TextPage extends Vue {
     }
 
     get canvasStyle1() {
-        return (this.activeCanvas ? {display: 'block'} : {display: 'none'});
+        return (this.activeCanvas ? {'z-index': 11} : {'z-index': 10});
     }
 
     get canvasStyle2() {
-        return (this.activeCanvas ? {display: 'none'} : {display: 'block'});
+        return (this.activeCanvas ? {'z-index': 10} : {'z-index': 11});
     }
     
     draw(immediate) {
