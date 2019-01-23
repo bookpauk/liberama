@@ -74,11 +74,6 @@ class TextPage extends Vue {
     }
 
     async calcDrawProps() {
-/*        this.canvas1.style.left = '0px';
-        this.canvas1.style.top = '0px';
-        this.canvas2.style.left = '0px';
-        this.canvas2.style.top = '0px';
-*/
         this.context1 = this.canvas1.getContext('2d');
         this.context2 = this.canvas2.getContext('2d');
 
@@ -125,7 +120,7 @@ class TextPage extends Vue {
             this.parsed.fontByStyle = this.fontByStyle;
         }
 
-        this.statusBarColor = this.hex2rgba(this.textColor, 0.5);
+        this.statusBarColor = this.hex2rgba(this.textColor, this.statusBarColorAlpha);
         this.currentTransition = '';
         this.pageChangeDirectionDown = true;
 
@@ -177,6 +172,7 @@ class TextPage extends Vue {
         this.showStatusBar = true;
         this.statusBarTop = false;// top, bottom
         this.statusBarHeight = 20;// px
+        this.statusBarColorAlpha = 0.4;
 
         this.pageChangeTransition = '';// '' - нет, downShift, rightShift, thaw - протаивание, blink - мерцание
         this.pageChangeTransitionSpeed = 50; //0-100%
