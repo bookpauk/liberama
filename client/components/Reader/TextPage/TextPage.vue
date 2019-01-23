@@ -59,6 +59,10 @@ class TextPage extends Vue {
             this.startClickRepeat(x, y);
         }, 800);
 
+        this.debouncedPrepareNextPage = _.debounce(() => {
+            this.prepareNextPage();
+        }, 100);
+
         this.$root.$on('resize', () => {this.$nextTick(this.onResize)});
         this.mobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry/i.test(navigator.userAgent);
     }
@@ -258,10 +262,12 @@ class TextPage extends Vue {
             if (this.pageChangeDirectionDown && this.pagePrepared && this.bookPos == this.bookPosPrepared) {
                 this.linesDown = this.linesDownNext;
                 this.linesUp = this.linesUpNext;
-                this.prepareNextPage();
+                this.pagePrepared = false;
+                this.debouncedPrepareNextPage();
             } else {
                 this.drawPage(context, this.bookPos);
-                this.prepareNextPage();
+                this.pagePrepared = false;
+                this.debouncedPrepareNextPage();
             }
 
             if (this.currentTransition) {
@@ -405,12 +411,9 @@ class TextPage extends Vue {
         if (!this.book || !this.parsed.textLength)
             return;
         
-        this.pagePrepared = false;
-        this.cancelPrepare = false;
         if (!this.preparing) {
             this.preparing = true;
 
-            this.pagePrepared = false;            
             (async() => {
                 await sleep(100);
                 if (this.cancelPrepare) {
@@ -432,8 +435,6 @@ class TextPage extends Vue {
 
                 this.preparing = false;
             })();
-        } else {
-            this.cancelPrepare = true;
         }
     }
 
@@ -553,8 +554,9 @@ class TextPage extends Vue {
         this.endClickRepeat();
         if (event.touches.length == 1) {
             const touch = event.touches[0];
-            const x = touch.pageX - this.canvas.offsetLeft;
-            const y = touch.pageY - this.canvas.offsetTop;
+            const rect = event.target.getBoundingClientRect();
+            const x = touch.pageX - rect.left;
+            const y = touch.pageY - rect.top;
             if (this.handleClick(x, y)) {
                 this.repDoing = true;
                 this.debouncedStartClickRepeat(x, y);
@@ -579,11 +581,9 @@ class TextPage extends Vue {
             return;
         this.endClickRepeat();
         if (event.button == 0) {
-            const x = event.pageX - this.canvas.offsetLeft;
-            const y = event.pageY - this.canvas.offsetTop;
-            if (this.handleClick(x, y)) {
+            if (this.handleClick(event.offsetX, event.offsetY)) {
                 this.repDoing = true;
-                this.debouncedStartClickRepeat(x, y);
+                this.debouncedStartClickRepeat(event.offsetX, event.offsetY);
             }
         } else if (event.button == 2) {
             this.doToolBarToggle();
@@ -692,10 +692,12 @@ class TextPage extends Vue {
     margin: 0;
     padding: 0;
     overflow: hidden;
+    position: relative;
 }
 
 .canvas {
     margin: 0;
     padding: 0;
+    position: absolute;
 }
 </style>
