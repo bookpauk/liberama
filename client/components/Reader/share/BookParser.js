@@ -379,7 +379,6 @@ export default class BookParser {
                 text: String,
             }
         }*/
-        
         let parts = this.splitToStyle(para.text);
 
         let line = {begin: para.offset, parts: []};
@@ -390,7 +389,7 @@ export default class BookParser {
         let prevW = 0;
         let j = 0;//номер строки
         let style = {};
-        let ofs = -1;
+        let ofs = 0;
         // тут начинается самый замес, перенос по слогам и стилизация
         for (const part of parts) {
             const words = part.text.split(' ');
@@ -450,7 +449,10 @@ export default class BookParser {
                             prevW -= this.measureText(' ', style);
                         }
                     }
+
                     line.end = para.offset + ofs - wordTail.length - 1;
+                    if (line.end - line.begin < 0)
+                        console.error(`Parse error, empty line in paragraph ${paraIndex}`);
                     line.width = prevW;
                     line.first = (j == 0);
                     line.last = false;
@@ -482,6 +484,8 @@ export default class BookParser {
             }
         }
         line.end = para.offset + para.length - 1;
+        if (line.end - line.begin < 0)
+            console.error(`Parse error, empty line in paragraph ${paraIndex}`);
         line.width = prevW;
         line.first = (j == 0);
         line.last = true;
