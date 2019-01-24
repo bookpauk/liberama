@@ -168,7 +168,7 @@ class TextPage extends Vue {
         //preloaded fonts
         this.fontShifts = {//%
             ReaderDefault: 0,
-            Arial: 5,
+            Arial: 10,
             ComicSansMS: -12,
             OpenSans: 0,
             Roboto: 0,
@@ -186,8 +186,8 @@ class TextPage extends Vue {
         this.textColor = '#000000';
         this.backgroundColor = '#478355';
         this.fontStyle = '';// 'bold','italic'
-        this.fontSize = 35;// px
-        this.fontName = 'ComicSansMS';
+        this.fontSize = 33;// px
+        this.fontName = 'Tahoma';
         this.lineInterval = 7;// px, межстрочный интервал
         this.textAlignJustify = true;// выравнивание по ширине
         this.p = 50;// px, отступ параграфа
@@ -197,7 +197,7 @@ class TextPage extends Vue {
 
         this.showStatusBar = true;
         this.statusBarTop = false;// top, bottom
-        this.statusBarHeight = 20;// px
+        this.statusBarHeight = 19;// px
         this.statusBarColorAlpha = 0.4;
 
         this.pageChangeTransition = '';// '' - нет, downShift, rightShift, thaw - протаивание, blink - мерцание
