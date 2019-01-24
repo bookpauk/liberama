@@ -346,7 +346,8 @@ export default class BookParser {
     parsePara(paraIndex) {
         const para = this.para[paraIndex];
 
-        if (para.parsed && 
+        if (!this.force &&
+            para.parsed && 
             para.parsed.w === this.w &&
             para.parsed.p === this.p &&
             para.parsed.wordWrap === this.wordWrap &&

@@ -1,9 +1,9 @@
 <template>
     <div ref="main" class="main">
-        <div v-show="activeCanvas" class="layout">
+        <div v-show="toggleLayout" class="layout">
             <div v-html="page1"></div>
         </div>
-        <div v-show="!activeCanvas" class="layout">
+        <div v-show="!toggleLayout" class="layout">
             <div v-html="page2"></div>
         </div>
         <div v-show="showStatusBar" ref="statusBar" class="layout">
@@ -17,7 +17,8 @@
                 @click.prevent.stop="onStatusBarClick"></div>
             <div v-show="fontsLoading" ref="fontsLoading"></div>
         </div>
-        <canvas ref="offscreenCanvas" style="display: none"></canvas>
+        <!-- невидимым делать нельзя, вовремя не подгружаютя шрифты -->
+        <canvas ref="offscreenCanvas" class="layout" style="width: 0px; height: 0px"></canvas>
     </div>
 </template>
 
@@ -41,7 +42,7 @@ export default @Component({
     },
 })
 class TextPage extends Vue {
-    activeCanvas = false;
+    toggleLayout = false;
     showStatusBar = false;
     page1 = null;
     page2 = null;
@@ -115,8 +116,6 @@ class TextPage extends Vue {
         this.$refs.layoutEvents.style.width = this.realWidth + 'px';
         this.$refs.layoutEvents.style.height = this.realHeight + 'px';
 
-        this.activeCanvas = false;
-
         this.w = this.realWidth - 2*this.indent;
         this.h = this.realHeight - (this.showStatusBar ? this.statusBarHeight : 0);
         this.lineHeight = this.fontSize + this.lineInterval;
@@ -131,7 +130,7 @@ class TextPage extends Vue {
         }
 
         //сообщение "Загрузка шрифтов..."
-        const flText = 'Загрузка шрифтов...';
+        const flText = 'Загрузка шрифта...';
         this.$refs.fontsLoading.innerHTML = flText;
         const fontsLoadingStyle = this.$refs.fontsLoading.style;
         fontsLoadingStyle.position = 'absolute';
@@ -172,18 +171,54 @@ class TextPage extends Vue {
         return this.context.measureText(text).width;
     }
 
-    async loadFonts() {
+    async checkLoadedFonts() {
         let loaded = await Promise.all(this.fontList.map(font => document.fonts.check(font)));
         if (loaded.some(r => !r)) {
             loaded = await Promise.all(this.fontList.map(font => document.fonts.load(font)));
-            await document.fonts.ready;
             if (loaded.some(r => !r.length))
                 throw new Error('some font not loaded');
         }
     }
 
+    async loadFonts() {
+        this.fontsLoading = true;
+
+        if (!this.fontsLoaded)
+            this.fontsLoaded = {};
+        //загрузка дин.шрифта
+        const loaded = this.fontsLoaded[this.fontCssUrl];
+        if (this.fontCssUrl && !loaded) {
+            loadCSS(this.fontCssUrl);
+            this.fontsLoaded[this.fontCssUrl] = 1;
+        }
+
+        const waitingTime = 10*1000;
+        const delay = 100;
+        let i = 0;
+        //ждем шрифты
+        while (i < waitingTime/delay) {
+            i++;
+            try {
+                await this.checkLoadedFonts();
+                i = waitingTime;
+            } catch (e) {
+                await sleep(delay);
+            }
+        }
+        if (i !== waitingTime) {
+            this.$notify.error({
+                title: 'Ошибка загрузки',
+                message: 'Некоторые шрифты не удалось загрузить'
+            });
+        }
+
+        this.fontsLoading = false;
+    }
+
     showBook() {
         this.$refs.main.focus();
+
+        this.toggleLayout = false;
         this.book = null;
         this.meta = null;
         this.fb2 = null;
@@ -196,7 +231,7 @@ class TextPage extends Vue {
         this.textColor = '#000000';
         this.backgroundColor = '#478355';
         this.fontStyle = '';// 'bold','italic'
-        this.fontSize = 33;// px
+        this.fontSize = 35;// px
         this.fontName = 'Archivo';
         this.fontCssUrl = '';
         this.lineInterval = 7;// px, межстрочный интервал
@@ -243,34 +278,20 @@ class TextPage extends Vue {
                 this.parsed = parsed;
                 this.calcDrawProps();
 
-                //загрузка дин.шрифта
-                if (this.fontCssUrl)
-                    loadCSS(this.fontCssUrl);
+                await this.loadFonts();
 
-                const waitingTime = 10*1000;
-                const delay = 100;
-                let i = 0;
-                this.fontsLoading = true;
-                //ждем шрифты
-                while (i < waitingTime/delay) {
-                    i++;
-                    try {
-                        await this.loadFonts();
-                        i = waitingTime;
-                    } catch (e) {
-                        await sleep(delay);
-                    }
-                }
-                this.fontsLoading = false;
-                if (i !== waitingTime) {
-                    this.$notify.error({
-                        title: 'Ошибка загрузки',
-                        message: 'Некоторые шрифты не удалось загрузить'
-                    });
-                }
-
-                this.draw();
+                this.draw(true);
                 this.refreshTime();
+
+                // шрифты хрен знает когда подгружаются, поэтому
+                let i = 0;
+                this.parsed.force = true;
+                while (i < 10) {
+                    this.draw(true);
+                    await sleep(1000);
+                    i++;
+                }
+                this.parsed.force = false;
             })();
         }
     }
@@ -294,10 +315,10 @@ class TextPage extends Vue {
             return;
         }
 
-        this.activeCanvas = !this.activeCanvas;
+        this.toggleLayout = !this.toggleLayout;
 
-        if (immediate) {            
-            if (this.activeCanvas)
+        if (immediate || (this.parsed && this.parsed.force)) {
+            if (this.toggleLayout)
                 this.page1 = this.drawPage(this.bookPos);
             else
                 this.page2 = this.drawPage(this.bookPos);
@@ -308,7 +329,7 @@ class TextPage extends Vue {
                 this.pagePrepared = false;
                 this.debouncedPrepareNextPage();
             } else {
-                if (this.activeCanvas)
+                if (this.toggleLayout)
                     this.page1 = this.drawPage(this.bookPos);
                 else
                     this.page2 = this.drawPage(this.bookPos);
@@ -477,7 +498,7 @@ class TextPage extends Vue {
                 if (i >= 0 && this.linesDown.length > i) {
                     this.bookPosPrepared = this.linesDown[i].begin;
 
-                    if (this.activeCanvas)
+                    if (this.toggleLayout)
                         this.page2 = this.drawPage(this.bookPosPrepared, true);//наоборот
                     else
                         this.page1 = this.drawPage(this.bookPosPrepared, true);

@@ -286,4 +286,9 @@ body, html, #app {
   src: url('fonts/archivo.woff2') format('woff2');
 }
 
+@font-face {
+  font-family: 'Rubik';
+  src: url('fonts/rubik.woff2') format('woff2');
+}
+
 </style>
