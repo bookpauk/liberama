@@ -15,6 +15,7 @@
             oncontextmenu="return false;">
             <div v-show="showStatusBar" v-html="statusBarClickable" @mousedown.prevent.stop @touchstart.stop
                 @click.prevent.stop="onStatusBarClick"></div>
+            <div v-show="fontsLoading" ref="fontsLoading"></div>
         </div>
         <canvas ref="offscreenCanvas" style="display: none"></canvas>
     </div>
@@ -46,6 +47,7 @@ class TextPage extends Vue {
     page2 = null;
     statusBar = null;
     statusBarClickable = null;
+    fontsLoading = null;
 
     lastBook = null;
     bookPos = 0;
@@ -94,6 +96,19 @@ class TextPage extends Vue {
     }
 
     async calcDrawProps() {
+        //preloaded fonts
+        this.fontShifts = {//%
+            ReaderDefault: 0,
+            Roboto: 0,
+            OpenSans: 0
+        }
+        if (!this.fontShifts.hasOwnProperty(this.fontName))
+            this.fontShifts[this.fontName] = 0;
+        this.fontList = [];
+        for (let fontName in this.fontShifts)
+            this.fontList.push(`12px ${fontName}`);
+
+        //widths
         this.realWidth = this.$refs.main.clientWidth;
         this.realHeight = this.$refs.main.clientHeight;
 
@@ -115,6 +130,16 @@ class TextPage extends Vue {
             this.parsed.measureText = this.measureText;
         }
 
+        //сообщение "Загрузка шрифтов..."
+        const flText = 'Загрузка шрифтов...';
+        this.$refs.fontsLoading.innerHTML = flText;
+        const fontsLoadingStyle = this.$refs.fontsLoading.style;
+        fontsLoadingStyle.position = 'absolute';
+        fontsLoadingStyle.fontSize = this.fontSize + 'px';
+        fontsLoadingStyle.top = (this.realHeight/2 - 2*this.fontSize) + 'px';
+        fontsLoadingStyle.left = (this.realWidth - this.measureText(flText, {}))/2 + 'px';
+
+        //stuff
         this.statusBarColor = this.hex2rgba(this.textColor, this.statusBarColorAlpha);
         this.currentTransition = '';
         this.pageChangeDirectionDown = true;
@@ -165,17 +190,6 @@ class TextPage extends Vue {
 
         this.linesUp = null;
         this.linesDown = null;
-
-        //preloaded fonts
-        this.fontShifts = {//%
-            ReaderDefault: 0,
-            Roboto: 0,
-            OpenSans: 0,
-            XoloniumRegular: 0,
-        }
-        this.fontList = [];
-        for (let fontName in this.fontShifts)
-            this.fontList.push(`12px ${fontName}`);
 
         //default draw props
         this.textColor = '#000000';
@@ -228,15 +242,30 @@ class TextPage extends Vue {
                 this.parsed = parsed;
                 this.calcDrawProps();
 
-                loadCSS(this.fontCssUrl);
-                let done = false;
-                while (!done) {
+                //загрузка дин.шрифта
+                if (this.fontCssUrl)
+                    loadCSS(this.fontCssUrl);
+
+                const waitingTime = 10*1000;
+                const delay = 100;
+                let i = 0;
+                this.fontsLoading = true;
+                //ждем шрифты
+                while (i < waitingTime/delay) {
+                    i++;
                     try {
                         await this.loadFonts();
-                        done = true;
+                        i = waitingTime;
                     } catch (e) {
-                        await sleep(100);
+                        await sleep(delay);
                     }
+                }
+                this.fontsLoading = false;
+                if (i !== waitingTime) {
+                    this.$notify.error({
+                        title: 'Ошибка загрузки',
+                        message: 'Некоторые шрифты не удалось загрузить'
+                    });
                 }
 
                 this.draw();
