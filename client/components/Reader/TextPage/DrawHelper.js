@@ -3,75 +3,85 @@ export default class DrawHelper {
         return `${size}px ${this.fontName}`;
     }
 
-    drawPercentBar(context, x, y, w, h, bookPos, textLength) {
+    drawPercentBar(x, y, w, h, font, bookPos, textLength) {
         const pad = 3;
         const fh = h - 2*pad;
         const fh2 = fh/2;
 
         const t1 = `${Math.floor((bookPos + 1)/1000)}k/${Math.floor(textLength/1000)}k`;
-        const w1 = context.measureText(t1).width + fh2;
+        const w1 = this.measureTextFont(t1, font) + fh2;
         const read = (bookPos + 1)/textLength;
         const t2 = `${(read*100).toFixed(2)}%`;
-        const w2 = context.measureText(t2).width;
+        const w2 = this.measureTextFont(t2, font);
         let w3 = w - w1 - w2;
 
+        let out = '';
         if (w1 + w2 <= w)
-            context.fillText(t1, x, y + h - 2);
+            out += this.fillText(t1, x, y, font);
         
         if (w1 + w2 + w3 <= w && w3 > (10 + fh2)) {
             const barWidth = w - w1 - w2 - fh2;
-            context.strokeRect(x + w1, y + pad + 1, barWidth, fh - 2);
-            context.fillRect(x + w1 + 2, y + pad + 3, (barWidth - 4)*read, fh - 6);
+            out += this.strokeRect(x + w1, y + pad - 2, barWidth, fh - 4, this.statusBarColor);
+            out += this.fillRect(x + w1 + 2, y + pad, (barWidth - 4)*read, fh - 6, this.statusBarColor);
         }
 
         if (w1 <= w)
-            context.fillText(t2, x + w1 + w3, y + h - 2);
+            out += this.fillText(t2, x + w1 + w3, y, font);
+
+        return out;
     }
 
-    async drawStatusBar(context, statusBarTop, statusBarHeight, statusBarColor, bookPos, textLength, title) {
-        const y = (statusBarTop ? 1 : this.realHeight - statusBarHeight);
+    drawStatusBar(statusBarTop, statusBarHeight, bookPos, textLength, title) {
 
-        context.fillStyle = this.backgroundColor;
-        context.fillRect(0, y, this.realWidth, statusBarHeight);
+        let out = `<div class="layout" style="` + 
+            `width: ${this.realWidth}px; height: ${statusBarHeight}px; ` + 
+            `color: ${this.statusBarColor}; background-color: ${this.backgroundColor}">`;
 
-        context.font = 'bold ' + this.fontBySize(statusBarHeight - 6);
-        context.fillStyle = statusBarColor;
-        context.strokeStyle = statusBarColor;
+        const fontSize = statusBarHeight - 6;
+        const font = 'bold ' + this.fontBySize(fontSize);
 
-        context.fillRect(0, (statusBarTop ? statusBarHeight : y), this.realWidth, 1);
+        out += this.fillRect(0, (statusBarTop ? statusBarHeight : 1), this.realWidth, 1, this.statusBarColor);
 
         const date = new Date();
-        const time = `  ${date.getHours().toString().padStart(2, '0')}:${date.getMinutes().toString().padStart(2, '0')}  `;
-        const timeW = context.measureText(time).width;
-        context.fillText(time, this.realWidth - timeW, y + statusBarHeight - 2);
+        const time = `${date.getHours().toString().padStart(2, '0')}:${date.getMinutes().toString().padStart(2, '0')}`;
+        const timeW = this.measureTextFont(time, font);
+        out += this.fillText(time, this.realWidth - timeW - fontSize, 3, font);
 
-        title = '  ' + title;
-        context.fillText(this.fittingString(context, title, this.realWidth/2 - 3), 0, y + statusBarHeight - 2);
+        out += this.fillText(this.fittingString(title, this.realWidth/2 - fontSize - 3, font), fontSize, 3, font);
 
-        this.drawPercentBar(context, this.realWidth/2, y, this.realWidth/2 - timeW, statusBarHeight, bookPos, textLength);
+        out += this.drawPercentBar(this.realWidth/2, 3, this.realWidth/2 - timeW - 2*fontSize, statusBarHeight, font, bookPos, textLength);
+        
+        out += '</div>';
+        return out;
     }
 
-    fittingString(context, str, maxWidth) {
-        let w = context.measureText(str).width;
+    fittingString(str, maxWidth, font) {
+        let w = this.measureTextFont(str, font);
         const ellipsis = '…';
-        const ellipsisWidth = context.measureText(ellipsis).width;
+        const ellipsisWidth = this.measureTextFont(ellipsis, font);
         if (w <= maxWidth || w <= ellipsisWidth) {
             return str;
         } else {
             let len = str.length;
             while (w >= maxWidth - ellipsisWidth && len-- > 0) {
                 str = str.substring(0, len);
-                w = context.measureText(str).width;
+                w = this.measureTextFont(str, font);
             }
             return str + ellipsis;
         }
     }
 
     fillText(text, x, y, font) {
-        /*this.context1.textAlign = 'left';
-        this.context2.textAlign = 'left';
-        this.context1.textBaseline = 'bottom';
-        this.context2.textBaseline = 'bottom';*/
-        return `<div style="position: absolute; left: ${x}px; top: ${y}px; font: ${font}">${text}</div>`;
+        return `<div style="position: absolute; border: 1px solid black; left: ${x}px; top: ${y}px; font: ${font}">${text}</div>`;
+    }
+
+    fillRect(x, y, w, h, color) {
+        return `<div style="margin: 0; padding: 0; position: absolute; left: ${x}px; top: ${y}px; ` +
+            `width: ${w}px; height: ${h}px; background-color: ${color}"></div>`; 
+    }
+
+    strokeRect(x, y, w, h, color) {
+        return `<div style="margin: 0; padding: 0; position: absolute; left: ${x}px; top: ${y}px; ` +
+            `width: ${w}px; height: ${h}px; border: 1px solid ${color}"></div>`; 
     }
 }

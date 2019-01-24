@@ -6,6 +6,9 @@
         <div v-show="!activeCanvas" class="layout">
             <div v-html="page2"></div>
         </div>
+        <div v-show="showStatusBar" ref="statusBar" class="layout">
+            <div v-html="statusBar"></div>
+        </div>
         <!--canvas :style="canvasStyle2" ref="canvas2" class="canvas" @mousedown.prevent.stop="onMouseDown" @mouseup.prevent.stop="onMouseUp"
             @wheel.prevent.stop="onMouseWheel"
             @touchstart.stop="onTouchStart" @touchend.stop="onTouchEnd" @touchcancel.prevent.stop="onTouchCancel"
@@ -40,8 +43,10 @@ export default @Component({
 })
 class TextPage extends Vue {
     activeCanvas = false;
+    showStatusBar = false;
     page1 = null;
     page2 = null;
+    statusBar = null;
 
     lastBook = null;
     bookPos = 0;
@@ -71,6 +76,10 @@ class TextPage extends Vue {
         this.debouncedPrepareNextPage = _.debounce(() => {
             this.prepareNextPage();
         }, 100);
+
+        this.debouncedDrawStatusBar = _.throttle(() => {
+            this.drawStatusBar();
+        }, 60);        
 
         this.$root.$on('resize', () => {this.$nextTick(this.onResize)});
         this.mobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry/i.test(navigator.userAgent);
@@ -118,10 +127,20 @@ class TextPage extends Vue {
         this.drawHelper.backgroundColor = this.backgroundColor;
         this.drawHelper.statusBarColor = this.statusBarColor;
         this.drawHelper.fontName = this.fontName;
+        this.drawHelper.measureText = this.measureText;
+        this.drawHelper.measureTextFont = this.measureTextFont;
+
+        this.$refs.statusBar.style.left = '0px';
+        this.$refs.statusBar.style.top = (this.statusBarTop ? 1 : this.realHeight - this.statusBarHeight) + 'px';
     }
 
     measureText(text, style) {// eslint-disable-line no-unused-vars
         this.context.font = this.fontByStyle(style);
+        return this.context.measureText(text).width;
+    }
+
+    measureTextFont(text, font) {// eslint-disable-line no-unused-vars
+        this.context.font = font;
         return this.context.measureText(text).width;
     }
 
@@ -153,7 +172,7 @@ class TextPage extends Vue {
         this.backgroundColor = '#478355';
         this.fontStyle = '';// 'bold','italic'
         this.fontSize = 35;// px
-        this.fontName = 'Arial';
+        this.fontName = 'ComicSansMS';
         this.lineInterval = 7;// px, межстрочный интервал
         this.textAlignJustify = true;// выравнивание по ширине
         this.p = 50;// px, отступ параграфа
@@ -201,7 +220,7 @@ class TextPage extends Vue {
                 await this.loadFonts();
 
                 this.draw();
-                //this.refreshTime();
+                this.refreshTime();
             })();
         }
     }
@@ -259,6 +278,8 @@ class TextPage extends Vue {
             this.currentTransition = '';
             this.pageChangeDirectionDown = false;//true только если PgDown
         }
+
+        this.debouncedDrawStatusBar();
     }
 
     drawPage(bookPos, nextChangeLines) {
@@ -356,23 +377,19 @@ class TextPage extends Vue {
         }
 
         out += '</div>';
-
-        //this.drawStatusBar(context, lines);
         return out;
     }
 
-    /*drawStatusBar(context, lines) {
-        if (!lines)
-            lines = this.linesDown;
-
-        if (this.showStatusBar) {
+    drawStatusBar() {
+        if (this.showStatusBar && this.linesDown) {
+            const lines = this.linesDown;
             let i = this.pageLineCount;
             if (this.keepLastToFirst)
                 i--;
             i = (i > lines.length - 1 ? lines.length - 1 : i);
 
-            this.drawHelper.drawStatusBar(context, this.statusBarTop, this.statusBarHeight, 
-                this.statusBarColor, lines[i].end, this.parsed.textLength, this.title);
+            this.statusBar = this.drawHelper.drawStatusBar(this.statusBarTop, this.statusBarHeight, 
+                lines[i].end, this.parsed.textLength, this.title);
         }
     }
 
@@ -382,12 +399,12 @@ class TextPage extends Vue {
             await sleep(60*1000);
 
             if (this.book && this.parsed.textLength) {
-                this.drawStatusBar(this.context);
+                this.debouncedDrawStatusBar();
             }
             this.timeRefreshing = false;
             this.refreshTime();
         }
-    }*/
+    }
 
     prepareNextPage() {
         // подготовка следующей страницы заранее        
