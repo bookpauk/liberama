@@ -250,7 +250,7 @@ class TextPage extends Vue {
         this.pageChangeTransitionSpeed = 50; //0-100%
 
         this.calcDrawProps();
-        this.draw(true);// пока не загрузили, очистим канвас
+        this.draw();// пока не загрузили, очистим канвас
 
         if (this.lastBook) {
             (async() => {
@@ -280,14 +280,14 @@ class TextPage extends Vue {
 
                 await this.loadFonts();
 
-                this.draw(true);
+                this.draw();
                 this.refreshTime();
 
                 // шрифты хрен знает когда подгружаются, поэтому
                 let i = 0;
                 this.parsed.force = true;
                 while (i < 10) {
-                    this.draw(true);
+                    this.draw();
                     await sleep(1000);
                     i++;
                 }
@@ -298,7 +298,7 @@ class TextPage extends Vue {
 
     onResize() {
         this.calcDrawProps();
-        this.draw(true);
+        this.draw();
     }
 
     get font() {
@@ -309,7 +309,7 @@ class TextPage extends Vue {
         return `${style.italic ? 'italic' : ''} ${style.bold ? 'bold' : ''} ${this.fontSize}px ${this.fontName}`;
     }
 
-    draw(immediate) {
+    draw() {
         if (this.book && this.bookPos > 0 && this.bookPos >= this.parsed.textLength) {
             this.doEnd();
             return;
@@ -317,39 +317,30 @@ class TextPage extends Vue {
 
         this.toggleLayout = !this.toggleLayout;
 
-        if (immediate || (this.parsed && this.parsed.force)) {
+        if (this.pageChangeDirectionDown && this.pagePrepared && this.bookPos == this.bookPosPrepared) {
+            this.linesDown = this.linesDownNext;
+            this.linesUp = this.linesUpNext;
+        } else {
             if (this.toggleLayout)
                 this.page1 = this.drawPage(this.bookPos);
             else
                 this.page2 = this.drawPage(this.bookPos);
-        } else {
-            if (this.pageChangeDirectionDown && this.pagePrepared && this.bookPos == this.bookPosPrepared) {
-                this.linesDown = this.linesDownNext;
-                this.linesUp = this.linesUpNext;
-                this.pagePrepared = false;
-                this.debouncedPrepareNextPage();
-            } else {
-                if (this.toggleLayout)
-                    this.page1 = this.drawPage(this.bookPos);
-                else
-                    this.page2 = this.drawPage(this.bookPos);
-                this.pagePrepared = false;
-                this.debouncedPrepareNextPage();
-            }
-
-            if (this.currentTransition) {
-                //this.currentTransition
-                //this.pageChangeTransitionSpeed
-                //this.pageChangeDirectionDown  
-                
-                //curr to next transition
-                //пока заглушка
-            }
-
-            this.currentTransition = '';
-            this.pageChangeDirectionDown = false;//true только если PgDown
         }
 
+        if (this.currentTransition) {
+            //this.currentTransition
+            //this.pageChangeTransitionSpeed
+            //this.pageChangeDirectionDown  
+            
+            //curr to next transition
+            //пока заглушка
+        }
+
+        this.currentTransition = '';
+        this.pageChangeDirectionDown = false;//true только если PgDown
+
+        this.pagePrepared = false;
+        this.debouncedPrepareNextPage();
         this.debouncedDrawStatusBar();
     }
 
