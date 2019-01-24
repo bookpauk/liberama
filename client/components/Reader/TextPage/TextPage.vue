@@ -227,23 +227,25 @@ class TextPage extends Vue {
 
         this.activeCanvas = !this.activeCanvas;
 
-        immediate = true;
         if (immediate) {            
             if (this.activeCanvas)
                 this.page1 = this.drawPage(this.bookPos);
             else
                 this.page2 = this.drawPage(this.bookPos);
         } else {
-            /*if (this.pageChangeDirectionDown && this.pagePrepared && this.bookPos == this.bookPosPrepared) {
+            if (this.pageChangeDirectionDown && this.pagePrepared && this.bookPos == this.bookPosPrepared) {
                 this.linesDown = this.linesDownNext;
                 this.linesUp = this.linesUpNext;
                 this.pagePrepared = false;
                 this.debouncedPrepareNextPage();
             } else {
-                this.drawPage(context, this.bookPos);
+                if (this.activeCanvas)
+                    this.page1 = this.drawPage(this.bookPos);
+                else
+                    this.page2 = this.drawPage(this.bookPos);
                 this.pagePrepared = false;
                 this.debouncedPrepareNextPage();
-            }*/
+            }
 
             if (this.currentTransition) {
                 //this.currentTransition
@@ -408,8 +410,10 @@ class TextPage extends Vue {
                 if (i >= 0 && this.linesDown.length > i) {
                     this.bookPosPrepared = this.linesDown[i].begin;
 
-                    const ctx = (!this.activeCanvas ? this.context1 : this.context2);
-                    this.drawPage(ctx, this.bookPosPrepared, true);
+                    if (this.activeCanvas)
+                        this.page2 = this.drawPage(this.bookPosPrepared, true);//наоборот
+                    else
+                        this.page1 = this.drawPage(this.bookPosPrepared, true);
   
                     this.pagePrepared = true;
                 }
