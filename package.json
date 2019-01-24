@@ -63,6 +63,7 @@
     "detect-file-type": "^0.2.0",
     "element-ui": "^2.4.11",
     "express": "^4.16.4",
+    "fg-loadcss": "^2.1.0",
     "fs-extra": "^7.0.1",
     "got": "^9.5.1",
     "iconv-lite": "^0.4.24",

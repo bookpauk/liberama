@@ -24,6 +24,7 @@
 //-----------------------------------------------------------------------------
 import Vue from 'vue';
 import Component from 'vue-class-component';
+import {loadCSS} from 'fg-loadcss';
 import _ from 'lodash';
 import {sleep} from '../../../share/utils';
 
@@ -170,6 +171,7 @@ class TextPage extends Vue {
             ReaderDefault: 0,
             Roboto: 0,
             OpenSans: 0,
+            XoloniumRegular: 0,
         }
         this.fontList = [];
         for (let fontName in this.fontShifts)
@@ -180,8 +182,8 @@ class TextPage extends Vue {
         this.backgroundColor = '#478355';
         this.fontStyle = '';// 'bold','italic'
         this.fontSize = 33;// px
-        this.fontName = 'ReaderDefault';
-        this.fontCss = '';
+        this.fontName = 'XoloniumRegular';
+        this.fontCssUrl = 'https://fontlibrary.org/face/xolonium';
         this.lineInterval = 7;// px, межстрочный интервал
         this.textAlignJustify = true;// выравнивание по ширине
         this.p = 50;// px, отступ параграфа
@@ -226,8 +228,16 @@ class TextPage extends Vue {
                 this.parsed = parsed;
                 this.calcDrawProps();
 
-                //await this.loadFontCss();
-                await this.loadFonts();
+                loadCSS(this.fontCssUrl);
+                let done = false;
+                while (!done) {
+                    try {
+                        await this.loadFonts();
+                        done = true;
+                    } catch (e) {
+                        await sleep(100);
+                    }
+                }
 
                 this.draw();
                 this.refreshTime();
