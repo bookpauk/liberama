@@ -21,8 +21,8 @@ export default class DrawHelper {
         
         if (w1 + w2 + w3 <= w && w3 > (10 + fh2)) {
             const barWidth = w - w1 - w2 - fh2;
-            out += this.strokeRect(x + w1, y + pad - 2, barWidth, fh - 4, this.statusBarColor);
-            out += this.fillRect(x + w1 + 2, y + pad, (barWidth - 4)*read, fh - 6, this.statusBarColor);
+            out += this.strokeRect(x + w1, y + pad, barWidth, fh - 2, this.statusBarColor);
+            out += this.fillRect(x + w1 + 2, y + pad + 2, (barWidth - 4)*read, fh - 6, this.statusBarColor);
         }
 
         if (w1 <= w)
@@ -37,10 +37,10 @@ export default class DrawHelper {
             `width: ${this.realWidth}px; height: ${statusBarHeight}px; ` + 
             `color: ${this.statusBarColor}; background-color: ${this.backgroundColor}">`;
 
-        const fontSize = statusBarHeight - 6;
+        const fontSize = statusBarHeight*0.75;
         const font = 'bold ' + this.fontBySize(fontSize);
 
-        out += this.fillRect(0, (statusBarTop ? statusBarHeight : 1), this.realWidth, 1, this.statusBarColor);
+        out += this.fillRect(0, (statusBarTop ? statusBarHeight : 0), this.realWidth, 1, this.statusBarColor);
 
         const date = new Date();
         const time = `${date.getHours().toString().padStart(2, '0')}:${date.getMinutes().toString().padStart(2, '0')}`;
@@ -53,6 +53,12 @@ export default class DrawHelper {
         
         out += '</div>';
         return out;
+    }
+
+    statusBarClickable(statusBarTop, statusBarHeight) {
+        return `<div class="layout" style="position: absolute; ` + 
+            `left: 0px; top: ${statusBarTop ? 1 : this.realHeight - statusBarHeight + 1}px; ` +
+            `width: ${this.realWidth/2}px; height: ${statusBarHeight}px; cursor: pointer"></div>`;
     }
 
     fittingString(str, maxWidth, font) {
@@ -71,12 +77,13 @@ export default class DrawHelper {
         }
     }
 
-    fillTextShift(text, x, y, font, size) {
-        return this.fillText(text, x, y + size*this.fontShift, font);        
+    fillTextShift(text, x, y, font, size, css) {
+        return this.fillText(text, x, y + size*this.fontShift, font, css);        
     }
 
-    fillText(text, x, y, font) {
-        return `<div style="position: absolute; left: ${x}px; top: ${y}px; font: ${font}">${text}</div>`;
+    fillText(text, x, y, font, css) {
+        css = (css ? css : '');
+        return `<div style="position: absolute; left: ${x}px; top: ${y}px; font: ${font}; ${css}">${text}</div>`;
     }
 
     fillRect(x, y, w, h, color) {
@@ -86,6 +93,6 @@ export default class DrawHelper {
 
     strokeRect(x, y, w, h, color) {
         return `<div style="position: absolute; left: ${x}px; top: ${y}px; ` +
-            `width: ${w}px; height: ${h}px; border: 1px solid ${color}"></div>`; 
+            `width: ${w}px; height: ${h}px; box-sizing: border-box; border: 1px solid ${color}"></div>`; 
     }
 }

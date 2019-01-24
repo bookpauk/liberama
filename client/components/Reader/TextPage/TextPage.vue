@@ -1,5 +1,5 @@
 <template>
-    <div ref="main" class="main" @click.capture="onMouseClick">
+    <div ref="main" class="main">
         <div v-show="activeCanvas" class="layout">
             <div v-html="page1"></div>
         </div>
@@ -9,15 +9,12 @@
         <div v-show="showStatusBar" ref="statusBar" class="layout">
             <div v-html="statusBar"></div>
         </div>
-        <!--canvas :style="canvasStyle2" ref="canvas2" class="canvas" @mousedown.prevent.stop="onMouseDown" @mouseup.prevent.stop="onMouseUp"
-            @wheel.prevent.stop="onMouseWheel"
-            @touchstart.stop="onTouchStart" @touchend.stop="onTouchEnd" @touchcancel.prevent.stop="onTouchCancel"
-            oncontextmenu="return false;">
-        </canvas-->
         <div ref="layoutEvents" class="layout events" @mousedown.prevent.stop="onMouseDown" @mouseup.prevent.stop="onMouseUp"
             @wheel.prevent.stop="onMouseWheel"
             @touchstart.stop="onTouchStart" @touchend.stop="onTouchEnd" @touchcancel.prevent.stop="onTouchCancel"
             oncontextmenu="return false;">
+            <div v-show="showStatusBar" v-html="statusBarClickable" @mousedown.prevent.stop @touchstart.stop
+                @click.prevent.stop="onStatusBarClick"></div>
         </div>
         <canvas ref="offscreenCanvas" style="display: none"></canvas>
     </div>
@@ -47,6 +44,7 @@ class TextPage extends Vue {
     page1 = null;
     page2 = null;
     statusBar = null;
+    statusBarClickable = null;
 
     lastBook = null;
     bookPos = 0;
@@ -134,6 +132,8 @@ class TextPage extends Vue {
 
         this.$refs.statusBar.style.left = '0px';
         this.$refs.statusBar.style.top = (this.statusBarTop ? 1 : this.realHeight - this.statusBarHeight) + 'px';
+
+        this.statusBarClickable = this.drawHelper.statusBarClickable(this.statusBarTop, this.statusBarHeight);
     }
 
     measureText(text, style) {// eslint-disable-line no-unused-vars
@@ -169,7 +169,7 @@ class TextPage extends Vue {
         this.fontShifts = {//%
             ReaderDefault: 0,
             Arial: 5,
-            ComicSansMS: -10,
+            ComicSansMS: -12,
             OpenSans: 0,
             Roboto: 0,
             ArialNarrow: 0,
@@ -623,27 +623,8 @@ class TextPage extends Vue {
         }
     }
 
-    checkPointInStatusBar(pointX, pointY) {
-        let titleBar = {x1: 0, y1: 0, x2: this.realWidth/2, y2: this.statusBarHeight + 1};
-        if (!this.statusBarTop) {
-            titleBar.y1 += this.realHeight - this.statusBarHeight + 1;
-            titleBar.y2 += this.realHeight - this.statusBarHeight + 1;
-        }
-
-        if (pointX >= titleBar.x1 && pointX <= titleBar.x2 &&
-            pointY >= titleBar.y1 && pointY <= titleBar.y2) {
-            return true;
-        }
-        return false;
-    }
-
-    onMouseClick(event) {
-        if (this.showStatusBar && this.book) {
-            if (this.checkPointInStatusBar(event.offsetX, event.offsetY)) {
-                window.open(this.meta.url, '_blank');
-                return false;
-            }
-        }
+    onStatusBarClick() {
+        window.open(this.meta.url, '_blank');
     }
 
     handleClick(pointX, pointY) {
@@ -653,12 +634,6 @@ class TextPage extends Vue {
             100: {30: 'PgUp', 100: 'PgDown'}
         };
 
-        if (this.showStatusBar && this.book) {
-            if (this.checkPointInStatusBar(pointX, pointY)) {
-                return false;
-            }
-        }
-        
         const w = pointX/this.realWidth*100;
         const h = pointY/this.realHeight*100;
 
