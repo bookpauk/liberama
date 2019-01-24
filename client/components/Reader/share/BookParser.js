@@ -8,15 +8,9 @@ export default class BookParser {
         this.w = 300;// px, ширина страницы
         this.wordWrap = false;// перенос по слогам
 
+        //заглушка
         this.measureText = (text, style) => {// eslint-disable-line no-unused-vars
-            if (this.context) {
-                this.context.save();
-                this.context.font = this.fontByStyle(style);
-                const w = this.context.measureText(text).width;
-                this.context.restore();
-                return w;
-            } else
-                return 0;
+            return text.length*20;
         };
     }
 

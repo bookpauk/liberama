@@ -1,15 +1,22 @@
 <template>
     <div ref="main" class="main" @click.capture="onMouseClick">
-        <canvas :style="canvasStyle1" ref="canvas1" class="canvas" @mousedown.prevent.stop="onMouseDown" @mouseup.prevent.stop="onMouseUp"
+        <div v-show="activeCanvas" class="layout">
+            <div v-html="page1"></div>
+        </div>
+        <div v-show="!activeCanvas" class="layout">
+            <div v-html="page2"></div>
+        </div>
+        <!--canvas :style="canvasStyle2" ref="canvas2" class="canvas" @mousedown.prevent.stop="onMouseDown" @mouseup.prevent.stop="onMouseUp"
             @wheel.prevent.stop="onMouseWheel"
             @touchstart.stop="onTouchStart" @touchend.stop="onTouchEnd" @touchcancel.prevent.stop="onTouchCancel"
             oncontextmenu="return false;">
-        </canvas>
-        <canvas :style="canvasStyle2" ref="canvas2" class="canvas" @mousedown.prevent.stop="onMouseDown" @mouseup.prevent.stop="onMouseUp"
+        </canvas-->
+        <div ref="layoutEvents" class="layout events" @mousedown.prevent.stop="onMouseDown" @mouseup.prevent.stop="onMouseUp"
             @wheel.prevent.stop="onMouseWheel"
             @touchstart.stop="onTouchStart" @touchend.stop="onTouchEnd" @touchcancel.prevent.stop="onTouchCancel"
             oncontextmenu="return false;">
-        </canvas>
+        </div>
+        <canvas ref="offscreenCanvas" style="display: none"></canvas>
     </div>
 </template>
 
@@ -33,6 +40,8 @@ export default @Component({
 })
 class TextPage extends Vue {
     activeCanvas = false;
+    page1 = null;
+    page2 = null;
 
     lastBook = null;
     bookPos = 0;
@@ -68,8 +77,7 @@ class TextPage extends Vue {
     }
 
     mounted() {
-        this.canvas1 = this.$refs.canvas1;
-        this.canvas2 = this.$refs.canvas2;
+        this.context = this.$refs.offscreenCanvas.getContext('2d');
     }
 
     hex2rgba(hex, alpha = 1) {
@@ -78,36 +86,12 @@ class TextPage extends Vue {
     }
 
     async calcDrawProps() {
-        this.context1 = this.canvas1.getContext('2d');
-        this.context2 = this.canvas2.getContext('2d');
-
         this.realWidth = this.$refs.main.clientWidth;
         this.realHeight = this.$refs.main.clientHeight;
 
-        let ratio = window.devicePixelRatio;
-        if (ratio) {
-            this.canvas1.width = this.realWidth*ratio;
-            this.canvas1.height = this.realHeight*ratio;
-            this.canvas1.style.width = this.$refs.main.clientWidth + 'px';
-            this.canvas1.style.height = this.$refs.main.clientHeight + 'px';
-            this.context1.scale(ratio, ratio);
+        this.$refs.layoutEvents.style.width = this.realWidth + 'px';
+        this.$refs.layoutEvents.style.height = this.realHeight + 'px';
 
-            this.canvas2.width = this.realWidth*ratio;
-            this.canvas2.height = this.realHeight*ratio;
-            this.canvas2.style.width = this.$refs.main.clientWidth + 'px';
-            this.canvas2.style.height = this.$refs.main.clientHeight + 'px';            
-            this.context2.scale(ratio, ratio);
-        } else {
-            this.canvas1.width = this.realWidth;
-            this.canvas1.height = this.realHeight;
-            this.canvas2.width = this.realWidth;
-            this.canvas2.height = this.realHeight;
-        }
-
-        this.context1.textAlign = 'left';
-        this.context2.textAlign = 'left';
-        this.context1.textBaseline = 'bottom';
-        this.context2.textBaseline = 'bottom';
         this.activeCanvas = false;
 
         this.w = this.realWidth - 2*this.indent;
@@ -120,8 +104,7 @@ class TextPage extends Vue {
             this.parsed.w = this.w;// px, ширина текста
             this.parsed.font = this.font;
             this.parsed.wordWrap = this.wordWrap;
-            this.parsed.context = this.context1;
-            this.parsed.fontByStyle = this.fontByStyle;
+            this.parsed.measureText = this.measureText;
         }
 
         this.statusBarColor = this.hex2rgba(this.textColor, this.statusBarColorAlpha);
@@ -135,6 +118,11 @@ class TextPage extends Vue {
         this.drawHelper.backgroundColor = this.backgroundColor;
         this.drawHelper.statusBarColor = this.statusBarColor;
         this.drawHelper.fontName = this.fontName;
+    }
+
+    measureText(text, style) {// eslint-disable-line no-unused-vars
+        this.context.font = this.fontByStyle(style);
+        return this.context.measureText(text).width;
     }
 
     async loadFonts() {
@@ -213,7 +201,7 @@ class TextPage extends Vue {
                 await this.loadFonts();
 
                 this.draw();
-                this.refreshTime();
+                //this.refreshTime();
             })();
         }
     }
@@ -231,22 +219,6 @@ class TextPage extends Vue {
         return `${style.italic ? 'italic' : ''} ${style.bold ? 'bold' : ''} ${this.fontSize}px ${this.fontName}`;
     }
 
-    get context() {
-        return (this.activeCanvas ? this.context1 : this.context2);
-    }
-    
-    get canvas() {
-        return (this.activeCanvas ? this.canvas1 : this.canvas2);
-    }
-
-    get canvasStyle1() {
-        return (this.activeCanvas ? {'z-index': 11} : {'z-index': 10});
-    }
-
-    get canvasStyle2() {
-        return (this.activeCanvas ? {'z-index': 10} : {'z-index': 11});
-    }
-    
     draw(immediate) {
         if (this.book && this.bookPos > 0 && this.bookPos >= this.parsed.textLength) {
             this.doEnd();
@@ -254,12 +226,15 @@ class TextPage extends Vue {
         }
 
         this.activeCanvas = !this.activeCanvas;
-        const context = this.context;
 
-        if (immediate) {
-            this.drawPage(context, this.bookPos);
+        immediate = true;
+        if (immediate) {            
+            if (this.activeCanvas)
+                this.page1 = this.drawPage(this.bookPos);
+            else
+                this.page2 = this.drawPage(this.bookPos);
         } else {
-            if (this.pageChangeDirectionDown && this.pagePrepared && this.bookPos == this.bookPosPrepared) {
+            /*if (this.pageChangeDirectionDown && this.pagePrepared && this.bookPos == this.bookPosPrepared) {
                 this.linesDown = this.linesDownNext;
                 this.linesUp = this.linesUpNext;
                 this.pagePrepared = false;
@@ -268,7 +243,7 @@ class TextPage extends Vue {
                 this.drawPage(context, this.bookPos);
                 this.pagePrepared = false;
                 this.debouncedPrepareNextPage();
-            }
+            }*/
 
             if (this.currentTransition) {
                 //this.currentTransition
@@ -284,19 +259,19 @@ class TextPage extends Vue {
         }
     }
 
-    drawPage(context, bookPos, nextChangeLines) {
+    drawPage(bookPos, nextChangeLines) {
         if (!this.lastBook)
             return;
 
-        context.fillStyle = this.backgroundColor;
-        context.fillRect(0, 0, this.realWidth, this.realHeight);
+        let out = `<div class="layout" style="width: ${this.realWidth}px; height: ${this.realHeight}px;` + 
+            ` color: ${this.textColor}; background-color: ${this.backgroundColor}">`;
 
-        if (!this.book || !this.parsed.textLength)
-            return;
+        if (!this.book || !this.parsed.textLength) {
+            out += '</div>';
+            return out;
+        }
 
-        context.font = this.font;
-        context.fillStyle = this.textColor;
-        const spaceWidth = context.measureText(' ').width;
+        const spaceWidth = this.measureText(' ', {});
 
         const lines = this.parsed.getLines(bookPos, 2*this.pageLineCount);
         if (!nextChangeLines) {
@@ -328,13 +303,15 @@ class TextPage extends Vue {
             }*/
 
             let indent = this.indent + (line.first ? this.p : 0);
-            y += this.lineHeight;
 
             let lineText = '';
             let center = false;
+            let centerStyle = {};
             for (const part of line.parts) {
                 lineText += part.text;
                 center = center || part.style.center;
+                if (part.style.center)
+                    centerStyle = part.style.center;
             }
 
             let filled = false;
@@ -349,13 +326,13 @@ class TextPage extends Vue {
 
                     let x = indent;
                     for (const part of line.parts) {
-                        context.font = this.fontByStyle(part.style);
+                        const font = this.fontByStyle(part.style);
                         let partWords = part.text.split(' ');
 
                         for (let i = 0; i < partWords.length; i++) {
                             let word = partWords[i];
-                            context.fillText(word, x, y);
-                            x += context.measureText(word).width + (i < partWords.length - 1 ? space : 0);
+                            out += this.drawHelper.fillText(word, x, y, font);
+                            x += this.measureText(word, part.style) + (i < partWords.length - 1 ? space : 0);
                         }
                     }
                     filled = true;
@@ -365,20 +342,24 @@ class TextPage extends Vue {
             // просто выводим текст
             if (!filled) {
                 let x = indent;
-                x = (center ? this.indent + (this.w - context.measureText(lineText).width)/2 : x);
+                x = (center ? this.indent + (this.w - this.measureText(lineText, centerStyle))/2 : x);
                 for (const part of line.parts) {
                     let text = part.text;
-                    context.font = this.fontByStyle(part.style);
-                    context.fillText(text, x, y);
-                    x += context.measureText(text).width;
+                    const font = this.fontByStyle(part.style);
+                    out += this.drawHelper.fillText(text, x, y, font);
+                    x += this.measureText(text, part.style);
                 }
             }
+            y += this.lineHeight;
         }
 
-        this.drawStatusBar(context, lines);
+        out += '</div>';
+
+        //this.drawStatusBar(context, lines);
+        return out;
     }
 
-    drawStatusBar(context, lines) {
+    /*drawStatusBar(context, lines) {
         if (!lines)
             lines = this.linesDown;
 
@@ -404,7 +385,7 @@ class TextPage extends Vue {
             this.timeRefreshing = false;
             this.refreshTime();
         }
-    }
+    }*/
 
     prepareNextPage() {
         // подготовка следующей страницы заранее        
@@ -622,10 +603,7 @@ class TextPage extends Vue {
 
     onMouseClick(event) {
         if (this.showStatusBar && this.book) {
-            const pointX = event.pageX - this.canvas.offsetLeft;
-            const pointY = event.pageY - this.canvas.offsetTop;
-
-            if (this.checkPointInStatusBar(pointX, pointY)) {
+            if (this.checkPointInStatusBar(event.offsetX, event.offsetY)) {
                 window.open(this.meta.url, '_blank');
                 return false;
             }
@@ -695,9 +673,15 @@ class TextPage extends Vue {
     position: relative;
 }
 
-.canvas {
+.layout {
     margin: 0;
     padding: 0;
     position: absolute;
+    z-index: 10;
+}
+
+.events {
+    z-index: 20;
+    background-color: rgba(0,0,0,0);
 }
 </style>

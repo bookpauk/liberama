@@ -67,5 +67,11 @@ export default class DrawHelper {
         }
     }
 
-
+    fillText(text, x, y, font) {
+        /*this.context1.textAlign = 'left';
+        this.context2.textAlign = 'left';
+        this.context1.textBaseline = 'bottom';
+        this.context2.textBaseline = 'bottom';*/
+        return `<div style="position: absolute; left: ${x}px; top: ${y}px; font: ${font}">${text}</div>`;
+    }
 }
