@@ -119,6 +119,7 @@ class TextPage extends Vue {
         this.statusBarColor = this.hex2rgba(this.textColor, this.statusBarColorAlpha);
         this.currentTransition = '';
         this.pageChangeDirectionDown = true;
+        this.fontShift = (this.fontShifts[this.fontName] ? this.fontShifts[this.fontName] : 0)/100;
 
         //drawHelper
         this.drawHelper.realWidth = this.realWidth;
@@ -127,6 +128,7 @@ class TextPage extends Vue {
         this.drawHelper.backgroundColor = this.backgroundColor;
         this.drawHelper.statusBarColor = this.statusBarColor;
         this.drawHelper.fontName = this.fontName;
+        this.drawHelper.fontShift = this.fontShift;
         this.drawHelper.measureText = this.measureText;
         this.drawHelper.measureTextFont = this.measureTextFont;
 
@@ -164,8 +166,21 @@ class TextPage extends Vue {
         this.linesDown = null;
 
         //preloaded fonts
-        this.fontList = ['12px ReaderDefault', '12px Arial', '12px ComicSansMS', '12px OpenSans', '12px Roboto', '12px ArialNarrow',
-            '12px Georgia', '12px Tahoma', '12px Helvetica', '12px CenturySchoolbook'];
+        this.fontShifts = {//%
+            ReaderDefault: 0,
+            Arial: 5,
+            ComicSansMS: -10,
+            OpenSans: 0,
+            Roboto: 0,
+            ArialNarrow: 0,
+            Georgia: 0,
+            Tahoma: 0,
+            Helvetica: 0,
+            CenturySchoolbook: 0,
+        }
+        this.fontList = [];
+        for (let fontName in this.fontShifts)
+            this.fontList.push(`12px ${fontName}`);
 
         //default draw props
         this.textColor = '#000000';
@@ -305,7 +320,7 @@ class TextPage extends Vue {
             this.linesUpNext = this.parsed.getLines(bookPos, -2*this.pageLineCount);
         }
 
-        let y = -this.lineInterval/2 + (this.h - this.pageLineCount*this.lineHeight)/2;
+        let y = -this.lineInterval/2 + (this.h - this.pageLineCount*this.lineHeight)/2 + this.fontSize*this.fontShift;
         if (this.showStatusBar)
             y += this.statusBarHeight*(this.statusBarTop ? 1 : 0);
 

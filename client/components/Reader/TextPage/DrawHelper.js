@@ -3,7 +3,7 @@ export default class DrawHelper {
         return `${size}px ${this.fontName}`;
     }
 
-    drawPercentBar(x, y, w, h, font, bookPos, textLength) {
+    drawPercentBar(x, y, w, h, font, fontSize, bookPos, textLength) {
         const pad = 3;
         const fh = h - 2*pad;
         const fh2 = fh/2;
@@ -17,7 +17,7 @@ export default class DrawHelper {
 
         let out = '';
         if (w1 + w2 <= w)
-            out += this.fillText(t1, x, y, font);
+            out += this.fillTextShift(t1, x, y, font, fontSize);
         
         if (w1 + w2 + w3 <= w && w3 > (10 + fh2)) {
             const barWidth = w - w1 - w2 - fh2;
@@ -26,7 +26,7 @@ export default class DrawHelper {
         }
 
         if (w1 <= w)
-            out += this.fillText(t2, x + w1 + w3, y, font);
+            out += this.fillTextShift(t2, x + w1 + w3, y, font, fontSize);
 
         return out;
     }
@@ -45,11 +45,11 @@ export default class DrawHelper {
         const date = new Date();
         const time = `${date.getHours().toString().padStart(2, '0')}:${date.getMinutes().toString().padStart(2, '0')}`;
         const timeW = this.measureTextFont(time, font);
-        out += this.fillText(time, this.realWidth - timeW - fontSize, 3, font);
+        out += this.fillTextShift(time, this.realWidth - timeW - fontSize, 2, font, fontSize);
 
-        out += this.fillText(this.fittingString(title, this.realWidth/2 - fontSize - 3, font), fontSize, 3, font);
+        out += this.fillTextShift(this.fittingString(title, this.realWidth/2 - fontSize - 3, font), fontSize, 2, font, fontSize);
 
-        out += this.drawPercentBar(this.realWidth/2, 3, this.realWidth/2 - timeW - 2*fontSize, statusBarHeight, font, bookPos, textLength);
+        out += this.drawPercentBar(this.realWidth/2, 2, this.realWidth/2 - timeW - 2*fontSize, statusBarHeight, font, fontSize, bookPos, textLength);
         
         out += '</div>';
         return out;
@@ -71,17 +71,21 @@ export default class DrawHelper {
         }
     }
 
+    fillTextShift(text, x, y, font, size) {
+        return this.fillText(text, x, y + size*this.fontShift, font);        
+    }
+
     fillText(text, x, y, font) {
-        return `<div style="position: absolute; border: 1px solid black; left: ${x}px; top: ${y}px; font: ${font}">${text}</div>`;
+        return `<div style="position: absolute; left: ${x}px; top: ${y}px; font: ${font}">${text}</div>`;
     }
 
     fillRect(x, y, w, h, color) {
-        return `<div style="margin: 0; padding: 0; position: absolute; left: ${x}px; top: ${y}px; ` +
+        return `<div style="position: absolute; left: ${x}px; top: ${y}px; ` +
             `width: ${w}px; height: ${h}px; background-color: ${color}"></div>`; 
     }
 
     strokeRect(x, y, w, h, color) {
-        return `<div style="margin: 0; padding: 0; position: absolute; left: ${x}px; top: ${y}px; ` +
+        return `<div style="position: absolute; left: ${x}px; top: ${y}px; ` +
             `width: ${w}px; height: ${h}px; border: 1px solid ${color}"></div>`; 
     }
 }
