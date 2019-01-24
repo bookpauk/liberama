@@ -260,7 +260,7 @@ body, html, #app {
     margin: 0;
     padding: 0;
     height: 100%;
-    font: normal 12pt Arial, Verdana, Sans-serif;
+    font: normal 12pt ReaderDefault;
 }
 
 @font-face {
@@ -280,4 +280,10 @@ body, html, #app {
   src: url('fonts/roboto.woff') format('woff'),
        url('fonts/roboto.ttf') format('truetype');
 }
+
+@font-face {
+  font-family: 'Archivo';
+  src: url('fonts/archivo.woff2') format('woff2');
+}
+
 </style>

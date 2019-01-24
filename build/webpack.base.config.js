@@ -53,7 +53,7 @@ module.exports = {
                 }
             },
             {
-                test: /\.(ttf|eot|woff)$/,
+                test: /\.(ttf|eot|woff|woff2)$/,
                 loader: "file-loader",
                 options: {
                     prefix: "font/"

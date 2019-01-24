@@ -176,6 +176,7 @@ class TextPage extends Vue {
         let loaded = await Promise.all(this.fontList.map(font => document.fonts.check(font)));
         if (loaded.some(r => !r)) {
             loaded = await Promise.all(this.fontList.map(font => document.fonts.load(font)));
+            await document.fonts.ready;
             if (loaded.some(r => !r.length))
                 throw new Error('some font not loaded');
         }
@@ -196,8 +197,8 @@ class TextPage extends Vue {
         this.backgroundColor = '#478355';
         this.fontStyle = '';// 'bold','italic'
         this.fontSize = 33;// px
-        this.fontName = 'XoloniumRegular';
-        this.fontCssUrl = 'https://fontlibrary.org/face/xolonium';
+        this.fontName = 'Archivo';
+        this.fontCssUrl = '';
         this.lineInterval = 7;// px, межстрочный интервал
         this.textAlignJustify = true;// выравнивание по ширине
         this.p = 50;// px, отступ параграфа
