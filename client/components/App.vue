@@ -270,18 +270,6 @@ body, html, #app {
 }
 
 @font-face {
-  font-family: 'Arial';
-  src: url('fonts/arial.woff') format('woff'),
-       url('fonts/arial.ttf') format('truetype');
-}
-
-@font-face {
-  font-family: 'ComicSansMS';
-  src: url('fonts/comic-sans-ms.woff') format('woff'),
-       url('fonts/comic-sans-ms.ttf') format('truetype');
-}
-
-@font-face {
   font-family: 'OpenSans';
   src: url('fonts/open-sans.woff') format('woff'),
        url('fonts/open-sans.ttf') format('truetype');
@@ -292,35 +280,4 @@ body, html, #app {
   src: url('fonts/roboto.woff') format('woff'),
        url('fonts/roboto.ttf') format('truetype');
 }
-
-@font-face {
-  font-family: 'ArialNarrow';
-  src: url('fonts/arial-narrow.woff') format('woff'),
-       url('fonts/arial-narrow.ttf') format('truetype');
-}
-
-@font-face {
-  font-family: 'Georgia';
-  src: url('fonts/georgia.woff') format('woff'),
-       url('fonts/georgia.ttf') format('truetype');
-}
-
-@font-face {
-  font-family: 'Tahoma';
-  src: url('fonts/tahoma.woff') format('woff'),
-       url('fonts/tahoma.ttf') format('truetype');
-}
-
-@font-face {
-  font-family: 'Helvetica';
-  src: url('fonts/helvetica.woff') format('woff'),
-       url('fonts/helvetica.ttf') format('truetype');
-}
-
-@font-face {
-  font-family: 'CenturySchoolbook';
-  src: url('fonts/century-schoolbook.woff') format('woff'),
-       url('fonts/century-schoolbook.ttf') format('truetype');
-}
-
 </style>

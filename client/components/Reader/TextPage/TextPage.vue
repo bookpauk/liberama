@@ -168,15 +168,8 @@ class TextPage extends Vue {
         //preloaded fonts
         this.fontShifts = {//%
             ReaderDefault: 0,
-            Arial: 10,
-            ComicSansMS: -12,
-            OpenSans: 0,
             Roboto: 0,
-            ArialNarrow: 0,
-            Georgia: 0,
-            Tahoma: 0,
-            Helvetica: 0,
-            CenturySchoolbook: 0,
+            OpenSans: 0,
         }
         this.fontList = [];
         for (let fontName in this.fontShifts)
@@ -187,7 +180,8 @@ class TextPage extends Vue {
         this.backgroundColor = '#478355';
         this.fontStyle = '';// 'bold','italic'
         this.fontSize = 33;// px
-        this.fontName = 'Tahoma';
+        this.fontName = 'ReaderDefault';
+        this.fontCss = '';
         this.lineInterval = 7;// px, межстрочный интервал
         this.textAlignJustify = true;// выравнивание по ширине
         this.p = 50;// px, отступ параграфа
@@ -232,6 +226,7 @@ class TextPage extends Vue {
                 this.parsed = parsed;
                 this.calcDrawProps();
 
+                //await this.loadFontCss();
                 await this.loadFonts();
 
                 this.draw();
@@ -423,7 +418,7 @@ class TextPage extends Vue {
 
     prepareNextPage() {
         // подготовка следующей страницы заранее        
-        if (!this.book || !this.parsed.textLength)
+        if (!this.book || !this.parsed.textLength || !this.linesDown)
             return;
         
         if (!this.preparing) {
