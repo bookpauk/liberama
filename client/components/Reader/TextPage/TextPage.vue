@@ -599,6 +599,11 @@ class TextPage extends Vue {
                     if (this.fullScreenToggle)
                         this.fullScreenToggle();
                     break;
+                case 'Tab':
+                    this.doToolBarToggle();
+                    event.preventDefault();
+                    event.stopPropagation();
+                    break;
             }
         }
     }
