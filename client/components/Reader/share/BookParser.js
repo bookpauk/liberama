@@ -488,6 +488,14 @@ export default class BookParser {
             line.first = (j == 0);
             line.last = true;
             lines.push(line);
+        } else {//подстраховка
+            if (lines.length) {
+                line = lines[lines.length - 1];
+                const end = para.offset + para.length - 1;
+                if (line.end != end)
+                    console.error(`Parse error, wrong end in paragraph ${paraIndex}`);
+                line.end = end;
+            }
         }
 
         parsed.lines = lines;
