@@ -42,7 +42,7 @@ function cleanBooks(state) {
         }
 
         if (found) {
-            delBook(found);
+            delBook(state, found);
             cleanBooks(state);
         }
     }
