@@ -13,6 +13,7 @@
                 stripe
                 border
                 :default-sort = "{prop: 'touchTime', order: 'descending'}"
+                :header-cell-style = "headerCellStyle"
                 >
 
                 <el-table-column
@@ -20,34 +21,40 @@
                     min-width="120px"
                     sortable
                     >
-                    <template slot="header" slot-scope="scope">
+                    <template slot="header" slot-scope="scope"><!-- eslint-disable-line vue/no-unused-vars -->
                         Время<br>просмотра
                     </template>
                 </el-table-column>
 
                 <el-table-column
-                    min-width="300px"
                     >
-                    <template slot="header" slot-scope="scope">
+                    <template slot="header" slot-scope="scope"><!-- eslint-disable-line vue/no-unused-vars -->
                         <el-input
                             v-model="search"
                             size="mini"
+                            style="margin: 0; padding: 0; vertical-align: bottom; margin-top: 10px"
                             placeholder="Найти"/>
                     </template>
-                    <template slot-scope="scope">
-                        <span>{{ scope.row.desc.author }}</span><br>
-                        <span>{{ `"${scope.row.desc.title}"` }}</span>
-                    </template>                    
-                </el-table-column>
 
-                <el-table-column
-                    >
-                    <template slot-scope="scope">
-                        <el-button
-                            size="mini"
-                            @click="handleDel(scope.$index, scope.row)">Убрать
-                        </el-button>
-                    </template>
+                    <el-table-column
+                        min-width="300px"
+                        >
+                        <template slot-scope="scope">
+                            <span>{{ scope.row.desc.author }}</span><br>
+                            <span>{{ `"${scope.row.desc.title}"` }}</span>
+                        </template>
+                    </el-table-column>
+
+                    <el-table-column
+                        >
+                        <template slot-scope="scope">
+                            <el-button
+                                size="mini"
+                                @click="handleDel(scope.$index, scope.row)">Убрать
+                            </el-button>
+                        </template>
+                    </el-table-column>
+
                 </el-table-column>
 
             </el-table>
@@ -98,6 +105,24 @@ class HistoryPage extends Vue {
             });
         }
 
+        const search = this.search;
+        return result.filter(item => {
+            return !search ||
+                item.touchTime.includes(search) ||
+                item.desc.title.toLowerCase().includes(search.toLowerCase()) ||
+                item.desc.author.toLowerCase().includes(search.toLowerCase())
+        });
+    }
+
+    headerCellStyle(cell) {
+        let result = {margin: 0, padding: 0};
+        if (cell.columnIndex > 0) {
+            result['border-bottom'] = 0;
+        }
+        if (cell.rowIndex > 0) {
+            result.height = '0px';
+            result['border-right'] = 0;
+        }
         return result;
     }
 
@@ -124,4 +149,8 @@ class HistoryPage extends Vue {
     max-width: 600px;
 }
 
+.header {
+    margin: 0;
+    padding: 0;
+}
 </style>
