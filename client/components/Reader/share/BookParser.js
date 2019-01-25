@@ -395,6 +395,7 @@ export default class BookParser {
             for (let i = 0; i < words.length; i++) {
                 const word = words[i];
                 ofs += word.length + (i < words.length - 1 ? 1 : 0);
+
                 if (word == '' && i > 0 && i < words.length - 1)
                     continue;
 
@@ -448,6 +449,7 @@ export default class BookParser {
                     line.end = para.offset + ofs - wordTail.length - 1;
                     if (line.end - line.begin < 0)
                         console.error(`Parse error, empty line in paragraph ${paraIndex}`);
+
                     line.width = prevW;
                     line.first = (j == 0);
                     line.last = false;
@@ -477,14 +479,16 @@ export default class BookParser {
                 line.parts[line.parts.length - 1].text = t.trimRight();
                 prevW -= this.measureText(' ', style);
             }
+
+            line.end = para.offset + para.length - 1;
+            if (line.end - line.begin < 0)
+                console.error(`Parse error, empty line in paragraph ${paraIndex}`);
+
+            line.width = prevW;
+            line.first = (j == 0);
+            line.last = true;
+            lines.push(line);
         }
-        line.end = para.offset + para.length - 1;
-        if (line.end - line.begin < 0)
-            console.error(`Parse error, empty line in paragraph ${paraIndex}`);
-        line.width = prevW;
-        line.first = (j == 0);
-        line.last = true;
-        lines.push(line);
 
         parsed.lines = lines;
         para.parsed = parsed;
