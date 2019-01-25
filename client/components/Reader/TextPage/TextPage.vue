@@ -454,9 +454,10 @@ class TextPage extends Vue {
             if (this.keepLastToFirst)
                 i--;
             i = (i > lines.length - 1 ? lines.length - 1 : i);
-
-            this.statusBar = this.drawHelper.drawStatusBar(this.statusBarTop, this.statusBarHeight, 
-                lines[i].end, this.parsed.textLength, this.title);
+            if (i >= 0) {
+                this.statusBar = this.drawHelper.drawStatusBar(this.statusBarTop, this.statusBarHeight, 
+                    lines[i].end, this.parsed.textLength, this.title);
+            }
         }
     }
 
@@ -567,6 +568,7 @@ class TextPage extends Vue {
     }
 
     keyHook(event) {
+        //console.log(event.code);
         if (event.type == 'keydown') {
             switch (event.code) {
                 case 'ArrowDown':
@@ -577,7 +579,6 @@ class TextPage extends Vue {
                     break;
                 case 'PageDown':
                 case 'ArrowRight':
-                case 'Enter':
                 case 'Space':
                     this.doPageDown();
                     break;
@@ -591,6 +592,12 @@ class TextPage extends Vue {
                     break;
                 case 'End':
                     this.doEnd();
+                    break;
+                case 'Enter':
+                case 'Backquote'://`
+                case 'KeyF':
+                    if (this.fullScreenToggle)
+                        this.fullScreenToggle();
                     break;
             }
         }

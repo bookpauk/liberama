@@ -2,7 +2,6 @@ import Vue from 'vue';
 
 // initial state
 const state = {
-    fullScreenActive: false,
     toolBarActive: true,
     openedBook: {},
 };
@@ -28,9 +27,6 @@ const actions = {};
 
 // mutations
 const mutations = {
-    setFullScreenActive(state, value) {
-        state.fullScreenActive = value;
-    },
     setToolBarActive(state, value) {
         state.toolBarActive = value;
     },

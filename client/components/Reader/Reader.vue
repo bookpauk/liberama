@@ -90,12 +90,14 @@ export default @Component({
             if (newValue !== '' && newValue !== this.lastOpenedBook.url) {
                 this.loadBook({url: newValue, bookPos: this.routeParamPos});
             }
-        }
+        },
     },
 })
 class Reader extends Vue {
     loaderActive = false;
     progressActive = false;
+    fullScreenActive = false;
+
     bookPos = null;
     allowUrlParamBookPos = true;
 
@@ -161,10 +163,6 @@ class Reader extends Vue {
         this.updateRoute();
     }
 
-    get fullScreenActive() {
-        return this.reader.fullScreenActive;
-    }
-
     get toolBarActive() {
         return this.reader.toolBarActive;
     }
@@ -178,11 +176,37 @@ class Reader extends Vue {
         this.$root.$emit('resize');
     }
 
+    fullScreenToggle(newValue) {
+        this.fullScreenActive = !this.fullScreenActive;
+        if (this.fullScreenActive) {
+            const element = document.documentElement;
+            if (element.requestFullscreen) {
+                element.requestFullscreen();
+            } else if (element.webkitrequestFullscreen) {
+                element.webkitRequestFullscreen();
+            } else if (element.mozRequestFullscreen) {
+                element.mozRequestFullScreen();
+            }
+        } else {
+            if (document.cancelFullScreen) {
+                document.cancelFullScreen();
+            } else if (document.mozCancelFullScreen) {
+                document.mozCancelFullScreen();
+            } else if (document.webkitCancelFullScreen) {
+                document.webkitCancelFullScreen();
+            }
+        }
+    }
+
     buttonClick(button) {
         switch (button) {
-            case 'loader': this.loaderActive = !this.loaderActive; break;
-            case 'fullScreen': this.commit('reader/setFullScreenActive', !this.fullScreenActive); break;
-            case 'refresh': 
+            case 'loader':
+                this.loaderActive = !this.loaderActive;
+                break;
+            case 'fullScreen':
+                this.fullScreenToggle();
+                break;
+            case 'refresh':
                 if (this.lastOpenedBook) {
                     this.loadBook({url: this.lastOpenedBook.url, force: true});
                 }
@@ -240,6 +264,11 @@ class Reader extends Vue {
                 }
             });
         }
+
+        this.$nextTick(() => {
+            if (this.$refs.page)
+                this.$refs.page.fullScreenToggle = this.fullScreenToggle;
+        });
 
         this.lastActivePage = result;
         return result;
