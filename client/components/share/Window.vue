@@ -2,6 +2,7 @@
     <div class="window">
         <div class="header">
             <span class="header-text"><slot name="header"></slot></span>
+            <span class="close-button" @click="close"><i class="el-icon-close"></i></span>
         </div>
         <slot></slot>
     </div>
@@ -15,7 +16,8 @@ import Component from 'vue-class-component';
 export default @Component({
 })
 class Window extends Vue {
-    created() {
+    close() {
+        this.$emit('close');
     }
 
 }
@@ -35,12 +37,23 @@ class Window extends Vue {
 
 .header {
     display: flex;
+    justify-content: flex-end;
     align-items: center;
     height: 40px;
 }
 
 .header-text {
+    flex: 1;
     margin-left: 10px;
     margin-right: 10px;
+}
+
+.close-button {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 40px;
+    height: 40px;
+    cursor: pointer;
 }
 </style>

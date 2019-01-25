@@ -23,7 +23,7 @@
                         sortable
                         >
                         <template slot="header" slot-scope="scope"><!-- eslint-disable-line vue/no-unused-vars -->
-                            Время<br>просм.
+                            <span style="font-size: 90%">Время<br>просм.</span>
                         </template>
                         <template slot-scope="scope"><!-- eslint-disable-line vue/no-unused-vars -->
                             <div class="desc" @click="loadBook(scope.row.url)">
@@ -69,7 +69,8 @@
                             <template slot-scope="scope">
                                 <el-button
                                     size="mini"
-                                    @click="handleDel(scope.row.key)">X
+                                    style="width: 30px; padding: 7px 0 7px 0; margin-left: 4px"
+                                    @click="handleDel(scope.row.key)"><i class="el-icon-close"></i>
                                 </el-button>
                             </template>
                         </el-table-column>
@@ -187,8 +188,8 @@ class HistoryPage extends Vue {
     keyHook(event) {
         if (event.type == 'keydown' && event.code == 'Escape') {
             this.close();
-            return true;
         }
+        return true;
     }
 }
 //-----------------------------------------------------------------------------

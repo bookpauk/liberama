@@ -379,8 +379,15 @@ class Reader extends Vue {
             if (this.$refs.page && this.$refs.page.keyHook)
                 handled = this.$refs.page.keyHook(event);
 
-            if (!handled && event.type == 'keydown' && event.code == 'Escape') {
-                this.loaderToggle();
+            if (!handled && event.type == 'keydown') {
+                switch (event.code) {
+                    case 'Escape':
+                        this.loaderToggle();
+                        break;
+                    case 'KeyH':
+                        this.historyToggle();
+                        break;
+                }
             }
         }
     }
