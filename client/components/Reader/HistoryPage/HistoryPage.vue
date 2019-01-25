@@ -1,13 +1,14 @@
 <template>
     <div ref="main" class="main">
-        <div class="window">
-            <div class="header">
-                <span class="header-text">Прочитаные книги:</span>
-            </div>
+        <Window>
+            <template slot="header">
+                Прочитаные книги:
+            </template>
+
             <div class="list">
                 Test
             </div>
-        </div>
+        </Window>
     </div>
 </template>
 
@@ -16,11 +17,17 @@
 import Vue from 'vue';
 import Component from 'vue-class-component';
 
+import Window from '../../share/Window.vue';
+
 export default @Component({
+    components: {
+        Window,
+    },
 })
 class HistoryPage extends Vue {
     created() {
         this.commit = this.$store.commit;
+        this.reader = this.$store.state.reader;
     }
 
 }
@@ -33,28 +40,6 @@ class HistoryPage extends Vue {
     display: flex;
     flex-direction: column;
     align-items: center;
-}
-
-.window {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    min-width: 200px;
-    max-width: 600px;
-    background-color: #f5f7fa;
-    margin: 10px;
-    border: 1px solid black;
-    box-shadow: 3px 3px 5px black;
-}
-
-.header {
-    display: flex;
-    align-items: center;
-    height: 40px;
-}
-
-.header-text {
-    margin-left: 10px;
 }
 
 .list {
