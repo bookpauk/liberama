@@ -18,7 +18,7 @@
 
                 <el-table-column
                     prop="touchTime"
-                    min-width="120px"
+                    min-width="115px"
                     sortable
                     >
                     <template slot="header" slot-scope="scope"><!-- eslint-disable-line vue/no-unused-vars -->
