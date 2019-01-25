@@ -96,7 +96,7 @@ class TextPage extends Vue {
         return `rgba(${r},${g},${b},${alpha})`;
     }
 
-    async calcDrawProps() {
+    calcDrawProps() {
         //preloaded fonts
         this.fontShifts = {//%
             ReaderDefault: 0,
@@ -279,15 +279,13 @@ class TextPage extends Vue {
 
                 this.$root.$emit('set-app-title', this.title);
 
-                const parsed = this.book.parsed;
-                this.parsed = parsed;
+                this.parsed = this.book.parsed;
                 this.calcDrawProps();
 
                 await this.loadFonts();
 
-                this.draw();
-                this.refreshTime();
-
+                //this.draw();
+                
                 // шрифты хрен знает когда подгружаются, поэтому
                 let i = 0;
                 this.parsed.force = true;
@@ -297,6 +295,8 @@ class TextPage extends Vue {
                     i++;
                 }
                 this.parsed.force = false;
+
+                this.refreshTime();
             })();
         }
     }
@@ -315,6 +315,8 @@ class TextPage extends Vue {
     }
 
     draw() {
+        if (this.w < 10)
+            return;
         if (this.book && this.bookPos > 0 && this.bookPos >= this.parsed.textLength) {
             this.doEnd();
             return;
