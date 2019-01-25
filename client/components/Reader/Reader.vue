@@ -34,7 +34,7 @@
                     </el-tooltip>
                     <div class="space"></div>
                     <el-tooltip content="История" :open-delay="1000" effect="light">
-                        <el-button ref="history" class="tool-button" @click="buttonClick('history')"><i class="el-icon-document"></i></el-button>
+                        <el-button ref="history" class="tool-button" :class="buttonActiveClass('history')" @click="buttonClick('history')"><i class="el-icon-document"></i></el-button>
                     </el-tooltip>
                 </div>
 
@@ -57,6 +57,7 @@
 import Vue from 'vue';
 import Component from 'vue-class-component';
 import LoaderPage from './LoaderPage/LoaderPage.vue';
+import HistoryPage from './HistoryPage/HistoryPage.vue';
 import TextPage from './TextPage/TextPage.vue';
 import ProgressPage from './ProgressPage/ProgressPage.vue';
 
@@ -66,6 +67,7 @@ import readerApi from '../../api/reader';
 export default @Component({
     components: {
         LoaderPage,
+        HistoryPage,
         TextPage,
         ProgressPage
     },
@@ -95,6 +97,8 @@ export default @Component({
 })
 class Reader extends Vue {
     loaderActive = false;
+    historyActive = false;
+
     progressActive = false;
     fullScreenActive = false;
 
@@ -202,10 +206,17 @@ class Reader extends Vue {
         this.loaderActive = !this.loaderActive;
     }
 
+    historyToggle() {
+        this.historyActive = !this.historyActive;
+    }
+
     buttonClick(button) {
         switch (button) {
             case 'loader':
                 this.loaderToggle();
+                break;
+            case 'history':
+                this.historyToggle();
                 break;
             case 'fullScreen':
                 this.fullScreenToggle();
@@ -223,6 +234,7 @@ class Reader extends Vue {
         const classActive = { 'tool-button-active': true, 'tool-button-active:hover': true };
         switch (button) {
             case 'loader': return (this.loaderActive ? classActive : {});
+            case 'history': return (this.historyActive ? classActive : {});
             case 'fullScreen': return (this.fullScreenActive ? classActive : {});
         }
         return {};
@@ -235,6 +247,8 @@ class Reader extends Vue {
             result = 'ProgressPage';
         else if (this.loaderActive)
             result = 'LoaderPage';
+        else if (this.historyActive)
+            result = 'HistoryPage';
         else if (this.lastOpenedBook)
             result = 'TextPage';
 
