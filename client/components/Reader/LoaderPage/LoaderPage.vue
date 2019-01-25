@@ -35,7 +35,6 @@ class LoaderPage extends Vue {
 
     created() {
         this.commit = this.$store.commit;
-        this.dispatch = this.$store.dispatch;
         this.config = this.$store.state.config;
     }
 
