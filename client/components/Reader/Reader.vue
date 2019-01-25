@@ -176,7 +176,7 @@ class Reader extends Vue {
         this.$root.$emit('resize');
     }
 
-    fullScreenToggle(newValue) {
+    fullScreenToggle() {
         this.fullScreenActive = !this.fullScreenActive;
         if (this.fullScreenActive) {
             const element = document.documentElement;
@@ -198,10 +198,14 @@ class Reader extends Vue {
         }
     }
 
+    loaderToggle() {
+        this.loaderActive = !this.loaderActive;
+    }
+
     buttonClick(button) {
         switch (button) {
             case 'loader':
-                this.loaderActive = !this.loaderActive;
+                this.loaderToggle();
                 break;
             case 'fullScreen':
                 this.fullScreenToggle();
@@ -350,8 +354,13 @@ class Reader extends Vue {
 
     keyHook(event) {
         if (this.$root.rootRoute == '/reader') {
+            let handled = false;
             if (this.$refs.page && this.$refs.page.keyHook)
-                this.$refs.page.keyHook(event);
+                handled = this.$refs.page.keyHook(event);
+
+            if (!handled && event.type == 'keydown' && event.code == 'Escape') {
+                this.loaderToggle();
+            }
         }
     }
 }
