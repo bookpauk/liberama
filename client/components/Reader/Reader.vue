@@ -46,7 +46,12 @@
 
         <el-main>
             <keep-alive>
-                <component ref="page" :is="pageActive" @load-book="loadBook" @book-pos-changed="bookPosChanged" @tool-bar-toggle="toolBarToggle"></component>
+                <component ref="page" :is="pageActive" 
+                    @load-book="loadBook" 
+                    @book-pos-changed="bookPosChanged" 
+                    @tool-bar-toggle="toolBarToggle"
+                    @history-toggle="historyToggle"
+                ></component>
             </keep-alive>
         </el-main>
     </el-container>

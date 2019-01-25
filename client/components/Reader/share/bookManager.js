@@ -121,7 +121,12 @@ class BookManager {
         const parsed = new BookParser();
 
         const parsedMeta = await parsed.parse(data, callback);
-        const result = Object.assign({}, meta, parsedMeta, {length: data.length, data, parsed});
+        const result = Object.assign({}, meta, parsedMeta, {
+            length: data.length,
+            textLength: parsed.textLength,
+            data,
+            parsed
+        });
 
         return result;
     }

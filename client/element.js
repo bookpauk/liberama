@@ -50,6 +50,12 @@ import './theme/main.css';
 import ElInput from 'element-ui/lib/input';
 import './theme/input.css';
 
+import ElTable from 'element-ui/lib/table';
+import './theme/table.css';
+
+import ElTableColumn from 'element-ui/lib/table-column';
+import './theme/table-column.css';
+
 import ElProgress from 'element-ui/lib/progress';
 import './theme/progress.css';
 
@@ -65,7 +71,8 @@ import './theme/message-box.css';
 const components = {
     ElMenu, ElMenuItem, ElButton, ElCheckbox, ElTabs, ElTabPane, ElTooltip,
     ElContainer, ElAside, ElMain, ElHeader,
-    ElInput, ElProgress
+    ElInput, ElTable, ElTableColumn,
+    ElProgress
 };
 
 for (let name in components) {

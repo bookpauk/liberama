@@ -27,9 +27,7 @@ class Window extends Vue {
     flex: 1;
     display: flex;
     flex-direction: column;
-    min-width: 200px;
-    max-width: 600px;
-    background-color: #f5f7fa;
+    background-color: #e5e7ea;
     margin: 10px;
     border: 1px solid black;
     box-shadow: 3px 3px 5px black;
@@ -43,5 +41,6 @@ class Window extends Vue {
 
 .header-text {
     margin-left: 10px;
+    margin-right: 10px;
 }
 </style>

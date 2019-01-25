@@ -17,3 +17,15 @@ export function hexToString(str) {
     }
     return result;
 }
+
+export function formatDate(d, format) {
+    if (!format)
+        format = 'normal';
+
+    switch (format) {
+        case 'normal':
+            return `${d.getDate().toString().padStart(2, '0')}.${(d.getMonth() + 1).toString().padStart(2, '0')}.${d.getFullYear()} ` + 
+                `${d.getHours().toString().padStart(2, '0')}:${d.getMinutes().toString().padStart(2, '0')}`;
+    }
+    
+}
