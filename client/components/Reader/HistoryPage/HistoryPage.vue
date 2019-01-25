@@ -1,64 +1,82 @@
 <template>
-    <div ref="main" class="main">
-        <Window class="window">
-            <template slot="header">
-                Последние 100 открытых книг
-            </template>
+    <div ref="main" class="main" @click="close">
+        <div class="main" @click.stop>
+            <Window @close="close">
+                <template slot="header">
+                    Последние 100 открытых книг
+                </template>
 
-            <el-table
-                :data="tableData"
-                style="width: 100%"
-                size="mini"
-                height="1px"
-                stripe
-                border
-                :default-sort = "{prop: 'touchTime', order: 'descending'}"
-                :header-cell-style = "headerCellStyle"
-                >
-
-                <el-table-column
-                    prop="touchTime"
-                    min-width="115px"
-                    sortable
+                <el-table
+                    :data="tableData"
+                    style="width: 100%"
+                    size="mini"
+                    height="1px"
+                    stripe
+                    border
+                    :default-sort = "{prop: 'touchDateTime', order: 'descending'}"
+                    :header-cell-style = "headerCellStyle"
                     >
-                    <template slot="header" slot-scope="scope"><!-- eslint-disable-line vue/no-unused-vars -->
-                        Время<br>просмотра
-                    </template>
-                </el-table-column>
-
-                <el-table-column
-                    >
-                    <template slot="header" slot-scope="scope"><!-- eslint-disable-line vue/no-unused-vars -->
-                        <el-input
-                            v-model="search"
-                            size="mini"
-                            style="margin: 0; padding: 0; vertical-align: bottom; margin-top: 10px"
-                            placeholder="Найти"/>
-                    </template>
 
                     <el-table-column
-                        min-width="300px"
+                        prop="touchDateTime"
+                        min-width="90px"
+                        sortable
                         >
-                        <template slot-scope="scope">
-                            <span>{{ scope.row.desc.author }}</span><br>
-                            <span>{{ `"${scope.row.desc.title}"` }}</span>
+                        <template slot="header" slot-scope="scope"><!-- eslint-disable-line vue/no-unused-vars -->
+                            Время<br>просм.
+                        </template>
+                        <template slot-scope="scope"><!-- eslint-disable-line vue/no-unused-vars -->
+                            {{ scope.row.touchDate }}<br>
+                            {{ scope.row.touchTime }}
                         </template>
                     </el-table-column>
 
                     <el-table-column
                         >
-                        <template slot-scope="scope">
-                            <el-button
+                        <template slot="header" slot-scope="scope"><!-- eslint-disable-line vue/no-unused-vars -->
+                            <el-input
+                                v-model="search"
                                 size="mini"
-                                @click="handleDel(scope.$index, scope.row)">Убрать
-                            </el-button>
+                                style="margin: 0; padding: 0; vertical-align: bottom; margin-top: 10px"
+                                placeholder="Найти"/>
                         </template>
+
+                        <el-table-column
+                            min-width="300px"
+                            >
+                            <template slot-scope="scope">
+                                <div class="desc" @click="loadBook(scope.row.url)">
+                                    <span>{{ scope.row.desc.author }}</span><br>
+                                    <span>{{ `"${scope.row.desc.title}"` }}</span>
+                                </div>
+                            </template>
+                        </el-table-column>
+
+                        <el-table-column
+                            min-width="100px"
+                            >
+                            <template slot-scope="scope">
+                                <span class="clickable" @click="openOriginal(scope.row.url)">Оригинал</span><br>
+                                <a :href="scope.row.path" :download="getFileNameFromPath(scope.row.path)">Скачать FB2</a>
+                            </template>
+                        </el-table-column>
+
+                        <el-table-column
+                            width="60px"
+                            >
+                            <template slot-scope="scope">
+                                <el-button
+                                    size="mini"
+                                    @click="handleDel(scope.row.key)">X
+                                </el-button>
+                            </template>
+                        </el-table-column>
+
                     </el-table-column>
 
-                </el-table-column>
-
-            </el-table>
-        </Window>
+                </el-table>
+            </Window>
+        </div>
     </div>
 </template>
 
@@ -66,7 +84,9 @@
 //-----------------------------------------------------------------------------
 import Vue from 'vue';
 import Component from 'vue-class-component';
+import path from 'path';
 import _ from 'lodash';
+
 import {formatDate} from '../../../share/utils';
 import Window from '../../share/Window.vue';
 
@@ -89,11 +109,14 @@ class HistoryPage extends Vue {
 
         for (let bookKey in state.openedBook) {
             const book = state.openedBook[bookKey];
-            let touchTime = new Date();
-            touchTime.setTime(book.touchTime);
+            let d = new Date();
+            d.setTime(book.touchTime);
+            const t = formatDate(d).split(' ');
 
             result.push({
-                touchTime: formatDate(touchTime),
+                touchDateTime: book.touchTime,
+                touchDate: t[0],
+                touchTime: t[1],
                 desc: {
                     title: book.fb2.bookTitle,
                     author: _.compact([
@@ -101,7 +124,10 @@ class HistoryPage extends Vue {
                         book.fb2.firstName,
                         book.fb2.middleName
                     ]).join(' '),
-                }
+                },
+                url: book.url,
+                path: book.path,
+                key: book.key,
             });
         }
 
@@ -126,9 +152,34 @@ class HistoryPage extends Vue {
         return result;
     }
 
+    getFileNameFromPath(fb2Path) {
+        return path.basename(fb2Path).substr(0, 10) + '.fb2';
+    }
+
+    openOriginal(url) {
+        window.open(url, '_blank');
+    }
+
+    openFb2(path) {
+        window.open(path, '_blank');
+    }
+
+    handleDel(key) {
+        this.commit('reader/delOpenedBook', {key});
+    }
+
+    loadBook(url) {
+        this.$emit('load-book', {url});
+        this.close();
+    }
+
+    close() {
+        this.$emit('history-toggle');
+    }
+
     keyHook(event) {
         if (event.type == 'keydown' && event.code == 'Escape') {
-            this.$emit('history-toggle');
+            this.close();
             return true;
         }
     }
@@ -144,13 +195,18 @@ class HistoryPage extends Vue {
     align-items: center;
 }
 
-.window {
-    min-width: 200px;
-    max-width: 600px;
-}
-
 .header {
     margin: 0;
     padding: 0;
+}
+
+.clickable {
+    color: blue;
+    text-decoration: underline;
+    cursor: pointer;
+}
+
+.desc {
+    cursor: pointer;
 }
 </style>
