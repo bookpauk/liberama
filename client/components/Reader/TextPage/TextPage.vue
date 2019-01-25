@@ -68,7 +68,7 @@ class TextPage extends Vue {
         this.reader = this.$store.state.reader;
 
         this.debouncedEmitPosChange = _.debounce((newValue) => {
-            this.$emit('book-pos-changed', {bookPos: newValue});
+            this.$emit('book-pos-changed', {bookPos: newValue, bookPosSeen: this.bookPosSeen});
         }, 1000);
 
         this.debouncedStartClickRepeat = _.debounce((x, y) => {
@@ -285,7 +285,7 @@ class TextPage extends Vue {
                 await this.loadFonts();
 
                 //this.draw();
-                
+
                 // шрифты хрен знает когда подгружаются, поэтому
                 let i = 0;
                 this.parsed.force = true;
@@ -459,6 +459,7 @@ class TextPage extends Vue {
             if (i >= 0) {
                 this.statusBar = this.drawHelper.drawStatusBar(this.statusBarTop, this.statusBarHeight, 
                     lines[i].end, this.parsed.textLength, this.title);
+                this.bookPosSeen = lines[i].end;
             }
         }
     }

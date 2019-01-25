@@ -26,8 +26,10 @@
                             Время<br>просм.
                         </template>
                         <template slot-scope="scope"><!-- eslint-disable-line vue/no-unused-vars -->
-                            {{ scope.row.touchDate }}<br>
-                            {{ scope.row.touchTime }}
+                            <div class="desc" @click="loadBook(scope.row.url)">
+                                {{ scope.row.touchDate }}<br>
+                                {{ scope.row.touchTime }}
+                            </div>
                         </template>
                     </el-table-column>
 
@@ -46,8 +48,8 @@
                             >
                             <template slot-scope="scope">
                                 <div class="desc" @click="loadBook(scope.row.url)">
-                                    <span>{{ scope.row.desc.author }}</span><br>
-                                    <span>{{ `"${scope.row.desc.title}"` }}</span>
+                                    <span style="color: green">{{ scope.row.desc.author }}</span><br>
+                                    <span>{{ scope.row.desc.title }}</span>
                                 </div>
                             </template>
                         </el-table-column>
@@ -113,12 +115,17 @@ class HistoryPage extends Vue {
             d.setTime(book.touchTime);
             const t = formatDate(d).split(' ');
 
+            let perc = '';
+            const p = (book.bookPosSeen ? book.bookPosSeen : (book.bookPos ? book.bookPos : 0));
+            if (book.textLength)
+                perc = ` [${((p/book.textLength)*100).toFixed(2)}%]`;
+
             result.push({
                 touchDateTime: book.touchTime,
                 touchDate: t[0],
                 touchTime: t[1],
                 desc: {
-                    title: book.fb2.bookTitle,
+                    title: `"${book.fb2.bookTitle}"${perc}`,
                     author: _.compact([
                         book.fb2.lastName,
                         book.fb2.firstName,

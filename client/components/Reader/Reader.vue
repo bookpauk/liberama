@@ -84,7 +84,7 @@ export default @Component({
                     textPage.bookPos = newValue;
                 }
                 if (this.lastOpenedBook && this.lastOpenedBook.bookPos != newValue) {
-                    this.commit('reader/setOpenedBook', Object.assign({}, this.lastOpenedBook, {bookPos: newValue}));
+                    this.commit('reader/setOpenedBook', Object.assign({}, this.lastOpenedBook, {bookPos: newValue, bookPosSeen: this.bookPosSeen}));
                 }
             }
         },
@@ -168,6 +168,7 @@ class Reader extends Vue {
     }
 
     bookPosChanged(event) {
+        this.bookPosSeen = event.bookPosSeen;
         this.bookPos = event.bookPos;
         this.updateRoute();
     }
@@ -311,6 +312,7 @@ class Reader extends Vue {
                 let wasOpened = this.reader.openedBook[key];
                 wasOpened = (wasOpened ? wasOpened : {});
                 const bookPos = (opts.bookPos !== undefined ? opts.bookPos : wasOpened.bookPos);
+                const bookPosSeen = (opts.bookPos !== undefined ? opts.bookPos : wasOpened.bookPosSeen);
 
                 let book = null;
 
@@ -322,7 +324,7 @@ class Reader extends Vue {
 
                     // если есть в локальном кеше
                     if (bookParsed) {
-                        this.commit('reader/setOpenedBook', Object.assign({bookPos}, bookManager.metaOnly(bookParsed)));
+                        this.commit('reader/setOpenedBook', Object.assign({bookPos, bookPosSeen}, bookManager.metaOnly(bookParsed)));
                         this.loaderActive = false;
                         progress.hide(); this.progressActive = false;
                         return;
@@ -358,7 +360,7 @@ class Reader extends Vue {
                 });
 
                 // добавляем в историю
-                this.commit('reader/setOpenedBook', Object.assign({bookPos}, bookManager.metaOnly(addedBook)));
+                this.commit('reader/setOpenedBook', Object.assign({bookPos, bookPosSeen}, bookManager.metaOnly(addedBook)));
                 this.updateRoute(true);
 
                 this.loaderActive = false;
