@@ -101,10 +101,13 @@ class TextPage extends Vue {
         this.fontShifts = {//%
             ReaderDefault: 0,
             Roboto: 0,
-            OpenSans: 0
+            OpenSans: 0,
+            Archivo: 0,
+            Rubik: 0,
+            Avrile: -10,
         }
         if (!this.fontShifts.hasOwnProperty(this.fontName))
-            this.fontShifts[this.fontName] = 0;
+            this.fontShifts[this.fontName] = this.fontVertShift;
         this.fontList = [];
         for (let fontName in this.fontShifts)
             this.fontList.push(`12px ${fontName}`);
@@ -234,6 +237,8 @@ class TextPage extends Vue {
         this.fontSize = 35;// px
         this.fontName = 'Archivo';
         this.fontCssUrl = '';
+        this.fontVertShift = 0;
+
         this.lineInterval = 7;// px, межстрочный интервал
         this.textAlignJustify = true;// выравнивание по ширине
         this.p = 50;// px, отступ параграфа

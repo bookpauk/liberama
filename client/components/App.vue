@@ -291,4 +291,10 @@ body, html, #app {
   src: url('fonts/rubik.woff2') format('woff2');
 }
 
+@font-face {
+  font-family: 'Avrile';
+  src: url('fonts/avrile.woff') format('woff'),
+       url('fonts/avrile.ttf') format('truetype');
+}
+
 </style>
