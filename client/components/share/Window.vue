@@ -31,7 +31,8 @@ class Window extends Vue {
     flex-direction: column;
     background-color: #e5e7ea;
     margin: 10px;
-    border: 1px solid black;
+    border: 3px double black;
+    border-radius: 4px;
     box-shadow: 3px 3px 5px black;
 }
 
