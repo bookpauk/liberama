@@ -58,7 +58,7 @@
                             min-width="100px"
                             >
                             <template slot-scope="scope">
-                                <span class="clickable" @click="openOriginal(scope.row.url)">Оригинал</span><br>
+                                <a :href="scope.row.url" target="_blank">Оригинал</a><br>
                                 <a :href="scope.row.path" :download="getFileNameFromPath(scope.row.path)">Скачать FB2</a>
                             </template>
                         </el-table-column>
@@ -117,16 +117,19 @@ class HistoryPage extends Vue {
             const t = formatDate(d).split(' ');
 
             let perc = '';
+            let textLen = '';
             const p = (book.bookPosSeen ? book.bookPosSeen : (book.bookPos ? book.bookPos : 0));
-            if (book.textLength)
+            if (book.textLength) {
                 perc = ` [${((p/book.textLength)*100).toFixed(2)}%]`;
+                textLen = ` ${Math.round(book.textLength/1000)}k`;
+            }
 
             result.push({
                 touchDateTime: book.touchTime,
                 touchDate: t[0],
                 touchTime: t[1],
                 desc: {
-                    title: `"${book.fb2.bookTitle}"${perc}`,
+                    title: `"${book.fb2.bookTitle}"${perc}${textLen}`,
                     author: _.compact([
                         book.fb2.lastName,
                         book.fb2.firstName,
@@ -214,12 +217,6 @@ class HistoryPage extends Vue {
 .header {
     margin: 0;
     padding: 0;
-}
-
-.clickable {
-    color: blue;
-    text-decoration: underline;
-    cursor: pointer;
 }
 
 .desc {
