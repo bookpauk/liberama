@@ -225,11 +225,6 @@ class BookConverter {
             body.section._a[0] = pars;
         }
 
-        //убрать лишнее
-        for (let p of body.section._a[0]) {
-            p._t = p._t.replace(/[\t\n\r]/g, ' ');
-        }
-
         return this.formatFb2(fb2);
     }
 
@@ -397,15 +392,18 @@ class BookConverter {
 
     formatFb2Node(node, name) {
         let out = '';
+
+        const repl = (text) => text.replace(/[\t\n\r]/g, ' ');
+
         if (Array.isArray(node)) {
             for (const n of node) {
                 out += this.formatFb2Node(n);
             }
         } else if (typeof node == 'string') {
             if (name)
-                out += `<${name}>${node}</${name}>`;
+                out += `<${name}>${repl(node)}</${name}>`;
             else
-                out += node;
+                out += repl(node);
         } else {
             if (node._n)
                 name = node._n;
@@ -413,7 +411,7 @@ class BookConverter {
             if (name)
                 out += `<${name}>`;
             if (node.hasOwnProperty('_t'))
-                out += node._t;
+                out += repl(node._t);
 
             for (let nodeName in node) {
                 if (nodeName && nodeName[0] == '_' && nodeName != '_a')

@@ -138,6 +138,8 @@ export default class BookParser {
         });
 
         parser.on('textNode', (text) => {
+            text = text.replace(/[\t\n\r]/g, ' ');
+            
             if (text != ' ' && text.trim() == '')
                 text = text.trim();
 
