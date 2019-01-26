@@ -138,8 +138,8 @@ export default class BookParser {
         });
 
         parser.on('textNode', (text) => {
-            text = text.replace(/[\t\n\r]/g, ' ');
-            
+            text = text.replace(/&nbsp;|[\t\n\r]/g, ' ');
+
             if (text != ' ' && text.trim() == '')
                 text = text.trim();
 
@@ -179,22 +179,22 @@ export default class BookParser {
                     fb2.annotation += text;
             }
 
-            let cOpen = (center ? '<center>' : '');
-            cOpen += (bold ? '<strong>' : '');
-            let cClose = (center ? '</center>' : '');
-            cClose += (bold ? '</strong>' : '');
+            let tOpen = (center ? '<center>' : '');
+            tOpen += (bold ? '<strong>' : '');
+            let tClose = (center ? '</center>' : '');
+            tClose += (bold ? '</strong>' : '');
 
             if (path.indexOf('/FictionBook/body/title') == 0) {
-                newParagraph(`${cOpen}${text}${cClose}`, text.length, true);
+                newParagraph(`${tOpen}${text}${tClose}`, text.length, true);
             }
 
             if (path.indexOf('/FictionBook/body/section') == 0) {
                 switch (tag) {
                     case 'p':
-                        growParagraph(`${cOpen}${text}${cClose}`, text.length);
+                        growParagraph(`${tOpen}${text}${tClose}`, text.length);
                         break;
                     default:
-                        growParagraph(`${cOpen}${text}${cClose}`, text.length);
+                        growParagraph(`${tOpen}${text}${tClose}`, text.length);
                 }
             }
         });
