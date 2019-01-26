@@ -297,4 +297,10 @@ body, html, #app {
   src: url('fonts/arimo.woff2') format('woff2');
 }
 
+@font-face {
+  font-family: 'GEO_1';
+  src: url('fonts/geo_1.woff') format('woff'),
+       url('fonts/geo_1.ttf') format('truetype');
+}
+
 </style>
