@@ -1,10 +1,11 @@
 function parseSync(xstr, options) {
-    let {onStartNode: _onStartNode = () => {}, 
-        onEndNode: _onEndNode = () => {},
-        onTextNode: _onTextNode = () => {},
-        onCdata: _onCdata = () => {},
-        onComment: _onComment = () => {},
-        onProgress: _onProgress = () => {},
+    const dummy = () => {};
+    let {onStartNode: _onStartNode = dummy,
+        onEndNode: _onEndNode = dummy,
+        onTextNode: _onTextNode = dummy,
+        onCdata: _onCdata = dummy,
+        onComment: _onComment = dummy,
+        onProgress: _onProgress = dummy,
         innerCut = new Set()
     } = options;
 
@@ -136,12 +137,13 @@ function parseSync(xstr, options) {
 //асинхронная копия parseSync
 //делается заменой "_on" => "await _on" после while
 async function parse(xstr, options) {
-    let {onStartNode: _onStartNode = () => {}, 
-        onEndNode: _onEndNode = () => {},
-        onTextNode: _onTextNode = () => {},
-        onCdata: _onCdata = () => {},
-        onComment: _onComment = () => {},
-        onProgress: _onProgress = () => {},
+    const dummy = () => {};
+    let {onStartNode: _onStartNode = dummy,
+        onEndNode: _onEndNode = dummy,
+        onTextNode: _onTextNode = dummy,
+        onCdata: _onCdata = dummy,
+        onComment: _onComment = dummy,
+        onProgress: _onProgress = dummy,
         innerCut = new Set()
     } = options;
 
