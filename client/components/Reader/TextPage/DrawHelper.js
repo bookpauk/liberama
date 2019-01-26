@@ -83,7 +83,7 @@ export default class DrawHelper {
 
     fillText(text, x, y, font, css) {
         css = (css ? css : '');
-        return `<div style="position: absolute; left: ${x}px; top: ${y}px; font: ${font}; ${css}">${text}</div>`;
+        return `<div style="position: absolute; white-space: pre; left: ${x}px; top: ${y}px; font: ${font}; ${css}">${text}</div>`;
     }
 
     fillRect(x, y, w, h, color) {
