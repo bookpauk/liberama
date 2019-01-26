@@ -28,11 +28,11 @@ class BookConverter {
             const parsedUrl = new URL(url);
             if (parsedUrl.hostname == 'samlib.ru' ||
                 parsedUrl.hostname == 'budclub.ru') {
-                await fs.writeFile(outputFile, await this.convertSamlib(data));
+                await fs.writeFile(outputFile, this.convertSamlib(data));
                 return;
             }
 
-            await fs.writeFile(outputFile, await this.convertHtml(data));
+            await fs.writeFile(outputFile, this.convertHtml(data));
             callback(100);
         } else {
             if (fileType)
@@ -56,7 +56,7 @@ class BookConverter {
         return iconv.decode(data, selected);
     }
 
-    async convertHtml(data, isText) {
+    convertHtml(data, isText) {
         let titleInfo = {};
         let desc = {_n: 'description', 'title-info': titleInfo};
         let pars = [];
@@ -123,7 +123,7 @@ class BookConverter {
 
         let buf = this.decode(data).toString();
 
-        await sax.parse(buf, {
+        sax.parseSync(buf, {
             onStartNode, onEndNode, onTextNode,
             innerCut: new Set(['head', 'script', 'style'])
         });
@@ -186,7 +186,7 @@ class BookConverter {
         return this.formatFb2(fb2);
     }
 
-    async convertSamlib(data) {
+    convertSamlib(data) {
         let titleInfo = {};
         let desc = {_n: 'description', 'title-info': titleInfo};
         let pars = [];
@@ -321,7 +321,7 @@ class BookConverter {
                 growParagraph(text);
         };
 
-        await sax.parse(repSpaces(this.decode(data).toString()), {
+        sax.parseSync(repSpaces(this.decode(data).toString()), {
             onStartNode, onEndNode, onTextNode, onComment,
             innerCut: new Set(['head', 'script', 'style'])
         });
