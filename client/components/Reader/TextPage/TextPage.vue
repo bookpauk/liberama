@@ -102,9 +102,9 @@ class TextPage extends Vue {
             ReaderDefault: 0,
             Roboto: 0,
             OpenSans: 0,
-            Archivo: 0,
             Rubik: 0,
             Avrile: -10,
+            Arimo: 0,
         }
         if (!this.fontShifts.hasOwnProperty(this.fontName))
             this.fontShifts[this.fontName] = this.fontVertShift;
@@ -235,7 +235,7 @@ class TextPage extends Vue {
         this.backgroundColor = '#478355';
         this.fontStyle = '';// 'bold','italic'
         this.fontSize = 35;// px
-        this.fontName = 'Archivo';
+        this.fontName = 'Arimo';
         this.fontCssUrl = '';
         this.fontVertShift = 0;
 

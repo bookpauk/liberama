@@ -282,11 +282,6 @@ body, html, #app {
 }
 
 @font-face {
-  font-family: 'Archivo';
-  src: url('fonts/archivo.woff2') format('woff2');
-}
-
-@font-face {
   font-family: 'Rubik';
   src: url('fonts/rubik.woff2') format('woff2');
 }
@@ -295,6 +290,11 @@ body, html, #app {
   font-family: 'Avrile';
   src: url('fonts/avrile.woff') format('woff'),
        url('fonts/avrile.ttf') format('truetype');
+}
+
+@font-face {
+  font-family: 'Arimo';
+  src: url('fonts/arimo.woff2') format('woff2');
 }
 
 </style>
