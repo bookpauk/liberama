@@ -240,45 +240,33 @@ class BookConverter {
         let body = {_n: 'body', section: {_a: [pars]}};
         let fb2 = [desc, body];
 
+        let inSubtitle = false;
         let path = '';
         let tag = '';// eslint-disable-line no-unused-vars
 
         let inText = false;
-        let center = false;
-        //let italic = false;
-        //let bold = false;
         let node = {};
 
         const newParagraph = () => {
-            node = {_n: 'p', _t: ''};
+            node = {_n: 'p', _a: []};
             pars.push(node);
         };
 
-        const newSubTitle = () => {
-            node = {_n: 'subtitle', _t: ''};
-            pars.push(node);
-        };
-
-        const newItalic = () => {
-            let n = {_n: 'emphasis', _t: ''};
-            if (!node._a)
-                node._a = [];
+        const openTag = (name) => {
+            let n = {_n: name, _a: [], _p: node};
             node._a.push(n);
             node = n;
         };
 
-        const newBold = () => {
-            let n = {_n: 'strong', _t: ''};
-            if (!node._a)
-                node._a = [];
-            node._a.push(n);
-            node = n;
+        const closeTag = (name) => {
+            if (node._n == name && node._p)
+                node = node._p;
         };
 
         const growParagraph = (text) => {
-            if (node._t == '')
+            if (node._a.length == 0)
                 text = text.trimLeft();
-            node._t += text;
+            node._a.push({_t: text});
         };
 
         newParagraph();
@@ -297,23 +285,21 @@ class BookConverter {
                     path += '/' + elemName;
                     tag = elemName;
                 } else {
-                    if (!center && (elemName == 'p' || elemName == 'dd')) {
+                    if (!inSubtitle && (elemName == 'p' || elemName == 'dd')) {
                         newParagraph();
                     }
 
                     switch (elemName) {
                         case 'i':
-                            newItalic();
-                            //italic = true;
+                            openTag('emphasis');
                             break;
                         case 'b':
-                            newBold();
-                            //bold = true;
+                            openTag('strong');
                             break;
                         case 'div':
                             if (tail == 'center') {
-                                newSubTitle();
-                                center = true;
+                                openTag('subtitle');
+                                inSubtitle = true;
                             }
                             break;
                     }
@@ -338,13 +324,13 @@ class BookConverter {
                 } else {
                     switch (elemName) {
                         case 'i':
-                            //italic = false;
+                            closeTag('emphasis');
                             break;
                         case 'b':
-                            //bold = false;
+                            closeTag('strong');
                             break;
                         case 'div':
-                            center = false;
+                            closeTag('subtitle');
                             break;
                     }
                 }
@@ -415,26 +401,29 @@ class BookConverter {
                 out += this.formatFb2Node(n);
             }
         } else if (typeof node == 'string') {
-            out += `<${name}>${node}</${name}>`;
+            if (name)
+                out += `<${name}>${node}</${name}>`;
+            else
+                out += node;
         } else {
             if (node._n)
                 name = node._n;
-            if (!name)
-                throw new Error(`malformed fb2 object`);
 
-            out += `<${name}>`;
+            if (name)
+                out += `<${name}>`;
             if (node.hasOwnProperty('_t'))
                 out += node._t;
 
             for (let nodeName in node) {
-                if (nodeName == '_n' || nodeName == '_t')
+                if (nodeName && nodeName[0] == '_' && nodeName != '_a')
                     continue;
 
                 const n = node[nodeName];
                 out += this.formatFb2Node(n, nodeName);
             }
             
-            out += `</${name}>`;
+            if (name)
+                out += `</${name}>`;
         }
         return out;
     }
