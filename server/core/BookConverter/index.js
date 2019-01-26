@@ -97,7 +97,7 @@ class BookConverter {
         newParagraph();
         const newPara = new Set(['tr', 'br', 'br/', 'dd', 'p', 'title', '/title', 'h1', 'h2', 'h3', '/h1', '/h2', '/h3']);
 
-        const onTextNode = (text, left, cutCounter, cutTag) => {// eslint-disable-line no-unused-vars
+        const onTextNode = (text, cutCounter, cutTag) => {// eslint-disable-line no-unused-vars
             if (!cutCounter) {
                 growParagraph(text);
             }
@@ -106,7 +106,7 @@ class BookConverter {
                 title = text;
         };
 
-        const onStartNode = (tag, tail, left, cutCounter, cutTag) => {// eslint-disable-line no-unused-vars
+        const onStartNode = (tag, tail, singleTag, cutCounter, cutTag) => {// eslint-disable-line no-unused-vars
             if (!cutCounter) {
                 if (newPara.has(tag))
                     newParagraph();
@@ -116,7 +116,7 @@ class BookConverter {
                 inTitle = true;
         };
 
-        const onEndNode = (tag, tail, left, cutCounter, cutTag) => {// eslint-disable-line no-unused-vars
+        const onEndNode = (tag, tail, singleTag, cutCounter, cutTag) => {// eslint-disable-line no-unused-vars
             if (tag == 'title')
                 inTitle = false;
         };
@@ -225,7 +225,7 @@ class BookConverter {
 
         newParagraph();
 
-        const onStartNode = (elemName, tail, left, cutCounter, cutTag) => {// eslint-disable-line no-unused-vars
+        const onStartNode = (elemName, tail, singleTag, cutCounter, cutTag) => {// eslint-disable-line no-unused-vars
             if (elemName == '')
                 return;
             if (!inText) {
@@ -253,7 +253,7 @@ class BookConverter {
             }
         };
 
-        const onEndNode = (elemName, tail, left, cutCounter, cutTag) => {// eslint-disable-line no-unused-vars
+        const onEndNode = (elemName, tail, singleTag, cutCounter, cutTag) => {// eslint-disable-line no-unused-vars
             if (!inText) {
                 const oldPath = path;
                 let t = '';
@@ -286,14 +286,14 @@ class BookConverter {
             }
         };
 
-        const onComment = (text, left, cutCounter, cutTag) => {// eslint-disable-line no-unused-vars
+        const onComment = (text) => {// eslint-disable-line no-unused-vars
             if (text == '--------- Собственно произведение -------------')
                 inText = true;
             if (text == '-----------------------------------------------')
                 inText = false;
         };
 
-        const onTextNode = (text, left, cutCounter, cutTag) => {// eslint-disable-line no-unused-vars
+        const onTextNode = (text) => {// eslint-disable-line no-unused-vars
             if (text != ' ' && text.trim() == '')
                 text = text.trim();
 
