@@ -400,7 +400,6 @@ export default class BookParser {
                     continue;
 
                 str += sp1 + word;
-                sp1 = ' ';
 
                 let p = (j == 0 ? parsed.p : 0);
                 let w = this.measureText(str, style) + p;
@@ -410,8 +409,8 @@ export default class BookParser {
                         let slogi = this.splitToSlogi(word);
 
                         if (slogi.length > 1) {
-                            let s = prevStr + ' ';
-                            let ss = ' ';
+                            let s = prevStr + sp1;
+                            let ss = sp1;
 
                             let pw;
                             const slogiLen = slogi.length;
@@ -464,6 +463,7 @@ export default class BookParser {
 
                 prevStr = str;
                 partText += sp2 + wordTail;
+                sp1 = ' ';
                 sp2 = ' ';
                 prevW = w;
             }
