@@ -46,13 +46,14 @@
 
         <el-main>
             <keep-alive>
-                <component ref="page" :is="pageActive" 
+                <component ref="page" :is="activePage" 
                     @load-book="loadBook" 
                     @book-pos-changed="bookPosChanged" 
-                    @tool-bar-toggle="toolBarToggle"
-                    @history-toggle="historyToggle"
+                    @tool-bar-toggle="toolBarToggle"                    
                 ></component>
             </keep-alive>
+
+            <HistoryPage v-if="historyActive" ref="historyPage" @load-book="loadBook" @history-toggle="historyToggle"></HistoryPage>
         </el-main>
     </el-container>
 </template>
@@ -78,7 +79,7 @@ export default @Component({
     },
     watch: {
         bookPos: function(newValue) {
-            if (newValue !== undefined && this.pageActive == 'TextPage') {
+            if (newValue !== undefined && this.activePage == 'TextPage') {
                 const textPage = this.$refs.page;
                 if (textPage.bookPos != newValue) {
                     textPage.bookPos = newValue;
@@ -246,15 +247,13 @@ class Reader extends Vue {
         return {};
     }
 
-    get pageActive() {
+    get activePage() {
         let result = '';
 
         if (this.progressActive)
             result = 'ProgressPage';
         else if (this.loaderActive)
             result = 'LoaderPage';
-        else if (this.historyActive)
-            result = 'HistoryPage';
         else if (this.lastOpenedBook)
             result = 'TextPage';
 
@@ -379,6 +378,9 @@ class Reader extends Vue {
             if (this.$refs.page && this.$refs.page.keyHook)
                 handled = this.$refs.page.keyHook(event);
 
+            if (this.historyActive)
+                handled = this.$refs.historyPage.keyHook(event);
+
             if (!handled && event.type == 'keydown') {
                 switch (event.code) {
                     case 'Escape':
@@ -418,6 +420,7 @@ class Reader extends Vue {
 }
 
 .el-main {
+    position: relative;
     display: flex;
     padding: 0;
     margin: 0;
