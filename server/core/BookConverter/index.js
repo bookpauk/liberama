@@ -259,12 +259,13 @@ class BookConverter {
         };
 
         const closeTag = (name) => {
-            if (node._n == name && node._p)
+            if (node._n == name && node._p) {
                 node = node._p;
+            }
         };
 
         const growParagraph = (text) => {
-            if (node._a.length == 0)
+            if (node._n == 'p' && node._a.length == 0)
                 text = text.trimLeft();
             node._a.push({_t: text});
         };
