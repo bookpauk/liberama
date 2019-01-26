@@ -7,6 +7,8 @@ const sax = require('./sax');
 
 const FileDetector = require('../FileDetector');
 
+const repSpaces = (text) => text.replace(/&nbsp;|[\t\n\r]/g, ' ');
+
 class BookConverter {
     constructor() {
         this.detector = new FileDetector();
@@ -30,7 +32,6 @@ class BookConverter {
                 return;
             }
 
-            //Заглушка
             await fs.writeFile(outputFile, await this.convertHtml(data));
             callback(100);
         } else {
@@ -96,7 +97,7 @@ class BookConverter {
         newParagraph();
         const newPara = new Set(['tr', 'br', 'br/', 'dd', 'p', 'title', '/title', 'h1', 'h2', 'h3', '/h1', '/h2', '/h3']);
 
-        const onText = (text, cutCounter, cutTag) => {// eslint-disable-line no-unused-vars
+        const onTextNode = (text, left, cutCounter, cutTag) => {// eslint-disable-line no-unused-vars
             if (!cutCounter) {
                 growParagraph(text);
             }
@@ -105,7 +106,7 @@ class BookConverter {
                 title = text;
         };
 
-        const onNode = (tag, tail, cutCounter, cutTag) => {// eslint-disable-line no-unused-vars
+        const onStartNode = (tag, tail, left, cutCounter, cutTag) => {// eslint-disable-line no-unused-vars
             if (!cutCounter) {
                 if (newPara.has(tag))
                     newParagraph();
@@ -113,13 +114,19 @@ class BookConverter {
 
             if (tag == 'title')
                 inTitle = true;
-            else if (tag == '/title')
+        };
+
+        const onEndNode = (tag, tail, left, cutCounter, cutTag) => {// eslint-disable-line no-unused-vars
+            if (tag == 'title')
                 inTitle = false;
         };
 
         let buf = this.decode(data).toString();
 
-        this.parseHtml(buf, onNode, onText, new Set(['head', 'script', 'style']));
+        sax.parse(buf, {
+            onStartNode, onEndNode, onTextNode,
+            innerCut: new Set(['head', 'script', 'style'])
+        });
 
         titleInfo['book-title'] = title;
 
@@ -171,6 +178,10 @@ class BookConverter {
         } else {
             body.section._a[0] = pars;
         }
+
+        //убираем лишнее
+        for (let i = 0; i < pars.length; i++)
+            pars[i]._t = repSpaces(pars[i]._t).trim();
 
         return this.formatFb2(fb2);
     }
@@ -310,7 +321,7 @@ class BookConverter {
                 growParagraph(text);
         };
 
-        sax.parse(this.decode(data).toString(), {
+        sax.parse(repSpaces(this.decode(data).toString()), {
             onStartNode, onEndNode, onTextNode, onComment,
             innerCut: new Set(['head', 'script', 'style'])
         });
@@ -344,17 +355,15 @@ class BookConverter {
     formatFb2Node(node, name) {
         let out = '';
 
-        const repl = (text) => text.replace(/&nbsp;|[\t\n\r]/g, ' ');
-
         if (Array.isArray(node)) {
             for (const n of node) {
                 out += this.formatFb2Node(n);
             }
         } else if (typeof node == 'string') {
             if (name)
-                out += `<${name}>${repl(node)}</${name}>`;
+                out += `<${name}>${repSpaces(node)}</${name}>`;
             else
-                out += repl(node);
+                out += repSpaces(node);
         } else {
             if (node._n)
                 name = node._n;
@@ -362,7 +371,7 @@ class BookConverter {
             if (name)
                 out += `<${name}>`;
             if (node.hasOwnProperty('_t'))
-                out += repl(node._t);
+                out += repSpaces(node._t);
 
             for (let nodeName in node) {
                 if (nodeName && nodeName[0] == '_' && nodeName != '_a')
