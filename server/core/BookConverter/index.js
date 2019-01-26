@@ -3,6 +3,7 @@ const URL = require('url').URL;
 const iconv = require('iconv-lite');
 const chardet = require('chardet');
 const _ = require('lodash');
+const sax = require('./sax');
 
 const FileDetector = require('../FileDetector');
 
@@ -52,60 +53,6 @@ class BookConverter {
         }
 
         return iconv.decode(data, selected);
-    }
-
-    parseHtml(buf, onNode, onText, innerCut) {
-        if (!onNode)
-            onNode = () => {};
-        if (!onText)
-            onText = () => {};
-        if (!innerCut)
-            innerCut = new Set();
-
-        buf = buf.replace(/&nbsp;/g, ' '); 
-
-        let i = 0;
-        const len = buf.length;
-        let cutCounter = 0;
-        let cutTag = '';
-        while (i < len) {
-            let left = buf.indexOf('<', i);
-            if (left < 0)
-                break;
-            let right = buf.indexOf('>', left + 1);
-            if (right < 0)
-                break;
-
-            let tag = buf.substr(left + 1, right - left - 1).trim().toLowerCase();
-            let tail = '';
-            const firstSpace = tag.indexOf(' ');
-            if (firstSpace >= 0) {
-                tail = tag.substr(firstSpace);
-                tag = tag.substr(0, firstSpace);
-            }
-
-            const text = buf.substr(i, left - i);
-
-            onText(text, cutCounter, cutTag);
-            onNode(tag, tail, cutCounter, cutTag);
-
-            if (innerCut.has(tag) && (!cutCounter || cutTag == tag)) {
-                if (!cutCounter)
-                    cutTag = tag;
-                cutCounter++;
-            }
-
-            if (tag != '' && tag.charAt(0) == '/' && cutTag == tag.substr(1)) {
-                cutCounter = (cutCounter > 0 ? cutCounter - 1 : 0);
-                if (!cutCounter)
-                    cutTag = '';
-            }
-
-            i = right + 1;
-        }
-
-        if (i < len)
-            onText(buf.substr(i, len - i), cutCounter, cutTag);
     }
 
     convertHtml(data, isText) {
@@ -267,75 +214,75 @@ class BookConverter {
 
         newParagraph();
 
-        const onNode = (elemName, tail, cutCounter, cutTag) => {// eslint-disable-line no-unused-vars
+        const onStartNode = (elemName, tail, left, cutCounter, cutTag) => {// eslint-disable-line no-unused-vars
             if (elemName == '')
                 return;
-            if (elemName[0] == '!') {//comment
-                const text = elemName + tail;
-                if (text == '!----------- собственно произведение ---------------')
-                    inText = true;
-                if (text == '!---------------------------------------------------')
-                    inText = false;
-            } else if (elemName[0] != '/') {//open tag
-                if (!inText) {
-                    path += '/' + elemName;
-                    tag = elemName;
-                } else {
-                    if (!inSubtitle && (elemName == 'p' || elemName == 'dd')) {
-                        newParagraph();
-                    }
-
-                    switch (elemName) {
-                        case 'i':
-                            openTag('emphasis');
-                            break;
-                        case 'b':
-                            openTag('strong');
-                            break;
-                        case 'div':
-                            if (tail.indexOf('align="center"') >= 0) {
-                                openTag('subtitle');
-                                inSubtitle = true;
-                            }
-                            break;
-                    }
+            if (!inText) {
+                path += '/' + elemName;
+                tag = elemName;
+            } else {
+                if (!inSubtitle && (elemName == 'p' || elemName == 'dd')) {
+                    newParagraph();
                 }
-            } else if (elemName[0] == '/') {//close tag
-                elemName = elemName.substr(1);
-                if (!inText) {
-                    const oldPath = path;
-                    let t = '';
-                    do  {
-                        let i = path.lastIndexOf('/');
-                        t = path.substr(i + 1);
-                        path = path.substr(0, i);
-                    } while (t != elemName && path);
 
-                    if (t != elemName) {
-                        path = oldPath;
-                    }
-
-                    let i = path.lastIndexOf('/');
-                    tag = path.substr(i + 1);
-                } else {
-                    switch (elemName) {
-                        case 'i':
-                            closeTag('emphasis');
-                            break;
-                        case 'b':
-                            closeTag('strong');
-                            break;
-                        case 'div':
-                            if (inSubtitle)
-                                closeTag('subtitle');
-                            inSubtitle = false;
-                            break;
-                    }
+                switch (elemName) {
+                    case 'i':
+                        openTag('emphasis');
+                        break;
+                    case 'b':
+                        openTag('strong');
+                        break;
+                    case 'div':
+                        if (tail.indexOf('align="center"') >= 0) {
+                            openTag('subtitle');
+                            inSubtitle = true;
+                        }
+                        break;
                 }
             }
         };
 
-        const onText = (text, cutCounter, cutTag) => {// eslint-disable-line no-unused-vars
+        const onEndNode = (elemName, tail, left, cutCounter, cutTag) => {// eslint-disable-line no-unused-vars
+            if (!inText) {
+                const oldPath = path;
+                let t = '';
+                do  {
+                    let i = path.lastIndexOf('/');
+                    t = path.substr(i + 1);
+                    path = path.substr(0, i);
+                } while (t != elemName && path);
+
+                if (t != elemName) {
+                    path = oldPath;
+                }
+
+                let i = path.lastIndexOf('/');
+                tag = path.substr(i + 1);
+            } else {
+                switch (elemName) {
+                    case 'i':
+                        closeTag('emphasis');
+                        break;
+                    case 'b':
+                        closeTag('strong');
+                        break;
+                    case 'div':
+                        if (inSubtitle)
+                            closeTag('subtitle');
+                        inSubtitle = false;
+                        break;
+                }
+            }
+        };
+
+        const onComment = (text, left, cutCounter, cutTag) => {// eslint-disable-line no-unused-vars
+            if (text == '--------- Собственно произведение -------------')
+                inText = true;
+            if (text == '-----------------------------------------------')
+                inText = false;
+        };
+
+        const onTextNode = (text, left, cutCounter, cutTag) => {// eslint-disable-line no-unused-vars
             if (text != ' ' && text.trim() == '')
                 text = text.trim();
 
@@ -363,8 +310,10 @@ class BookConverter {
                 growParagraph(text);
         };
 
-        this.parseHtml(this.decode(data).toString(), 
-            onNode, onText, new Set(['head', 'script', 'style']));
+        sax.parse(this.decode(data).toString(), {
+            onStartNode, onEndNode, onTextNode, onComment,
+            innerCut: new Set(['head', 'script', 'style'])
+        });
 
         const title = (titleInfo['book-title'] ? titleInfo['book-title'] : '');
         let author = '';
@@ -395,7 +344,7 @@ class BookConverter {
     formatFb2Node(node, name) {
         let out = '';
 
-        const repl = (text) => text.replace(/[\t\n\r]/g, ' ');
+        const repl = (text) => text.replace(/&nbsp;|[\t\n\r]/g, ' ');
 
         if (Array.isArray(node)) {
             for (const n of node) {
