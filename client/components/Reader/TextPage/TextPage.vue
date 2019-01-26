@@ -235,12 +235,12 @@ class TextPage extends Vue {
         this.textColor = '#000000';
         this.backgroundColor = '#478355';
         this.fontStyle = '';// 'bold','italic'
-        this.fontSize = 35;// px
+        this.fontSize = 36;// px
         this.fontName = 'GEO_1';
         this.fontCssUrl = '';
         this.fontVertShift = 0;
 
-        this.lineInterval = 7;// px, межстрочный интервал
+        this.lineInterval = 6;// px, межстрочный интервал
         this.textAlignJustify = true;// выравнивание по ширине
         this.p = 50;// px, отступ параграфа
         this.indent = 15;// px, отступ всего текста слева и справа
