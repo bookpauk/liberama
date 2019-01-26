@@ -293,7 +293,7 @@ class BookConverter {
                             openTag('strong');
                             break;
                         case 'div':
-                            if (tail == 'center') {
+                            if (tail.indexOf('align="center"') >= 0) {
                                 openTag('subtitle');
                                 inSubtitle = true;
                             }
@@ -326,7 +326,9 @@ class BookConverter {
                             closeTag('strong');
                             break;
                         case 'div':
-                            closeTag('subtitle');
+                            if (inSubtitle)
+                                closeTag('subtitle');
+                            inSubtitle = false;
                             break;
                     }
                 }
