@@ -55,7 +55,61 @@ class BookConverter {
         return iconv.decode(data, selected);
     }
 
-    async convertHtml(data, isText) {
+    parseHtml(buf, onNode, onText, innerCut) {
+        if (!onNode)
+            onNode = () => {};
+        if (!onText)
+            onText = () => {};
+        if (!innerCut)
+            innerCut = new Set();
+
+        buf = buf.replace(/&nbsp;/g, ' '); 
+
+        let i = 0;
+        const len = buf.length;
+        let cutCounter = 0;
+        let cutTag = '';
+        while (i < len) {
+            let left = buf.indexOf('<', i);
+            if (left < 0)
+                break;
+            let right = buf.indexOf('>', left + 1);
+            if (right < 0)
+                break;
+
+            let tag = buf.substr(left + 1, right - left - 1).trim().toLowerCase();
+            let tail = '';
+            const firstSpace = tag.indexOf(' ');
+            if (firstSpace >= 0) {
+                tail = tag.substr(firstSpace + 1);
+                tag = tag.substr(0, firstSpace);
+            }
+
+            const text = buf.substr(i, left - i);
+
+            onText(text, cutCounter, cutTag);
+            onNode(tag, tail, cutCounter, cutTag);
+
+            if (innerCut.has(tag) && (!cutCounter || cutTag == tag)) {
+                if (!cutCounter)
+                    cutTag = tag;
+                cutCounter++;
+            }
+
+            if (tag != '' && tag.charAt(0) == '/' && cutTag == tag.substr(1)) {
+                cutCounter = (cutCounter > 0 ? cutCounter - 1 : 0);
+                if (!cutCounter)
+                    cutTag = '';
+            }
+
+            i = right + 1;
+        }
+
+        if (i < len)
+            onText(buf.substr(i, len - i), cutCounter, cutTag);
+    }
+
+    convertHtml(data, isText) {
         let titleInfo = {};
         let desc = {_n: 'description', 'title-info': titleInfo};
         let pars = [];
@@ -94,67 +148,32 @@ class BookConverter {
         };
 
         newParagraph();
-        const newPara = new Set(['TR', 'BR', 'BR/', 'DD', 'P', 'TITLE', '/TITLE', 'H1', 'H2', 'H3', '/H1', '/H2', '/H3']);
+        const newPara = new Set(['tr', 'br', 'br/', 'dd', 'p', 'title', '/title', 'h1', 'h2', 'h3', '/h1', '/h2', '/h3']);
 
-        const onText = (text) => {
+        const onText = (text, cutCounter, cutTag) => {// eslint-disable-line no-unused-vars
+            if (!cutCounter) {
+                growParagraph(text);
+            }
+
             if (inTitle && !title)
                 title = text;
         };
 
-        const onNode = (elem) => {
-            if (elem == 'TITLE')
-                inTitle = true;
-            else if (elem == '/TITLE')
-                inTitle = false;
-        };
-
-        const innerCut = new Set(['HEAD', 'SCRIPT', 'STYLE']);
-        let buf = this.decode(data).toString();
-        buf = buf.replace(/&nbsp;/g, ' '); 
-
-        let i = 0;
-        const len = buf.length;
-        let cutCounter = 0;
-        let cutTag = '';
-        while (i < len) {
-            let left = buf.indexOf('<', i);
-            if (left < 0)
-                break;
-            let right = buf.indexOf('>', left + 1);
-            if (right < 0)
-                break;
-
-            let tag = buf.substr(left + 1, right - left - 1).trim().toUpperCase();
-            const firstSpace = tag.indexOf(' ');
-            if (firstSpace >= 0)
-                tag = tag.substr(0, firstSpace);
-
-            const text = buf.substr(i, left - i);
+        const onNode = (tag, tail, cutCounter, cutTag) => {// eslint-disable-line no-unused-vars
             if (!cutCounter) {
-                growParagraph(text);
                 if (newPara.has(tag))
                     newParagraph();
             }
-            onText(text);
-            onNode(tag);
 
-            if (innerCut.has(tag) && (!cutCounter || cutTag == tag)) {
-                if (!cutCounter)
-                    cutTag = tag;
-                cutCounter++;
-            }
+            if (tag == 'title')
+                inTitle = true;
+            else if (tag == '/title')
+                inTitle = false;
+        };
 
-            if (tag != '' && tag.charAt(0) == '/' && cutTag == tag.substr(1)) {
-                cutCounter = (cutCounter > 0 ? cutCounter - 1 : 0);
-                if (!cutCounter)
-                    cutTag = '';
-            }
+        let buf = this.decode(data).toString();
 
-            i = right + 1;
-        }
-
-        if (i < len && !cutCounter)
-            growParagraph(buf.substr(i, len - i));
+        this.parseHtml(buf, onNode, onText, new Set(['head', 'script', 'style']));
 
         titleInfo['book-title'] = title;
 
@@ -297,7 +316,6 @@ class BookConverter {
                         break;
                 }
             }
-
         });
 
         parser.on('endNode', (elemName, isTagStart, getStrNode) => {// eslint-disable-line no-unused-vars
