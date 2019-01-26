@@ -56,7 +56,7 @@ class BookConverter {
         return iconv.decode(data, selected);
     }
 
-    convertHtml(data, isText) {
+    async convertHtml(data, isText) {
         let titleInfo = {};
         let desc = {_n: 'description', 'title-info': titleInfo};
         let pars = [];
@@ -123,7 +123,7 @@ class BookConverter {
 
         let buf = this.decode(data).toString();
 
-        sax.parse(buf, {
+        await sax.parse(buf, {
             onStartNode, onEndNode, onTextNode,
             innerCut: new Set(['head', 'script', 'style'])
         });
@@ -321,7 +321,7 @@ class BookConverter {
                 growParagraph(text);
         };
 
-        sax.parse(repSpaces(this.decode(data).toString()), {
+        await sax.parse(repSpaces(this.decode(data).toString()), {
             onStartNode, onEndNode, onTextNode, onComment,
             innerCut: new Set(['head', 'script', 'style'])
         });

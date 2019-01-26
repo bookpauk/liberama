@@ -1,4 +1,4 @@
-import EasySAXParser from './easysax';
+import sax from '../../../../server/core/BookConverter/sax';
 import {sleep} from '../../../share/utils';
 
 export default class BookParser {
@@ -19,8 +19,6 @@ export default class BookParser {
             callback = () => {};
         callback(0);
 
-        this.data = data;
-
         if (data.indexOf('<FictionBook') < 0) {            
             throw new Error('Неверный формат файла');
         }
@@ -35,7 +33,6 @@ export default class BookParser {
 
         let path = '';
         let tag = '';
-        let nextPerc = 0;
         let center = false;
         let bold = false;
 
@@ -61,6 +58,7 @@ export default class BookParser {
             para[paraIndex] = p;
             paraOffset += p.length;
         };
+
         const growParagraph = (text, len) => {
             let p = para[paraIndex];
             if (p) {
@@ -84,16 +82,14 @@ export default class BookParser {
             paraOffset += p.length;
         };
 
-        const parser = new EasySAXParser();
+        const onStartNode = (elemName) => {// eslint-disable-line no-unused-vars
+            if (elemName == '?xml')
+                return;
 
-        parser.on('error', (msgError) => {// eslint-disable-line no-unused-vars
-        });
-
-        parser.on('startNode', (elemName, getAttr, isTagEnd, getStrNode) => {// eslint-disable-line no-unused-vars
             tag = elemName;
             path += '/' + elemName;
 
-            if ((tag == 'p' || tag == 'empty-line') && path.indexOf('/FictionBook/body/section') == 0) {
+            if ((tag == 'p' || tag == 'empty-line') && path.indexOf('/fictionbook/body/section') == 0) {
                 newParagraph(' ', 1);
             }
 
@@ -111,9 +107,9 @@ export default class BookParser {
                 newParagraph(' ', 1);
                 bold = true;
             }
-        });
+        };
 
-        parser.on('endNode', (elemName, isTagStart, getStrNode) => {// eslint-disable-line no-unused-vars
+        const onEndNode = (elemName) => {// eslint-disable-line no-unused-vars
             if (tag == elemName) {
                 if (tag == 'emphasis' || tag == 'strong') {
                     growParagraph(`</${tag}>`, 0);
@@ -135,9 +131,9 @@ export default class BookParser {
                     tag = path;
                 }
             }
-        });
+        };
 
-        parser.on('textNode', (text) => {
+        const onTextNode = (text) => {// eslint-disable-line no-unused-vars
             text = text.replace(/&nbsp;|[\t\n\r]/g, ' ');
 
             if (text != ' ' && text.trim() == '')
@@ -147,30 +143,30 @@ export default class BookParser {
                 return;
 
             switch (path) {
-                case '/FictionBook/description/title-info/author/first-name':
+                case '/fictionbook/description/title-info/author/first-name':
                     fb2.firstName = text;
                     break;
-                case '/FictionBook/description/title-info/author/middle-name':
+                case '/fictionbook/description/title-info/author/middle-name':
                     fb2.middleName = text;
                     break;
-                case '/FictionBook/description/title-info/author/last-name':
+                case '/fictionbook/description/title-info/author/last-name':
                     fb2.lastName = text;
                     break;
-                case '/FictionBook/description/title-info/genre':
+                case '/fictionbook/description/title-info/genre':
                     fb2.genre = text;
                     break;
-                case '/FictionBook/description/title-info/date':
+                case '/fictionbook/description/title-info/date':
                     fb2.date = text;
                     break;
-                case '/FictionBook/description/title-info/book-title':
+                case '/fictionbook/description/title-info/book-title':
                     fb2.bookTitle = text;
                     break;
-                case '/FictionBook/description/title-info/id':
+                case '/fictionbook/description/title-info/id':
                     fb2.id = text;
                     break;
             }
 
-            if (path.indexOf('/FictionBook/description/title-info/annotation') == 0) {
+            if (path.indexOf('/fictionbook/description/title-info/annotation') == 0) {
                 if (!fb2.annotation)
                     fb2.annotation = '';
                 if (tag != 'annotation')
@@ -184,11 +180,11 @@ export default class BookParser {
             let tClose = (center ? '</center>' : '');
             tClose += (bold ? '</strong>' : '');
 
-            if (path.indexOf('/FictionBook/body/title') == 0) {
+            if (path.indexOf('/fictionbook/body/title') == 0) {
                 newParagraph(`${tOpen}${text}${tClose}`, text.length, true);
             }
 
-            if (path.indexOf('/FictionBook/body/section') == 0) {
+            if (path.indexOf('/fictionbook/body/section') == 0) {
                 switch (tag) {
                     case 'p':
                         growParagraph(`${tOpen}${text}${tClose}`, text.length);
@@ -197,23 +193,16 @@ export default class BookParser {
                         growParagraph(`${tOpen}${text}${tClose}`, text.length);
                 }
             }
-        });
+        };
 
-        parser.on('cdata', (data) => {// eslint-disable-line no-unused-vars
-        });
+        const onProgress = async(prog) => {
+            await sleep(1);
+            callback(prog);
+        };
 
-        parser.on('comment', (text) => {// eslint-disable-line no-unused-vars
+        await sax.parse(data, {
+            onStartNode, onEndNode, onTextNode, onProgress
         });
-
-        parser.on('progress', async(progress) => {
-            if (progress > nextPerc) {
-                await sleep(1);
-                callback(progress);
-                nextPerc += 10;
-            }
-        });
-
-        await parser.parse(data);
 
         this.fb2 = fb2;
         this.para = para;
@@ -252,17 +241,16 @@ export default class BookParser {
             style: {bold: Boolean, italic: Boolean, center: Boolean},
             text: String,
         }*/
-        const parser = new EasySAXParser();
         let style = {};
 
-        parser.on('textNode', (text) => {
+        const onTextNode = async(text) => {// eslint-disable-line no-unused-vars
             result.push({
                 style: Object.assign({}, style),
                 text: text
             });
-        });
+        };
 
-        parser.on('startNode', (elemName, getAttr, isTagEnd, getStrNode) => {// eslint-disable-line no-unused-vars
+        const onStartNode = async(elemName) => {// eslint-disable-line no-unused-vars
             switch (elemName) {
                 case 'strong':
                     style.bold = true;
@@ -274,9 +262,9 @@ export default class BookParser {
                     style.center = true;
                     break;
             }
-        });
+        };
 
-        parser.on('endNode', (elemName, isTagStart, getStrNode) => {// eslint-disable-line no-unused-vars
+        const onEndNode = async(elemName) => {// eslint-disable-line no-unused-vars
             switch (elemName) {
                 case 'strong':
                     style.bold = false;
@@ -288,9 +276,11 @@ export default class BookParser {
                     style.center = false;
                     break;
             }
-        });
+        };
 
-        parser.parse(`<p>${s}</p>`);
+        sax.parseSync(s, {
+            onStartNode, onEndNode, onTextNode
+        });
 
         return result;
     }
