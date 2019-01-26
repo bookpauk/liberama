@@ -5,7 +5,6 @@ const chardet = require('chardet');
 const _ = require('lodash');
 
 const FileDetector = require('../FileDetector');
-const EasySAXParser = require('./easysaxmod');
 
 class BookConverter {
     constructor() {
@@ -81,7 +80,7 @@ class BookConverter {
             let tail = '';
             const firstSpace = tag.indexOf(' ');
             if (firstSpace >= 0) {
-                tail = tag.substr(firstSpace + 1);
+                tail = tag.substr(firstSpace);
                 tag = tag.substr(0, firstSpace);
             }
 
@@ -284,72 +283,75 @@ class BookConverter {
 
         newParagraph();
 
-        const parser = new EasySAXParser();
+        const onNode = (elemName, tail, cutCounter, cutTag) => {// eslint-disable-line no-unused-vars
+            if (elemName == '')
+                return;
+            if (elemName[0] == '!') {//comment
+                const text = elemName + tail;
+                if (text == '!----------- собственно произведение ---------------')
+                    inText = true;
+                if (text == '!---------------------------------------------------')
+                    inText = false;
+            } else if (elemName[0] != '/') {//open tag
+                if (!inText) {
+                    path += '/' + elemName;
+                    tag = elemName;
+                } else {
+                    if (!center && (elemName == 'p' || elemName == 'dd')) {
+                        newParagraph();
+                    }
 
-        parser.on('error', (msgError) => {// eslint-disable-line no-unused-vars
-        });
-
-        parser.on('startNode', (elemName, getAttr, isTagEnd, getStrNode) => {// eslint-disable-line no-unused-vars
-            if (!inText) {
-                path += '/' + elemName;
-                tag = elemName;
-            } else {
-                if (!center && (elemName == 'p' || elemName == 'dd')) {
-                    newParagraph();
+                    switch (elemName) {
+                        case 'i':
+                            newItalic();
+                            //italic = true;
+                            break;
+                        case 'b':
+                            newBold();
+                            //bold = true;
+                            break;
+                        case 'div':
+                            if (tail == 'center') {
+                                newSubTitle();
+                                center = true;
+                            }
+                            break;
+                    }
                 }
+            } else if (elemName[0] == '/') {//close tag
+                elemName = elemName.substr(1);
+                if (!inText) {
+                    const oldPath = path;
+                    let t = '';
+                    do  {
+                        let i = path.lastIndexOf('/');
+                        t = path.substr(i + 1);
+                        path = path.substr(0, i);
+                    } while (t != elemName && path);
 
-                switch (elemName) {
-                    case 'i':
-                        newItalic();
-                        //italic = true;
-                        break;
-                    case 'b':
-                        newBold();
-                        //bold = true;
-                        break;
-                    case 'div':
-                        var a = getAttr();
-                        if (a && a.align == 'center') {
-                            newSubTitle();
-                            center = true;
-                        }
-                        break;
-                }
-            }
-        });
+                    if (t != elemName) {
+                        path = oldPath;
+                    }
 
-        parser.on('endNode', (elemName, isTagStart, getStrNode) => {// eslint-disable-line no-unused-vars
-            if (!inText) {
-                const oldPath = path;
-                let t = '';
-                do  {
                     let i = path.lastIndexOf('/');
-                    t = path.substr(i + 1);
-                    path = path.substr(0, i);
-                } while (t != elemName && path);
-
-                if (t != elemName) {
-                    path = oldPath;
-                }
-
-                let i = path.lastIndexOf('/');
-                tag = path.substr(i + 1);
-            } else {
-                switch (elemName) {
-                    case 'i':
-                        //italic = false;
-                        break;
-                    case 'b':
-                        //bold = false;
-                        break;
-                    case 'div':
-                        center = false;
-                        break;
+                    tag = path.substr(i + 1);
+                } else {
+                    switch (elemName) {
+                        case 'i':
+                            //italic = false;
+                            break;
+                        case 'b':
+                            //bold = false;
+                            break;
+                        case 'div':
+                            center = false;
+                            break;
+                    }
                 }
             }
-        });
+        };
 
-        parser.on('textNode', (text) => {// eslint-disable-line no-unused-vars
+        const onText = (text, cutCounter, cutTag) => {// eslint-disable-line no-unused-vars
             if (text != ' ' && text.trim() == '')
                 text = text.trim();
 
@@ -375,26 +377,10 @@ class BookConverter {
 
             if (inText)
                 growParagraph(text);
-        });
+        };
 
-        parser.on('cdata', (data) => {// eslint-disable-line no-unused-vars
-        });
-
-        parser.on('comment', (text) => {// eslint-disable-line no-unused-vars
-            if (text == '--------- Собственно произведение -------------')
-                inText = true;
-
-            if (text == '-----------------------------------------------')
-                inText = false;
-        });
-
-        /*
-        parser.on('progress', async(progress) => {
-            callback(...........);
-        });
-        */
-
-        await parser.parse(this.decode(data));
+        this.parseHtml(this.decode(data).toString(), 
+            onNode, onText, new Set(['head', 'script', 'style']));
 
         const title = (titleInfo['book-title'] ? titleInfo['book-title'] : '');
         let author = '';
