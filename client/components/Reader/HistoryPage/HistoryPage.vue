@@ -1,6 +1,6 @@
 <template>
     <div ref="main" class="main" @click="close">
-        <div class="clickStop" @click.stop>
+        <div class="mainWindow" @click.stop>
             <Window @close="close">
                 <template slot="header">
                     Последние 100 открытых книг
@@ -217,7 +217,7 @@ class HistoryPage extends Vue {
     align-items: center;
 }
 
-.clickStop {
+.mainWindow {
     height: 100%;
     display: flex;
 }
