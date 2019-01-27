@@ -189,7 +189,6 @@ class HistoryPage extends Vue {
 
     loadBook(url) {
         this.$emit('load-book', {url});
-        this.close();
     }
 
     close() {

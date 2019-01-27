@@ -199,10 +199,8 @@ class Reader extends Vue {
 
     get lastOpenedBook() {
         const result = this.$store.getters['reader/lastOpenedBook'];
-        if (!result) {
+        if (!result)
             this.closeAllTextPages();
-            this.historyActive = false;
-        }
         return result;
     }
 
@@ -234,6 +232,7 @@ class Reader extends Vue {
     }
 
     closeAllTextPages() {
+        this.historyActive = false;
         this.setPositionActive = false;
     }
 
