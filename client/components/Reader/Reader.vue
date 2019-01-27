@@ -199,8 +199,10 @@ class Reader extends Vue {
 
     get lastOpenedBook() {
         const result = this.$store.getters['reader/lastOpenedBook'];
-        if (!result)
-            this.closeAllTextPages()
+        if (!result) {
+            this.closeAllTextPages();
+            this.historyActive = false;
+        }
         return result;
     }
 
@@ -232,7 +234,6 @@ class Reader extends Vue {
     }
 
     closeAllTextPages() {
-        this.historyActive = false;
         this.setPositionActive = false;
     }
 
@@ -245,7 +246,7 @@ class Reader extends Vue {
 
     historyToggle() {
         this.historyActive = !this.historyActive;
-        if (this.historyActive && this.activePage == 'TextPage') {
+        if (this.historyActive) {
             this.closeAllTextPages();
             this.historyActive = true;
         } else {
@@ -317,9 +318,9 @@ class Reader extends Vue {
                 case 'scrolling':
                 case 'search':
                 case 'copyText':
-                case 'history':
                     classResult = classDisabled;
                     break;
+                case 'history':
                 case 'refresh':
                     if (!this.lastOpenedBook)
                         classResult = classDisabled;
