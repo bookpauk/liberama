@@ -121,6 +121,10 @@ class Reader extends Vue {
         this.$root.addKeyHook(this.keyHook);
 
         this.lastActivePage = false;
+
+        document.addEventListener('fullscreenchange', (event) => {
+            this.fullScreenActive = (document.fullscreenElement !== null);
+        });
     }
 
     mounted() {
