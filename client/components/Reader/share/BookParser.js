@@ -282,6 +282,32 @@ export default class BookParser {
             onStartNode, onEndNode, onTextNode
         });
 
+
+        //длинные слова (или белиберду без пробелов) тоже разобьем
+        
+        const maxWordLength = this.maxWordLength;
+        const parts = result;
+        result = [];
+        for (const part of parts) {
+            let p = part;
+            let i = 0;
+            let spaceIndex = -1;
+            while (i < p.text.length) {
+                if (p.text[i] == ' ')
+                    spaceIndex = i;
+
+                if (i - spaceIndex >= maxWordLength && i < p.text.length - 1 && 
+                    this.measureText(p.text.substr(spaceIndex + 1, i - spaceIndex), p.style) >= this.w - this.p) {
+                    result.push({style: p.style, text: p.text.substr(0, i + 1)});
+                    p = {style: p.style, text: p.text.substr(i + 1)};
+                    spaceIndex = -1;
+                    i = -1;
+                }
+                i++;
+            }
+            result.push(p);
+        }
+
         return result;
     }
 
@@ -343,6 +369,7 @@ export default class BookParser {
             para.parsed.w === this.w &&
             para.parsed.p === this.p &&
             para.parsed.wordWrap === this.wordWrap &&
+            para.parsed.maxWordLength === this.maxWordLength &&
             para.parsed.font === this.font
             )
             return para.parsed;
@@ -351,6 +378,7 @@ export default class BookParser {
             w: this.w,
             p: this.p,
             wordWrap: this.wordWrap,
+            maxWordLength: this.maxWordLength,
             font: this.font,
         };
 

@@ -33,6 +33,8 @@ import {sleep} from '../../../share/utils';
 import bookManager from '../share/bookManager';
 import DrawHelper from './DrawHelper';
 
+const minLayoutWidth = 100;
+
 export default @Component({
     watch: {
         bookPos: function(newValue) {
@@ -130,6 +132,9 @@ class TextPage extends Vue {
             this.parsed.w = this.w;// px, ширина текста
             this.parsed.font = this.font;
             this.parsed.wordWrap = this.wordWrap;
+            let t = '';
+            while (this.measureText(t, {}) < this.w) t += 'Щ';
+            this.parsed.maxWordLength = t.length - 1;
             this.parsed.measureText = this.measureText;
         }
 
@@ -316,8 +321,13 @@ class TextPage extends Vue {
     }
 
     draw() {
-        if (this.w < 10)
+        if (this.w < minLayoutWidth) {
+            this.page1 = null;
+            this.page2 = null;
+            this.statusBar = null;
             return;
+        }
+
         if (this.book && this.bookPos > 0 && this.bookPos >= this.parsed.textLength) {
             this.doEnd();
             return;
@@ -451,6 +461,11 @@ class TextPage extends Vue {
     }
 
     drawStatusBar() {
+        if (this.w < minLayoutWidth) {
+            this.statusBar = null;
+            return;
+        }
+
         if (this.showStatusBar && this.linesDown) {
             const lines = this.linesDown;
             let i = this.pageLineCount;
@@ -764,6 +779,7 @@ class TextPage extends Vue {
     padding: 0;
     overflow: hidden;
     position: relative;
+    min-width: 200px;
 }
 
 .layout {
