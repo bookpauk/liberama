@@ -222,11 +222,6 @@ class HistoryPage extends Vue {
     display: flex;
 }
 
-.header {
-    margin: 0;
-    padding: 0;
-}
-
 .desc {
     cursor: pointer;
 }
