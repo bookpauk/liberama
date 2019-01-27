@@ -632,8 +632,7 @@ class TextPage extends Vue {
                 case 'Enter':
                 case 'Backquote'://`
                 case 'KeyF':
-                    if (this.fullScreenToggle)
-                        this.fullScreenToggle();
+                    this.$emit('full-screen-toogle');
                     break;
                 case 'Tab':
                     this.doToolBarToggle();

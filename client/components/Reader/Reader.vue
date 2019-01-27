@@ -8,10 +8,10 @@
 
                 <div>
                     <el-tooltip content="Действие назад" :open-delay="1000" effect="light">
-                        <el-button ref="undoAction" class="tool-button" @click="buttonClick('undoAction')" ><i class="el-icon-arrow-left"></i></el-button>
+                        <el-button ref="undoAction" class="tool-button" :class="buttonActiveClass('undoAction')" @click="buttonClick('undoAction')" ><i class="el-icon-arrow-left"></i></el-button>
                     </el-tooltip>
                     <el-tooltip content="Действие вперед" :open-delay="1000" effect="light">
-                        <el-button ref="redoAction" class="tool-button" @click="buttonClick('redoAction')" ><i class="el-icon-arrow-right"></i></el-button>
+                        <el-button ref="redoAction" class="tool-button" :class="buttonActiveClass('redoAction')" @click="buttonClick('redoAction')" ><i class="el-icon-arrow-right"></i></el-button>
                     </el-tooltip>
                     <div class="space"></div>
                     <el-tooltip content="На весь экран" :open-delay="1000" effect="light">
@@ -21,16 +21,18 @@
                         <el-button ref="setPosition" class="tool-button" :class="buttonActiveClass('setPosition')" @click="buttonClick('setPosition')"><i class="el-icon-d-arrow-right"></i></el-button>
                     </el-tooltip>
                     <el-tooltip content="Плавный скроллинг" :open-delay="1000" effect="light">
-                        <el-button ref="scrolling" class="tool-button" @click="buttonClick('scrolling')"><i class="el-icon-sort"></i></el-button>
+                        <el-button ref="scrolling" class="tool-button" :class="buttonActiveClass('scrolling')" @click="buttonClick('scrolling')"><i class="el-icon-sort"></i></el-button>
                     </el-tooltip>
                     <el-tooltip content="Найти в тексте" :open-delay="1000" effect="light">
-                        <el-button ref="search" class="tool-button" @click="buttonClick('search')"><i class="el-icon-search"></i></el-button>
+                        <el-button ref="search" class="tool-button" :class="buttonActiveClass('search')" @click="buttonClick('search')"><i class="el-icon-search"></i></el-button>
                     </el-tooltip>
                     <el-tooltip content="Скопировать текст со страницы" :open-delay="1000" effect="light">
-                        <el-button ref="copyText" class="tool-button" @click="buttonClick('copyText')"><i class="el-icon-edit-outline"></i></el-button>
+                        <el-button ref="copyText" class="tool-button" :class="buttonActiveClass('copyText')" @click="buttonClick('copyText')"><i class="el-icon-edit-outline"></i></el-button>
                     </el-tooltip>
                     <el-tooltip content="Принудительно обновить книгу в обход кеша" :open-delay="1000" effect="light">
-                        <el-button ref="refresh" class="tool-button" @click="buttonClick('refresh')"><i class="el-icon-refresh" :class="{clear: !showRefreshIcon}"></i></el-button>
+                        <el-button ref="refresh" class="tool-button" :class="buttonActiveClass('refresh')" @click="buttonClick('refresh')">
+                            <i class="el-icon-refresh" :class="{clear: !showRefreshIcon}"></i>
+                        </el-button>
                     </el-tooltip>
                     <div class="space"></div>
                     <el-tooltip content="История" :open-delay="1000" effect="light">
@@ -46,10 +48,11 @@
 
         <el-main>
             <keep-alive>
-                <component ref="page" :is="activePage" 
-                    @load-book="loadBook" 
-                    @book-pos-changed="bookPosChanged" 
-                    @tool-bar-toggle="toolBarToggle"                    
+                <component ref="page" :is="activePage"
+                    @load-book="loadBook"
+                    @book-pos-changed="bookPosChanged"
+                    @tool-bar-toggle="toolBarToggle"
+                    @full-screen-toogle="fullScreenToggle"
                 ></component>
             </keep-alive>
 
@@ -112,6 +115,9 @@ class Reader extends Vue {
     progressActive = false;
     fullScreenActive = false;
 
+    scrollingActive = false;
+    searchActive = false;
+    copyTextActive = false;
     historyActive = false;
     setPositionActive = false;
 
@@ -192,7 +198,10 @@ class Reader extends Vue {
     }
 
     get lastOpenedBook() {
-        return this.$store.getters['reader/lastOpenedBook'];
+        const result = this.$store.getters['reader/lastOpenedBook'];
+        if (!result)
+            this.closeAllTextPages()
+        return result;
     }
 
     toolBarToggle() {
@@ -222,21 +231,40 @@ class Reader extends Vue {
         }
     }
 
+    closeAllTextPages() {
+        this.historyActive = false;
+        this.setPositionActive = false;
+    }
+
     loaderToggle() {
         this.loaderActive = !this.loaderActive;
+        if (this.loaderActive) {
+            this.closeAllTextPages();
+        }
     }
 
     historyToggle() {
         this.historyActive = !this.historyActive;
+        if (this.historyActive && this.activePage == 'TextPage') {
+            this.closeAllTextPages();
+            this.historyActive = true;
+        } else {
+            this.historyActive = false;
+        }
     }
 
     setPositionToggle() {
         this.setPositionActive = !this.setPositionActive;
-        if (this.setPositionActive) {
+        if (this.setPositionActive && this.activePage == 'TextPage' && this.lastOpenedBook) {
+            this.closeAllTextPages();
+            this.setPositionActive = true;
+
             this.$nextTick(() => {
                 this.$refs.setPositionPage.sliderMax = this.lastOpenedBook.textLength - 1;
                 this.$refs.setPositionPage.sliderValue = this.lastOpenedBook.bookPos;
             });
+        } else {
+            this.setPositionActive = false;
         }
     }
 
@@ -265,13 +293,41 @@ class Reader extends Vue {
 
     buttonActiveClass(button) {
         const classActive = { 'tool-button-active': true, 'tool-button-active:hover': true };
+        const classDisabled = { 'tool-button-disabled': true, 'tool-button-disabled:hover': true };
+        let classResult = {};
+
         switch (button) {
-            case 'loader': return (this.loaderActive ? classActive : {});
-            case 'fullScreen': return (this.fullScreenActive ? classActive : {});
-            case 'history': return (this.historyActive ? classActive : {});
-            case 'setPosition': return (this.setPositionActive ? classActive : {});
+            case 'loader':
+            case 'fullScreen':
+            case 'setPosition':
+            case 'scrolling':
+            case 'search':
+            case 'copyText':
+            case 'history':
+                if (this[`${button}Active`])
+                    classResult = classActive;
+                break;
         }
-        return {};
+
+        if (this.activePage == 'LoaderPage' || !this.lastOpenedBook) {
+            switch (button) {
+                case 'undoAction':
+                case 'redoAction':
+                case 'setPosition':
+                case 'scrolling':
+                case 'search':
+                case 'copyText':
+                case 'history':
+                    classResult = classDisabled;
+                    break;
+                case 'refresh':
+                    if (!this.lastOpenedBook)
+                        classResult = classDisabled;
+                    break;
+            }
+        }
+
+        return classResult;
     }
 
     get activePage() {
@@ -315,16 +371,12 @@ class Reader extends Vue {
             });
         }
 
-        this.$nextTick(() => {
-            if (this.$refs.page)
-                this.$refs.page.fullScreenToggle = this.fullScreenToggle;
-        });
-
         this.lastActivePage = result;
         return result;
     }
 
     loadBook(opts) {
+        this.closeAllTextPages();
         this.progressActive = true;
         this.$nextTick(async() => {
             const progress = this.$refs.page;
@@ -523,6 +575,16 @@ class Reader extends Vue {
 .tool-button-active:hover {
     color: white;
     background-color: #81C581;
+}
+
+.tool-button-disabled {
+    color: lightgray;
+    background-color: gray;
+}
+
+.tool-button-disabled:hover {
+    color: lightgray;
+    background-color: gray;
 }
 
 i {
