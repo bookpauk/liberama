@@ -372,11 +372,12 @@ export default class BookParser {
         let partText = '';//накапливаемый кусок со стилем
 
         let str = '';//измеряемая строка
-        let prevStr = '';
+        let prevStr = '';//строка без крайнего слова
         let prevW = 0;
         let j = 0;//номер строки
         let style = {};
-        let ofs = 0;
+        let ofs = 0;//смещение от начала параграфа para.offset
+
         // тут начинается самый замес, перенос по слогам и стилизация
         for (const part of parts) {
             const words = part.text.split(' ');
@@ -396,7 +397,7 @@ export default class BookParser {
                 let p = (j == 0 ? parsed.p : 0);
                 let w = this.measureText(str, style) + p;
                 let wordTail = word;
-                if (w > parsed.w) {
+                if (w > parsed.w && prevStr != '') {
                     if (parsed.wordWrap) {//по слогам
                         let slogi = this.splitToSlogi(word);
 
