@@ -29,8 +29,8 @@ class Window extends Vue {
     flex: 1;
     display: flex;
     flex-direction: column;
-    background-color: #e5e7ea;
     margin: 10px;
+    background-color: #ffffff;
     border: 3px double black;
     border-radius: 4px;
     box-shadow: 3px 3px 5px black;
@@ -39,6 +39,7 @@ class Window extends Vue {
 .header {
     display: flex;
     justify-content: flex-end;
+    background-color: #e5e7ea;
     align-items: center;
     height: 40px;
 }
