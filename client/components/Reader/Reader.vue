@@ -54,6 +54,8 @@
             </keep-alive>
 
             <HistoryPage v-if="historyActive" ref="historyPage" @load-book="loadBook" @history-toggle="historyToggle"></HistoryPage>
+            <SetPositionPage v-if="setPositionActive" ref="setPositionPage" @set-position-toggle="setPositionToggle" @book-pos-changed="bookPosChanged"></SetPositionPage>
+
         </el-main>
     </el-container>
 </template>
@@ -63,9 +65,11 @@
 import Vue from 'vue';
 import Component from 'vue-class-component';
 import LoaderPage from './LoaderPage/LoaderPage.vue';
-import HistoryPage from './HistoryPage/HistoryPage.vue';
 import TextPage from './TextPage/TextPage.vue';
 import ProgressPage from './ProgressPage/ProgressPage.vue';
+
+import HistoryPage from './HistoryPage/HistoryPage.vue';
+import SetPositionPage from './SetPositionPage/SetPositionPage.vue';
 
 import bookManager from './share/bookManager';
 import readerApi from '../../api/reader';
@@ -74,9 +78,10 @@ import {sleep} from '../../share/utils';
 export default @Component({
     components: {
         LoaderPage,
-        HistoryPage,
         TextPage,
-        ProgressPage
+        ProgressPage,
+        HistoryPage,
+        SetPositionPage,
     },
     watch: {
         bookPos: function(newValue) {
@@ -104,10 +109,11 @@ export default @Component({
 })
 class Reader extends Vue {
     loaderActive = false;
-    historyActive = false;
-
     progressActive = false;
     fullScreenActive = false;
+
+    historyActive = false;
+    setPositionActive = false;
 
     bookPos = null;
     allowUrlParamBookPos = true;
@@ -122,7 +128,7 @@ class Reader extends Vue {
 
         this.lastActivePage = false;
 
-        document.addEventListener('fullscreenchange', (event) => {
+        document.addEventListener('fullscreenchange', () => {
             this.fullScreenActive = (document.fullscreenElement !== null);
         });
     }
@@ -175,7 +181,8 @@ class Reader extends Vue {
     }
 
     bookPosChanged(event) {
-        this.bookPosSeen = event.bookPosSeen;
+        if (event.bookPosSeen !== undefined)
+            this.bookPosSeen = event.bookPosSeen;
         this.bookPos = event.bookPos;
         this.updateRoute();
     }
@@ -223,17 +230,30 @@ class Reader extends Vue {
         this.historyActive = !this.historyActive;
     }
 
+    setPositionToggle() {
+        this.setPositionActive = !this.setPositionActive;
+        if (this.setPositionActive) {
+            this.$nextTick(() => {
+                this.$refs.setPositionPage.sliderMax = this.lastOpenedBook.textLength - 1;
+                this.$refs.setPositionPage.sliderValue = this.lastOpenedBook.bookPos;
+            });
+        }
+    }
+
     buttonClick(button) {
         switch (button) {
             case 'loader':
                 this.loaderToggle();
                 break;
-            case 'history':
-                this.historyToggle();
-                break;
             case 'fullScreen':
                 this.fullScreenToggle();
                 break;
+            case 'history':
+                this.historyToggle();
+                break;
+            case 'setPosition':
+                this.setPositionToggle();
+                break;                
             case 'refresh':
                 if (this.lastOpenedBook) {
                     this.loadBook({url: this.lastOpenedBook.url, force: true});
@@ -247,8 +267,9 @@ class Reader extends Vue {
         const classActive = { 'tool-button-active': true, 'tool-button-active:hover': true };
         switch (button) {
             case 'loader': return (this.loaderActive ? classActive : {});
-            case 'history': return (this.historyActive ? classActive : {});
             case 'fullScreen': return (this.fullScreenActive ? classActive : {});
+            case 'history': return (this.historyActive ? classActive : {});
+            case 'setPosition': return (this.setPositionActive ? classActive : {});
         }
         return {};
     }
@@ -416,6 +437,9 @@ class Reader extends Vue {
             if (this.historyActive)
                 handled = this.$refs.historyPage.keyHook(event);
 
+            if (this.setPositionActive)
+                handled = this.$refs.setPositionPage.keyHook(event);
+
             if (!handled && this.$refs.page && this.$refs.page.keyHook)
                 handled = this.$refs.page.keyHook(event);
 
@@ -426,6 +450,9 @@ class Reader extends Vue {
                         break;
                     case 'KeyH':
                         this.historyToggle();
+                        break;
+                    case 'KeyP':
+                        this.setPositionToggle();
                         break;
                 }
             }
