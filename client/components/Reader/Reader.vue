@@ -375,11 +375,11 @@ class Reader extends Vue {
     keyHook(event) {
         if (this.$root.rootRoute == '/reader') {
             let handled = false;
-            if (this.$refs.page && this.$refs.page.keyHook)
-                handled = this.$refs.page.keyHook(event);
-
             if (this.historyActive)
                 handled = this.$refs.historyPage.keyHook(event);
+
+            if (!handled && this.$refs.page && this.$refs.page.keyHook)
+                handled = this.$refs.page.keyHook(event);
 
             if (!handled && event.type == 'keydown') {
                 switch (event.code) {

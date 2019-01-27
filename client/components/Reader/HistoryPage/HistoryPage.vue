@@ -36,11 +36,18 @@
                     <el-table-column
                         >
                         <template slot="header" slot-scope="scope"><!-- eslint-disable-line vue/no-unused-vars -->
-                            <el-input
-                                v-model="search"
+                            <!--el-input ref="input"
+                                :value="search" @input="search = $event"
                                 size="mini"
                                 style="margin: 0; padding: 0; vertical-align: bottom; margin-top: 10px"
-                                placeholder="Найти"/>
+                                placeholder="Найти"/-->
+                                <div class="el-input el-input--mini">
+                                    <input class="el-input__inner"
+                                        placeholder="Найти"
+                                        style="margin: 0; padding: 0; vertical-align: bottom; margin-top: 20px; padding: 0 10px 0 10px"
+                                        :value="search" @input="search = $event.target.value"
+                                    />
+                                </div>
                         </template>
 
                         <el-table-column
@@ -146,6 +153,7 @@ class HistoryPage extends Vue {
         return result.filter(item => {
             return !search ||
                 item.touchTime.includes(search) ||
+                item.touchDate.includes(search) ||
                 item.desc.title.toLowerCase().includes(search.toLowerCase()) ||
                 item.desc.author.toLowerCase().includes(search.toLowerCase())
         });
