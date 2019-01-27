@@ -30,7 +30,7 @@
                         <el-button ref="copyText" class="tool-button" @click="buttonClick('copyText')"><i class="el-icon-edit-outline"></i></el-button>
                     </el-tooltip>
                     <el-tooltip content="Принудительно обновить книгу в обход кеша" :open-delay="1000" effect="light">
-                        <el-button ref="refresh" class="tool-button" @click="buttonClick('refresh')"><i class="el-icon-refresh"></i></el-button>                
+                        <el-button ref="refresh" class="tool-button" @click="buttonClick('refresh')"><i class="el-icon-refresh" :class="{clear: !showRefreshIcon}"></i></el-button>
                     </el-tooltip>
                     <div class="space"></div>
                     <el-tooltip content="История" :open-delay="1000" effect="light">
@@ -69,6 +69,7 @@ import ProgressPage from './ProgressPage/ProgressPage.vue';
 
 import bookManager from './share/bookManager';
 import readerApi from '../../api/reader';
+import {sleep} from '../../share/utils';
 
 export default @Component({
     components: {
@@ -110,6 +111,7 @@ class Reader extends Vue {
 
     bookPos = null;
     allowUrlParamBookPos = true;
+    showRefreshIcon = true;
 
     created() {
         this.commit = this.$store.commit;
@@ -326,6 +328,7 @@ class Reader extends Vue {
                         this.commit('reader/setOpenedBook', Object.assign({bookPos, bookPosSeen}, bookManager.metaOnly(bookParsed)));
                         this.loaderActive = false;
                         progress.hide(); this.progressActive = false;
+                        this.blinkCachedLoadMessage();
                         return;
                     }
 
@@ -346,10 +349,12 @@ class Reader extends Vue {
                 progress.setState({totalSteps: 5});
 
                 // не удалось, скачиваем книгу полностью с конвертацией
+                let loadCached = true;
                 if (!book) {
                     book = await readerApi.loadBook(opts.url, (state) => {
                         progress.setState(state);
                     });
+                    loadCached = false;
                 }
 
                 // добавляем в bookManager
@@ -364,12 +369,41 @@ class Reader extends Vue {
 
                 this.loaderActive = false;
                 progress.hide(); this.progressActive = false;
+                if (loadCached) {
+                    this.blinkCachedLoadMessage();
+                } else
+                    this.stopBlink = true;
             } catch (e) {
                 progress.hide(); this.progressActive = false;
                 this.loaderActive = true;
                 this.$alert(e.message, 'Ошибка', {type: 'error'});
             }
         });
+    }
+
+    blinkCachedLoadMessage() {
+        this.blinkCount = 30;
+        if (!this.inBlink) {
+            this.inBlink = true;
+            this.stopBlink = false;
+            this.$nextTick(async() => {
+                let page = this.$refs.page;
+                while (this.blinkCount) {
+                    this.showRefreshIcon = !this.showRefreshIcon;
+                    if (page.blinkCachedLoadMessage)
+                        page.blinkCachedLoadMessage(this.showRefreshIcon);
+                    await sleep(500);
+                    if (this.stopBlink)
+                        break;
+                    this.blinkCount--;
+                    page = this.$refs.page;
+                }
+                this.showRefreshIcon = true;
+                this.inBlink = false;
+                if (page.blinkCachedLoadMessage)
+                    page.blinkCachedLoadMessage('finish');
+            });
+        }
     }
 
     keyHook(event) {
@@ -467,5 +501,9 @@ i {
 .space {
     width: 10px;
     display: inline-block;
+}
+
+.clear {
+    color: rgba(0,0,0,0);
 }
 </style>

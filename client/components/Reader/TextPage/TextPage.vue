@@ -458,11 +458,25 @@ class TextPage extends Vue {
                 i--;
             i = (i > lines.length - 1 ? lines.length - 1 : i);
             if (i >= 0) {
+                let message = this.statusBarMessage;
+                if (!message)
+                    message = this.title;
                 this.statusBar = this.drawHelper.drawStatusBar(this.statusBarTop, this.statusBarHeight, 
-                    lines[i].end, this.parsed.textLength, this.title);
+                    lines[i].end, this.parsed.textLength, message);
                 this.bookPosSeen = lines[i].end;
             }
         }
+    }
+
+    blinkCachedLoadMessage(state) {
+        if (state === 'finish') {
+            this.statusBarMessage = '';
+        } else if (state) {
+            this.statusBarMessage = 'Книга загружена из кеша';
+        } else {
+            this.statusBarMessage = ' ';
+        }
+        this.drawStatusBar();
     }
 
     async refreshTime() {
