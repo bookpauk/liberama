@@ -18,7 +18,7 @@
                         <el-button ref="fullScreen" class="tool-button" :class="buttonActiveClass('fullScreen')" @click="buttonClick('fullScreen')"><i class="el-icon-rank"></i></el-button>
                     </el-tooltip>
                     <el-tooltip content="Прокрутка книги" :open-delay="1000" effect="light">
-                        <el-button ref="setPosition" class="tool-button" @click="buttonClick('setPosition')"><i class="el-icon-d-arrow-right"></i></el-button>
+                        <el-button ref="setPosition" class="tool-button" :class="buttonActiveClass('setPosition')" @click="buttonClick('setPosition')"><i class="el-icon-d-arrow-right"></i></el-button>
                     </el-tooltip>
                     <el-tooltip content="Плавный скроллинг" :open-delay="1000" effect="light">
                         <el-button ref="scrolling" class="tool-button" @click="buttonClick('scrolling')"><i class="el-icon-sort"></i></el-button>
@@ -434,10 +434,10 @@ class Reader extends Vue {
     keyHook(event) {
         if (this.$root.rootRoute == '/reader') {
             let handled = false;
-            if (this.historyActive)
+            if (!handled && this.historyActive)
                 handled = this.$refs.historyPage.keyHook(event);
 
-            if (this.setPositionActive)
+            if (!handled && this.setPositionActive)
                 handled = this.$refs.setPositionPage.keyHook(event);
 
             if (!handled && this.$refs.page && this.$refs.page.keyHook)

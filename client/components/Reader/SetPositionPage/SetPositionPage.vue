@@ -1,6 +1,6 @@
 <template>
     <div ref="main" class="main" @click="close">
-        <div class="clickStop" @click.stop>
+        <div class="mainWindow" @click.stop>
             <Window @close="close">
                 <template slot="header">
                     Установить позицию
@@ -78,11 +78,13 @@ class SetPositionPage extends Vue {
     align-items: center;
 }
 
-.clickStop {
+.mainWindow {
     width: 100%;
     max-width: 600px;
     height: 140px;
     display: flex;
+    position: relative;
+    top: -50px;
 }
 
 .slider {

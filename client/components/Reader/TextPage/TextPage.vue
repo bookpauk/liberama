@@ -360,6 +360,9 @@ class TextPage extends Vue {
         this.pagePrepared = false;
         this.debouncedPrepareNextPage();
         this.debouncedDrawStatusBar();
+
+        if (this.book && this.linesDown && this.linesDown.length < this.pageLineCount)
+            this.doEnd();
     }
 
     drawPage(bookPos, nextChangeLines) {
