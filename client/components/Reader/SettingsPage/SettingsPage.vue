@@ -8,10 +8,9 @@
 
                 <el-tabs type="border-card" tab-position="left" style="height: 100%;" v-model="selectedTab">
                     <el-tab-pane label="Вид">
-                        <el-form :model="form" size="mini" label-width="100px">
-                            <el-form-item>
-                                <b>Цвет</b>
-                            </el-form-item>
+                        <el-form :model="form" size="small" label-width="100px">
+                            <div class="partHeader">Цвет</div>
+
                             <el-form-item label="Текст">
                                 <el-color-picker v-model="textColor" color-format="hex" :predefine="predefineTextColors"></el-color-picker>
                                 <span class="color-picked"><b>{{ textColor }}</b></span>
@@ -24,21 +23,32 @@
                         </el-form>
 
                         <el-form :model="form" size="mini" label-width="100px">
-                            <el-form-item>
-                                <b>Шрифт</b>
+                            <div class="partHeader">Шрифт</div>
+
+                            <el-form-item label="Размер/наз.">
+                                    <el-col :span="11">
+                                        <el-input-number v-model="fontSize" :min="5" :max="100"></el-input-number>
+                                    </el-col>
+                                    <el-col :span="11">
+                                        <el-select v-model="fontName" placeholder="Шрифт">
+                                            <el-option label="По-умолчанию" value="ReaderDefault"></el-option>
+                                            <el-option label="BPG Arial" value="GEO_1"></el-option>
+                                            <el-option value="Avrile"></el-option>
+                                            <el-option value="Arimo"></el-option>
+                                            <el-option value="Roboto"></el-option>
+                                            <el-option value="OpenSans"></el-option>
+                                            <el-option value="Rubik"></el-option>
+                                        </el-select>
+                                    </el-col>
                             </el-form-item>
                         </el-form>
 
                         <el-form :model="form" size="mini" label-width="100px">
-                            <el-form-item>
-                                <b>Текст</b>
-                            </el-form-item>
+                            <div class="partHeader">Текст</div>
                         </el-form>
 
                         <el-form :model="form" size="mini" label-width="100px">
-                            <el-form-item>
-                                <b>Строка статуса</b>
-                            </el-form-item>
+                            <div class="partHeader">Строка статуса</div>
                         </el-form>
                     </el-tab-pane>
                     <el-tab-pane label="Листание">
@@ -183,6 +193,7 @@ class SettingsPage extends Vue {
 
 .el-form {
     border-top: 2px solid #bbbbbb;
+    margin-bottom: 15px;
 }
 
 .el-form-item {
@@ -194,6 +205,11 @@ class SettingsPage extends Vue {
 .color-picked {
     margin-left: 10px;
     position: relative;
-    top: -9px;
+    top: -11px;
+}
+
+.partHeader {
+    font-weight: bold;
+    margin-bottom: 5px;
 }
 </style>

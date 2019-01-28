@@ -35,6 +35,9 @@ import './theme/tab-pane.css';
 import ElTooltip from 'element-ui/lib/tooltip';
 import './theme/tooltip.css';
 
+import ElCol from 'element-ui/lib/col';
+import './theme/col.css';
+
 import ElContainer from 'element-ui/lib/container';
 import './theme/container.css';
 
@@ -49,6 +52,15 @@ import './theme/main.css';
 
 import ElInput from 'element-ui/lib/input';
 import './theme/input.css';
+
+import ElInputNumber from 'element-ui/lib/input-number';
+import './theme/input-number.css';
+
+import ElSelect from 'element-ui/lib/select';
+import './theme/select.css';
+
+import ElOption from 'element-ui/lib/option';
+import './theme/option.css';
 
 import ElTable from 'element-ui/lib/table';
 import './theme/table.css';
@@ -82,8 +94,8 @@ import './theme/message-box.css';
 
 const components = {
     ElMenu, ElMenuItem, ElButton, ElCheckbox, ElTabs, ElTabPane, ElTooltip,
-    ElContainer, ElAside, ElMain, ElHeader,
-    ElInput, ElTable, ElTableColumn,
+    ElCol, ElContainer, ElAside, ElMain, ElHeader,
+    ElInput, ElInputNumber, ElSelect, ElOption, ElTable, ElTableColumn,
     ElProgress, ElSlider, ElForm, ElFormItem,
     ElColorPicker,
 };
