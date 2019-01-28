@@ -13,11 +13,13 @@
                                 <b>Цвет</b>
                             </el-form-item>
                             <el-form-item label="Текст">
-                                <el-color-picker v-model="textColor" show-alpha :predefine="predefineTextColors"></el-color-picker>
+                                <el-color-picker v-model="textColor" color-format="hex" :predefine="predefineTextColors"></el-color-picker>
+                                <span class="color-picked">{{ textColor }}</b></span>
                             </el-form-item>
 
                             <el-form-item label="Фон">
-                                <el-color-picker v-model="backgroundColor" show-alpha :predefine="predefineBackgroundColors"></el-color-picker>
+                                <el-color-picker v-model="backgroundColor" color-format="hex" :predefine="predefineBackgroundColors"></el-color-picker>
+                                <span class="color-picked">{{ backgroundColor }}</span>
                             </el-form-item>
                         </el-form>
 
@@ -159,5 +161,12 @@ class SettingsPage extends Vue {
 .el-form-item {
     padding: 0;
     margin: 0;
+    position: relative;
+}
+
+.color-picked {
+    margin-left: 10px;
+    position: relative;
+    top: -9px;
 }
 </style>
