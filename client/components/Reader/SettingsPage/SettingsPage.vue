@@ -40,13 +40,20 @@
                                         &nbsp;
                                     </el-col>
                                     <el-col :span="10">
-                                        <el-select v-model="webFontName">
-                                            <el-option label="Нет" value=""></el-option>
-                                            <el-option v-for="item in webFonts"
-                                                :key="item.name"
-                                                :value="item.name">
-                                            </el-option>
-                                        </el-select>
+                                        <el-tooltip :open-delay="500" effect="light">
+                                            <template slot="content">
+                                                Веб шрифты дают большое разнообразие,<br>
+                                                однако есть шанс, что шрифт будет загружаться<br>
+                                                очень медленно или вовсе не загрузится
+                                            </template>
+                                            <el-select v-model="webFontName">
+                                                <el-option label="Нет" value=""></el-option>
+                                                <el-option v-for="item in webFonts"
+                                                    :key="item.name"
+                                                    :value="item.name">
+                                                </el-option>
+                                            </el-select>
+                                        </el-tooltip>
                                     </el-col>
                             </el-form-item>
                             <el-form-item label="Размер">
