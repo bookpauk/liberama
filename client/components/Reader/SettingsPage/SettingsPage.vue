@@ -6,8 +6,9 @@
                     Настройки
                 </template>
 
-                <el-tabs type="border-card" tab-position="left" style="height: 100%;" v-model="selectedTab">
+                <el-tabs class="tabs" type="border-card" tab-position="left" v-model="selectedTab">
                     <el-tab-pane label="Вид">
+
                         <el-form :model="form" size="small" label-width="120px">
                             <div class="partHeader">Цвет</div>
 
@@ -28,13 +29,11 @@
                             <el-form-item label="Локальный/веб">
                                     <el-col :span="10">
                                         <el-select v-model="fontName" placeholder="Шрифт" :disabled="webFontName != ''">
-                                            <el-option label="По-умолчанию" value="ReaderDefault"></el-option>
-                                            <el-option label="BPG Arial" value="GEO_1"></el-option>
-                                            <el-option value="Avrile"></el-option>
-                                            <el-option value="Arimo"></el-option>
-                                            <el-option value="Roboto"></el-option>
-                                            <el-option value="OpenSans"></el-option>
-                                            <el-option value="Rubik"></el-option>
+                                            <el-option v-for="item in fonts"
+                                                :key="item.name"
+                                                :label="item.label"
+                                                :value="item.name">
+                                            </el-option>
                                         </el-select>
                                     </el-col>
                                     <el-col :span="1">
@@ -66,12 +65,34 @@
                             </el-form-item>
                         </el-form>
 
-                        <el-form :model="form" size="mini" label-width="100px">
+                        <el-form :model="form" size="mini" label-width="120px">
                             <div class="partHeader">Текст</div>
+
+                            <el-form-item label="Интервал">
+                                <el-input-number v-model="lineInterval" :min="0" :max="100"></el-input-number>
+                            </el-form-item>
+                            <el-form-item label="Параграф">
+                                <el-input-number v-model="p" :min="0" :max="200"></el-input-number>
+                            </el-form-item>
+                            <el-form-item label="Выравнивание">
+                                <el-checkbox v-model="textAlignJustify">По ширине</el-checkbox>
+                                <el-checkbox v-model="wordWrap">Перенос по слогам</el-checkbox>
+                            </el-form-item>
                         </el-form>
 
-                        <el-form :model="form" size="mini" label-width="100px">
+                        <el-form :model="form" size="mini" label-width="120px">
                             <div class="partHeader">Строка статуса</div>
+
+                            <el-form-item label="Статус">
+                                <el-checkbox v-model="showStatusBar">Показывать</el-checkbox>
+                                <el-checkbox v-model="statusBarTop" :disabled="!showStatusBar">Вверху/внизу</el-checkbox>
+                            </el-form-item>
+                            <el-form-item label="Высота">
+                                <el-input-number v-model="statusBarHeight" :min="5" :max="50" :disabled="!showStatusBar"></el-input-number>
+                            </el-form-item>
+                            <el-form-item label="Прозрачность">
+                                <el-input-number v-model="statusBarColorAlpha" :min="0" :max="1" :precision="2" :step="0.1" :disabled="!showStatusBar"></el-input-number>
+                            </el-form-item>
                         </el-form>
                     </el-tab-pane>
                     <el-tab-pane label="Листание">
@@ -80,6 +101,7 @@
                     <el-tab-pane label="Другое">
                         
                     </el-tab-pane>
+
                 </el-tabs>
             </Window>
         </div>
@@ -251,4 +273,15 @@ class SettingsPage extends Vue {
     font-weight: bold;
     margin-bottom: 5px;
 }
+
+.tabs {
+    flex: 1;
+    display: flex;
+}
+
+.el-tab-pane {
+    height: 100%;
+    overflow-y: auto;
+}
+
 </style>
