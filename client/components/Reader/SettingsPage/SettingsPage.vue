@@ -10,10 +10,28 @@
                     <el-tab-pane label="Вид">
                         <el-form :model="form" size="mini" label-width="100px">
                             <el-form-item>
-                                Название раздела
+                                Цвет
                             </el-form-item>
                             <el-form-item label="item">
                                 <el-input v-model="form.item"></el-input>
+                            </el-form-item>
+                        </el-form>
+
+                        <el-form :model="form" size="mini" label-width="100px">
+                            <el-form-item>
+                                Шрифт
+                            </el-form-item>
+                        </el-form>
+
+                        <el-form :model="form" size="mini" label-width="100px">
+                            <el-form-item>
+                                Текст
+                            </el-form-item>
+                        </el-form>
+
+                        <el-form :model="form" size="mini" label-width="100px">
+                            <el-form-item>
+                                Строка статуса
                             </el-form-item>
                         </el-form>
                     </el-tab-pane>

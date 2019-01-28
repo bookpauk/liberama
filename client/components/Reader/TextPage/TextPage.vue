@@ -41,6 +41,9 @@ export default @Component({
             this.debouncedEmitPosChange(newValue);
             this.draw();
         },
+        settings: function() {
+            this.loadSettings();
+        },
     },
 })
 class TextPage extends Vue {
@@ -148,7 +151,7 @@ class TextPage extends Vue {
         fontsLoadingStyle.left = (this.realWidth - this.measureText(flText, {}))/2 + 'px';
 
         //stuff
-        this.statusBarColor = this.hex2rgba(this.textColor, this.statusBarColorAlpha);
+        this.statusBarColor = this.hex2rgba(this.textColor || '#000000', this.statusBarColorAlpha);
         this.currentTransition = '';
         this.pageChangeDirectionDown = true;
         this.fontShift = (this.fontShifts[this.fontName] ? this.fontShifts[this.fontName] : 0)/100;
@@ -224,6 +227,48 @@ class TextPage extends Vue {
         this.fontsLoading = false;
     }
 
+    getSettings() {
+        const settings = this.settings;
+
+        this.textColor = settings.textColor;
+        this.backgroundColor = settings.backgroundColor;
+        this.fontStyle = settings.fontStyle;// 'italic'
+        this.fontWeight = settings.fontWeight;// 'bold'
+        this.fontSize = settings.fontSize;// px
+        this.fontName = settings.fontName;
+        this.fontCssUrl = settings.fontCssUrl;
+        this.fontVertShift = settings.fontVertShift;
+
+        this.lineInterval = settings.lineInterval;// px, межстрочный интервал
+        this.textAlignJustify = settings.textAlignJustify;// выравнивание по ширине
+        this.p = settings.p;// px, отступ параграфа
+        this.indent = settings.indent;// px, отступ всего текста слева и справа
+        this.wordWrap = settings.wordWrap;
+        this.keepLastToFirst = settings.keepLastToFirst;// перенос последней строки в первую при листании
+
+        this.showStatusBar = settings.showStatusBar;
+        this.statusBarTop = settings.statusBarTop;// top, bottom
+        this.statusBarHeight = settings.statusBarHeight;// px
+        this.statusBarColorAlpha = settings.statusBarColorAlpha;
+
+        this.pageChangeTransition = settings.pageChangeTransition;// '' - нет, downShift, rightShift, thaw - протаивание, blink - мерцание
+        this.pageChangeTransitionSpeed = settings.pageChangeTransitionSpeed; //0-100%
+    }
+
+    loadSettings() {
+        (async() => {
+            let fontName = this.fontName;
+
+            this.getSettings();
+            this.calcDrawProps();
+
+            if (fontName != this.fontName)
+                await this.loadFonts();
+
+            this.draw();
+        })();
+    }
+
     showBook() {
         this.$refs.main.focus();
 
@@ -236,30 +281,7 @@ class TextPage extends Vue {
         this.linesUp = null;
         this.linesDown = null;
 
-        //default draw props
-        this.textColor = '#000000';
-        this.backgroundColor = '#478355';
-        this.fontStyle = '';// 'bold','italic'
-        this.fontSize = 36;// px
-        this.fontName = 'GEO_1';
-        this.fontCssUrl = '';
-        this.fontVertShift = 0;
-
-        this.lineInterval = 6;// px, межстрочный интервал
-        this.textAlignJustify = true;// выравнивание по ширине
-        this.p = 50;// px, отступ параграфа
-        this.indent = 15;// px, отступ всего текста слева и справа
-        this.wordWrap = true;
-        this.keepLastToFirst = true;// перенос последней строки в первую при листании
-
-        this.showStatusBar = true;
-        this.statusBarTop = false;// top, bottom
-        this.statusBarHeight = 19;// px
-        this.statusBarColorAlpha = 0.4;
-
-        this.pageChangeTransition = '';// '' - нет, downShift, rightShift, thaw - протаивание, blink - мерцание
-        this.pageChangeTransitionSpeed = 50; //0-100%
-
+        this.getSettings();
         this.calcDrawProps();
         this.draw();// пока не загрузили, очистим канвас
 
@@ -286,6 +308,7 @@ class TextPage extends Vue {
                 this.$root.$emit('set-app-title', this.title);
 
                 this.parsed = this.book.parsed;
+
                 this.calcDrawProps();
 
                 await this.loadFonts();
@@ -312,12 +335,16 @@ class TextPage extends Vue {
         this.draw();
     }
 
+    get settings() {
+        return this.$store.state.reader.settings;
+    }
+
     get font() {
-        return `${this.fontStyle} ${this.fontSize}px ${this.fontName}`;
+        return `${this.fontStyle} ${this.fontWeight} ${this.fontSize}px ${this.fontName}`;
     }
 
     fontByStyle(style) {
-        return `${style.italic ? 'italic' : ''} ${style.bold ? 'bold' : ''} ${this.fontSize}px ${this.fontName}`;
+        return `${style.italic ? 'italic' : this.fontStyle} ${style.bold ? 'bold' : this.fontWeight} ${this.fontSize}px ${this.fontName}`;
     }
 
     draw() {

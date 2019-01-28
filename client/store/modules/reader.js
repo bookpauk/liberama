@@ -4,6 +4,33 @@ import Vue from 'vue';
 const state = {
     toolBarActive: true,
     openedBook: {},
+    settings: {
+        textColor: '#000000',
+        backgroundColor: '#EBE2C9',
+        fontStyle: '',// 'italic'
+        fontWeight: '',// 'bold'
+        fontSize: 20,// px
+        fontName: 'ReaderDefault',
+        fontCssUrl: '',
+        fontVertShift: 0,
+
+        lineInterval: 3,// px, межстрочный интервал
+        textAlignJustify: true,// выравнивание по ширине
+        p: 25,// px, отступ параграфа
+        indent: 15,// px, отступ всего текста слева и справа
+        wordWrap: true,//перенос по слогам
+        keepLastToFirst: true,// перенос последней строки в первую при листании
+
+        showStatusBar: true,
+        statusBarTop: false,// top, bottom
+        statusBarHeight: 19,// px
+        statusBarColorAlpha: 0.4,
+
+        pageChangeTransition: '',// '' - нет, downShift, rightShift, thaw - протаивание, blink - мерцание
+        pageChangeTransitionSpeed: 50, //0-100%
+
+        allowUrlParamBookPos: true,
+    },
 };
 
 // getters
