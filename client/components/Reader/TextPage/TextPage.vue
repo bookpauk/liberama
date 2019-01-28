@@ -257,15 +257,32 @@ class TextPage extends Vue {
         this.pageChangeTransitionSpeed = settings.pageChangeTransitionSpeed; //0-100%
     }
 
+    async calcPropsAndLoadFonts(omitLoadFonts) {
+        this.calcDrawProps();
+
+        if (!omitLoadFonts)
+            await this.loadFonts();
+
+        //this.draw();
+
+        // шрифты хрен знает когда подгружаются, поэтому
+        if (!this.parsed.force) {
+            let i = 0;
+            this.parsed.force = true;
+            while (i < 10) {
+                this.draw();
+                await sleep(1000);
+                i++;
+            }
+            this.parsed.force = false;
+        }
+    }
+
     loadSettings() {
         (async() => {
             let fontName = this.fontName;
-
             this.getSettings();
-            this.calcDrawProps();
-
-            if (fontName != this.fontName)
-                await this.loadFonts();
+            await this.calcPropsAndLoadFonts(fontName == this.fontName);
 
             this.draw();
         })();
@@ -311,22 +328,7 @@ class TextPage extends Vue {
 
                 this.parsed = this.book.parsed;
 
-                this.calcDrawProps();
-
-                await this.loadFonts();
-
-                //this.draw();
-
-                // шрифты хрен знает когда подгружаются, поэтому
-                let i = 0;
-                this.parsed.force = true;
-                while (i < 10) {
-                    this.draw();
-                    await sleep(1000);
-                    i++;
-                }
-                this.parsed.force = false;
-
+                this.calcPropsAndLoadFonts();
                 this.refreshTime();
             })();
         }
