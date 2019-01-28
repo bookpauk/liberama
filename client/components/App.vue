@@ -168,7 +168,7 @@ class App extends Vue {
         if (!title) {
             if (this.mode == 'omnireader') {
                 document.title = `Omni Reader - всегда с вами`;
-            } else if (this.config) {
+            } else if (this.config && this.mode !== null) {
                 document.title = `${this.config.name} - ${this.itemRuText[this.$root.rootRoute]}`;
             }
         } else {
@@ -185,7 +185,7 @@ class App extends Vue {
     }
 
     get showAsideBar() {
-        return (this.mode != 'reader' && this.mode != 'omnireader');
+        return (this.mode !== null && this.mode != 'reader' && this.mode != 'omnireader');
     }
 
     get isReaderActive() {
