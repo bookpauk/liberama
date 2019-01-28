@@ -1,5 +1,15 @@
 import Vue from 'vue';
 
+const fonts = [
+    {name: 'ReaderDefault', label: 'По-умолчанию', fontVertShift: 0},
+    {name: 'GEO_1', label: 'BPG Arial', fontVertShift: 10},
+    {name: 'Arimo', fontVertShift: 0},
+    {name: 'Avrile', fontVertShift: -10},
+    {name: 'OpenSans', fontVertShift: 0},
+    {name: 'Roboto', fontVertShift: 0},
+    {name: 'Rubik', fontVertShift: 0},
+];
+
 const webFonts = [
     {css: 'https://fonts.googleapis.com/css?family=Oswald', name: 'Oswald', fontVertShift: 0},
     {css: 'https://fonts.googleapis.com/css?family=Lobster', name: 'Lobster', fontVertShift: 0},
@@ -100,6 +110,7 @@ const mutations = {
 };
 
 export default {
+    fonts,
     webFonts,
     namespaced: true,
     state,

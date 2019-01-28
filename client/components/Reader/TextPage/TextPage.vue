@@ -32,7 +32,7 @@ import {sleep} from '../../../share/utils';
 
 import bookManager from '../share/bookManager';
 import DrawHelper from './DrawHelper';
-import reader from '../../../store/modules/reader';
+import rstore from '../../../store/modules/reader';
 const minLayoutWidth = 100;
 
 export default @Component({
@@ -90,6 +90,11 @@ class TextPage extends Vue {
 
         this.$root.$on('resize', () => {this.$nextTick(this.onResize)});
         this.mobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry/i.test(navigator.userAgent);
+
+        this.fontShifts = {};
+        for (const font of rstore.fonts) {
+            this.fontShifts[font.name] = font.fontVertShift;
+        }
     }
 
     mounted() {
@@ -103,15 +108,6 @@ class TextPage extends Vue {
 
     calcDrawProps() {
         //preloaded fonts
-        this.fontShifts = {//%
-            ReaderDefault: 0,
-            Roboto: 0,
-            OpenSans: 0,
-            Rubik: 0,
-            Avrile: -10,
-            Arimo: 0,
-            GEO_1: 10,
-        }
         if (!this.fontShifts.hasOwnProperty(this.fontName))
             this.fontShifts[this.fontName] = this.fontVertShift;
         this.fontList = [];
@@ -238,11 +234,11 @@ class TextPage extends Vue {
         this.fontName = settings.fontName;
 
         const wf = settings.webFontName;
-        const i = _.findIndex(reader.webFonts, ['name', wf]);
+        const i = _.findIndex(rstore.webFonts, ['name', wf]);
         if (wf && i >= 0) {
             this.fontName = wf;
-            this.fontCssUrl = reader.webFonts[i].css;
-            this.fontVertShift = reader.webFonts[i].fontVertShift;
+            this.fontCssUrl = rstore.webFonts[i].css;
+            this.fontVertShift = rstore.webFonts[i].fontVertShift;
         }
 
         this.lineInterval = settings.lineInterval;// px, межстрочный интервал

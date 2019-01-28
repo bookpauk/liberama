@@ -92,7 +92,7 @@ import Vue from 'vue';
 import Component from 'vue-class-component';
 
 import Window from '../../share/Window.vue';
-import reader from '../../../store/modules/reader';
+import rstore from '../../../store/modules/reader';
 
 const propsData = {
     textColor: '#000000',
@@ -147,6 +147,7 @@ class SettingsPage extends Vue {
     fontItalic = false;
 
     webFonts = [];
+    fonts = [];
 
     created() {
         this.commit = this.$store.commit;
@@ -161,7 +162,9 @@ class SettingsPage extends Vue {
         }
         this.fontBold = (this.fontWeight == 'bold');
         this.fontItalic = (this.fontStyle == 'italic');
-        this.webFonts = reader.webFonts;
+
+        this.fonts = rstore.fonts;
+        this.webFonts = rstore.webFonts;
     }
 
     get settings() {
