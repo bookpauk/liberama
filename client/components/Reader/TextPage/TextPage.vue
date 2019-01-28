@@ -32,7 +32,7 @@ import {sleep} from '../../../share/utils';
 
 import bookManager from '../share/bookManager';
 import DrawHelper from './DrawHelper';
-
+import reader from '../../../store/modules/reader';
 const minLayoutWidth = 100;
 
 export default @Component({
@@ -236,8 +236,14 @@ class TextPage extends Vue {
         this.fontWeight = settings.fontWeight;// 'bold'
         this.fontSize = settings.fontSize;// px
         this.fontName = settings.fontName;
-        this.fontCssUrl = settings.fontCssUrl;
-        this.fontVertShift = settings.fontVertShift;
+
+        const wf = settings.webFontName;
+        const i = _.findIndex(reader.webFonts, ['name', wf]);
+        if (wf && i >= 0) {
+            this.fontName = wf;
+            this.fontCssUrl = reader.webFonts[i].css;
+            this.fontVertShift = reader.webFonts[i].fontVertShift;
+        }
 
         this.lineInterval = settings.lineInterval;// px, межстрочный интервал
         this.textAlignJustify = settings.textAlignJustify;// выравнивание по ширине

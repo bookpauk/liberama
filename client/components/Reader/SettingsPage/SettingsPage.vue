@@ -8,7 +8,7 @@
 
                 <el-tabs type="border-card" tab-position="left" style="height: 100%;" v-model="selectedTab">
                     <el-tab-pane label="Вид">
-                        <el-form :model="form" size="small" label-width="100px">
+                        <el-form :model="form" size="small" label-width="120px">
                             <div class="partHeader">Цвет</div>
 
                             <el-form-item label="Текст">
@@ -22,15 +22,12 @@
                             </el-form-item>
                         </el-form>
 
-                        <el-form :model="form" size="mini" label-width="100px">
+                        <el-form :model="form" size="mini" label-width="120px">
                             <div class="partHeader">Шрифт</div>
 
-                            <el-form-item label="Размер/наз.">
-                                    <el-col :span="11">
-                                        <el-input-number v-model="fontSize" :min="5" :max="100"></el-input-number>
-                                    </el-col>
-                                    <el-col :span="11">
-                                        <el-select v-model="fontName" placeholder="Шрифт">
+                            <el-form-item label="Локальный/веб">
+                                    <el-col :span="10">
+                                        <el-select v-model="fontName" placeholder="Шрифт" :disabled="webFontName != ''">
                                             <el-option label="По-умолчанию" value="ReaderDefault"></el-option>
                                             <el-option label="BPG Arial" value="GEO_1"></el-option>
                                             <el-option value="Avrile"></el-option>
@@ -40,6 +37,32 @@
                                             <el-option value="Rubik"></el-option>
                                         </el-select>
                                     </el-col>
+                                    <el-col :span="1">
+                                        &nbsp;
+                                    </el-col>
+                                    <el-col :span="10">
+                                        <el-select v-model="webFontName">
+                                            <el-option label="Нет" value=""></el-option>
+                                            <el-option v-for="item in webFonts"
+                                                :key="item.name"
+                                                :value="item.name">
+                                            </el-option>
+                                        </el-select>
+                                    </el-col>
+                            </el-form-item>
+                            <el-form-item label="Размер">
+                                    <el-col :span="10">
+                                        <el-input-number v-model="fontSize" :min="5" :max="100"></el-input-number>
+                                    </el-col>
+                            </el-form-item>
+
+                            <el-form-item label="Стиль">
+                                <el-col :span="11">
+                                    <el-checkbox v-model="fontBold">Жирный</el-checkbox>
+                                </el-col>
+                                <el-col :span="11">
+                                    <el-checkbox v-model="fontItalic">Курсив</el-checkbox>
+                                </el-col>
                             </el-form-item>
                         </el-form>
 
@@ -69,6 +92,7 @@ import Vue from 'vue';
 import Component from 'vue-class-component';
 
 import Window from '../../share/Window.vue';
+import reader from '../../../store/modules/reader';
 
 const propsData = {
     textColor: '#000000',
@@ -77,8 +101,7 @@ const propsData = {
     fontWeight: '',// 'bold'
     fontSize: 20,// px
     fontName: 'ReaderDefault',
-    fontCssUrl: '',
-    fontVertShift: 0,
+    webFontName: '',
 
     lineInterval: 3,// px, межстрочный интервал
     textAlignJustify: true,// выравнивание по ширине
@@ -109,11 +132,21 @@ export default @Component({
         form: function(newValue) {
             this.commit('reader/setSettings', newValue);
         },
+        fontBold: function(newValue) {
+            this.fontWeight = (newValue ? 'bold' : '');
+        },
+        fontItalic: function(newValue) {
+            this.fontStyle = (newValue ? 'italic' : '');
+        },
     },
 })
 class SettingsPage extends Vue {
     selectedTab = null;
     form = {};
+    fontBold = false;
+    fontItalic = false;
+
+    webFonts = [];
 
     created() {
         this.commit = this.$store.commit;
@@ -126,6 +159,9 @@ class SettingsPage extends Vue {
                 this.form = Object.assign({}, this.form, {[prop]: newValue})
             });
         }
+        this.fontBold = (this.fontWeight == 'bold');
+        this.fontItalic = (this.fontStyle == 'italic');
+        this.webFonts = reader.webFonts;
     }
 
     get settings() {
@@ -193,13 +229,13 @@ class SettingsPage extends Vue {
 
 .el-form {
     border-top: 2px solid #bbbbbb;
-    margin-bottom: 15px;
+    margin-bottom: 5px;
 }
 
 .el-form-item {
     padding: 0;
     margin: 0;
-    position: relative;
+    margin-bottom: 5px;
 }
 
 .color-picked {

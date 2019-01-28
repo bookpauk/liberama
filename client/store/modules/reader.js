@@ -1,5 +1,13 @@
 import Vue from 'vue';
 
+const webFonts = [
+    {css: 'https://fonts.googleapis.com/css?family=Oswald', name: 'Oswald', fontVertShift: 0},
+    {css: 'https://fonts.googleapis.com/css?family=Lobster', name: 'Lobster', fontVertShift: 0},
+    {css: 'https://fonts.googleapis.com/css?family=Pacifico', name: 'Pacifico', fontVertShift: 0},
+    {css: 'https://fonts.googleapis.com/css?family=Comfortaa', name: 'Comfortaa', fontVertShift: 0},
+    
+];
+
 // initial state
 const state = {
     toolBarActive: true,
@@ -11,8 +19,7 @@ const state = {
         fontWeight: '',// 'bold'
         fontSize: 20,// px
         fontName: 'ReaderDefault',
-        fontCssUrl: '',
-        fontVertShift: 0,
+        webFontName: '',
 
         lineInterval: 3,// px, межстрочный интервал
         textAlignJustify: true,// выравнивание по ширине
@@ -93,6 +100,7 @@ const mutations = {
 };
 
 export default {
+    webFonts,
     namespaced: true,
     state,
     getters,
