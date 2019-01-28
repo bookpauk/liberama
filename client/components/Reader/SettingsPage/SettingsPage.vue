@@ -40,7 +40,7 @@
                                         &nbsp;
                                     </el-col>
                                     <el-col :span="10">
-                                        <el-tooltip :open-delay="500" effect="light">
+                                        <el-tooltip :open-delay="500" effect="light" placement="top">
                                             <template slot="content">
                                                 Веб шрифты дают большое разнообразие,<br>
                                                 однако есть шанс, что шрифт будет загружаться<br>
