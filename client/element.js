@@ -62,6 +62,12 @@ import './theme/progress.css';
 import ElSlider from 'element-ui/lib/slider';
 import './theme/slider.css';
 
+import ElForm from 'element-ui/lib/form';
+import './theme/form.css';
+
+import ElFormItem from 'element-ui/lib/form-item';
+import './theme/form-item.css';
+
 import Notification from 'element-ui/lib/notification';
 import './theme/notification.css';
 
@@ -75,7 +81,7 @@ const components = {
     ElMenu, ElMenuItem, ElButton, ElCheckbox, ElTabs, ElTabPane, ElTooltip,
     ElContainer, ElAside, ElMain, ElHeader,
     ElInput, ElTable, ElTableColumn,
-    ElProgress, ElSlider
+    ElProgress, ElSlider, ElForm, ElFormItem,
 };
 
 for (let name in components) {

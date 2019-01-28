@@ -6,6 +6,24 @@
                     Настройки
                 </template>
 
+                <el-tabs type="border-card" tab-position="left" style="height: 100%;" v-model="selectedTab">
+                    <el-tab-pane label="Вид">
+                        <el-form :model="form" size="mini" label-width="100px">
+                            <el-form-item>
+                                Название раздела
+                            </el-form-item>
+                            <el-form-item label="item">
+                                <el-input v-model="form.item"></el-input>
+                            </el-form-item>
+                        </el-form>
+                    </el-tab-pane>
+                    <el-tab-pane label="Листание">
+                        
+                    </el-tab-pane>
+                    <el-tab-pane label="Другое">
+                        
+                    </el-tab-pane>
+                </el-tabs>
             </Window>
         </div>
     </div>
@@ -24,8 +42,8 @@ export default @Component({
     },
 })
 class SettingsPage extends Vue {
-    sliderValue = null;
-    sliderMax = null;
+    selectedTab = null;
+    form = {};
 
     created() {
         this.commit = this.$store.commit;
@@ -64,5 +82,9 @@ class SettingsPage extends Vue {
     height: 70%;
     display: flex;
     position: relative;
+}
+
+.el-form {
+    border-top: 2px solid #bbbbbb;
 }
 </style>
