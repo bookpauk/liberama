@@ -41,7 +41,7 @@
                 </div>
 
                 <el-tooltip content="Настроить" :open-delay="1000" effect="light">
-                    <el-button ref="settings" class="tool-button" @click="buttonClick('settings')"><i class="el-icon-setting"></i></el-button>            
+                    <el-button ref="settings" class="tool-button" :class="buttonActiveClass('settings')" @click="buttonClick('settings')"><i class="el-icon-setting"></i></el-button>            
                 </el-tooltip>
             </div>
         </el-header>
@@ -56,9 +56,9 @@
                 ></component>
             </keep-alive>
 
-            <HistoryPage v-if="historyActive" ref="historyPage" @load-book="loadBook" @history-toggle="historyToggle"></HistoryPage>
             <SetPositionPage v-if="setPositionActive" ref="setPositionPage" @set-position-toggle="setPositionToggle" @book-pos-changed="bookPosChanged"></SetPositionPage>
-
+            <HistoryPage v-if="historyActive" ref="historyPage" @load-book="loadBook" @history-toggle="historyToggle"></HistoryPage>
+            <SettingsPage v-if="settingsActive" ref="settingsPage" @settings-toggle="settingsToggle"></SettingsPage>
         </el-main>
     </el-container>
 </template>
@@ -71,8 +71,9 @@ import LoaderPage from './LoaderPage/LoaderPage.vue';
 import TextPage from './TextPage/TextPage.vue';
 import ProgressPage from './ProgressPage/ProgressPage.vue';
 
-import HistoryPage from './HistoryPage/HistoryPage.vue';
 import SetPositionPage from './SetPositionPage/SetPositionPage.vue';
+import HistoryPage from './HistoryPage/HistoryPage.vue';
+import SettingsPage from './SettingsPage/SettingsPage.vue';
 
 import bookManager from './share/bookManager';
 import readerApi from '../../api/reader';
@@ -83,8 +84,10 @@ export default @Component({
         LoaderPage,
         TextPage,
         ProgressPage,
-        HistoryPage,
+
         SetPositionPage,
+        HistoryPage,
+        SettingsPage,
     },
     watch: {
         bookPos: function(newValue) {
@@ -115,11 +118,12 @@ class Reader extends Vue {
     progressActive = false;
     fullScreenActive = false;
 
+    setPositionActive = false;
     scrollingActive = false;
     searchActive = false;
     copyTextActive = false;
     historyActive = false;
-    setPositionActive = false;
+    settingsActive = false;
 
     bookPos = null;
     allowUrlParamBookPos = true;
@@ -232,24 +236,15 @@ class Reader extends Vue {
     }
 
     closeAllTextPages() {
-        this.historyActive = false;
         this.setPositionActive = false;
+        this.historyActive = false;
+        this.settingsActive = false;
     }
 
     loaderToggle() {
         this.loaderActive = !this.loaderActive;
         if (this.loaderActive) {
             this.closeAllTextPages();
-        }
-    }
-
-    historyToggle() {
-        this.historyActive = !this.historyActive;
-        if (this.historyActive) {
-            this.closeAllTextPages();
-            this.historyActive = true;
-        } else {
-            this.historyActive = false;
         }
     }
 
@@ -268,6 +263,26 @@ class Reader extends Vue {
         }
     }
 
+    historyToggle() {
+        this.historyActive = !this.historyActive;
+        if (this.historyActive) {
+            this.closeAllTextPages();
+            this.historyActive = true;
+        } else {
+            this.historyActive = false;
+        }
+    }
+
+    settingsToggle() {
+        this.settingsActive = !this.settingsActive;
+        if (this.settingsActive) {
+            this.closeAllTextPages();
+            this.settingsActive = true;
+        } else {
+            this.settingsActive = false;
+        }
+    }
+
     buttonClick(button) {
         switch (button) {
             case 'loader':
@@ -276,16 +291,19 @@ class Reader extends Vue {
             case 'fullScreen':
                 this.fullScreenToggle();
                 break;
-            case 'history':
-                this.historyToggle();
-                break;
             case 'setPosition':
                 this.setPositionToggle();
                 break;                
+            case 'history':
+                this.historyToggle();
+                break;
             case 'refresh':
                 if (this.lastOpenedBook) {
                     this.loadBook({url: this.lastOpenedBook.url, force: true});
                 }
+                break;
+            case 'settings':
+                this.settingsToggle();
                 break;
         }
         this.$refs[button].$el.blur();
@@ -304,6 +322,7 @@ class Reader extends Vue {
             case 'search':
             case 'copyText':
             case 'history':
+            case 'settings':
                 if (this[`${button}Active`])
                     classResult = classActive;
                 break;
@@ -486,6 +505,9 @@ class Reader extends Vue {
     keyHook(event) {
         if (this.$root.rootRoute == '/reader') {
             let handled = false;
+            if (!handled && this.settingsActive)
+                handled = this.$refs.settingsPage.keyHook(event);
+
             if (!handled && this.historyActive)
                 handled = this.$refs.historyPage.keyHook(event);
 
@@ -496,16 +518,21 @@ class Reader extends Vue {
                 handled = this.$refs.page.keyHook(event);
 
             if (!handled && event.type == 'keydown') {
-                switch (event.code) {
-                    case 'Escape':
-                        this.loaderToggle();
-                        break;
-                    case 'KeyH':
-                        this.historyToggle();
-                        break;
-                    case 'KeyP':
-                        this.setPositionToggle();
-                        break;
+                if (event.code == 'Escape')
+                    this.loaderToggle();
+
+                if (this.activePage == 'TextPage') {
+                    switch (event.code) {
+                        case 'KeyP':
+                            this.setPositionToggle();
+                            break;
+                        case 'KeyH':
+                            this.historyToggle();
+                            break;
+                        case 'KeyS':
+                            this.settingsToggle();
+                            break;
+                    }
                 }
             }
         }
