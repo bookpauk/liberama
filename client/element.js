@@ -68,6 +68,9 @@ import './theme/form.css';
 import ElFormItem from 'element-ui/lib/form-item';
 import './theme/form-item.css';
 
+import ElColorPicker from 'element-ui/lib/color-picker';
+import './theme/color-picker.css';
+
 import Notification from 'element-ui/lib/notification';
 import './theme/notification.css';
 
@@ -82,6 +85,7 @@ const components = {
     ElContainer, ElAside, ElMain, ElHeader,
     ElInput, ElTable, ElTableColumn,
     ElProgress, ElSlider, ElForm, ElFormItem,
+    ElColorPicker,
 };
 
 for (let name in components) {

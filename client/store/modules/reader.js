@@ -86,6 +86,9 @@ const mutations = {
     },
     delOpenedBook(state, value) {
         delBook(state, value);
+    },
+    setSettings(state, value) {
+        state.settings = Object.assign({}, state.settings, value);
     }
 };
 

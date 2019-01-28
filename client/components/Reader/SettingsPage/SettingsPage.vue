@@ -10,10 +10,14 @@
                     <el-tab-pane label="Вид">
                         <el-form :model="form" size="mini" label-width="100px">
                             <el-form-item>
-                                Цвет
+                                <b>Цвет</b>
                             </el-form-item>
-                            <el-form-item label="item">
-                                <el-input v-model="form.item"></el-input>
+                            <el-form-item label="Текст">
+                                <el-color-picker v-model="textColor" show-alpha :predefine="predefineTextColors"></el-color-picker>
+                            </el-form-item>
+
+                            <el-form-item label="Фон">
+                                <el-color-picker v-model="backgroundColor" show-alpha :predefine="predefineBackgroundColors"></el-color-picker>
                             </el-form-item>
                         </el-form>
 
@@ -54,9 +58,26 @@ import Component from 'vue-class-component';
 
 import Window from '../../share/Window.vue';
 
+const props = [
+    'textColor',
+    'backgroundColor'
+];
+
+let propsData = {};
+for (const prop of props)
+    propsData[prop] = null;
+
 export default @Component({
     components: {
         Window,
+    },
+    data: function() {
+        return Object.assign({}, propsData);
+    },
+    watch: {
+        form: function(newValue) {
+            this.commit('reader/setSettings', newValue);
+        },
     },
 })
 class SettingsPage extends Vue {
@@ -66,6 +87,35 @@ class SettingsPage extends Vue {
     created() {
         this.commit = this.$store.commit;
         this.reader = this.$store.state.reader;
+
+        this.form = this.settings;
+        for (const prop of props) {
+            this[prop] = this.form[prop];
+            this.$watch(prop, (newValue) => {
+                this.form = Object.assign({}, this.form, {[prop]: newValue})
+            });
+        }
+    }
+
+    get settings() {
+        return this.$store.state.reader.settings;
+    }
+
+    get predefineTextColors() {
+        return [
+          '#ff4500',
+          '#ff8c00',
+        ];
+    }
+
+    get predefineBackgroundColors() {
+        return [
+          '#ff4500',
+          '#ff8c00',
+          '#ffd700',
+          '#c71585',
+          'rgba(255, 69, 0, 0.68)',
+        ];
     }
 
     close() {
@@ -104,5 +154,10 @@ class SettingsPage extends Vue {
 
 .el-form {
     border-top: 2px solid #bbbbbb;
+}
+
+.el-form-item {
+    padding: 0;
+    margin: 0;
 }
 </style>
