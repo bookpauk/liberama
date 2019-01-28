@@ -14,30 +14,30 @@
                             </el-form-item>
                             <el-form-item label="Текст">
                                 <el-color-picker v-model="textColor" color-format="hex" :predefine="predefineTextColors"></el-color-picker>
-                                <span class="color-picked">{{ textColor }}</b></span>
+                                <span class="color-picked"><b>{{ textColor }}</b></span>
                             </el-form-item>
 
                             <el-form-item label="Фон">
                                 <el-color-picker v-model="backgroundColor" color-format="hex" :predefine="predefineBackgroundColors"></el-color-picker>
-                                <span class="color-picked">{{ backgroundColor }}</span>
+                                <span class="color-picked"><b>{{ backgroundColor }}</b></span>
                             </el-form-item>
                         </el-form>
 
                         <el-form :model="form" size="mini" label-width="100px">
                             <el-form-item>
-                                Шрифт
+                                <b>Шрифт</b>
                             </el-form-item>
                         </el-form>
 
                         <el-form :model="form" size="mini" label-width="100px">
                             <el-form-item>
-                                Текст
+                                <b>Текст</b>
                             </el-form-item>
                         </el-form>
 
                         <el-form :model="form" size="mini" label-width="100px">
                             <el-form-item>
-                                Строка статуса
+                                <b>Строка статуса</b>
                             </el-form-item>
                         </el-form>
                     </el-tab-pane>
@@ -60,14 +60,33 @@ import Component from 'vue-class-component';
 
 import Window from '../../share/Window.vue';
 
-const props = [
-    'textColor',
-    'backgroundColor'
-];
+const propsData = {
+    textColor: '#000000',
+    backgroundColor: '#EBE2C9',
+    fontStyle: '',// 'italic'
+    fontWeight: '',// 'bold'
+    fontSize: 20,// px
+    fontName: 'ReaderDefault',
+    fontCssUrl: '',
+    fontVertShift: 0,
 
-let propsData = {};
-for (const prop of props)
-    propsData[prop] = null;
+    lineInterval: 3,// px, межстрочный интервал
+    textAlignJustify: true,// выравнивание по ширине
+    p: 25,// px, отступ параграфа
+    indent: 15,// px, отступ всего текста слева и справа
+    wordWrap: true,//перенос по слогам
+    keepLastToFirst: true,// перенос последней строки в первую при листании
+
+    showStatusBar: true,
+    statusBarTop: false,// top, bottom
+    statusBarHeight: 19,// px
+    statusBarColorAlpha: 0.4,
+
+    pageChangeTransition: '',// '' - нет, downShift, rightShift, thaw - протаивание, blink - мерцание
+    pageChangeTransitionSpeed: 50, //0-100%
+
+    allowUrlParamBookPos: true,
+};
 
 export default @Component({
     components: {
@@ -91,7 +110,7 @@ class SettingsPage extends Vue {
         this.reader = this.$store.state.reader;
 
         this.form = this.settings;
-        for (const prop of props) {
+        for (let prop in propsData) {
             this[prop] = this.form[prop];
             this.$watch(prop, (newValue) => {
                 this.form = Object.assign({}, this.form, {[prop]: newValue})
@@ -105,18 +124,26 @@ class SettingsPage extends Vue {
 
     get predefineTextColors() {
         return [
-          '#ff4500',
-          '#ff8c00',
+          '#ffffff',
+          '#000000',
+          '#202020',
+          '#323232',
+          '#aaaaaa',
+          '#00c0c0',
         ];
     }
 
     get predefineBackgroundColors() {
         return [
-          '#ff4500',
-          '#ff8c00',
-          '#ffd700',
-          '#c71585',
-          'rgba(255, 69, 0, 0.68)',
+          '#ffffff',
+          '#000000',
+          '#202020',
+          '#ebe2c9',
+          '#478355',
+          '#909080',
+          '#808080',
+          '#a6caf0',
+          '#c8c8c8',
         ];
     }
 
