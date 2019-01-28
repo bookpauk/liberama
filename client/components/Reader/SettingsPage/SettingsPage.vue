@@ -96,9 +96,49 @@
                         </el-form>
                     </el-tab-pane>
                     <el-tab-pane label="Листание">
+                        <el-form :model="form" size="mini" label-width="120px">
+                            <div class="partHeader">Анимация</div>
+
+                            <el-form-item label="Вид">
+                                не готово
+                            </el-form-item>
+
+                            <el-form-item label="Скорость">
+                                не готово
+                            </el-form-item>
+                        </el-form>
+
+                        <el-form :model="form" size="mini" label-width="120px">
+                            <div class="partHeader">Другое</div>
+
+                            <el-form-item label="Страница">
+                                <el-tooltip :open-delay="500" effect="light">
+                                    <template slot="content">
+                                        Переносить последнюю строку страницы<br>
+                                        в начало следующей при листании
+                                    </template>
+                                    <el-checkbox v-model="keepLastToFirst">Переносить последнюю строку</el-checkbox>
+                                </el-tooltip>
+                            </el-form-item>
+                        </el-form>
                         
                     </el-tab-pane>
                     <el-tab-pane label="Другое">
+                        <el-form :model="form" size="mini" label-width="120px">
+                            <el-form-item label="URL">
+                                <el-tooltip :open-delay="500" effect="light">
+                                    <template slot="content">
+                                        Добавление параметра "__p" в строке браузера<br>
+                                        позволяет передавать ссылку на книгу в читалке<br>
+                                        без потери текущей позиции. Однако в этом случае<br>
+                                        при листании забивается история браузера, т.к. на<br>
+                                        каждое изменение позиции происходит смена URL.
+                                    </template>
+                                    <el-checkbox v-model="allowUrlParamBookPos">Добавлять параметр "__p"</el-checkbox>
+                                </el-tooltip>
+                            </el-form-item>
+
+                        </el-form>
                         
                     </el-tab-pane>
 
@@ -245,8 +285,6 @@ class SettingsPage extends Vue {
 }
 
 .mainWindow {
-    width: 100%;
-    max-width: 600px;
     height: 70%;
     display: flex;
     position: relative;
@@ -280,6 +318,7 @@ class SettingsPage extends Vue {
 }
 
 .el-tab-pane {
+    width: 420px;
     height: 100%;
     overflow-y: auto;
 }

@@ -46,7 +46,7 @@ const state = {
         pageChangeTransition: '',// '' - нет, downShift, rightShift, thaw - протаивание, blink - мерцание
         pageChangeTransitionSpeed: 50, //0-100%
 
-        allowUrlParamBookPos: true,
+        allowUrlParamBookPos: false,
     },
 };
 
