@@ -284,7 +284,6 @@ export default class BookParser {
 
 
         //длинные слова (или белиберду без пробелов) тоже разобьем
-        
         const maxWordLength = this.maxWordLength;
         const parts = result;
         result = [];
