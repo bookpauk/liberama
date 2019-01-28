@@ -111,6 +111,10 @@ export default @Component({
                 this.loadBook({url: newValue, bookPos: this.routeParamPos});
             }
         },
+        settings: function(newValue) {
+            this.allowUrlParamBookPos = newValue.allowUrlParamBookPos;
+            this.updateRoute();
+        },
     },
 })
 class Reader extends Vue {
@@ -206,6 +210,10 @@ class Reader extends Vue {
         if (!result)
             this.closeAllTextPages();
         return result;
+    }
+
+    get settings() {
+        return this.$store.state.reader.settings;
     }
 
     toolBarToggle() {
