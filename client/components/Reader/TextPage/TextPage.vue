@@ -360,10 +360,13 @@ class TextPage extends Vue {
             this.linesDown = this.linesDownNext;
             this.linesUp = this.linesUpNext;
         } else {
+            const lines = this.getLines(this.bookPos);
+            this.linesDown = lines.linesDown;
+            this.linesUp = lines.linesUp;
             if (this.toggleLayout)
-                this.page1 = this.drawPage(this.bookPos);
+                this.page1 = this.drawPage(lines.linesDown);
             else
-                this.page2 = this.drawPage(this.bookPos);
+                this.page2 = this.drawPage(lines.linesDown);
         }
 
         if (this.currentTransition) {
@@ -386,100 +389,99 @@ class TextPage extends Vue {
             this.doEnd();
     }
 
-    drawPage(bookPos, nextChangeLines) {
+    getLines(bookPos) {
+        if (!this.parsed || this.pageLineCount < 1)
+            return {};
+
+        return {
+            linesDown: this.parsed.getLines(bookPos, 2*this.pageLineCount),
+            linesUp: this.parsed.getLines(bookPos, -2*this.pageLineCount)
+        };
+    }
+
+    drawPage(lines) {
         if (!this.lastBook || this.pageLineCount < 1)
             return '';
 
         let out = `<div class="layout" style="width: ${this.realWidth}px; height: ${this.realHeight}px;` + 
             ` color: ${this.textColor}; background-color: ${this.backgroundColor}">`;
 
-        if (!this.book || !this.parsed.textLength) {
+        if (!this.book || !lines || !this.parsed.textLength) {
             out += '</div>';
             return out;
         }
 
         const spaceWidth = this.measureText(' ', {});
 
-        const lines = this.parsed.getLines(bookPos, 2*this.pageLineCount);
-        if (!nextChangeLines) {
-            this.linesDown = lines;
-            this.linesUp = this.parsed.getLines(bookPos, -2*this.pageLineCount);
-        } else {
-            this.linesDownNext = lines;
-            this.linesUpNext = this.parsed.getLines(bookPos, -2*this.pageLineCount);
-        }
+        let y = this.indentTB - this.lineInterval/2 + (this.h - this.pageLineCount*this.lineHeight)/2 + this.fontSize*this.fontShift;
+        if (this.showStatusBar)
+            y += this.statusBarHeight*(this.statusBarTop ? 1 : 0);
 
-        if (lines) {
-            let y = this.indentTB - this.lineInterval/2 + (this.h - this.pageLineCount*this.lineHeight)/2 + this.fontSize*this.fontShift;
-            if (this.showStatusBar)
-                y += this.statusBarHeight*(this.statusBarTop ? 1 : 0);
-
-            let len = lines.length;
-            len = (len > this.pageLineCount ? len = this.pageLineCount : len);
-            for (let i = 0; i < len; i++) {
-                const line = lines[i];
-                /* line:
-                {
-                    begin: Number,
-                    end: Number,
-                    first: Boolean,
-                    last: Boolean,
-                    parts: array of {
-                        style: {bold: Boolean, italic: Boolean, center: Boolean}
-                        text: String,
-                    }
-                }*/
-
-                let indent = this.indentLR + (line.first ? this.p : 0);
-
-                let lineText = '';
-                let center = false;
-                let centerStyle = {};
-                for (const part of line.parts) {
-                    lineText += part.text;
-                    center = center || part.style.center;
-                    if (part.style.center)
-                        centerStyle = part.style.center;
+        let len = lines.length;
+        len = (len > this.pageLineCount ? len = this.pageLineCount : len);
+        for (let i = 0; i < len; i++) {
+            const line = lines[i];
+            /* line:
+            {
+                begin: Number,
+                end: Number,
+                first: Boolean,
+                last: Boolean,
+                parts: array of {
+                    style: {bold: Boolean, italic: Boolean, center: Boolean}
+                    text: String,
                 }
+            }*/
 
-                let filled = false;
-                // если выравнивание по ширине включено
-                if (this.textAlignJustify && !line.last && !center) {
-                    const words = lineText.split(' ');
+            let indent = this.indentLR + (line.first ? this.p : 0);
 
-                    if (words.length > 1) {
-                        const spaceCount = words.length - 1;
-
-                        const space = (this.w - line.width + spaceWidth*spaceCount)/spaceCount;
-
-                        let x = indent;
-                        for (const part of line.parts) {
-                            const font = this.fontByStyle(part.style);
-                            let partWords = part.text.split(' ');
-
-                            for (let i = 0; i < partWords.length; i++) {
-                                let word = partWords[i];
-                                out += this.drawHelper.fillText(word, x, y, font);
-                                x += this.measureText(word, part.style) + (i < partWords.length - 1 ? space : 0);
-                            }
-                        }
-                        filled = true;
-                    }
-                }
-
-                // просто выводим текст
-                if (!filled) {
-                    let x = indent;
-                    x = (center ? this.indent + (this.w - this.measureText(lineText, centerStyle))/2 : x);
-                    for (const part of line.parts) {
-                        let text = part.text;
-                        const font = this.fontByStyle(part.style);
-                        out += this.drawHelper.fillText(text, x, y, font);
-                        x += this.measureText(text, part.style);
-                    }
-                }
-                y += this.lineHeight;
+            let lineText = '';
+            let center = false;
+            let centerStyle = {};
+            for (const part of line.parts) {
+                lineText += part.text;
+                center = center || part.style.center;
+                if (part.style.center)
+                    centerStyle = part.style.center;
             }
+
+            let filled = false;
+            // если выравнивание по ширине включено
+            if (this.textAlignJustify && !line.last && !center) {
+                const words = lineText.split(' ');
+
+                if (words.length > 1) {
+                    const spaceCount = words.length - 1;
+
+                    const space = (this.w - line.width + spaceWidth*spaceCount)/spaceCount;
+
+                    let x = indent;
+                    for (const part of line.parts) {
+                        const font = this.fontByStyle(part.style);
+                        let partWords = part.text.split(' ');
+
+                        for (let i = 0; i < partWords.length; i++) {
+                            let word = partWords[i];
+                            out += this.drawHelper.fillText(word, x, y, font);
+                            x += this.measureText(word, part.style) + (i < partWords.length - 1 ? space : 0);
+                        }
+                    }
+                    filled = true;
+                }
+            }
+
+            // просто выводим текст
+            if (!filled) {
+                let x = indent;
+                x = (center ? this.indent + (this.w - this.measureText(lineText, centerStyle))/2 : x);
+                for (const part of line.parts) {
+                    let text = part.text;
+                    const font = this.fontByStyle(part.style);
+                    out += this.drawHelper.fillText(text, x, y, font);
+                    x += this.measureText(text, part.style);
+                }
+            }
+            y += this.lineHeight;
         }
 
         out += '</div>';
@@ -555,11 +557,15 @@ class TextPage extends Vue {
                     i--;
                 if (i >= 0 && this.linesDown.length > i) {
                     this.bookPosPrepared = this.linesDown[i].begin;
+                    
+                    const lines = this.getLines(this.bookPosPrepared);
+                    this.linesDownNext = lines.linesDown;
+                    this.linesUpNext =  lines.linesUp;
 
                     if (this.toggleLayout)
-                        this.page2 = this.drawPage(this.bookPosPrepared, true);//наоборот
+                        this.page2 = this.drawPage(lines.linesDown);//наоборот
                     else
-                        this.page1 = this.drawPage(this.bookPosPrepared, true);
+                        this.page1 = this.drawPage(lines.linesDown);
   
                     this.pagePrepared = true;
                 }
