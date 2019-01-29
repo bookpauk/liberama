@@ -7,6 +7,7 @@
                 </template>
 
                 <el-tabs class="tabs" type="border-card" tab-position="left" v-model="selectedTab">
+                    <!--------------------------------------------------------------------------->
                     <el-tab-pane label="Вид">
 
                         <el-form :model="form" size="small" label-width="120px">
@@ -58,6 +59,16 @@
                             </el-form-item>
                             <el-form-item label="Размер">
                                 <el-input-number v-model="fontSize" :min="5" :max="100"></el-input-number>
+                            </el-form-item>
+                            <el-form-item label="Сдвиг">
+                                        <el-tooltip :open-delay="500" effect="light">
+                                            <template slot="content">
+                                                Сдвиг шрифта по вертикали в процентах от размера.<br>
+                                                Отрицательное значение сдвигает вверх, положительное -<br>
+                                                вниз
+                                            </template>
+                                            <el-input-number v-model="vertShift" :min="-100" :max="100"></el-input-number>
+                                        </el-tooltip>
                             </el-form-item>
 
                             <el-form-item label="Стиль">
@@ -121,6 +132,8 @@
                             </el-form-item>
                         </el-form>
                     </el-tab-pane>
+
+                    <!--------------------------------------------------------------------------->
                     <el-tab-pane label="Листание">
                         <el-form :model="form" size="mini" label-width="120px">
                             <div class="partHeader">Анимация</div>
@@ -149,7 +162,8 @@
                         </el-form>
                         
                     </el-tab-pane>
-                    <el-tab-pane label="Другое">
+                    <!--------------------------------------------------------------------------->
+                    <el-tab-pane label="Прочее">
                         <el-form :model="form" size="mini" label-width="120px">
                             <el-form-item label="URL">
                                 <el-tooltip :open-delay="500" effect="light">
@@ -199,6 +213,19 @@ export default @Component({
         fontItalic: function(newValue) {
             this.fontStyle = (newValue ? 'italic' : '');
         },
+        vertShift: function(newValue) {
+            const font = (this.webFontName ? this.webFontName : this.fontName);
+            this.fontShifts = Object.assign({}, this.fontShifts, {[font]: newValue});
+            this.fontVertShift = newValue;
+        },
+        fontName: function(newValue) {
+            const font = (this.webFontName ? this.webFontName : newValue);
+            this.vertShift = this.fontShifts[font] || 0;
+        },
+        webFontName: function(newValue) {
+            const font = (newValue ? newValue : this.fontName);
+            this.vertShift = this.fontShifts[font] || 0;
+        },
     },
 })
 class SettingsPage extends Vue {
@@ -206,6 +233,7 @@ class SettingsPage extends Vue {
     form = {};
     fontBold = false;
     fontItalic = false;
+    vertShift = 0;
 
     webFonts = [];
     fonts = [];
@@ -214,11 +242,11 @@ class SettingsPage extends Vue {
         this.commit = this.$store.commit;
         this.reader = this.$store.state.reader;
 
-        this.form = this.settings;
+        this.form = Object.assign({}, this.settings);
         for (let prop in rstore.settingDefaults) {
             this[prop] = this.form[prop];
             this.$watch(prop, (newValue) => {
-                this.form = Object.assign({}, this.form, {[prop]: newValue})
+                this.form = Object.assign({}, this.form, {[prop]: newValue});
             });
         }
         this.fontBold = (this.fontWeight == 'bold');
@@ -226,6 +254,8 @@ class SettingsPage extends Vue {
 
         this.fonts = rstore.fonts;
         this.webFonts = rstore.webFonts;
+        const font = (this.webFontName ? this.webFontName : this.fontName);
+        this.vertShift = this.fontShifts[font] || 0;
     }
 
     get settings() {

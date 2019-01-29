@@ -42,7 +42,7 @@ export default @Component({
             this.draw();
         },
         settings: function() {
-            this.loadSettings();
+            this.debouncedLoadSettings();
         },
     },
 })
@@ -88,13 +88,13 @@ class TextPage extends Vue {
             this.drawStatusBar();
         }, 60);        
 
+        this.debouncedLoadSettings = _.throttle(() => {
+            this.loadSettings();
+        }, 50);
+
         this.$root.$on('resize', () => {this.$nextTick(this.onResize)});
         this.mobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry/i.test(navigator.userAgent);
 
-        this.fontShifts = {};
-        for (const font of rstore.fonts) {
-            this.fontShifts[font.name] = font.fontVertShift;
-        }
 /*
         const settings = Object.assign({}, this.settings);
         let updated = false;
@@ -120,11 +120,7 @@ class TextPage extends Vue {
 
     calcDrawProps() {
         //preloaded fonts
-        if (!this.fontShifts.hasOwnProperty(this.fontName))
-            this.fontShifts[this.fontName] = this.fontVertShift;
-        this.fontList = [];
-        for (let fontName in this.fontShifts)
-            this.fontList.push(`12px ${fontName}`);
+        this.fontList = [`12px ${this.fontName}`];
 
         //widths
         this.realWidth = this.$refs.main.clientWidth;
@@ -162,7 +158,7 @@ class TextPage extends Vue {
         this.statusBarColor = this.hex2rgba(this.textColor || '#000000', this.statusBarColorAlpha);
         this.currentTransition = '';
         this.pageChangeDirectionDown = true;
-        this.fontShift = (this.fontShifts[this.fontName] ? this.fontShifts[this.fontName] : 0)/100;
+        this.fontShift = this.fontVertShift/100;
 
         //drawHelper
         this.drawHelper.realWidth = this.realWidth;
@@ -247,7 +243,7 @@ class TextPage extends Vue {
         if (wf && i >= 0) {
             this.fontName = wf;
             this.fontCssUrl = rstore.webFonts[i].css;
-            this.fontVertShift = rstore.webFonts[i].fontVertShift;
+            this.fontVertShift = settings.fontShifts[wf] || 0;
         }
     }
 
