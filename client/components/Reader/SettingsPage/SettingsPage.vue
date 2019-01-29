@@ -187,6 +187,17 @@
                                     <el-checkbox v-model="allowUrlParamBookPos">Добавлять параметр "__p"</el-checkbox>
                                 </el-tooltip>
                             </el-form-item>
+                            <el-form-item label="Парсинг">
+                                <el-tooltip :open-delay="500" effect="light">
+                                    <template slot="content">
+                                        Включение этой опции позволяет делать предварительную<br>
+                                        обработку текста в ленивом режиме сразу после загрузки<br>
+                                        книги. Это может ускорить отзывчивость читалки, но<br>
+                                        нагружает процессор каждый раз при открытии книги.
+                                    </template>
+                                    <el-checkbox v-model="lazyParseEnabled">Предварительная обработка текста</el-checkbox>
+                                </el-tooltip>
+                            </el-form-item>
 
                         </el-form>
                         

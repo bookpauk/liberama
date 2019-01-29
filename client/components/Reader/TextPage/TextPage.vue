@@ -308,10 +308,15 @@ class TextPage extends Vue {
 
         if (this.lastBook) {
             (async() => {
+                //подождем ленивый парсинг
+                this.stopLazyParse = true;
+                while (this.doingLazyParse) await sleep(10);
+
                 const isParsed = await bookManager.hasBookParsed(this.lastBook);
                 if (!isParsed) {
                     return;
                 }
+
                 this.book = await bookManager.getBook(this.lastBook);
                 this.meta = bookManager.metaOnly(this.book);
                 this.fb2 = this.meta.fb2;
@@ -332,6 +337,8 @@ class TextPage extends Vue {
 
                 this.calcPropsAndLoadFonts();
                 this.refreshTime();
+                if (this.lazyParseEnabled)
+                    this.lazyParsePara();
             })();
         }
     }
@@ -460,7 +467,7 @@ class TextPage extends Vue {
                 lineText += part.text;
                 center = center || part.style.center;
                 if (part.style.center)
-                    centerStyle = part.style.center;
+                    centerStyle = part.style;
             }
 
             let filled = false;
@@ -491,7 +498,7 @@ class TextPage extends Vue {
             // просто выводим текст
             if (!filled) {
                 let x = indent;
-                x = (center ? this.indent + (this.w - this.measureText(lineText, centerStyle))/2 : x);
+                x = (center ? this.indentLR + (this.w - this.measureText(lineText, centerStyle))/2 : x);
                 for (const part of line.parts) {
                     let text = part.text;
                     const font = this.fontByStyle(part.style);
@@ -506,7 +513,7 @@ class TextPage extends Vue {
         return out;
     }
 
-    drawStatusBar() {
+    drawStatusBar(message) {
         if (this.w < minLayoutWidth) {
             this.statusBar = null;
             return;
@@ -519,7 +526,8 @@ class TextPage extends Vue {
                 i--;
             i = (i > lines.length - 1 ? lines.length - 1 : i);
             if (i >= 0) {
-                let message = this.statusBarMessage;
+                if (!message)
+                    message = this.statusBarMessage;
                 if (!message)
                     message = this.title;
                 this.statusBar = this.drawHelper.drawStatusBar(this.statusBarTop, this.statusBarHeight, 
@@ -540,6 +548,36 @@ class TextPage extends Vue {
             this.statusBarMessage = ' ';
         }
         this.drawStatusBar();
+    }
+
+    async lazyParsePara() {
+        if (!this.parsed || this.doingLazyParse)
+            return;
+        this.doingLazyParse = true;
+        let j = 0;
+        let k = 0;
+        let prevPerc = 0;
+        this.stopLazyParse = false;
+        for (let i = 0; i < this.parsed.para.length; i++) {
+            j++;
+            if (j > 1) {
+                await sleep(1);
+                j = 0;
+            }
+            if (this.stopLazyParse)
+                break;
+            this.parsed.parsePara(i);
+            k++;
+            if (k > 100) {
+                let perc = Math.round(i/this.parsed.para.length*100);
+                if (perc != prevPerc)
+                    this.drawStatusBar(`Обработка текста ${perc}%`);
+                prevPerc = perc;
+                k = 0;
+            }
+        }
+        this.drawStatusBar();
+        this.doingLazyParse = false;
     }
 
     async refreshTime() {

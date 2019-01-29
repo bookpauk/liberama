@@ -46,6 +46,7 @@ const settingDefaults = {
         pageChangeTransitionSpeed: 50, //0-100%
 
         allowUrlParamBookPos: false,
+        lazyParseEnabled: false,
         fontShifts: {},
 };
 
