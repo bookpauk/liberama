@@ -143,7 +143,7 @@ class TextPage extends Vue {
         this.w = this.realWidth - 2*this.indentLR;
         this.h = this.realHeight - (this.showStatusBar ? this.statusBarHeight : 0) - 2*this.indentTB;
         this.lineHeight = this.fontSize + this.lineInterval;
-        this.pageLineCount = Math.floor(this.h/this.lineHeight);
+        this.pageLineCount = 1 + Math.floor((this.h - this.fontSize)/this.lineHeight);
 
         if (this.parsed) {
             this.parsed.p = this.p;
@@ -430,7 +430,7 @@ class TextPage extends Vue {
 
         const spaceWidth = this.measureText(' ', {});
 
-        let y = this.indentTB - this.lineInterval/2 + (this.h - this.pageLineCount*this.lineHeight)/2 + this.fontSize*this.fontShift;
+        let y = this.indentTB + (this.h - this.pageLineCount*this.lineHeight + this.lineInterval)/2 + this.fontSize*this.fontShift;
         if (this.showStatusBar)
             y += this.statusBarHeight*(this.statusBarTop ? 1 : 0);
 
