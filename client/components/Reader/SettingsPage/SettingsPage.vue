@@ -58,7 +58,12 @@
                                     </el-col>
                             </el-form-item>
                             <el-form-item label="Размер">
-                                <el-input-number v-model="fontSize" :min="5" :max="100"></el-input-number>
+                                <el-col :span="17">
+                                    <el-input-number v-model="fontSize" :min="5" :max="100"></el-input-number>
+                                </el-col>
+                                <el-col :span="1">
+                                    <a href="https://fonts.google.com/?subset=cyrillic" target="_blank">Примеры</a>
+                                </el-col>
                             </el-form-item>
                             <el-form-item label="Сдвиг">
                                         <el-tooltip :open-delay="500" effect="light">

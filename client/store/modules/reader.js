@@ -11,11 +11,55 @@ const fonts = [
 ];
 
 const webFonts = [
+    {css: 'https://fonts.googleapis.com/css?family=Alegreya', name: 'Alegreya', fontVertShift: -5},
+    {css: 'https://fonts.googleapis.com/css?family=Alegreya+Sans', name: 'Alegreya Sans', fontVertShift: 5},
+    {css: 'https://fonts.googleapis.com/css?family=Amatic+SC', name: 'Amatic SC', fontVertShift: 0},
+
     {css: 'https://fonts.googleapis.com/css?family=Comfortaa', name: 'Comfortaa', fontVertShift: 10},
+    {css: 'https://fonts.googleapis.com/css?family=Cuprum', name: 'Cuprum', fontVertShift: 5},
+
+    {css: 'https://fonts.googleapis.com/css?family=EB+Garamond', name: 'EB Garamond', fontVertShift: -5},
+
+    {css: 'https://fonts.googleapis.com/css?family=Fira+Sans', name: 'Fira Sans', fontVertShift: 5},
+    {css: 'https://fonts.googleapis.com/css?family=Fira+Sans+Condensed', name: 'Fira Sans Condensed', fontVertShift: 5},
+
+    {css: 'https://fonts.googleapis.com/css?family=Kosugi+Maru', name: 'Kosugi Maru', fontVertShift: 10},
+
     {css: 'https://fonts.googleapis.com/css?family=Lobster', name: 'Lobster', fontVertShift: 0},
-    {css: 'https://fonts.googleapis.com/css?family=Oswald', name: 'Oswald', fontVertShift: -20},
-    {css: 'https://fonts.googleapis.com/css?family=Pacifico', name: 'Pacifico', fontVertShift: -35},
+    {css: 'https://fonts.googleapis.com/css?family=Lora', name: 'Lora', fontVertShift: 0},
+
+    {css: 'https://fonts.googleapis.com/css?family=Merriweather', name: 'Merriweather', fontVertShift: 0},
+    {css: 'https://fonts.googleapis.com/css?family=Montserrat', name: 'Montserrat', fontVertShift: 0},
+
+    {css: 'https://fonts.googleapis.com/css?family=Noto+Sans', name: 'Noto Sans', fontVertShift: -10},
+    {css: 'https://fonts.googleapis.com/css?family=Noto+Serif', name: 'Noto Serif', fontVertShift: -10},
+    {css: 'https://fonts.googleapis.com/css?family=Noto+Serif+TC', name: 'Noto Serif TC', fontVertShift: -15},
     
+    {css: 'https://fonts.googleapis.com/css?family=Old+Standard+TT', name: 'Old Standard TT', fontVertShift: 15},
+    {css: 'https://fonts.googleapis.com/css?family=Open+Sans+Condensed:300', name: 'Open Sans Condensed', fontVertShift: -5},
+    {css: 'https://fonts.googleapis.com/css?family=Oswald', name: 'Oswald', fontVertShift: -20},
+
+    {css: 'https://fonts.googleapis.com/css?family=Pacifico', name: 'Pacifico', fontVertShift: -35},
+    {css: 'https://fonts.googleapis.com/css?family=Play', name: 'Play', fontVertShift: 5},
+    {css: 'https://fonts.googleapis.com/css?family=Playfair+Display', name: 'Playfair Display', fontVertShift: -5},
+    {css: 'https://fonts.googleapis.com/css?family=PT+Sans', name: 'PT Sans', fontVertShift: -10},
+    {css: 'https://fonts.googleapis.com/css?family=PT+Sans+Caption', name: 'PT Sans Caption', fontVertShift: -10},
+    {css: 'https://fonts.googleapis.com/css?family=PT+Sans+Narrow', name: 'PT Sans Narrow', fontVertShift: -10},
+    {css: 'https://fonts.googleapis.com/css?family=PT+Serif', name: 'PT Serif', fontVertShift: -10},
+
+    {css: 'https://fonts.googleapis.com/css?family=Roboto+Condensed', name: 'Roboto Condensed', fontVertShift: 0},
+    {css: 'https://fonts.googleapis.com/css?family=Roboto+Mono', name: 'Roboto Mono', fontVertShift: -5},
+    {css: 'https://fonts.googleapis.com/css?family=Roboto+Slab', name: 'Roboto Slab', fontVertShift: 0},
+
+    {css: 'https://fonts.googleapis.com/css?family=Source+Sans+Pro', name: 'Source Sans Pro', fontVertShift: 0},
+
+    {css: 'https://fonts.googleapis.com/css?family=Ubuntu+Condensed', name: 'Ubuntu Condensed', fontVertShift: -5},
+    {css: 'https://fonts.googleapis.com/css?family=Vollkorn', name: 'Vollkorn', fontVertShift: -5},
+
+    {css: 'https://fonts.googleapis.com/css?family=Yanone+Kaffeesatz', name: 'Yanone Kaffeesatz', fontVertShift: 20},
+    
+
+
 ];
 
 const settingDefaults = {
