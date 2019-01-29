@@ -598,6 +598,8 @@ export default class BookParser {
             }
         }
 
+        if (!result.length)
+            result = null;
         return result;
     }
 }

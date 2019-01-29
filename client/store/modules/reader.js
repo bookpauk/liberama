@@ -18,11 +18,7 @@ const webFonts = [
     
 ];
 
-// initial state
-const state = {
-    toolBarActive: true,
-    openedBook: {},
-    settings: {
+const settingDefaults = {
         textColor: '#000000',
         backgroundColor: '#EBE2C9',
         fontStyle: '',// 'italic'
@@ -34,7 +30,8 @@ const state = {
         lineInterval: 3,// px, межстрочный интервал
         textAlignJustify: true,// выравнивание по ширине
         p: 25,// px, отступ параграфа
-        indent: 15,// px, отступ всего текста слева и справа
+        indentLR: 15,// px, отступ всего текста слева и справа
+        indentTB: 0,// px, отступ всего текста сверху и снизу
         wordWrap: true,//перенос по слогам
         keepLastToFirst: true,// перенос последней строки в первую при листании
 
@@ -47,7 +44,13 @@ const state = {
         pageChangeTransitionSpeed: 50, //0-100%
 
         allowUrlParamBookPos: false,
-    },
+};
+
+// initial state
+const state = {
+    toolBarActive: true,
+    openedBook: {},
+    settings: Object.assign({}, settingDefaults),
 };
 
 // getters
@@ -112,6 +115,8 @@ const mutations = {
 export default {
     fonts,
     webFonts,
+    settingDefaults,
+
     namespaced: true,
     state,
     getters,

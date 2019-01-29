@@ -27,7 +27,7 @@
                             <div class="partHeader">Шрифт</div>
 
                             <el-form-item label="Локальный/веб">
-                                    <el-col :span="10">
+                                    <el-col :span="11">
                                         <el-select v-model="fontName" placeholder="Шрифт" :disabled="webFontName != ''">
                                             <el-option v-for="item in fonts"
                                                 :key="item.name"
@@ -39,7 +39,7 @@
                                     <el-col :span="1">
                                         &nbsp;
                                     </el-col>
-                                    <el-col :span="10">
+                                    <el-col :span="11">
                                         <el-tooltip :open-delay="500" effect="light" placement="top">
                                             <template slot="content">
                                                 Веб шрифты дают большое разнообразие,<br>
@@ -57,16 +57,14 @@
                                     </el-col>
                             </el-form-item>
                             <el-form-item label="Размер">
-                                    <el-col :span="10">
-                                        <el-input-number v-model="fontSize" :min="5" :max="100"></el-input-number>
-                                    </el-col>
+                                <el-input-number v-model="fontSize" :min="5" :max="100"></el-input-number>
                             </el-form-item>
 
                             <el-form-item label="Стиль">
-                                <el-col :span="11">
+                                <el-col :span="8">
                                     <el-checkbox v-model="fontBold">Жирный</el-checkbox>
                                 </el-col>
-                                <el-col :span="11">
+                                <el-col :span="8">
                                     <el-checkbox v-model="fontItalic">Курсив</el-checkbox>
                                 </el-col>
                             </el-form-item>
@@ -80,6 +78,27 @@
                             </el-form-item>
                             <el-form-item label="Параграф">
                                 <el-input-number v-model="p" :min="0" :max="200"></el-input-number>
+                            </el-form-item>
+                            <el-form-item label="Отступ">
+                                <el-col :span="11">
+                                    <el-tooltip :open-delay="500" effect="light">
+                                        <template slot="content">
+                                            Слева/справа
+                                        </template>
+                                        <el-input-number v-model="indentLR" :min="0" :max="200"></el-input-number>
+                                    </el-tooltip>
+                                </el-col>
+                                <el-col :span="1">
+                                    &nbsp;
+                                </el-col>
+                                <el-col :span="11">
+                                    <el-tooltip :open-delay="500" effect="light">
+                                        <template slot="content">
+                                            Сверху/снизу
+                                        </template>
+                                        <el-input-number v-model="indentTB" :min="0" :max="200"></el-input-number>
+                                    </el-tooltip>
+                                </el-col>
                             </el-form-item>
                             <el-form-item label="Выравнивание">
                                 <el-checkbox v-model="textAlignJustify">По ширине</el-checkbox>
@@ -163,39 +182,12 @@ import Component from 'vue-class-component';
 import Window from '../../share/Window.vue';
 import rstore from '../../../store/modules/reader';
 
-const propsData = {
-    textColor: '#000000',
-    backgroundColor: '#EBE2C9',
-    fontStyle: '',// 'italic'
-    fontWeight: '',// 'bold'
-    fontSize: 20,// px
-    fontName: 'ReaderDefault',
-    webFontName: '',
-
-    lineInterval: 3,// px, межстрочный интервал
-    textAlignJustify: true,// выравнивание по ширине
-    p: 25,// px, отступ параграфа
-    indent: 15,// px, отступ всего текста слева и справа
-    wordWrap: true,//перенос по слогам
-    keepLastToFirst: true,// перенос последней строки в первую при листании
-
-    showStatusBar: true,
-    statusBarTop: false,// top, bottom
-    statusBarHeight: 19,// px
-    statusBarColorAlpha: 0.4,
-
-    pageChangeTransition: '',// '' - нет, downShift, rightShift, thaw - протаивание, blink - мерцание
-    pageChangeTransitionSpeed: 50, //0-100%
-
-    allowUrlParamBookPos: true,
-};
-
 export default @Component({
     components: {
         Window,
     },
     data: function() {
-        return Object.assign({}, propsData);
+        return Object.assign({}, rstore.settingDefaults);
     },
     watch: {
         form: function(newValue) {
@@ -223,7 +215,7 @@ class SettingsPage extends Vue {
         this.reader = this.$store.state.reader;
 
         this.form = this.settings;
-        for (let prop in propsData) {
+        for (let prop in rstore.settingDefaults) {
             this[prop] = this.form[prop];
             this.$watch(prop, (newValue) => {
                 this.form = Object.assign({}, this.form, {[prop]: newValue})

@@ -95,6 +95,18 @@ class TextPage extends Vue {
         for (const font of rstore.fonts) {
             this.fontShifts[font.name] = font.fontVertShift;
         }
+/*
+        const settings = Object.assign({}, this.settings);
+        let updated = false;
+        for (let prop in rstore.settingDefaults) {
+            if (!settings.hasOwnProperty(prop)) {
+                settings[prop] = rstore.settingDefaults[prop];
+                updated = true;
+            }
+        }
+        if (updated) 
+            this.commit('reader/setSettings', settings);
+*/
     }
 
     mounted() {
@@ -121,8 +133,8 @@ class TextPage extends Vue {
         this.$refs.layoutEvents.style.width = this.realWidth + 'px';
         this.$refs.layoutEvents.style.height = this.realHeight + 'px';
 
-        this.w = this.realWidth - 2*this.indent;
-        this.h = this.realHeight - (this.showStatusBar ? this.statusBarHeight : 0);
+        this.w = this.realWidth - 2*this.indentLR;
+        this.h = this.realHeight - (this.showStatusBar ? this.statusBarHeight : 0) - 2*this.indentTB;
         this.lineHeight = this.fontSize + this.lineInterval;
         this.pageLineCount = Math.floor(this.h/this.lineHeight);
 
@@ -226,35 +238,17 @@ class TextPage extends Vue {
     getSettings() {
         const settings = this.settings;
 
-        this.textColor = settings.textColor;
-        this.backgroundColor = settings.backgroundColor;
-        this.fontStyle = settings.fontStyle;// 'italic'
-        this.fontWeight = settings.fontWeight;// 'bold'
-        this.fontSize = settings.fontSize;// px
-        this.fontName = settings.fontName;
+        for (let prop in rstore.settingDefaults) {
+            this[prop] = settings[prop];
+        }
 
-        const wf = settings.webFontName;
+        const wf = this.webFontName;
         const i = _.findIndex(rstore.webFonts, ['name', wf]);
         if (wf && i >= 0) {
             this.fontName = wf;
             this.fontCssUrl = rstore.webFonts[i].css;
             this.fontVertShift = rstore.webFonts[i].fontVertShift;
         }
-
-        this.lineInterval = settings.lineInterval;// px, межстрочный интервал
-        this.textAlignJustify = settings.textAlignJustify;// выравнивание по ширине
-        this.p = settings.p;// px, отступ параграфа
-        this.indent = settings.indent;// px, отступ всего текста слева и справа
-        this.wordWrap = settings.wordWrap;
-        this.keepLastToFirst = settings.keepLastToFirst;// перенос последней строки в первую при листании
-
-        this.showStatusBar = settings.showStatusBar;
-        this.statusBarTop = settings.statusBarTop;// top, bottom
-        this.statusBarHeight = settings.statusBarHeight;// px
-        this.statusBarColorAlpha = settings.statusBarColorAlpha;
-
-        this.pageChangeTransition = settings.pageChangeTransition;// '' - нет, downShift, rightShift, thaw - протаивание, blink - мерцание
-        this.pageChangeTransitionSpeed = settings.pageChangeTransitionSpeed; //0-100%
     }
 
     async calcPropsAndLoadFonts(omitLoadFonts) {
@@ -397,8 +391,8 @@ class TextPage extends Vue {
     }
 
     drawPage(bookPos, nextChangeLines) {
-        if (!this.lastBook)
-            return;
+        if (!this.lastBook || this.pageLineCount < 1)
+            return '';
 
         let out = `<div class="layout" style="width: ${this.realWidth}px; height: ${this.realHeight}px;` + 
             ` color: ${this.textColor}; background-color: ${this.backgroundColor}">`;
@@ -419,75 +413,77 @@ class TextPage extends Vue {
             this.linesUpNext = this.parsed.getLines(bookPos, -2*this.pageLineCount);
         }
 
-        let y = -this.lineInterval/2 + (this.h - this.pageLineCount*this.lineHeight)/2 + this.fontSize*this.fontShift;
-        if (this.showStatusBar)
-            y += this.statusBarHeight*(this.statusBarTop ? 1 : 0);
+        if (lines) {
+            let y = this.indentTB - this.lineInterval/2 + (this.h - this.pageLineCount*this.lineHeight)/2 + this.fontSize*this.fontShift;
+            if (this.showStatusBar)
+                y += this.statusBarHeight*(this.statusBarTop ? 1 : 0);
 
-        let len = lines.length;
-        len = (len > this.pageLineCount ? len = this.pageLineCount : len);
-        for (let i = 0; i < len; i++) {
-            const line = lines[i];
-            /* line:
-            {
-                begin: Number,
-                end: Number,
-                first: Boolean,
-                last: Boolean,
-                parts: array of {
-                    style: {bold: Boolean, italic: Boolean, center: Boolean}
-                    text: String,
-                }
-            }*/
-
-            let indent = this.indent + (line.first ? this.p : 0);
-
-            let lineText = '';
-            let center = false;
-            let centerStyle = {};
-            for (const part of line.parts) {
-                lineText += part.text;
-                center = center || part.style.center;
-                if (part.style.center)
-                    centerStyle = part.style.center;
-            }
-
-            let filled = false;
-            // если выравнивание по ширине включено
-            if (this.textAlignJustify && !line.last && !center) {
-                const words = lineText.split(' ');
-
-                if (words.length > 1) {
-                    const spaceCount = words.length - 1;
-
-                    const space = (this.w - line.width + spaceWidth*spaceCount)/spaceCount;
-
-                    let x = indent;
-                    for (const part of line.parts) {
-                        const font = this.fontByStyle(part.style);
-                        let partWords = part.text.split(' ');
-
-                        for (let i = 0; i < partWords.length; i++) {
-                            let word = partWords[i];
-                            out += this.drawHelper.fillText(word, x, y, font);
-                            x += this.measureText(word, part.style) + (i < partWords.length - 1 ? space : 0);
-                        }
+            let len = lines.length;
+            len = (len > this.pageLineCount ? len = this.pageLineCount : len);
+            for (let i = 0; i < len; i++) {
+                const line = lines[i];
+                /* line:
+                {
+                    begin: Number,
+                    end: Number,
+                    first: Boolean,
+                    last: Boolean,
+                    parts: array of {
+                        style: {bold: Boolean, italic: Boolean, center: Boolean}
+                        text: String,
                     }
-                    filled = true;
-                }
-            }
+                }*/
 
-            // просто выводим текст
-            if (!filled) {
-                let x = indent;
-                x = (center ? this.indent + (this.w - this.measureText(lineText, centerStyle))/2 : x);
+                let indent = this.indentLR + (line.first ? this.p : 0);
+
+                let lineText = '';
+                let center = false;
+                let centerStyle = {};
                 for (const part of line.parts) {
-                    let text = part.text;
-                    const font = this.fontByStyle(part.style);
-                    out += this.drawHelper.fillText(text, x, y, font);
-                    x += this.measureText(text, part.style);
+                    lineText += part.text;
+                    center = center || part.style.center;
+                    if (part.style.center)
+                        centerStyle = part.style.center;
                 }
+
+                let filled = false;
+                // если выравнивание по ширине включено
+                if (this.textAlignJustify && !line.last && !center) {
+                    const words = lineText.split(' ');
+
+                    if (words.length > 1) {
+                        const spaceCount = words.length - 1;
+
+                        const space = (this.w - line.width + spaceWidth*spaceCount)/spaceCount;
+
+                        let x = indent;
+                        for (const part of line.parts) {
+                            const font = this.fontByStyle(part.style);
+                            let partWords = part.text.split(' ');
+
+                            for (let i = 0; i < partWords.length; i++) {
+                                let word = partWords[i];
+                                out += this.drawHelper.fillText(word, x, y, font);
+                                x += this.measureText(word, part.style) + (i < partWords.length - 1 ? space : 0);
+                            }
+                        }
+                        filled = true;
+                    }
+                }
+
+                // просто выводим текст
+                if (!filled) {
+                    let x = indent;
+                    x = (center ? this.indent + (this.w - this.measureText(lineText, centerStyle))/2 : x);
+                    for (const part of line.parts) {
+                        let text = part.text;
+                        const font = this.fontByStyle(part.style);
+                        out += this.drawHelper.fillText(text, x, y, font);
+                        x += this.measureText(text, part.style);
+                    }
+                }
+                y += this.lineHeight;
             }
-            y += this.lineHeight;
         }
 
         out += '</div>';
@@ -500,7 +496,7 @@ class TextPage extends Vue {
             return;
         }
 
-        if (this.showStatusBar && this.linesDown) {
+        if (this.showStatusBar && this.linesDown && this.pageLineCount > 0) {
             const lines = this.linesDown;
             let i = this.pageLineCount;
             if (this.keepLastToFirst)
@@ -514,6 +510,8 @@ class TextPage extends Vue {
                     lines[i].end, this.parsed.textLength, message);
                 this.bookPosSeen = lines[i].end;
             }
+        } else {
+            this.statusBar = '';
         }
     }
 
@@ -543,7 +541,7 @@ class TextPage extends Vue {
 
     prepareNextPage() {
         // подготовка следующей страницы заранее        
-        if (!this.book || !this.parsed.textLength || !this.linesDown)
+        if (!this.book || !this.parsed.textLength || !this.linesDown || this.pageLineCount < 1)
             return;
         
         if (!this.preparing) {
@@ -576,19 +574,19 @@ class TextPage extends Vue {
     }
 
     doDown() {
-        if (this.linesDown && this.linesDown.length > this.pageLineCount) {
+        if (this.linesDown && this.linesDown.length > this.pageLineCount && this.pageLineCount > 0) {
             this.bookPos = this.linesDown[1].begin;
         }
     }
 
     doUp() {
-        if (this.linesUp && this.linesUp.length > 1) {
+        if (this.linesUp && this.linesUp.length > 1 && this.pageLineCount > 0) {
             this.bookPos = this.linesUp[1].begin;
         }
     }
 
     doPageDown() {
-        if (this.linesDown) {
+        if (this.linesDown && this.pageLineCount > 0) {
             let i = this.pageLineCount;
             if (this.keepLastToFirst)
                 i--;
@@ -602,7 +600,7 @@ class TextPage extends Vue {
     }
 
     doPageUp() {
-        if (this.linesUp) {
+        if (this.linesUp && this.pageLineCount > 0) {
             let i = this.pageLineCount;
             if (this.keepLastToFirst)
                 i--;
@@ -620,13 +618,15 @@ class TextPage extends Vue {
     }
 
     doEnd() {
-        if (this.parsed.para.length) {
+        if (this.parsed.para.length && this.pageLineCount > 0) {
             let i = this.parsed.para.length - 1;
             let lastPos = this.parsed.para[i].offset + this.parsed.para[i].length - 1;
             const lines = this.parsed.getLines(lastPos, -this.pageLineCount);
-            i = this.pageLineCount - 1;
-            i = (i > lines.length - 1 ? lines.length - 1 : i);
-            this.bookPos = lines[i].begin;
+            if (lines) {
+                i = this.pageLineCount - 1;
+                i = (i > lines.length - 1 ? lines.length - 1 : i);
+                this.bookPos = lines[i].begin;
+            }
         }
     }
 
