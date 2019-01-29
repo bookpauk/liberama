@@ -65,7 +65,7 @@
                                             <template slot="content">
                                                 Сдвиг шрифта по вертикали в процентах от размера.<br>
                                                 Отрицательное значение сдвигает вверх, положительное -<br>
-                                                вниз
+                                                вниз. Значение зависит от метрики шрифта.
                                             </template>
                                             <el-input-number v-model="vertShift" :min="-100" :max="100"></el-input-number>
                                         </el-tooltip>
@@ -110,6 +110,16 @@
                                         <el-input-number v-model="indentTB" :min="0" :max="200"></el-input-number>
                                     </el-tooltip>
                                 </el-col>
+                            </el-form-item>
+                            <el-form-item label="Сдвиг">
+                                        <el-tooltip :open-delay="500" effect="light">
+                                            <template slot="content">
+                                                Сдвиг текста по вертикали в процентах от размера шрифта.<br>
+                                                Отрицательное значение сдвигает вверх, положительное -<br>
+                                                вниз. Менять, как правило, не требуется.
+                                            </template>
+                                            <el-input-number v-model="textVertShift" :min="-100" :max="100"></el-input-number>
+                                        </el-tooltip>
                             </el-form-item>
                             <el-form-item label="Выравнивание">
                                 <el-checkbox v-model="textAlignJustify">По ширине</el-checkbox>

@@ -170,6 +170,7 @@ class TextPage extends Vue {
         this.currentTransition = '';
         this.pageChangeDirectionDown = true;
         this.fontShift = this.fontVertShift/100;
+        this.textShift = this.textVertShift/100 + this.fontShift;
 
         //drawHelper
         this.drawHelper.realWidth = this.realWidth;
@@ -430,7 +431,7 @@ class TextPage extends Vue {
 
         const spaceWidth = this.measureText(' ', {});
 
-        let y = this.indentTB + (this.h - this.pageLineCount*this.lineHeight + this.lineInterval)/2 + this.fontSize*this.fontShift;
+        let y = this.indentTB + (this.h - this.pageLineCount*this.lineHeight + this.lineInterval)/2 + this.fontSize*this.textShift;
         if (this.showStatusBar)
             y += this.statusBarHeight*(this.statusBarTop ? 1 : 0);
 
