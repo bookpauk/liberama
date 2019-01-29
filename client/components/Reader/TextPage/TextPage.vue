@@ -88,9 +88,20 @@ class TextPage extends Vue {
             this.drawStatusBar();
         }, 60);        
 
-        this.debouncedLoadSettings = _.throttle(() => {
+        this.debouncedLoadSettings = _.debounce(() => {
             this.loadSettings();
         }, 50);
+
+        this.debouncedUpdatePage = _.debounce((lines) => {
+            this.toggleLayout = !this.toggleLayout;
+
+            if (this.toggleLayout)
+                this.page1 = this.drawPage(lines);
+            else
+                this.page2 = this.drawPage(lines);
+
+            this.doPageTransition();
+        }, 10);
 
         this.$root.$on('resize', () => {this.$nextTick(this.onResize)});
         this.mobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry/i.test(navigator.userAgent);
@@ -354,21 +365,34 @@ class TextPage extends Vue {
             return;
         }
 
-        this.toggleLayout = !this.toggleLayout;
 
         if (this.pageChangeDirectionDown && this.pagePrepared && this.bookPos == this.bookPosPrepared) {
+            this.toggleLayout = !this.toggleLayout;
             this.linesDown = this.linesDownNext;
             this.linesUp = this.linesUpNext;
+            this.doPageTransition();
         } else {
             const lines = this.getLines(this.bookPos);
             this.linesDown = lines.linesDown;
             this.linesUp = lines.linesUp;
-            if (this.toggleLayout)
+
+            /*if (this.toggleLayout)
                 this.page1 = this.drawPage(lines.linesDown);
             else
-                this.page2 = this.drawPage(lines.linesDown);
+                this.page2 = this.drawPage(lines.linesDown);*/
+            
+            this.debouncedUpdatePage(lines.linesDown);
         }
 
+        this.pagePrepared = false;
+        this.debouncedPrepareNextPage();
+        this.debouncedDrawStatusBar();
+
+        if (this.book && this.linesDown && this.linesDown.length < this.pageLineCount)
+            this.doEnd();
+    }
+
+    doPageTransition() {
         if (this.currentTransition) {
             //this.currentTransition
             //this.pageChangeTransitionSpeed
@@ -380,13 +404,6 @@ class TextPage extends Vue {
 
         this.currentTransition = '';
         this.pageChangeDirectionDown = false;//true только если PgDown
-
-        this.pagePrepared = false;
-        this.debouncedPrepareNextPage();
-        this.debouncedDrawStatusBar();
-
-        if (this.book && this.linesDown && this.linesDown.length < this.pageLineCount)
-            this.doEnd();
     }
 
     getLines(bookPos) {
