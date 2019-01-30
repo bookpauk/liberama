@@ -1,13 +1,15 @@
 <template>
     <div ref="main" class="main">
-        <div v-show="toggleLayout" class="layout">
-            <div v-html="page1"></div>
-        </div>
-        <div v-show="!toggleLayout" class="layout">
-            <div v-html="page2"></div>
-        </div>
-        <div v-show="showStatusBar" ref="statusBar" class="layout">
-            <div v-html="statusBar"></div>
+        <div class="background">
+            <div v-show="toggleLayout" class="layout">
+                <div v-html="page1"></div>
+            </div>
+            <div v-show="!toggleLayout" class="layout">
+                <div v-html="page2"></div>
+            </div>
+            <div v-show="showStatusBar" ref="statusBar" class="layout">
+                <div v-html="statusBar"></div>
+            </div>
         </div>
         <div ref="layoutEvents" class="layout events" @mousedown.prevent.stop="onMouseDown" @mouseup.prevent.stop="onMouseUp"
             @wheel.prevent.stop="onMouseWheel"
@@ -265,18 +267,26 @@ class TextPage extends Vue {
         if (!omitLoadFonts)
             await this.loadFonts();
 
-        //this.draw();
+        this.setBackground();
+        this.page1 = null;
+        this.page2 = null;
+        this.statusBar = null;
+
+        this.draw();
 
         // шрифты хрен знает когда подгружаются, поэтому
-        if (!this.parsed.force) {
+        const parsed = this.parsed;
+        if (!parsed.force) {
             let i = 0;
-            this.parsed.force = true;
+            parsed.force = true;
             while (i < 10) {
-                this.draw();
                 await sleep(1000);
+                if (!this.parsed)
+                    break;
+                this.draw();
                 i++;
             }
-            this.parsed.force = false;
+            parsed.force = false;
         }
     }
 
@@ -285,8 +295,6 @@ class TextPage extends Vue {
             let fontName = this.fontName;
             this.getSettings();
             await this.calcPropsAndLoadFonts(fontName == this.fontName);
-
-            this.draw();
         })();
     }
 
@@ -341,6 +349,9 @@ class TextPage extends Vue {
                     this.lazyParsePara();
             })();
         }
+    }
+
+    setBackground() {
     }
 
     onResize() {
@@ -871,6 +882,13 @@ class TextPage extends Vue {
     overflow: hidden;
     position: relative;
     min-width: 200px;
+}
+
+.background {
+    margin: 0;
+    padding: 0;
+    position: relative;
+    z-index: 5;
 }
 
 .layout {
