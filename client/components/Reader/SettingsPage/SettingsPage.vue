@@ -10,7 +10,7 @@
                     <!--------------------------------------------------------------------------->
                     <el-tab-pane label="Вид">
 
-                        <el-form :model="form" size="small" label-width="120px">
+                        <el-form :model="form" size="small" label-width="120px" @submit.native.prevent>
                             <div class="partHeader">Цвет</div>
 
                             <el-form-item label="Текст">
@@ -24,7 +24,7 @@
                             </el-form-item>
                         </el-form>
 
-                        <el-form :model="form" size="mini" label-width="120px">
+                        <el-form :model="form" size="mini" label-width="120px" @submit.native.prevent>
                             <div class="partHeader">Шрифт</div>
 
                             <el-form-item label="Локальный/веб">
@@ -86,7 +86,7 @@
                             </el-form-item>
                         </el-form>
 
-                        <el-form :model="form" size="mini" label-width="120px">
+                        <el-form :model="form" size="mini" label-width="120px" @submit.native.prevent>
                             <div class="partHeader">Текст</div>
 
                             <el-form-item label="Интервал">
@@ -132,7 +132,7 @@
                             </el-form-item>
                         </el-form>
 
-                        <el-form :model="form" size="mini" label-width="120px">
+                        <el-form :model="form" size="mini" label-width="120px" @submit.native.prevent>
                             <div class="partHeader">Строка статуса</div>
 
                             <el-form-item label="Статус">
@@ -150,7 +150,7 @@
 
                     <!--------------------------------------------------------------------------->
                     <el-tab-pane label="Листание">
-                        <el-form :model="form" size="mini" label-width="120px">
+                        <el-form :model="form" size="mini" label-width="120px" @submit.native.prevent>
                             <div class="partHeader">Анимация</div>
 
                             <el-form-item label="Вид">
@@ -162,7 +162,7 @@
                             </el-form-item>
                         </el-form>
 
-                        <el-form :model="form" size="mini" label-width="120px">
+                        <el-form :model="form" size="mini" label-width="120px" @submit.native.prevent>
                             <div class="partHeader">Другое</div>
 
                             <el-form-item label="Страница">
@@ -179,7 +179,7 @@
                     </el-tab-pane>
                     <!--------------------------------------------------------------------------->
                     <el-tab-pane label="Прочее">
-                        <el-form :model="form" size="mini" label-width="120px">
+                        <el-form :model="form" size="mini" label-width="120px" @submit.native.prevent>
                             <el-form-item label="URL">
                                 <el-tooltip :open-delay="500" effect="light">
                                     <template slot="content">
