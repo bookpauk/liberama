@@ -130,7 +130,7 @@ class Reader extends Vue {
     settingsActive = false;
 
     bookPos = null;
-    allowUrlParamBookPos = true;
+    allowUrlParamBookPos = false;
     showRefreshIcon = true;
 
     created() {
@@ -145,6 +145,8 @@ class Reader extends Vue {
         document.addEventListener('fullscreenchange', () => {
             this.fullScreenActive = (document.fullscreenElement !== null);
         });
+
+        this.allowUrlParamBookPos = this.settings.allowUrlParamBookPos;
     }
 
     mounted() {
