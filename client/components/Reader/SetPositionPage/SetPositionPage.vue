@@ -42,7 +42,7 @@ class SetPositionPage extends Vue {
 
         this.debouncedEmitPosChange = _.debounce((newValue) => {
             this.$emit('book-pos-changed', {bookPos: newValue});
-        }, 500);
+        }, 300);
     }
 
     formatTooltip(val) {

@@ -35,7 +35,7 @@
                         </el-button>
                     </el-tooltip>
                     <div class="space"></div>
-                    <el-tooltip content="История" :open-delay="1000" effect="light">
+                    <el-tooltip content="Открыть недавние" :open-delay="1000" effect="light">
                         <el-button ref="history" class="tool-button" :class="buttonActiveClass('history')" @click="buttonClick('history')"><i class="el-icon-document"></i></el-button>
                     </el-tooltip>
                 </div>
