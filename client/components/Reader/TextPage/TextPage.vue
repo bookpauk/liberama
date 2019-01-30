@@ -266,11 +266,11 @@ class TextPage extends Vue {
 
     async calcPropsAndLoadFonts(omitLoadFonts) {
         this.calcDrawProps();
+        this.setBackground();
 
         if (!omitLoadFonts)
             await this.loadFonts();
 
-        this.setBackground();
         this.draw();
 
         // шрифты хрен знает когда подгружаются, поэтому
@@ -347,7 +347,7 @@ class TextPage extends Vue {
                 this.statusBar = null;
 
                 this.calcPropsAndLoadFonts();
-                
+
                 this.refreshTime();
                 if (this.lazyParseEnabled)
                     this.lazyParsePara();
