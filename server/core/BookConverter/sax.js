@@ -18,6 +18,7 @@ function parseSync(xstr, options) {
     let cutTag = '';
     let inCdata;
     let inComment;
+    let leftData = 0;
     while (i < len) {
         inCdata = false;
         inComment = false;
@@ -26,7 +27,7 @@ function parseSync(xstr, options) {
         let left = xstr.indexOf('<', i);
         if (left < 0)
             break;
-        let leftData = left;
+        leftData = left;
 
         if (left < len - 2 && xstr[left + 1] == '!') {
             if (xstr[left + 2] == '-') {
@@ -45,6 +46,9 @@ function parseSync(xstr, options) {
                 }
             }
         }
+
+        const text = xstr.substr(i, left - i);
+        _onTextNode(text, cutCounter, cutTag);
 
         let right = null;
         let rightData = null;
@@ -87,10 +91,6 @@ function parseSync(xstr, options) {
             }
             tag = tag.toLowerCase();
 
-            const text = xstr.substr(i, left - i);
-
-            _onTextNode(text, cutCounter, cutTag);
-
             let endTag = (singleTag ? tag : '');
             if (tag === '' || tag[0] !== '/') {
                 _onStartNode(tag, tail, singleTag, cutCounter, cutTag);
@@ -123,9 +123,9 @@ function parseSync(xstr, options) {
 
     if (i < len) {
         if (inCdata) {
-            _onCdata(xstr.substr(i, len - i), cutCounter, cutTag);
+            _onCdata(xstr.substr(leftData, len - leftData), cutCounter, cutTag);
         } else if (inComment) {
-            _onComment(xstr.substr(i, len - i), cutCounter, cutTag);
+            _onComment(xstr.substr(leftData, len - leftData), cutCounter, cutTag);
         } else {
             _onTextNode(xstr.substr(i, len - i), cutCounter, cutTag);
         }
@@ -156,6 +156,7 @@ async function parse(xstr, options) {
     let cutTag = '';
     let inCdata;
     let inComment;
+    let leftData = 0;
     while (i < len) {
         inCdata = false;
         inComment = false;
@@ -164,7 +165,7 @@ async function parse(xstr, options) {
         let left = xstr.indexOf('<', i);
         if (left < 0)
             break;
-        let leftData = left;
+        leftData = left;
 
         if (left < len - 2 && xstr[left + 1] == '!') {
             if (xstr[left + 2] == '-') {
@@ -183,6 +184,9 @@ async function parse(xstr, options) {
                 }
             }
         }
+
+        const text = xstr.substr(i, left - i);
+        await _onTextNode(text, cutCounter, cutTag);
 
         let right = null;
         let rightData = null;
@@ -225,10 +229,6 @@ async function parse(xstr, options) {
             }
             tag = tag.toLowerCase();
 
-            const text = xstr.substr(i, left - i);
-
-            await _onTextNode(text, cutCounter, cutTag);
-
             let endTag = (singleTag ? tag : '');
             if (tag === '' || tag[0] !== '/') {
                 await _onStartNode(tag, tail, singleTag, cutCounter, cutTag);
@@ -261,9 +261,9 @@ async function parse(xstr, options) {
 
     if (i < len) {
         if (inCdata) {
-            await _onCdata(xstr.substr(i, len - i), cutCounter, cutTag);
+            await _onCdata(xstr.substr(leftData, len - leftData), cutCounter, cutTag);
         } else if (inComment) {
-            await _onComment(xstr.substr(i, len - i), cutCounter, cutTag);
+            await _onComment(xstr.substr(leftData, len - leftData), cutCounter, cutTag);
         } else {
             await _onTextNode(xstr.substr(i, len - i), cutCounter, cutTag);
         }
