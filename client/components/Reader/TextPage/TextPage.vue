@@ -1,15 +1,17 @@
 <template>
     <div ref="main" class="main">
-        <div class="background">
-            <div v-show="toggleLayout" class="layout">
-                <div v-html="page1"></div>
-            </div>
-            <div v-show="!toggleLayout" class="layout">
-                <div v-html="page2"></div>
-            </div>
-            <div v-show="showStatusBar" ref="statusBar" class="layout">
-                <div v-html="statusBar"></div>
-            </div>
+        <div class="layout back">
+            <div v-html="background"></div>
+            <!-- img -->
+        </div>
+        <div v-show="toggleLayout" class="layout">
+            <div v-html="page1"></div>
+        </div>
+        <div v-show="!toggleLayout" class="layout">
+            <div v-html="page2"></div>
+        </div>
+        <div v-show="showStatusBar" ref="statusBar" class="layout">
+            <div v-html="statusBar"></div>
         </div>
         <div ref="layoutEvents" class="layout events" @mousedown.prevent.stop="onMouseDown" @mouseup.prevent.stop="onMouseUp"
             @wheel.prevent.stop="onMouseWheel"
@@ -51,6 +53,7 @@ export default @Component({
 class TextPage extends Vue {
     toggleLayout = false;
     showStatusBar = false;
+    background = null;
     page1 = null;
     page2 = null;
     statusBar = null;
@@ -281,7 +284,7 @@ class TextPage extends Vue {
             parsed.force = true;
             while (i < 10) {
                 await sleep(1000);
-                if (!this.parsed)
+                if (this.parsed != parsed)
                     break;
                 this.draw();
                 i++;
@@ -352,10 +355,13 @@ class TextPage extends Vue {
     }
 
     setBackground() {
+        this.background = `<div class="layout" style="width: ${this.realWidth}px; height: ${this.realHeight}px;` + 
+            ` background-color: ${this.backgroundColor}"></div>`;
     }
 
     onResize() {
         this.calcDrawProps();
+        this.setBackground();
         this.draw();
     }
 
@@ -440,7 +446,7 @@ class TextPage extends Vue {
             return '';
 
         let out = `<div class="layout" style="width: ${this.realWidth}px; height: ${this.realHeight}px;` + 
-            ` color: ${this.textColor}; background-color: ${this.backgroundColor}">`;
+            ` color: ${this.textColor}">`;
 
         if (!this.book || !lines || !this.parsed.textLength) {
             out += '</div>';
@@ -884,13 +890,6 @@ class TextPage extends Vue {
     min-width: 200px;
 }
 
-.background {
-    margin: 0;
-    padding: 0;
-    position: relative;
-    z-index: 5;
-}
-
 .layout {
     margin: 0;
     padding: 0;
@@ -898,6 +897,9 @@ class TextPage extends Vue {
     z-index: 10;
 }
 
+.back {
+    z-index: 5;
+}
 .events {
     z-index: 20;
     background-color: rgba(0,0,0,0);

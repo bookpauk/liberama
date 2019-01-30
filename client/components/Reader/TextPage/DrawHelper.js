@@ -35,7 +35,7 @@ export default class DrawHelper {
 
         let out = `<div class="layout" style="` + 
             `width: ${this.realWidth}px; height: ${statusBarHeight}px; ` + 
-            `color: ${this.statusBarColor}; background-color: ${this.backgroundColor}">`;
+            `color: ${this.statusBarColor}">`;
 
         const fontSize = statusBarHeight*0.75;
         const font = 'bold ' + this.fontBySize(fontSize);
