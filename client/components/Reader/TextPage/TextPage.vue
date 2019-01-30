@@ -271,10 +271,6 @@ class TextPage extends Vue {
             await this.loadFonts();
 
         this.setBackground();
-        this.page1 = null;
-        this.page2 = null;
-        this.statusBar = null;
-
         this.draw();
 
         // шрифты хрен знает когда подгружаются, поэтому
@@ -346,7 +342,12 @@ class TextPage extends Vue {
 
                 this.parsed = this.book.parsed;
 
+                this.page1 = null;
+                this.page2 = null;
+                this.statusBar = null;
+
                 this.calcPropsAndLoadFonts();
+                
                 this.refreshTime();
                 if (this.lazyParseEnabled)
                     this.lazyParsePara();
