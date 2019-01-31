@@ -361,6 +361,10 @@ class TextPage extends Vue {
     }
 
     onResize() {
+        this.page1 = null;
+        this.page2 = null;
+        this.statusBar = null;
+
         this.calcDrawProps();
         this.setBackground();
         this.draw();
