@@ -47,8 +47,10 @@ function parseSync(xstr, options) {
             }
         }
 
-        const text = xstr.substr(i, left - i);
-        _onTextNode(text, cutCounter, cutTag);
+        if (left != i) {
+            const text = xstr.substr(i, left - i);
+            _onTextNode(text, cutCounter, cutTag);
+        }
 
         let right = null;
         let rightData = null;
@@ -185,8 +187,10 @@ async function parse(xstr, options) {
             }
         }
 
-        const text = xstr.substr(i, left - i);
-        await _onTextNode(text, cutCounter, cutTag);
+        if (left != i) {
+            const text = xstr.substr(i, left - i);
+            await _onTextNode(text, cutCounter, cutTag);
+        }
 
         let right = null;
         let rightData = null;
