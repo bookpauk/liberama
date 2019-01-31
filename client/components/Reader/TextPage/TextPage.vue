@@ -367,7 +367,6 @@ class TextPage extends Vue {
         this.page1 = null;
         this.page2 = null;
         this.statusBar = null;
-        await this.stopTextScrolling();
 
         this.calcDrawProps();
         this.setBackground();
@@ -394,7 +393,7 @@ class TextPage extends Vue {
     async startTextScrolling() {
         if (this.doingScrolling || !this.book || !this.parsed.textLength || !this.linesDown || this.pageLineCount < 1 ||
             this.linesDown.length <= this.pageLineCount) {
-            this.$emit('scrolling-toggle');
+            this.$emit('stop-scrolling');
             return;
         }
 
@@ -427,7 +426,6 @@ class TextPage extends Vue {
                 if (i > 0) {
                     this.doDown();
                     if (this.linesDown.length <= this.pageLineCount + 1) {
-                        this.$emit('scrolling-toggle');
                         this.stopScrolling = true;
                     }
                 }
@@ -439,6 +437,7 @@ class TextPage extends Vue {
         }
         this.resolveTransitionFinish = null;
         this.doingScrolling = false;
+        this.$emit('stop-scrolling');
     }
 
     async stopTextScrolling() {

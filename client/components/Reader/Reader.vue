@@ -53,7 +53,7 @@
                     @book-pos-changed="bookPosChanged"
                     @tool-bar-toggle="toolBarToggle"
                     @full-screen-toogle="fullScreenToggle"
-                    @scrolling-toggle="scrollingToggle"
+                    @stop-scrolling="stopScrolling"
                 ></component>
             </keep-alive>
 
@@ -250,8 +250,7 @@ class Reader extends Vue {
         this.setPositionActive = false;
         this.historyActive = false;
         this.settingsActive = false;
-        if (this.scrollingActive)
-            this.scrollingToggle();
+        this.stopScrolling();
     }
 
     loaderToggle() {
@@ -274,6 +273,11 @@ class Reader extends Vue {
         } else {
             this.setPositionActive = false;
         }
+    }
+
+    stopScrolling() {
+        if (this.scrollingActive)
+            this.scrollingToggle();
     }
 
     scrollingToggle() {
