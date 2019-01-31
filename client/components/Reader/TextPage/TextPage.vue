@@ -5,7 +5,9 @@
             <!-- img -->
         </div>
         <div v-show="toggleLayout" class="layout">
-            <div v-html="page1"></div>
+            <div ref="scrollingPage" class="layout" @transitionend="onScrollingTransitionEnd">
+                <div v-html="page1"></div>
+            </div>
         </div>
         <div v-show="!toggleLayout" class="layout">
             <div v-html="page2"></div>
@@ -345,6 +347,7 @@ class TextPage extends Vue {
                 this.page1 = null;
                 this.page2 = null;
                 this.statusBar = null;
+                await this.stopTextScrolling();
 
                 this.calcPropsAndLoadFonts();
 
@@ -360,10 +363,11 @@ class TextPage extends Vue {
             ` background-color: ${this.backgroundColor}"></div>`;
     }
 
-    onResize() {
+    async onResize() {
         this.page1 = null;
         this.page2 = null;
         this.statusBar = null;
+        await this.stopTextScrolling();
 
         this.calcDrawProps();
         this.setBackground();
@@ -382,7 +386,84 @@ class TextPage extends Vue {
         return `${style.italic ? 'italic' : this.fontStyle} ${style.bold ? 'bold' : this.fontWeight} ${this.fontSize}px ${this.fontName}`;
     }
 
+    onScrollingTransitionEnd() {
+        if (this.resolveTransitionFinish)
+            this.resolveTransitionFinish();
+    }
+
+    async startTextScrolling() {
+        if (this.doingScrolling || !this.book || !this.parsed.textLength || !this.linesDown || this.pageLineCount < 1 ||
+            this.linesDown.length <= this.pageLineCount) {
+            this.$emit('scrolling-toggle');
+            return;
+        }
+
+        this.stopScrolling = false;
+        this.doingScrolling = true;
+
+        const transitionFinish = (timeout) => {
+            return new Promise(async(resolve) => {
+                this.resolveTransitionFinish = resolve;
+                let steps = timeout/100;
+                while (steps > 0 && !this.stopScrolling) {
+                    steps--;
+                    await sleep(100);
+                }
+                resolve();
+            });
+        };
+
+        if (!this.toggleLayout)
+            this.page1 = this.page2;
+        this.toggleLayout = true;
+        await sleep(50);
+
+        const page = this.$refs.scrollingPage;
+        let i = 0;
+        while (!this.stopScrolling) {
+                page.style.transition = 'all 2s linear 0s';
+                page.style.transform = `translateY(-${this.lineHeight}px)`;
+
+                if (i > 0) {
+                    this.doDown();
+                    if (this.linesDown.length <= this.pageLineCount + 1) {
+                        this.$emit('scrolling-toggle');
+                        this.stopScrolling = true;
+                    }
+                }
+                await transitionFinish(2500);
+                page.style.transition = '';
+                page.style.transform = 'none';
+                page.offsetHeight;
+                i++;
+        }
+        page.style.transition = '';
+        page.style.transform = 'none';
+        this.resolveTransitionFinish = null;
+        this.doingScrolling = false;
+    }
+
+    async stopTextScrolling() {
+        this.stopScrolling = true;
+
+        const page = this.$refs.scrollingPage;
+        page.style.transition = '';
+        page.style.transform = 'none';
+        page.offsetHeight;
+
+        while (this.doingScrolling) await sleep(10);
+    }
+
     draw() {
+        if (this.doingScrolling) {
+            const lines = this.getLines(this.bookPos);
+            this.linesDown = lines.linesDown;
+            this.linesUp = lines.linesUp;
+            this.page1 = this.drawPage(lines.linesDown);
+            this.debouncedDrawStatusBar();
+            return;
+        }
+
         if (this.w < minLayoutWidth) {
             this.page1 = null;
             this.page2 = null;
@@ -465,7 +546,7 @@ class TextPage extends Vue {
             y += this.statusBarHeight*(this.statusBarTop ? 1 : 0);
 
         let len = lines.length;
-        len = (len > this.pageLineCount ? len = this.pageLineCount : len);
+        len = (len > this.pageLineCount + 1 ? this.pageLineCount + 1 : len);
         for (let i = 0; i < len; i++) {
             const line = lines[i];
             /* line:
@@ -620,36 +701,22 @@ class TextPage extends Vue {
         if (!this.book || !this.parsed.textLength || !this.linesDown || this.pageLineCount < 1)
             return;
         
-        if (!this.preparing) {
-            this.preparing = true;
+        let i = this.pageLineCount;
+        if (this.keepLastToFirst)
+            i--;
+        if (i >= 0 && this.linesDown.length > i) {
+            this.bookPosPrepared = this.linesDown[i].begin;
+            
+            const lines = this.getLines(this.bookPosPrepared);
+            this.linesDownNext = lines.linesDown;
+            this.linesUpNext =  lines.linesUp;
 
-            (async() => {
-                await sleep(100);
-                if (this.cancelPrepare) {
-                    this.preparing = false;
-                    return;
-                }
+            if (this.toggleLayout)
+                this.page2 = this.drawPage(lines.linesDown);//наоборот
+            else
+                this.page1 = this.drawPage(lines.linesDown);
 
-                let i = this.pageLineCount;
-                if (this.keepLastToFirst)
-                    i--;
-                if (i >= 0 && this.linesDown.length > i) {
-                    this.bookPosPrepared = this.linesDown[i].begin;
-                    
-                    const lines = this.getLines(this.bookPosPrepared);
-                    this.linesDownNext = lines.linesDown;
-                    this.linesUpNext =  lines.linesUp;
-
-                    if (this.toggleLayout)
-                        this.page2 = this.drawPage(lines.linesDown);//наоборот
-                    else
-                        this.page1 = this.drawPage(lines.linesDown);
-  
-                    this.pagePrepared = true;
-                }
-
-                this.preparing = false;
-            })();
+            this.pagePrepared = true;
         }
     }
 

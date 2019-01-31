@@ -53,6 +53,7 @@
                     @book-pos-changed="bookPosChanged"
                     @tool-bar-toggle="toolBarToggle"
                     @full-screen-toogle="fullScreenToggle"
+                    @scrolling-toggle="scrollingToggle"
                 ></component>
             </keep-alive>
 
@@ -249,6 +250,8 @@ class Reader extends Vue {
         this.setPositionActive = false;
         this.historyActive = false;
         this.settingsActive = false;
+        if (this.scrollingActive)
+            this.scrollingToggle();
     }
 
     loaderToggle() {
@@ -270,6 +273,18 @@ class Reader extends Vue {
             });
         } else {
             this.setPositionActive = false;
+        }
+    }
+
+    scrollingToggle() {
+        this.scrollingActive = !this.scrollingActive;
+        if (this.activePage == 'TextPage') {
+            const page = this.$refs.page;
+            if (this.scrollingActive) {
+                page.startTextScrolling();
+            } else {
+                page.stopTextScrolling();
+            }
         }
     }
 
@@ -303,7 +318,10 @@ class Reader extends Vue {
                 break;
             case 'setPosition':
                 this.setPositionToggle();
-                break;                
+                break;
+            case 'scrolling':
+                this.scrollingToggle()
+                break;
             case 'history':
                 this.historyToggle();
                 break;
@@ -535,6 +553,9 @@ class Reader extends Vue {
                     switch (event.code) {
                         case 'KeyP':
                             this.setPositionToggle();
+                            break;
+                        case 'KeyZ':
+                            this.scrollingToggle();
                             break;
                         case 'KeyH':
                             this.historyToggle();
