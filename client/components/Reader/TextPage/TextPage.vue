@@ -404,9 +404,9 @@ class TextPage extends Vue {
         const transitionFinish = (timeout) => {
             return new Promise(async(resolve) => {
                 this.resolveTransitionFinish = resolve;
-                let steps = timeout/100;
-                while (steps > 0 && !this.stopScrolling) {
-                    steps--;
+                let wait = timeout/100;
+                while (wait > 0 && !this.stopScrolling) {
+                    wait--;
                     await sleep(100);
                 }
                 resolve();
@@ -421,7 +421,7 @@ class TextPage extends Vue {
         const page = this.$refs.scrollingPage;
         let i = 0;
         while (!this.stopScrolling) {
-                page.style.transition = 'all 2s linear 0s';
+                page.style.transition = `${this.scrollingDelay}ms ${this.scrollingType}`;
                 page.style.transform = `translateY(-${this.lineHeight}px)`;
 
                 if (i > 0) {
@@ -431,14 +431,12 @@ class TextPage extends Vue {
                         this.stopScrolling = true;
                     }
                 }
-                await transitionFinish(2500);
+                await transitionFinish(this.scrollingDelay + 201);
                 page.style.transition = '';
                 page.style.transform = 'none';
                 page.offsetHeight;
                 i++;
         }
-        page.style.transition = '';
-        page.style.transform = 'none';
         this.resolveTransitionFinish = null;
         this.doingScrolling = false;
     }

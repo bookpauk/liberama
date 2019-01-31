@@ -28,34 +28,34 @@
                             <div class="partHeader">Шрифт</div>
 
                             <el-form-item label="Локальный/веб">
-                                    <el-col :span="11">
-                                        <el-select v-model="fontName" placeholder="Шрифт" :disabled="webFontName != ''">
-                                            <el-option v-for="item in fonts"
+                                <el-col :span="11">
+                                    <el-select v-model="fontName" placeholder="Шрифт" :disabled="webFontName != ''">
+                                        <el-option v-for="item in fonts"
+                                            :key="item.name"
+                                            :label="item.label"
+                                            :value="item.name">
+                                        </el-option>
+                                    </el-select>
+                                </el-col>
+                                <el-col :span="1">
+                                    &nbsp;
+                                </el-col>
+                                <el-col :span="11">
+                                    <el-tooltip :open-delay="500" effect="light" placement="top">
+                                        <template slot="content">
+                                            Веб шрифты дают большое разнообразие,<br>
+                                            однако есть шанс, что шрифт будет загружаться<br>
+                                            очень медленно или вовсе не загрузится
+                                        </template>
+                                        <el-select v-model="webFontName">
+                                            <el-option label="Нет" value=""></el-option>
+                                            <el-option v-for="item in webFonts"
                                                 :key="item.name"
-                                                :label="item.label"
                                                 :value="item.name">
                                             </el-option>
                                         </el-select>
-                                    </el-col>
-                                    <el-col :span="1">
-                                        &nbsp;
-                                    </el-col>
-                                    <el-col :span="11">
-                                        <el-tooltip :open-delay="500" effect="light" placement="top">
-                                            <template slot="content">
-                                                Веб шрифты дают большое разнообразие,<br>
-                                                однако есть шанс, что шрифт будет загружаться<br>
-                                                очень медленно или вовсе не загрузится
-                                            </template>
-                                            <el-select v-model="webFontName">
-                                                <el-option label="Нет" value=""></el-option>
-                                                <el-option v-for="item in webFonts"
-                                                    :key="item.name"
-                                                    :value="item.name">
-                                                </el-option>
-                                            </el-select>
-                                        </el-tooltip>
-                                    </el-col>
+                                    </el-tooltip>
+                                </el-col>
                             </el-form-item>
                             <el-form-item label="Размер">
                                 <el-col :span="17">
@@ -66,14 +66,14 @@
                                 </el-col>
                             </el-form-item>
                             <el-form-item label="Сдвиг">
-                                        <el-tooltip :open-delay="500" effect="light">
-                                            <template slot="content">
-                                                Сдвиг шрифта по вертикали в процентах от размера.<br>
-                                                Отрицательное значение сдвигает вверх, положительное -<br>
-                                                вниз. Значение зависит от метрики шрифта.
-                                            </template>
-                                            <el-input-number v-model="vertShift" :min="-100" :max="100"></el-input-number>
-                                        </el-tooltip>
+                                <el-tooltip :open-delay="500" effect="light">
+                                    <template slot="content">
+                                        Сдвиг шрифта по вертикали в процентах от размера.<br>
+                                        Отрицательное значение сдвигает вверх, положительное -<br>
+                                        вниз. Значение зависит от метрики шрифта.
+                                    </template>
+                                    <el-input-number v-model="vertShift" :min="-100" :max="100"></el-input-number>
+                                </el-tooltip>
                             </el-form-item>
 
                             <el-form-item label="Стиль">
@@ -117,14 +117,46 @@
                                 </el-col>
                             </el-form-item>
                             <el-form-item label="Сдвиг">
-                                        <el-tooltip :open-delay="500" effect="light">
-                                            <template slot="content">
-                                                Сдвиг текста по вертикали в процентах от размера шрифта.<br>
-                                                Отрицательное значение сдвигает вверх, положительное -<br>
-                                                вниз. Менять, как правило, не требуется.
-                                            </template>
-                                            <el-input-number v-model="textVertShift" :min="-100" :max="100"></el-input-number>
-                                        </el-tooltip>
+                                <el-tooltip :open-delay="500" effect="light">
+                                    <template slot="content">
+                                        Сдвиг текста по вертикали в процентах от размера шрифта.<br>
+                                        Отрицательное значение сдвигает вверх, положительное -<br>
+                                        вниз. Менять, как правило, не требуется.
+                                    </template>
+                                    <el-input-number v-model="textVertShift" :min="-100" :max="100"></el-input-number>
+                                </el-tooltip>
+                            </el-form-item>
+                            <el-form-item label="Скроллинг">
+                                <el-col :span="11">
+                                    <el-tooltip :open-delay="500" effect="light">
+                                        <template slot="content">
+                                            Замедление скроллинга в миллисекундах.<br>
+                                            Определяет время, за которое текст<br>
+                                            прокручивается на одну строку.
+                                        </template>
+                                        <el-input-number v-model="scrollingDelay" :min="0" :max="10000"></el-input-number>
+                                    </el-tooltip>
+                                </el-col>
+                                <el-col :span="1">
+                                    &nbsp;
+                                </el-col>
+                                <el-col :span="11">
+                                    <el-tooltip :open-delay="500" effect="light">
+                                        <template slot="content">
+                                            Вид скроллинга: линейный,<br>
+                                            ускорение-замедление и пр.
+                                        </template>
+
+                                        <el-select v-model="scrollingType">
+                                            <el-option value="linear"></el-option>
+                                            <el-option value="ease"></el-option>
+                                            <el-option value="ease-in"></el-option>
+                                            <el-option value="ease-out"></el-option>
+                                            <el-option value="ease-in-out"></el-option>
+                                        </el-select>
+                                    </el-tooltip>
+                                </el-col>
+
                             </el-form-item>
                             <el-form-item label="Выравнивание">
                                 <el-checkbox v-model="textAlignJustify">По ширине</el-checkbox>

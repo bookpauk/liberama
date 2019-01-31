@@ -148,6 +148,9 @@ const settingDefaults = {
         statusBarHeight: 19,// px
         statusBarColorAlpha: 0.4,
 
+        scrollingDelay: 3000,// замедление, ms
+        scrollingType: 'ease-in-out', //linear, ease, ease-in, ease-out, ease-in-out
+
         pageChangeTransition: '',// '' - нет, downShift, rightShift, thaw - протаивание, blink - мерцание
         pageChangeTransitionSpeed: 50, //0-100%
 
