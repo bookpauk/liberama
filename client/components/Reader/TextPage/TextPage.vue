@@ -4,12 +4,12 @@
             <div v-html="background"></div>
             <!-- img -->
         </div>
-        <div v-show="toggleLayout" class="layout">
+        <div v-show="toggleLayout" ref="scrollBox1" class="layout" style="overflow: hidden">
             <div ref="scrollingPage" class="layout" @transitionend="onScrollingTransitionEnd">
                 <div v-html="page1"></div>
             </div>
         </div>
-        <div v-show="!toggleLayout" class="layout">
+        <div v-show="!toggleLayout"  ref="scrollBox2" class="layout" style="overflow: hidden">
             <div v-html="page2"></div>
         </div>
         <div v-show="showStatusBar" ref="statusBar" class="layout">
@@ -194,6 +194,22 @@ class TextPage extends Vue {
         this.$refs.statusBar.style.top = (this.statusBarTop ? 1 : this.realHeight - this.statusBarHeight) + 'px';
 
         this.statusBarClickable = this.drawHelper.statusBarClickable(this.statusBarTop, this.statusBarHeight);
+
+        //scrolling page
+        const pageDelta = this.h - (this.pageLineCount*this.lineHeight - this.lineInterval);
+        let y = this.indentTB + pageDelta/2;
+        if (this.showStatusBar)
+            y += this.statusBarHeight*(this.statusBarTop ? 1 : 0);
+        const page1 = this.$refs.scrollBox1;
+        const page2 = this.$refs.scrollBox2;
+        page1.style.width = this.w + 'px';
+        page2.style.width = this.w + 'px';
+        page1.style.height = (this.h - pageDelta) + 'px';
+        page2.style.height = (this.h - pageDelta) + 'px';
+        page1.style.top = y + 'px';
+        page2.style.top = y + 'px';
+        page1.style.left = this.indentLR + 'px';
+        page2.style.left = this.indentLR + 'px';
     }
 
     measureText(text, style) {// eslint-disable-line no-unused-vars
@@ -525,25 +541,19 @@ class TextPage extends Vue {
     }
 
     drawPage(lines) {
-        if (!this.lastBook || this.pageLineCount < 1)
+        if (!this.lastBook || this.pageLineCount < 1 || !this.book || !lines || !this.parsed.textLength)
             return '';
+
+        const spaceWidth = this.measureText(' ', {});
 
         let out = `<div class="layout" style="width: ${this.realWidth}px; height: ${this.realHeight}px;` + 
             ` color: ${this.textColor}">`;
 
-        if (!this.book || !lines || !this.parsed.textLength) {
-            out += '</div>';
-            return out;
-        }
-
-        const spaceWidth = this.measureText(' ', {});
-
-        let y = this.indentTB + (this.h - this.pageLineCount*this.lineHeight + this.lineInterval)/2 + this.fontSize*this.textShift;
-        if (this.showStatusBar)
-            y += this.statusBarHeight*(this.statusBarTop ? 1 : 0);
-
         let len = lines.length;
         len = (len > this.pageLineCount + 1 ? this.pageLineCount + 1 : len);
+
+        let y = this.fontSize*this.textShift;
+        
         for (let i = 0; i < len; i++) {
             const line = lines[i];
             /* line:
@@ -558,7 +568,7 @@ class TextPage extends Vue {
                 }
             }*/
 
-            let indent = this.indentLR + (line.first ? this.p : 0);
+            let indent = line.first ? this.p : 0;
 
             let lineText = '';
             let center = false;
@@ -598,7 +608,7 @@ class TextPage extends Vue {
             // просто выводим текст
             if (!filled) {
                 let x = indent;
-                x = (center ? this.indentLR + (this.w - this.measureText(lineText, centerStyle))/2 : x);
+                x = (center ? (this.w - this.measureText(lineText, centerStyle))/2 : x);
                 for (const part of line.parts) {
                     let text = part.text;
                     const font = this.fontByStyle(part.style);

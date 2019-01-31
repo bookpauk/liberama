@@ -121,7 +121,7 @@
                                     <template slot="content">
                                         Сдвиг текста по вертикали в процентах от размера шрифта.<br>
                                         Отрицательное значение сдвигает вверх, положительное -<br>
-                                        вниз. Менять, как правило, не требуется.
+                                        вниз.
                                     </template>
                                     <el-input-number v-model="textVertShift" :min="-100" :max="100"></el-input-number>
                                 </el-tooltip>
