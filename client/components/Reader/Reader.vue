@@ -54,6 +54,7 @@
                     @tool-bar-toggle="toolBarToggle"
                     @full-screen-toogle="fullScreenToggle"
                     @stop-scrolling="stopScrolling"
+                    @scrolling-toggle="scrollingToggle"
                 ></component>
             </keep-alive>
 

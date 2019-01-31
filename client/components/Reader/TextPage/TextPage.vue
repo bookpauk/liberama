@@ -553,7 +553,7 @@ class TextPage extends Vue {
         len = (len > this.pageLineCount + 1 ? this.pageLineCount + 1 : len);
 
         let y = this.fontSize*this.textShift;
-        
+
         for (let i = 0; i < len; i++) {
             const line = lines[i];
             /* line:
@@ -886,6 +886,8 @@ class TextPage extends Vue {
                 this.repDoing = true;
                 this.debouncedStartClickRepeat(event.offsetX, event.offsetY);
             }
+        } else if (event.button == 1) {
+            this.$emit('scrolling-toggle');
         } else if (event.button == 2) {
             this.doToolBarToggle();
         }
