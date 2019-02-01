@@ -141,7 +141,7 @@
                                     &nbsp;
                                 </el-col>
                                 <el-col :span="11">
-                                    <el-tooltip :open-delay="500" effect="light">
+                                    <el-tooltip :open-delay="500" effect="light" placement="top">
                                         <template slot="content">
                                             Вид скроллинга: линейный,<br>
                                             ускорение-замедление и пр.
