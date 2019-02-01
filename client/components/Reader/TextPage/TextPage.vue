@@ -434,6 +434,7 @@ class TextPage extends Vue {
         await this.$nextTick();
         await sleep(50);
 
+        this.cachedPos = -1;
         const page = this.$refs.scrollingPage;
         let i = 0;
         while (!this.stopScrolling) {
@@ -470,10 +471,29 @@ class TextPage extends Vue {
 
     draw() {
         if (this.doingScrolling) {
-            const lines = this.getLines(this.bookPos);
-            this.linesDown = lines.linesDown;
-            this.linesUp = lines.linesUp;
-            this.page1 = this.drawPage(lines.linesDown);
+            if (this.cachedPos == this.bookPos) {
+                this.linesDown = this.linesCached.linesDown;
+                this.linesUp = this.linesCached.linesUp;
+                this.page1 = this.pageCached;
+            } else {
+                const lines = this.getLines(this.bookPos);
+                this.linesDown = lines.linesDown;
+                this.linesUp = lines.linesUp;
+                this.page1 = this.drawPage(lines.linesDown);
+            }
+
+            //caching next
+            if (this.cachedPageTimer)
+                clearTimeout(this.cachedPageTimer);
+            this.cachedPageTimer = setTimeout(() => {
+                if (this.linesDown && this.linesDown.length > this.pageLineCount && this.pageLineCount > 0) {
+                    this.cachedPos = this.linesDown[1].begin;
+                    this.linesCached = this.getLines(this.cachedPos);
+                    this.pageCached = this.drawPage(this.linesCached.linesDown);
+                }
+                this.cachedPageTimer = null;
+            }, 20);
+
             this.debouncedDrawStatusBar();
             return;
         }
