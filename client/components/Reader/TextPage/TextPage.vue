@@ -375,7 +375,7 @@ class TextPage extends Vue {
     }
 
     setBackground() {
-        this.background = `<div class="layout" style="width: ${this.realWidth}px; height: ${this.realHeight}px;` + 
+        this.background = `<div class="layout ${this.wallpaper}" style="width: ${this.realWidth}px; height: ${this.realHeight}px;` + 
             ` background-color: ${this.backgroundColor}"></div>`;
     }
 
@@ -1002,8 +1002,57 @@ class TextPage extends Vue {
 .back {
     z-index: 5;
 }
+
 .events {
     z-index: 20;
     background-color: rgba(0,0,0,0);
 }
+
+</style>
+
+<style>
+.paper1 {
+    background: url("images/paper1.jpg") center;
+    background-size: cover;
+}
+
+.paper2 {
+    background: url("images/paper2.jpg") center;
+    background-size: cover;
+}
+
+.paper3 {
+    background: url("images/paper3.jpg") center;
+    background-size: cover;
+}
+
+.paper4 {
+    background: url("images/paper4.jpg") center;
+    background-size: cover;
+}
+
+.paper5 {
+    background: url("images/paper5.jpg") center;
+    background-size: cover;
+}
+
+.paper6 {
+    background: url("images/paper6.jpg") center;
+    background-size: cover;
+}
+
+.paper7 {
+    background: url("images/paper7.jpg") center;
+    background-size: cover;
+}
+
+.paper8 {
+    background: url("images/paper8.jpg") center;
+    background-size: cover;
+}
+
+.paper9 {
+    background: url("images/paper9.jpg");
+}
+
 </style>

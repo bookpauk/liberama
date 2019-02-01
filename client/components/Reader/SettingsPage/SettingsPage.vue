@@ -14,13 +14,35 @@
                             <div class="partHeader">Цвет</div>
 
                             <el-form-item label="Текст">
-                                <el-color-picker v-model="textColor" color-format="hex" :predefine="predefineTextColors"></el-color-picker>
-                                <span class="color-picked"><b>{{ textColor }}</b></span>
+                                <el-col :span="12">
+                                    <el-color-picker v-model="textColor" color-format="hex" :predefine="predefineTextColors"></el-color-picker>
+                                    <span class="color-picked"><b>{{ textColor }}</b></span>
+                                </el-col>
+                                <el-col :span="5">
+                                    <span style="position: relative; top: 20px;">Обои:</span>
+                                </el-col>
                             </el-form-item>
 
                             <el-form-item label="Фон">
-                                <el-color-picker v-model="backgroundColor" color-format="hex" :predefine="predefineBackgroundColors"></el-color-picker>
-                                <span class="color-picked"><b>{{ backgroundColor }}</b></span>
+                                <el-col :span="12">
+                                    <el-color-picker v-model="backgroundColor" color-format="hex" :predefine="predefineBackgroundColors" :disabled="wallpaper != ''"></el-color-picker>
+                                    <span v-show="wallpaper == ''" class="color-picked"><b>{{ backgroundColor }}</b></span>
+                                </el-col>
+
+                                <el-col :span="11">
+                                    <el-select v-model="wallpaper">
+                                        <el-option label="Нет" value=""></el-option>
+                                        <el-option label="1" value="paper1"></el-option>
+                                        <el-option label="2" value="paper2"></el-option>
+                                        <el-option label="3" value="paper3"></el-option>
+                                        <el-option label="4" value="paper4"></el-option>
+                                        <el-option label="5" value="paper5"></el-option>
+                                        <el-option label="6" value="paper6"></el-option>
+                                        <el-option label="7" value="paper7"></el-option>
+                                        <el-option label="8" value="paper8"></el-option>
+                                        <el-option label="9" value="paper9"></el-option>
+                                    </el-select>
+                                </el-col>
                             </el-form-item>
                         </el-form>
 

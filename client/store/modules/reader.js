@@ -127,6 +127,7 @@ const webFonts = [
 const settingDefaults = {
         textColor: '#000000',
         backgroundColor: '#EBE2C9',
+        wallpaper: '',
         fontStyle: '',// 'italic'
         fontWeight: '',// 'bold'
         fontSize: 20,// px
