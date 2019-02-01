@@ -33,16 +33,14 @@ module.exports = {
                 test: /\.gif$/,
                 loader: "url-loader",
                 options: {
-                    name: "images/[name]-[hash:6].[ext]",
-                    limit: 10000
+                    name: "images/[name]-[hash:6].[ext]"
                 }
             },
             {
                 test: /\.png$/,
                 loader: "url-loader",
                 options: {
-                    name: "images/[name]-[hash:6].[ext]",
-                    limit: 10000
+                    name: "images/[name]-[hash:6].[ext]"
                 }
             },
             {
@@ -56,7 +54,7 @@ module.exports = {
                 test: /\.(ttf|eot|woff|woff2)$/,
                 loader: "file-loader",
                 options: {
-                    prefix: "font/"
+                    name: "fonts/[name]-[hash:6].[ext]"
                 }
             },
         ]
