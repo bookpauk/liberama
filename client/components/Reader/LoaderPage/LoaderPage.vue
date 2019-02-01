@@ -13,10 +13,12 @@
             <el-button size="mini" @click="loadFle">
                 Загрузить файл с диска
             </el-button>
+            <div class="space"></div>
+            <span v-if="config.mode == 'omnireader'" class="bottom-span clickable" @click="openComments">Комментарии</span>
         </div>
         <div class="part bottom">
-            <span v-if="config.mode == 'omnireader'" class="bottom-span clickable" @click="openComments">Комментарии</span>
             <span class="bottom-span clickable" @click="openHelp">Справка</span>
+            <span class="bottom-span clickable" @click="openDonate">Донат</span>
             <span class="bottom-span">{{ version }}</span>
         </div>
     </div>
@@ -70,6 +72,9 @@ class LoaderPage extends Vue {
     openHelp() {
     }
 
+    openDonate() {
+    }
+    
     openComments() {
         window.open('http://samlib.ru/comment/b/bookpauk/bookpauk_reader', '_blank');
     }
