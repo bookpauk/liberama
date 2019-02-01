@@ -431,6 +431,7 @@ class TextPage extends Vue {
         if (!this.toggleLayout)
             this.page1 = this.page2;
         this.toggleLayout = true;
+        await this.$nextTick();
         await sleep(50);
 
         const page = this.$refs.scrollingPage;
