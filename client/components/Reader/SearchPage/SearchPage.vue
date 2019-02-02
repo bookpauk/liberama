@@ -130,7 +130,13 @@ class SearchPage extends Vue {
             this.foundCur = next;
         else
             this.foundCur = (this.foundList.length ? 0 : -1);
-        this.$emit('book-pos-changed', {bookPos: this.foundList[this.foundCur]});
+
+        if (this.foundCur >= 0) {
+            this.$emit('start-text-search', {needle: this.needle.toLowerCase()});
+            this.$emit('book-pos-changed', {bookPos: this.foundList[this.foundCur]});
+        } else {
+            this.$emit('stop-text-search');
+        }
         this.$refs.input.focus();
     }
 
@@ -140,7 +146,13 @@ class SearchPage extends Vue {
             this.foundCur = prev;
         else
             this.foundCur = this.foundList.length - 1;
-        this.$emit('book-pos-changed', {bookPos: this.foundList[this.foundCur]});
+
+        if (this.foundCur >= 0) {
+            this.$emit('start-text-search', {needle: this.needle.toLowerCase()});
+            this.$emit('book-pos-changed', {bookPos: this.foundList[this.foundCur]});
+        } else {
+            this.$emit('stop-text-search');
+        }
         this.$refs.input.focus();
     }
 

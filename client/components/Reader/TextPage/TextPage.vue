@@ -322,6 +322,7 @@ class TextPage extends Vue {
 
         this.linesUp = null;
         this.linesDown = null;
+        this.searching = false;
 
         this.getSettings();
         this.calcDrawProps();
@@ -400,6 +401,25 @@ class TextPage extends Vue {
     onScrollingTransitionEnd() {
         if (this.resolveTransitionFinish)
             this.resolveTransitionFinish();
+    }
+
+    startSearch(needle) {
+        this.needle = '';
+        const words = needle.split(' ');
+        for (const word of words) {
+            if (word != '') {
+                this.needle = word;
+                break;
+            }
+        }
+
+        this.searching = true;
+        this.draw();
+    }
+
+    stopSearch() {
+        this.searching = false;
+        this.draw();
     }
 
     async startTextScrolling() {
@@ -612,10 +632,14 @@ class TextPage extends Vue {
                         const font = this.fontByStyle(part.style);
                         let partWords = part.text.split(' ');
 
-                        for (let i = 0; i < partWords.length; i++) {
-                            let word = partWords[i];
-                            out += this.drawHelper.fillText(word, x, y, font);
-                            x += this.measureText(word, part.style) + (i < partWords.length - 1 ? space : 0);
+                        for (let j = 0; j < partWords.length; j++) {
+                            let f = font;
+                            let word = partWords[j];
+                            if (i == 0 && this.searching && word.toLowerCase().indexOf(this.needle) >= 0) {
+                                f = this.fontByStyle(Object.assign({}, part.style, {bold: true}));
+                            }
+                            out += this.drawHelper.fillText(word, x, y, f);
+                            x += this.measureText(word, part.style) + (j < partWords.length - 1 ? space : 0);
                         }
                     }
                     filled = true;
@@ -627,10 +651,23 @@ class TextPage extends Vue {
                 let x = indent;
                 x = (center ? (this.w - this.measureText(lineText, centerStyle))/2 : x);
                 for (const part of line.parts) {
-                    let text = part.text;
-                    const font = this.fontByStyle(part.style);
-                    out += this.drawHelper.fillText(text, x, y, font);
-                    x += this.measureText(text, part.style);
+                    let font = this.fontByStyle(part.style);
+
+                    if (i == 0 && this.searching) {//для поиска, разбивка по словам
+                        let partWords = part.text.split(' ');
+                        for (let j = 0; j < partWords.length; j++) {
+                            let f = font;
+                            let word = partWords[j];
+                            if (word.toLowerCase().indexOf(this.needle) >= 0) {
+                                f = this.fontByStyle(Object.assign({}, part.style, {bold: true}));
+                            }
+                            out += this.drawHelper.fillText(word, x, y, f);
+                            x += this.measureText(word, part.style) + (j < partWords.length - 1 ? spaceWidth : 0);
+                        }
+                    } else {
+                        out += this.drawHelper.fillText(part.text, x, y, font);
+                        x += this.measureText(part.text, part.style);
+                    }
                 }
             }
             y += this.lineHeight;

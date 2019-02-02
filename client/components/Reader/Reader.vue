@@ -59,7 +59,12 @@
             </keep-alive>
 
             <SetPositionPage v-if="setPositionActive" ref="setPositionPage" @set-position-toggle="setPositionToggle" @book-pos-changed="bookPosChanged"></SetPositionPage>
-            <SearchPage v-show="searchActive" ref="searchPage" @search-toggle="searchToggle" @book-pos-changed="bookPosChanged"></SearchPage>
+            <SearchPage v-show="searchActive" ref="searchPage" 
+                @search-toggle="searchToggle" 
+                @book-pos-changed="bookPosChanged"
+                @start-text-search="startTextSearch"
+                @stop-text-search="stopTextSearch">
+            </SearchPage>
             <HistoryPage v-if="historyActive" ref="historyPage" @load-book="loadBook" @history-toggle="historyToggle"></HistoryPage>
             <SettingsPage v-if="settingsActive" ref="settingsPage" @settings-toggle="settingsToggle"></SettingsPage>
         </el-main>
@@ -261,10 +266,10 @@ class Reader extends Vue {
 
     closeAllTextPages() {
         this.setPositionActive = false;
-        this.searchActive = false;
         this.historyActive = false;
         this.settingsActive = false;
         this.stopScrolling();
+        this.stopSearch();
     }
 
     loaderToggle() {
@@ -306,6 +311,21 @@ class Reader extends Vue {
         }
     }
 
+    stopSearch() {
+        if (this.searchActive)
+            this.searchToggle();
+    }
+
+    startTextSearch(opts) {
+        if (this.activePage == 'TextPage')
+            this.$refs.page.startSearch(opts.needle);
+    }
+
+    stopTextSearch() {
+        if (this.activePage == 'TextPage')
+            this.$refs.page.stopSearch();
+    }
+
     searchToggle() {
         this.searchActive = !this.searchActive;
         const page = this.$refs.page;
@@ -317,6 +337,7 @@ class Reader extends Vue {
                 this.$refs.searchPage.init(page.parsed);
             });
         } else {
+            this.stopTextSearch();
             this.searchActive = false;
         }
     }
