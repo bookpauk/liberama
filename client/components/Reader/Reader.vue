@@ -17,11 +17,11 @@
                     <el-tooltip content="На весь экран" :open-delay="1000" effect="light">
                         <el-button ref="fullScreen" class="tool-button" :class="buttonActiveClass('fullScreen')" @click="buttonClick('fullScreen')"><i class="el-icon-rank"></i></el-button>
                     </el-tooltip>
-                    <el-tooltip content="Прокрутка книги" :open-delay="1000" effect="light">
-                        <el-button ref="setPosition" class="tool-button" :class="buttonActiveClass('setPosition')" @click="buttonClick('setPosition')"><i class="el-icon-d-arrow-right"></i></el-button>
-                    </el-tooltip>
                     <el-tooltip content="Плавный скроллинг" :open-delay="1000" effect="light">
                         <el-button ref="scrolling" class="tool-button" :class="buttonActiveClass('scrolling')" @click="buttonClick('scrolling')"><i class="el-icon-sort"></i></el-button>
+                    </el-tooltip>
+                    <el-tooltip content="Прокрутка книги" :open-delay="1000" effect="light">
+                        <el-button ref="setPosition" class="tool-button" :class="buttonActiveClass('setPosition')" @click="buttonClick('setPosition')"><i class="el-icon-d-arrow-right"></i></el-button>
                     </el-tooltip>
                     <el-tooltip content="Найти в тексте" :open-delay="1000" effect="light">
                         <el-button ref="search" class="tool-button" :class="buttonActiveClass('search')" @click="buttonClick('search')"><i class="el-icon-search"></i></el-button>
@@ -59,6 +59,7 @@
             </keep-alive>
 
             <SetPositionPage v-if="setPositionActive" ref="setPositionPage" @set-position-toggle="setPositionToggle" @book-pos-changed="bookPosChanged"></SetPositionPage>
+            <SearchPage v-if="searchActive" ref="searchPage" @search-toggle="searchToggle"></SearchPage>
             <HistoryPage v-if="historyActive" ref="historyPage" @load-book="loadBook" @history-toggle="historyToggle"></HistoryPage>
             <SettingsPage v-if="settingsActive" ref="settingsPage" @settings-toggle="settingsToggle"></SettingsPage>
         </el-main>
@@ -74,6 +75,7 @@ import TextPage from './TextPage/TextPage.vue';
 import ProgressPage from './ProgressPage/ProgressPage.vue';
 
 import SetPositionPage from './SetPositionPage/SetPositionPage.vue';
+import SearchPage from './SearchPage/SearchPage.vue';
 import HistoryPage from './HistoryPage/HistoryPage.vue';
 import SettingsPage from './SettingsPage/SettingsPage.vue';
 
@@ -88,6 +90,7 @@ export default @Component({
         ProgressPage,
 
         SetPositionPage,
+        SearchPage,
         HistoryPage,
         SettingsPage,
     },
@@ -124,8 +127,8 @@ class Reader extends Vue {
     progressActive = false;
     fullScreenActive = false;
 
-    setPositionActive = false;
     scrollingActive = false;
+    setPositionActive = false;
     searchActive = false;
     copyTextActive = false;
     historyActive = false;
@@ -249,6 +252,7 @@ class Reader extends Vue {
 
     closeAllTextPages() {
         this.setPositionActive = false;
+        this.searchActive = false;
         this.historyActive = false;
         this.settingsActive = false;
         this.stopScrolling();
@@ -293,6 +297,20 @@ class Reader extends Vue {
         }
     }
 
+    searchToggle() {
+        this.searchActive = !this.searchActive;
+        if (this.searchActive && this.activePage == 'TextPage' && this.lastOpenedBook) {
+            this.closeAllTextPages();
+            this.searchActive = true;
+
+            this.$nextTick(() => {
+                //this.$refs.searchPage
+            });
+        } else {
+            this.searchActive = false;
+        }
+    }
+
     historyToggle() {
         this.historyActive = !this.historyActive;
         if (this.historyActive) {
@@ -325,7 +343,10 @@ class Reader extends Vue {
                 this.setPositionToggle();
                 break;
             case 'scrolling':
-                this.scrollingToggle()
+                this.scrollingToggle();
+                break;
+            case 'search':
+                this.searchToggle();
                 break;
             case 'history':
                 this.historyToggle();
@@ -547,6 +568,9 @@ class Reader extends Vue {
             if (!handled && this.setPositionActive)
                 handled = this.$refs.setPositionPage.keyHook(event);
 
+            if (!handled && this.searchActive)
+                handled = this.$refs.searchPage.keyHook(event);
+
             if (!handled && this.$refs.page && this.$refs.page.keyHook)
                 handled = this.$refs.page.keyHook(event);
 
@@ -558,6 +582,13 @@ class Reader extends Vue {
                     switch (event.code) {
                         case 'KeyP':
                             this.setPositionToggle();
+                            break;
+                        case 'KeyF':
+                            if (event.ctrlKey) {
+                                this.searchToggle();
+                                event.preventDefault();
+                                event.stopPropagation();
+                            }
                             break;
                         case 'KeyZ':
                             this.scrollingToggle();
