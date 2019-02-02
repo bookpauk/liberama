@@ -61,34 +61,38 @@ class SearchPage extends Vue {
     }
 
     async init(parsed) {
-        this.parsed = parsed;
+        if (this.parsed != parsed) {
+            this.initStep = true;
+            this.stopInit = false;
+            this.header = 'Подготовка';
+            await this.$nextTick();
 
-        this.initStep = true;
-        this.stopInit = false;
-        this.header = 'Подготовка';
-        await this.$nextTick();
+            let prevPerc = 0;
+            let text = '';
+            for (let i = 0; i < parsed.para.length; i++) {
+                const p = parsed.para[i];
+                const parts = parsed.splitToStyle(p.text);
+                if (this.stopInit)
+                    break;
 
-        let prevPerc = 0;
-        let text = '';
-        for (let i = 0; i < parsed.para.length; i++) {
-            const p = parsed.para[i];
-            const parts = parsed.splitToStyle(p.text);
-            if (this.stopInit)
-                break;
+                for (const part of parts)
+                    text += part.text;
 
-            for (const part of parts)
-                text += part.text;
+                const perc = Math.round(i/parsed.para.length*100);
 
-            const perc = Math.round(i/parsed.para.length*100);
-
-            if (perc != prevPerc) {
-                this.initPercentage = perc;
-                await sleep(1);
-                prevPerc = perc;
+                if (perc != prevPerc) {
+                    this.initPercentage = perc;
+                    await sleep(1);
+                    prevPerc = perc;
+                }
             }
+            this.text = text.toLowerCase();
+            this.initStep = false;
+            this.needle = '';
+            this.foundList = [];
+            this.foundCur = -1;
+            this.parsed = parsed;
         }
-        this.text = text.toLowerCase();
-        this.initStep = false;
 
         this.header = 'Найти';
         await this.$nextTick();
