@@ -59,7 +59,7 @@
             </keep-alive>
 
             <SetPositionPage v-if="setPositionActive" ref="setPositionPage" @set-position-toggle="setPositionToggle" @book-pos-changed="bookPosChanged"></SetPositionPage>
-            <SearchPage v-if="searchActive" ref="searchPage" @search-toggle="searchToggle"></SearchPage>
+            <SearchPage v-show="searchActive" ref="searchPage" @search-toggle="searchToggle"></SearchPage>
             <HistoryPage v-if="historyActive" ref="historyPage" @load-book="loadBook" @history-toggle="historyToggle"></HistoryPage>
             <SettingsPage v-if="settingsActive" ref="settingsPage" @settings-toggle="settingsToggle"></SettingsPage>
         </el-main>
@@ -299,12 +299,13 @@ class Reader extends Vue {
 
     searchToggle() {
         this.searchActive = !this.searchActive;
-        if (this.searchActive && this.activePage == 'TextPage' && this.lastOpenedBook) {
+        const page = this.$refs.page;
+        if (this.searchActive && this.activePage == 'TextPage' && page.parsed && this.lastOpenedBook) {
             this.closeAllTextPages();
             this.searchActive = true;
 
             this.$nextTick(() => {
-                //this.$refs.searchPage
+                this.$refs.searchPage.init(page.parsed);
             });
         } else {
             this.searchActive = false;
@@ -640,9 +641,7 @@ class Reader extends Vue {
 }
 
 .tool-button {
-    margin: 0;
-    margin-left: 2px;
-    margin-right: 2px;
+    margin: 0 2px 0 2px;
     padding: 0;
     color: #3E843E;
     background-color: #E6EDF4;

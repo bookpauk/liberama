@@ -23,6 +23,9 @@ import './theme/menu-item.css';
 import ElButton from 'element-ui/lib/button';
 import './theme/button.css';
 
+import ElButtonGroup from 'element-ui/lib/button-group';
+import './theme/button-group.css';
+
 import ElCheckbox from 'element-ui/lib/checkbox';
 import './theme/checkbox.css';
 
@@ -93,7 +96,7 @@ import MessageBox from 'element-ui/lib/message-box';
 import './theme/message-box.css';
 
 const components = {
-    ElMenu, ElMenuItem, ElButton, ElCheckbox, ElTabs, ElTabPane, ElTooltip,
+    ElMenu, ElMenuItem, ElButton, ElButtonGroup, ElCheckbox, ElTabs, ElTabPane, ElTooltip,
     ElCol, ElContainer, ElAside, ElMain, ElHeader,
     ElInput, ElInputNumber, ElSelect, ElOption, ElTable, ElTableColumn,
     ElProgress, ElSlider, ElForm, ElFormItem,
