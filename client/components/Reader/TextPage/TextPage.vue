@@ -44,7 +44,7 @@ const minLayoutWidth = 100;
 export default @Component({
     watch: {
         bookPos: function(newValue) {
-            this.debouncedEmitPosChange(newValue);
+            this.$emit('book-pos-changed', {bookPos: newValue, bookPosSeen: this.bookPosSeen});
             this.draw();
         },
         settings: function() {
@@ -78,10 +78,6 @@ class TextPage extends Vue {
         this.dispatch = this.$store.dispatch;
         this.config = this.$store.state.config;
         this.reader = this.$store.state.reader;
-
-        this.debouncedEmitPosChange = _.debounce((newValue) => {
-            this.$emit('book-pos-changed', {bookPos: newValue, bookPosSeen: this.bookPosSeen});
-        }, 1000);
 
         this.debouncedStartClickRepeat = _.debounce((x, y) => {
             this.startClickRepeat(x, y);

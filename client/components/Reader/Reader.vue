@@ -81,6 +81,7 @@ import SettingsPage from './SettingsPage/SettingsPage.vue';
 
 import bookManager from './share/bookManager';
 import readerApi from '../../api/reader';
+import _ from 'lodash';
 import {sleep} from '../../share/utils';
 
 export default @Component({
@@ -101,9 +102,7 @@ export default @Component({
                 if (textPage.bookPos != newValue) {
                     textPage.bookPos = newValue;
                 }
-                if (this.lastOpenedBook && this.lastOpenedBook.bookPos != newValue) {
-                    this.commit('reader/setOpenedBook', Object.assign({}, this.lastOpenedBook, {bookPos: newValue, bookPosSeen: this.bookPosSeen}));
-                }
+                this.debouncedCommitOpenedBook(newValue);
             }
         },
         routeParamPos: function(newValue) {
@@ -146,6 +145,16 @@ class Reader extends Vue {
         this.$root.addKeyHook(this.keyHook);
 
         this.lastActivePage = false;
+
+        this.debouncedUpdateRoute = _.debounce(() => {
+            this.updateRoute();
+        }, 1000);
+
+        this.debouncedCommitOpenedBook = _.debounce((newValue) => {
+            if (this.lastOpenedBook && this.lastOpenedBook.bookPos != newValue) {
+                this.commit('reader/setOpenedBook', Object.assign({}, this.lastOpenedBook, {bookPos: newValue, bookPosSeen: this.bookPosSeen}));
+            }
+        }, 500);
 
         document.addEventListener('fullscreenchange', () => {
             this.fullScreenActive = (document.fullscreenElement !== null);
@@ -205,7 +214,7 @@ class Reader extends Vue {
         if (event.bookPosSeen !== undefined)
             this.bookPosSeen = event.bookPosSeen;
         this.bookPos = event.bookPos;
-        this.updateRoute();
+        this.debouncedUpdateRoute();
     }
 
     get toolBarActive() {
