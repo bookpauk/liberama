@@ -206,6 +206,7 @@ export default class BookParser {
 
         this.fb2 = fb2;
         this.para = para;
+
         this.textLength = paraOffset;
 
         callback(100);
@@ -465,7 +466,7 @@ export default class BookParser {
                         }
                     }
 
-                    line.end = para.offset + ofs - wordTail.length - 1;
+                    line.end = para.offset + ofs - wordTail.length - 1 - (i < words.length - 1 ? 1 : 0);
                     if (line.end - line.begin < 0)
                         console.error(`Parse error, empty line in paragraph ${paraIndex}`);
 
@@ -547,7 +548,7 @@ export default class BookParser {
     }
 
     getLines(bookPos, n) {
-        const result = [];
+        let result = [];
         let paraIndex = this.findParaIndex(bookPos);
 
         if (paraIndex === undefined)
