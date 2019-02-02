@@ -28,7 +28,7 @@ export default @Component({
     },
     watch: {
         sliderValue: function(newValue) {
-            this.debouncedEmitPosChange(newValue);
+            this.$emit('book-pos-changed', {bookPos: newValue});
         },
     },
 })
@@ -39,10 +39,6 @@ class SetPositionPage extends Vue {
     created() {
         this.commit = this.$store.commit;
         this.reader = this.$store.state.reader;
-
-        this.debouncedEmitPosChange = _.debounce((newValue) => {
-            this.$emit('book-pos-changed', {bookPos: newValue});
-        }, 300);
     }
 
     formatTooltip(val) {
