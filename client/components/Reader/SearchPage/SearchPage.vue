@@ -16,8 +16,8 @@
                         <div style="position: absolute; right: 10px; margin-top: 10px; font-size: 16px;">{{ foundText }}</div>
                     </div>
                     <el-button-group v-show="!initStep" class="button-group">
-                        <el-button @click="findNext"><i class="el-icon-arrow-down"></i></el-button>
-                        <el-button @click="findPrev"><i class="el-icon-arrow-up"></i></el-button>
+                        <el-button @click="showNext"><i class="el-icon-arrow-down"></i></el-button>
+                        <el-button @click="showPrev"><i class="el-icon-arrow-up"></i></el-button>
                     </el-button-group>
                 </div>
             </Window>
@@ -43,7 +43,7 @@ export default @Component({
 
         },
         foundText: function(newValue) {
-            this.$refs.input.style.paddingRight = newValue.length*12 + 'px';
+            this.$refs.input.style.paddingRight = (10 + newValue.length*12) + 'px';
         },
     },
 })
@@ -87,7 +87,7 @@ class SearchPage extends Vue {
                 prevPerc = perc;
             }
         }
-        this.text = text;
+        this.text = text.toLowerCase();
         this.initStep = false;
 
         this.header = 'Найти';
@@ -98,26 +98,46 @@ class SearchPage extends Vue {
 
     get foundText() {
         if (this.foundList.length && this.foundCur >= 0)
-            return `${this.foundCur}/${this.foundList.length}`;
+            return `${this.foundCur + 1}/${this.foundList.length}`;
         else
             return '';
     }
 
     find() {
         let foundList = [];
-        let i = 0;
-        while (i < this.text.length) {
-            i++;
+        if (this.needle) {
+            const needle = this.needle.toLowerCase();
+            let i = 0;
+            while (i < this.text.length) {
+                const found = this.text.indexOf(needle, i);
+                if (found >= 0)
+                    foundList.push(found);
+                i = (found >= 0 ? found + 1 : this.text.length);
+            }
         }
         this.foundList = foundList;
+        this.foundCur = -1;
+        this.showNext();
     }
 
-    findNext() {
-        console.log('1');
+    showNext() {
+        const next = this.foundCur + 1;
+        if (next < this.foundList.length)
+            this.foundCur = next;
+        else
+            this.foundCur = (this.foundList.length ? 0 : -1);
+        this.$emit('book-pos-changed', {bookPos: this.foundList[this.foundCur]});
+        this.$refs.input.focus();
     }
 
-    findPrev() {
-        console.log('2');
+    showPrev() {
+        const prev = this.foundCur - 1;
+        if (prev >= 0)
+            this.foundCur = prev;
+        else
+            this.foundCur = this.foundList.length - 1;
+        this.$emit('book-pos-changed', {bookPos: this.foundList[this.foundCur]});
+        this.$refs.input.focus();
     }
 
     close() {
@@ -128,7 +148,7 @@ class SearchPage extends Vue {
     keyHook(event) {
         //недостатки сторонних ui
         if (document.activeElement === this.$refs.input && event.type == 'keydown' && event.key == 'Enter') {
-            this.find();
+            this.showNext();
         }
 
         if (event.type == 'keydown' && (event.code == 'Escape')) {

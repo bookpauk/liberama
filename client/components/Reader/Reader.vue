@@ -59,7 +59,7 @@
             </keep-alive>
 
             <SetPositionPage v-if="setPositionActive" ref="setPositionPage" @set-position-toggle="setPositionToggle" @book-pos-changed="bookPosChanged"></SetPositionPage>
-            <SearchPage v-show="searchActive" ref="searchPage" @search-toggle="searchToggle"></SearchPage>
+            <SearchPage v-show="searchActive" ref="searchPage" @search-toggle="searchToggle" @book-pos-changed="bookPosChanged"></SearchPage>
             <HistoryPage v-if="historyActive" ref="historyPage" @load-book="loadBook" @history-toggle="historyToggle"></HistoryPage>
             <SettingsPage v-if="settingsActive" ref="settingsPage" @settings-toggle="settingsToggle"></SettingsPage>
         </el-main>
