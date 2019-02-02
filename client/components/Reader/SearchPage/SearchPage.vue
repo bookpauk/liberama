@@ -73,7 +73,7 @@ class SearchPage extends Vue {
                 const p = parsed.para[i];
                 const parts = parsed.splitToStyle(p.text);
                 if (this.stopInit)
-                    break;
+                    return;
 
                 for (const part of parts)
                     text += part.text;
@@ -85,7 +85,7 @@ class SearchPage extends Vue {
                     await sleep(1);
                     prevPerc = perc;
                 }
-            }
+            }            
             this.text = text.toLowerCase();
             this.initStep = false;
             this.needle = '';
