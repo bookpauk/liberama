@@ -810,8 +810,9 @@ class TextPage extends Vue {
     }
 
     keyHook(event) {
-        //console.log(event.code);
-        if (event.type == 'keydown') {
+        let result = false;
+        if (event.type == 'keydown' && !event.ctrlKey && !event.altKey && !event.shiftKey) {
+            result = true;
             switch (event.code) {
                 case 'ArrowDown':
                     this.doDown();
@@ -845,8 +846,12 @@ class TextPage extends Vue {
                     event.preventDefault();
                     event.stopPropagation();
                     break;
+                default:
+                    result = false;
+                    break;
             }
         }
+        return result;
     }
 
     async startClickRepeat(pointX, pointY) {
