@@ -634,12 +634,14 @@ class TextPage extends Vue {
 
                         for (let j = 0; j < partWords.length; j++) {
                             let f = font;
+                            let style = part.style;
                             let word = partWords[j];
                             if (i == 0 && this.searching && word.toLowerCase().indexOf(this.needle) >= 0) {
-                                f = this.fontByStyle(Object.assign({}, part.style, {bold: true}));
+                                style = Object.assign({}, part.style, {bold: true});
+                                f = this.fontByStyle(style);
                             }
                             out += this.drawHelper.fillText(word, x, y, f);
-                            x += this.measureText(word, part.style) + (j < partWords.length - 1 ? space : 0);
+                            x += this.measureText(word, style) + (j < partWords.length - 1 ? space : 0);
                         }
                     }
                     filled = true;
@@ -657,12 +659,14 @@ class TextPage extends Vue {
                         let partWords = part.text.split(' ');
                         for (let j = 0; j < partWords.length; j++) {
                             let f = font;
+                            let style = part.style;
                             let word = partWords[j];
                             if (word.toLowerCase().indexOf(this.needle) >= 0) {
-                                f = this.fontByStyle(Object.assign({}, part.style, {bold: true}));
+                                style = Object.assign({}, part.style, {bold: true});
+                                f = this.fontByStyle(style);
                             }
                             out += this.drawHelper.fillText(word, x, y, f);
-                            x += this.measureText(word, part.style) + (j < partWords.length - 1 ? spaceWidth : 0);
+                            x += this.measureText(word, style) + (j < partWords.length - 1 ? spaceWidth : 0);
                         }
                     } else {
                         out += this.drawHelper.fillText(part.text, x, y, font);
