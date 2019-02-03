@@ -99,26 +99,34 @@ import _ from 'lodash';
 
 import {formatDate} from '../../../share/utils';
 import Window from '../../share/Window.vue';
+import bookManager from '../share/bookManager';
 
 export default @Component({
     components: {
         Window,
     },
+    watch: {
+        search: function() {
+            this.updateTableData();
+        }
+    },
 })
 class HistoryPage extends Vue {
     search = null;
+    tableData = null;
 
     created() {
-        this.commit = this.$store.commit;
-        this.reader = this.$store.state.reader;
     }
 
-    get tableData() {
-        const state = this.reader;
+    mounted() {
+        this.updateTableData();
+    }
+
+    updateTableData() {
         let result = [];
 
-        for (let bookKey in state.openedBook) {
-            const book = state.openedBook[bookKey];
+        for (let bookKey in bookManager.recent) {
+            const book = bookManager.recent[bookKey];
             let d = new Date();
             d.setTime(book.touchTime);
             const t = formatDate(d).split(' ');
@@ -151,7 +159,7 @@ class HistoryPage extends Vue {
         }
 
         const search = this.search;
-        return result.filter(item => {
+        this.tableData = result.filter(item => {
             return !search ||
                 item.touchTime.includes(search) ||
                 item.touchDate.includes(search) ||
@@ -184,8 +192,9 @@ class HistoryPage extends Vue {
         window.open(path, '_blank');
     }
 
-    handleDel(key) {
-        this.commit('reader/delOpenedBook', {key});
+    async handleDel(key) {
+        await bookManager.delRecentBook({key});
+        this.updateTableData();
     }
 
     loadBook(url) {

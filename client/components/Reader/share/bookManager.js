@@ -13,12 +13,17 @@ const bmDataStore = localForage.createInstance({
     name: 'bmDataStore'
 });
 
+const bmRecentStore = localForage.createInstance({
+    name: 'bmRecentStore'
+});
+
 class BookManager {
     async init() {
         this.books = {};
+        this.recent = {};
+        this.recentChanged = true;
 
-        const len = await bmMetaStore.length();
-
+        let len = await bmMetaStore.length();
         for (let i = 0; i < len; i++) {
             const key = await bmMetaStore.key(i);
             const keySplit = key.split('-');
@@ -28,6 +33,13 @@ class BookManager {
 
                 this.books[meta.key] = meta;
             }
+        }
+
+        len = await bmRecentStore.length();
+        for (let i = 0; i < len; i++) {
+            const key = await bmRecentStore.key(i);
+            let r = await bmRecentStore.getItem(key);
+            this.recent[r.key] = r;
         }
 
         await this.cleanBooks();
@@ -140,6 +152,75 @@ class BookManager {
 
     keyFromUrl(url) {
         return utils.stringToHex(url);
+    }
+
+    async setRecentBook(value) {
+        if (!this.recent) 
+            await this.init();
+        const result = Object.assign({}, value, {touchTime: Date.now()});
+        this.recent[result.key] = result;
+
+        await bmRecentStore.setItem(result.key, result);
+        await this.cleanRecentBooks();
+
+        this.recentChanged = true;
+        return result;
+    }
+
+    async getRecentBook(value) {
+        if (!this.recent) 
+            await this.init();
+        return this.recent[value.key];
+    }
+
+    async delRecentBook(value) {
+        if (!this.recent) 
+            await this.init();
+
+        await bmRecentStore.removeItem(value.key);
+        delete this.recent[value.key];
+        this.recentChanged = true;
+    }
+
+    async cleanRecentBooks() {
+        if (!this.recent) 
+            await this.init();
+
+        if (Object.keys(this.recent).length > 3) {
+            let min = Date.now();
+            let found = null;
+            for (let key in this.recent) {
+                const book = this.recent[key];
+                if (book.touchTime < min) {
+                    min = book.touchTime;
+                    found = book;
+                }
+            }
+
+            if (found) {
+                await this.delRecentBook(found);
+                await this.cleanRecentBooks();
+            }
+        }
+    }
+
+    mostRecentBook() {
+        if (!this.recentChanged && this.mostRecentCached) {
+            return this.mostRecentCached;
+        }
+
+        let max = 0;
+        let result = null;
+        for (let key in this.recent) {
+            const book = this.recent[key];
+            if (book.touchTime > max) {
+                max = book.touchTime;
+                result = book;
+            }
+        }
+        this.mostRecentCached = result;
+        this.recentChanged = false;
+        return result;
     }
 
 }

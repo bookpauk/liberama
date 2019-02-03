@@ -107,7 +107,7 @@ export default @Component({
                 if (textPage.bookPos != newValue) {
                     textPage.bookPos = newValue;
                 }
-                this.debouncedCommitOpenedBook(newValue);
+                this.debouncedSetRecentBook(newValue);
             }
         },
         routeParamPos: function(newValue) {
@@ -116,7 +116,7 @@ export default @Component({
             }
         },
         routeParamUrl: function(newValue) {
-            if (newValue !== '' && newValue !== this.lastOpenedBook.url) {
+            if (newValue !== '' && newValue !== this.mostRecentBook().url) {
                 this.loadBook({url: newValue, bookPos: this.routeParamPos});
             }
         },
@@ -155,9 +155,10 @@ class Reader extends Vue {
             this.updateRoute();
         }, 1000);
 
-        this.debouncedCommitOpenedBook = _.debounce((newValue) => {
-            if (this.lastOpenedBook && this.lastOpenedBook.bookPos != newValue) {
-                this.commit('reader/setOpenedBook', Object.assign({}, this.lastOpenedBook, {bookPos: newValue, bookPosSeen: this.bookPosSeen}));
+        this.debouncedSetRecentBook = _.debounce(async(newValue) => {
+            const recent = this.mostRecentBook();
+            if (recent && recent.bookPos != newValue) {
+                await bookManager.setRecentBook(Object.assign({}, recent, {bookPos: newValue, bookPosSeen: this.bookPosSeen}));
             }
         }, 500);
 
@@ -169,14 +170,11 @@ class Reader extends Vue {
     }
 
     mounted() {
-        /*while (this.lastOpenedBook) {
-            this.commit('reader/delOpenedBook', this.lastOpenedBook);
-        }*/
         if (this.$root.rootRoute == '/reader') {
             if (this.routeParamUrl) {
                 this.loadBook({url: this.routeParamUrl, bookPos: this.routeParamPos});
-            } else if (this.lastOpenedBook) {
-                this.loadBook({url: this.lastOpenedBook.url});
+            } else if (this.mostRecentBook()) {
+                this.loadBook({url: this.this.mostRecentBook().url});
             } else {
                 this.loaderActive = true;
             }
@@ -197,10 +195,11 @@ class Reader extends Vue {
 
     updateRoute(isNewRoute) {
         const pos = (this.bookPos != undefined && this.allowUrlParamBookPos ? `__p=${this.bookPos}&` : '');
+        const url = (this.mostRecentBook() ? `url=${this.mostRecentBook().url}` : '');        
         if (isNewRoute)
-            this.$router.push(`/reader?${pos}url=${this.lastOpenedBook.url}`);
+            this.$router.push(`/reader?${pos}${url}`);
         else
-            this.$router.replace(`/reader?${pos}url=${this.lastOpenedBook.url}`);
+            this.$router.replace(`/reader?${pos}${url}`);
 
     }
 
@@ -226,8 +225,8 @@ class Reader extends Vue {
         return this.reader.toolBarActive;
     }
 
-    get lastOpenedBook() {
-        const result = this.$store.getters['reader/lastOpenedBook'];
+    mostRecentBook() {
+        const result = bookManager.mostRecentBook();
         if (!result)
             this.closeAllTextPages();
         return result;
@@ -281,13 +280,13 @@ class Reader extends Vue {
 
     setPositionToggle() {
         this.setPositionActive = !this.setPositionActive;
-        if (this.setPositionActive && this.activePage == 'TextPage' && this.lastOpenedBook) {
+        if (this.setPositionActive && this.activePage == 'TextPage' && this.mostRecentBook()) {
             this.closeAllTextPages();
             this.setPositionActive = true;
 
             this.$nextTick(() => {
-                this.$refs.setPositionPage.sliderMax = this.lastOpenedBook.textLength - 1;
-                this.$refs.setPositionPage.sliderValue = this.lastOpenedBook.bookPos;
+                this.$refs.setPositionPage.sliderMax = this.mostRecentBook().textLength - 1;
+                this.$refs.setPositionPage.sliderValue = this.mostRecentBook().bookPos;
             });
         } else {
             this.setPositionActive = false;
@@ -329,7 +328,7 @@ class Reader extends Vue {
     searchToggle() {
         this.searchActive = !this.searchActive;
         const page = this.$refs.page;
-        if (this.searchActive && this.activePage == 'TextPage' && page.parsed && this.lastOpenedBook) {
+        if (this.searchActive && this.activePage == 'TextPage' && page.parsed && this.mostRecentBook()) {
             this.closeAllTextPages();
             this.searchActive = true;
 
@@ -383,8 +382,8 @@ class Reader extends Vue {
                 this.historyToggle();
                 break;
             case 'refresh':
-                if (this.lastOpenedBook) {
-                    this.loadBook({url: this.lastOpenedBook.url, force: true});
+                if (this.mostRecentBook()) {
+                    this.loadBook({url: this.mostRecentBook().url, force: true});
                 }
                 break;
             case 'settings':
@@ -413,7 +412,7 @@ class Reader extends Vue {
                 break;
         }
 
-        if (this.activePage == 'LoaderPage' || !this.lastOpenedBook) {
+        if (this.activePage == 'LoaderPage' || !this.mostRecentBook()) {
             switch (button) {
                 case 'undoAction':
                 case 'redoAction':
@@ -425,7 +424,7 @@ class Reader extends Vue {
                     break;
                 case 'history':
                 case 'refresh':
-                    if (!this.lastOpenedBook)
+                    if (!this.mostRecentBook())
                         classResult = classDisabled;
                     break;
             }
@@ -441,7 +440,7 @@ class Reader extends Vue {
             result = 'ProgressPage';
         else if (this.loaderActive)
             result = 'LoaderPage';
-        else if (this.lastOpenedBook)
+        else if (this.mostRecentBook())
             result = 'TextPage';
 
         if (!result) {
@@ -456,7 +455,7 @@ class Reader extends Vue {
         if (this.lastActivePage != result && result == 'TextPage') {
             //акивируем страницу с текстом
             this.$nextTick(async() => {
-                const last = this.lastOpenedBook;
+                const last = this.mostRecentBook();
 
                 const isParsed = await bookManager.hasBookParsed(last);
                 if (!isParsed) {
@@ -489,9 +488,9 @@ class Reader extends Vue {
                 progress.show();
                 progress.setState({state: 'parse'});
 
-                // есть ли среди истории OpenedBook
+                // есть ли среди недавних
                 const key = bookManager.keyFromUrl(opts.url);
-                let wasOpened = this.reader.openedBook[key];
+                let wasOpened = bookManager.getRecentBook({key});
                 wasOpened = (wasOpened ? wasOpened : {});
                 const bookPos = (opts.bookPos !== undefined ? opts.bookPos : wasOpened.bookPos);
                 const bookPosSeen = (opts.bookPos !== undefined ? opts.bookPos : wasOpened.bookPosSeen);
@@ -506,7 +505,7 @@ class Reader extends Vue {
 
                     // если есть в локальном кеше
                     if (bookParsed) {
-                        this.commit('reader/setOpenedBook', Object.assign({bookPos, bookPosSeen}, bookManager.metaOnly(bookParsed)));
+                        await bookManager.setRecentBook(Object.assign({bookPos, bookPosSeen}, bookManager.metaOnly(bookParsed)));
                         this.loaderActive = false;
                         progress.hide(); this.progressActive = false;
                         this.blinkCachedLoadMessage();
@@ -545,7 +544,7 @@ class Reader extends Vue {
                 });
 
                 // добавляем в историю
-                this.commit('reader/setOpenedBook', Object.assign({bookPos, bookPosSeen}, bookManager.metaOnly(addedBook)));
+                await bookManager.setRecentBook(Object.assign({bookPos, bookPosSeen}, bookManager.metaOnly(addedBook)));
                 this.updateRoute(true);
 
                 this.loaderActive = false;
