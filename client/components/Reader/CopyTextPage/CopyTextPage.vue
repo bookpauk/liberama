@@ -130,7 +130,7 @@ class CopyTextPage extends Vue {
     flex: 1;
     overflow-wrap: anywhere;
     overflow-y: auto;
-    margin: 0 10px 0 10px;
+    padding: 0 10px 0 10px;
     position: relative;
     font-size: 120%;
 }
