@@ -490,7 +490,7 @@ class Reader extends Vue {
 
                 // есть ли среди недавних
                 const key = bookManager.keyFromUrl(opts.url);
-                let wasOpened = bookManager.getRecentBook({key});
+                let wasOpened = await bookManager.getRecentBook({key});
                 wasOpened = (wasOpened ? wasOpened : {});
                 const bookPos = (opts.bookPos !== undefined ? opts.bookPos : wasOpened.bookPos);
                 const bookPosSeen = (opts.bookPos !== undefined ? opts.bookPos : wasOpened.bookPosSeen);
