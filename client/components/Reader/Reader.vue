@@ -175,15 +175,18 @@ class Reader extends Vue {
     }
 
     mounted() {
-        if (this.$root.rootRoute == '/reader') {
-            if (this.routeParamUrl) {
-                this.loadBook({url: this.routeParamUrl, bookPos: this.routeParamPos});
-            } else if (this.mostRecentBook()) {
-                this.loadBook({url: this.this.mostRecentBook().url});
-            } else {
-                this.loaderActive = true;
+        (async() => {
+            await bookManager.init();
+            if (this.$root.rootRoute == '/reader') {
+                if (this.routeParamUrl) {
+                    this.loadBook({url: this.routeParamUrl, bookPos: this.routeParamPos});
+                } else if (this.mostRecentBook()) {
+                    this.loadBook({url: this.mostRecentBook().url});
+                } else {
+                    this.loaderActive = true;
+                }
             }
-        }
+        })();
     }
 
     get routeParamPos() {
