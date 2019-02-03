@@ -66,7 +66,7 @@
                 @stop-text-search="stopTextSearch">
             </SearchPage>
             <CopyTextPage v-if="copyTextActive" ref="copyTextPage" @copy-text-toggle="copyTextToggle"></CopyTextPage>            
-            <HistoryPage v-if="historyActive" ref="historyPage" @load-book="loadBook" @most-recent-book="mostRecentBook" @history-toggle="historyToggle"></HistoryPage>
+            <HistoryPage v-if="historyActive" ref="historyPage" @load-book="loadBook" @history-toggle="historyToggle"></HistoryPage>
             <SettingsPage v-if="settingsActive" ref="settingsPage" @settings-toggle="settingsToggle"></SettingsPage>
         </el-main>
     </el-container>
@@ -485,7 +485,6 @@ class Reader extends Vue {
             //акивируем страницу с текстом
             this.$nextTick(async() => {
                 const last = this.mostRecentBookReactive;
-
                 const isParsed = await bookManager.hasBookParsed(last);
                 if (!isParsed) {
                     this.$root.$emit('set-app-title');
@@ -508,7 +507,11 @@ class Reader extends Vue {
     }
 
     loadBook(opts) {
-        this.closeAllTextPages();
+        if (!opts) {
+            this.mostRecentBook();
+            return;
+        }
+        
         this.progressActive = true;
         this.$nextTick(async() => {
             const progress = this.$refs.page;

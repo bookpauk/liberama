@@ -120,6 +120,7 @@ class HistoryPage extends Vue {
 
     mounted() {
         this.updateTableData();
+        this.mostRecentBook = bookManager.mostRecentBook();
     }
 
     updateTableData() {
@@ -194,12 +195,17 @@ class HistoryPage extends Vue {
 
     async handleDel(key) {
         await bookManager.delRecentBook({key});
-        this.$emit('most-recent-book');
         this.updateTableData();
+
+        const newRecent = bookManager.mostRecentBook();
+        if (this.mostRecentBook != newRecent)
+            this.$emit('load-book', newRecent);
+        this.mostRecentBook = newRecent;
     }
 
     loadBook(url) {
         this.$emit('load-book', {url});
+        this.close();
     }
 
     close() {
