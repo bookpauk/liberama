@@ -38,61 +38,58 @@ class CopyTextPage extends Vue {
     }
 
     async init(bookPos, parsed, copyFullText) {
-        if (parsed && this.parsed != parsed) {
-            this.text = 'Загрузка';
-            await this.$nextTick();
+        this.text = 'Загрузка';
+        await this.$nextTick();
 
-            const paraIndex = parsed.findParaIndex(bookPos);
-            this.initStep = true;
-            this.stopInit = false;
+        const paraIndex = parsed.findParaIndex(bookPos);
+        this.initStep = true;
+        this.stopInit = false;
 
-            let nextPerc = 0;
-            let text = '';
-            let cut = '';
-            let from = 0;
-            let to = parsed.para.length;
-            if (!copyFullText) {
-                from = paraIndex - 100;
-                from = (from < 0 ? 0 : from);
-                to = paraIndex + 100;
-                to = (to > parsed.para.length ? parsed.para.length : to);
-                cut = '<p>..... Текст вырезан. Если хотите скопировать больше, поставьте в настройках галочку "Загружать весь текст"';
+        let nextPerc = 0;
+        let text = '';
+        let cut = '';
+        let from = 0;
+        let to = parsed.para.length;
+        if (!copyFullText) {
+            from = paraIndex - 100;
+            from = (from < 0 ? 0 : from);
+            to = paraIndex + 100;
+            to = (to > parsed.para.length ? parsed.para.length : to);
+            cut = '<p>..... Текст вырезан. Если хотите скопировать больше, поставьте в настройках галочку "Загружать весь текст"';
+        }
+
+        if (from > 0)
+            text += cut;
+        for (let i = from; i < to; i++) {
+            const p = parsed.para[i];
+            const parts = parsed.splitToStyle(p.text);
+            if (this.stopInit)
+                return;
+
+            text += `<p id="p${i}" class="copyPara">`;
+            for (const part of parts)
+                text += part.text;
+
+            const perc = Math.round(i/parsed.para.length*100);
+
+            if (perc > nextPerc) {
+                this.initPercentage = perc;
+                await sleep(1);
+                nextPerc = perc + 10;
             }
+        }
+        if (to < parsed.para.length)
+            text += cut;
 
-            if (from > 0)
-                text += cut;
-            for (let i = from; i < to; i++) {
-                const p = parsed.para[i];
-                const parts = parsed.splitToStyle(p.text);
-                if (this.stopInit)
-                    return;
+        this.text = text;
+        this.initStep = false;
 
-                text += `<p id="p${i}" class="copyPara">`;
-                for (const part of parts)
-                    text += part.text;
+        await this.$nextTick();
+        this.$refs.text.focus();
 
-                const perc = Math.round(i/parsed.para.length*100);
-
-                if (perc > nextPerc) {
-                    this.initPercentage = perc;
-                    await sleep(1);
-                    nextPerc = perc + 10;
-                }
-            }
-            if (to < parsed.para.length)
-                text += cut;
-
-            this.text = text;
-            this.initStep = false;
-            this.parsed = parsed;
-
-            await this.$nextTick();
-            this.$refs.text.focus();
-
-            const p = document.getElementById('p' + paraIndex);
-            if (p) {
-                this.$refs.text.scrollTop = p.offsetTop;
-            }
+        const p = document.getElementById('p' + paraIndex);
+        if (p) {
+            this.$refs.text.scrollTop = p.offsetTop;
         }
     }
 
