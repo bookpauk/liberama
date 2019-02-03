@@ -66,8 +66,9 @@ class SearchPage extends Vue {
             this.stopInit = false;
             this.header = 'Подготовка';
             await this.$nextTick();
+            await sleep(10);
 
-            let prevPerc = 0;
+            let nextPerc = 0;
             let text = '';
             for (let i = 0; i < parsed.para.length; i++) {
                 const p = parsed.para[i];
@@ -80,10 +81,10 @@ class SearchPage extends Vue {
 
                 const perc = Math.round(i/parsed.para.length*100);
 
-                if (perc != prevPerc) {
+                if (perc > nextPerc) {
                     this.initPercentage = perc;
                     await sleep(1);
-                    prevPerc = perc;
+                    nextPerc = perc + 10;
                 }
             }            
             this.text = text.toLowerCase();
