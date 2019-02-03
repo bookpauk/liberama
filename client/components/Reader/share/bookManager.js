@@ -186,7 +186,7 @@ class BookManager {
         if (!this.recent) 
             await this.init();
 
-        if (Object.keys(this.recent).length > 3) {
+        if (Object.keys(this.recent).length > 100) {
             let min = Date.now();
             let found = null;
             for (let key in this.recent) {
