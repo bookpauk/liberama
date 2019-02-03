@@ -148,6 +148,7 @@ class Reader extends Vue {
     mostRecentBookReactive = null;
 
     created() {
+        this.loading = true;
         this.commit = this.$store.commit;
         this.dispatch = this.$store.dispatch;
         this.reader = this.$store.state.reader;
@@ -187,6 +188,7 @@ class Reader extends Vue {
                     this.loaderActive = true;
                 }
             }
+            this.loading = false;
         })();
     }
 
@@ -471,7 +473,7 @@ class Reader extends Vue {
         else if (this.mostRecentBookReactive)
             result = 'TextPage';
 
-        if (!result) {
+        if (!result && !this.loading) {
             this.loaderActive = true;
             result = 'LoaderPage';
         }
@@ -484,7 +486,7 @@ class Reader extends Vue {
             //акивируем страницу с текстом
             this.$nextTick(async() => {
                 const last = this.mostRecentBookReactive;
-                const isParsed = await bookManager.hasBookParsed(last);
+                const isParsed = bookManager.hasBookParsed(last);
                 if (!isParsed) {
                     this.$root.$emit('set-app-title');
                     return;
@@ -508,6 +510,13 @@ class Reader extends Vue {
     loadBook(opts) {
         if (!opts) {
             this.mostRecentBook();
+            return;
+        }
+
+        // уже просматривается сейчас
+        const recent = this.mostRecentBook();
+        if (recent && recent.url == opts.url && bookManager.hasBookParsed(recent)) {
+            this.loaderActive = false;
             return;
         }
 

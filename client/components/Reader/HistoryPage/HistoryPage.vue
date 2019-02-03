@@ -207,8 +207,7 @@ class HistoryPage extends Vue {
     }
 
     loadBook(url) {
-        if (this.mostRecentBook.url != url)
-            this.$emit('load-book', {url});
+        this.$emit('load-book', {url});
         this.close();
     }
 
