@@ -203,8 +203,9 @@ class Reader extends Vue {
     }
 
     updateRoute(isNewRoute) {
-        const pos = (this.bookPos != undefined && this.allowUrlParamBookPos ? `__p=${this.bookPos}&` : '');
-        const url = (this.mostRecentBook() ? `url=${this.mostRecentBook().url}` : '');        
+        const recent = this.mostRecentBook();
+        const pos = (recent && recent.bookPos && this.allowUrlParamBookPos ? `__p=${recent.bookPos}&` : '');
+        const url = (recent ? `url=${recent.url}` : '');
         if (isNewRoute)
             this.$router.push(`/reader?${pos}${url}`);
         else
@@ -236,8 +237,6 @@ class Reader extends Vue {
 
     mostRecentBook() {
         const result = bookManager.mostRecentBook();
-        if (!result)
-            this.closeAllTextPages();
         this.mostRecentBookReactive = result;
         return result;
     }
@@ -363,7 +362,7 @@ class Reader extends Vue {
                 this.$refs.copyTextPage.init(this.mostRecentBook().bookPos, page.parsed, this.copyFullText);
             });
         } else {
-            this.searchActive = false;
+            this.copyTextActive = false;
         }
     }
 
@@ -511,7 +510,7 @@ class Reader extends Vue {
             this.mostRecentBook();
             return;
         }
-        
+
         this.progressActive = true;
         this.$nextTick(async() => {
             const progress = this.$refs.page;

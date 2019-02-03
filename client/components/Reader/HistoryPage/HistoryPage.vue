@@ -200,7 +200,10 @@ class HistoryPage extends Vue {
         const newRecent = bookManager.mostRecentBook();
         if (this.mostRecentBook != newRecent)
             this.$emit('load-book', newRecent);
+        
         this.mostRecentBook = newRecent;
+        if (!this.mostRecentBook)
+            this.close();
     }
 
     loadBook(url) {
