@@ -6,6 +6,9 @@
                     Скопировать текст
                 </template>
 
+                <div ref="text" class="text" tabindex="-1">
+                    <div v-html="text"></div>
+                </div>
             </Window>
         </div>
     </div>
@@ -25,6 +28,7 @@ export default @Component({
     },
 })
 class CopyTextPage extends Vue {
+    text = null;
     initStep = null;
     initPercentage = 0;
 
@@ -33,19 +37,37 @@ class CopyTextPage extends Vue {
         this.reader = this.$store.state.reader;
     }
 
-    async init(bookPos, parsed) {
-        if (this.parsed != parsed) {
+    async init(bookPos, parsed, copyFullText) {
+        if (parsed && this.parsed != parsed) {
+            this.text = 'Загрузка';
+            await this.$nextTick();
+
+            const paraIndex = parsed.findParaIndex(bookPos);
             this.initStep = true;
             this.stopInit = false;
 
             let nextPerc = 0;
             let text = '';
-            for (let i = 0; i < parsed.para.length; i++) {
+            let cut = '';
+            let from = 0;
+            let to = parsed.para.length;
+            if (!copyFullText) {
+                from = paraIndex - 100;
+                from = (from < 0 ? 0 : from);
+                to = paraIndex + 100;
+                to = (to > parsed.para.length ? parsed.para.length : to);
+                cut = '<p>..... Текст вырезан. Если хотите скопировать больше, поставьте в настройках галочку "Загружать весь текст"';
+            }
+
+            if (from > 0)
+                text += cut;
+            for (let i = from; i < to; i++) {
                 const p = parsed.para[i];
                 const parts = parsed.splitToStyle(p.text);
                 if (this.stopInit)
                     return;
 
+                text += `<p id="p${i}" class="copyPara">`;
                 for (const part of parts)
                     text += part.text;
 
@@ -56,10 +78,21 @@ class CopyTextPage extends Vue {
                     await sleep(1);
                     nextPerc = perc + 10;
                 }
-            }            
+            }
+            if (to < parsed.para.length)
+                text += cut;
 
+            this.text = text;
             this.initStep = false;
             this.parsed = parsed;
+
+            await this.$nextTick();
+            this.$refs.text.focus();
+
+            const p = document.getElementById('p' + paraIndex);
+            if (p) {
+                this.$refs.text.scrollTop = p.offsetTop;
+            }
         }
     }
 
@@ -92,40 +125,27 @@ class CopyTextPage extends Vue {
 
 .mainWindow {
     width: 100%;
-    max-width: 500px;
-    height: 125px;
+    height: 100%;
     display: flex;
-    position: relative;
-    top: -50px;
 }
 
-.content {
+.text {
     flex: 1;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    padding: 10px;
-}
-
-.input {
-    display: flex;
-    margin: 0;
-    padding: 0;
-    width: 100%;
+    overflow-wrap: anywhere;
+    overflow-y: auto;
+    margin: 0 10px 0 10px;
     position: relative;
+    font-size: 120%;
 }
 
-.button-group {
-    width: 150px;
+.text:focus {
+    outline: none;
+}
+</style>
+<style>
+.copyPara {
     margin: 0;
     padding: 0;
-}
-
-.el-button {
-    padding: 9px 17px 9px 17px;
-}
-
-i {
-    font-size: 20px;
+    text-indent: 30px;
 }
 </style>

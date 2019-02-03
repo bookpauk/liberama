@@ -257,6 +257,15 @@
                                     <el-checkbox v-model="lazyParseEnabled">Предварительная обработка текста</el-checkbox>
                                 </el-tooltip>
                             </el-form-item>
+                            <el-form-item label="Копирование">
+                                <el-tooltip :open-delay="500" effect="light">
+                                    <template slot="content">
+                                        Загружать весь текст в окно<br>
+                                        копирования текста со страницы
+                                    </template>
+                                    <el-checkbox v-model="copyFullText">Загружать весь текст</el-checkbox>
+                                </el-tooltip>
+                            </el-form-item>
 
                         </el-form>
                         

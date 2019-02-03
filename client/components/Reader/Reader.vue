@@ -125,6 +125,7 @@ export default @Component({
         },
         settings: function(newValue) {
             this.allowUrlParamBookPos = newValue.allowUrlParamBookPos;
+            this.copyFullText = newValue.copyFullText;
             this.updateRoute();
         },
     },
@@ -170,6 +171,7 @@ class Reader extends Vue {
         });
 
         this.allowUrlParamBookPos = this.settings.allowUrlParamBookPos;
+        this.copyFullText = this.settings.copyFullText;
     }
 
     mounted() {
@@ -353,7 +355,7 @@ class Reader extends Vue {
             this.copyTextActive = true;
 
             this.$nextTick(() => {
-                this.$refs.copyTextPage.init(this.mostRecentBook().bookPos, page.parsed);
+                this.$refs.copyTextPage.init(this.mostRecentBook().bookPos, page.parsed, this.copyFullText);
             });
         } else {
             this.searchActive = false;
