@@ -515,7 +515,7 @@ class Reader extends Vue {
 
         // уже просматривается сейчас
         const recent = this.mostRecentBook();
-        if (recent && recent.url == opts.url && bookManager.hasBookParsed(recent)) {
+        if (!opts.force && recent && recent.url == opts.url && bookManager.hasBookParsed(recent)) {
             this.loaderActive = false;
             return;
         }
