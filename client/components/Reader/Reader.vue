@@ -66,7 +66,7 @@
                 @stop-text-search="stopTextSearch">
             </SearchPage>
             <CopyTextPage v-if="copyTextActive" ref="copyTextPage" @copy-text-toggle="copyTextToggle"></CopyTextPage>            
-            <HistoryPage v-if="historyActive" ref="historyPage" @load-book="loadBook" @history-toggle="historyToggle"></HistoryPage>
+            <HistoryPage v-if="historyActive" ref="historyPage" @load-book="loadBook" @most-recent-book="mostRecentBook" @history-toggle="historyToggle"></HistoryPage>
             <SettingsPage v-if="settingsActive" ref="settingsPage" @settings-toggle="settingsToggle"></SettingsPage>
         </el-main>
     </el-container>
@@ -145,6 +145,7 @@ class Reader extends Vue {
     bookPos = null;
     allowUrlParamBookPos = false;
     showRefreshIcon = true;
+    mostRecentBookReactive = null;
 
     created() {
         this.commit = this.$store.commit;
@@ -237,6 +238,7 @@ class Reader extends Vue {
         const result = bookManager.mostRecentBook();
         if (!result)
             this.closeAllTextPages();
+        this.mostRecentBookReactive = result;
         return result;
     }
 
@@ -467,7 +469,7 @@ class Reader extends Vue {
             result = 'ProgressPage';
         else if (this.loaderActive)
             result = 'LoaderPage';
-        else if (this.mostRecentBook())
+        else if (this.mostRecentBookReactive)
             result = 'TextPage';
 
         if (!result) {
@@ -482,7 +484,7 @@ class Reader extends Vue {
         if (this.lastActivePage != result && result == 'TextPage') {
             //акивируем страницу с текстом
             this.$nextTick(async() => {
-                const last = this.mostRecentBook();
+                const last = this.mostRecentBookReactive;
 
                 const isParsed = await bookManager.hasBookParsed(last);
                 if (!isParsed) {
@@ -533,6 +535,7 @@ class Reader extends Vue {
                     // если есть в локальном кеше
                     if (bookParsed) {
                         await bookManager.setRecentBook(Object.assign({bookPos, bookPosSeen}, bookManager.metaOnly(bookParsed)));
+                        this.mostRecentBook();
                         this.loaderActive = false;
                         progress.hide(); this.progressActive = false;
                         this.blinkCachedLoadMessage();
@@ -572,6 +575,7 @@ class Reader extends Vue {
 
                 // добавляем в историю
                 await bookManager.setRecentBook(Object.assign({bookPos, bookPosSeen}, bookManager.metaOnly(addedBook)));
+                this.mostRecentBook();
                 this.updateRoute(true);
 
                 this.loaderActive = false;

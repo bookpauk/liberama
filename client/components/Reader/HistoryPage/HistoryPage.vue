@@ -194,6 +194,7 @@ class HistoryPage extends Vue {
 
     async handleDel(key) {
         await bookManager.delRecentBook({key});
+        this.$emit('most-recent-book');
         this.updateTableData();
     }
 
