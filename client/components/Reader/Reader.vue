@@ -65,6 +65,7 @@
                 @start-text-search="startTextSearch"
                 @stop-text-search="stopTextSearch">
             </SearchPage>
+            <CopyTextPage v-if="copyTextActive" ref="copyTextPage" @copy-text-toggle="copyTextToggle"></CopyTextPage>            
             <HistoryPage v-if="historyActive" ref="historyPage" @load-book="loadBook" @history-toggle="historyToggle"></HistoryPage>
             <SettingsPage v-if="settingsActive" ref="settingsPage" @settings-toggle="settingsToggle"></SettingsPage>
         </el-main>
@@ -81,6 +82,7 @@ import ProgressPage from './ProgressPage/ProgressPage.vue';
 
 import SetPositionPage from './SetPositionPage/SetPositionPage.vue';
 import SearchPage from './SearchPage/SearchPage.vue';
+import CopyTextPage from './CopyTextPage/CopyTextPage.vue';
 import HistoryPage from './HistoryPage/HistoryPage.vue';
 import SettingsPage from './SettingsPage/SettingsPage.vue';
 
@@ -97,6 +99,7 @@ export default @Component({
 
         SetPositionPage,
         SearchPage,
+        CopyTextPage,
         HistoryPage,
         SettingsPage,
     },
@@ -265,6 +268,7 @@ class Reader extends Vue {
 
     closeAllTextPages() {
         this.setPositionActive = false;
+        this.copyTextActive = false;
         this.historyActive = false;
         this.settingsActive = false;
         this.stopScrolling();
@@ -328,7 +332,7 @@ class Reader extends Vue {
     searchToggle() {
         this.searchActive = !this.searchActive;
         const page = this.$refs.page;
-        if (this.searchActive && this.activePage == 'TextPage' && page.parsed && this.mostRecentBook()) {
+        if (this.searchActive && this.activePage == 'TextPage' && page.parsed) {
             this.closeAllTextPages();
             this.searchActive = true;
 
@@ -337,6 +341,21 @@ class Reader extends Vue {
             });
         } else {
             this.stopTextSearch();
+            this.searchActive = false;
+        }
+    }
+
+    copyTextToggle() {
+        this.copyTextActive = !this.copyTextActive;
+        const page = this.$refs.page;
+        if (this.copyTextActive && this.activePage == 'TextPage' && page.parsed) {
+            this.closeAllTextPages();
+            this.copyTextActive = true;
+
+            this.$nextTick(() => {
+                this.$refs.copyTextPage.init(this.mostRecentBook().bookPos, page.parsed);
+            });
+        } else {
             this.searchActive = false;
         }
     }
@@ -377,6 +396,9 @@ class Reader extends Vue {
                 break;
             case 'search':
                 this.searchToggle();
+                break;
+            case 'copyText':
+                this.copyTextToggle();
                 break;
             case 'history':
                 this.historyToggle();
@@ -601,6 +623,9 @@ class Reader extends Vue {
             if (!handled && this.searchActive)
                 handled = this.$refs.searchPage.keyHook(event);
 
+            if (!handled && this.copyTextActive)
+                handled = this.$refs.copyTextPage.keyHook(event);
+
             if (!handled && this.$refs.page && this.$refs.page.keyHook)
                 handled = this.$refs.page.keyHook(event);
 
@@ -616,6 +641,13 @@ class Reader extends Vue {
                         case 'KeyF':
                             if (event.ctrlKey) {
                                 this.searchToggle();
+                                event.preventDefault();
+                                event.stopPropagation();
+                            }
+                            break;
+                        case 'KeyC':
+                            if (event.ctrlKey) {
+                                this.copyTextToggle();
                                 event.preventDefault();
                                 event.stopPropagation();
                             }
