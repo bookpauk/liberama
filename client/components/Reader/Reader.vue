@@ -147,6 +147,9 @@ class Reader extends Vue {
     showRefreshIcon = true;
     mostRecentBookReactive = null;
 
+    actionList = [];
+    actionCur = -1;
+
     created() {
         this.loading = true;
         this.commit = this.$store.commit;
@@ -165,6 +168,9 @@ class Reader extends Vue {
             const recent = this.mostRecentBook();
             if (recent && recent.bookPos != newValue) {
                 await bookManager.setRecentBook(Object.assign({}, recent, {bookPos: newValue, bookPosSeen: this.bookPosSeen}));
+
+                if (this.actionCur < 0 || (this.actionCur >= 0 && this.actionList[this.actionCur] != newValue))
+                    this.addAction(newValue);
             }
         }, 500);
 
@@ -245,6 +251,16 @@ class Reader extends Vue {
 
     get settings() {
         return this.$store.state.reader.settings;
+    }
+
+    addAction(pos) {
+        let a = this.actionList;
+        if (!a.length || a[a.length - 1] != pos) {
+            a.push(pos);
+            if (a.length > 20)
+                a.shift();
+            this.actionCur = a.length - 1;
+        }
     }
 
     toolBarToggle() {
@@ -393,6 +409,18 @@ class Reader extends Vue {
             case 'loader':
                 this.loaderToggle();
                 break;
+            case 'undoAction':
+                if (this.actionCur > 0) {
+                    this.actionCur--;
+                    this.bookPosChanged({bookPos: this.actionList[this.actionCur]});
+                }
+                break;
+            case 'redoAction':
+                if (this.actionCur < this.actionList.length - 1) {
+                    this.actionCur++;
+                    this.bookPosChanged({bookPos: this.actionList[this.actionCur]});
+                }
+                break;
             case 'fullScreen':
                 this.fullScreenToggle();
                 break;
@@ -439,6 +467,17 @@ class Reader extends Vue {
             case 'settings':
                 if (this[`${button}Active`])
                     classResult = classActive;
+                break;
+        }
+
+        switch (button) {
+            case 'undoAction':
+                if (this.actionCur <= 0)
+                    classResult = classDisabled;
+                break;
+            case 'redoAction':
+                if (this.actionCur == this.actionList.length - 1)
+                    classResult = classDisabled;
                 break;
         }
 
@@ -524,6 +563,9 @@ class Reader extends Vue {
         this.$nextTick(async() => {
             const progress = this.$refs.page;
 
+            this.actionList = [];
+            this.actionCur = -1;
+
             try {
                 progress.show();
                 progress.setState({state: 'parse'});
@@ -547,6 +589,7 @@ class Reader extends Vue {
                     if (bookParsed) {
                         await bookManager.setRecentBook(Object.assign({bookPos, bookPosSeen}, bookManager.metaOnly(bookParsed)));
                         this.mostRecentBook();
+                        this.addAction(bookPos);
                         this.loaderActive = false;
                         progress.hide(); this.progressActive = false;
                         this.blinkCachedLoadMessage();
@@ -587,6 +630,7 @@ class Reader extends Vue {
                 // добавляем в историю
                 await bookManager.setRecentBook(Object.assign({bookPos, bookPosSeen}, bookManager.metaOnly(addedBook)));
                 this.mostRecentBook();
+                this.addAction(bookPos);
                 this.updateRoute(true);
 
                 this.loaderActive = false;
