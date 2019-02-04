@@ -1,3 +1,4 @@
+import he from 'he';
 import sax from '../../../../server/core/BookConverter/sax';
 import {sleep} from '../../../share/utils';
 
@@ -134,7 +135,8 @@ export default class BookParser {
         };
 
         const onTextNode = (text) => {// eslint-disable-line no-unused-vars
-            text = text.replace(/&nbsp;|[\t\n\r]/g, ' ');
+            text = he.decode(text);
+            text = text.replace(/[\t\n\r]/g, ' ');
 
             if (text != ' ' && text.trim() == '')
                 text = text.trim();

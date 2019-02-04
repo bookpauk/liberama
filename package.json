@@ -66,6 +66,7 @@
     "fg-loadcss": "^2.1.0",
     "fs-extra": "^7.0.1",
     "got": "^9.5.1",
+    "he": "^1.2.0",
     "iconv-lite": "^0.4.24",
     "localforage": "^1.7.3",
     "lodash": "^4.17.11",
