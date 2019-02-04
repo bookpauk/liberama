@@ -1,5 +1,6 @@
 const fs = require('fs-extra');
 const path = require('path');
+const crypto = require('crypto');
 
 const workerState = require('./workerState');
 const FileDownloader = require('./FileDownloader');
@@ -90,7 +91,20 @@ class ReaderWorker {
     }
 
     async saveFile(file) {
-        return `file://${file.filename}`;
+        const buf = await fs.readFile(file.path);
+
+        const hash = crypto.createHash('sha256').update(buf).digest('hex');
+
+        const outFilename = `${this.config.uploadDir}/${hash}`;
+
+        if (!await fs.pathExists(outFilename)) {
+            await fs.move(file.path, outFilename);
+        } else {
+            await fs.utimes(outFilename, Date.now()/1000, Date.now()/1000);
+            await fs.remove(file.path);
+        }
+
+        return `file://${hash}`;
     }
 }
 
