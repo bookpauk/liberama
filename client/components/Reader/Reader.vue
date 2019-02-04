@@ -660,9 +660,9 @@ class Reader extends Vue {
                     progress.setState(state);
                 });
 
-                this.loadBook({url});
-
                 progress.hide(); this.progressActive = false;
+
+                this.loadBook({url});
             } catch (e) {
                 progress.hide(); this.progressActive = false;
                 this.loaderActive = true;
