@@ -60,7 +60,7 @@ class LoaderPage extends Vue {
         return `v${this.config.version}`;
     }
 
-    async submitUrl() {
+    submitUrl() {
         if (this.bookUrl) {
             this.$emit('load-book', {url: this.bookUrl});
             this.bookUrl = '';
