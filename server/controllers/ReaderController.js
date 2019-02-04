@@ -32,7 +32,7 @@ class ReaderController extends BaseController {
         let error = '';
         try {
             const url = await this.readerWorker.saveFile(file);
-            return ({url});
+            return {url};
         } catch (e) {
             error = e.message;
         }

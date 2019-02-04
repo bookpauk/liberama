@@ -27,6 +27,7 @@ class ReaderWorker {
         let errMes = '';
         let decompDir = '';
         let downloadedFilename = '';
+        let isUploaded = false;
         let convertFilename = '';
         try {
             wState.set({state: 'download', step: 1, totalSteps: 3, url});
@@ -35,13 +36,19 @@ class ReaderWorker {
             const tempFilename2 = utils.randomHexString(30);
             const decompDirname = utils.randomHexString(30);
 
-            //download
-            const downdata = await this.down.load(url, (progress) => {
-                wState.set({progress});
-            });
+            if (url.indexOf('file://') != 0) {//download
+                const downdata = await this.down.load(url, (progress) => {
+                    wState.set({progress});
+                });
 
-            downloadedFilename = `${this.config.tempDownloadDir}/${tempFilename}`;
-            await fs.writeFile(downloadedFilename, downdata);
+                downloadedFilename = `${this.config.tempDownloadDir}/${tempFilename}`;
+                await fs.writeFile(downloadedFilename, downdata);
+            } else {//uploaded file
+                downloadedFilename = `${this.config.uploadDir}/${url.substr(7)}`;
+                if (!await fs.pathExists(downloadedFilename)) 
+                    throw new Error('Файл не найден на сервере (возможно был удален как устаревший). Пожалуйста, загрузите файл с диска на сервер заново.');
+                isUploaded = true;
+            }
             wState.set({progress: 100});
 
             //decompress
@@ -73,7 +80,7 @@ class ReaderWorker {
             //clean
             if (decompDir)
                 await fs.remove(decompDir);
-            if (downloadedFilename)
+            if (downloadedFilename && !isUploaded)
                 await fs.remove(downloadedFilename);
             if (convertFilename)
                 await fs.remove(convertFilename);
