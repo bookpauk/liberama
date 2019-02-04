@@ -20,7 +20,7 @@
                     <el-tooltip content="Плавный скроллинг" :open-delay="1000" effect="light">
                         <el-button ref="scrolling" class="tool-button" :class="buttonActiveClass('scrolling')" @click="buttonClick('scrolling')"><i class="el-icon-sort"></i></el-button>
                     </el-tooltip>
-                    <el-tooltip content="Прокрутка книги" :open-delay="1000" effect="light">
+                    <el-tooltip content="Перелистнуть" :open-delay="1000" effect="light">
                         <el-button ref="setPosition" class="tool-button" :class="buttonActiveClass('setPosition')" @click="buttonClick('setPosition')"><i class="el-icon-d-arrow-right"></i></el-button>
                     </el-tooltip>
                     <el-tooltip content="Найти в тексте" :open-delay="1000" effect="light">
