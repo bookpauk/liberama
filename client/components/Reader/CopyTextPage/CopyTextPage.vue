@@ -41,7 +41,7 @@ class CopyTextPage extends Vue {
         this.text = 'Загрузка';
         await this.$nextTick();
 
-        const paraIndex = parsed.findParaIndex(bookPos);
+        const paraIndex = parsed.findParaIndex(bookPos || 0);
         this.initStep = true;
         this.stopInit = false;
 
