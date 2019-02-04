@@ -65,7 +65,7 @@
                             min-width="100px"
                             >
                             <template slot-scope="scope">
-                                <a :href="scope.row.url" target="_blank">Оригинал</a><br>
+                                <a v-show="isUrl(scope.row.url)" :href="scope.row.url" target="_blank">Оригинал</a><br>
                                 <a :href="scope.row.path" :download="getFileNameFromPath(scope.row.path)">Скачать FB2</a>
                             </template>
                         </el-table-column>
@@ -209,6 +209,10 @@ class HistoryPage extends Vue {
     loadBook(url) {
         this.$emit('load-book', {url});
         this.close();
+    }
+
+    isUrl(url) {
+        return (url.indexOf('file://') != 0);
     }
 
     close() {
