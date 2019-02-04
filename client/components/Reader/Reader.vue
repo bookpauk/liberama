@@ -50,6 +50,7 @@
             <keep-alive>
                 <component ref="page" :is="activePage"
                     @load-book="loadBook"
+                    @load-file="loadFile"
                     @book-pos-changed="bookPosChanged"
                     @tool-bar-toggle="toolBarToggle"
                     @full-screen-toogle="fullScreenToggle"
@@ -639,6 +640,29 @@ class Reader extends Vue {
                     this.blinkCachedLoadMessage();
                 } else
                     this.stopBlink = true;
+            } catch (e) {
+                progress.hide(); this.progressActive = false;
+                this.loaderActive = true;
+                this.$alert(e.message, 'Ошибка', {type: 'error'});
+            }
+        });
+    }
+
+    loadFile(opts) {
+        this.progressActive = true;
+        this.$nextTick(async() => {
+            const progress = this.$refs.page;
+            try {
+                progress.show();
+                progress.setState({state: 'upload'});
+
+                const url = await readerApi.uploadFile(opts.file, (state) => {
+                    progress.setState(state);
+                });
+
+                this.loadBook(url);
+
+                progress.hide(); this.progressActive = false;
             } catch (e) {
                 progress.hide(); this.progressActive = false;
                 this.loaderActive = true;

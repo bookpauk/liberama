@@ -10,7 +10,8 @@
                 <el-button slot="append" icon="el-icon-check" @click="submitUrl"></el-button>
             </el-input>
             <div class="space"></div>
-            <el-button size="mini" @click="loadFle">
+            <input type="file" id="file" ref="file" @change="loadFile" style='display: none;'/>
+            <el-button size="mini" @click="loadFileClick">
                 Загрузить файл с диска
             </el-button>
             <div class="space"></div>
@@ -66,7 +67,13 @@ class LoaderPage extends Vue {
         }
     }
 
-    loadFle() {
+    loadFileClick() {
+        this.$refs.file.click();
+    }
+
+    loadFile() {
+        const file = this.$refs.file.files[0];
+        this.$emit('load-file', {file});
     }
 
     openHelp() {

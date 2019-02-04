@@ -14,19 +14,25 @@ class ReaderController extends BaseController {
         const request = req.body;
         let error = '';
         try {
-            if (!request.type || !(request.type == 'url' || request.type == 'file'))
-                throw new Error(`key 'type' is wrong`);
+            if (!request.url) 
+                throw new Error(`key 'url' is empty`);
+            const workerId = this.readerWorker.loadBookUrl(request.url);
+            const state = workerState.getState(workerId);
+            return (state ? state : {});
+        } catch (e) {
+            error = e.message;
+        }
+        //bad request
+        res.status(400).send({error});
+        return false;
+    }
 
-            if (request.type == 'file')
-                throw new Error(`file loading is not supported yet`);
-
-            if (request.type == 'url') {
-                if (!request.url) 
-                    throw new Error(`key 'url' is empty`);
-                const workerId = this.readerWorker.loadBookUrl(request.url);
-                const state = workerState.getState(workerId);
-                return (state ? state : {});
-            }
+    async uploadFile(req, res) {
+        const file = req.file;
+        let error = '';
+        try {
+            const url = await this.readerWorker.saveFile(file);
+            return ({url});
         } catch (e) {
             error = e.message;
         }

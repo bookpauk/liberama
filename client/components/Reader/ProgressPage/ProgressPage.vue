@@ -21,6 +21,7 @@ const ruMessage = {
     'convert': 'конвертирование',
     'loading': 'загрузка',
     'parse': 'обработка',
+    'upload': 'отправка',
 };
 
 export default @Component({

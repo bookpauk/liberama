@@ -1,6 +1,7 @@
 import axios from 'axios';
 import {sleep} from '../share/utils';
 
+const maxFileUploadSize = 10*1024*1024;
 const api = axios.create({
   baseURL: '/api/reader'
 });
@@ -64,6 +65,36 @@ class Reader {
         }
         //загрузка
         return await axios.get(url, options);
+    }
+
+    async uploadFile(file, callback) {
+        if (file.size > maxFileUploadSize)
+            throw new Error(`Размер файла превышает ${maxFileUploadSize} байт`);
+
+        let formData = new FormData();
+        formData.append('file', file);
+
+        const options = {
+            headers: {
+              'Content-Type': 'multipart/form-data'
+            },
+            onUploadProgress: progress => {
+                const total = (progress.total ? progress.total : progress.loaded + 200000);
+                if (callback)
+                    callback({state: 'upload', progress: Math.round((progress.loaded*100)/total)});
+            }
+
+        };
+
+        let response = await api.post('/upload-file', formData, options);
+        if (response.data.state == 'error')
+            throw new Error(response.data.error);
+
+        const url = response.data.url;
+        if (!url) 
+            throw new Error('Неверный ответ api');
+
+        return url;
     }
 }
 

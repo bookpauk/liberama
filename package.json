@@ -70,6 +70,7 @@
     "iconv-lite": "^0.4.24",
     "localforage": "^1.7.3",
     "lodash": "^4.17.11",
+    "multer": "^1.4.1",
     "path-browserify": "^1.0.0",
     "sql-template-strings": "^2.2.2",
     "sqlite": "^3.0.0",

@@ -13,6 +13,7 @@ module.exports = {
     tempDir: `${dataDir}/tmp`,
     logDir: `${dataDir}/log`,
     publicDir: `${execDir}/public`,
+    uploadDir: `${execDir}/public/upload`,
     dbFileName: 'db.sqlite',
     loggingEnabled: true,
 

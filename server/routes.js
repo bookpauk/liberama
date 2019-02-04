@@ -1,4 +1,6 @@
 const c = require('./controllers');
+const utils = require('./core/utils');
+const multer = require('multer');
 
 function initRoutes(app, connPool, config) {
     const misc = new c.MiscController(connPool, config);
@@ -9,16 +11,35 @@ function initRoutes(app, connPool, config) {
     const [aAll, aNormal, aSite, aReader, aOmnireader] = // eslint-disable-line no-unused-vars
         [config.mode, 'normal', 'site', 'reader', 'omnireader'];
 
+    //multer
+    const storage = multer.diskStorage({
+        destination: (req, file, cb) => {
+            cb(null, config.uploadDir);
+        },
+        filename: (req, file, cb) => {
+            cb(null, utils.randomHexString(30));
+        }
+    });
+    const upload = multer({ storage, limits: {fileSize: 10*1024*1024} });    
+
     //routes
     const routes = [
         ['POST', '/api/config', misc.getConfig.bind(misc), [aAll], {}],
         ['POST', '/api/reader/load-book', reader.loadBook.bind(reader), [aAll], {}],
+        ['POST', '/api/reader/upload-file', [upload.single('file'), reader.uploadFile.bind(reader)], [aAll], {}],
         ['POST', '/api/worker/get-state', worker.getState.bind(worker), [aAll], {}],
     ];
 
     //to app
     for (let route of routes) {
-        let [httpMethod, path, controller, access, options] = route;
+        let callbacks = [];
+        let [httpMethod, path, controllers, access, options] = route;
+        let controller = controllers;
+        if (Array.isArray(controllers)) {
+            controller = controllers[controllers.length - 1];
+            callbacks = controllers.slice(0, -1);
+        }
+
         access = new Set(access);
 
         let callback = () => {};
@@ -38,13 +59,14 @@ function initRoutes(app, connPool, config) {
                 res.status(403);
             };
         }
+        callbacks.push(callback);
 
         switch (httpMethod) {
             case 'GET' :
-                app.get(path, callback);
+                app.get(path, ...callbacks);
                 break;
             case 'POST':
-                app.post(path, callback);
+                app.post(path, ...callbacks);
                 break;
             default: 
                 throw new Error(`initRoutes error: unknown httpMethod: ${httpMethod}`);

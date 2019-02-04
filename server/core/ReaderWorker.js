@@ -88,6 +88,10 @@ class ReaderWorker {
 
         return workerId;
     }
+
+    async saveFile(file) {
+        return `file://${file.filename}`;
+    }
 }
 
 module.exports = ReaderWorker;
