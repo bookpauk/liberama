@@ -19,7 +19,7 @@
         </div>
         <div class="part bottom">
             <span class="bottom-span clickable" @click="openHelp">Справка</span>
-            <span class="bottom-span clickable" @click="openDonate">Донат</span>
+            <span class="bottom-span clickable" @click="openDonate">Помочь проекту</span>
             <span class="bottom-span">{{ version }}</span>
         </div>
     </div>
