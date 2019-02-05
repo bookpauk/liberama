@@ -6,7 +6,7 @@
                     Настройки
                 </template>
 
-                <el-tabs class="tabs" type="border-card" tab-position="left" v-model="selectedTab">
+                <el-tabs type="border-card" tab-position="left" v-model="selectedTab">
                     <!--------------------------------------------------------------------------->
                     <el-tab-pane label="Вид">
 
@@ -430,15 +430,18 @@ class SettingsPage extends Vue {
     margin-bottom: 5px;
 }
 
-.tabs {
+.el-tabs {
     flex: 1;
     display: flex;
 }
 
 .el-tab-pane {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
     width: 420px;
-    height: 100%;
     overflow-y: auto;
+    padding: 15px;
 }
 
 </style>
