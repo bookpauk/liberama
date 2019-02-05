@@ -78,6 +78,7 @@ class LoaderPage extends Vue {
     }
 
     openHelp() {
+        this.$emit('help-toggle');
     }
 
     openDonate() {

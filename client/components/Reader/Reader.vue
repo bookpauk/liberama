@@ -56,6 +56,7 @@
                     @full-screen-toogle="fullScreenToggle"
                     @stop-scrolling="stopScrolling"
                     @scrolling-toggle="scrollingToggle"
+                    @help-toggle="helpToggle"
                 ></component>
             </keep-alive>
 
@@ -69,6 +70,7 @@
             <CopyTextPage v-if="copyTextActive" ref="copyTextPage" @copy-text-toggle="copyTextToggle"></CopyTextPage>            
             <HistoryPage v-if="historyActive" ref="historyPage" @load-book="loadBook" @history-toggle="historyToggle"></HistoryPage>
             <SettingsPage v-if="settingsActive" ref="settingsPage" @settings-toggle="settingsToggle"></SettingsPage>
+            <HelpPage v-if="helpActive" ref="helpPage" @help-toggle="helpToggle"></HelpPage>
         </el-main>
     </el-container>
 </template>
@@ -86,6 +88,7 @@ import SearchPage from './SearchPage/SearchPage.vue';
 import CopyTextPage from './CopyTextPage/CopyTextPage.vue';
 import HistoryPage from './HistoryPage/HistoryPage.vue';
 import SettingsPage from './SettingsPage/SettingsPage.vue';
+import HelpPage from './HelpPage/HelpPage.vue';
 
 import bookManager from './share/bookManager';
 import readerApi from '../../api/reader';
@@ -103,6 +106,7 @@ export default @Component({
         CopyTextPage,
         HistoryPage,
         SettingsPage,
+        HelpPage,
     },
     watch: {
         bookPos: function(newValue) {
@@ -142,6 +146,7 @@ class Reader extends Vue {
     copyTextActive = false;
     historyActive = false;
     settingsActive = false;
+    helpActive = false;
 
     bookPos = null;
     allowUrlParamBookPos = false;
@@ -298,6 +303,7 @@ class Reader extends Vue {
         this.settingsActive = false;
         this.stopScrolling();
         this.stopSearch();
+        this.helpActive = false;
     }
 
     loaderToggle() {
@@ -402,6 +408,14 @@ class Reader extends Vue {
             this.settingsActive = true;
         } else {
             this.settingsActive = false;
+        }
+    }
+
+    helpToggle() {
+        this.helpActive = !this.helpActive;
+        if (this.helpActive) {
+            this.closeAllTextPages();
+            this.helpActive = true;
         }
     }
 
@@ -699,6 +713,9 @@ class Reader extends Vue {
     keyHook(event) {
         if (this.$root.rootRoute == '/reader') {
             let handled = false;
+            if (!handled && this.helpActive)
+                handled = this.$refs.helpPage.keyHook(event);
+
             if (!handled && this.settingsActive)
                 handled = this.$refs.settingsPage.keyHook(event);
 
