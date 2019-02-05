@@ -8,6 +8,10 @@ const FileDecompressor = require('./FileDecompressor');
 const BookConverter = require('./BookConverter');
 const utils = require('./utils');
 
+const maxTempPublicDirSize = 512*1024*1024;//512Мб
+const maxUploadDirSize = 100*1024*1024;//100Мб
+let singleCleanExecute = false;
+
 class ReaderWorker {
     constructor(config) {
         this.config = Object.assign({}, config);
@@ -21,6 +25,12 @@ class ReaderWorker {
         this.down = new FileDownloader();
         this.decomp = new FileDecompressor();
         this.bookConverter = new BookConverter();
+
+        if (!singleCleanExecute) {
+            this.periodicCleanDir(this.config.tempPublicDir, maxTempPublicDirSize, 60*60*1000);//1 раз в час
+            this.periodicCleanDir(this.config.uploadDir, maxUploadDirSize, 60*60*1000);//1 раз в час
+            singleCleanExecute = true;
+        }
     }
 
     async loadBook(url, wState) {
@@ -112,6 +122,34 @@ class ReaderWorker {
         }
 
         return `file://${hash}`;
+    }
+
+    async periodicCleanDir(dir, maxSize, timeout) {        
+        const list = await fs.readdir(dir);
+
+        let size = 0;
+        let files = [];
+        for (const name of list) {
+            const stat = await fs.stat(`${dir}/${name}`);
+            if (!stat.isDirectory()) {
+                size += stat.size;
+                files.push({name, stat});
+            }
+        }
+
+        files.sort((a, b) => a.stat.mtimeMs - b.stat.mtimeMs);
+
+        let i = 0;
+        while (i < files.length && size > maxSize) {
+            const file = files[i];
+            await fs.remove(`${dir}/${file.name}`);
+            size -= file.stat.size;
+            i++;
+        }
+
+        setTimeout(() => {
+            this.periodicCleanDir(dir, maxSize, timeout);
+        }, timeout);
     }
 }
 
