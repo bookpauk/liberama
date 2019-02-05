@@ -1,3 +1,4 @@
+const fs = require('fs-extra');
 const crypto = require('crypto');
 
 function sleep(ms) {
@@ -8,7 +9,12 @@ function randomHexString(len) {
     return crypto.randomBytes(len).toString('hex')
 }
 
+async function touchFile(filename) {
+    await fs.utimes(filename, Date.now()/1000, Date.now()/1000);
+}
+
 module.exports = {
     sleep,
-    randomHexString
+    randomHexString,
+    touchFile
 };

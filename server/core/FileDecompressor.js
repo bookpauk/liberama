@@ -1,6 +1,7 @@
 const fs = require('fs-extra');
 const zlib = require('zlib');
 const crypto = require('crypto');
+const utils = require('./utils');
 const decompress = require('decompress');
 const FileDetector = require('./FileDetector');
 
@@ -51,7 +52,7 @@ class FileDecompressor {
         if (!await fs.pathExists(outFilename)) {
             await fs.writeFile(outFilename, await this.gzipBuffer(buf))
         } else {
-            await fs.utimes(outFilename, Date.now()/1000, Date.now()/1000);
+            await utils.touchFile(outFilename);
         }
 
         return outFilename;

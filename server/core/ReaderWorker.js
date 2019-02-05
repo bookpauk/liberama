@@ -57,6 +57,7 @@ class ReaderWorker {
                 downloadedFilename = `${this.config.uploadDir}/${url.substr(7)}`;
                 if (!await fs.pathExists(downloadedFilename)) 
                     throw new Error('Файл не найден на сервере (возможно был удален как устаревший). Пожалуйста, загрузите файл с диска на сервер заново.');
+                await utils.touchFile(downloadedFilename);
                 isUploaded = true;
             }
             wState.set({progress: 100});
@@ -117,7 +118,7 @@ class ReaderWorker {
         if (!await fs.pathExists(outFilename)) {
             await fs.move(file.path, outFilename);
         } else {
-            await fs.utimes(outFilename, Date.now()/1000, Date.now()/1000);
+            await utils.touchFile(outFilename);
             await fs.remove(file.path);
         }
 
