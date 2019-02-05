@@ -136,6 +136,8 @@ export default class BookParser {
 
         const onTextNode = (text) => {// eslint-disable-line no-unused-vars
             text = he.decode(text);
+            text = text.replace(/>/g, '&gt;');
+            text = text.replace(/</g, '&lt;');
             text = text.replace(/[\t\n\r]/g, ' ');
 
             if (text != ' ' && text.trim() == '')
