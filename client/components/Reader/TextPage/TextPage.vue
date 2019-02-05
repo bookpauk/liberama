@@ -4,12 +4,12 @@
             <div v-html="background"></div>
             <!-- img -->
         </div>
-        <div v-show="toggleLayout" ref="scrollBox1" class="layout" style="overflow: hidden">
+        <div ref="scrollBox1" class="layout" style="overflow: hidden">
             <div ref="scrollingPage" class="layout" @transitionend="onScrollingTransitionEnd">
                 <div v-html="page1"></div>
             </div>
         </div>
-        <div v-show="!toggleLayout"  ref="scrollBox2" class="layout" style="overflow: hidden">
+        <div ref="scrollBox2" class="layout" style="overflow: hidden">
             <div v-html="page2"></div>
         </div>
         <div v-show="showStatusBar" ref="statusBar" class="layout">
@@ -49,6 +49,9 @@ export default @Component({
         },
         settings: function() {
             this.debouncedLoadSettings();
+        },
+        toggleLayout: function() {
+            this.updateLayout();
         },
     },
 })
@@ -315,6 +318,7 @@ class TextPage extends Vue {
         this.$refs.main.focus();
 
         this.toggleLayout = false;
+        this.updateLayout();
         this.book = null;
         this.meta = null;
         this.fb2 = null;
@@ -368,6 +372,16 @@ class TextPage extends Vue {
                 if (this.lazyParseEnabled)
                     this.lazyParsePara();
             })();
+        }
+    }
+
+    updateLayout() {
+        if (this.toggleLayout) {
+            this.$refs.scrollBox1.style.visibility = 'visible';
+            this.$refs.scrollBox2.style.visibility = 'hidden';
+        } else {
+            this.$refs.scrollBox1.style.visibility = 'hidden';
+            this.$refs.scrollBox2.style.visibility = 'visible';
         }
     }
 
