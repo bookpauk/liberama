@@ -232,7 +232,7 @@ class BookConverter {
                 path += '/' + elemName;
                 tag = elemName;
             } else {
-                if (!inSubtitle && (elemName == 'p' || elemName == 'dd')) {
+                if (!inSubtitle && (elemName == 'p' || elemName == 'dd' || elemName == 'li')) {
                     newParagraph();
                 }
 
@@ -248,6 +248,11 @@ class BookConverter {
                             openTag('subtitle');
                             inSubtitle = true;
                         }
+
+                        if (!inSubtitle && tail.indexOf('align="justify"') >= 0) {
+                            newParagraph();
+                        }
+
                         break;
                 }
             }
