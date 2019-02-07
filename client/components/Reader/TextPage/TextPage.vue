@@ -328,6 +328,8 @@ class TextPage extends Vue {
         this.linesDown = null;
         this.searching = false;
 
+        this.statusBarMessage = '';
+        
         this.getSettings();
         this.calcDrawProps();
         this.draw();// пока не загрузили, очистим канвас
