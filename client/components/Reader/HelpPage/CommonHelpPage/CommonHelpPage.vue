@@ -5,7 +5,7 @@
             <li>загрузка любой страницы интернета</li>
             <li>изменение цвета фона, текста, размер и тип шрифта и прочее</li>
             <li>установка и запоминание текущей позиции и настроек в браузере (в будущем планируется сохранение и на сервер)</li>
-            <li>кеширование файлов книг на клиенте и на сервере</li>
+            <li>кэширование файлов книг на клиенте и на сервере</li>
             <li>открытие книг с локального диска</li>
             <li>плавный скроллинг текста</li>
             <li>анимация перелистывания (скоро)</li>
@@ -37,9 +37,7 @@ export default @Component({
         Window,
     },
 })
-class HelpPage extends Vue {
-    selectedTab = null;
-
+class CommonHelpPage extends Vue {
     created() {
         this.config = this.$store.state.config;
     }
@@ -63,6 +61,7 @@ class HelpPage extends Vue {
     padding: 15px;
     overflow-y: auto;
     font-size: 150%;
+    line-height: 130%;
 }
 
 h4 {

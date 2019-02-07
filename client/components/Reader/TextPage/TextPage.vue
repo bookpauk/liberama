@@ -860,21 +860,76 @@ class TextPage extends Vue {
         this.$emit('tool-bar-toggle');
     }
 
+    async doFontSizeInc() {
+        if (!this.settingsChanging) {
+            this.settingsChanging = true;
+            const newSize = (this.settings.fontSize + 1 < 100 ? this.settings.fontSize + 1 : 100);
+            const newSettings = Object.assign({}, this.settings, {fontSize: newSize});
+            this.commit('reader/setSettings', newSettings);
+            await sleep(50);
+            this.settingsChanging = false;
+        }
+    }
+
+    async doFontSizeDec() {
+        if (!this.settingsChanging) {
+            this.settingsChanging = true;
+            const newSize = (this.settings.fontSize - 1 > 5 ? this.settings.fontSize - 1 : 5);
+            const newSettings = Object.assign({}, this.settings, {fontSize: newSize});
+            this.commit('reader/setSettings', newSettings);
+            await sleep(50);
+            this.settingsChanging = false;
+        }
+    }
+
+    async doScrollingSpeedUp() {
+        if (!this.settingsChanging) {
+            this.settingsChanging = true;
+            const newDelay = (this.settings.scrollingDelay - 50 > 1 ? this.settings.scrollingDelay - 50 : 1);
+            const newSettings = Object.assign({}, this.settings, {scrollingDelay: newDelay});
+            this.commit('reader/setSettings', newSettings);
+            await sleep(50);
+            this.settingsChanging = false;
+        }
+    }
+
+    async doScrollingSpeedDown() {
+        if (!this.settingsChanging) {
+            this.settingsChanging = true;
+            const newDelay = (this.settings.scrollingDelay + 50 < 10000 ? this.settings.scrollingDelay + 50 : 10000);
+            const newSettings = Object.assign({}, this.settings, {scrollingDelay: newDelay});
+            this.commit('reader/setSettings', newSettings);
+            await sleep(50);
+            this.settingsChanging = false;
+        }
+    }
+
     keyHook(event) {
         let result = false;
-        if (event.type == 'keydown' && !event.ctrlKey && !event.altKey && !event.shiftKey) {
+        if (event.type == 'keydown' && !event.ctrlKey && !event.altKey) {
             result = true;
             switch (event.code) {
                 case 'ArrowDown':
-                    this.doDown();
+                    if (event.shiftKey)
+                        this.doScrollingSpeedUp();
+                    else
+                        this.doDown();
                     break;
                 case 'ArrowUp':
-                    this.doUp();
+                    if (event.shiftKey)
+                        this.doScrollingSpeedDown();
+                    else
+                        this.doUp();
                     break;
                 case 'PageDown':
                 case 'ArrowRight':
-                case 'Space':
                     this.doPageDown();
+                    break;
+                case 'Space':
+                    if (event.shiftKey)
+                        this.doPageUp();
+                    else
+                        this.doPageDown();
                     break;
                 case 'PageUp':
                 case 'ArrowLeft':
@@ -886,6 +941,12 @@ class TextPage extends Vue {
                     break;
                 case 'End':
                     this.doEnd();
+                    break;
+                case 'KeyA':
+                    if (event.shiftKey)
+                        this.doFontSizeDec();
+                    else
+                        this.doFontSizeInc();
                     break;
                 case 'Enter':
                 case 'Backquote'://`
