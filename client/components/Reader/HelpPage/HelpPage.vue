@@ -12,7 +12,7 @@
                     </el-tab-pane>
                     <el-tab-pane label="Клавиатура">
                     </el-tab-pane>
-                    <el-tab-pane label="Мышь">
+                    <el-tab-pane label="Мышь/тачпад">
                     </el-tab-pane>
                     <el-tab-pane label="Помочь проекту">
                     </el-tab-pane>
