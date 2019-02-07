@@ -156,7 +156,7 @@
                                             Определяет время, за которое текст<br>
                                             прокручивается на одну строку.
                                         </template>
-                                        <el-input-number v-model="scrollingDelay" :min="0" :max="10000"></el-input-number>
+                                        <el-input-number v-model="scrollingDelay" :min="1" :max="10000"></el-input-number>
                                     </el-tooltip>
                                 </el-col>
                                 <el-col :span="1">
