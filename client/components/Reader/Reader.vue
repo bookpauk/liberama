@@ -29,7 +29,7 @@
                     <el-tooltip content="Скопировать текст со страницы" :open-delay="1000" effect="light">
                         <el-button ref="copyText" class="tool-button" :class="buttonActiveClass('copyText')" @click="buttonClick('copyText')"><i class="el-icon-edit-outline"></i></el-button>
                     </el-tooltip>
-                    <el-tooltip content="Принудительно обновить книгу в обход кеша" :open-delay="1000" effect="light">
+                    <el-tooltip content="Принудительно обновить книгу в обход кэша" :open-delay="1000" effect="light">
                         <el-button ref="refresh" class="tool-button" :class="buttonActiveClass('refresh')" @click="buttonClick('refresh')">
                             <i class="el-icon-refresh" :class="{clear: !showRefreshIcon}"></i>
                         </el-button>
