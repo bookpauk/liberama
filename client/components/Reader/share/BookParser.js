@@ -105,11 +105,13 @@ export default class BookParser {
             }
 
             if (tag == 'title') {
+                newParagraph(' ', 1);
                 bold = true;
                 center = true;
             }
 
             if (tag == 'subtitle') {
+                newParagraph(' ', 1);
                 bold = true;
             }
 
