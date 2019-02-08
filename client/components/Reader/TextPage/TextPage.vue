@@ -1052,7 +1052,12 @@ class TextPage extends Vue {
     }
 
     onStatusBarClick() {
-        window.open(this.meta.url, '_blank');
+        const url = this.meta.url;
+        if (url && url.indexOf('file://') != 0) {
+            window.open(url, '_blank');
+        } else {
+            this.$alert('Оригинал не доступен, т.к. файл книги был загружен с локального диска', '', {type: 'warning'});
+        }
     }
 
     handleClick(pointX, pointY) {
