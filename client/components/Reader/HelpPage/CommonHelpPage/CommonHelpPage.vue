@@ -30,12 +30,7 @@
 import Vue from 'vue';
 import Component from 'vue-class-component';
 
-import Window from '../../../share/Window.vue';
-
 export default @Component({
-    components: {
-        Window,
-    },
 })
 class CommonHelpPage extends Vue {
     created() {
