@@ -522,9 +522,11 @@ class Reader extends Vue {
     }
 
     async showClickMapPage() {
-        this.clickMapActive = true;
-        await this.$refs.clickMapPage.slowDisappear();
-        this.clickMapActive = false;
+        if (!this.clickMapActive) {
+            this.clickMapActive = true;
+            await this.$refs.clickMapPage.slowDisappear();
+            this.clickMapActive = false;
+        }
     }
 
     get activePage() {
