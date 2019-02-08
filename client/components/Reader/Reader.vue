@@ -758,6 +758,12 @@ class Reader extends Vue {
 
                 if (this.activePage == 'TextPage') {
                     switch (event.code) {
+                        case 'KeyH':
+                        case 'F1':
+                            this.helpToggle();
+                            event.preventDefault();
+                            event.stopPropagation();
+                            break;
                         case 'KeyP':
                             this.setPositionToggle();
                             break;
@@ -778,7 +784,7 @@ class Reader extends Vue {
                         case 'KeyZ':
                             this.scrollingToggle();
                             break;
-                        case 'KeyH':
+                        case 'KeyX':
                             this.historyToggle();
                             break;
                         case 'KeyS':
