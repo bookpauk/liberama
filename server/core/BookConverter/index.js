@@ -190,28 +190,30 @@ class BookConverter {
         let titleInfo = {};
         let desc = {_n: 'description', 'title-info': titleInfo};
         let pars = [];
-        let body = {_n: 'body', section: {_a: [pars]}};
+        let body = {_n: 'body', section: {_a: pars}};
         let fb2 = [desc, body];
 
         let inSubtitle = false;
+        let inJustify = true;
         let path = '';
         let tag = '';// eslint-disable-line no-unused-vars
 
         let inText = false;
-        let node = {};
+        let node = {_a: pars};
 
-        const newParagraph = () => {
-            node = {_n: 'p', _a: []};
-            pars.push(node);
-        };
+        let inPara = false;
 
         const openTag = (name) => {
+            if (name == 'p')
+                inPara = true;
             let n = {_n: name, _a: [], _p: node};
             node._a.push(n);
             node = n;
         };
 
         const closeTag = (name) => {
+            if (name == 'p')
+                inPara = false;
             if (node._n == name && node._p) {
                 node = node._p;
             }
@@ -223,7 +225,7 @@ class BookConverter {
             node._a.push({_t: text});
         };
 
-        newParagraph();
+        openTag('p');
 
         const onStartNode = (elemName, tail, singleTag, cutCounter, cutTag) => {// eslint-disable-line no-unused-vars
             if (elemName == '')
@@ -232,11 +234,18 @@ class BookConverter {
                 path += '/' + elemName;
                 tag = elemName;
             } else {
-                if (!inSubtitle && (elemName == 'p' || elemName == 'dd' || elemName == 'li')) {
-                    newParagraph();
-                }
+                if (inPara && elemName != 'i' && elemName != 'b')
+                    closeTag('p');
 
                 switch (elemName) {
+                    case 'li':
+                    case 'p':
+                    case 'dd':
+                    case 'h1':
+                    case 'h2':
+                    case 'h3':
+                        openTag('p');
+                        break;
                     case 'i':
                         openTag('emphasis');
                         break;
@@ -249,8 +258,9 @@ class BookConverter {
                             inSubtitle = true;
                         }
 
-                        if (!inSubtitle && tail.indexOf('align="justify"') >= 0) {
-                            newParagraph();
+                        if (tail.indexOf('align="justify"') >= 0) {
+                            openTag('p');
+                            inJustify = true;
                         }
 
                         break;
@@ -276,6 +286,14 @@ class BookConverter {
                 tag = path.substr(i + 1);
             } else {
                 switch (elemName) {
+                    case 'li':
+                    case 'p':
+                    case 'dd':
+                    case 'h1':
+                    case 'h2':
+                    case 'h3':
+                        closeTag('p');
+                        break;
                     case 'i':
                         closeTag('emphasis');
                         break;
@@ -283,9 +301,15 @@ class BookConverter {
                         closeTag('strong');
                         break;
                     case 'div':
-                        if (inSubtitle)
+                        if (inSubtitle) {
                             closeTag('subtitle');
-                        inSubtitle = false;
+                            inSubtitle = false;
+                        }
+
+                        if (inJustify) {
+                            closeTag('p');
+                            inJustify = false;
+                        }
                         break;
                 }
             }
