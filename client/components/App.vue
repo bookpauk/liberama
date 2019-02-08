@@ -268,6 +268,7 @@ body, html, #app {
     padding: 0 !important;
     display: flex;
     flex-direction: column;
+    overflow: hidden;
 }
 
 @font-face {

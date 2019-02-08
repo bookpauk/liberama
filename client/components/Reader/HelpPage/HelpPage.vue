@@ -82,10 +82,12 @@ class HelpPage extends Vue {
     flex: 1;
     display: flex;
     flex-direction: column;
+    overflow: hidden;
 }
 
 .el-tab-pane {
     flex: 1;
     display: flex;
+    overflow: hidden;
 }
 </style>
