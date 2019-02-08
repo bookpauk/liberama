@@ -61,6 +61,11 @@ export default class BookParser {
         };
 
         const growParagraph = (text, len) => {
+            if (paraIndex < 0) {
+                newParagraph(text, len);
+                return;
+            }
+
             let p = para[paraIndex];
             if (p) {
                 paraOffset -= p.length;
@@ -99,13 +104,13 @@ export default class BookParser {
             }
 
             if (tag == 'title') {
-                newParagraph(' ', 1);
+                //newParagraph(' ', 1);
                 bold = true;
                 center = true;
             }
 
             if (tag == 'subtitle') {
-                newParagraph(' ', 1);
+                //newParagraph(' ', 1);
                 bold = true;
             }
         };
@@ -138,13 +143,14 @@ export default class BookParser {
             text = he.decode(text);
             text = text.replace(/>/g, '&gt;');
             text = text.replace(/</g, '&lt;');
-            text = text.replace(/[\t\n\r]/g, ' ');
 
             if (text != ' ' && text.trim() == '')
                 text = text.trim();
 
             if (text == '')
                 return;
+
+            text = text.replace(/[\t\n\r]/g, ' ');
 
             switch (path) {
                 case '/fictionbook/description/title-info/author/first-name':
