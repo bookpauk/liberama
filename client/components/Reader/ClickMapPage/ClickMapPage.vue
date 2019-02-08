@@ -1,6 +1,6 @@
 <template>
-    <div ref="page" class="page">
-        <div v-html="mapHtml"></div>
+    <div ref="page" class="map-page">
+        <div class="content" v-html="mapHtml"></div>
     </div>
 </template>
 
@@ -21,7 +21,7 @@ class ClickMapPage extends Vue {
     }
 
     get mapHtml() {
-        let result = '<div style="display: flex; width: 100%; height: 100%; position: absolute;">';
+        let result = '<div style="flex: 1; display: flex;">';
 
         let px = 0;
         for (const x in clickMap) {
@@ -34,7 +34,7 @@ class ClickMapPage extends Vue {
                 for (const t of text)
                     divText += `<span>${t}</span>`;
                 div += `<div style="display: flex; flex-direction: column; justify-content: center; align-items: center; ` +
-                    `height: ${y - py}%; border: 1px solid white; font-size: ${this.fontSize}">${divText}</div>`;
+                    `height: ${y - py}%; border: 1px solid white; font-size: ${this.fontSize}; line-height: 100%;">${divText}</div>`;
                 py = y;
             }
 
@@ -57,20 +57,24 @@ class ClickMapPage extends Vue {
 </script>
 
 <style scoped>
-.page {
+.map-page {
     position: absolute;
     width: 100%;
     height: 100%;
-    z-index: 45;
+    z-index: 19;
     background-color: rgba(0, 0, 0, 0.9);
     color: white;
     display: flex;
 }
 
+.content {
+    flex: 1;
+    display: flex;
+}
 </style>
 <style>
 @keyframes click-map-disappear {
-  0%   { opacity: 0.9; }
-  100% { opacity: 0; }
+    0%   { opacity: 0.9; }
+    100% { opacity: 0; }
 }
 </style>

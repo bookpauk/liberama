@@ -14,6 +14,7 @@
                         <HotkeysHelpPage></HotkeysHelpPage>
                     </el-tab-pane>
                     <el-tab-pane label="Мышь/тачпад">
+                        <MouseHelpPage></MouseHelpPage>
                     </el-tab-pane>
                     <el-tab-pane label="Помочь проекту">
                     </el-tab-pane>
@@ -32,12 +33,14 @@ import Component from 'vue-class-component';
 import Window from '../../share/Window.vue';
 import CommonHelpPage from './CommonHelpPage/CommonHelpPage.vue';
 import HotkeysHelpPage from './HotkeysHelpPage/HotkeysHelpPage.vue';
+import MouseHelpPage from './MouseHelpPage/MouseHelpPage.vue';
 
 export default @Component({
     components: {
         Window,
         CommonHelpPage,
         HotkeysHelpPage,
+        MouseHelpPage,
     },
 })
 class HelpPage extends Vue {
