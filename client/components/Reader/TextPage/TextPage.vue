@@ -39,6 +39,8 @@ import {sleep} from '../../../share/utils';
 import bookManager from '../share/bookManager';
 import DrawHelper from './DrawHelper';
 import rstore from '../../../store/modules/reader';
+import clickMap from '../share/clickMap';
+
 const minLayoutWidth = 100;
 
 export default @Component({
@@ -329,7 +331,7 @@ class TextPage extends Vue {
         this.searching = false;
 
         this.statusBarMessage = '';
-        
+
         this.getSettings();
         this.calcDrawProps();
         this.draw();// пока не загрузили, очистим канвас
@@ -1054,21 +1056,15 @@ class TextPage extends Vue {
     }
 
     handleClick(pointX, pointY) {
-        const mouseLegend = {
-            40: {30: 'PgUp', 100: 'PgDown'},
-            60: {40: 'Up', 60: 'Menu', 100: 'Down'},
-            100: {30: 'PgUp', 100: 'PgDown'}
-        };
-
         const w = pointX/this.realWidth*100;
         const h = pointY/this.realHeight*100;
 
         let action = '';
         loops: {
-            for (const x in mouseLegend) {
-                for (const y in mouseLegend[x]) {
+            for (const x in clickMap) {
+                for (const y in clickMap[x]) {
                     if (w < x && h < y) {
-                        action = mouseLegend[x][y];
+                        action = clickMap[x][y];
                         break loops;
                     }
                 }
