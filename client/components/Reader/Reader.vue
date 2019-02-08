@@ -71,6 +71,7 @@
             <HistoryPage v-if="historyActive" ref="historyPage" @load-book="loadBook" @history-toggle="historyToggle"></HistoryPage>
             <SettingsPage v-if="settingsActive" ref="settingsPage" @settings-toggle="settingsToggle"></SettingsPage>
             <HelpPage v-if="helpActive" ref="helpPage" @help-toggle="helpToggle"></HelpPage>
+            <ClickMapPage v-show="clickMapActive" ref="clickMapPage"></ClickMapPage>
         </el-main>
     </el-container>
 </template>
@@ -89,6 +90,7 @@ import CopyTextPage from './CopyTextPage/CopyTextPage.vue';
 import HistoryPage from './HistoryPage/HistoryPage.vue';
 import SettingsPage from './SettingsPage/SettingsPage.vue';
 import HelpPage from './HelpPage/HelpPage.vue';
+import ClickMapPage from './ClickMapPage/ClickMapPage.vue';
 
 import bookManager from './share/bookManager';
 import readerApi from '../../api/reader';
@@ -107,6 +109,7 @@ export default @Component({
         HistoryPage,
         SettingsPage,
         HelpPage,
+        ClickMapPage,
     },
     watch: {
         bookPos: function(newValue) {
@@ -147,6 +150,7 @@ class Reader extends Vue {
     historyActive = false;
     settingsActive = false;
     helpActive = false;
+    clickMapActive = false;
 
     bookPos = null;
     allowUrlParamBookPos = false;
@@ -517,6 +521,12 @@ class Reader extends Vue {
         return classResult;
     }
 
+    async showClickMapPage() {
+        this.clickMapActive = true;
+        await this.$refs.clickMapPage.slowDisappear();
+        this.clickMapActive = false;
+    }
+
     get activePage() {
         let result = '';
 
@@ -608,6 +618,8 @@ class Reader extends Vue {
                         this.loaderActive = false;
                         progress.hide(); this.progressActive = false;
                         this.blinkCachedLoadMessage();
+
+                        await this.showClickMapPage();
                         return;
                     }
 
@@ -654,6 +666,8 @@ class Reader extends Vue {
                     this.blinkCachedLoadMessage();
                 } else
                     this.stopBlink = true;
+
+                await this.showClickMapPage();
             } catch (e) {
                 progress.hide(); this.progressActive = false;
                 this.loaderActive = true;

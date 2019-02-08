@@ -39,7 +39,7 @@ import {sleep} from '../../../share/utils';
 import bookManager from '../share/bookManager';
 import DrawHelper from './DrawHelper';
 import rstore from '../../../store/modules/reader';
-import clickMap from '../share/clickMap';
+import {clickMap} from '../share/clickMap';
 
 const minLayoutWidth = 100;
 
