@@ -609,12 +609,12 @@ class Reader extends Vue {
                 let book = null;
 
                 if (!opts.force) {
-                    // пытаемся загрузить и распарсить книгу в менеджере из локального кеша
+                    // пытаемся загрузить и распарсить книгу в менеджере из локального кэша
                     const bookParsed = await bookManager.getBook({url: opts.url}, (prog) => {
                         progress.setState({progress: prog});
                     });
 
-                    // если есть в локальном кеше
+                    // если есть в локальном кэше
                     if (bookParsed) {
                         await bookManager.setRecentBook(Object.assign({bookPos, bookPosSeen}, bookManager.metaOnly(bookParsed)));
                         this.mostRecentBook();

@@ -729,7 +729,7 @@ class TextPage extends Vue {
         if (state === 'finish') {
             this.statusBarMessage = '';
         } else if (state) {
-            this.statusBarMessage = 'Книга загружена из кеша';
+            this.statusBarMessage = 'Книга загружена из кэша';
         } else {
             this.statusBarMessage = ' ';
         }
