@@ -239,7 +239,7 @@
                                     <template slot="content">
                                         Показывать или нет подсказку при каждой загрузке книги
                                     </template>
-                                    <el-checkbox v-model="showClickMapPage">Показывать сектора управления кликом</el-checkbox>
+                                    <el-checkbox v-model="showClickMapPage">Показывать области управления кликом</el-checkbox>
                                 </el-tooltip>
                             </el-form-item>                            
                             <el-form-item label="URL">
