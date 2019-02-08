@@ -134,6 +134,7 @@ export default @Component({
         settings: function(newValue) {
             this.allowUrlParamBookPos = newValue.allowUrlParamBookPos;
             this.copyFullText = newValue.copyFullText;
+            this.showClickMapPage = newValue.showClickMapPage;
             this.updateRoute();
         },
     },
@@ -190,6 +191,7 @@ class Reader extends Vue {
 
         this.allowUrlParamBookPos = this.settings.allowUrlParamBookPos;
         this.copyFullText = this.settings.copyFullText;
+        this.showClickMapPage = this.settings.showClickMapPage;
     }
 
     mounted() {
@@ -521,8 +523,8 @@ class Reader extends Vue {
         return classResult;
     }
 
-    async showClickMapPage() {
-        if (!this.clickMapActive) {
+    async acivateClickMapPage() {
+        if (this.showClickMapPage && !this.clickMapActive) {
             this.clickMapActive = true;
             await this.$refs.clickMapPage.slowDisappear();
             this.clickMapActive = false;
@@ -621,7 +623,7 @@ class Reader extends Vue {
                         progress.hide(); this.progressActive = false;
                         this.blinkCachedLoadMessage();
 
-                        await this.showClickMapPage();
+                        await this.acivateClickMapPage();
                         return;
                     }
 
@@ -669,7 +671,7 @@ class Reader extends Vue {
                 } else
                     this.stopBlink = true;
 
-                await this.showClickMapPage();
+                await this.acivateClickMapPage();
             } catch (e) {
                 progress.hide(); this.progressActive = false;
                 this.loaderActive = true;

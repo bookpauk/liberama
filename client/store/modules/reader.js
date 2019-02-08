@@ -158,6 +158,7 @@ const settingDefaults = {
         allowUrlParamBookPos: false,
         lazyParseEnabled: false,
         copyFullText: false,
+        showClickMapPage: true,
         fontShifts: {},
 };
 
