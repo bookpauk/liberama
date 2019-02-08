@@ -9,7 +9,7 @@ const BookConverter = require('./BookConverter');
 const utils = require('./utils');
 
 const maxTempPublicDirSize = 512*1024*1024;//512Мб
-const maxUploadDirSize = 100*1024*1024;//100Мб
+const maxUploadDirSize = 200*1024*1024;//100Мб
 let singleCleanExecute = false;
 
 class ReaderWorker {
