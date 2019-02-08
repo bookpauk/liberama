@@ -36,6 +36,7 @@ export default class BookParser {
         let tag = '';
         let center = false;
         let bold = false;
+        let italic = false;
 
         let paraIndex = -1;
         let paraOffset = 0;
@@ -95,7 +96,7 @@ export default class BookParser {
             tag = elemName;
             path += '/' + elemName;
 
-            if ((tag == 'p' || tag == 'empty-line') && path.indexOf('/fictionbook/body/section') == 0) {
+            if ((tag == 'p' || tag == 'empty-line' || tag == 'v') && path.indexOf('/fictionbook/body/section') == 0) {
                 newParagraph(' ', 1);
             }
 
@@ -104,14 +105,20 @@ export default class BookParser {
             }
 
             if (tag == 'title') {
-                //newParagraph(' ', 1);
                 bold = true;
                 center = true;
             }
 
             if (tag == 'subtitle') {
-                //newParagraph(' ', 1);
                 bold = true;
+            }
+
+            if (tag == 'epigraph') {
+                italic = true;
+            }
+
+            if (tag == 'stanza') {
+                newParagraph(' ', 1);
             }
         };
 
@@ -126,8 +133,17 @@ export default class BookParser {
                     center = false;
                 }
 
-                if (tag == 'subtitle')
+                if (tag == 'subtitle') {
                     bold = false;
+                }
+
+                if (tag == 'epigraph') {
+                    italic = false;
+                }
+
+                if (tag == 'stanza') {
+                    newParagraph(' ', 1);
+                }
 
                 path = path.substr(0, path.length - tag.length - 1);
                 let i = path.lastIndexOf('/');
@@ -187,8 +203,10 @@ export default class BookParser {
 
             let tOpen = (center ? '<center>' : '');
             tOpen += (bold ? '<strong>' : '');
+            tOpen += (italic ? '<emphasis>' : '');
             let tClose = (center ? '</center>' : '');
             tClose += (bold ? '</strong>' : '');
+            tClose += (italic ? '</emphasis>' : '');
 
             if (path.indexOf('/fictionbook/body/title') == 0) {
                 newParagraph(`${tOpen}${text}${tClose}`, text.length, true);
