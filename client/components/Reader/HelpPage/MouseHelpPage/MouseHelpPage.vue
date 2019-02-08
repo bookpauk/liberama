@@ -2,8 +2,10 @@
     <div class="page">
         <h4>Управление с помощью мыши/тачпада:</h4>
         <ul>
-            <li><b>ЛКМ/ТАЧ</b> - активация действия:</li>
-                <div class="click-map-page"><ClickMapPage ref="clickMapPage"></ClickMapPage></div>
+            <li><b>ЛКМ/ТАЧ</b> по экрану в одну из областей - активация действия:</li>
+                <div class="click-map-page">
+                    <ClickMapPage ref="clickMapPage"></ClickMapPage>
+                </div>
             <li><b>ПКМ</b> - показать/скрыть панель управления</li>
             <li><b>СКМ</b> - вкл./выкл. плавный скроллинг текста</li>
         </ul>
@@ -27,7 +29,8 @@ class MouseHelpPage extends Vue {
     }
 
     mounted() {
-        this.$refs.clickMapPage.fontSize = '100%';
+        this.$refs.clickMapPage.$el.style.fontSize = '50%';
+        this.$refs.clickMapPage.$el.style.backgroundColor = '#478355';
     }
 }
 //-----------------------------------------------------------------------------
@@ -50,5 +53,6 @@ h4 {
     position: relative;
     width: 400px;
     height: 400px;
+    margin: 10px 0 10px 0;
 }
 </style>
