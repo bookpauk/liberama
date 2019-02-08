@@ -1,11 +1,12 @@
 const got = require('got');
 
+const maxDownloadSize = 50*1024*1024;
+
 class FileDownloader {
     constructor() {
     }
 
     async load(url, callback) {
-        const maxDownloadSize = 10*1024*1024;
         let errMes = '';
 
         const response = await got(url, {method: 'HEAD'});

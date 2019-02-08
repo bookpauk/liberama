@@ -1,7 +1,7 @@
 import axios from 'axios';
 import {sleep} from '../share/utils';
 
-const maxFileUploadSize = 10*1024*1024;
+const maxFileUploadSize = 50*1024*1024;
 const api = axios.create({
   baseURL: '/api/reader'
 });
