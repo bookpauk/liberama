@@ -4,6 +4,7 @@ const iconv = require('iconv-lite');
 const chardet = require('chardet');
 const _ = require('lodash');
 const sax = require('./sax');
+const getEncoding = require('./getEncoding');
 
 const FileDetector = require('../FileDetector');
 
@@ -43,14 +44,18 @@ class BookConverter {
     }
 
     decode(data) {
-        const charsetAll = chardet.detectAll(data.slice(0, 10000));
+        const charsetAll = chardet.detectAll(data.slice(0, 20000));
 
-        let selected = 'ISO-8859-1';
+        let selected = 'ISO-8859-5';
         for (const charset of charsetAll) {
             if (charset.name.indexOf('ISO-8859') < 0) {
                 selected = charset.name;
                 break;
             }
+        }
+
+        if (selected == 'ISO-8859-5') {
+            selected = getEncoding(data);
         }
 
         return iconv.decode(data, selected);
