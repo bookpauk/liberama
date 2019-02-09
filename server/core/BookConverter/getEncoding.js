@@ -1,4 +1,4 @@
-function getEncoding(str) {
+function getEncoding(buf) {
         const lowerCase = 3;
         const upperCase = 1;
 
@@ -18,17 +18,16 @@ function getEncoding(str) {
             'm': 0
         };
 
-        const len = str.len;
+        const len = buf.length;
         const blockSize = (len > 5*3000 ? 3000 : len);
         let counter = 0;
         let i = 0;
         while (i < len) {
-            const char = str.charCodeAt(i);
-
+            const char = buf[i];
+            i++;
             //non-russian characters
             if (char < 128 || char > 256)
                 continue;
-
             //CP866
             if ((char > 159 && char < 176) || (char > 223 && char < 242)) charsets['d'] += lowerCase;
             if ((char > 127 && char < 160)) charsets['d'] += upperCase;
@@ -55,14 +54,13 @@ function getEncoding(str) {
                 counter = 0;
                 i += Math.round(len/2 - 2*blockSize);
             }
-            i++;
         }
 
         let sorted = Object.keys(charsets).map(function(key) {
             return { codePage: codePage[key], c: charsets[key] };
         });
 
-        sorted.sort((a, b) => a.c - b.c);
+        sorted.sort((a, b) => b.c - a.c);
 
         return sorted[0].codePage;
     }
