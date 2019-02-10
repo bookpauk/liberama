@@ -56,7 +56,6 @@ export default @Component({
                 //старый url
                 const search = window.location.search.substr(1);
                 const url = search.split('url=')[1] || '';
-                console.log(url);
                 if (url) {
                     window.location = `/#/reader?url=${url}`;
                 } else {
