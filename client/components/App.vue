@@ -53,7 +53,15 @@ export default @Component({
         rootRoute: function(newValue) {
             this.setAppTitle();
             if ((this.mode == 'reader' || this.mode == 'omnireader') && (newValue != '/reader')) {
-                this.$router.replace('/reader');
+                //старый url
+                const search = window.location.search.substr(1);
+                const url = search.split('url=')[1] || '';
+                console.log(url);
+                if (url) {
+                    window.location = `/#/reader?url=${url}`;
+                } else {
+                    this.$router.replace('/reader');
+                }
             }
         },
     },
