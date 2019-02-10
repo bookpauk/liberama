@@ -41,7 +41,7 @@ class MouseHelpPage extends Vue {
     flex: 1;
     padding: 15px;
     overflow-y: auto;
-    font-size: 150%;
+    font-size: 120%;
     line-height: 130%;
 }
 
