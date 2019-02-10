@@ -56,11 +56,19 @@ class Reader {
     }
 
     async loadCachedBook(url, callback){
+        const response = await axios.get(url, {method: 'HEAD'});
+
+        let estSize = 1000000;
+        if (response.headers['content-length']) {
+            estSize = response.headers['content-length'];
+        }
+
         const options = {
             onDownloadProgress: progress => {
-                const total = (progress.total ? progress.total : progress.loaded + 200000);
+                while (progress.loaded > estSize) estSize *= 1.5;
+
                 if (callback)
-                    callback({state: 'loading', progress: Math.round((progress.loaded*100)/total)});
+                    callback({state: 'loading', progress: Math.round((progress.loaded*100)/estSize)});
             }
         }
         //загрузка
