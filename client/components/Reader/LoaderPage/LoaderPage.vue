@@ -91,8 +91,16 @@ class LoaderPage extends Vue {
 
     keyHook(event) {
         //недостатки сторонних ui
-        if (document.activeElement === this.$refs.input.$refs.input && event.type == 'keydown' && event.key == 'Enter') {
+        const input = this.$refs.input.$refs.input;
+        if (document.activeElement === input && event.type == 'keydown' && event.code == 'Enter') {
             this.submitUrl();
+        }
+
+        if (event.type == 'keydown' && (event.code == 'F1' || (document.activeElement !== input && event.code == 'KeyH'))) {
+            this.$emit('help-toggle');
+            event.preventDefault();
+            event.stopPropagation();
+            return true;
         }
     }
 }
