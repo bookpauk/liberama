@@ -113,19 +113,6 @@ class TextPage extends Vue {
 
         this.$root.$on('resize', () => {this.$nextTick(this.onResize)});
         this.mobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry/i.test(navigator.userAgent);
-
-/*
-        const settings = Object.assign({}, this.settings);
-        let updated = false;
-        for (let prop in rstore.settingDefaults) {
-            if (!settings.hasOwnProperty(prop)) {
-                settings[prop] = rstore.settingDefaults[prop];
-                updated = true;
-            }
-        }
-        if (updated) 
-            this.commit('reader/setSettings', settings);
-*/
     }
 
     mounted() {
