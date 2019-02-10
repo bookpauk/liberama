@@ -57,6 +57,7 @@
                     @stop-scrolling="stopScrolling"
                     @scrolling-toggle="scrollingToggle"
                     @help-toggle="helpToggle"
+                    @donate-toggle="donateToggle"
                 ></component>
             </keep-alive>
 
@@ -422,6 +423,15 @@ class Reader extends Vue {
         if (this.helpActive) {
             this.closeAllTextPages();
             this.helpActive = true;
+        }
+    }
+
+    donateToggle() {
+        this.helpToggle();
+        if (this.helpActive) {
+            this.$nextTick(() => {
+                this.$refs.helpPage.activateDonateHelpPage();
+            });
         }
     }
 

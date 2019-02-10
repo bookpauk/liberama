@@ -82,6 +82,7 @@ class LoaderPage extends Vue {
     }
 
     openDonate() {
+        this.$emit('donate-toggle');
     }
     
     openComments() {

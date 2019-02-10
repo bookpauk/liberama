@@ -16,7 +16,7 @@
                     <el-tab-pane label="Мышь/тачпад">
                         <MouseHelpPage></MouseHelpPage>
                     </el-tab-pane>
-                    <el-tab-pane label="Помочь проекту">
+                    <el-tab-pane label="Помочь проекту" name="donate">
                         <DonateHelpPage></DonateHelpPage>
                     </el-tab-pane>
 
@@ -51,6 +51,10 @@ class HelpPage extends Vue {
 
     close() {
         this.$emit('help-toggle');
+    }
+
+    activateDonateHelpPage() {
+        this.selectedTab = 'donate';
     }
 
     keyHook(event) {
