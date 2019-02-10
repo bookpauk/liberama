@@ -4,7 +4,7 @@
             <p class="p">Проект существует исключительно на личном энтузиазме.</p>
             <p class="p">Чтобы энтузиазма было побольше, вы можете пожертвовать на развитие проекта любую сумму:</p>
             <div class="address">
-                <img class="logo" src="./assets/Yandex_Money_rgb_ru.png">
+                <img class="logo" src="./assets/yandex.png">
                 <el-button class="button" @click="donateYandexMoney">Пожертвовать</el-button><br>
                 <div class="para">{{ yandexAddress }}</div>
             </div>
