@@ -97,6 +97,7 @@ import bookManager from './share/bookManager';
 import readerApi from '../../api/reader';
 import _ from 'lodash';
 import {sleep} from '../../share/utils';
+import restoreOldSettings from './share/restoreOldSettings';
 
 export default @Component({
     components: {
@@ -198,6 +199,8 @@ class Reader extends Vue {
     mounted() {
         (async() => {
             await bookManager.init();
+            await restoreOldSettings(this.settings, bookManager, this.commit);
+
             if (this.$root.rootRoute == '/reader') {
                 if (this.routeParamUrl) {
                     this.loadBook({url: this.routeParamUrl, bookPos: this.routeParamPos});
@@ -615,6 +618,7 @@ class Reader extends Vue {
                 wasOpened = (wasOpened ? wasOpened : {});
                 const bookPos = (opts.bookPos !== undefined ? opts.bookPos : wasOpened.bookPos);
                 const bookPosSeen = (opts.bookPos !== undefined ? opts.bookPos : wasOpened.bookPosSeen);
+                const bookPosPercent = wasOpened.bookPosPercent;
 
                 let book = null;
 
@@ -626,7 +630,7 @@ class Reader extends Vue {
 
                     // если есть в локальном кэше
                     if (bookParsed) {
-                        await bookManager.setRecentBook(Object.assign({bookPos, bookPosSeen}, bookManager.metaOnly(bookParsed)));
+                        await bookManager.setRecentBook(Object.assign({bookPos, bookPosSeen, bookPosPercent}, bookManager.metaOnly(bookParsed)));
                         this.mostRecentBook();
                         this.addAction(bookPos);
                         this.loaderActive = false;
@@ -669,7 +673,7 @@ class Reader extends Vue {
                 });
 
                 // добавляем в историю
-                await bookManager.setRecentBook(Object.assign({bookPos, bookPosSeen}, bookManager.metaOnly(addedBook)));
+                await bookManager.setRecentBook(Object.assign({bookPos, bookPosSeen, bookPosPercent}, bookManager.metaOnly(addedBook)));
                 this.mostRecentBook();
                 this.addAction(bookPos);
                 this.updateRoute(true);

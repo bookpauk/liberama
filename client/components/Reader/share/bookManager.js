@@ -154,10 +154,16 @@ class BookManager {
         return utils.stringToHex(url);
     }
 
-    async setRecentBook(value) {
+    async setRecentBook(value, noTouch) {
         if (!this.recent) 
             await this.init();
-        const result = Object.assign({}, value, {touchTime: Date.now()});
+        const result = Object.assign({}, value);
+        if (!noTouch)
+            Object.assign(result, {touchTime: Date.now()});
+
+        if (result.textLength && !result.bookPos && result.bookPosPercent)
+            result.bookPos = Math.round(result.bookPosPercent*result.textLength);
+
         this.recent[result.key] = result;
 
         await bmRecentStore.setItem(result.key, result);
