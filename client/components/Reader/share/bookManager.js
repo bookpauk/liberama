@@ -3,7 +3,7 @@ import localForage from 'localforage';
 import * as utils from '../../../share/utils';
 import BookParser from './BookParser';
 
-const maxDataSize = 100*1024*1024;//chars, not bytes
+const maxDataSize = 500*1024*1024;//chars, not bytes
 
 const bmMetaStore = localForage.createInstance({
     name: 'bmMetaStore'
