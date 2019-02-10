@@ -29,3 +29,37 @@ export function formatDate(d, format) {
     }
     
 }
+
+export function fallbackCopyTextToClipboard(text) {
+    let textArea = document.createElement('textarea');
+    textArea.value = text;
+    document.body.appendChild(textArea);
+    textArea.focus();
+    textArea.select();
+
+    let result = false;
+    try {
+         result = document.execCommand('copy');
+    } catch (e) {
+        //
+    }
+
+    document.body.removeChild(textArea);
+    return result;
+}
+
+export async function copyTextToClipboard(text) {
+    if (!navigator.clipboard) {
+        return fallbackCopyTextToClipboard(text);
+    }
+
+    let result = false;
+    try {
+        await navigator.clipboard.writeText(text);
+        result = true;
+    } catch (e) {
+        //
+    }
+
+    return result;
+}
