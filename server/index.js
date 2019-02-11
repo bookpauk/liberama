@@ -16,6 +16,13 @@ async function init() {
     await fs.ensureDir(config.uploadDir);
     await fs.ensureDir(config.tempDir);
     await fs.emptyDir(config.tempDir);
+
+    const appDir = `${config.publicDir}/app`;
+    const appNewDir = `${config.publicDir}/app_new`;
+    if (await fs.pathExists(appNewDir)) {
+        await fs.remove(appDir);
+        await fs.move(appNewDir, appDir);
+    }
 }
 
 async function main() {
