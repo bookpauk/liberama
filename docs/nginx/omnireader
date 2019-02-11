@@ -1,13 +1,16 @@
 server {
   listen 80;
   server_name omnireader.ru;
+  client_max_body_size 50m;
 
   location /api {
     proxy_pass http://localhost:44081;
   }
 
   location /tmp {
-    root /var/www/omnireader/public/tmp;
+    root /var/www/omnireader/public;
+    add_header Content-Type text/xml;
+    add_header Content-Encoding gzip;
   }
 
   location / {
