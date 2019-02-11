@@ -14,12 +14,12 @@ server {
   }
 
   location /tmp {
-    root /var/www/omnireader/public;
+    root /home/liberama/public;
     add_header Content-Type text/xml;
     add_header Content-Encoding gzip;
   }
 
   location / {
-    root /var/www/omnireader/public;
+    root /home/liberama/public;
   }
 }

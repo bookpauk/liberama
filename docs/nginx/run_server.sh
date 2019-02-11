@@ -1,1 +1,1 @@
-sudo -u www-data /var/www/omnireader/liberama
+sudo -u www-data /home/liberama/liberama
