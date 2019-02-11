@@ -50,19 +50,13 @@ import Component from 'vue-class-component';
 
 export default @Component({
     watch: {
-        rootRoute: function(newValue) {
+        rootRoute: function() {
             this.setAppTitle();
-            if ((this.mode == 'reader' || this.mode == 'omnireader') && (newValue != '/reader')) {
-                //старый url
-                const search = window.location.search.substr(1);
-                const url = search.split('url=')[1] || '';
-                if (url) {
-                    window.location = `/#/reader?url=${url}`;
-                } else {
-                    this.$router.replace('/reader');
-                }
-            }
+            this.redirectIfNeeded();
         },
+        mode: function() {
+            this.redirectIfNeeded();
+        }
     },
 
 })
@@ -188,7 +182,7 @@ class App extends Vue {
     }
 
     get mode() {
-        return this.config.mode;
+        return this.$store.state.config.mode;
     }
 
     get showAsideBar() {
@@ -201,6 +195,19 @@ class App extends Vue {
 
     get showMain() {
         return (this.showAsideBar || this.isReaderActive);
+    }
+
+    redirectIfNeeded() {
+        if ((this.mode == 'reader' || this.mode == 'omnireader') && (this.rootRoute != '/reader')) {
+            //старый url
+            const search = window.location.search.substr(1);
+            const url = search.split('url=')[1] || '';
+            if (url) {
+                window.location = `/#/reader?url=${url}`;
+            } else {
+                this.$router.replace('/reader');
+            }
+        }
     }
 }
 //-----------------------------------------------------------------------------
