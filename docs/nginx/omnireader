@@ -1,7 +1,13 @@
 server {
   listen 80;
   server_name omnireader.ru;
+
   client_max_body_size 50m;
+
+  gzip on;
+  gzip_min_length 1024;
+  gzip_proxied expired no-cache no-store private auth;
+  gzip_types *;
 
   location /api {
     proxy_pass http://localhost:44081;
