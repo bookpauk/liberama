@@ -22,7 +22,7 @@ async function main() {
 
     await fs.ensureDir(tempDownloadDir);
 
-
+    //sqlite3
     const sqliteRemoteUrl = 'https://mapbox-node-binary.s3.amazonaws.com/sqlite3/v4.0.4/node-v64-win32-x64.tar.gz';
     const sqliteDecompressedFilename = `${tempDownloadDir}/node-v64-win32-x64/node_sqlite3.node`;
 
@@ -43,6 +43,7 @@ async function main() {
     await fs.copy(sqliteDecompressedFilename, `${outDir}/node_sqlite3.node`);
     console.log(`copied ${sqliteDecompressedFilename} to ${outDir}/node_sqlite3.node`);
 
+    //ipfs
     const ipfsDecompressedFilename = `${tempDownloadDir}/go-ipfs/ipfs.exe`;
     if (!await fs.pathExists(ipfsDecompressedFilename)) {
         // Скачиваем ipfs
