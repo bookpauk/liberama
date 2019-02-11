@@ -1,0 +1,1 @@
+sudo -u www-data /var/www/omnireader/liberama
