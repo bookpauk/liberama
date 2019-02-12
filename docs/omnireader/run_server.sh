@@ -1,0 +1,1 @@
+sudo -u www-data /home/liberama/liberama

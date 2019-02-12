@@ -1,0 +1,5 @@
+/node_modules
+/server/data
+/server/public
+/server/ipfs
+/dist
