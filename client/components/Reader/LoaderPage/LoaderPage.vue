@@ -73,6 +73,7 @@ class LoaderPage extends Vue {
 
     loadFile() {
         const file = this.$refs.file.files[0];
+        this.$refs.file.value = '';
         if (file)
             this.$emit('load-file', {file});
     }
