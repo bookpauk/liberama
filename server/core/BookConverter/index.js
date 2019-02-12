@@ -4,7 +4,7 @@ const iconv = require('iconv-lite');
 const chardet = require('chardet');
 const _ = require('lodash');
 const sax = require('./sax');
-const getEncoding = require('./getEncoding');
+const textUtils = require('./textUtils');
 
 const FileDetector = require('../FileDetector');
 
@@ -18,9 +18,10 @@ class BookConverter {
     async convertToFb2(inputFile, outputFile, url, callback) {
         const fileType = await this.detector.detectFile(inputFile);
         
-        if (fileType && (fileType.ext == 'html' || fileType.ext == 'xml')) {
-            const data = await fs.readFile(inputFile);
+        const data = await fs.readFile(inputFile);
+        callback(100);
 
+        if (fileType && (fileType.ext == 'html' || fileType.ext == 'xml')) {
             if (data.toString().indexOf('<FictionBook') >= 0) {            
                 await fs.writeFile(outputFile, data);
                 return;
@@ -34,12 +35,19 @@ class BookConverter {
             }
 
             await fs.writeFile(outputFile, this.convertHtml(data));
-            callback(100);
+            return;
         } else {
             if (fileType)
-                throw new Error(`unknown file format: ${fileType.mime}`);
-            else
-                throw new Error(`unsupported file format: ${url}`);
+                throw new Error(`Этот формат файла не поддерживается: ${fileType.mime}`);
+            else {
+                //может это чистый текст?
+                if (textUtils.checkIfText(data)) {
+                    await fs.writeFile(outputFile, this.convertHtml(data));
+                    return;
+                }
+
+                throw new Error(`Не удалось определить формат файла: ${url}`);
+            }
         }
     }
 
@@ -55,7 +63,7 @@ class BookConverter {
         }
 
         if (selected == 'ISO-8859-5') {
-            selected = getEncoding(data);
+            selected = textUtils.getEncoding(data);
         }
 
         return iconv.decode(data, selected);
