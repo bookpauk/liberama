@@ -56,7 +56,7 @@ class Reader {
     }
 
     async loadCachedBook(url, callback){
-        const response = await axios.get(url, {method: 'HEAD'});
+        const response = await axios.head(url);
 
         let estSize = 1000000;
         if (response.headers['content-length']) {
