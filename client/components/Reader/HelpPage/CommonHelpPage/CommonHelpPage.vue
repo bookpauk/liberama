@@ -22,6 +22,7 @@
         <p>Поддерживаемые форматы: <strong>html, txt, fb2, fb2.zip</strong></p>
 
         <div v-html="automationHtml"></div>
+        <p>Связаться с разработчиком: <a href="mailto:bookpauk@gmail.com">bookpauk@gmail.com</a></p>
     </div>
 </template>
 
