@@ -80,8 +80,10 @@ class BookConverter {
                 const m = head.match(/encoding="(.*)"/);
                 if (m) {
                     let encoding = m[1].toLowerCase();
-                    if (encoding != 'utf-8')
+                    if (encoding != 'utf-8') {
                         result = iconv.decode(data, encoding);
+                        result = Buffer.from(result.toString().replace(m[0], 'encoding="utf-8"'));
+                    }
                 }
             }
         }
