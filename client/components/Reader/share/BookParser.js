@@ -122,6 +122,11 @@ export default class BookParser {
             if (tag == 'stanza') {
                 newParagraph(' ', 1);
             }
+
+            if (tag == 'text-author') {
+                newParagraph(' <s> <s> <s> ', 4);
+            }
+
         };
 
         const onEndNode = (elemName) => {// eslint-disable-line no-unused-vars
