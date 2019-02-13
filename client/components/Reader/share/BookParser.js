@@ -121,7 +121,7 @@ export default class BookParser {
                     italic = true;
                 }
 
-                if (tag == 'stanza') {
+                if (tag == 'poem') {
                     newParagraph(' ', 1);
                 }
 
