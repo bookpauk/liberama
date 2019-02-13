@@ -141,17 +141,27 @@ class HistoryPage extends Vue {
             }
 
             const fb2 = (book.fb2 ? book.fb2 : {});
+
+            let title = fb2.bookTitle;
+            if (title)
+                title = `"${title}"`;
+            else
+                title = '';
+
+            let author = _.compact([
+                fb2.lastName,
+                fb2.firstName,
+                fb2.middleName
+            ]).join(' ');
+            author = (author ? author : (fb2.bookTitle ? fb2.bookTitle : book.url));
+
             result.push({
                 touchDateTime: book.touchTime,
                 touchDate: t[0],
                 touchTime: t[1],
                 desc: {
-                    title: `"${fb2.bookTitle}"${perc}${textLen}`,
-                    author: _.compact([
-                        fb2.lastName,
-                        fb2.firstName,
-                        fb2.middleName
-                    ]).join(' '),
+                    title: `${title}${perc}${textLen}`,
+                    author,
                 },
                 url: book.url,
                 path: book.path,
