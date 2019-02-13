@@ -1,8 +1,10 @@
 const config = require('./config');
-
 const {initLogger, getLog} = require('./core/getLogger');
 initLogger(config);
 const log = getLog();
+
+const configSaver = require('./config/configSaver');
+const argv = require('minimist')(process.argv.slice(2));
 
 const fs = require('fs-extra');
 const path = require('path');
@@ -23,15 +25,17 @@ async function init() {
         await fs.remove(appDir);
         await fs.move(appNewDir, appDir);
     }
+
+    //загружаем конфиг из файла
+    await configSaver.load(config, argv.config);
 }
 
 async function main() {
-    const connPool = new SqliteConnectionPool(20, config);
-    
     log('Initializing');
     await init();
 
     log('Opening database');
+    const connPool = new SqliteConnectionPool(20, config);
     await connPool.init();
 
     //servers
@@ -42,7 +46,7 @@ async function main() {
 
             let devModule = undefined;
             if (serverConfig.branch == 'development') {
-                const devFileName = './dev.js'; //ignored by pkg -50Mb executable size
+                const devFileName = './dev.js'; //require ignored by pkg -50Mb executable size
                 devModule = require(devFileName);
                 devModule.webpackDevMiddleware(app);
             }
@@ -80,4 +84,12 @@ async function main() {
     }
 }
 
-main();
+
+(async() => {
+    try {
+        await main();
+    } catch (e) {
+        console.error(e.message);
+        process.exit(1);
+    }
+})();
