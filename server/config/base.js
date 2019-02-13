@@ -24,12 +24,6 @@ module.exports = {
             ip: '0.0.0.0',
             port: '33080',
         },
-        {
-            serverName: '2',
-            mode: 'omnireader',
-            ip: '0.0.0.0',
-            port: '33081',
-        },
     ],
 
 };
