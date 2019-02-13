@@ -440,51 +440,55 @@ class Reader extends Vue {
 
     buttonClick(button) {
         const activeClass = this.buttonActiveClass(button);
-        if (!activeClass['tool-button-disabled'])
-            switch (button) {
-                case 'loader':
-                    this.loaderToggle();
-                    break;
-                case 'undoAction':
-                    if (this.actionCur > 0) {
-                        this.actionCur--;
-                        this.bookPosChanged({bookPos: this.actionList[this.actionCur]});
-                    }
-                    break;
-                case 'redoAction':
-                    if (this.actionCur < this.actionList.length - 1) {
-                        this.actionCur++;
-                        this.bookPosChanged({bookPos: this.actionList[this.actionCur]});
-                    }
-                    break;
-                case 'fullScreen':
-                    this.fullScreenToggle();
-                    break;
-                case 'setPosition':
-                    this.setPositionToggle();
-                    break;
-                case 'scrolling':
-                    this.scrollingToggle();
-                    break;
-                case 'search':
-                    this.searchToggle();
-                    break;
-                case 'copyText':
-                    this.copyTextToggle();
-                    break;
-                case 'history':
-                    this.historyToggle();
-                    break;
-                case 'refresh':
-                    if (this.mostRecentBook()) {
-                        this.loadBook({url: this.mostRecentBook().url, force: true});
-                    }
-                    break;
-                case 'settings':
-                    this.settingsToggle();
-                    break;
-            }
+
         this.$refs[button].$el.blur();
+
+        if (activeClass['tool-button-disabled'])
+            return;
+        
+        switch (button) {
+            case 'loader':
+                this.loaderToggle();
+                break;
+            case 'undoAction':
+                if (this.actionCur > 0) {
+                    this.actionCur--;
+                    this.bookPosChanged({bookPos: this.actionList[this.actionCur]});
+                }
+                break;
+            case 'redoAction':
+                if (this.actionCur < this.actionList.length - 1) {
+                    this.actionCur++;
+                    this.bookPosChanged({bookPos: this.actionList[this.actionCur]});
+                }
+                break;
+            case 'fullScreen':
+                this.fullScreenToggle();
+                break;
+            case 'setPosition':
+                this.setPositionToggle();
+                break;
+            case 'scrolling':
+                this.scrollingToggle();
+                break;
+            case 'search':
+                this.searchToggle();
+                break;
+            case 'copyText':
+                this.copyTextToggle();
+                break;
+            case 'history':
+                this.historyToggle();
+                break;
+            case 'refresh':
+                if (this.mostRecentBook()) {
+                    this.loadBook({url: this.mostRecentBook().url, force: true});
+                }
+                break;
+            case 'settings':
+                this.settingsToggle();
+                break;
+        }
     }
 
     buttonActiveClass(button) {
@@ -591,14 +595,19 @@ class Reader extends Vue {
     }
 
     loadBook(opts) {
-        if (!opts) {
+        if (!opts || !opts.url) {
             this.mostRecentBook();
             return;
         }
 
+        let url = opts.url;
+        if ((url.indexOf('http://') != 0) && (url.indexOf('https://') != 0) &&
+            (url.indexOf('file://') != 0))
+            url = 'http://' + url;
+
         // уже просматривается сейчас
         const lastBook = (this.$refs.page ? this.$refs.page.lastBook : null);
-        if (!opts.force && lastBook && lastBook.url == opts.url && bookManager.hasBookParsed(lastBook)) {
+        if (!opts.force && lastBook && lastBook.url == url && bookManager.hasBookParsed(lastBook)) {
             this.loaderActive = false;
             return;
         }
@@ -615,7 +624,7 @@ class Reader extends Vue {
                 progress.setState({state: 'parse'});
 
                 // есть ли среди недавних
-                const key = bookManager.keyFromUrl(opts.url);
+                const key = bookManager.keyFromUrl(url);
                 let wasOpened = await bookManager.getRecentBook({key});
                 wasOpened = (wasOpened ? wasOpened : {});
                 const bookPos = (opts.bookPos !== undefined ? opts.bookPos : wasOpened.bookPos);
@@ -626,7 +635,7 @@ class Reader extends Vue {
 
                 if (!opts.force) {
                     // пытаемся загрузить и распарсить книгу в менеджере из локального кэша
-                    const bookParsed = await bookManager.getBook({url: opts.url}, (prog) => {
+                    const bookParsed = await bookManager.getBook({url}, (prog) => {
                         progress.setState({progress: prog});
                     });
 
@@ -662,7 +671,7 @@ class Reader extends Vue {
                 // не удалось, скачиваем книгу полностью с конвертацией
                 let loadCached = true;
                 if (!book) {
-                    book = await readerApi.loadBook(opts.url, (state) => {
+                    book = await readerApi.loadBook(url, (state) => {
                         progress.setState(state);
                     });
                     loadCached = false;

@@ -62,7 +62,10 @@ function getEncoding(buf) {
 
     sorted.sort((a, b) => b.c - a.c);
 
-    return sorted[0].codePage;
+    if (sorted[0].c > 0)
+        return sorted[0].codePage;
+    else
+        return 'ISO-8859-5';
 }
 
 function checkIfText(buf) {

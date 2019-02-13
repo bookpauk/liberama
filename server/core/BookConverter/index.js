@@ -22,8 +22,8 @@ class BookConverter {
         callback(100);
 
         if (fileType && (fileType.ext == 'html' || fileType.ext == 'xml')) {
-            if (data.toString().indexOf('<FictionBook') >= 0) {            
-                await fs.writeFile(outputFile, data);
+            if (data.toString().indexOf('<FictionBook') >= 0) {
+                await fs.writeFile(outputFile, this.checkEncoding(data));
                 return;
             }
 
@@ -67,6 +67,28 @@ class BookConverter {
         }
 
         return iconv.decode(data, selected);
+    }
+
+    checkEncoding(data) {
+        let result = data;
+
+        const left = data.indexOf('<?xml version="1.0"');
+        if (left >= 0) {
+            const right = data.indexOf('?>', left);
+            if (right >= 0) {
+                const head = data.slice(left, right + 2).toString();
+                const m = head.match(/encoding="(.*)"/);
+                if (m) {
+                    let encoding = m[1].toLowerCase();
+                    if (encoding != 'utf-8') {
+                        result = iconv.decode(data, encoding);
+                        result = Buffer.from(result.toString().replace(m[0], 'encoding="utf-8"'));
+                    }
+                }
+            }
+        }
+
+        return result;
     }
 
     convertHtml(data, isText) {
