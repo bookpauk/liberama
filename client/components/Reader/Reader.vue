@@ -439,6 +439,12 @@ class Reader extends Vue {
         }
     }
 
+    refreshBook() {
+        if (this.mostRecentBook()) {
+            this.loadBook({url: this.mostRecentBook().url, force: true});
+        }
+    }
+
     buttonClick(button) {
         const activeClass = this.buttonActiveClass(button);
 
@@ -482,9 +488,7 @@ class Reader extends Vue {
                 this.historyToggle();
                 break;
             case 'refresh':
-                if (this.mostRecentBook()) {
-                    this.loadBook({url: this.mostRecentBook().url, force: true});
-                }
+                this.refreshBook();
                 break;
             case 'settings':
                 this.settingsToggle();
@@ -790,6 +794,9 @@ class Reader extends Vue {
                             event.preventDefault();
                             event.stopPropagation();
                             break;
+                        case 'KeyZ':
+                            this.scrollingToggle();
+                            break;
                         case 'KeyP':
                             this.setPositionToggle();
                             break;
@@ -807,8 +814,8 @@ class Reader extends Vue {
                                 event.stopPropagation();
                             }
                             break;
-                        case 'KeyZ':
-                            this.scrollingToggle();
+                        case 'KeyR':
+                            this.refreshBook();
                             break;
                         case 'KeyX':
                             this.historyToggle();
