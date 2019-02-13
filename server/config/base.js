@@ -17,6 +17,10 @@ module.exports = {
     dbFileName: 'db.sqlite',
     loggingEnabled: true,
 
+    maxUploadFileSize: 50*1024*1024,//50Мб
+    maxTempPublicDirSize: 512*1024*1024,//512Мб
+    maxUploadPublicDirSize: 200*1024*1024,//100Мб
+
     servers: [
         {
             serverName: '1',

@@ -2,8 +2,6 @@ const c = require('./controllers');
 const utils = require('./core/utils');
 const multer = require('multer');
 
-const maxUploadSize = 50*1024*1024;
-
 function initRoutes(app, connPool, config) {
     const misc = new c.MiscController(connPool, config);
     const reader = new c.ReaderController(connPool, config);
@@ -22,7 +20,7 @@ function initRoutes(app, connPool, config) {
             cb(null, utils.randomHexString(30));
         }
     });
-    const upload = multer({ storage, limits: {fileSize: maxUploadSize} });
+    const upload = multer({ storage, limits: {fileSize: config.maxUploadFileSize} });
 
     //routes
     const routes = [
