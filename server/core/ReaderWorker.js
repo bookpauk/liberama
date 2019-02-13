@@ -8,8 +8,6 @@ const FileDecompressor = require('./FileDecompressor');
 const BookConverter = require('./BookConverter');
 const utils = require('./utils');
 
-const maxTempPublicDirSize = 512*1024*1024;//512Мб
-const maxUploadDirSize = 200*1024*1024;//100Мб
 let singleCleanExecute = false;
 
 class ReaderWorker {
@@ -27,8 +25,8 @@ class ReaderWorker {
         this.bookConverter = new BookConverter();
 
         if (!singleCleanExecute) {
-            this.periodicCleanDir(this.config.tempPublicDir, maxTempPublicDirSize, 60*60*1000);//1 раз в час
-            this.periodicCleanDir(this.config.uploadDir, maxUploadDirSize, 60*60*1000);//1 раз в час
+            this.periodicCleanDir(this.config.tempPublicDir, this.config.maxTempPublicDirSize, 60*60*1000);//1 раз в час
+            this.periodicCleanDir(this.config.uploadDir, this.config.maxUploadPublicDirSize, 60*60*1000);//1 раз в час
             singleCleanExecute = true;
         }
     }

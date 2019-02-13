@@ -19,12 +19,6 @@ module.exports = Object.assign({}, base, {
                 ip: '0.0.0.0',
                 port: '44080',
             },
-            {
-                serverName: '2',
-                mode: 'omnireader',
-                ip: '0.0.0.0',
-                port: '44081',
-            },
         ],
 
     }

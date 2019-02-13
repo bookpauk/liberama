@@ -45,9 +45,12 @@ const minLayoutWidth = 100;
 
 export default @Component({
     watch: {
-        bookPos: function(newValue) {
-            this.$emit('book-pos-changed', {bookPos: newValue, bookPosSeen: this.bookPosSeen});
+        bookPos: function() {
+            this.$emit('book-pos-changed', {bookPos: this.bookPos, bookPosSeen: this.bookPosSeen});
             this.draw();
+        },
+        bookPosSeen: function() {
+            this.$emit('book-pos-changed', {bookPos: this.bookPos, bookPosSeen: this.bookPosSeen});
         },
         settings: function() {
             this.debouncedLoadSettings();
@@ -69,6 +72,7 @@ class TextPage extends Vue {
 
     lastBook = null;
     bookPos = 0;
+    bookPosSeen = null;
 
     fontStyle = null;
     fontSize = null;

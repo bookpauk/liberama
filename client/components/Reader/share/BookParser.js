@@ -63,7 +63,8 @@ export default class BookParser {
 
         const growParagraph = (text, len) => {
             if (paraIndex < 0) {
-                newParagraph(text, len);
+                newParagraph(' ', 1);
+                growParagraph(text, len);
                 return;
             }
 
@@ -96,55 +97,63 @@ export default class BookParser {
             tag = elemName;
             path += '/' + elemName;
 
-            if ((tag == 'p' || tag == 'empty-line' || tag == 'v') && path.indexOf('/fictionbook/body/section') == 0) {
-                newParagraph(' ', 1);
-            }
+            if (path.indexOf('/fictionbook/body') == 0) {
+                if (tag == 'title') {
+                    newParagraph(' ', 1);
+                    bold = true;
+                    center = true;
+                }
 
-            if (tag == 'emphasis' || tag == 'strong') {
-                growParagraph(`<${tag}>`, 0);
-            }
+                if (tag == 'emphasis' || tag == 'strong') {
+                    growParagraph(`<${tag}>`, 0);
+                }
 
-            if (tag == 'title') {
-                newParagraph(' ', 1);
-                bold = true;
-                center = true;
-            }
+                if ((tag == 'p' || tag == 'empty-line' || tag == 'v')) {
+                    newParagraph(' ', 1);
+                }
 
-            if (tag == 'subtitle') {
-                newParagraph(' ', 1);
-                bold = true;
-            }
+                if (tag == 'subtitle') {
+                    newParagraph(' ', 1);
+                    bold = true;
+                }
 
-            if (tag == 'epigraph') {
-                italic = true;
-            }
+                if (tag == 'epigraph') {
+                    italic = true;
+                }
 
-            if (tag == 'stanza') {
-                newParagraph(' ', 1);
+                if (tag == 'poem') {
+                    newParagraph(' ', 1);
+                }
+
+                if (tag == 'text-author') {
+                    newParagraph(' <s> <s> <s> ', 4);
+                }
             }
         };
 
         const onEndNode = (elemName) => {// eslint-disable-line no-unused-vars
             if (tag == elemName) {
-                if (tag == 'emphasis' || tag == 'strong') {
-                    growParagraph(`</${tag}>`, 0);
-                }
+                if (path.indexOf('/fictionbook/body') == 0) {
+                    if (tag == 'title') {
+                        bold = false;
+                        center = false;
+                    }
 
-                if (tag == 'title') {
-                    bold = false;
-                    center = false;
-                }
+                    if (tag == 'emphasis' || tag == 'strong') {
+                        growParagraph(`</${tag}>`, 0);
+                    }
 
-                if (tag == 'subtitle') {
-                    bold = false;
-                }
+                    if (tag == 'subtitle') {
+                        bold = false;
+                    }
 
-                if (tag == 'epigraph') {
-                    italic = false;
-                }
+                    if (tag == 'epigraph') {
+                        italic = false;
+                    }
 
-                if (tag == 'stanza') {
-                    newParagraph(' ', 1);
+                    if (tag == 'stanza') {
+                        newParagraph(' ', 1);
+                    }
                 }
 
                 path = path.substr(0, path.length - tag.length - 1);
@@ -206,12 +215,12 @@ export default class BookParser {
             let tOpen = (center ? '<center>' : '');
             tOpen += (bold ? '<strong>' : '');
             tOpen += (italic ? '<emphasis>' : '');
-            let tClose = (center ? '</center>' : '');
+            let tClose = (italic ? '</emphasis>' : '');
             tClose += (bold ? '</strong>' : '');
-            tClose += (italic ? '</emphasis>' : '');
+            tClose += (center ? '</center>' : '');
 
             if (path.indexOf('/fictionbook/body/title') == 0) {
-                newParagraph(`${tOpen}${text}${tClose}`, text.length, true);
+                growParagraph(`${tOpen}${text}${tClose}`, text.length, true);
             }
 
             if (path.indexOf('/fictionbook/body/section') == 0) {
