@@ -1,7 +1,6 @@
 import axios from 'axios';
 import {sleep} from '../share/utils';
 
-const maxFileUploadSize = 50*1024*1024;
 const api = axios.create({
   baseURL: '/api/reader'
 });
@@ -75,9 +74,11 @@ class Reader {
         return await axios.get(url, options);
     }
 
-    async uploadFile(file, callback) {
-        if (file.size > maxFileUploadSize)
-            throw new Error(`Размер файла превышает ${maxFileUploadSize} байт`);
+    async uploadFile(file, maxUploadFileSize, callback) {
+        if (!maxUploadFileSize)
+            maxUploadFileSize = 10*1024*1024;
+        if (file.size > maxUploadFileSize)
+            throw new Error(`Размер файла превышает ${maxUploadFileSize} байт`);
 
         let formData = new FormData();
         formData.append('file', file);

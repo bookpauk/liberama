@@ -168,6 +168,7 @@ class Reader extends Vue {
         this.commit = this.$store.commit;
         this.dispatch = this.$store.dispatch;
         this.reader = this.$store.state.reader;
+        this.config = this.$store.state.config;
 
         this.$root.addKeyHook(this.keyHook);
 
@@ -713,7 +714,7 @@ class Reader extends Vue {
                 progress.show();
                 progress.setState({state: 'upload'});
 
-                const url = await readerApi.uploadFile(opts.file, (state) => {
+                const url = await readerApi.uploadFile(opts.file, this.config.maxUploadFileSize, (state) => {
                     progress.setState(state);
                 });
 
