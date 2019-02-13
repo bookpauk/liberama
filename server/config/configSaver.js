@@ -2,7 +2,11 @@ const fs = require('fs-extra');
 const _ = require('lodash');
 
 const propsToSave = [
-    'servers'
+    'maxUploadFileSize',
+    'maxTempPublicDirSize',
+    'maxUploadPublicDirSize',
+
+    'servers',
 ];
 
 async function load(config, configFilename) {
