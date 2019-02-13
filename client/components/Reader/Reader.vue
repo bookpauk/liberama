@@ -440,51 +440,55 @@ class Reader extends Vue {
 
     buttonClick(button) {
         const activeClass = this.buttonActiveClass(button);
-        if (!activeClass['tool-button-disabled'])
-            switch (button) {
-                case 'loader':
-                    this.loaderToggle();
-                    break;
-                case 'undoAction':
-                    if (this.actionCur > 0) {
-                        this.actionCur--;
-                        this.bookPosChanged({bookPos: this.actionList[this.actionCur]});
-                    }
-                    break;
-                case 'redoAction':
-                    if (this.actionCur < this.actionList.length - 1) {
-                        this.actionCur++;
-                        this.bookPosChanged({bookPos: this.actionList[this.actionCur]});
-                    }
-                    break;
-                case 'fullScreen':
-                    this.fullScreenToggle();
-                    break;
-                case 'setPosition':
-                    this.setPositionToggle();
-                    break;
-                case 'scrolling':
-                    this.scrollingToggle();
-                    break;
-                case 'search':
-                    this.searchToggle();
-                    break;
-                case 'copyText':
-                    this.copyTextToggle();
-                    break;
-                case 'history':
-                    this.historyToggle();
-                    break;
-                case 'refresh':
-                    if (this.mostRecentBook()) {
-                        this.loadBook({url: this.mostRecentBook().url, force: true});
-                    }
-                    break;
-                case 'settings':
-                    this.settingsToggle();
-                    break;
-            }
+
         this.$refs[button].$el.blur();
+
+        if (activeClass['tool-button-disabled'])
+            return;
+        
+        switch (button) {
+            case 'loader':
+                this.loaderToggle();
+                break;
+            case 'undoAction':
+                if (this.actionCur > 0) {
+                    this.actionCur--;
+                    this.bookPosChanged({bookPos: this.actionList[this.actionCur]});
+                }
+                break;
+            case 'redoAction':
+                if (this.actionCur < this.actionList.length - 1) {
+                    this.actionCur++;
+                    this.bookPosChanged({bookPos: this.actionList[this.actionCur]});
+                }
+                break;
+            case 'fullScreen':
+                this.fullScreenToggle();
+                break;
+            case 'setPosition':
+                this.setPositionToggle();
+                break;
+            case 'scrolling':
+                this.scrollingToggle();
+                break;
+            case 'search':
+                this.searchToggle();
+                break;
+            case 'copyText':
+                this.copyTextToggle();
+                break;
+            case 'history':
+                this.historyToggle();
+                break;
+            case 'refresh':
+                if (this.mostRecentBook()) {
+                    this.loadBook({url: this.mostRecentBook().url, force: true});
+                }
+                break;
+            case 'settings':
+                this.settingsToggle();
+                break;
+        }
     }
 
     buttonActiveClass(button) {
