@@ -161,7 +161,8 @@ const settingDefaults = {
         showClickMapPage: true,
         clickControl: true,
         cutEmptyParagraphs: false,
-        
+        addEmptyParagraphs: 0,
+
         fontShifts: {},
 };
 

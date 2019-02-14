@@ -17,6 +17,7 @@ export default class BookParser {
         //настройки
         if (settings) {
             this.cutEmptyParagraphs = settings.cutEmptyParagraphs;
+            this.addEmptyParagraphs = settings.addEmptyParagraphs;
         }
     }
 
@@ -53,9 +54,9 @@ export default class BookParser {
                 text: String //текст параграфа (или title или epigraph и т.д) с вложенными тегами
             }
         */
-        const newParagraph = (text, len) => {
+        const newParagraph = (text, len, noCut) => {
             //схлопывание пустых параграфов
-            if (this.cutEmptyParagraphs && paraIndex >= 0) {
+            if (!noCut && this.cutEmptyParagraphs && paraIndex >= 0 && len == 1 && text[0] == ' ') {
                 let p = para[paraIndex];
                 if (p.length == 1 && p.text[0] == ' ')
                     return;
@@ -82,6 +83,16 @@ export default class BookParser {
 
             let p = para[paraIndex];
             if (p) {
+                //добавление пустых параграфов
+                if (this.addEmptyParagraphs && p.length == 1 && p.text[0] == ' ' && len > 0) {
+                    let i = this.addEmptyParagraphs;
+                    while (i > 0) {
+                        newParagraph(' ', 1, true);
+                        i--;
+                    }
+                    p = para[paraIndex];
+                }
+
                 paraOffset -= p.length;
                 if (p.length == 1 && p.text[0] == ' ' && len > 0) {
                     p.length = 0;
