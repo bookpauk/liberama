@@ -255,6 +255,15 @@
                                     <el-checkbox v-model="showClickMapPage">Показывать области управления кликом</el-checkbox>
                                 </el-tooltip>
                             </el-form-item>
+                            <el-form-item label="Подсказка">
+                                <el-tooltip :open-delay="500" effect="light">
+                                    <template slot="content">
+                                        Мерцать сообщением в строке статуса и на кнопке<br>
+                                        обновления при загрузке книги из кэша
+                                    </template>
+                                    <el-checkbox v-model="blinkCachedLoad">Предупреждать о загрузке из кэша</el-checkbox>
+                                </el-tooltip>
+                            </el-form-item>
                             <el-form-item label="URL">
                                 <el-tooltip :open-delay="500" effect="light">
                                     <template slot="content">

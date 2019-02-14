@@ -162,6 +162,7 @@ const settingDefaults = {
         clickControl: true,
         cutEmptyParagraphs: false,
         addEmptyParagraphs: 0,
+        blinkCachedLoad: true,
 
         fontShifts: {},
 };
