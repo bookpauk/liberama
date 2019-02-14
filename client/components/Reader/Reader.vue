@@ -139,6 +139,12 @@ export default @Component({
             this.showClickMapPage = newValue.showClickMapPage;
             this.updateRoute();
         },
+        loaderActive: function(newValue) {
+            const recent = this.mostRecentBook();
+            if (!newValue && !this.loading && recent && !bookManager.hasBookParsed(recent)) {
+                this.loadBook(recent);
+            }
+        },
     },
 })
 class Reader extends Vue {
@@ -205,8 +211,6 @@ class Reader extends Vue {
             if (this.$root.rootRoute == '/reader') {
                 if (this.routeParamUrl) {
                     this.loadBook({url: this.routeParamUrl, bookPos: this.routeParamPos});
-                } else if (this.mostRecentBook()) {
-                    this.loadBook({url: this.mostRecentBook().url});
                 } else {
                     this.loaderActive = true;
                 }
