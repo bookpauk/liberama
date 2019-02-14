@@ -220,6 +220,7 @@ class Reader extends Vue {
         this.allowUrlParamBookPos = settings.allowUrlParamBookPos;
         this.copyFullText = settings.copyFullText;
         this.showClickMapPage = settings.showClickMapPage;
+        this.clickControl = settings.clickControl;
         this.blinkCachedLoad = settings.blinkCachedLoad;
     }
 
@@ -555,8 +556,8 @@ class Reader extends Vue {
         return classResult;
     }
 
-    async acivateClickMapPage() {
-        if (this.showClickMapPage && !this.clickMapActive) {
+    async activateClickMapPage() {
+        if (this.clickControl && this.showClickMapPage && !this.clickMapActive) {
             this.clickMapActive = true;
             await this.$refs.clickMapPage.slowDisappear();
             this.clickMapActive = false;
@@ -661,7 +662,7 @@ class Reader extends Vue {
                         progress.hide(); this.progressActive = false;
                         this.blinkCachedLoadMessage();
 
-                        await this.acivateClickMapPage();
+                        await this.activateClickMapPage();
                         return;
                     }
 
@@ -709,7 +710,7 @@ class Reader extends Vue {
                 } else
                     this.stopBlink = true;
 
-                await this.acivateClickMapPage();
+                await this.activateClickMapPage();
             } catch (e) {
                 progress.hide(); this.progressActive = false;
                 this.loaderActive = true;
