@@ -3,7 +3,7 @@ import sax from '../../../../server/core/BookConverter/sax';
 import {sleep} from '../../../share/utils';
 
 export default class BookParser {
-    constructor() {
+    constructor(settings) {
         // defaults
         this.p = 30;// px, отступ параграфа
         this.w = 300;// px, ширина страницы
@@ -13,6 +13,12 @@ export default class BookParser {
         this.measureText = (text, style) => {// eslint-disable-line no-unused-vars
             return text.length*20;
         };
+
+        //настройки
+        if (settings) {
+            this.cutEmptyParagraphs = settings.cutEmptyParagraphs;
+            this.addEmptyParagraphs = settings.addEmptyParagraphs;
+        }
     }
 
     async parse(data, callback) {
@@ -48,7 +54,14 @@ export default class BookParser {
                 text: String //текст параграфа (или title или epigraph и т.д) с вложенными тегами
             }
         */
-        const newParagraph = (text, len) => {
+        const newParagraph = (text, len, noCut) => {
+            //схлопывание пустых параграфов
+            if (!noCut && this.cutEmptyParagraphs && paraIndex >= 0 && len == 1 && text[0] == ' ') {
+                let p = para[paraIndex];
+                if (p.length == 1 && p.text[0] == ' ')
+                    return;
+            }
+
             paraIndex++;
             let p = {
                 index: paraIndex,
@@ -70,6 +83,16 @@ export default class BookParser {
 
             let p = para[paraIndex];
             if (p) {
+                //добавление пустых параграфов
+                if (this.addEmptyParagraphs && p.length == 1 && p.text[0] == ' ' && len > 0) {
+                    let i = this.addEmptyParagraphs;
+                    while (i > 0) {
+                        newParagraph(' ', 1, true);
+                        i--;
+                    }
+                    p = para[paraIndex];
+                }
+
                 paraOffset -= p.length;
                 if (p.length == 1 && p.text[0] == ' ' && len > 0) {
                     p.length = 0;

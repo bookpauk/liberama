@@ -159,6 +159,10 @@ const settingDefaults = {
         lazyParseEnabled: false,
         copyFullText: false,
         showClickMapPage: true,
+        clickControl: true,
+        cutEmptyParagraphs: false,
+        addEmptyParagraphs: 0,
+
         fontShifts: {},
 };
 

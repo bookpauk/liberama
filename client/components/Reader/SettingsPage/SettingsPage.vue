@@ -81,7 +81,7 @@
                             </el-form-item>
                             <el-form-item label="Размер">
                                 <el-col :span="17">
-                                    <el-input-number v-model="fontSize" :min="5" :max="100"></el-input-number>
+                                    <el-input-number v-model="fontSize" :min="5" :max="200"></el-input-number>
                                 </el-col>
                                 <el-col :span="1">
                                     <a href="https://fonts.google.com/?subset=cyrillic" target="_blank">Примеры</a>
@@ -112,10 +112,10 @@
                             <div class="partHeader">Текст</div>
 
                             <el-form-item label="Интервал">
-                                <el-input-number v-model="lineInterval" :min="0" :max="100"></el-input-number>
+                                <el-input-number v-model="lineInterval" :min="0" :max="200"></el-input-number>
                             </el-form-item>
                             <el-form-item label="Параграф">
-                                <el-input-number v-model="p" :min="0" :max="200"></el-input-number>
+                                <el-input-number v-model="p" :min="0" :max="1000"></el-input-number>
                             </el-form-item>
                             <el-form-item label="Отступ">
                                 <el-col :span="11">
@@ -123,7 +123,7 @@
                                         <template slot="content">
                                             Слева/справа
                                         </template>
-                                        <el-input-number v-model="indentLR" :min="0" :max="200"></el-input-number>
+                                        <el-input-number v-model="indentLR" :min="0" :max="500"></el-input-number>
                                     </el-tooltip>
                                 </el-col>
                                 <el-col :span="1">
@@ -134,7 +134,7 @@
                                         <template slot="content">
                                             Сверху/снизу
                                         </template>
-                                        <el-input-number v-model="indentTB" :min="0" :max="200"></el-input-number>
+                                        <el-input-number v-model="indentTB" :min="0" :max="500"></el-input-number>
                                     </el-tooltip>
                                 </el-col>
                             </el-form-item>
@@ -184,6 +184,16 @@
                                 <el-checkbox v-model="textAlignJustify">По ширине</el-checkbox>
                                 <el-checkbox v-model="wordWrap">Перенос по слогам</el-checkbox>
                             </el-form-item>
+                            <el-form-item label="Обработка">
+                                <el-checkbox v-model="cutEmptyParagraphs" @change="needReload">Убирать пустые параграфы</el-checkbox>
+                            </el-form-item>
+                            <el-form-item label="">
+                                <el-col :span="12">
+                                    Добавлять пустые
+                                </el-col>
+                                <el-input-number v-model="addEmptyParagraphs" :min="0" :max="2" @change="needReload"></el-input-number>
+                            </el-form-item>
+                            
                         </el-form>
 
                         <el-form :model="form" size="mini" label-width="120px" @submit.native.prevent>
@@ -194,7 +204,7 @@
                                 <el-checkbox v-model="statusBarTop" :disabled="!showStatusBar">Вверху/внизу</el-checkbox>
                             </el-form-item>
                             <el-form-item label="Высота">
-                                <el-input-number v-model="statusBarHeight" :min="5" :max="50" :disabled="!showStatusBar"></el-input-number>
+                                <el-input-number v-model="statusBarHeight" :min="5" :max="100" :disabled="!showStatusBar"></el-input-number>
                             </el-form-item>
                             <el-form-item label="Прозрачность">
                                 <el-input-number v-model="statusBarColorAlpha" :min="0" :max="1" :precision="2" :step="0.1" :disabled="!showStatusBar"></el-input-number>
@@ -234,6 +244,9 @@
                     <!--------------------------------------------------------------------------->
                     <el-tab-pane label="Прочее">
                         <el-form :model="form" size="mini" label-width="120px" @submit.native.prevent>
+                            <el-form-item label="Управление">
+                                <el-checkbox v-model="clickControl">Включить управление кликом</el-checkbox>
+                            </el-form-item>
                             <el-form-item label="Подсказка">
                                 <el-tooltip :open-delay="500" effect="light">
                                     <template slot="content">
@@ -241,7 +254,7 @@
                                     </template>
                                     <el-checkbox v-model="showClickMapPage">Показывать области управления кликом</el-checkbox>
                                 </el-tooltip>
-                            </el-form-item>                            
+                            </el-form-item>
                             <el-form-item label="URL">
                                 <el-tooltip :open-delay="500" effect="light">
                                     <template slot="content">
@@ -382,6 +395,10 @@ class SettingsPage extends Vue {
           '#478355',
           '#a6caf0',
         ];
+    }
+
+    needReload() {
+        this.$notify.warning({message: 'Необходимо обновить страницу (F5), чтобы изменения возымели эффект'});
     }
 
     close() {

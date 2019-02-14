@@ -4,18 +4,18 @@
             <div v-html="background"></div>
             <!-- img -->
         </div>
-        <div ref="scrollBox1" class="layout" style="overflow: hidden">
+        <div ref="scrollBox1" class="layout" style="overflow: hidden" @wheel.prevent.stop="onMouseWheel">
             <div ref="scrollingPage" class="layout" @transitionend="onScrollingTransitionEnd">
                 <div v-html="page1"></div>
             </div>
         </div>
-        <div ref="scrollBox2" class="layout" style="overflow: hidden">
+        <div ref="scrollBox2" class="layout" style="overflow: hidden" @wheel.prevent.stop="onMouseWheel">
             <div v-html="page2"></div>
         </div>
         <div v-show="showStatusBar" ref="statusBar" class="layout">
             <div v-html="statusBar"></div>
         </div>
-        <div ref="layoutEvents" class="layout events" @mousedown.prevent.stop="onMouseDown" @mouseup.prevent.stop="onMouseUp"
+        <div v-show="clickControl" ref="layoutEvents" class="layout events" @mousedown.prevent.stop="onMouseDown" @mouseup.prevent.stop="onMouseUp"
             @wheel.prevent.stop="onMouseWheel"
             @touchstart.stop="onTouchStart" @touchend.stop="onTouchEnd" @touchcancel.prevent.stop="onTouchCancel"
             oncontextmenu="return false;">
@@ -23,6 +23,8 @@
                 @click.prevent.stop="onStatusBarClick"></div>
             <div v-show="fontsLoading" ref="fontsLoading"></div>
         </div>
+        <div v-show="!clickControl && showStatusBar" class="layout" v-html="statusBarClickable" @mousedown.prevent.stop @touchstart.stop
+            @click.prevent.stop="onStatusBarClick"></div>
         <!-- невидимым делать нельзя, вовремя не подгружаютя шрифты -->
         <canvas ref="offscreenCanvas" class="layout" style="width: 0px; height: 0px"></canvas>
     </div>
@@ -63,6 +65,8 @@ export default @Component({
 class TextPage extends Vue {
     toggleLayout = false;
     showStatusBar = false;
+    clickControl = true;
+
     background = null;
     page1 = null;
     page2 = null;
