@@ -234,6 +234,9 @@
                     <!--------------------------------------------------------------------------->
                     <el-tab-pane label="Прочее">
                         <el-form :model="form" size="mini" label-width="120px" @submit.native.prevent>
+                            <el-form-item label="Управление">
+                                <el-checkbox v-model="clickControl">Включить управление кликом</el-checkbox>
+                            </el-form-item>
                             <el-form-item label="Подсказка">
                                 <el-tooltip :open-delay="500" effect="light">
                                     <template slot="content">
@@ -241,7 +244,7 @@
                                     </template>
                                     <el-checkbox v-model="showClickMapPage">Показывать области управления кликом</el-checkbox>
                                 </el-tooltip>
-                            </el-form-item>                            
+                            </el-form-item>
                             <el-form-item label="URL">
                                 <el-tooltip :open-delay="500" effect="light">
                                     <template slot="content">
