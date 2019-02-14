@@ -287,7 +287,7 @@ class TextPage extends Vue {
 
         this.draw();
 
-        // шрифты хрен знает когда подгружаются, поэтому
+        // шрифты хрен знает когда подгружаются в div, поэтому
         const parsed = this.parsed;
         if (!parsed.force) {
             let i = 0;
