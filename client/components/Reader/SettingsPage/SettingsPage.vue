@@ -184,6 +184,10 @@
                                 <el-checkbox v-model="textAlignJustify">По ширине</el-checkbox>
                                 <el-checkbox v-model="wordWrap">Перенос по слогам</el-checkbox>
                             </el-form-item>
+                            <el-form-item label="Обработка">
+                                <el-checkbox v-model="cutEmptyParagraphs" @change="needReload">Убирать пустые параграфы</el-checkbox>
+                            </el-form-item>
+                            
                         </el-form>
 
                         <el-form :model="form" size="mini" label-width="120px" @submit.native.prevent>
@@ -385,6 +389,10 @@ class SettingsPage extends Vue {
           '#478355',
           '#a6caf0',
         ];
+    }
+
+    needReload() {
+        this.$notify.warning({message: 'Необходимо обновить страницу (F5), чтобы изменения возымели эффект'});
     }
 
     close() {

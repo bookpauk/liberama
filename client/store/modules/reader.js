@@ -160,6 +160,8 @@ const settingDefaults = {
         copyFullText: false,
         showClickMapPage: true,
         clickControl: true,
+        cutEmptyParagraphs: false,
+        
         fontShifts: {},
 };
 

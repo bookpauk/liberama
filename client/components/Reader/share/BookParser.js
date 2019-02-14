@@ -3,7 +3,7 @@ import sax from '../../../../server/core/BookConverter/sax';
 import {sleep} from '../../../share/utils';
 
 export default class BookParser {
-    constructor() {
+    constructor(settings) {
         // defaults
         this.p = 30;// px, отступ параграфа
         this.w = 300;// px, ширина страницы
@@ -13,6 +13,11 @@ export default class BookParser {
         this.measureText = (text, style) => {// eslint-disable-line no-unused-vars
             return text.length*20;
         };
+
+        //настройки
+        if (settings) {
+            this.cutEmptyParagraphs = settings.cutEmptyParagraphs;
+        }
     }
 
     async parse(data, callback) {
@@ -49,6 +54,13 @@ export default class BookParser {
             }
         */
         const newParagraph = (text, len) => {
+            //схлопывание пустых параграфов
+            if (this.cutEmptyParagraphs && paraIndex >= 0) {
+                let p = para[paraIndex];
+                if (p.length == 1 && p.text[0] == ' ')
+                    return;
+            }
+
             paraIndex++;
             let p = {
                 index: paraIndex,
