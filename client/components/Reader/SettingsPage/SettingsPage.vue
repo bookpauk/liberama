@@ -115,7 +115,7 @@
                                 <el-input-number v-model="lineInterval" :min="0" :max="200"></el-input-number>
                             </el-form-item>
                             <el-form-item label="Параграф">
-                                <el-input-number v-model="p" :min="0" :max="1000"></el-input-number>
+                                <el-input-number v-model="p" :min="0" :max="2000"></el-input-number>
                             </el-form-item>
                             <el-form-item label="Отступ">
                                 <el-col :span="11">
@@ -123,7 +123,7 @@
                                         <template slot="content">
                                             Слева/справа
                                         </template>
-                                        <el-input-number v-model="indentLR" :min="0" :max="500"></el-input-number>
+                                        <el-input-number v-model="indentLR" :min="0" :max="2000"></el-input-number>
                                     </el-tooltip>
                                 </el-col>
                                 <el-col :span="1">
@@ -134,7 +134,7 @@
                                         <template slot="content">
                                             Сверху/снизу
                                         </template>
-                                        <el-input-number v-model="indentTB" :min="0" :max="500"></el-input-number>
+                                        <el-input-number v-model="indentTB" :min="0" :max="2000"></el-input-number>
                                     </el-tooltip>
                                 </el-col>
                             </el-form-item>
@@ -287,9 +287,11 @@
                                     <el-checkbox v-model="copyFullText">Загружать весь текст</el-checkbox>
                                 </el-tooltip>
                             </el-form-item>
-
                         </el-form>
-                        
+                    </el-tab-pane>
+                    <!--------------------------------------------------------------------------->
+                    <el-tab-pane label="Сброс">
+                        <el-button @click="setDefaults">Установить по-умолчанию</el-button>
                     </el-tab-pane>
 
                 </el-tabs>
@@ -403,6 +405,23 @@ class SettingsPage extends Vue {
 
     close() {
         this.$emit('settings-toggle');
+    }
+
+    async setDefaults() {
+        try {
+            if (await this.$confirm('Подтвердите установку настроек по-умолчанию', '', {
+              confirmButtonText: 'OK',
+              cancelButtonText: 'Отмена',
+              type: 'warning'
+            })) {
+                this.form = Object.assign({}, rstore.settingDefaults);
+                for (let prop in rstore.settingDefaults) {
+                    this[prop] = this.form[prop];
+                }
+            }
+        } catch (e) {
+            //
+        }
     }
 
     keyHook(event) {
