@@ -1,3 +1,5 @@
+//import {sleep} from '../../../share/utils';
+
 export default class DrawHelper {
     fontBySize(size) {
         return `${size}px ${this.fontName}`;
@@ -212,5 +214,11 @@ export default class DrawHelper {
     strokeRect(x, y, w, h, color) {
         return `<div style="position: absolute; left: ${x}px; top: ${y}px; ` +
             `width: ${w}px; height: ${h}px; box-sizing: border-box; border: 1px solid ${color}"></div>`; 
+    }
+
+    async doPageAnimationThaw(page1, page2, duration, isDown, animationFinish) {
+        page1.style.animation = `page1-animation-thaw ${duration}ms ease-in 1`;
+        page2.style.animation = `page2-animation-thaw ${duration}ms ease-in 1`;
+        await animationFinish(duration + 201);
     }
 }
