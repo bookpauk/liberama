@@ -5,12 +5,14 @@
             <!-- img -->
         </div>
         <div ref="scrollBox1" class="layout" style="overflow: hidden" @wheel.prevent.stop="onMouseWheel">
-            <div ref="scrollingPage" class="layout" @transitionend="onScrollingTransitionEnd">
+            <div ref="scrollingPage1" class="layout" @transitionend="onScrollingTransitionEnd">
                 <div v-html="page1"></div>
             </div>
         </div>
         <div ref="scrollBox2" class="layout" style="overflow: hidden" @wheel.prevent.stop="onMouseWheel">
-            <div v-html="page2"></div>
+            <div ref="scrollingPage2" class="layout" @transitionend="onScrollingTransitionEnd">
+                <div v-html="page2"></div>
+            </div>
         </div>
         <div v-show="showStatusBar" ref="statusBar" class="layout">
             <div v-html="statusBar"></div>
@@ -60,6 +62,9 @@ export default @Component({
         toggleLayout: function() {
             this.updateLayout();
         },
+        inTransition: function() {
+            this.updateLayout();
+        },
     },
 })
 class TextPage extends Vue {
@@ -81,6 +86,9 @@ class TextPage extends Vue {
     fontStyle = null;
     fontSize = null;
     fontName = null;
+    fontWeight = null;
+
+    inTransition = false;
 
     meta = null;
 
@@ -378,7 +386,10 @@ class TextPage extends Vue {
     }
 
     updateLayout() {
-        if (this.toggleLayout) {
+        if (this.inTransition) {
+            this.$refs.scrollBox1.style.visibility = 'visible';
+            this.$refs.scrollBox2.style.visibility = 'visible';
+        } else if (this.toggleLayout) {
             this.$refs.scrollBox1.style.visibility = 'visible';
             this.$refs.scrollBox2.style.visibility = 'hidden';
         } else {
@@ -463,7 +474,7 @@ class TextPage extends Vue {
         await sleep(50);
 
         this.cachedPos = -1;
-        const page = this.$refs.scrollingPage;
+        const page = this.$refs.scrollingPage1;
         let i = 0;
         while (!this.stopScrolling) {
                 page.style.transition = `${this.scrollingDelay}ms ${this.scrollingType}`;
@@ -489,7 +500,7 @@ class TextPage extends Vue {
     async stopTextScrolling() {
         this.stopScrolling = true;
 
-        const page = this.$refs.scrollingPage;
+        const page = this.$refs.scrollingPage1;
         page.style.transition = '';
         page.style.transform = 'none';
         page.offsetHeight;
@@ -498,6 +509,7 @@ class TextPage extends Vue {
     }
 
     draw() {
+        //scrolling
         if (this.doingScrolling) {
             if (this.cachedPos == this.bookPos) {
                 this.linesDown = this.linesCached.linesDown;
@@ -526,6 +538,7 @@ class TextPage extends Vue {
             return;
         }
 
+        //check
         if (this.w < minLayoutWidth) {
             this.page1 = null;
             this.page2 = null;
@@ -538,13 +551,13 @@ class TextPage extends Vue {
             return;
         }
 
-
+        //fast draw prepared
         if (this.pageChangeDirectionDown && this.pagePrepared && this.bookPos == this.bookPosPrepared) {
             this.toggleLayout = !this.toggleLayout;
             this.linesDown = this.linesDownNext;
             this.linesUp = this.linesUpNext;
             this.doPageTransition();
-        } else {
+        } else {//normal debounced draw
             const lines = this.getLines(this.bookPos);
             this.linesDown = lines.linesDown;
             this.linesUp = lines.linesUp;
@@ -555,18 +568,21 @@ class TextPage extends Vue {
         this.debouncedPrepareNextPage();
         this.debouncedDrawStatusBar();
 
-        if (this.book && this.linesDown && this.linesDown.length < this.pageLineCount)
+        if (this.book && this.linesDown && this.linesDown.length < this.pageLineCount) {
             this.doEnd();
+            return;
+        }
     }
 
-    doPageTransition() {
+    async doPageTransition() {
         if (this.currentTransition) {
+            this.inTransition = true;
+            //switch ()
             //this.currentTransition
             //this.pageChangeTransitionSpeed
             //this.pageChangeDirectionDown  
             
-            //curr to next transition
-            //пока заглушка
+            this.inTransition = false;
         }
 
         this.currentTransition = '';
