@@ -221,8 +221,8 @@
                                 <el-col :span="11">
                                     <el-select v-model="pageChangeAnimation">
                                         <el-option label="Нет" value=""></el-option>
-                                        <el-option label="Снизу вверх" value="downShift"></el-option>
-                                        <el-option label="Слева направо" value="rightShift"></el-option>
+                                        <el-option label="Вверх-вниз" value="downShift"></el-option>
+                                        <el-option label="Вправо-влево" value="rightShift"></el-option>
                                         <el-option label="Протаивание" value="thaw"></el-option>
                                         <el-option label="Мерцание" value="blink"></el-option>
                                     </el-select>
