@@ -1,4 +1,4 @@
-//import {sleep} from '../../../share/utils';
+import {sleep} from '../../../share/utils';
 
 export default class DrawHelper {
     fontBySize(size) {
@@ -19,7 +19,7 @@ export default class DrawHelper {
         return this.context.measureText(text).width;
     }
 
-    drawPage(lines) {
+    drawPage(lines, isScrolling) {
         if (!this.lastBook || this.pageLineCount < 1 || !this.book || !lines || !this.parsed.textLength)
             return '';
 
@@ -29,7 +29,8 @@ export default class DrawHelper {
             ` color: ${this.textColor}">`;
 
         let len = lines.length;
-        len = (len > this.pageLineCount + 1 ? this.pageLineCount + 1 : len);
+        const lineCount = this.pageLineCount + (isScrolling ? 1 : 0);
+        len = (len > lineCount ? lineCount : len);
 
         let y = this.fontSize*this.textShift;
 
@@ -235,8 +236,55 @@ export default class DrawHelper {
         page2.style.opacity = '1';
     }
 
-    async doPageAnimationRightShift(page1, page2, duration, isDown, animation1Finish, animation2Finish) {
-                page.style.transition = `${this.scrollingDelay}ms ${this.scrollingType}`;
-                page.style.transform = `translateY(-${this.lineHeight}px)`;
+    async doPageAnimationRightShift(page1, page2, duration, isDown, animation1Finish) {
+        const s = this.w + this.fontSize;
+
+        if (isDown) {
+            page1.style.transform = `translateX(${s}px)`;
+            await sleep(30);
+
+            page1.style.transition = `${duration}ms ease-in-out`;
+            page1.style.transform = `translateX(0px)`;
+
+            page2.style.transition = `${duration}ms ease-in-out`;
+            page2.style.transform = `translateX(-${s}px)`;
+            await animation1Finish(duration);
+        } else {
+            page1.style.transform = `translateX(-${s}px)`;
+            await sleep(30);
+
+            page1.style.transition = `${duration}ms ease-in-out`;
+            page1.style.transform = `translateX(0px)`;
+
+            page2.style.transition = `${duration}ms ease-in-out`;
+            page2.style.transform = `translateX(${s}px)`;
+            await animation1Finish(duration);
+        }
+    }
+
+    async doPageAnimationDownShift(page1, page2, duration, isDown, animation1Finish) {
+        const s = this.h + this.fontSize/2;
+
+        if (isDown) {
+            page1.style.transform = `translateY(${s}px)`;
+            await sleep(30);
+
+            page1.style.transition = `${duration}ms ease-in-out`;
+            page1.style.transform = `translateY(0px)`;
+
+            page2.style.transition = `${duration}ms ease-in-out`;
+            page2.style.transform = `translateY(-${s}px)`;
+            await animation1Finish(duration);
+        } else {
+            page1.style.transform = `translateY(-${s}px)`;
+            await sleep(30);
+
+            page1.style.transition = `${duration}ms ease-in-out`;
+            page1.style.transform = `translateY(0px)`;
+
+            page2.style.transition = `${duration}ms ease-in-out`;
+            page2.style.transform = `translateY(${s}px)`;
+            await animation1Finish(duration);
+        }
     }
 }

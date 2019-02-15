@@ -161,6 +161,9 @@ class TextPage extends Vue {
         this.lineHeight = this.fontSize + this.lineInterval;
         this.pageLineCount = 1 + Math.floor((this.h - this.fontSize)/this.lineHeight);
 
+        this.$refs.scrollingPage1.style.width = this.w + 'px';
+        this.$refs.scrollingPage2.style.width = this.w + 'px';
+
         //stuff
         this.currentAnimation = '';
         this.pageChangeDirectionDown = true;
@@ -186,6 +189,8 @@ class TextPage extends Vue {
         this.drawHelper.textShift = this.textShift;
         this.drawHelper.p = this.p;
         this.drawHelper.w = this.w;
+        this.drawHelper.h = this.h;
+        this.drawHelper.indentLR = this.indentLR;
         this.drawHelper.textAlignJustify = this.textAlignJustify;
         this.drawHelper.lineHeight = this.lineHeight;
         this.drawHelper.context = this.context;
@@ -471,6 +476,9 @@ class TextPage extends Vue {
             return;
         }
 
+        //ждем анимацию
+        while (this.inAnimation) await sleep(10);
+
         this.stopScrolling = false;
         this.doingScrolling = true;
 
@@ -483,6 +491,8 @@ class TextPage extends Vue {
         await sleep(50);
 
         this.cachedPos = -1;
+        this.draw();
+
         const page = this.$refs.scrollingPage1;
         let i = 0;
         while (!this.stopScrolling) {
@@ -504,6 +514,7 @@ class TextPage extends Vue {
         this.resolveTransition1Finish = null;
         this.doingScrolling = false;
         this.$emit('stop-scrolling');
+        this.draw();
     }
 
     async stopTextScrolling() {
@@ -520,6 +531,8 @@ class TextPage extends Vue {
     draw() {
         //scrolling
         if (this.doingScrolling) {
+            this.currentAnimation = '';
+            
             if (this.cachedPos == this.bookPos) {
                 this.linesDown = this.linesCached.linesDown;
                 this.linesUp = this.linesCached.linesUp;
@@ -528,7 +541,7 @@ class TextPage extends Vue {
                 const lines = this.getLines(this.bookPos);
                 this.linesDown = lines.linesDown;
                 this.linesUp = lines.linesUp;
-                this.page1 = this.drawHelper.drawPage(lines.linesDown);
+                this.page1 = this.drawHelper.drawPage(lines.linesDown, true);
             }
 
             //caching next
@@ -538,7 +551,7 @@ class TextPage extends Vue {
                 if (this.linesDown && this.linesDown.length > this.pageLineCount && this.pageLineCount > 0) {
                     this.cachedPos = this.linesDown[1].begin;
                     this.linesCached = this.getLines(this.cachedPos);
-                    this.pageCached = this.drawHelper.drawPage(this.linesCached.linesDown);
+                    this.pageCached = this.drawHelper.drawPage(this.linesCached.linesDown, true);
                 }
                 this.cachedPageTimer = null;
             }, 20);
@@ -599,6 +612,8 @@ class TextPage extends Vue {
 
             const animation1Finish = this.generateWaitingFunc('resolveAnimation1Finish', 'stopAnimation');
             const animation2Finish = this.generateWaitingFunc('resolveAnimation2Finish', 'stopAnimation');
+            const transition1Finish = this.generateWaitingFunc('resolveTransition1Finish', 'stopAnimation');
+            //const transition2Finish = this.generateWaitingFunc('resolveTransition2Finish', 'stopAnimation');
             
             const duration = Math.round(3000*(1 - this.pageChangeAnimationSpeed/100));
             let page1 = this.$refs.scrollingPage1;
@@ -615,15 +630,29 @@ class TextPage extends Vue {
                     break;
                 case 'rightShift':
                     await this.drawHelper.doPageAnimationRightShift(page1, page2, 
-                        duration, this.pageChangeDirectionDown, animation1Finish, animation2Finish);
+                        duration, this.pageChangeDirectionDown, transition1Finish);
+                    break;
+                case 'downShift':
+                    await this.drawHelper.doPageAnimationDownShift(page1, page2, 
+                        duration, this.pageChangeDirectionDown, transition1Finish);
                     break;
             }
             
             this.resolveAnimation1Finish = null;
             this.resolveAnimation2Finish = null;
+            this.resolveTransition1Finish = null;
+            this.resolveTransition2Finish = null;
 
             page1.style.animation = '';
             page2.style.animation = '';
+
+            page1.style.transition = '';
+            page1.style.transform = 'none';
+            page1.offsetHeight;
+
+            page2.style.transition = '';
+            page2.style.transform = 'none';
+            page2.offsetHeight;
 
             this.currentAnimation = '';
             this.pageChangeDirectionDown = false;//true только если PgDown
