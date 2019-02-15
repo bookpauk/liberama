@@ -3,6 +3,124 @@ export default class DrawHelper {
         return `${size}px ${this.fontName}`;
     }
 
+    fontByStyle(style) {
+        return `${style.italic ? 'italic' : this.fontStyle} ${style.bold ? 'bold' : this.fontWeight} ${this.fontSize}px ${this.fontName}`;
+    }
+
+    measureText(text, style) {// eslint-disable-line no-unused-vars
+        this.context.font = this.fontByStyle(style);
+        return this.context.measureText(text).width;
+    }
+
+    measureTextFont(text, font) {// eslint-disable-line no-unused-vars
+        this.context.font = font;
+        return this.context.measureText(text).width;
+    }
+
+    drawPage(lines) {
+        if (!this.lastBook || this.pageLineCount < 1 || !this.book || !lines || !this.parsed.textLength)
+            return '';
+
+        const spaceWidth = this.measureText(' ', {});
+
+        let out = `<div class="layout" style="width: ${this.realWidth}px; height: ${this.realHeight}px;` + 
+            ` color: ${this.textColor}">`;
+
+        let len = lines.length;
+        len = (len > this.pageLineCount + 1 ? this.pageLineCount + 1 : len);
+
+        let y = this.fontSize*this.textShift;
+
+        for (let i = 0; i < len; i++) {
+            const line = lines[i];
+            /* line:
+            {
+                begin: Number,
+                end: Number,
+                first: Boolean,
+                last: Boolean,
+                parts: array of {
+                    style: {bold: Boolean, italic: Boolean, center: Boolean}
+                    text: String,
+                }
+            }*/
+
+            let indent = line.first ? this.p : 0;
+
+            let lineText = '';
+            let center = false;
+            let centerStyle = {};
+            for (const part of line.parts) {
+                lineText += part.text;
+                center = center || part.style.center;
+                if (part.style.center)
+                    centerStyle = part.style;
+            }
+
+            let filled = false;
+            // если выравнивание по ширине включено
+            if (this.textAlignJustify && !line.last && !center) {
+                const words = lineText.split(' ');
+
+                if (words.length > 1) {
+                    const spaceCount = words.length - 1;
+
+                    const space = (this.w - line.width + spaceWidth*spaceCount)/spaceCount;
+
+                    let x = indent;
+                    for (const part of line.parts) {
+                        const font = this.fontByStyle(part.style);
+                        let partWords = part.text.split(' ');
+
+                        for (let j = 0; j < partWords.length; j++) {
+                            let f = font;
+                            let style = part.style;
+                            let word = partWords[j];
+                            if (i == 0 && this.searching && word.toLowerCase().indexOf(this.needle) >= 0) {
+                                style = Object.assign({}, part.style, {bold: true});
+                                f = this.fontByStyle(style);
+                            }
+                            out += this.fillText(word, x, y, f);
+                            x += this.measureText(word, style) + (j < partWords.length - 1 ? space : 0);
+                        }
+                    }
+                    filled = true;
+                }
+            }
+
+            // просто выводим текст
+            if (!filled) {
+                let x = indent;
+                x = (center ? (this.w - this.measureText(lineText, centerStyle))/2 : x);
+                for (const part of line.parts) {
+                    let font = this.fontByStyle(part.style);
+
+                    if (i == 0 && this.searching) {//для поиска, разбивка по словам
+                        let partWords = part.text.split(' ');
+                        for (let j = 0; j < partWords.length; j++) {
+                            let f = font;
+                            let style = part.style;
+                            let word = partWords[j];
+                            if (word.toLowerCase().indexOf(this.needle) >= 0) {
+                                style = Object.assign({}, part.style, {bold: true});
+                                f = this.fontByStyle(style);
+                            }
+                            out += this.fillText(word, x, y, f);
+                            x += this.measureText(word, style) + (j < partWords.length - 1 ? spaceWidth : 0);
+                        }
+                    } else {
+                        out += this.fillText(part.text, x, y, font);
+                        x += this.measureText(part.text, part.style);
+                    }
+                }
+            }
+            y += this.lineHeight;
+        }
+
+        out += '</div>';
+        return out;
+    }
+
     drawPercentBar(x, y, w, h, font, fontSize, bookPos, textLength) {
         const pad = 3;
         const fh = h - 2*pad;

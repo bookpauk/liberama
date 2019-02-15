@@ -112,9 +112,9 @@ class TextPage extends Vue {
             this.toggleLayout = !this.toggleLayout;
 
             if (this.toggleLayout)
-                this.page1 = this.drawPage(lines);
+                this.page1 = this.drawHelper.drawPage(lines);
             else
-                this.page2 = this.drawPage(lines);
+                this.page2 = this.drawHelper.drawPage(lines);
 
             this.doPageTransition();
         }, 10);
@@ -148,28 +148,7 @@ class TextPage extends Vue {
         this.lineHeight = this.fontSize + this.lineInterval;
         this.pageLineCount = 1 + Math.floor((this.h - this.fontSize)/this.lineHeight);
 
-        if (this.parsed) {
-            this.parsed.p = this.p;
-            this.parsed.w = this.w;// px, ширина текста
-            this.parsed.font = this.font;
-            this.parsed.wordWrap = this.wordWrap;
-            let t = '';
-            while (this.measureText(t, {}) < this.w) t += 'Щ';
-            this.parsed.maxWordLength = t.length - 1;
-            this.parsed.measureText = this.measureText;
-        }
-
-        //сообщение "Загрузка шрифтов..."
-        const flText = 'Загрузка шрифта...';
-        this.$refs.fontsLoading.innerHTML = flText;
-        const fontsLoadingStyle = this.$refs.fontsLoading.style;
-        fontsLoadingStyle.position = 'absolute';
-        fontsLoadingStyle.fontSize = this.fontSize + 'px';
-        fontsLoadingStyle.top = (this.realHeight/2 - 2*this.fontSize) + 'px';
-        fontsLoadingStyle.left = (this.realWidth - this.measureText(flText, {}))/2 + 'px';
-
         //stuff
-        this.statusBarColor = this.hex2rgba(this.textColor || '#000000', this.statusBarColorAlpha);
         this.currentTransition = '';
         this.pageChangeDirectionDown = true;
         this.fontShift = this.fontVertShift/100;
@@ -178,17 +157,52 @@ class TextPage extends Vue {
         //drawHelper
         this.drawHelper.realWidth = this.realWidth;
         this.drawHelper.realHeight = this.realHeight;
+        this.drawHelper.lastBook = this.lastBook;
+        this.drawHelper.book = this.book;
+        this.drawHelper.parsed = this.parsed;
+        this.drawHelper.pageLineCount = this.pageLineCount;
 
         this.drawHelper.backgroundColor = this.backgroundColor;
         this.drawHelper.statusBarColor = this.statusBarColor;
+        this.drawHelper.fontStyle = this.fontStyle;
+        this.drawHelper.fontWeight = this.fontWeight;
+        this.drawHelper.fontSize = this.fontSize;
         this.drawHelper.fontName = this.fontName;
         this.drawHelper.fontShift = this.fontShift;
-        this.drawHelper.measureText = this.measureText;
-        this.drawHelper.measureTextFont = this.measureTextFont;
+        this.drawHelper.textColor = this.textColor;
+        this.drawHelper.textShift = this.textShift;
+        this.drawHelper.p = this.p;
+        this.drawHelper.w = this.w;
+        this.drawHelper.textAlignJustify = this.textAlignJustify;
+        this.drawHelper.lineHeight = this.lineHeight;
+        this.drawHelper.context = this.context;
 
+        //сообщение "Загрузка шрифтов..."
+        const flText = 'Загрузка шрифта...';
+        this.$refs.fontsLoading.innerHTML = flText;
+        const fontsLoadingStyle = this.$refs.fontsLoading.style;
+        fontsLoadingStyle.position = 'absolute';
+        fontsLoadingStyle.fontSize = this.fontSize + 'px';
+        fontsLoadingStyle.top = (this.realHeight/2 - 2*this.fontSize) + 'px';
+        fontsLoadingStyle.left = (this.realWidth - this.drawHelper.measureText(flText, {}))/2 + 'px';
+
+        //parsed
+        if (this.parsed) {
+            this.parsed.p = this.p;
+            this.parsed.w = this.w;// px, ширина текста
+            this.parsed.font = this.font;
+            this.parsed.wordWrap = this.wordWrap;
+            let t = '';
+            while (this.drawHelper.measureText(t, {}) < this.w) t += 'Щ';
+            this.parsed.maxWordLength = t.length - 1;
+            this.parsed.measureText = this.drawHelper.measureText.bind(this.drawHelper);
+        }
+
+        //statusBar
         this.$refs.statusBar.style.left = '0px';
         this.$refs.statusBar.style.top = (this.statusBarTop ? 1 : this.realHeight - this.statusBarHeight) + 'px';
 
+        this.statusBarColor = this.hex2rgba(this.textColor || '#000000', this.statusBarColorAlpha);
         this.statusBarClickable = this.drawHelper.statusBarClickable(this.statusBarTop, this.statusBarHeight);
 
         //scrolling page
@@ -206,16 +220,6 @@ class TextPage extends Vue {
         page2.style.top = y + 'px';
         page1.style.left = this.indentLR + 'px';
         page2.style.left = this.indentLR + 'px';
-    }
-
-    measureText(text, style) {// eslint-disable-line no-unused-vars
-        this.context.font = this.fontByStyle(style);
-        return this.context.measureText(text).width;
-    }
-
-    measureTextFont(text, font) {// eslint-disable-line no-unused-vars
-        this.context.font = font;
-        return this.context.measureText(text).width;
     }
 
     async checkLoadedFonts() {
@@ -323,7 +327,6 @@ class TextPage extends Vue {
 
         this.linesUp = null;
         this.linesDown = null;
-        this.searching = false;
 
         this.statusBarMessage = '';
 
@@ -407,31 +410,27 @@ class TextPage extends Vue {
         return `${this.fontStyle} ${this.fontWeight} ${this.fontSize}px ${this.fontName}`;
     }
 
-    fontByStyle(style) {
-        return `${style.italic ? 'italic' : this.fontStyle} ${style.bold ? 'bold' : this.fontWeight} ${this.fontSize}px ${this.fontName}`;
-    }
-
     onScrollingTransitionEnd() {
         if (this.resolveTransitionFinish)
             this.resolveTransitionFinish();
     }
 
     startSearch(needle) {
-        this.needle = '';
+        this.drawHelper.needle = '';
         const words = needle.split(' ');
         for (const word of words) {
             if (word != '') {
-                this.needle = word;
+                this.drawHelper.needle = word;
                 break;
             }
         }
 
-        this.searching = true;
+        this.drawHelper.searching = true;
         this.draw();
     }
 
     stopSearch() {
-        this.searching = false;
+        this.drawHelper.searching = false;
         this.draw();
     }
 
@@ -508,7 +507,7 @@ class TextPage extends Vue {
                 const lines = this.getLines(this.bookPos);
                 this.linesDown = lines.linesDown;
                 this.linesUp = lines.linesUp;
-                this.page1 = this.drawPage(lines.linesDown);
+                this.page1 = this.drawHelper.drawPage(lines.linesDown);
             }
 
             //caching next
@@ -518,7 +517,7 @@ class TextPage extends Vue {
                 if (this.linesDown && this.linesDown.length > this.pageLineCount && this.pageLineCount > 0) {
                     this.cachedPos = this.linesDown[1].begin;
                     this.linesCached = this.getLines(this.cachedPos);
-                    this.pageCached = this.drawPage(this.linesCached.linesDown);
+                    this.pageCached = this.drawHelper.drawPage(this.linesCached.linesDown);
                 }
                 this.cachedPageTimer = null;
             }, 20);
@@ -549,12 +548,6 @@ class TextPage extends Vue {
             const lines = this.getLines(this.bookPos);
             this.linesDown = lines.linesDown;
             this.linesUp = lines.linesUp;
-
-            /*if (this.toggleLayout)
-                this.page1 = this.drawPage(lines.linesDown);
-            else
-                this.page2 = this.drawPage(lines.linesDown);*/
-            
             this.debouncedUpdatePage(lines.linesDown);
         }
 
@@ -588,110 +581,6 @@ class TextPage extends Vue {
             linesDown: this.parsed.getLines(bookPos, 2*this.pageLineCount),
             linesUp: this.parsed.getLines(bookPos, -2*this.pageLineCount)
         };
-    }
-
-    drawPage(lines) {
-        if (!this.lastBook || this.pageLineCount < 1 || !this.book || !lines || !this.parsed.textLength)
-            return '';
-
-        const spaceWidth = this.measureText(' ', {});
-
-        let out = `<div class="layout" style="width: ${this.realWidth}px; height: ${this.realHeight}px;` + 
-            ` color: ${this.textColor}">`;
-
-        let len = lines.length;
-        len = (len > this.pageLineCount + 1 ? this.pageLineCount + 1 : len);
-
-        let y = this.fontSize*this.textShift;
-
-        for (let i = 0; i < len; i++) {
-            const line = lines[i];
-            /* line:
-            {
-                begin: Number,
-                end: Number,
-                first: Boolean,
-                last: Boolean,
-                parts: array of {
-                    style: {bold: Boolean, italic: Boolean, center: Boolean}
-                    text: String,
-                }
-            }*/
-
-            let indent = line.first ? this.p : 0;
-
-            let lineText = '';
-            let center = false;
-            let centerStyle = {};
-            for (const part of line.parts) {
-                lineText += part.text;
-                center = center || part.style.center;
-                if (part.style.center)
-                    centerStyle = part.style;
-            }
-
-            let filled = false;
-            // если выравнивание по ширине включено
-            if (this.textAlignJustify && !line.last && !center) {
-                const words = lineText.split(' ');
-
-                if (words.length > 1) {
-                    const spaceCount = words.length - 1;
-
-                    const space = (this.w - line.width + spaceWidth*spaceCount)/spaceCount;
-
-                    let x = indent;
-                    for (const part of line.parts) {
-                        const font = this.fontByStyle(part.style);
-                        let partWords = part.text.split(' ');
-
-                        for (let j = 0; j < partWords.length; j++) {
-                            let f = font;
-                            let style = part.style;
-                            let word = partWords[j];
-                            if (i == 0 && this.searching && word.toLowerCase().indexOf(this.needle) >= 0) {
-                                style = Object.assign({}, part.style, {bold: true});
-                                f = this.fontByStyle(style);
-                            }
-                            out += this.drawHelper.fillText(word, x, y, f);
-                            x += this.measureText(word, style) + (j < partWords.length - 1 ? space : 0);
-                        }
-                    }
-                    filled = true;
-                }
-            }
-
-            // просто выводим текст
-            if (!filled) {
-                let x = indent;
-                x = (center ? (this.w - this.measureText(lineText, centerStyle))/2 : x);
-                for (const part of line.parts) {
-                    let font = this.fontByStyle(part.style);
-
-                    if (i == 0 && this.searching) {//для поиска, разбивка по словам
-                        let partWords = part.text.split(' ');
-                        for (let j = 0; j < partWords.length; j++) {
-                            let f = font;
-                            let style = part.style;
-                            let word = partWords[j];
-                            if (word.toLowerCase().indexOf(this.needle) >= 0) {
-                                style = Object.assign({}, part.style, {bold: true});
-                                f = this.fontByStyle(style);
-                            }
-                            out += this.drawHelper.fillText(word, x, y, f);
-                            x += this.measureText(word, style) + (j < partWords.length - 1 ? spaceWidth : 0);
-                        }
-                    } else {
-                        out += this.drawHelper.fillText(part.text, x, y, font);
-                        x += this.measureText(part.text, part.style);
-                    }
-                }
-            }
-            y += this.lineHeight;
-        }
-
-        out += '</div>';
-        return out;
     }
 
     drawStatusBar(message) {
@@ -790,9 +679,9 @@ class TextPage extends Vue {
             this.linesUpNext =  lines.linesUp;
 
             if (this.toggleLayout)
-                this.page2 = this.drawPage(lines.linesDown);//наоборот
+                this.page2 = this.drawHelper.drawPage(lines.linesDown);//наоборот
             else
-                this.page1 = this.drawPage(lines.linesDown);
+                this.page1 = this.drawHelper.drawPage(lines.linesDown);
 
             this.pagePrepared = true;
         }
