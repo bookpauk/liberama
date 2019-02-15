@@ -243,7 +243,7 @@ export default class BookParser {
             tClose += (center ? '</center>' : '');
 
             if (path.indexOf('/fictionbook/body/title') == 0) {
-                growParagraph(`${tOpen}${text}${tClose}`, text.length, true);
+                growParagraph(`${tOpen}${text}${tClose}`, text.length);
             }
 
             if (path.indexOf('/fictionbook/body/section') == 0) {
