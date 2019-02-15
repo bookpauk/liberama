@@ -153,7 +153,7 @@ const settingDefaults = {
         scrollingType: 'ease-in-out', //linear, ease, ease-in, ease-out, ease-in-out
 
         pageChangeAnimation: 'thaw',// '' - нет, downShift, rightShift, thaw - протаивание, blink - мерцание
-        pageChangeAnimationSpeed: 80, //0-100%
+        pageChangeAnimationSpeed: 90, //0-100%
 
         allowUrlParamBookPos: false,
         lazyParseEnabled: false,

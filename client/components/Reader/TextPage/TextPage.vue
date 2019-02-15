@@ -553,7 +553,7 @@ class TextPage extends Vue {
         }
 
         //fast draw prepared
-        if (!this.currentAnimation && this.pageChangeDirectionDown && this.pagePrepared && this.bookPos == this.bookPosPrepared) {
+        if (!this.inAnimation && !this.currentAnimation && this.pageChangeDirectionDown && this.pagePrepared && this.bookPos == this.bookPosPrepared) {
             this.toggleLayout = !this.toggleLayout;
             this.linesDown = this.linesDownNext;
             this.linesUp = this.linesUpNext;
@@ -566,7 +566,7 @@ class TextPage extends Vue {
         }
 
         this.pagePrepared = false;
-        if (!this.currentAnimation)
+        if (!this.inAnimation && !this.currentAnimation)
             this.debouncedPrepareNextPage();
         this.debouncedDrawStatusBar();
 
