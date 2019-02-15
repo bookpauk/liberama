@@ -218,11 +218,19 @@
                             <div class="partHeader">Анимация</div>
 
                             <el-form-item label="Вид">
-                                не готово
+                                <el-col :span="11">
+                                    <el-select v-model="pageChangeAnimation">
+                                        <el-option label="Нет" value=""></el-option>
+                                        <el-option label="Снизу вверх" value="downShift"></el-option>
+                                        <el-option label="Слева направо" value="rightShift"></el-option>
+                                        <el-option label="Протаивание" value="thaw"></el-option>
+                                        <el-option label="Мерцание" value="blink"></el-option>
+                                    </el-select>
+                                </el-col>
                             </el-form-item>
 
                             <el-form-item label="Скорость">
-                                не готово
+                                <el-input-number v-model="pageChangeAnimationSpeed" :min="0" :max="100" :disabled="pageChangeAnimation == ''"></el-input-number>
                             </el-form-item>
                         </el-form>
 
@@ -252,7 +260,16 @@
                                     <template slot="content">
                                         Показывать или нет подсказку при каждой загрузке книги
                                     </template>
-                                    <el-checkbox v-model="showClickMapPage">Показывать области управления кликом</el-checkbox>
+                                    <el-checkbox v-model="showClickMapPage" :disabled="!clickControl">Показывать области управления кликом</el-checkbox>
+                                </el-tooltip>
+                            </el-form-item>
+                            <el-form-item label="Подсказка">
+                                <el-tooltip :open-delay="500" effect="light">
+                                    <template slot="content">
+                                        Мерцать сообщением в строке статуса и на кнопке<br>
+                                        обновления при загрузке книги из кэша
+                                    </template>
+                                    <el-checkbox v-model="blinkCachedLoad">Предупреждать о загрузке из кэша</el-checkbox>
                                 </el-tooltip>
                             </el-form-item>
                             <el-form-item label="URL">

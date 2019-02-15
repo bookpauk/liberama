@@ -1,6 +1,6 @@
 {
   "name": "Liberama",
-  "version": "0.1.7",
+  "version": "0.2.0",
   "engines": {
     "node": ">=10.0.0"
   },

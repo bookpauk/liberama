@@ -133,10 +133,8 @@ export default @Component({
                 this.loadBook({url: newValue, bookPos: this.routeParamPos});
             }
         },
-        settings: function(newValue) {
-            this.allowUrlParamBookPos = newValue.allowUrlParamBookPos;
-            this.copyFullText = newValue.copyFullText;
-            this.showClickMapPage = newValue.showClickMapPage;
+        settings: function() {
+            this.loadSettings();
             this.updateRoute();
         },
         loaderActive: function(newValue) {
@@ -198,9 +196,7 @@ class Reader extends Vue {
             this.fullScreenActive = (document.fullscreenElement !== null);
         });
 
-        this.allowUrlParamBookPos = this.settings.allowUrlParamBookPos;
-        this.copyFullText = this.settings.copyFullText;
-        this.showClickMapPage = this.settings.showClickMapPage;
+        this.loadSettings();
     }
 
     mounted() {
@@ -217,6 +213,15 @@ class Reader extends Vue {
             }
             this.loading = false;
         })();
+    }
+
+    loadSettings() {
+        const settings = this.settings;
+        this.allowUrlParamBookPos = settings.allowUrlParamBookPos;
+        this.copyFullText = settings.copyFullText;
+        this.showClickMapPage = settings.showClickMapPage;
+        this.clickControl = settings.clickControl;
+        this.blinkCachedLoad = settings.blinkCachedLoad;
     }
 
     get routeParamPos() {
@@ -551,8 +556,8 @@ class Reader extends Vue {
         return classResult;
     }
 
-    async acivateClickMapPage() {
-        if (this.showClickMapPage && !this.clickMapActive) {
+    async activateClickMapPage() {
+        if (this.clickControl && this.showClickMapPage && !this.clickMapActive) {
             this.clickMapActive = true;
             await this.$refs.clickMapPage.slowDisappear();
             this.clickMapActive = false;
@@ -657,7 +662,7 @@ class Reader extends Vue {
                         progress.hide(); this.progressActive = false;
                         this.blinkCachedLoadMessage();
 
-                        await this.acivateClickMapPage();
+                        await this.activateClickMapPage();
                         return;
                     }
 
@@ -705,7 +710,7 @@ class Reader extends Vue {
                 } else
                     this.stopBlink = true;
 
-                await this.acivateClickMapPage();
+                await this.activateClickMapPage();
             } catch (e) {
                 progress.hide(); this.progressActive = false;
                 this.loaderActive = true;
@@ -738,6 +743,9 @@ class Reader extends Vue {
     }
 
     blinkCachedLoadMessage() {
+        if (!this.blinkCachedLoad)
+            return;
+
         this.blinkCount = 30;
         if (!this.inBlink) {
             this.inBlink = true;

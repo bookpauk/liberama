@@ -152,8 +152,8 @@ const settingDefaults = {
         scrollingDelay: 3000,// замедление, ms
         scrollingType: 'ease-in-out', //linear, ease, ease-in, ease-out, ease-in-out
 
-        pageChangeTransition: '',// '' - нет, downShift, rightShift, thaw - протаивание, blink - мерцание
-        pageChangeTransitionSpeed: 50, //0-100%
+        pageChangeAnimation: 'blink',// '' - нет, downShift, rightShift, thaw - протаивание, blink - мерцание
+        pageChangeAnimationSpeed: 80, //0-100%
 
         allowUrlParamBookPos: false,
         lazyParseEnabled: false,
@@ -162,6 +162,7 @@ const settingDefaults = {
         clickControl: true,
         cutEmptyParagraphs: false,
         addEmptyParagraphs: 0,
+        blinkCachedLoad: true,
 
         fontShifts: {},
 };

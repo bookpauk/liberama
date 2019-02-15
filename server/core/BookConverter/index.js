@@ -29,7 +29,8 @@ class BookConverter {
 
             const parsedUrl = new URL(url);
             if (parsedUrl.hostname == 'samlib.ru' ||
-                parsedUrl.hostname == 'budclub.ru') {
+                parsedUrl.hostname == 'budclub.ru' ||
+                parsedUrl.hostname == 'zhurnal.lib.ru') {
                 await fs.writeFile(outputFile, this.convertSamlib(data));
                 return;
             }
@@ -237,6 +238,8 @@ class BookConverter {
         let node = {_a: pars};
 
         let inPara = false;
+        let italic = false;
+        let bold = false;
 
         const openTag = (name) => {
             if (name == 'p')
@@ -249,8 +252,11 @@ class BookConverter {
         const closeTag = (name) => {
             if (name == 'p')
                 inPara = false;
-            if (node._n == name && node._p) {
+            if (node._p) {
+                const exact = (node._n == name);
                 node = node._p;
+                if (!exact)
+                    closeTag(name);
             }
         };
 
@@ -283,9 +289,11 @@ class BookConverter {
                         break;
                     case 'i':
                         openTag('emphasis');
+                        italic = true;
                         break;
                     case 'b':
                         openTag('strong');
+                        bold = true;
                         break;
                     case 'div':
                         if (tail.indexOf('align="center"') >= 0) {
@@ -331,9 +339,11 @@ class BookConverter {
                         break;
                     case 'i':
                         closeTag('emphasis');
+                        italic = false;
                         break;
                     case 'b':
                         closeTag('strong');
+                        bold = false;
                         break;
                     case 'div':
                         if (inSubtitle) {
@@ -381,8 +391,13 @@ class BookConverter {
                     return;
             }
 
+            let tOpen = (bold ? '<strong>' : '');
+            tOpen += (italic ? '<emphasis>' : '');
+            let tClose = (italic ? '</emphasis>' : '');
+            tClose += (bold ? '</strong>' : '');
+
             if (inText)
-                growParagraph(text);
+                growParagraph(`${tOpen}${text}${tClose}`);
         };
 
         sax.parseSync(repSpaces(this.decode(data).toString()), {

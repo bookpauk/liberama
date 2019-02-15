@@ -1,6 +1,127 @@
+import {sleep} from '../../../share/utils';
+
 export default class DrawHelper {
     fontBySize(size) {
         return `${size}px ${this.fontName}`;
+    }
+
+    fontByStyle(style) {
+        return `${style.italic ? 'italic' : this.fontStyle} ${style.bold ? 'bold' : this.fontWeight} ${this.fontSize}px ${this.fontName}`;
+    }
+
+    measureText(text, style) {// eslint-disable-line no-unused-vars
+        this.context.font = this.fontByStyle(style);
+        return this.context.measureText(text).width;
+    }
+
+    measureTextFont(text, font) {// eslint-disable-line no-unused-vars
+        this.context.font = font;
+        return this.context.measureText(text).width;
+    }
+
+    drawPage(lines, isScrolling) {
+        if (!this.lastBook || this.pageLineCount < 1 || !this.book || !lines || !this.parsed.textLength)
+            return '';
+
+        const spaceWidth = this.measureText(' ', {});
+
+        let out = `<div class="layout" style="width: ${this.realWidth}px; height: ${this.realHeight}px;` + 
+            ` color: ${this.textColor}">`;
+
+        let len = lines.length;
+        const lineCount = this.pageLineCount + (isScrolling ? 1 : 0);
+        len = (len > lineCount ? lineCount : len);
+
+        let y = this.fontSize*this.textShift;
+
+        for (let i = 0; i < len; i++) {
+            const line = lines[i];
+            /* line:
+            {
+                begin: Number,
+                end: Number,
+                first: Boolean,
+                last: Boolean,
+                parts: array of {
+                    style: {bold: Boolean, italic: Boolean, center: Boolean}
+                    text: String,
+                }
+            }*/
+
+            let indent = line.first ? this.p : 0;
+
+            let lineText = '';
+            let center = false;
+            let centerStyle = {};
+            for (const part of line.parts) {
+                lineText += part.text;
+                center = center || part.style.center;
+                if (part.style.center)
+                    centerStyle = part.style;
+            }
+
+            let filled = false;
+            // если выравнивание по ширине включено
+            if (this.textAlignJustify && !line.last && !center) {
+                const words = lineText.split(' ');
+
+                if (words.length > 1) {
+                    const spaceCount = words.length - 1;
+
+                    const space = (this.w - line.width + spaceWidth*spaceCount)/spaceCount;
+
+                    let x = indent;
+                    for (const part of line.parts) {
+                        const font = this.fontByStyle(part.style);
+                        let partWords = part.text.split(' ');
+
+                        for (let j = 0; j < partWords.length; j++) {
+                            let f = font;
+                            let style = part.style;
+                            let word = partWords[j];
+                            if (i == 0 && this.searching && word.toLowerCase().indexOf(this.needle) >= 0) {
+                                style = Object.assign({}, part.style, {bold: true});
+                                f = this.fontByStyle(style);
+                            }
+                            out += this.fillText(word, x, y, f);
+                            x += this.measureText(word, style) + (j < partWords.length - 1 ? space : 0);
+                        }
+                    }
+                    filled = true;
+                }
+            }
+
+            // просто выводим текст
+            if (!filled) {
+                let x = indent;
+                x = (center ? (this.w - this.measureText(lineText, centerStyle))/2 : x);
+                for (const part of line.parts) {
+                    let font = this.fontByStyle(part.style);
+
+                    if (i == 0 && this.searching) {//для поиска, разбивка по словам
+                        let partWords = part.text.split(' ');
+                        for (let j = 0; j < partWords.length; j++) {
+                            let f = font;
+                            let style = part.style;
+                            let word = partWords[j];
+                            if (word.toLowerCase().indexOf(this.needle) >= 0) {
+                                style = Object.assign({}, part.style, {bold: true});
+                                f = this.fontByStyle(style);
+                            }
+                            out += this.fillText(word, x, y, f);
+                            x += this.measureText(word, style) + (j < partWords.length - 1 ? spaceWidth : 0);
+                        }
+                    } else {
+                        out += this.fillText(part.text, x, y, font);
+                        x += this.measureText(part.text, part.style);
+                    }
+                }
+            }
+            y += this.lineHeight;
+        }
+
+        out += '</div>';
+        return out;
     }
 
     drawPercentBar(x, y, w, h, font, fontSize, bookPos, textLength) {
@@ -94,5 +215,76 @@ export default class DrawHelper {
     strokeRect(x, y, w, h, color) {
         return `<div style="position: absolute; left: ${x}px; top: ${y}px; ` +
             `width: ${w}px; height: ${h}px; box-sizing: border-box; border: 1px solid ${color}"></div>`; 
+    }
+
+    async doPageAnimationThaw(page1, page2, duration, isDown, animation1Finish) {
+        page1.style.animation = `page1-animation-thaw ${duration}ms ease-in 1`;
+        page2.style.animation = `page2-animation-thaw ${duration}ms ease-in 1`;
+        await animation1Finish(duration);
+    }
+
+    async doPageAnimationBlink(page1, page2, duration, isDown, animation1Finish, animation2Finish) {
+        page1.style.opacity = '0';
+        page2.style.opacity = '0';
+        page2.style.animation = `page2-animation-thaw ${duration/2}ms ease-out 1`;
+        await animation2Finish(duration/2);
+
+        page1.style.opacity = '1';
+        page1.style.animation = `page1-animation-thaw ${duration/2}ms ease-in 1`;
+        await animation1Finish(duration/2);
+
+        page2.style.opacity = '1';
+    }
+
+    async doPageAnimationRightShift(page1, page2, duration, isDown, animation1Finish) {
+        const s = this.w + this.fontSize;
+
+        if (isDown) {
+            page1.style.transform = `translateX(${s}px)`;
+            await sleep(30);
+
+            page1.style.transition = `${duration}ms ease-in-out`;
+            page1.style.transform = `translateX(0px)`;
+
+            page2.style.transition = `${duration}ms ease-in-out`;
+            page2.style.transform = `translateX(-${s}px)`;
+            await animation1Finish(duration);
+        } else {
+            page1.style.transform = `translateX(-${s}px)`;
+            await sleep(30);
+
+            page1.style.transition = `${duration}ms ease-in-out`;
+            page1.style.transform = `translateX(0px)`;
+
+            page2.style.transition = `${duration}ms ease-in-out`;
+            page2.style.transform = `translateX(${s}px)`;
+            await animation1Finish(duration);
+        }
+    }
+
+    async doPageAnimationDownShift(page1, page2, duration, isDown, animation1Finish) {
+        const s = this.h + this.fontSize/2;
+
+        if (isDown) {
+            page1.style.transform = `translateY(${s}px)`;
+            await sleep(30);
+
+            page1.style.transition = `${duration}ms ease-in-out`;
+            page1.style.transform = `translateY(0px)`;
+
+            page2.style.transition = `${duration}ms ease-in-out`;
+            page2.style.transform = `translateY(-${s}px)`;
+            await animation1Finish(duration);
+        } else {
+            page1.style.transform = `translateY(-${s}px)`;
+            await sleep(30);
+
+            page1.style.transition = `${duration}ms ease-in-out`;
+            page1.style.transform = `translateY(0px)`;
+
+            page2.style.transition = `${duration}ms ease-in-out`;
+            page2.style.transform = `translateY(${s}px)`;
+            await animation1Finish(duration);
+        }
     }
 }

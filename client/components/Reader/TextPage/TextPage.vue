@@ -5,12 +5,14 @@
             <!-- img -->
         </div>
         <div ref="scrollBox1" class="layout" style="overflow: hidden" @wheel.prevent.stop="onMouseWheel">
-            <div ref="scrollingPage" class="layout" @transitionend="onScrollingTransitionEnd">
+            <div ref="scrollingPage1" class="layout" @transitionend="onPage1TransitionEnd" @animationend="onPage1AnimationEnd">
                 <div v-html="page1"></div>
             </div>
         </div>
         <div ref="scrollBox2" class="layout" style="overflow: hidden" @wheel.prevent.stop="onMouseWheel">
-            <div v-html="page2"></div>
+            <div ref="scrollingPage2" class="layout" @transitionend="onPage2TransitionEnd" @animationend="onPage2AnimationEnd">
+                <div v-html="page2"></div>
+            </div>
         </div>
         <div v-show="showStatusBar" ref="statusBar" class="layout">
             <div v-html="statusBar"></div>
@@ -60,6 +62,9 @@ export default @Component({
         toggleLayout: function() {
             this.updateLayout();
         },
+        inAnimation: function() {
+            this.updateLayout();
+        },
     },
 })
 class TextPage extends Vue {
@@ -81,6 +86,9 @@ class TextPage extends Vue {
     fontStyle = null;
     fontSize = null;
     fontName = null;
+    fontWeight = null;
+
+    inAnimation = false;
 
     meta = null;
 
@@ -108,15 +116,20 @@ class TextPage extends Vue {
             this.loadSettings();
         }, 50);
 
-        this.debouncedUpdatePage = _.debounce((lines) => {
-            this.toggleLayout = !this.toggleLayout;
+        this.debouncedUpdatePage = _.debounce(async(lines) => {
+            if (!this.pageChangeAnimation)
+                this.toggleLayout = !this.toggleLayout;
+            else {
+                this.page2 = this.page1;
+                this.toggleLayout = true;
+            }
 
             if (this.toggleLayout)
-                this.page1 = this.drawPage(lines);
+                this.page1 = this.drawHelper.drawPage(lines);
             else
-                this.page2 = this.drawPage(lines);
+                this.page2 = this.drawHelper.drawPage(lines);
 
-            this.doPageTransition();
+            await this.doPageAnimation();
         }, 10);
 
         this.$root.$on('resize', () => {this.$nextTick(this.onResize)});
@@ -148,16 +161,39 @@ class TextPage extends Vue {
         this.lineHeight = this.fontSize + this.lineInterval;
         this.pageLineCount = 1 + Math.floor((this.h - this.fontSize)/this.lineHeight);
 
-        if (this.parsed) {
-            this.parsed.p = this.p;
-            this.parsed.w = this.w;// px, ширина текста
-            this.parsed.font = this.font;
-            this.parsed.wordWrap = this.wordWrap;
-            let t = '';
-            while (this.measureText(t, {}) < this.w) t += 'Щ';
-            this.parsed.maxWordLength = t.length - 1;
-            this.parsed.measureText = this.measureText;
-        }
+        this.$refs.scrollingPage1.style.width = this.w + 'px';
+        this.$refs.scrollingPage2.style.width = this.w + 'px';
+
+        //stuff
+        this.currentAnimation = '';
+        this.pageChangeDirectionDown = true;
+        this.fontShift = this.fontVertShift/100;
+        this.textShift = this.textVertShift/100 + this.fontShift;
+
+        //drawHelper
+        this.drawHelper.realWidth = this.realWidth;
+        this.drawHelper.realHeight = this.realHeight;
+        this.drawHelper.lastBook = this.lastBook;
+        this.drawHelper.book = this.book;
+        this.drawHelper.parsed = this.parsed;
+        this.drawHelper.pageLineCount = this.pageLineCount;
+
+        this.drawHelper.backgroundColor = this.backgroundColor;
+        this.drawHelper.statusBarColor = this.statusBarColor;
+        this.drawHelper.fontStyle = this.fontStyle;
+        this.drawHelper.fontWeight = this.fontWeight;
+        this.drawHelper.fontSize = this.fontSize;
+        this.drawHelper.fontName = this.fontName;
+        this.drawHelper.fontShift = this.fontShift;
+        this.drawHelper.textColor = this.textColor;
+        this.drawHelper.textShift = this.textShift;
+        this.drawHelper.p = this.p;
+        this.drawHelper.w = this.w;
+        this.drawHelper.h = this.h;
+        this.drawHelper.indentLR = this.indentLR;
+        this.drawHelper.textAlignJustify = this.textAlignJustify;
+        this.drawHelper.lineHeight = this.lineHeight;
+        this.drawHelper.context = this.context;
 
         //сообщение "Загрузка шрифтов..."
         const flText = 'Загрузка шрифта...';
@@ -166,29 +202,25 @@ class TextPage extends Vue {
         fontsLoadingStyle.position = 'absolute';
         fontsLoadingStyle.fontSize = this.fontSize + 'px';
         fontsLoadingStyle.top = (this.realHeight/2 - 2*this.fontSize) + 'px';
-        fontsLoadingStyle.left = (this.realWidth - this.measureText(flText, {}))/2 + 'px';
+        fontsLoadingStyle.left = (this.realWidth - this.drawHelper.measureText(flText, {}))/2 + 'px';
 
-        //stuff
-        this.statusBarColor = this.hex2rgba(this.textColor || '#000000', this.statusBarColorAlpha);
-        this.currentTransition = '';
-        this.pageChangeDirectionDown = true;
-        this.fontShift = this.fontVertShift/100;
-        this.textShift = this.textVertShift/100 + this.fontShift;
+        //parsed
+        if (this.parsed) {
+            this.parsed.p = this.p;
+            this.parsed.w = this.w;// px, ширина текста
+            this.parsed.font = this.font;
+            this.parsed.wordWrap = this.wordWrap;
+            let t = '';
+            while (this.drawHelper.measureText(t, {}) < this.w) t += 'Щ';
+            this.parsed.maxWordLength = t.length - 1;
+            this.parsed.measureText = this.drawHelper.measureText.bind(this.drawHelper);
+        }
 
-        //drawHelper
-        this.drawHelper.realWidth = this.realWidth;
-        this.drawHelper.realHeight = this.realHeight;
-
-        this.drawHelper.backgroundColor = this.backgroundColor;
-        this.drawHelper.statusBarColor = this.statusBarColor;
-        this.drawHelper.fontName = this.fontName;
-        this.drawHelper.fontShift = this.fontShift;
-        this.drawHelper.measureText = this.measureText;
-        this.drawHelper.measureTextFont = this.measureTextFont;
-
+        //statusBar
         this.$refs.statusBar.style.left = '0px';
         this.$refs.statusBar.style.top = (this.statusBarTop ? 1 : this.realHeight - this.statusBarHeight) + 'px';
 
+        this.statusBarColor = this.hex2rgba(this.textColor || '#000000', this.statusBarColorAlpha);
         this.statusBarClickable = this.drawHelper.statusBarClickable(this.statusBarTop, this.statusBarHeight);
 
         //scrolling page
@@ -206,16 +238,6 @@ class TextPage extends Vue {
         page2.style.top = y + 'px';
         page1.style.left = this.indentLR + 'px';
         page2.style.left = this.indentLR + 'px';
-    }
-
-    measureText(text, style) {// eslint-disable-line no-unused-vars
-        this.context.font = this.fontByStyle(style);
-        return this.context.measureText(text).width;
-    }
-
-    measureTextFont(text, font) {// eslint-disable-line no-unused-vars
-        this.context.font = font;
-        return this.context.measureText(text).width;
     }
 
     async checkLoadedFonts() {
@@ -287,18 +309,12 @@ class TextPage extends Vue {
 
         this.draw();
 
-        // шрифты хрен знает когда подгружаются, поэтому
+        // шрифты хрен знает когда подгружаются в div, поэтому
         const parsed = this.parsed;
-        if (!parsed.force) {
-            let i = 0;
+        await sleep(5000);
+        if (this.parsed === parsed) {
             parsed.force = true;
-            while (i < 10) {
-                await sleep(1000);
-                if (this.parsed != parsed)
-                    break;
-                this.draw();
-                i++;
-            }
+            this.draw();
             parsed.force = false;
         }
     }
@@ -323,7 +339,6 @@ class TextPage extends Vue {
 
         this.linesUp = null;
         this.linesDown = null;
-        this.searching = false;
 
         this.statusBarMessage = '';
 
@@ -375,7 +390,10 @@ class TextPage extends Vue {
     }
 
     updateLayout() {
-        if (this.toggleLayout) {
+        if (this.inAnimation) {
+            this.$refs.scrollBox1.style.visibility = 'visible';
+            this.$refs.scrollBox2.style.visibility = 'visible';
+        } else if (this.toggleLayout) {
             this.$refs.scrollBox1.style.visibility = 'visible';
             this.$refs.scrollBox2.style.visibility = 'hidden';
         } else {
@@ -407,32 +425,48 @@ class TextPage extends Vue {
         return `${this.fontStyle} ${this.fontWeight} ${this.fontSize}px ${this.fontName}`;
     }
 
-    fontByStyle(style) {
-        return `${style.italic ? 'italic' : this.fontStyle} ${style.bold ? 'bold' : this.fontWeight} ${this.fontSize}px ${this.fontName}`;
+    onPage1TransitionEnd() {
+        if (this.resolveTransition1Finish)
+            this.resolveTransition1Finish();
     }
 
-    onScrollingTransitionEnd() {
-        if (this.resolveTransitionFinish)
-            this.resolveTransitionFinish();
+    onPage2TransitionEnd() {
+        if (this.resolveTransition2Finish)
+            this.resolveTransition2Finish();
     }
 
     startSearch(needle) {
-        this.needle = '';
+        this.drawHelper.needle = '';
         const words = needle.split(' ');
         for (const word of words) {
             if (word != '') {
-                this.needle = word;
+                this.drawHelper.needle = word;
                 break;
             }
         }
 
-        this.searching = true;
+        this.drawHelper.searching = true;
         this.draw();
     }
 
     stopSearch() {
-        this.searching = false;
+        this.drawHelper.searching = false;
         this.draw();
+    }
+
+    generateWaitingFunc(waitingHandlerName, stopPropertyName) {
+        const func = (timeout) => {
+            return new Promise(async(resolve) => {
+                this[waitingHandlerName] = resolve;
+                let wait = (timeout + 201)/100;
+                while (wait > 0 && !this[stopPropertyName]) {
+                    wait--;
+                    await sleep(100);
+                }
+                resolve();
+            });
+        };
+        return func;
     }
 
     async startTextScrolling() {
@@ -442,20 +476,13 @@ class TextPage extends Vue {
             return;
         }
 
+        //ждем анимацию
+        while (this.inAnimation) await sleep(10);
+
         this.stopScrolling = false;
         this.doingScrolling = true;
 
-        const transitionFinish = (timeout) => {
-            return new Promise(async(resolve) => {
-                this.resolveTransitionFinish = resolve;
-                let wait = timeout/100;
-                while (wait > 0 && !this.stopScrolling) {
-                    wait--;
-                    await sleep(100);
-                }
-                resolve();
-            });
-        };
+        const transitionFinish = this.generateWaitingFunc('resolveTransition1Finish', 'stopScrolling');
 
         if (!this.toggleLayout)
             this.page1 = this.page2;
@@ -464,7 +491,9 @@ class TextPage extends Vue {
         await sleep(50);
 
         this.cachedPos = -1;
-        const page = this.$refs.scrollingPage;
+        this.draw();
+
+        const page = this.$refs.scrollingPage1;
         let i = 0;
         while (!this.stopScrolling) {
                 page.style.transition = `${this.scrollingDelay}ms ${this.scrollingType}`;
@@ -476,21 +505,22 @@ class TextPage extends Vue {
                         this.stopScrolling = true;
                     }
                 }
-                await transitionFinish(this.scrollingDelay + 201);
+                await transitionFinish(this.scrollingDelay);
                 page.style.transition = '';
                 page.style.transform = 'none';
                 page.offsetHeight;
                 i++;
         }
-        this.resolveTransitionFinish = null;
+        this.resolveTransition1Finish = null;
         this.doingScrolling = false;
         this.$emit('stop-scrolling');
+        this.draw();
     }
 
     async stopTextScrolling() {
         this.stopScrolling = true;
 
-        const page = this.$refs.scrollingPage;
+        const page = this.$refs.scrollingPage1;
         page.style.transition = '';
         page.style.transform = 'none';
         page.offsetHeight;
@@ -499,7 +529,10 @@ class TextPage extends Vue {
     }
 
     draw() {
+        //scrolling
         if (this.doingScrolling) {
+            this.currentAnimation = '';
+            
             if (this.cachedPos == this.bookPos) {
                 this.linesDown = this.linesCached.linesDown;
                 this.linesUp = this.linesCached.linesUp;
@@ -508,7 +541,7 @@ class TextPage extends Vue {
                 const lines = this.getLines(this.bookPos);
                 this.linesDown = lines.linesDown;
                 this.linesUp = lines.linesUp;
-                this.page1 = this.drawPage(lines.linesDown);
+                this.page1 = this.drawHelper.drawPage(lines.linesDown, true);
             }
 
             //caching next
@@ -518,7 +551,7 @@ class TextPage extends Vue {
                 if (this.linesDown && this.linesDown.length > this.pageLineCount && this.pageLineCount > 0) {
                     this.cachedPos = this.linesDown[1].begin;
                     this.linesCached = this.getLines(this.cachedPos);
-                    this.pageCached = this.drawPage(this.linesCached.linesDown);
+                    this.pageCached = this.drawHelper.drawPage(this.linesCached.linesDown, true);
                 }
                 this.cachedPageTimer = null;
             }, 20);
@@ -527,6 +560,7 @@ class TextPage extends Vue {
             return;
         }
 
+        //check
         if (this.w < minLayoutWidth) {
             this.page1 = null;
             this.page2 = null;
@@ -539,45 +573,93 @@ class TextPage extends Vue {
             return;
         }
 
-
-        if (this.pageChangeDirectionDown && this.pagePrepared && this.bookPos == this.bookPosPrepared) {
+        //fast draw prepared
+        if (!this.pageChangeAnimation && this.pageChangeDirectionDown && this.pagePrepared && this.bookPos == this.bookPosPrepared) {
             this.toggleLayout = !this.toggleLayout;
             this.linesDown = this.linesDownNext;
             this.linesUp = this.linesUpNext;
-            this.doPageTransition();
-        } else {
+        } else {//normal debounced draw
             const lines = this.getLines(this.bookPos);
             this.linesDown = lines.linesDown;
             this.linesUp = lines.linesUp;
-
-            /*if (this.toggleLayout)
-                this.page1 = this.drawPage(lines.linesDown);
-            else
-                this.page2 = this.drawPage(lines.linesDown);*/
-            
             this.debouncedUpdatePage(lines.linesDown);
         }
 
         this.pagePrepared = false;
-        this.debouncedPrepareNextPage();
+        if (!this.pageChangeAnimation)
+            this.debouncedPrepareNextPage();
         this.debouncedDrawStatusBar();
 
-        if (this.book && this.linesDown && this.linesDown.length < this.pageLineCount)
+        if (this.book && this.linesDown && this.linesDown.length < this.pageLineCount) {
             this.doEnd();
+            return;
+        }
     }
 
-    doPageTransition() {
-        if (this.currentTransition) {
-            //this.currentTransition
-            //this.pageChangeTransitionSpeed
-            //this.pageChangeDirectionDown  
-            
-            //curr to next transition
-            //пока заглушка
-        }
+    onPage1AnimationEnd() {
+        if (this.resolveAnimation1Finish)
+            this.resolveAnimation1Finish();
+    }
 
-        this.currentTransition = '';
-        this.pageChangeDirectionDown = false;//true только если PgDown
+    onPage2AnimationEnd() {
+        if (this.resolveAnimation2Finish)
+            this.resolveAnimation2Finish();
+    }
+
+    async doPageAnimation() {
+        if (this.currentAnimation && !this.inAnimation) {
+            this.inAnimation = true;
+
+            const animation1Finish = this.generateWaitingFunc('resolveAnimation1Finish', 'stopAnimation');
+            const animation2Finish = this.generateWaitingFunc('resolveAnimation2Finish', 'stopAnimation');
+            const transition1Finish = this.generateWaitingFunc('resolveTransition1Finish', 'stopAnimation');
+            //const transition2Finish = this.generateWaitingFunc('resolveTransition2Finish', 'stopAnimation');
+            
+            const duration = Math.round(3000*(1 - this.pageChangeAnimationSpeed/100));
+            let page1 = this.$refs.scrollingPage1;
+            let page2 = this.$refs.scrollingPage2;
+
+            switch (this.currentAnimation) {
+                case 'thaw':
+                    await this.drawHelper.doPageAnimationThaw(page1, page2, 
+                        duration, this.pageChangeDirectionDown, animation1Finish);
+                    break;
+                case 'blink':
+                    await this.drawHelper.doPageAnimationBlink(page1, page2, 
+                        duration, this.pageChangeDirectionDown, animation1Finish, animation2Finish);
+                    break;
+                case 'rightShift':
+                    await this.drawHelper.doPageAnimationRightShift(page1, page2, 
+                        duration, this.pageChangeDirectionDown, transition1Finish);
+                    break;
+                case 'downShift':
+                    await this.drawHelper.doPageAnimationDownShift(page1, page2, 
+                        duration, this.pageChangeDirectionDown, transition1Finish);
+                    break;
+            }
+            
+            this.resolveAnimation1Finish = null;
+            this.resolveAnimation2Finish = null;
+            this.resolveTransition1Finish = null;
+            this.resolveTransition2Finish = null;
+
+            page1.style.animation = '';
+            page2.style.animation = '';
+
+            page1.style.transition = '';
+            page1.style.transform = 'none';
+            page1.offsetHeight;
+
+            page2.style.transition = '';
+            page2.style.transform = 'none';
+            page2.offsetHeight;
+
+            this.currentAnimation = '';
+            this.pageChangeDirectionDown = false;//true только если PgDown
+
+            this.inAnimation = false;
+            this.stopAnimation = false;
+        }
     }
 
     getLines(bookPos) {
@@ -588,110 +670,6 @@ class TextPage extends Vue {
             linesDown: this.parsed.getLines(bookPos, 2*this.pageLineCount),
             linesUp: this.parsed.getLines(bookPos, -2*this.pageLineCount)
         };
-    }
-
-    drawPage(lines) {
-        if (!this.lastBook || this.pageLineCount < 1 || !this.book || !lines || !this.parsed.textLength)
-            return '';
-
-        const spaceWidth = this.measureText(' ', {});
-
-        let out = `<div class="layout" style="width: ${this.realWidth}px; height: ${this.realHeight}px;` + 
-            ` color: ${this.textColor}">`;
-
-        let len = lines.length;
-        len = (len > this.pageLineCount + 1 ? this.pageLineCount + 1 : len);
-
-        let y = this.fontSize*this.textShift;
-
-        for (let i = 0; i < len; i++) {
-            const line = lines[i];
-            /* line:
-            {
-                begin: Number,
-                end: Number,
-                first: Boolean,
-                last: Boolean,
-                parts: array of {
-                    style: {bold: Boolean, italic: Boolean, center: Boolean}
-                    text: String,
-                }
-            }*/
-
-            let indent = line.first ? this.p : 0;
-
-            let lineText = '';
-            let center = false;
-            let centerStyle = {};
-            for (const part of line.parts) {
-                lineText += part.text;
-                center = center || part.style.center;
-                if (part.style.center)
-                    centerStyle = part.style;
-            }
-
-            let filled = false;
-            // если выравнивание по ширине включено
-            if (this.textAlignJustify && !line.last && !center) {
-                const words = lineText.split(' ');
-
-                if (words.length > 1) {
-                    const spaceCount = words.length - 1;
-
-                    const space = (this.w - line.width + spaceWidth*spaceCount)/spaceCount;
-
-                    let x = indent;
-                    for (const part of line.parts) {
-                        const font = this.fontByStyle(part.style);
-                        let partWords = part.text.split(' ');
-
-                        for (let j = 0; j < partWords.length; j++) {
-                            let f = font;
-                            let style = part.style;
-                            let word = partWords[j];
-                            if (i == 0 && this.searching && word.toLowerCase().indexOf(this.needle) >= 0) {
-                                style = Object.assign({}, part.style, {bold: true});
-                                f = this.fontByStyle(style);
-                            }
-                            out += this.drawHelper.fillText(word, x, y, f);
-                            x += this.measureText(word, style) + (j < partWords.length - 1 ? space : 0);
-                        }
-                    }
-                    filled = true;
-                }
-            }
-
-            // просто выводим текст
-            if (!filled) {
-                let x = indent;
-                x = (center ? (this.w - this.measureText(lineText, centerStyle))/2 : x);
-                for (const part of line.parts) {
-                    let font = this.fontByStyle(part.style);
-
-                    if (i == 0 && this.searching) {//для поиска, разбивка по словам
-                        let partWords = part.text.split(' ');
-                        for (let j = 0; j < partWords.length; j++) {
-                            let f = font;
-                            let style = part.style;
-                            let word = partWords[j];
-                            if (word.toLowerCase().indexOf(this.needle) >= 0) {
-                                style = Object.assign({}, part.style, {bold: true});
-                                f = this.fontByStyle(style);
-                            }
-                            out += this.drawHelper.fillText(word, x, y, f);
-                            x += this.measureText(word, style) + (j < partWords.length - 1 ? spaceWidth : 0);
-                        }
-                    } else {
-                        out += this.drawHelper.fillText(part.text, x, y, font);
-                        x += this.measureText(part.text, part.style);
-                    }
-                }
-            }
-            y += this.lineHeight;
-        }
-
-        out += '</div>';
-        return out;
     }
 
     drawStatusBar(message) {
@@ -790,9 +768,9 @@ class TextPage extends Vue {
             this.linesUpNext =  lines.linesUp;
 
             if (this.toggleLayout)
-                this.page2 = this.drawPage(lines.linesDown);//наоборот
+                this.page2 = this.drawHelper.drawPage(lines.linesDown);//наоборот
             else
-                this.page1 = this.drawPage(lines.linesDown);
+                this.page1 = this.drawHelper.drawPage(lines.linesDown);
 
             this.pagePrepared = true;
         }
@@ -816,7 +794,7 @@ class TextPage extends Vue {
             if (this.keepLastToFirst)
                 i--;
             if (i >= 0 && this.linesDown.length >= 2*i) {
-                this.currentTransition = this.pageChangeTransition;
+                this.currentAnimation = this.pageChangeAnimation;
                 this.pageChangeDirectionDown = true;
                 this.bookPos = this.linesDown[i].begin;
             } else 
@@ -831,7 +809,7 @@ class TextPage extends Vue {
                 i--;
             i = (i > this.linesUp.length - 1 ? this.linesUp.length - 1 : i);
             if (i >= 0 && this.linesUp.length > i) {
-                this.currentTransition = this.pageChangeTransition;
+                this.currentAnimation = this.pageChangeAnimation;
                 this.pageChangeDirectionDown = false;
                 this.bookPos = this.linesUp[i].begin;
             }
@@ -839,6 +817,8 @@ class TextPage extends Vue {
     }
 
     doHome() {
+        this.currentAnimation = this.pageChangeAnimation;
+        this.pageChangeDirectionDown = false;
         this.bookPos = 0;
     }
 
@@ -850,6 +830,8 @@ class TextPage extends Vue {
             if (lines) {
                 i = this.pageLineCount - 1;
                 i = (i > lines.length - 1 ? lines.length - 1 : i);
+                this.currentAnimation = this.pageChangeAnimation;
+                this.pageChangeDirectionDown = true;
                 this.bookPos = lines[i].begin;
             }
         }
@@ -1170,4 +1152,13 @@ class TextPage extends Vue {
     background: url("images/paper9.jpg");
 }
 
+@keyframes page1-animation-thaw {
+    0%   { opacity: 0; }
+    100% { opacity: 1; }
+}
+
+@keyframes page2-animation-thaw {
+    0%   { opacity: 1; }
+    100% { opacity: 0; }
+}
 </style>
