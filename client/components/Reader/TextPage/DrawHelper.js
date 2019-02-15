@@ -216,9 +216,22 @@ export default class DrawHelper {
             `width: ${w}px; height: ${h}px; box-sizing: border-box; border: 1px solid ${color}"></div>`; 
     }
 
-    async doPageAnimationThaw(page1, page2, duration, isDown, animationFinish) {
+    async doPageAnimationThaw(page1, page2, duration, isDown, animation1Finish) {
         page1.style.animation = `page1-animation-thaw ${duration}ms ease-in 1`;
         page2.style.animation = `page2-animation-thaw ${duration}ms ease-in 1`;
-        await animationFinish(duration + 201);
+        await animation1Finish(duration + 201);
+    }
+
+    async doPageAnimationBlink(page1, page2, duration, isDown, animation1Finish, animation2Finish) {
+        page1.style.opacity = '0';
+        page2.style.opacity = '0';
+        page2.style.animation = `page2-animation-thaw ${duration/2}ms ease-out 1`;
+        await animation2Finish(duration/2 + 201);
+
+        page1.style.opacity = '1';
+        page1.style.animation = `page1-animation-thaw ${duration/2}ms ease-in 1`;
+        await animation1Finish(duration/2 + 201);
+
+        page2.style.opacity = '1';
     }
 }

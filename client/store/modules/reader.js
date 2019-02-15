@@ -152,8 +152,8 @@ const settingDefaults = {
         scrollingDelay: 3000,// замедление, ms
         scrollingType: 'ease-in-out', //linear, ease, ease-in, ease-out, ease-in-out
 
-        pageChangeAnimation: 'thaw',// '' - нет, downShift, rightShift, thaw - протаивание, blink - мерцание
-        pageChangeAnimationSpeed: 90, //0-100%
+        pageChangeAnimation: 'blink',// '' - нет, downShift, rightShift, thaw - протаивание, blink - мерцание
+        pageChangeAnimationSpeed: 80, //0-100%
 
         allowUrlParamBookPos: false,
         lazyParseEnabled: false,
