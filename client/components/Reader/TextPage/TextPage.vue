@@ -117,15 +117,19 @@ class TextPage extends Vue {
         }, 50);
 
         this.debouncedUpdatePage = _.debounce(async(lines) => {
-            if (!this.toggleLayout)
+            if (!this.pageChangeAnimation)
+                this.toggleLayout = !this.toggleLayout;
+            else {
+                this.page2 = this.page1;
+                this.toggleLayout = true;
+            }
+
+            if (this.toggleLayout)
                 this.page1 = this.drawHelper.drawPage(lines);
             else
                 this.page2 = this.drawHelper.drawPage(lines);
 
             await this.doPageAnimation();
-
-            if (!this.inAnimation)
-                this.toggleLayout = !this.toggleLayout;
         }, 10);
 
         this.$root.$on('resize', () => {this.$nextTick(this.onResize)});
@@ -302,16 +306,10 @@ class TextPage extends Vue {
 
         // шрифты хрен знает когда подгружаются в div, поэтому
         const parsed = this.parsed;
-        if (!parsed.force) {
-            let i = 0;
+        await sleep(5000);
+        if (this.parsed === parsed) {
             parsed.force = true;
-            while (i < 10) {
-                await sleep(1000);
-                if (this.parsed != parsed)
-                    break;
-                this.draw();
-                i++;
-            }
+            this.draw();
             parsed.force = false;
         }
     }
@@ -553,11 +551,10 @@ class TextPage extends Vue {
         }
 
         //fast draw prepared
-        if (!this.inAnimation && !this.currentAnimation && this.pageChangeDirectionDown && this.pagePrepared && this.bookPos == this.bookPosPrepared) {
+        if (!this.pageChangeAnimation && this.pageChangeDirectionDown && this.pagePrepared && this.bookPos == this.bookPosPrepared) {
             this.toggleLayout = !this.toggleLayout;
             this.linesDown = this.linesDownNext;
             this.linesUp = this.linesUpNext;
-            this.doPageAnimation();
         } else {//normal debounced draw
             const lines = this.getLines(this.bookPos);
             this.linesDown = lines.linesDown;
@@ -566,7 +563,7 @@ class TextPage extends Vue {
         }
 
         this.pagePrepared = false;
-        if (!this.inAnimation && !this.currentAnimation)
+        if (!this.pageChangeAnimation)
             this.debouncedPrepareNextPage();
         this.debouncedDrawStatusBar();
 
@@ -615,12 +612,8 @@ class TextPage extends Vue {
             };
             
             const duration = Math.round(3000*(1 - this.pageChangeAnimationSpeed/100));
-            let page1 = this.$refs.scrollingPage2;
-            let page2 = this.$refs.scrollingPage1;
-            if (!this.toggleLayout) {
-                [page1, page2] = [page2, page1];
-                [animation1Finish, animation2Finish] = [animation2Finish, animation1Finish];
-            }
+            let page1 = this.$refs.scrollingPage1;
+            let page2 = this.$refs.scrollingPage2;
 
             switch (this.currentAnimation) {
                 case 'thaw':
@@ -635,15 +628,16 @@ class TextPage extends Vue {
             
             this.resolveAnimation1Finish = null;
             this.resolveAnimation2Finish = null;
-            this.inAnimation = false;
-            this.stopAnimation = false;
 
             page1.style.animation = '';
             page2.style.animation = '';
-        }
 
-        this.currentAnimation = '';
-        this.pageChangeDirectionDown = false;//true только если PgDown
+            this.currentAnimation = '';
+            this.pageChangeDirectionDown = false;//true только если PgDown
+
+            this.inAnimation = false;
+            this.stopAnimation = false;
+        }
     }
 
     getLines(bookPos) {
