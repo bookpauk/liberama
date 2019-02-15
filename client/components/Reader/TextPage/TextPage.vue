@@ -5,12 +5,12 @@
             <!-- img -->
         </div>
         <div ref="scrollBox1" class="layout" style="overflow: hidden" @wheel.prevent.stop="onMouseWheel">
-            <div ref="scrollingPage1" class="layout" @transitionend="onScrollingTransitionEnd" @animationend="onPage1AnimationEnd">
+            <div ref="scrollingPage1" class="layout" @transitionend="onPage1TransitionEnd" @animationend="onPage1AnimationEnd">
                 <div v-html="page1"></div>
             </div>
         </div>
         <div ref="scrollBox2" class="layout" style="overflow: hidden" @wheel.prevent.stop="onMouseWheel">
-            <div ref="scrollingPage2" class="layout" @animationend="onPage2AnimationEnd">
+            <div ref="scrollingPage2" class="layout" @transitionend="onPage2TransitionEnd" @animationend="onPage2AnimationEnd">
                 <div v-html="page2"></div>
             </div>
         </div>
@@ -420,9 +420,14 @@ class TextPage extends Vue {
         return `${this.fontStyle} ${this.fontWeight} ${this.fontSize}px ${this.fontName}`;
     }
 
-    onScrollingTransitionEnd() {
-        if (this.resolveTransitionFinish)
-            this.resolveTransitionFinish();
+    onPage1TransitionEnd() {
+        if (this.resolveTransition1Finish)
+            this.resolveTransition1Finish();
+    }
+
+    onPage2TransitionEnd() {
+        if (this.resolveTransition2Finish)
+            this.resolveTransition2Finish();
     }
 
     startSearch(needle) {
@@ -444,6 +449,21 @@ class TextPage extends Vue {
         this.draw();
     }
 
+    generateWaitingFunc(waitingHandlerName, stopPropertyName) {
+        const func = (timeout) => {
+            return new Promise(async(resolve) => {
+                this[waitingHandlerName] = resolve;
+                let wait = (timeout + 201)/100;
+                while (wait > 0 && !this[stopPropertyName]) {
+                    wait--;
+                    await sleep(100);
+                }
+                resolve();
+            });
+        };
+        return func;
+    }
+
     async startTextScrolling() {
         if (this.doingScrolling || !this.book || !this.parsed.textLength || !this.linesDown || this.pageLineCount < 1 ||
             this.linesDown.length <= this.pageLineCount) {
@@ -454,17 +474,7 @@ class TextPage extends Vue {
         this.stopScrolling = false;
         this.doingScrolling = true;
 
-        const transitionFinish = (timeout) => {
-            return new Promise(async(resolve) => {
-                this.resolveTransitionFinish = resolve;
-                let wait = timeout/100;
-                while (wait > 0 && !this.stopScrolling) {
-                    wait--;
-                    await sleep(100);
-                }
-                resolve();
-            });
-        };
+        const transitionFinish = this.generateWaitingFunc('resolveTransition1Finish', 'stopScrolling');
 
         if (!this.toggleLayout)
             this.page1 = this.page2;
@@ -485,13 +495,13 @@ class TextPage extends Vue {
                         this.stopScrolling = true;
                     }
                 }
-                await transitionFinish(this.scrollingDelay + 201);
+                await transitionFinish(this.scrollingDelay);
                 page.style.transition = '';
                 page.style.transform = 'none';
                 page.offsetHeight;
                 i++;
         }
-        this.resolveTransitionFinish = null;
+        this.resolveTransition1Finish = null;
         this.doingScrolling = false;
         this.$emit('stop-scrolling');
     }
@@ -587,29 +597,8 @@ class TextPage extends Vue {
         if (this.currentAnimation && !this.inAnimation) {
             this.inAnimation = true;
 
-            let animation1Finish = (timeout) => {
-                return new Promise(async(resolve) => {
-                    this.resolveAnimation1Finish = resolve;
-                    let wait = timeout/100;
-                    while (wait > 0 && !this.stopAnimation) {
-                        wait--;
-                        await sleep(100);
-                    }
-                    resolve();
-                });
-            };
-            
-            let animation2Finish = (timeout) => {
-                return new Promise(async(resolve) => {
-                    this.resolveAnimation2Finish = resolve;
-                    let wait = timeout/100;
-                    while (wait > 0 && !this.stopAnimation) {
-                        wait--;
-                        await sleep(100);
-                    }
-                    resolve();
-                });
-            };
+            const animation1Finish = this.generateWaitingFunc('resolveAnimation1Finish', 'stopAnimation');
+            const animation2Finish = this.generateWaitingFunc('resolveAnimation2Finish', 'stopAnimation');
             
             const duration = Math.round(3000*(1 - this.pageChangeAnimationSpeed/100));
             let page1 = this.$refs.scrollingPage1;
@@ -622,6 +611,10 @@ class TextPage extends Vue {
                     break;
                 case 'blink':
                     await this.drawHelper.doPageAnimationBlink(page1, page2, 
+                        duration, this.pageChangeDirectionDown, animation1Finish, animation2Finish);
+                    break;
+                case 'rightShift':
+                    await this.drawHelper.doPageAnimationRightShift(page1, page2, 
                         duration, this.pageChangeDirectionDown, animation1Finish, animation2Finish);
                     break;
             }

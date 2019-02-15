@@ -219,19 +219,24 @@ export default class DrawHelper {
     async doPageAnimationThaw(page1, page2, duration, isDown, animation1Finish) {
         page1.style.animation = `page1-animation-thaw ${duration}ms ease-in 1`;
         page2.style.animation = `page2-animation-thaw ${duration}ms ease-in 1`;
-        await animation1Finish(duration + 201);
+        await animation1Finish(duration);
     }
 
     async doPageAnimationBlink(page1, page2, duration, isDown, animation1Finish, animation2Finish) {
         page1.style.opacity = '0';
         page2.style.opacity = '0';
         page2.style.animation = `page2-animation-thaw ${duration/2}ms ease-out 1`;
-        await animation2Finish(duration/2 + 201);
+        await animation2Finish(duration/2);
 
         page1.style.opacity = '1';
         page1.style.animation = `page1-animation-thaw ${duration/2}ms ease-in 1`;
-        await animation1Finish(duration/2 + 201);
+        await animation1Finish(duration/2);
 
         page2.style.opacity = '1';
+    }
+
+    async doPageAnimationRightShift(page1, page2, duration, isDown, animation1Finish, animation2Finish) {
+                page.style.transition = `${this.scrollingDelay}ms ${this.scrollingType}`;
+                page.style.transform = `translateY(-${this.lineHeight}px)`;
     }
 }
