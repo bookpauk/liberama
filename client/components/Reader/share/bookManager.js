@@ -22,7 +22,8 @@ class BookManager {
         this.settings = settings;
         this.books = {};
         this.recent = {};
-        this.recentChanged = true;
+        this.recentChanged1 = true;
+        this.recentChanged2 = true;
 
         let len = await bmMetaStore.length();
         for (let i = 0; i < len; i++) {
@@ -170,7 +171,8 @@ class BookManager {
         await bmRecentStore.setItem(result.key, result);
         await this.cleanRecentBooks();
 
-        this.recentChanged = true;
+        this.recentChanged1 = true;
+        this.recentChanged2 = true;
         return result;
     }
 
@@ -186,7 +188,8 @@ class BookManager {
 
         await bmRecentStore.removeItem(value.key);
         delete this.recent[value.key];
-        this.recentChanged = true;
+        this.recentChanged1 = true;
+        this.recentChanged2 = true;
     }
 
     async cleanRecentBooks() {
@@ -212,7 +215,7 @@ class BookManager {
     }
 
     mostRecentBook() {
-        if (!this.recentChanged && this.mostRecentCached) {
+        if (!this.recentChanged1 && this.mostRecentCached) {
             return this.mostRecentCached;
         }
 
@@ -226,12 +229,12 @@ class BookManager {
             }
         }
         this.mostRecentCached = result;
-        this.recentChanged = false;
+        this.recentChanged1 = false;
         return result;
     }
 
     getSortedRecent() {
-        if (!this.recentChanged && this.sortedRecentCached) {
+        if (!this.recentChanged2 && this.sortedRecentCached) {
             return this.sortedRecentCached;
         }
 
@@ -240,6 +243,7 @@ class BookManager {
         result.sort((a, b) => b.touchTime - a.touchTime);
 
         this.sortedRecentCached = result;
+        this.recentChanged2 = false;
         return result;
     }
 
