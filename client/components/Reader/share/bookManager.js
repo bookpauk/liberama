@@ -193,7 +193,7 @@ class BookManager {
         if (!this.recent) 
             await this.init();
 
-        if (Object.keys(this.recent).length > 100) {
+        if (Object.keys(this.recent).length > 1000) {
             let min = Date.now();
             let found = null;
             for (let key in this.recent) {
@@ -229,6 +229,20 @@ class BookManager {
         this.recentChanged = false;
         return result;
     }
+
+    getSortedRecent() {
+        if (!this.recentChanged && this.sortedRecentCached) {
+            return this.sortedRecentCached;
+        }
+
+        let result = Object.values(this.recent);
+
+        result.sort((a, b) => b.touchTime - a.touchTime);
+
+        this.sortedRecentCached = result;
+        return result;
+    }
+
 
 }
 
