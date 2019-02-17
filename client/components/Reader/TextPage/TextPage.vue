@@ -569,7 +569,7 @@ class TextPage extends Vue {
         }
 
         if (this.book && this.bookPos > 0 && this.bookPos >= this.parsed.textLength) {
-            this.doEnd();
+            this.doEnd(true);
             return;
         }
 
@@ -591,7 +591,7 @@ class TextPage extends Vue {
         this.debouncedDrawStatusBar();
 
         if (this.book && this.linesDown && this.linesDown.length < this.pageLineCount) {
-            this.doEnd();
+            this.doEnd(true);
             return;
         }
     }
@@ -822,7 +822,7 @@ class TextPage extends Vue {
         this.bookPos = 0;
     }
 
-    doEnd() {
+    doEnd(noAni) {
         if (this.parsed.para.length && this.pageLineCount > 0) {
             let i = this.parsed.para.length - 1;
             let lastPos = this.parsed.para[i].offset + this.parsed.para[i].length - 1;
@@ -830,7 +830,8 @@ class TextPage extends Vue {
             if (lines) {
                 i = this.pageLineCount - 1;
                 i = (i > lines.length - 1 ? lines.length - 1 : i);
-                this.currentAnimation = this.pageChangeAnimation;
+                if (!noAni)
+                    this.currentAnimation = this.pageChangeAnimation;
                 this.pageChangeDirectionDown = true;
                 this.bookPos = lines[i].begin;
             }
