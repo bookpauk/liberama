@@ -6,7 +6,7 @@ const fonts = [
     {name: 'Arimo', fontVertShift: 0},
     {name: 'Avrile', fontVertShift: -10},
     {name: 'OpenSans', fontVertShift: -5},
-    {name: 'Roboto', fontVertShift: 10},
+    {name: 'Roboto', fontVertShift: 0},
     {name: 'Rubik', fontVertShift: 0},
 ];
 
@@ -134,7 +134,7 @@ const settingDefaults = {
         fontName: 'ReaderDefault',
         webFontName: '',
         fontVertShift: 0,
-        textVertShift: -20,
+        textVertShift: -15,
 
         lineInterval: 3,// px, межстрочный интервал
         textAlignJustify: true,// выравнивание по ширине
