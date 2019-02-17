@@ -284,11 +284,9 @@ class BookConverter {
                         openTag('p');
                         break;
                     case 'i':
-                        openTag('emphasis');
                         italic = true;
                         break;
                     case 'b':
-                        openTag('strong');
                         bold = true;
                         break;
                     case 'div':
@@ -334,11 +332,9 @@ class BookConverter {
                         closeTag('p');
                         break;
                     case 'i':
-                        closeTag('emphasis');
                         italic = false;
                         break;
                     case 'b':
-                        closeTag('strong');
                         bold = false;
                         break;
                     case 'div':
