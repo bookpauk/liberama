@@ -43,7 +43,7 @@ class BookConverter {
             else {
                 //может это чистый текст?
                 if (textUtils.checkIfText(data)) {
-                    await fs.writeFile(outputFile, this.convertHtml(data));
+                    await fs.writeFile(outputFile, this.convertHtml(data, true));
                     return;
                 }
 
@@ -167,7 +167,7 @@ class BookConverter {
         titleInfo['book-title'] = title;
 
         //подозрение на чистый текст, надо разбить на параграфы
-        if ((isText || pars.length < buf.length/2000) && spaceCounter.length) {
+        if (isText || pars.length < buf.length/2000) {
             let total = 0;
             for (let i = 0; i < spaceCounter.length; i++) {
                 total += (spaceCounter[i] ? spaceCounter[i] : 0);
@@ -176,41 +176,37 @@ class BookConverter {
             let i = spaceCounter.length - 1;
             while (i > 0 && (!spaceCounter[i] || spaceCounter[i] < total)) i--;
 
-            const parIndent = i;
-            if (parIndent > 0) {//нашли отступ параграфа
+            const parIndent = (i > 0 ? i : 0);
 
-                let newPars = [];
-                const newPar = () => {
-                    newPars.push({_n: 'p', _t: ''});
-                };
+            let newPars = [];
+            const newPar = () => {
+                newPars.push({_n: 'p', _t: ''});
+            };
 
-                const growPar = (text) => {
-                    const l = newPars.length;
-                    if (l) {
-                        newPars[l - 1]._t += text;
-                    }
+            const growPar = (text) => {
+                const l = newPars.length;
+                if (l) {
+                    newPars[l - 1]._t += text;
                 }
-
-                for (const par of pars) {
-                    newPar();
-
-                    const lines = par._t.split('\n');
-                    for (const line of lines) {
-                        const sp = line.split(' ');
-                        let l = 0;
-                        while (l < sp.length && sp[l].trim() == '') {
-                            l++;
-                        }
-                        if (l >= parIndent)
-                            newPar();
-                        growPar(line.trim() + ' ');
-                    }
-                }
-
-                body.section._a[0] = newPars;
-            } else {
-                body.section._a[0] = pars;
             }
+
+            for (const par of pars) {
+                newPar();
+
+                const lines = par._t.split('\n');
+                for (const line of lines) {
+                    const sp = line.split(' ');
+                    let l = 0;
+                    while (l < sp.length && sp[l].trim() == '') {
+                        l++;
+                    }
+                    if (l >= parIndent)
+                        newPar();
+                    growPar(line.trim() + ' ');
+                }
+            }
+
+            body.section._a[0] = newPars;
         } else {
             body.section._a[0] = pars;
         }
