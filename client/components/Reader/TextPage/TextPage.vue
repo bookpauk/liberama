@@ -436,15 +436,7 @@ class TextPage extends Vue {
     }
 
     startSearch(needle) {
-        this.drawHelper.needle = '';
-        const words = needle.split(' ');
-        for (const word of words) {
-            if (word != '') {
-                this.drawHelper.needle = word;
-                break;
-            }
-        }
-
+        this.drawHelper.needle = needle;
         this.drawHelper.searching = true;
         this.draw();
     }

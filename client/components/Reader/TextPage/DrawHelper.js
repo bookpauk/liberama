@@ -47,16 +47,46 @@ export default class DrawHelper {
                     text: String,
                 }
             }*/
+            let sel = new Set();
+            if (i == 0 && this.searching) {
+                let pureText = '';
+                for (const part of line.parts) {
+                    pureText += part.text;
+                }
+
+                pureText = pureText.toLowerCase();
+                let j = 0;
+                while (1) {// eslint-disable-line no-constant-condition
+                    j = pureText.indexOf(this.needle, j);
+                    if (j >= 0) {
+                        for (let k = 0; k < this.needle.length; k++) {
+                            sel.add(j + k);
+                        }
+                    } else
+                        break;
+                    j++;
+                }
+            }
 
             let lineText = '';
             let center = false;
+            let j = 0;
             for (const part of line.parts) {
                 let tOpen = (part.style.bold ? '<b>' : '');
                 tOpen += (part.style.italic ? '<i>' : '');
                 let tClose = (part.style.italic ? '</i>' : '');
                 tClose += (part.style.bold ? '</b>' : '');
 
-                lineText += `${tOpen}${part.text}${tClose}`;
+                let text = '';
+                if (i == 0 && this.searching) {
+                    for (let k = 0; k < part.text.length; k++) {
+                        text += (sel.has(j) ? `<ins>${part.text[k]}</ins>` : part.text[k]);
+                        j++;
+                    }
+                } else
+                    text = part.text;
+
+                lineText += `${tOpen}${text}${tClose}`;
 
                 center = center || part.style.center;
             }
