@@ -6,7 +6,7 @@ const api = axios.create({
 
 class Misc {
     async loadConfig() {
-        const response = await api.post('/config', {params: ['name', 'version', 'mode', 'maxUploadFileSize']});
+        const response = await api.post('/config', {params: ['name', 'version', 'mode', 'maxUploadFileSize', 'branch']});
         return response.data;
     }
 }
