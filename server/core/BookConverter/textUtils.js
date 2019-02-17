@@ -70,13 +70,22 @@ function getEncoding(buf) {
 
 function checkIfText(buf) {
     let spaceCount = 0;
+    let crCount = 0;
+    let lfCount = 0;
     for (let i = 0; i < buf.length; i++) {
         if (buf[i] == 32)
             spaceCount++;
+        if (buf[i] == 13)
+            crCount++;
+        if (buf[i] == 10)
+            lfCount++;
     }
-    const freq = spaceCount/(buf.length + 1);
 
-    return (freq > 0.1);
+    const spaceFreq = spaceCount/(buf.length + 1);
+    const crFreq = crCount/(buf.length + 1);
+    const lfFreq = lfCount/(buf.length + 1);
+
+    return (spaceFreq > 0.1 || crFreq > 0.03 || lfFreq > 0.03);
 }
 
 module.exports = {
