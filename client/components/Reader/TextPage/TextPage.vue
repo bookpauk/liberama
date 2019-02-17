@@ -1,6 +1,6 @@
 <template>
     <div ref="main" class="main">
-        <div class="layout back">
+        <div class="layout back" @wheel.prevent.stop="onMouseWheel">
             <div v-html="background"></div>
             <!-- img -->
         </div>
