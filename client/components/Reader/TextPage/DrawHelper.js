@@ -23,16 +23,16 @@ export default class DrawHelper {
         if (!this.lastBook || this.pageLineCount < 1 || !this.book || !lines || !this.parsed.textLength)
             return '';
 
-        const spaceWidth = this.measureText(' ', {});
+        const font = this.fontByStyle({});
+        const justify = (this.textAlignJustify ? 'text-align: justify; text-align-last: justify;' : '');
 
-        let out = `<div class="layout" style="width: ${this.realWidth}px; height: ${this.realHeight}px;` + 
-            ` color: ${this.textColor}">`;
+        let out = `<div class="layout" style="width: ${this.w}px; height: ${this.h}px;` + 
+            ` position: absolute; top: ${this.fontSize*this.textShift}px; color: ${this.textColor}; font: ${font}; ${justify}` +
+            ` line-height: ${this.lineHeight}px;">`;            
 
         let len = lines.length;
         const lineCount = this.pageLineCount + (isScrolling ? 1 : 0);
         len = (len > lineCount ? lineCount : len);
-
-        let y = this.fontSize*this.textShift;
 
         for (let i = 0; i < len; i++) {
             const line = lines[i];
@@ -47,77 +47,57 @@ export default class DrawHelper {
                     text: String,
                 }
             }*/
+            let sel = new Set();
+            if (i == 0 && this.searching) {
+                let pureText = '';
+                for (const part of line.parts) {
+                    pureText += part.text;
+                }
 
-            let indent = line.first ? this.p : 0;
+                pureText = pureText.toLowerCase();
+                let j = 0;
+                while (1) {// eslint-disable-line no-constant-condition
+                    j = pureText.indexOf(this.needle, j);
+                    if (j >= 0) {
+                        for (let k = 0; k < this.needle.length; k++) {
+                            sel.add(j + k);
+                        }
+                    } else
+                        break;
+                    j++;
+                }
+            }
 
             let lineText = '';
             let center = false;
-            let centerStyle = {};
+            let j = 0;
             for (const part of line.parts) {
-                lineText += part.text;
+                let tOpen = (part.style.bold ? '<b>' : '');
+                tOpen += (part.style.italic ? '<i>' : '');
+                let tClose = (part.style.italic ? '</i>' : '');
+                tClose += (part.style.bold ? '</b>' : '');
+
+                let text = '';
+                if (i == 0 && this.searching) {
+                    for (let k = 0; k < part.text.length; k++) {
+                        text += (sel.has(j) ? `<ins>${part.text[k]}</ins>` : part.text[k]);
+                        j++;
+                    }
+                } else
+                    text = part.text;
+
+                lineText += `${tOpen}${text}${tClose}`;
+
                 center = center || part.style.center;
-                if (part.style.center)
-                    centerStyle = part.style;
             }
 
-            let filled = false;
-            // если выравнивание по ширине включено
-            if (this.textAlignJustify && !line.last && !center) {
-                const words = lineText.split(' ');
+            const centerStyle = (center ? `text-align: center; text-align-last: center; width: ${this.w}px` : '')
+            if (line.first)
+                lineText = `<span style="display: inline-block; margin-left: ${this.p}px"></span>${lineText}`;
+            if (line.last || center)
+                lineText = `<span style="display: inline-block; ${centerStyle}">${lineText}</span>`;
 
-                if (words.length > 1) {
-                    const spaceCount = words.length - 1;
-
-                    const space = (this.w - line.width + spaceWidth*spaceCount)/spaceCount;
-
-                    let x = indent;
-                    for (const part of line.parts) {
-                        const font = this.fontByStyle(part.style);
-                        let partWords = part.text.split(' ');
-
-                        for (let j = 0; j < partWords.length; j++) {
-                            let f = font;
-                            let style = part.style;
-                            let word = partWords[j];
-                            if (i == 0 && this.searching && word.toLowerCase().indexOf(this.needle) >= 0) {
-                                style = Object.assign({}, part.style, {bold: true});
-                                f = this.fontByStyle(style);
-                            }
-                            out += this.fillText(word, x, y, f);
-                            x += this.measureText(word, style) + (j < partWords.length - 1 ? space : 0);
-                        }
-                    }
-                    filled = true;
-                }
-            }
-
-            // просто выводим текст
-            if (!filled) {
-                let x = indent;
-                x = (center ? (this.w - this.measureText(lineText, centerStyle))/2 : x);
-                for (const part of line.parts) {
-                    let font = this.fontByStyle(part.style);
-
-                    if (i == 0 && this.searching) {//для поиска, разбивка по словам
-                        let partWords = part.text.split(' ');
-                        for (let j = 0; j < partWords.length; j++) {
-                            let f = font;
-                            let style = part.style;
-                            let word = partWords[j];
-                            if (word.toLowerCase().indexOf(this.needle) >= 0) {
-                                style = Object.assign({}, part.style, {bold: true});
-                                f = this.fontByStyle(style);
-                            }
-                            out += this.fillText(word, x, y, f);
-                            x += this.measureText(word, style) + (j < partWords.length - 1 ? spaceWidth : 0);
-                        }
-                    } else {
-                        out += this.fillText(part.text, x, y, font);
-                        x += this.measureText(part.text, part.style);
-                    }
-                }
-            }
-            y += this.lineHeight;
+            out += (i > 0 ? '<br>' : '') + lineText;
         }
 
         out += '</div>';
