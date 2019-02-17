@@ -126,8 +126,10 @@ class HistoryPage extends Vue {
     updateTableData() {
         let result = [];
 
-        for (let bookKey in bookManager.recent) {
-            const book = bookManager.recent[bookKey];
+        const sorted = bookManager.getSortedRecent();
+        const len = (sorted.length < 100 ? sorted.length : 100);
+        for (let i = 0; i < len; i++) {
+            const book = sorted[i];
             let d = new Date();
             d.setTime(book.touchTime);
             const t = formatDate(d).split(' ');
