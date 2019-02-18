@@ -103,6 +103,13 @@ class LoaderPage extends Vue {
             event.stopPropagation();
             return true;
         }
+
+        if (event.type == 'keydown' && (document.activeElement !== input && event.code == 'KeyQ')) {
+            this.$emit('tool-bar-toggle');
+            event.preventDefault();
+            event.stopPropagation();
+            return true;
+        }
     }
 }
 //-----------------------------------------------------------------------------

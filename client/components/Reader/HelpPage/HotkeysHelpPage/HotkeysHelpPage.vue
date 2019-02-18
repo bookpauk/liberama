@@ -4,7 +4,7 @@
         <ul>
             <li><b>F1, H</b> - открыть справку</li>
             <li><b>Escape</b> - показать/скрыть страницу загрузки</li>
-            <li><b>Tab</b> - показать/скрыть панель управления</li>
+            <li><b>Tab, Q</b> - показать/скрыть панель управления</li>
             <li><b>PageUp, Left, Shift+Space, Backspace</b> - страницу назад</li>
             <li><b>PageDown, Right, Space</b> - страницу вперед</li>
             <li><b>Home</b> - в начало книги</li>

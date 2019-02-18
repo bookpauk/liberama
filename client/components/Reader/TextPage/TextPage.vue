@@ -930,6 +930,7 @@ class TextPage extends Vue {
                     this.$emit('full-screen-toogle');
                     break;
                 case 'Tab':
+                case 'KeyQ':
                     this.doToolBarToggle();
                     event.preventDefault();
                     event.stopPropagation();
