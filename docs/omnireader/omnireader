@@ -23,3 +23,26 @@ server {
     root /home/liberama/public;
   }
 }
+
+server {
+  listen 11080;
+  server_name omnireader.ru;
+
+  client_max_body_size 50m;
+
+  gzip on;
+  gzip_min_length 1024;
+  gzip_proxied expired no-cache no-store private auth;
+  gzip_types *;
+
+  root /home/oldreader;
+
+  index index.html;
+
+  # Обработка php файлов с помощью fpm
+  location ~ \.php$ { 
+    try_files $uri =404; 
+    include /etc/nginx/fastcgi.conf;
+    fastcgi_pass unix:/run/php/php7.2-fpm.sock;
+  }
+}

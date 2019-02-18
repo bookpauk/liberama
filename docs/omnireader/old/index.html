@@ -1,0 +1,279 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=windows-1251">
+	<meta http-equiv="Content-Language" content="ru">
+	<meta name="viewport" content="height=device-height, width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no, target-densitydpi=device-dpi" />
+	<meta name="description" content="браузерная онлайн-читалка книг из интернета">
+	<meta name="keywords" content="онлайн,читалка,книги,читать,браузер,интернет">
+	<title>Omni Reader - браузерная онлайн-читалка</title>
+	<link rel="icon" type="image/gif" href="js/bpricon.gif">
+	<link rel="shortcut icon" type="image/gif" href="js/bpricon.gif">
+	<link rel="stylesheet" type="text/css" media="screen" href="js/stylex.css">
+	<script src="config/config.js" type="text/javascript"></script>
+	<script src="js/bpr318.js" type="text/javascript"></script>
+	<meta name="yandex-verification" content="be58752dfe93d304" />
+</head>
+
+<body onload="onLoa();">
+
+	<div style="display: none;" id="loading">
+		<img style="float:left;padding: 0; margin: 0" src="js/load.gif"></img>
+	</div>
+
+	<noscript>
+		<div  class="over">JavaScript disabled
+		</div>
+	</noscript>
+
+	<hr id="fhr">
+
+	<div id="win">
+		<div id="header" class="header">
+		</div>
+		<!-- MAIN DIV -->
+		<div id="main">
+		</div>
+	</div>
+
+	<div class="podk" id="comm">
+		<div style="background-color: rgb(34, 34, 0); color: rgb(235, 226, 201);" class="menuCross" id="mcross" onclick="menu();return false;">x
+		</div>
+		<br>
+		<div style="text-decoration: underline; text-align: center"><span>МЕНЮ</span></div>
+		<div class="melem">
+			<br>
+			<a href="/?#" onclick="goTo();return false;">На страницу:&nbsp;</a>
+			<b onmousedown="gpa=1;pageGoto(1);" onmouseup="gpa=0;" onmouseout="gpa=0;">&lt;</b>
+			<input value="1" style="color: rgb(34, 34, 0);" id="pageGoto" size="3" maxlength="4" type="text" onkeydown="if (event.keyCode == 13) {goTo();return false;}">
+			<b onmousedown="gpa=1;pageGoto(0);" onmouseup="gpa=0;" onmouseout="gpa=0;">&gt;</b>
+			&nbsp;
+			<a href="/?#" onclick="goTo();return false;">Ok</a>
+			<br>
+			<a href="/?#" onclick="return statusPanel();">Панель статуса(px):&nbsp;</a>
+			<input style="color: rgb(34, 34, 0);" id="id_sp_size" size="3" maxlength="3" type="text" onkeydown="if (event.keyCode == 13) return statusPanel();">
+			<a href="/?#" onclick="return statusPanel();">Ok</a>
+			<br>
+			<a href="/?#" onclick="return statusPanel();">Скроллинг(ms):&nbsp;</a>
+			<input style="color: rgb(34, 34, 0);" id="id_sc_int" size="3" maxlength="3" type="text" onkeydown="if (event.keyCode == 13) return scrollInterval();">
+			<a href="/?#" onclick="return scrollInterval();">Ok</a>
+			<br>
+			<label>Полоса прокрутки<input id="id_scroll" type="checkbox" onclick="return showScroll()"></label>
+			<br>
+			<label>Управление кликом<input id="id_by_click" type="checkbox" onclick="return byClick()"></label>
+			<br><br>
+			<a href="/?#Настроить цвет и шрифт" onclick="colorMenu();return false;">Настроить цвет и шрифт</a>
+			<br>
+			<a href="/?#Справка" onclick="legend(1);return false;">Справка</a>
+			<br>
+		</div>
+	</div>
+
+	<div style="top: 172px; left: 423px" id="colorSelect">
+		<div style="background-color: rgb(34, 34, 0); color: rgb(235, 226, 201);" class="colorCross" id="cross" onclick="colorClose(); return false;">x
+		</div>
+		<div class="colorImage" onclick="colorSet(); return false;">
+		</div>
+		<div style="border-color: rgb(136, 132, 100);" class="colorMenu">
+			<div style="position:absolute;top:180px;left:0px;">
+				<div onclick="colorFontTemp=1; setSelectedFontItem(); return false;" onmouseover="this.style.backgroundColor='#0FA';" onmouseout="this.style.background='none';">
+					<span id="fontItemText">&nbsp;Текст</span>
+				</div>
+				<input onchange="colorChange(1,this.value);" id="fcolor" size="8" maxlength="7" type="text" onkeydown="if (event.keyCode == 13) {colorChange(1,this.value);return false;}">
+				<br>
+				<div onclick="colorFontTemp=0; setSelectedFontItem(); return false;" onmouseover="this.style.backgroundColor='#0FA';" onmouseout="this.style.background='none';">
+					<span id="fontItemBack">&nbsp;Фон</span>
+				</div>
+				<input onchange="colorChange(2,this.value);" id="bcolor" size="8" maxlength="7" type="text" onkeydown="if (event.keyCode == 13) {colorChange(2,this.value);return false;}">
+				<br>
+				<div>
+					&nbsp;Размер
+				</div>
+				<input onchange="colorChange(3,this.value);" id="fsize" size="8" maxlength="3" type="text" onkeydown="if (event.keyCode == 13) {colorChange(3,this.value);return false;}">
+				<br>
+				<div>
+					&nbsp;Шрифт
+				</div>
+				<select id="ffamily" onchange="gdb('ffamily2').value='';colorChange(4,this.value);">
+					<option>Trebuchet Ms</option>
+					<option>Serif</option>
+					<option>Arial</option>
+					<option>Times New Roman</option>
+					<option>Sans-Serif</option>
+					<option>Tahoma</option>
+					<option>Verdana</option>
+					<option>Lucida Sans Unicode</option>
+				</select>
+				<br>
+				<div>
+					&nbsp;Свой
+				</div>
+				<input onchange="colorChange(4,this.value);" id="ffamily2" size="8" maxlength="70" type="text" onkeydown="if (event.keyCode == 13) {colorChange(4,this.value);return false;}">
+			</div>
+			<div class="colorExample" style="cursor: pointer; height: 24px; bottom: 0px; background-color: rgb(204, 238, 255); border-top: 2px solid rgb(136, 132, 100); line-height: 26px; border-color: rgb(136, 132, 100);" onmouseover="this.style.backgroundColor='#CFC';" onmouseout="this.style.backgroundColor='#CEF';" onclick="colorSubmit();">
+				OK
+			</div>
+
+			<div id="clrdiv" class="colorExample" style="top: 78px; border-bottom: 2px solid rgb(136, 132, 100); color: rgb(34, 34, 0); background-color: rgb(235, 226, 201); border-color: rgb(136, 132, 100);overflow: hidden;">
+				Пример.
+			</div>
+			<div id="clrdiv2" class="colorExample" style="top: 0px; font-size: 21px; color: rgb(34, 34, 0); background-color: rgb(235, 226, 201);overflow: hidden;">
+				Результат.
+			</div>
+
+		</div>
+	</div>
+
+	<div id="dop" style="display:none">
+
+		<center>
+			<br><h4><strong>Omni Reader - браузерная онлайн-читалка.</strong></h4>
+			<br>Добро пожаловать!
+			<br><br><br>
+			<div class="addr">
+				<div align="left" style="text-indent: 0">Адрес книги (URL):
+				</div>
+				<input class="book" id="book" style="width:70%" type="text" onkeydown="if (event.keyCode == 13) gdb('btnOk').click()">
+				<input class="book" id="btnOk" value="ОК" onclick="location.href=siteroot + '?url=' + gdb('book').value;" type="button">
+				<div align="left" style="text-indent: 0;font-size: 12px;line-height:16px">
+					<b><a href="http://samlib.ru/comment/b/bookpauk/bookpauk_reader" target="_blank">Комментировать</a></b>
+				</div>
+			 </div>
+			 <div id="id_add"></div>
+		</center>
+
+		<br><br><strong>Возможности читалки:</strong>
+			<p>- загрузка любой страницы интернета
+			<p>- подключение к интернету не обязательно для чтения книги после ее загрузки
+			<p>- возможность изменить цвет фона, текста, размер и тип шрифта, размер панели статуса
+			<p>- запоминание текущей позиции и настроек в браузере
+			<p>- переход на заданную страницу
+			<p>- плавный скроллинг текста
+			<p>- управление кликом для сенсорных экранов
+			<p>- регистрация не требуется
+
+		<br><br>В качестве URL можно задавать html-страничку с книгой, либо прямую ссылку на файл из онлайн-библиотеки (например, скопировав адрес ссылки или кнопки "скачать fb2").
+				Поддерживаемые форматы: <strong>html, txt, fb2, fb2.zip</strong>
+
+		<br><br>Вы можете добавить в свой браузер закладку, указав в ее свойствах вместо адреса следующий код:
+		<br><p><strong>javascript:location.href='http://omnireader.ru:11080/?url='+location.href;</strong>
+		<br>Тогда, нажав на получившуюся кнопку на любой странице интернета, вы автоматически откроете ее в Omni Reader.
+
+		<br><br>Для Chrome на Android можно вызывать закладку по ее имени (имя стоит сделать попроще) в адресной строке браузера, поскольку стандартный вызов такой закладки не работает.
+
+		<br><br>Количество и нумерация страниц в читалке зависит от размера окна браузера.
+
+		<br><br><strong>Популярные ресурсы с книгами и электронные библиотеки:</strong>
+		<br><p><a href="http://samlib.ru" target="_blank">samlib.ru</a>
+		<br><p><a href="http://flibusta.is" target="_blank">flibusta.is</a>
+		<br><p><a href="http://fantasy-worlds.org" target="_blank">fantasy-worlds.org</a>
+		<br><p><a href="http://www.litmir.co" target="_blank">www.litmir.co</a>
+		<br><p><a href="http://lib.ru" target="_blank">lib.ru</a>
+
+		<br><br><strong>При необходимости загрузить файл с локального диска в читалку</strong>, можно воспользоваться одним из файлообменных
+					сервисов. Рекомендуемые файлообменники:					
+		<br><p><a href="http://fayloobmennik.cloud" target="_blank">fayloobmennik.cloud</a>
+		<br><p><a href="http://zaix.ru" target="_blank">zaix.ru</a>
+
+		<br><br>После загрузки файла на обменник, прямую ссылку на файл необходимо скопировать в поле "Адрес книги" (см. выше).
+
+		<br><br><strong>Известные проблемы:</strong>
+			<p>- при изменении/применении настроек бывают сбои из-за масштабирования страницы. Помогает обновление страницы в браузере.
+	</div>
+
+	<div id="leg" onclick="legend();">
+		<br>
+		<b>Управление:</b>
+		<p>M - МЕНЮ
+		<p>PgUp, Left, Shift+Space, Backspace - страницу назад
+		<p>PgDown, Right, Space, Enter - страницу вперёд
+		<p>Home - в начало книги
+		<p>End - в конец книги
+		<p>Up - строчку назад
+		<p>Down - строчку вперёд
+		<p>A, Shift+A - изменить размер шрифта
+		<p>S - показать/скрыть полосу прокрутки
+		<p>T - включить/отключить управление кликом
+		<p>F, F11, ` (апостроф) - вкл./выкл. полный экран
+		<p>Z, Shift+Down - плавный скроллинг текста
+		<p>Shift+Left/Shift+Right - увеличить/уменьшить интервал скроллинга
+		<p>R - принудительно обновить книгу в обход кэша
+
+		<br><br><strong>Управление на сенсорных экранах (кликом):</strong>
+		<p>PgUp-------Up------PgUp
+		<p>PgDown---Menu---PgDown
+		<p>PgDown---Down---PgDown
+
+<div id="top100">
+	<div id="id_add2"></div>
+	<br>
+<!-- Yandex.Metrika informer --><a href="https://metrika.yandex.ru/stat/?id=31398038&amp;from=informer"target="_blank" rel="nofollow"><img src="https://mc.yandex.ru/informer/31398038/3_1_FFFFFFFF_EFEFEFFF_0_pageviews"style="width:88px; height:31px; border:0;" alt="Яндекс.Метрика" title="Яндекс.Метрика: данные за сегодня (просмотры, визиты и уникальные посетители)" onclick="try{Ya.Metrika.informer({i:this,id:31398038,lang:'ru'});return false}catch(e){}" /></a><!-- /Yandex.Metrika informer --> <!-- Yandex.Metrika counter --><script type="text/javascript"> (function (d, w, c) { (w[c] = w[c] || []).push(function() { try { w.yaCounter31398038 = new Ya.Metrika({ id:31398038, clickmap:true, trackLinks:true, accurateTrackBounce:true }); } catch(e) { } }); var n = d.getElementsByTagName("script")[0], s = d.createElement("script"), f = function () { n.parentNode.insertBefore(s, n); }; s.type = "text/javascript"; s.async = true; s.src = "https://mc.yandex.ru/metrika/watch.js"; if (w.opera == "[object Opera]") { d.addEventListener("DOMContentLoaded", f, false); } else { f(); } })(document, window, "yandex_metrika_callbacks");</script><noscript><div><img src="https://mc.yandex.ru/watch/31398038" style="position:absolute; left:-9999px;" alt="" /></div></noscript><!-- /Yandex.Metrika counter -->
+
+</div>
+	</div>
+
+	<div id="footer" class="footer">
+		<div id="id_lp" style="position: absolute; left: 0">
+			<div id="bmain" class="page">
+				<a href="/"><span title="Вернуться на главную">&nbsp;&nbsp;&nbsp;&lt;&lt;&lt;&nbsp;&nbsp;</span></a>
+			</div>
+
+			<div class="page">&nbsp;&nbsp;&nbsp;
+			</div>
+			<div class="cpage" onclick="menu();return false;">
+				<span title="M - показать/скрыть меню">МЕНЮ</span>
+			</div>
+			<div class="page">&nbsp;&nbsp;&nbsp;
+			</div>
+			<div class="cpage" onclick="toggleFullScreen();return false;">
+				<span title="F, F11, ` (апостроф) - вкл./выкл. полный экран">&lt;---&gt;</span>
+			</div>
+			<div class="page">&nbsp;&nbsp;&nbsp;
+			</div>
+			<div class="cpage" onclick="incFont(1);return false;">
+				<span title="A - увеличить размер шрифта">A+</span>
+			</div>
+			<div class="page">&nbsp;
+			</div>
+			<div class="cpage" onclick="incFont(-1);return false;">
+				<span title="Shift+A - уменьшить размер шрифта">A-</span>
+			</div>
+			<div class="page">&nbsp;&nbsp;
+			</div>
+			<div class="cpage" onclick="return toggleScroll();">
+				<span title="Z, Shift+Down - вкл./выкл. плавный скроллинг текста">$</span>
+			</div>
+			<div class="page">&nbsp;&nbsp;
+			</div>
+			<div id="reload" class="cpage" onclick="return reloadBook();">
+				<span title="R - принудительно обновить книгу в обход кэша">@</span>
+			</div>
+			<div class="page" style="width: 20px">&nbsp;
+			</div>
+		</div>
+
+		<div id="orig" class="page">
+			<a id="orig_href" href="" target="_blank">&nbsp;</a>
+		</div>
+
+		<div id="id_rp" style="position: absolute; right: 0">
+			<div id="pageCount" class="page">
+				<div onmousedown="pageMove(1);" onmouseout="pageMoveClear();" onmouseup="pageMoveClear();">&lt;&nbsp;
+				</div>
+				<div onclick="pageMoveShow();" style="visibility:visible;">1/1
+				</div>
+				<div onmousedown="pageMove(0); " onmouseout="pageMoveClear();" onmouseup="pageMoveClear();">&nbsp;&gt;
+				</div>
+			</div>
+
+			<div id="pagePercent" class="page">
+			</div>
+
+			<div id="tm" class="page">
+			</div>
+			<div class="page">&nbsp;&nbsp;&nbsp;
+			</div>
+		</div>
+	</div>
+</body>
+</html>

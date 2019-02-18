@@ -1,0 +1,438 @@
+*
+{
+margin:0px;
+padding:0px;
+}
+
+body
+{
+font: 21px/26px 'Comic Sans Ms', Fantasy;
+color: #FFFFFF;
+padding: 0;
+margin: 0;
+background-color: 0;
+}
+
+hr {
+position:absolute;
+left:1%;
+width: 98%;
+height: 1px;
+bottom: 22px;
+color:#000000;
+border: none;
+z-index:6;
+}
+
+#win {
+  display:none;
+  width: 100%;
+}
+
+#main {
+width: 94.9%;
+padding-left: 2.5%;
+padding-right: 2.5%;
+font: 21px/26px 'Trebuchet Ms', Sans-Serif;
+color: #220;
+float:left;
+position:relative;
+top:0px;
+text-align: justify;
+overflow:hidden;
+overflow-y:auto;
+/*border:1px solid #000;*/
+}
+
+#main span
+{
+display:block;
+text-indent:7%;
+clear:both;
+padding:0px;
+}
+
+#main p
+{
+display:block;
+text-indent:7%;
+clear:both;
+padding:0px;
+}
+
+#main dd
+{
+display:block;
+text-indent:7%;
+clear:both;
+padding:0px;
+}
+
+#main div
+{
+text-indent:7%;
+clear:both;
+padding:0px;
+}
+
+
+#main span p
+{
+text-indent:0;
+}
+
+#main span div
+{
+text-indent:0;
+}
+
+div#main img
+{
+border:0px;
+vertical-align:top;float:left;
+
+padding:0px;
+line-height:0px;
+font-size:0px;
+}
+
+div.podk
+{
+position:absolute;
+border:3px solid #220;
+display:none;
+z-index:9;
+height:280px;
+width:264px;
+font: bold 16px 'Trebuchet Ms', Sans-Serif;
+display:none;
+}
+
+div.podk span
+{
+  text-align:center;
+  font: 21px/21px 'Trebuchet Ms', Sans-Serif;
+}
+
+div.melem {
+  padding-left: 20px;
+  line-height: 25px;
+}
+
+div.melem label {
+  cursor: pointer;
+}
+
+div.melem label input {
+  cursor: pointer;
+  position: relative; 
+  border:0;
+  left: 10px; 
+  top: 5px;
+}
+
+div.melem input
+{
+background-color:transparent;
+border:0px solid #fff;
+font: bold 14px 'Trebuchet Ms', Sans-Serif;
+text-align:center;
+height: 18px;
+border:1px solid #000;
+}
+
+div.melem b
+{
+cursor:pointer;
+}
+
+
+.over
+{
+display:block;
+color:#500;
+background-color:black;
+text-align:center;
+vertical-align:middle;
+width:100%;
+height:10050px;
+position:absolute;
+right:0px;
+bottom:0px;
+z-index:15;
+}
+
+div#loading
+{
+background-color:black;
+font: 40px 'Trebuchet Ms', Sans-Serif;
+align:center;
+color:#FFFFFF;
+position:absolute;
+left:48%;
+bottom:50%;
+z-index:16;
+}
+
+a
+{
+  text-decoration:none;
+}
+a:hover
+{
+  text-decoration:underline;
+}
+
+div#footer div a:hover, div#comm div a:hover
+{
+  text-decoration:none;
+}
+
+#tl
+{
+width:14px;
+float:left;
+}
+#tr
+{
+width:14px;
+float:right;
+}
+
+.header
+{
+  height: 0px;
+}
+
+
+.footer {
+  display: none;
+  font: 18px/21px 'Trebuchet Ms', Sans-Serif;
+  width:100%;
+  height:22px;
+  position:absolute;
+  bottom:0px;
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+.page, .cpage
+{
+  position:relative;
+  float: left;
+  vertical-align: bottom;
+  border: 0px solid yellow;
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+.cpage
+{
+  cursor:pointer;
+}
+
+#tm
+{
+}
+
+#pageCount
+{
+}
+
+#pagePercent
+{
+}
+
+#bmain
+{
+}
+
+div#pageCount div
+{
+overflow:hidden;
+float:left;
+cursor:pointer;
+text-align:center;
+visibility:hidden;
+}
+
+.l
+{
+left:17px;
+float:left;
+margin-left:0;
+}
+.t
+{
+top:4px;
+}
+.b
+{
+bottom:4px;
+}
+.r
+{
+right:17px;
+float:right;
+}
+.a
+{
+position:absolute;
+line-height:0px;
+}
+
+.addr {
+  width:80%;
+  margin-left: 21%;
+}
+
+#book
+{
+border-right:0px solid #fff !important;
+}
+.book
+{
+background-color:transparent;
+border:2px groove #000;
+font: bold 16px 'Trebuchet Ms', Sans-Serif;
+height: 26px;
+padding:0;
+margin:0;
+display:block;
+float:left;
+}
+#btnOk 
+{
+  height: 30px;
+}
+
+#book:hover
+{
+border-left:2px ridge #000;
+}
+.book:hover
+{
+border:2px ridge #000;
+}
+
+#leg
+{
+font: bold 12px Verdana, Sans-Serif;
+line-height:12px;
+width:60%;
+height:60%;
+background-color:#fff;
+color:#000;
+border:4px double black;
+padding:20px;
+text-align: justify;
+z-index:16;
+position:absolute;
+overflow:scroll;
+top:0;
+left:0;
+display:none;
+}
+#leg b
+{
+color: #AA2222;
+}
+
+
+
+
+
+
+/*келв аьюмоч фаепч START*/
+div#colorSelect 
+{  
+width:758px;
+height:600px;
+z-index:20;
+display:none;
+position:absolute;
+color:#220;
+}
+div.colorImage
+{
+width:600px;
+height:600px;
+background:url(/js/colo58.png);
+float:right;
+cursor:crosshair;
+}
+div.colorMenu
+{
+overflow:hidden;
+width:150px;
+height:330px;
+border: 3px solid #000;
+position:relative;
+background-color:white;
+font: 20px/22px 'Trebuchet Ms', Sans-Serif;
+top:150px;
+}
+div.colorMenu div div
+{
+cursor:pointer;
+float:left;
+width:76px;
+}
+div.colorMenu div input
+{
+float:right;
+height:18px;
+width:70px;
+border: 1px solid #000;
+margin:1px 0px;
+display:block;
+}
+
+div.colorMenu div select
+{
+  width: 70px;
+}
+                        
+div.colorExample
+{
+position:absolute;
+width:150px;
+height:78px;
+font: 21px/78px 'Trebuchet Ms', Sans-Serif;
+text-align:center;
+}
+div.colorCross
+{
+position:absolute;
+top:143px;
+left:147px;
+width:14px;
+height:14px;
+z-index:21;
+cursor:pointer;
+line-height:7px;
+}
+
+div.menuCross
+{
+font: 21px/26px 'Comic Sans Ms', Fantasy;
+position:absolute;
+top:-8px;
+left: 258px;
+width:14px;
+height:14px;
+z-index:21;
+cursor:pointer;
+line-height:7px;
+}
+/*келв аьюмоч фаепч END*/
+
+.test {
+  border: 1px solid #FFFFFF;
+}
+
+
+#cbscroll {
+  padding-top: 3px;
+  padding-left: 30px;
+}

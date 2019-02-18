@@ -1,0 +1,6 @@
+#RewriteEngine On
+#RewriteCond %{HTTP_HOST} ^www.bookpauk.ru$ [NC]
+#RewriteRule ^(.*)$ http://bookpauk.ru/$1 [R=301,L]
+
+Options None
+Options +ExecCGI
