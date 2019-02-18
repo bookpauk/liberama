@@ -85,7 +85,7 @@ function checkIfText(buf) {
     const crFreq = crCount/(buf.length + 1);
     const lfFreq = lfCount/(buf.length + 1);
 
-    return (spaceFreq > 0.1 || crFreq > 0.03 || lfFreq > 0.03);
+    return (buf.length < 1000 || spaceFreq > 0.1 || crFreq > 0.03 || lfFreq > 0.03);
 }
 
 module.exports = {
