@@ -2,6 +2,8 @@ import he from 'he';
 import sax from '../../../../server/core/BookConverter/sax';
 import {sleep} from '../../../share/utils';
 
+const maxImageLineCount = 100;
+
 export default class BookParser {
     constructor() {
         // defaults
@@ -141,6 +143,12 @@ export default class BookParser {
                 binaryType = (attrs['content-type'].value ? attrs['content-type'].value : '');
                 if (binaryType == 'image/jpeg' || binaryType == 'image/png')
                     binaryId = (attrs.id.value ? attrs.id.value : '');
+            }
+
+            if (tag == 'image') {
+                let attrs = sax.getAttrsSync(tail);
+                if (attrs.href.value)
+                    newParagraph(`<image href="${attrs.href.value}">${' '.repeat(maxImageLineCount)}</image>`, maxImageLineCount);
             }
 
             if (path.indexOf('/fictionbook/body') == 0) {
@@ -301,6 +309,7 @@ export default class BookParser {
             try {
                 await Promise.all(dimPromises);
             } catch (e) {
+                //
             }
         }
 
@@ -340,18 +349,26 @@ export default class BookParser {
     splitToStyle(s) {
         let result = [];/*array of {
             style: {bold: Boolean, italic: Boolean, center: Boolean},
+            image: Boolean,
+            imageId: String,
             text: String,
         }*/
         let style = {};
+        let image = {};
 
+                /*let attrs = sax.getAttrsSync(tail);
+                if (attrs.href.value)
+                    newParagraph(' '.repeat(maxImageLineCount) + `<image href="${attrs.href.value}" />`, maxImageLineCount);
+*/
         const onTextNode = async(text) => {// eslint-disable-line no-unused-vars
             result.push({
                 style: Object.assign({}, style),
-                text: text
+                image,
+                text
             });
         };
 
-        const onStartNode = async(elemName) => {// eslint-disable-line no-unused-vars
+        const onStartNode = async(elemName, tail) => {// eslint-disable-line no-unused-vars
             switch (elemName) {
                 case 'strong':
                     style.bold = true;
@@ -361,6 +378,9 @@ export default class BookParser {
                     break;
                 case 'center':
                     style.center = true;
+                    break;
+                case 'image':
+                    image = {};
                     break;
             }
         };
@@ -376,13 +396,15 @@ export default class BookParser {
                 case 'center':
                     style.center = false;
                     break;
+                case 'image':
+                    image = {};
+                    break;
             }
         };
 
         sax.parseSync(s, {
             onStartNode, onEndNode, onTextNode
         });
-
 
         //длинные слова (или белиберду без пробелов) тоже разобьем
         const maxWordLength = this.maxWordLength;
@@ -398,7 +420,7 @@ export default class BookParser {
 
                 if (i - spaceIndex >= maxWordLength && i < p.text.length - 1 && 
                     this.measureText(p.text.substr(spaceIndex + 1, i - spaceIndex), p.style) >= this.w - this.p) {
-                    result.push({style: p.style, text: p.text.substr(0, i + 1)});
+                    result.push({style: p.style, image: p.image, text: p.text.substr(0, i + 1)});
                     p = {style: p.style, text: p.text.substr(i + 1)};
                     spaceIndex = -1;
                     i = -1;
