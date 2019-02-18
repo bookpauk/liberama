@@ -53,18 +53,16 @@ class BookConverter {
     }
 
     decode(data) {
-        const charsetAll = chardet.detectAll(data.slice(0, 20000));
-
-        let selected = 'ISO-8859-5';
-        for (const charset of charsetAll) {
-            if (charset.name.indexOf('ISO-8859') < 0) {
-                selected = charset.name;
-                break;
-            }
-        }
+        let selected = textUtils.getEncoding(data);
 
         if (selected == 'ISO-8859-5') {
-            selected = textUtils.getEncoding(data);
+            const charsetAll = chardet.detectAll(data.slice(0, 20000));
+            for (const charset of charsetAll) {
+                if (charset.name.indexOf('ISO-8859') < 0) {
+                    selected = charset.name;
+                    break;
+                }
+            }
         }
 
         return iconv.decode(data, selected);
