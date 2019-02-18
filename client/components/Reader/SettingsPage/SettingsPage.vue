@@ -185,13 +185,13 @@
                                 <el-checkbox v-model="wordWrap">Перенос по слогам</el-checkbox>
                             </el-form-item>
                             <el-form-item label="Обработка">
-                                <el-checkbox v-model="cutEmptyParagraphs" @change="needReload">Убирать пустые параграфы</el-checkbox>
+                                <el-checkbox v-model="cutEmptyParagraphs">Убирать пустые параграфы</el-checkbox>
                             </el-form-item>
                             <el-form-item label="">
                                 <el-col :span="12">
                                     Добавлять пустые
                                 </el-col>
-                                <el-input-number v-model="addEmptyParagraphs" :min="0" :max="2" @change="needReload"></el-input-number>
+                                <el-input-number v-model="addEmptyParagraphs" :min="0" :max="2"></el-input-number>
                             </el-form-item>
                             
                         </el-form>
