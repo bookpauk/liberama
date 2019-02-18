@@ -37,6 +37,10 @@ export default class BookParser {
         let center = false;
         let bold = false;
         let italic = false;
+        this.binary = {};
+        let binaryId = '';
+        let binaryType = '';
+        let dimPromises = [];
 
         let paraIndex = -1;
         let paraOffset = 0;
@@ -50,6 +54,28 @@ export default class BookParser {
                 addIndex: Number, //индекс добавляемого пустого параграфа (addEmptyParagraphs)
             }
         */
+        const getImageDimensions = (binaryId, binaryType, data) => {
+            return new Promise (async(resolve, reject) => {
+                const i = new Image();
+                let resolved = false;
+                i.onload = () => {
+                    resolved = true;
+                    this.binary[binaryId] = {
+                        w: i.width,
+                        h: i.height,
+                        type: binaryType,
+                        data
+                    };
+                    resolve();
+                };
+
+                i.src = `data:${binaryType};base64,${data}`;
+                await sleep(30*1000);
+                if (!resolved)
+                    reject('Не удалось получить размер изображения');
+            });
+        };
+
         const newParagraph = (text, len, addIndex) => {
             paraIndex++;
             let p = {
@@ -103,12 +129,19 @@ export default class BookParser {
             paraOffset += p.length;
         };
 
-        const onStartNode = (elemName) => {// eslint-disable-line no-unused-vars
+        const onStartNode = (elemName, tail) => {// eslint-disable-line no-unused-vars
             if (elemName == '?xml')
                 return;
 
             tag = elemName;
             path += '/' + elemName;
+
+            if (tag == 'binary') {
+                let attrs = sax.getAttrsSync(tail);
+                binaryType = (attrs['content-type'].value ? attrs['content-type'].value : '');
+                if (binaryType == 'image/jpeg' || binaryType == 'image/png')
+                    binaryId = (attrs.id.value ? attrs.id.value : '');
+            }
 
             if (path.indexOf('/fictionbook/body') == 0) {
                 if (tag == 'title') {
@@ -146,6 +179,10 @@ export default class BookParser {
 
         const onEndNode = (elemName) => {// eslint-disable-line no-unused-vars
             if (tag == elemName) {
+                if (tag == 'binary') {
+                    binaryId = '';
+                }
+            
                 if (path.indexOf('/fictionbook/body') == 0) {
                     if (tag == 'title') {
                         bold = false;
@@ -245,6 +282,10 @@ export default class BookParser {
                         growParagraph(`${tOpen}${text}${tClose}`, text.length);
                 }
             }
+
+            if (binaryId) {
+                dimPromises.push(getImageDimensions(binaryId, binaryType, text));
+            }
         };
 
         const onProgress = async(prog) => {
@@ -255,6 +296,13 @@ export default class BookParser {
         await sax.parse(data, {
             onStartNode, onEndNode, onTextNode, onProgress
         });
+
+        if (dimPromises.length) {
+            try {
+                await Promise.all(dimPromises);
+            } catch (e) {
+            }
+        }
 
         this.fb2 = fb2;
         this.para = para;

@@ -276,7 +276,84 @@ async function parse(xstr, options) {
     await _onProgress(100);
 }
 
+function getAttrsSync(tail) {
+    let result = {};
+    let name = '';    
+    let value = '';
+    let vOpen = '';
+    let inName = false;
+    let inValue = false;
+    let waitValue = false;
+    let waitEq = false;
+
+    const pushResult = () => {
+        if (name != '') {
+            let ns = '';
+            if (name.indexOf(':') >= 0) {
+                [ns, name] = name.split(':');
+            }
+
+            result[name] = {value, ns};
+        }
+        name = '';
+        value = '';
+        vOpen = '';
+        inName = false;
+        inValue = false;
+        waitValue = false;
+        waitEq = false;
+    };
+
+    tail = tail.replace(/[\t\n\r]/g, ' ');
+    for (let i = 0; i < tail.length; i++) {
+        const c = tail.charAt(i);
+        if (c == ' ') {
+            if (inValue) {
+                if (vOpen == '"')
+                    value += c;
+                else
+                    pushResult();
+            } else if (inName) {
+                waitEq = true;
+                inName = false;
+            }
+        } else if (!inValue && c == '=') {
+            waitEq = false;
+            waitValue = true;
+            inName = false;
+        } else if (c == '"') {
+            if (inValue) {
+                pushResult();
+            } else if (waitValue) {
+                inValue = true;
+                vOpen = '"';
+            }
+        } else if (inValue) {
+            value += c;
+        } else if (inName) {
+            name += c;
+        } else if (waitEq) {
+            pushResult();
+            inName = true;
+            name = c;
+        } else if (waitValue) {
+            waitValue = false;
+            inValue = true;
+            vOpen = ' ';
+            value = c;
+        } else {
+            inName = true;
+            name = c;
+        }
+    }
+    if (name != '')
+        pushResult();
+
+    return result;
+}
+
 module.exports = {
     parseSync,
+    getAttrsSync,
     parse
 }
