@@ -3,7 +3,7 @@ import sax from '../../../../server/core/BookConverter/sax';
 import {sleep} from '../../../share/utils';
 
 export default class BookParser {
-    constructor(settings) {
+    constructor() {
         // defaults
         this.p = 30;// px, отступ параграфа
         this.w = 300;// px, ширина страницы
@@ -13,12 +13,6 @@ export default class BookParser {
         this.measureText = (text, style) => {// eslint-disable-line no-unused-vars
             return text.length*20;
         };
-
-        //настройки
-        if (settings) {
-            this.cutEmptyParagraphs = settings.cutEmptyParagraphs;
-            this.addEmptyParagraphs = settings.addEmptyParagraphs;
-        }
     }
 
     async parse(data, callback) {
@@ -51,23 +45,20 @@ export default class BookParser {
                 index: Number,
                 offset: Number, //сумма всех length до этого параграфа
                 length: Number, //длина text без тегов
-                text: String //текст параграфа (или title или epigraph и т.д) с вложенными тегами
+                text: String, //текст параграфа с вложенными тегами
+                cut: Boolean, //параграф - кандидат на сокрытие (cutEmptyParagraphs)
+                addIndex: Number, //индекс добавляемого пустого параграфа (addEmptyParagraphs)
             }
         */
-        const newParagraph = (text, len, noCut) => {
-            //схлопывание пустых параграфов
-            if (!noCut && this.cutEmptyParagraphs && paraIndex >= 0 && len == 1 && text[0] == ' ') {
-                let p = para[paraIndex];
-                if (p.length == 1 && p.text[0] == ' ')
-                    return;
-            }
-
+        const newParagraph = (text, len, addIndex) => {
             paraIndex++;
             let p = {
                 index: paraIndex,
                 offset: paraOffset,
                 length: len,
                 text: text,
+                cut: (!addIndex && (len == 1 && text[0] == ' ')),
+                addIndex: (addIndex ? addIndex : 0),
             };
 
             para[paraIndex] = p;
@@ -82,32 +73,31 @@ export default class BookParser {
             }
 
             let p = para[paraIndex];
-            if (p) {
-                //добавление пустых параграфов
-                if (this.addEmptyParagraphs && p.length == 1 && p.text[0] == ' ' && len > 0) {
-                    let i = this.addEmptyParagraphs;
-                    while (i > 0) {
-                        newParagraph(' ', 1, true);
-                        i--;
-                    }
-                    p = para[paraIndex];
+            //добавление пустых (addEmptyParagraphs) параграфов
+            if (p.length == 1 && p.text[0] == ' ' && len > 0) {
+                paraIndex--;
+                paraOffset -= p.length;
+                for (let i = 0; i < 2; i++) {
+                    newParagraph(' ', 1, i + 1);
                 }
 
-                paraOffset -= p.length;
-                if (p.length == 1 && p.text[0] == ' ' && len > 0) {
-                    p.length = 0;
-                    p.text = p.text.substr(1);
-                }
-                p.length += len;
-                p.text += text;
-            } else {
-                p = {
-                    index: paraIndex,
-                    offset: paraOffset,
-                    length: len,
-                    text: text
-                };
+                paraIndex++;
+                p.index = paraIndex;
+                p.offset = paraOffset;
+                para[paraIndex] = p;
+                paraOffset += p.length;
             }
+
+            paraOffset -= p.length;
+            //параграф оказался непустой
+            if (p.length == 1 && p.text[0] == ' ' && len > 0) {
+                p.length = 0;
+                p.text = p.text.substr(1);
+                p.cut = (len == 1 && text[0] == ' ');
+            }
+
+            p.length += len;
+            p.text += text;
 
             para[paraIndex] = p;
             paraOffset += p.length;
@@ -432,7 +422,9 @@ export default class BookParser {
             para.parsed.p === this.p &&
             para.parsed.wordWrap === this.wordWrap &&
             para.parsed.maxWordLength === this.maxWordLength &&
-            para.parsed.font === this.font
+            para.parsed.font === this.font &&
+            para.parsed.cutEmptyParagraphs === this.cutEmptyParagraphs &&
+            para.parsed.addEmptyParagraphs === this.addEmptyParagraphs
             )
             return para.parsed;
 
@@ -442,6 +434,12 @@ export default class BookParser {
             wordWrap: this.wordWrap,
             maxWordLength: this.maxWordLength,
             font: this.font,
+            cutEmptyParagraphs: this.cutEmptyParagraphs,
+            addEmptyParagraphs: this.addEmptyParagraphs,
+            visible: !(
+                (this.cutEmptyParagraphs && para.cut) ||
+                (para.addIndex > this.addEmptyParagraphs)
+            )
         };
 
 
@@ -614,16 +612,19 @@ export default class BookParser {
         let paraIndex = this.findParaIndex(bookPos);
 
         if (paraIndex === undefined)
-            return result;
+            return null;
         
         if (n > 0) {
             let parsed = this.parsePara(paraIndex);
             let i = this.findLineIndex(bookPos, parsed.lines);
             if (i === undefined)
-                return result;
+                return null;
 
             while (n > 0) {
-                result.push(parsed.lines[i]);
+                if (parsed.visible) {
+                    result.push(parsed.lines[i]);
+                    n--;
+                }
                 i++;
 
                 if (i >= parsed.lines.length) {
@@ -631,21 +632,22 @@ export default class BookParser {
                     if (paraIndex < this.para.length)
                         parsed = this.parsePara(paraIndex);
                     else
-                        return result;
+                        break;
                     i = 0;
                 }
-
-                n--;
             }
         } else if (n < 0) {
             n = -n;
             let parsed = this.parsePara(paraIndex);
             let i = this.findLineIndex(bookPos, parsed.lines);
             if (i === undefined)
-                return result;
+                return null;
 
             while (n > 0) {
-                result.push(parsed.lines[i]);
+                if (parsed.visible) {
+                    result.push(parsed.lines[i]);
+                    n--;
+                }
                 i--;
 
                 if (i < 0) {
@@ -653,16 +655,15 @@ export default class BookParser {
                     if (paraIndex >= 0)
                         parsed = this.parsePara(paraIndex);
                     else
-                        return result;
+                        break;
                     i = parsed.lines.length - 1;
                 }
-                
-                n--;
             }
         }
 
         if (!result.length)
             result = null;
+
         return result;
     }
 }

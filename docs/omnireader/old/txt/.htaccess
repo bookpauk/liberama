@@ -1,0 +1,2 @@
+AddType 'text/plain; charset=windows-1251' .txz .txt
+AddEncoding gzip .txz

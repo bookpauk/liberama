@@ -18,8 +18,7 @@ const bmRecentStore = localForage.createInstance({
 });
 
 class BookManager {
-    async init(settings) {
-        this.settings = settings;
+    async init() {
         this.books = {};
         this.recent = {};
         this.recentChanged1 = true;
@@ -132,7 +131,7 @@ class BookManager {
     async parseBook(meta, data, callback) {
         if (!this.books) 
             await this.init();
-        const parsed = new BookParser(this.settings);
+        const parsed = new BookParser();
 
         const parsedMeta = await parsed.parse(data, callback);
         const result = Object.assign({}, meta, parsedMeta, {
