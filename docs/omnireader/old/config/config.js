@@ -1,2 +1,2 @@
-	siteroot = 'http://omnireader.ru:11080/';
+	siteroot = 'http://old.omnireader.ru/';
 	doRedirect = '';
