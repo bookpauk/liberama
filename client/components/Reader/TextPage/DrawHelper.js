@@ -73,7 +73,7 @@ export default class DrawHelper {
 
             let lineText = '';
             let center = false;
-            let space = false;
+            let space = 0;
             let j = 0;
             //формируем строку
             for (const part of line.parts) {
@@ -97,7 +97,7 @@ export default class DrawHelper {
                 lineText += `${tOpen}${text}${tClose}`;
 
                 center = center || part.style.center;
-                space = space || part.style.space;
+                space = (part.style.space > 0 ? part.style.space : space);
 
                 //избражения
                 //image: {local: Boolean, inline: Boolean, id: String, imageLine: Number, lineCount: Number, paraIndex: Number},
@@ -129,7 +129,7 @@ export default class DrawHelper {
             const centerStyle = (center ? `text-align: center; text-align-last: center; width: ${this.w}px` : '')
             if ((line.first || space) && !center) {
                 let p = (line.first ? this.p : 0);
-                p = (space ? p + this.p : p);
+                p = (space ? p + this.p*space : p);
                 lineText = `<span style="display: inline-block; margin-left: ${p}px"></span>${lineText}`;
             }
 
