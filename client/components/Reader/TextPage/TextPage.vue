@@ -219,6 +219,7 @@ class TextPage extends Vue {
             this.parsed.measureText = this.drawHelper.measureText.bind(this.drawHelper);
             this.parsed.lineHeight = this.lineHeight;
             this.parsed.showImages = this.showImages;
+            this.parsed.showInlineImagesInCenter = this.showInlineImagesInCenter;
             this.parsed.imageHeightLines = this.imageHeightLines;
         }
 
