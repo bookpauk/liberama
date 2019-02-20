@@ -194,6 +194,26 @@
                                 <el-input-number v-model="addEmptyParagraphs" :min="0" :max="2"></el-input-number>
                             </el-form-item>
                             
+                            <el-form-item label="Изображения">
+                                <el-col :span="11">
+                                    <el-checkbox v-model="showImages">Показывать</el-checkbox>
+                                </el-col>
+
+                                <el-col :span="1">
+                                    &nbsp;
+                                </el-col>
+                                <el-col :span="11">
+                                    <el-tooltip :open-delay="500" effect="light" placement="top">
+                                        <template slot="content">
+                                            Определяет высоту изображения количеством строк.<br>
+                                            В случае превышения высоты, изображение будет<br>
+                                            уменьшено с сохранением пропорций так, чтобы<br>
+                                            помещаться в указанное количество строк.
+                                        </template>
+                                        <el-input-number v-model="imageHeightLines" :min="1" :max="100"></el-input-number>
+                                    </el-tooltip>
+                                </el-col>
+                            </el-form-item>
                         </el-form>
 
                         <el-form :model="form" size="mini" label-width="120px" @submit.native.prevent>

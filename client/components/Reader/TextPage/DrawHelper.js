@@ -26,10 +26,11 @@ export default class DrawHelper {
         const font = this.fontByStyle({});
         const justify = (this.textAlignJustify ? 'text-align: justify; text-align-last: justify;' : '');
 
-        let out = `<div class="layout" style="width: ${this.w}px; height: ${this.h}px;` + 
+        let out = `<div style="width: ${this.w}px; height: ${this.h}px;` + 
             ` position: absolute; top: ${this.fontSize*this.textShift}px; color: ${this.textColor}; font: ${font}; ${justify}` +
-            ` line-height: ${this.lineHeight}px;">`;            
+            ` line-height: ${this.lineHeight}px;">`;
 
+        let imageDrawn = new Set();
         let len = lines.length;
         const lineCount = this.pageLineCount + (isScrolling ? 1 : 0);
         len = (len > lineCount ? lineCount : len);
@@ -43,11 +44,13 @@ export default class DrawHelper {
                 first: Boolean,
                 last: Boolean,
                 parts: array of {
-                    style: {bold: Boolean, italic: Boolean, center: Boolean}
+                    style: {bold: Boolean, italic: Boolean, center: Boolean},
+                    image: {local: Boolean, inline: Boolean, id: String, imageLine: Number, lineCount: Number, paraIndex: Number},
                     text: String,
                 }
             }*/
             let sel = new Set();
+            //поиск
             if (i == 0 && this.searching) {
                 let pureText = '';
                 for (const part of line.parts) {
@@ -70,7 +73,9 @@ export default class DrawHelper {
 
             let lineText = '';
             let center = false;
+            let space = 0;
             let j = 0;
+            //формируем строку
             for (const part of line.parts) {
                 let tOpen = (part.style.bold ? '<b>' : '');
                 tOpen += (part.style.italic ? '<i>' : '');
@@ -86,14 +91,61 @@ export default class DrawHelper {
                 } else
                     text = part.text;
 
+                if (text.trim() == '')
+                    text = `<span style="white-space: pre">${text}</span>`;
+
                 lineText += `${tOpen}${text}${tClose}`;
 
                 center = center || part.style.center;
+                space = (part.style.space > 0 ? part.style.space : space);
+
+                //избражения
+                //image: {local: Boolean, inline: Boolean, id: String, imageLine: Number, lineCount: Number, paraIndex: Number},
+                const img = part.image;
+                if (img && img.id && !img.inline && !imageDrawn.has(img.paraIndex)) {
+                    if (img.local) {
+                        const bin = this.parsed.binary[img.id];
+
+                        let imgH = img.lineCount*this.lineHeight;
+                        imgH = (imgH <= bin.h ? imgH : bin.h);
+                        let imgW = bin.w;
+
+                        let resize = '';                        
+                        if (bin.h > imgH) {
+                            resize = `height: ${imgH}px`;
+                            imgW = imgW*imgH/bin.h;
+                        }
+
+                        const left = (this.w - imgW)/2;
+                        const top = ((img.lineCount*this.lineHeight - imgH)/2) + (i - img.imageLine)*this.lineHeight;
+                        lineText += `<img src="data:${bin.type};base64,${bin.data}" style="position: absolute; left: ${left}px; top: ${top}px; ${resize}"/>`;
+                    } else {
+                        //
+                    }
+                    imageDrawn.add(img.paraIndex);
+                }
+
+                if (img && img.id && img.inline) {
+                    if (img.local) {
+                        const bin = this.parsed.binary[img.id];
+                        let resize = '';
+                        if (bin.h > this.fontSize) {
+                            resize = `height: ${this.fontSize - 3}px`;
+                        }
+                        lineText += `<img src="data:${bin.type};base64,${bin.data}" style="${resize}"/>`;
+                    } else {
+                        //
+                    }
+                }
             }
 
             const centerStyle = (center ? `text-align: center; text-align-last: center; width: ${this.w}px` : '')
-            if (line.first)
-                lineText = `<span style="display: inline-block; margin-left: ${this.p}px"></span>${lineText}`;
+            if ((line.first || space) && !center) {
+                let p = (line.first ? this.p : 0);
+                p = (space ? p + this.p*space : p);
+                lineText = `<span style="display: inline-block; margin-left: ${p}px"></span>${lineText}`;
+            }
+
             if (line.last || center)
                 lineText = `<span style="display: inline-block; ${centerStyle}">${lineText}</span>`;
 

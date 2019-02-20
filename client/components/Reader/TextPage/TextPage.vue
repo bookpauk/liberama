@@ -209,6 +209,7 @@ class TextPage extends Vue {
             this.parsed.p = this.p;
             this.parsed.w = this.w;// px, ширина текста
             this.parsed.font = this.font;
+            this.parsed.fontSize = this.fontSize;
             this.parsed.wordWrap = this.wordWrap;
             this.parsed.cutEmptyParagraphs = this.cutEmptyParagraphs;
             this.parsed.addEmptyParagraphs = this.addEmptyParagraphs;
@@ -216,6 +217,9 @@ class TextPage extends Vue {
             while (this.drawHelper.measureText(t, {}) < this.w) t += 'Щ';
             this.parsed.maxWordLength = t.length - 1;
             this.parsed.measureText = this.drawHelper.measureText.bind(this.drawHelper);
+            this.parsed.lineHeight = this.lineHeight;
+            this.parsed.showImages = this.showImages;
+            this.parsed.imageHeightLines = this.imageHeightLines;
         }
 
         //statusBar
