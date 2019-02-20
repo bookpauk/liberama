@@ -26,10 +26,11 @@ export default class DrawHelper {
         const font = this.fontByStyle({});
         const justify = (this.textAlignJustify ? 'text-align: justify; text-align-last: justify;' : '');
 
-        let out = `<div class="layout" style="width: ${this.w}px; height: ${this.h}px;` + 
+        let out = `<div style="width: ${this.w}px; height: ${this.h}px;` + 
             ` position: absolute; top: ${this.fontSize*this.textShift}px; color: ${this.textColor}; font: ${font}; ${justify}` +
             ` line-height: ${this.lineHeight}px;">`;
 
+        let imageDrawn = new Set();
         let len = lines.length;
         const lineCount = this.pageLineCount + (isScrolling ? 1 : 0);
         len = (len > lineCount ? lineCount : len);
@@ -43,7 +44,8 @@ export default class DrawHelper {
                 first: Boolean,
                 last: Boolean,
                 parts: array of {
-                    style: {bold: Boolean, italic: Boolean, center: Boolean}
+                    style: {bold: Boolean, italic: Boolean, center: Boolean},
+                    image: {local: Boolean, inline: Boolean, id: String, imageLine: Number, lineCount: Number, resize: Boolean, paraIndex: Number},
                     text: String,
                 }
             }*/
@@ -89,10 +91,26 @@ export default class DrawHelper {
                 lineText += `${tOpen}${text}${tClose}`;
 
                 center = center || part.style.center;
+
+                //избражения
+                //image: {local: Boolean, inline: Boolean, id: String, imageLine: Number, lineCount: Number, resize: Boolean, paraIndex: Number},
+                const img = part.image;
+                if (img && img.id && !img.inline && !imageDrawn.has(img.paraIndex)) {
+                    if (img.local) {
+                        const bin = this.parsed.binary[img.id];
+                        const left = (this.w - bin.w)/2;
+                        const s = (img.lineCount*this.lineHeight - bin.h)/2;
+                        const top = s + (i - img.imageLine)*this.lineHeight;
+                        lineText += `<img src="data:${bin.type};base64,${bin.data}" style="position: absolute; left: ${left}px; top: ${top}px"/>`;
+                    } else {
+                        //
+                    }
+                    imageDrawn.add(img.paraIndex);
+                }
             }
 
             const centerStyle = (center ? `text-align: center; text-align-last: center; width: ${this.w}px` : '')
-            if (line.first)
+            if (line.first && !center)
                 lineText = `<span style="display: inline-block; margin-left: ${this.p}px"></span>${lineText}`;
             if (line.last || center)
                 lineText = `<span style="display: inline-block; ${centerStyle}">${lineText}</span>`;

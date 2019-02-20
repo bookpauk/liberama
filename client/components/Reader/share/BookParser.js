@@ -349,8 +349,7 @@ export default class BookParser {
     splitToStyle(s) {
         let result = [];/*array of {
             style: {bold: Boolean, italic: Boolean, center: Boolean},
-            image: Boolean,
-            imageId: String,
+            image: {local: Boolean, inline: Boolean, id: String},
             text: String,
         }*/
         let style = {};
@@ -379,8 +378,12 @@ export default class BookParser {
                         let attrs = sax.getAttrsSync(tail);
                         let id = attrs.href.value;
                         if (id) {
-                            id = id.substr(1);
-                            image = {inline: false, id};
+                            let local = false;
+                            if (id[0] == '#') {
+                                id = id.substr(1);
+                                local = true;
+                            }
+                            image = {local, inline: false, id};
                         }
                         break;
                     }
@@ -529,7 +532,7 @@ export default class BookParser {
             last: Boolean,
             parts: array of {
                 style: {bold: Boolean, italic: Boolean, center: Boolean},
-                image: {inline: Boolean, id: String, imageLine: Number, lineCount: Number, resize: Boolean},
+                image: {local: Boolean, inline: Boolean, id: String, imageLine: Number, lineCount: Number, resize: Boolean, paraIndex: Number},
                 text: String,
             }
         }*/
@@ -560,7 +563,15 @@ export default class BookParser {
                     line.end = para.offset + ofs;
                     line.first = (j == 0);
                     line.last = false;
-                    line.parts.push({style, text: '!', image: {inline: false, id: part.image.id, imageLine: i, lineCount, resize: (c > lineCount)}});
+                    line.parts.push({style, text: ' ', image: {
+                        local: part.image.local,
+                        inline: false, 
+                        id: part.image.id,
+                        imageLine: i,
+                        lineCount,
+                        resize: (c > lineCount),
+                        paraIndex
+                    }});
                     lines.push(line);
                     line = {begin: line.end + 1, parts: []};
                     ofs++;
@@ -568,7 +579,8 @@ export default class BookParser {
                 }
                 line.first = (j == 0);
                 line.last = true;
-                line.parts.push({style, text: '!', image: {inline: false, id: part.image.id, imageLine: i, lineCount, resize: (c > lineCount)}});
+                line.parts.push({style, text: ' ',
+                    image: {local: part.image.local, inline: false, id: part.image.id, imageLine: i, lineCount, resize: (c > lineCount), paraIndex}});
                 continue;
             }
 
