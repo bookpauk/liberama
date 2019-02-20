@@ -158,6 +158,10 @@ export default class BookParser {
                     center = true;
                 }
 
+                if (tag == 'section') {
+                    newParagraph(' ', 1);
+                }
+
                 if (tag == 'emphasis' || tag == 'strong') {
                     growParagraph(`<${tag}>`, 0);
                 }
