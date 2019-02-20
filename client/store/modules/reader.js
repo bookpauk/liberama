@@ -1,5 +1,3 @@
-import Vue from 'vue';
-
 const fonts = [
     {name: 'ReaderDefault', label: 'По-умолчанию', fontVertShift: 0},
     {name: 'GEO_1', label: 'BPG Arial', fontVertShift: 10},
@@ -164,6 +162,7 @@ const settingDefaults = {
         addEmptyParagraphs: 0,
         blinkCachedLoad: true,
         showImages: true,
+        showInlineImagesInCenter: false,
         imageHeightLines: 100,
 
         fontShifts: {},

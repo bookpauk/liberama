@@ -205,6 +205,16 @@
                                 <el-col :span="11">
                                     <el-tooltip :open-delay="500" effect="light" placement="top">
                                         <template slot="content">
+                                            Выносить все изображения в центр экрана
+                                        </template>
+                                        <el-checkbox v-model="showInlineImagesInCenter" @change="needReload">Инлайн в центр</el-checkbox>
+                                    </el-tooltip>
+                                </el-col>
+                            </el-form-item>
+                            <el-form-item label="">
+                                    Размер изображения
+                                    <el-tooltip :open-delay="500" effect="light" placement="top">
+                                        <template slot="content">
                                             Определяет высоту изображения количеством строк.<br>
                                             В случае превышения высоты, изображение будет<br>
                                             уменьшено с сохранением пропорций так, чтобы<br>
@@ -212,7 +222,6 @@
                                         </template>
                                         <el-input-number v-model="imageHeightLines" :min="1" :max="100"></el-input-number>
                                     </el-tooltip>
-                                </el-col>
                             </el-form-item>
                         </el-form>
 
