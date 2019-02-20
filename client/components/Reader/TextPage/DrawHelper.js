@@ -98,10 +98,20 @@ export default class DrawHelper {
                 if (img && img.id && !img.inline && !imageDrawn.has(img.paraIndex)) {
                     if (img.local) {
                         const bin = this.parsed.binary[img.id];
-                        const left = (this.w - bin.w)/2;
-                        const s = (img.lineCount*this.lineHeight - bin.h)/2;
-                        const top = s + (i - img.imageLine)*this.lineHeight;
-                        lineText += `<img src="data:${bin.type};base64,${bin.data}" style="position: absolute; left: ${left}px; top: ${top}px"/>`;
+
+                        let imgH = img.lineCount*this.lineHeight;
+                        imgH = (imgH <= bin.h ? imgH : bin.h);
+                        let imgW = bin.w;
+
+                        let resize = '';                        
+                        if (bin.h > imgH) {
+                            resize = `height: ${imgH}px`;
+                            imgW = imgW*imgH/bin.h;
+                        }
+
+                        const left = (this.w - imgW)/2;
+                        const top = ((img.lineCount*this.lineHeight - imgH)/2) + (i - img.imageLine)*this.lineHeight;
+                        lineText += `<img src="data:${bin.type};base64,${bin.data}" style="position: absolute; left: ${left}px; top: ${top}px; ${resize}"/>`;
                     } else {
                         //
                     }

@@ -532,7 +532,7 @@ export default class BookParser {
             last: Boolean,
             parts: array of {
                 style: {bold: Boolean, italic: Boolean, center: Boolean},
-                image: {local: Boolean, inline: Boolean, id: String, imageLine: Number, lineCount: Number, resize: Boolean, paraIndex: Number},
+                image: {local: Boolean, inline: Boolean, id: String, imageLine: Number, lineCount: Number, paraIndex: Number},
                 text: String,
             }
         }*/
@@ -553,6 +553,7 @@ export default class BookParser {
 
             //изображения
             if (part.image.id && !part.image.inline) {
+                parsed.visible = this.showImages;
                 const bin = this.binary[part.image.id];
 
                 let lineCount = this.imageHeightLines;
@@ -569,7 +570,6 @@ export default class BookParser {
                         id: part.image.id,
                         imageLine: i,
                         lineCount,
-                        resize: (c > lineCount),
                         paraIndex
                     }});
                     lines.push(line);
@@ -580,7 +580,7 @@ export default class BookParser {
                 line.first = (j == 0);
                 line.last = true;
                 line.parts.push({style, text: ' ',
-                    image: {local: part.image.local, inline: false, id: part.image.id, imageLine: i, lineCount, resize: (c > lineCount), paraIndex}});
+                    image: {local: part.image.local, inline: false, id: part.image.id, imageLine: i, lineCount, paraIndex}});
                 continue;
             }
 

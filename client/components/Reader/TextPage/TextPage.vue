@@ -217,8 +217,8 @@ class TextPage extends Vue {
             this.parsed.maxWordLength = t.length - 1;
             this.parsed.measureText = this.drawHelper.measureText.bind(this.drawHelper);
             this.parsed.lineHeight = this.lineHeight;
-            this.parsed.showImages = true;
-            this.parsed.imageHeightLines = 100;
+            this.parsed.showImages = this.showImages;
+            this.parsed.imageHeightLines = this.imageHeightLines;
         }
 
         //statusBar

@@ -163,6 +163,8 @@ const settingDefaults = {
         cutEmptyParagraphs: false,
         addEmptyParagraphs: 0,
         blinkCachedLoad: true,
+        showImages: true,
+        imageHeightLines: 100,
 
         fontShifts: {},
 };
