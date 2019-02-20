@@ -124,6 +124,19 @@ export default class DrawHelper {
                     }
                     imageDrawn.add(img.paraIndex);
                 }
+
+                if (img && img.id && img.inline) {
+                    if (img.local) {
+                        const bin = this.parsed.binary[img.id];
+                        let resize = '';
+                        if (bin.h > this.fontSize) {
+                            resize = `height: ${this.fontSize - 3}px`;
+                        }
+                        lineText += `<img src="data:${bin.type};base64,${bin.data}" style="${resize}"/>`;
+                    } else {
+                        //
+                    }
+                }
             }
 
             const centerStyle = (center ? `text-align: center; text-align-last: center; width: ${this.w}px` : '')

@@ -209,6 +209,7 @@ class TextPage extends Vue {
             this.parsed.p = this.p;
             this.parsed.w = this.w;// px, ширина текста
             this.parsed.font = this.font;
+            this.parsed.fontSize = this.fontSize;
             this.parsed.wordWrap = this.wordWrap;
             this.parsed.cutEmptyParagraphs = this.cutEmptyParagraphs;
             this.parsed.addEmptyParagraphs = this.addEmptyParagraphs;

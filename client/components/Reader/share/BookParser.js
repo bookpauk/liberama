@@ -40,6 +40,7 @@ export default class BookParser {
         let bold = false;
         let italic = false;
         let space = 0;
+        let inPara = false;
 
         this.binary = {};
         let binaryId = '';
@@ -149,8 +150,12 @@ export default class BookParser {
 
             if (tag == 'image') {
                 let attrs = sax.getAttrsSync(tail);
-                if (attrs.href.value)
-                    newParagraph(`<image href="${attrs.href.value}">${' '.repeat(maxImageLineCount)}</image>`, maxImageLineCount);
+                if (attrs.href.value) {
+                    if (inPara)
+                        growParagraph(`<image-inline href="${attrs.href.value}"></image-inline>`, 0);
+                    else
+                        newParagraph(`<image href="${attrs.href.value}">${' '.repeat(maxImageLineCount)}</image>`, maxImageLineCount);
+                }
             }
 
             if (path.indexOf('/fictionbook/body') == 0) {
@@ -170,6 +175,8 @@ export default class BookParser {
 
                 if ((tag == 'p' || tag == 'empty-line' || tag == 'v')) {
                     newParagraph(' ', 1);
+                    if (tag == 'p')
+                        inPara = true;
                 }
 
                 if (tag == 'subtitle') {
@@ -207,6 +214,10 @@ export default class BookParser {
 
                     if (tag == 'emphasis' || tag == 'strong') {
                         growParagraph(`</${tag}>`, 0);
+                    }
+
+                    if (tag == 'p') {
+                        inPara = false;
                     }
 
                     if (tag == 'subtitle') {
@@ -408,6 +419,23 @@ export default class BookParser {
                     }
                     break;
                 }
+                case 'image-inline': {
+                    let attrs = sax.getAttrsSync(tail);
+                    let id = attrs.href.value;
+                    if (id) {
+                        let local = false;
+                        if (id[0] == '#') {
+                            id = id.substr(1);
+                            local = true;
+                        }
+                        result.push({
+                            style: Object.assign({}, style),
+                            image: {local, inline: true, id},
+                            text: ''
+                        });
+                    }
+                    break;
+                }
             }
         };
 
@@ -427,6 +455,8 @@ export default class BookParser {
                     break;
                 case 'image':
                     image = {};
+                    break;
+                case 'image-inline':
                     break;
             }
         };
@@ -570,8 +600,9 @@ export default class BookParser {
         let j = 0;//номер строки
         let style = {};
         let ofs = 0;//смещение от начала параграфа para.offset
+        let imgW = 0;
 
-        // тут начинается самый замес, перенос по слогам и стилизация
+        // тут начинается самый замес, перенос по слогам и стилизация, а также изображения
         for (const part of parts) {
             style = part.style;
 
@@ -608,6 +639,14 @@ export default class BookParser {
                 continue;
             }
 
+            if (part.image.id && part.image.inline && this.showImages) {
+                const bin = this.binary[part.image.id];
+                let imgH = (bin.h > this.fontSize ? this.fontSize : bin.h);
+                imgW += bin.w*imgH/bin.h;
+                line.parts.push({style, text: '',
+                    image: {local: part.image.local, inline: true, id: part.image.id}});
+            }
+
             let words = part.text.split(' ');
 
             let sp1 = '';
@@ -621,7 +660,7 @@ export default class BookParser {
 
                 str += sp1 + word;
 
-                let p = (j == 0 ? parsed.p : 0);
+                let p = (j == 0 ? parsed.p : 0) + imgW;
                 p = (style.space ? p + parsed.p*style.space : p);
                 let w = this.measureText(str, style) + p;
                 let wordTail = word;
@@ -676,6 +715,7 @@ export default class BookParser {
                     partText = '';
                     sp2 = '';
                     str = wordTail;
+                    imgW = 0;
                     j++;
                 }
 
