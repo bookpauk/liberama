@@ -356,10 +356,6 @@ export default class BookParser {
         let style = {};
         let image = {};
 
-                /*let attrs = sax.getAttrsSync(tail);
-                if (attrs.href.value)
-                    newParagraph(' '.repeat(maxImageLineCount) + `<image href="${attrs.href.value}" />`, maxImageLineCount);
-*/
         const onTextNode = async(text) => {// eslint-disable-line no-unused-vars
             result.push({
                 style: Object.assign({}, style),
@@ -379,9 +375,15 @@ export default class BookParser {
                 case 'center':
                     style.center = true;
                     break;
-                case 'image':
-                    image = {};
-                    break;
+                case 'image': {
+                        let attrs = sax.getAttrsSync(tail);
+                        let id = attrs.href.value;
+                        if (id) {
+                            id = id.substr(1);
+                            image = {inline: false, id};
+                        }
+                        break;
+                    }
             }
         };
 
@@ -412,20 +414,22 @@ export default class BookParser {
         result = [];
         for (const part of parts) {
             let p = part;
-            let i = 0;
-            let spaceIndex = -1;
-            while (i < p.text.length) {
-                if (p.text[i] == ' ')
-                    spaceIndex = i;
+            if (!p.image.id) {
+                let i = 0;
+                let spaceIndex = -1;
+                while (i < p.text.length) {
+                    if (p.text[i] == ' ')
+                        spaceIndex = i;
 
-                if (i - spaceIndex >= maxWordLength && i < p.text.length - 1 && 
-                    this.measureText(p.text.substr(spaceIndex + 1, i - spaceIndex), p.style) >= this.w - this.p) {
-                    result.push({style: p.style, image: p.image, text: p.text.substr(0, i + 1)});
-                    p = {style: p.style, text: p.text.substr(i + 1)};
-                    spaceIndex = -1;
-                    i = -1;
+                    if (i - spaceIndex >= maxWordLength && i < p.text.length - 1 && 
+                        this.measureText(p.text.substr(spaceIndex + 1, i - spaceIndex), p.style) >= this.w - this.p) {
+                        result.push({style: p.style, image: p.image, text: p.text.substr(0, i + 1)});
+                        p = {style: p.style, text: p.text.substr(i + 1)};
+                        spaceIndex = -1;
+                        i = -1;
+                    }
+                    i++;
                 }
-                i++;
             }
             result.push(p);
         }
@@ -494,7 +498,9 @@ export default class BookParser {
             para.parsed.maxWordLength === this.maxWordLength &&
             para.parsed.font === this.font &&
             para.parsed.cutEmptyParagraphs === this.cutEmptyParagraphs &&
-            para.parsed.addEmptyParagraphs === this.addEmptyParagraphs
+            para.parsed.addEmptyParagraphs === this.addEmptyParagraphs &&
+            para.parsed.showImages === this.showImages &&
+            para.parsed.imageHeightLines === this.imageHeightLines
             )
             return para.parsed;
 
@@ -506,6 +512,8 @@ export default class BookParser {
             font: this.font,
             cutEmptyParagraphs: this.cutEmptyParagraphs,
             addEmptyParagraphs: this.addEmptyParagraphs,
+            showImages: this.showImages,
+            imageHeightLines: this.imageHeightLines,
             visible: !(
                 (this.cutEmptyParagraphs && para.cut) ||
                 (para.addIndex > this.addEmptyParagraphs)
@@ -521,6 +529,7 @@ export default class BookParser {
             last: Boolean,
             parts: array of {
                 style: {bold: Boolean, italic: Boolean, center: Boolean},
+                image: {inline: Boolean, id: String, imageLine: Number, lineCount: Number, resize: Boolean},
                 text: String,
             }
         }*/
@@ -531,15 +540,39 @@ export default class BookParser {
 
         let str = '';//измеряемая строка
         let prevStr = '';//строка без крайнего слова
-        let prevW = 0;
         let j = 0;//номер строки
         let style = {};
         let ofs = 0;//смещение от начала параграфа para.offset
 
         // тут начинается самый замес, перенос по слогам и стилизация
         for (const part of parts) {
-            const words = part.text.split(' ');
             style = part.style;
+
+            //изображения
+            if (part.image.id && !part.image.inline) {
+                const bin = this.binary[part.image.id];
+
+                let lineCount = this.imageHeightLines;
+                const c = Math.ceil(bin.h/this.lineHeight);
+                lineCount = (c < lineCount ? c : lineCount);
+                let i = 0;
+                for (; i < lineCount - 1; i++) {
+                    line.end = para.offset + ofs;
+                    line.first = (j == 0);
+                    line.last = false;
+                    line.parts.push({style, text: '!', image: {inline: false, id: part.image.id, imageLine: i, lineCount, resize: (c > lineCount)}});
+                    lines.push(line);
+                    line = {begin: line.end + 1, parts: []};
+                    ofs++;
+                    j++;
+                }
+                line.first = (j == 0);
+                line.last = true;
+                line.parts.push({style, text: '!', image: {inline: false, id: part.image.id, imageLine: i, lineCount, resize: (c > lineCount)}});
+                continue;
+            }
+
+            const words = part.text.split(' ');
 
             let sp1 = '';
             let sp2 = '';
@@ -578,7 +611,6 @@ export default class BookParser {
                             }
 
                             if (pw) {
-                                prevW = pw;
                                 partText += ss + (ss[ss.length - 1] == '-' ? '' : '-');
                                 wordTail = slogi.join('');
                             }
@@ -592,7 +624,6 @@ export default class BookParser {
                         let t = line.parts[line.parts.length - 1].text;
                         if (t[t.length - 1] == ' ') {
                             line.parts[line.parts.length - 1].text = t.trimRight();
-                            prevW -= this.measureText(' ', style);
                         }
                     }
 
@@ -600,7 +631,6 @@ export default class BookParser {
                     if (line.end - line.begin < 0)
                         console.error(`Parse error, empty line in paragraph ${paraIndex}`);
 
-                    line.width = prevW;
                     line.first = (j == 0);
                     line.last = false;
                     lines.push(line);
@@ -616,7 +646,6 @@ export default class BookParser {
                 partText += sp2 + wordTail;
                 sp1 = ' ';
                 sp2 = ' ';
-                prevW = w;
             }
 
             if (partText != '')
@@ -628,14 +657,12 @@ export default class BookParser {
             let t = line.parts[line.parts.length - 1].text;
             if (t[t.length - 1] == ' ') {
                 line.parts[line.parts.length - 1].text = t.trimRight();
-                prevW -= this.measureText(' ', style);
             }
 
             line.end = para.offset + para.length - 1;
             if (line.end - line.begin < 0)
                 console.error(`Parse error, empty line in paragraph ${paraIndex}`);
 
-            line.width = prevW;
             line.first = (j == 0);
             line.last = true;
             lines.push(line);

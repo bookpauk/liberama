@@ -28,7 +28,7 @@ export default class DrawHelper {
 
         let out = `<div class="layout" style="width: ${this.w}px; height: ${this.h}px;` + 
             ` position: absolute; top: ${this.fontSize*this.textShift}px; color: ${this.textColor}; font: ${font}; ${justify}` +
-            ` line-height: ${this.lineHeight}px;">`;            
+            ` line-height: ${this.lineHeight}px;">`;
 
         let len = lines.length;
         const lineCount = this.pageLineCount + (isScrolling ? 1 : 0);
