@@ -39,6 +39,8 @@ export default class BookParser {
         let center = false;
         let bold = false;
         let italic = false;
+        let space = false;
+
         this.binary = {};
         let binaryId = '';
         let binaryType = '';
@@ -177,6 +179,7 @@ export default class BookParser {
 
                 if (tag == 'epigraph') {
                     italic = true;
+                    space = true;
                 }
 
                 if (tag == 'poem') {
@@ -184,7 +187,7 @@ export default class BookParser {
                 }
 
                 if (tag == 'text-author') {
-                    newParagraph(' <s> <s> <s> ', 4);
+                    space = true;
                 }
             }
         };
@@ -211,10 +214,15 @@ export default class BookParser {
 
                     if (tag == 'epigraph') {
                         italic = false;
+                        space = false;
                     }
 
                     if (tag == 'stanza') {
                         newParagraph(' ', 1);
+                    }
+
+                    if (tag == 'text-author') {
+                        space = false;
                     }
                 }
 
@@ -277,7 +285,9 @@ export default class BookParser {
             let tOpen = (center ? '<center>' : '');
             tOpen += (bold ? '<strong>' : '');
             tOpen += (italic ? '<emphasis>' : '');
-            let tClose = (italic ? '</emphasis>' : '');
+            tOpen += (space ? '<space>' : '');
+            let tClose = (space ? '</space>' : '');
+            tClose += (italic ? '</emphasis>' : '');
             tClose += (bold ? '</strong>' : '');
             tClose += (center ? '</center>' : '');
 
@@ -352,7 +362,7 @@ export default class BookParser {
 
     splitToStyle(s) {
         let result = [];/*array of {
-            style: {bold: Boolean, italic: Boolean, center: Boolean},
+            style: {bold: Boolean, italic: Boolean, center: Boolean, space: Number},
             image: {local: Boolean, inline: Boolean, id: String},
             text: String,
         }*/
@@ -378,19 +388,23 @@ export default class BookParser {
                 case 'center':
                     style.center = true;
                     break;
+                case 'space': {
+                    style.space = true;
+                    break;
+                }
                 case 'image': {
-                        let attrs = sax.getAttrsSync(tail);
-                        let id = attrs.href.value;
-                        if (id) {
-                            let local = false;
-                            if (id[0] == '#') {
-                                id = id.substr(1);
-                                local = true;
-                            }
-                            image = {local, inline: false, id};
+                    let attrs = sax.getAttrsSync(tail);
+                    let id = attrs.href.value;
+                    if (id) {
+                        let local = false;
+                        if (id[0] == '#') {
+                            id = id.substr(1);
+                            local = true;
                         }
-                        break;
+                        image = {local, inline: false, id};
                     }
+                    break;
+                }
             }
         };
 
@@ -404,6 +418,9 @@ export default class BookParser {
                     break;
                 case 'center':
                     style.center = false;
+                    break;
+                case 'space':
+                    style.space = false;
                     break;
                 case 'image':
                     image = {};
@@ -588,7 +605,7 @@ export default class BookParser {
                 continue;
             }
 
-            const words = part.text.split(' ');
+            let words = part.text.split(' ');
 
             let sp1 = '';
             let sp2 = '';
@@ -602,6 +619,7 @@ export default class BookParser {
                 str += sp1 + word;
 
                 let p = (j == 0 ? parsed.p : 0);
+                p = (style.space ? p + parsed.p : p);
                 let w = this.measureText(str, style) + p;
                 let wordTail = word;
                 if (w > parsed.w && prevStr != '') {
