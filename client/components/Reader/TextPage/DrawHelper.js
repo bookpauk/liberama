@@ -45,11 +45,12 @@ export default class DrawHelper {
                 last: Boolean,
                 parts: array of {
                     style: {bold: Boolean, italic: Boolean, center: Boolean},
-                    image: {local: Boolean, inline: Boolean, id: String, imageLine: Number, lineCount: Number, resize: Boolean, paraIndex: Number},
+                    image: {local: Boolean, inline: Boolean, id: String, imageLine: Number, lineCount: Number, paraIndex: Number},
                     text: String,
                 }
             }*/
             let sel = new Set();
+            //поиск
             if (i == 0 && this.searching) {
                 let pureText = '';
                 for (const part of line.parts) {
@@ -73,6 +74,7 @@ export default class DrawHelper {
             let lineText = '';
             let center = false;
             let j = 0;
+            //формируем строку
             for (const part of line.parts) {
                 let tOpen = (part.style.bold ? '<b>' : '');
                 tOpen += (part.style.italic ? '<i>' : '');
@@ -88,12 +90,15 @@ export default class DrawHelper {
                 } else
                     text = part.text;
 
+                if (text.trim() == '')
+                    text = `<span style="white-space: pre">${text}</span>`;
+
                 lineText += `${tOpen}${text}${tClose}`;
 
                 center = center || part.style.center;
 
                 //избражения
-                //image: {local: Boolean, inline: Boolean, id: String, imageLine: Number, lineCount: Number, resize: Boolean, paraIndex: Number},
+                //image: {local: Boolean, inline: Boolean, id: String, imageLine: Number, lineCount: Number, paraIndex: Number},
                 const img = part.image;
                 if (img && img.id && !img.inline && !imageDrawn.has(img.paraIndex)) {
                     if (img.local) {
@@ -122,6 +127,7 @@ export default class DrawHelper {
             const centerStyle = (center ? `text-align: center; text-align-last: center; width: ${this.w}px` : '')
             if (line.first && !center)
                 lineText = `<span style="display: inline-block; margin-left: ${this.p}px"></span>${lineText}`;
+
             if (line.last || center)
                 lineText = `<span style="display: inline-block; ${centerStyle}">${lineText}</span>`;
 
