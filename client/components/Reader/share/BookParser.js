@@ -5,7 +5,11 @@ import {sleep} from '../../../share/utils';
 const maxImageLineCount = 100;
 
 export default class BookParser {
-    constructor() {
+    constructor(settings) {
+        if (settings) {
+            this.showInlineImagesInCenter = settings.showInlineImagesInCenter;
+        }
+
         // defaults
         this.p = 30;// px, отступ параграфа
         this.w = 300;// px, ширина страницы
@@ -151,10 +155,13 @@ export default class BookParser {
             if (tag == 'image') {
                 let attrs = sax.getAttrsSync(tail);
                 if (attrs.href.value) {
-                    if (inPara)
+                    if (inPara && !this.showInlineImagesInCenter)
                         growParagraph(`<image-inline href="${attrs.href.value}"></image-inline>`, 0);
                     else
                         newParagraph(`<image href="${attrs.href.value}">${' '.repeat(maxImageLineCount)}</image>`, maxImageLineCount);
+
+                    if (inPara && this.showInlineImagesInCenter)
+                        newParagraph(' ', 1);
                 }
             }
 
