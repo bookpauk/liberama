@@ -427,7 +427,7 @@ export default class BookParser {
                     if (i - spaceIndex >= maxWordLength && i < p.text.length - 1 && 
                         this.measureText(p.text.substr(spaceIndex + 1, i - spaceIndex), p.style) >= this.w - this.p) {
                         result.push({style: p.style, image: p.image, text: p.text.substr(0, i + 1)});
-                        p = {style: p.style, text: p.text.substr(i + 1)};
+                        p = {style: p.style, image: p.image, text: p.text.substr(i + 1)};
                         spaceIndex = -1;
                         i = -1;
                     }
