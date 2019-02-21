@@ -9,6 +9,7 @@ const textUtils = require('./textUtils');
 const FileDetector = require('../FileDetector');
 
 const repSpaces = (text) => text.replace(/&nbsp;|[\t\n\r]/g, ' ');
+const repSpaces2 = (text) => text.replace(/[\n\r]/g, '');
 
 class BookConverter {
     constructor() {
@@ -31,7 +32,7 @@ class BookConverter {
             if (parsedUrl.hostname == 'samlib.ru' ||
                 parsedUrl.hostname == 'budclub.ru' ||
                 parsedUrl.hostname == 'zhurnal.lib.ru') {
-                await fs.writeFile(outputFile, this.convertSamlib(data));
+                await fs.writeFile(outputFile, this.convertSamlib(data, parsedUrl.hostname));
                 return;
             }
 
@@ -216,7 +217,7 @@ class BookConverter {
         return this.formatFb2(fb2);
     }
 
-    convertSamlib(data) {
+    convertSamlib(data, hostname) {
         let titleInfo = {};
         let desc = {_n: 'description', 'title-info': titleInfo};
         let pars = [];
@@ -225,6 +226,7 @@ class BookConverter {
 
         let inSubtitle = false;
         let inJustify = true;
+        let inImage = false;
         let path = '';
         let tag = '';// eslint-disable-line no-unused-vars
 
@@ -235,10 +237,10 @@ class BookConverter {
         let italic = false;
         let bold = false;
 
-        const openTag = (name) => {
+        const openTag = (name, attrs) => {
             if (name == 'p')
                 inPara = true;
-            let n = {_n: name, _a: [], _p: node};
+            let n = {_n: name, _attrs: attrs, _a: [], _p: node};
             node._a.push(n);
             node = n;
         };
@@ -269,7 +271,7 @@ class BookConverter {
                 path += '/' + elemName;
                 tag = elemName;
             } else {
-                if (inPara && elemName != 'i' && elemName != 'b')
+                if (inPara && elemName != 'i' && elemName != 'b' && elemName != 'img')
                     closeTag('p');
 
                 switch (elemName) {
@@ -299,6 +301,17 @@ class BookConverter {
                         }
 
                         break;
+                    case 'img': {
+                        const attrs = sax.getAttrsSync(tail);
+                        if (attrs.src && attrs.src.value) {
+                            let href = attrs.src.value;
+                            if (href[0] == '/')
+                                href = `http://${hostname}${href}`;
+                            openTag('image', {href});
+                            inImage = true;
+                        }
+                        break;
+                    }
                 }
             }
         };
@@ -346,6 +359,11 @@ class BookConverter {
                             inJustify = false;
                         }
                         break;
+                    case 'img':
+                        if (inImage)
+                            closeTag('image');
+                        inImage = false;
+                        break;
                 }
             }
         };
@@ -390,7 +408,7 @@ class BookConverter {
                 growParagraph(`${tOpen}${text}${tClose}`);
         };
 
-        sax.parseSync(repSpaces(this.decode(data).toString()), {
+        sax.parseSync(repSpaces(repSpaces2(this.decode(data).toString())), {
             onStartNode, onEndNode, onTextNode, onComment,
             innerCut: new Set(['head', 'script', 'style'])
         });
@@ -437,8 +455,15 @@ class BookConverter {
             if (node._n)
                 name = node._n;
 
+            let attrs = '';
+            if (node._attrs) {
+                for (let attrName in node._attrs) {
+                    attrs += ` ${attrName}="${node._attrs[attrName]}"`;
+                }
+            }
+
             if (name)
-                out += `<${name}>`;
+                out += `<${name}${attrs}>`;
             if (node.hasOwnProperty('_t'))
                 out += repSpaces(node._t);
 

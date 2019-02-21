@@ -103,9 +103,8 @@ export default class DrawHelper {
                 //image: {local: Boolean, inline: Boolean, id: String, imageLine: Number, lineCount: Number, paraIndex: Number},
                 const img = part.image;
                 if (img && img.id && !img.inline && !imageDrawn.has(img.paraIndex)) {
-                    if (img.local) {
-                        const bin = this.parsed.binary[img.id];
-
+                    const bin = this.parsed.binary[img.id];
+                    if (bin) {
                         let imgH = img.lineCount*this.lineHeight;
                         imgH = (imgH <= bin.h ? imgH : bin.h);
                         let imgW = bin.w;
@@ -118,9 +117,11 @@ export default class DrawHelper {
 
                         const left = (this.w - imgW)/2;
                         const top = ((img.lineCount*this.lineHeight - imgH)/2) + (i - img.imageLine)*this.lineHeight;
-                        lineText += `<img src="data:${bin.type};base64,${bin.data}" style="position: absolute; left: ${left}px; top: ${top}px; ${resize}"/>`;
-                    } else {
-                        //
+                        if (img.local) {
+                            lineText += `<img src="data:${bin.type};base64,${bin.data}" style="position: absolute; left: ${left}px; top: ${top}px; ${resize}"/>`;
+                        } else {
+                            lineText += `<img src="${img.id}" style="position: absolute; left: ${left}px; top: ${top}px; ${resize}"/>`;
+                        }
                     }
                     imageDrawn.add(img.paraIndex);
                 }
@@ -128,11 +129,13 @@ export default class DrawHelper {
                 if (img && img.id && img.inline) {
                     if (img.local) {
                         const bin = this.parsed.binary[img.id];
-                        let resize = '';
-                        if (bin.h > this.fontSize) {
-                            resize = `height: ${this.fontSize - 3}px`;
+                        if (bin) {
+                            let resize = '';
+                            if (bin.h > this.fontSize) {
+                                resize = `height: ${this.fontSize - 3}px`;
+                            }
+                            lineText += `<img src="data:${bin.type};base64,${bin.data}" style="${resize}"/>`;
                         }
-                        lineText += `<img src="data:${bin.type};base64,${bin.data}" style="${resize}"/>`;
                     } else {
                         //
                     }
