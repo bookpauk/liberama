@@ -78,7 +78,35 @@ export default class BookParser {
                     resolve();
                 };
 
+                i.onerror = (e) => {
+                    reject(e);
+                };
+
                 i.src = `data:${binaryType};base64,${data}`;
+                await sleep(30*1000);
+                if (!resolved)
+                    reject('Не удалось получить размер изображения');
+            });
+        };
+
+        const getExternalImageDimensions = (src) => {
+            return new Promise (async(resolve, reject) => {
+                const i = new Image();
+                let resolved = false;
+                i.onload = () => {
+                    resolved = true;
+                    this.binary[src] = {
+                        w: i.width,
+                        h: i.height,
+                    };
+                    resolve();
+                };
+
+                i.onerror = (e) => {
+                    reject(e);
+                };
+
+                i.src = src;
                 await sleep(30*1000);
                 if (!resolved)
                     reject('Не удалось получить размер изображения');
@@ -147,21 +175,26 @@ export default class BookParser {
 
             if (tag == 'binary') {
                 let attrs = sax.getAttrsSync(tail);
-                binaryType = (attrs['content-type'].value ? attrs['content-type'].value : '');
+                binaryType = (attrs['content-type'] && attrs['content-type'].value ? attrs['content-type'].value : '');
                 if (binaryType == 'image/jpeg' || binaryType == 'image/png')
                     binaryId = (attrs.id.value ? attrs.id.value : '');
             }
 
             if (tag == 'image') {
                 let attrs = sax.getAttrsSync(tail);
-                if (attrs.href.value) {
-                    if (inPara && !this.showInlineImagesInCenter)
-                        growParagraph(`<image-inline href="${attrs.href.value}"></image-inline>`, 0);
-                    else
-                        newParagraph(`<image href="${attrs.href.value}">${' '.repeat(maxImageLineCount)}</image>`, maxImageLineCount);
-
-                    if (inPara && this.showInlineImagesInCenter)
-                        newParagraph(' ', 1);
+                if (attrs.href && attrs.href.value) {
+                    const href = attrs.href.value;
+                    if (href[0] == '#') {//local
+                        if (inPara && !this.showInlineImagesInCenter)
+                            growParagraph(`<image-inline href="${href}"></image-inline>`, 0);
+                        else
+                            newParagraph(`<image href="${href}">${' '.repeat(maxImageLineCount)}</image>`, maxImageLineCount);
+                        if (inPara && this.showInlineImagesInCenter)
+                            newParagraph(' ', 1);
+                    } else {//external
+                        dimPromises.push(getExternalImageDimensions(href));
+                        newParagraph(`<image href="${href}">${' '.repeat(maxImageLineCount)}</image>`, maxImageLineCount);
+                    }
                 }
             }
 
@@ -409,14 +442,14 @@ export default class BookParser {
                     break;
                 case 'space': {
                     let attrs = sax.getAttrsSync(tail);
-                    if (attrs.w.value)
+                    if (attrs.w && attrs.w.value)
                         style.space = attrs.w.value;
                     break;
                 }
                 case 'image': {
                     let attrs = sax.getAttrsSync(tail);
-                    let id = attrs.href.value;
-                    if (id) {
+                    if (attrs.href && attrs.href.value) {
+                        let id = attrs.href.value;
                         let local = false;
                         if (id[0] == '#') {
                             id = id.substr(1);
@@ -428,8 +461,8 @@ export default class BookParser {
                 }
                 case 'image-inline': {
                     let attrs = sax.getAttrsSync(tail);
-                    let id = attrs.href.value;
-                    if (id) {
+                    if (attrs.href && attrs.href.value) {
+                        let id = attrs.href.value;
                         let local = false;
                         if (id[0] == '#') {
                             id = id.substr(1);
@@ -616,7 +649,9 @@ export default class BookParser {
             //изображения
             if (part.image.id && !part.image.inline) {
                 parsed.visible = this.showImages;
-                const bin = this.binary[part.image.id];
+                let bin = this.binary[part.image.id];
+                if (!bin)
+                    bin = {h: 0, w: 0};
 
                 let lineCount = this.imageHeightLines;
                 const c = Math.ceil(bin.h/this.lineHeight);
@@ -643,15 +678,18 @@ export default class BookParser {
                 line.last = true;
                 line.parts.push({style, text: ' ',
                     image: {local: part.image.local, inline: false, id: part.image.id, imageLine: i, lineCount, paraIndex}});
+                
                 continue;
             }
 
             if (part.image.id && part.image.inline && this.showImages) {
                 const bin = this.binary[part.image.id];
-                let imgH = (bin.h > this.fontSize ? this.fontSize : bin.h);
-                imgW += bin.w*imgH/bin.h;
-                line.parts.push({style, text: '',
-                    image: {local: part.image.local, inline: true, id: part.image.id}});
+                if (bin) {
+                    let imgH = (bin.h > this.fontSize ? this.fontSize : bin.h);
+                    imgW += bin.w*imgH/bin.h;
+                    line.parts.push({style, text: '',
+                        image: {local: part.image.local, inline: true, id: part.image.id}});
+                }
             }
 
             let words = part.text.split(' ');
