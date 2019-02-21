@@ -281,12 +281,15 @@ class BookConverter {
                     case 'h1':
                     case 'h2':
                     case 'h3':
+                    case 'br':
                         openTag('p');
                         break;
                     case 'i':
+                    case 'em':
                         italic = true;
                         break;
                     case 'b':
+                    case 'strong':
                         bold = true;
                         break;
                     case 'div':
@@ -343,9 +346,11 @@ class BookConverter {
                         closeTag('p');
                         break;
                     case 'i':
+                    case 'em':
                         italic = false;
                         break;
                     case 'b':
+                    case 'strong':
                         bold = false;
                         break;
                     case 'div':
