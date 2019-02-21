@@ -271,7 +271,7 @@ class BookConverter {
                 path += '/' + elemName;
                 tag = elemName;
             } else {
-                if (inPara && elemName != 'i' && elemName != 'b' && elemName != 'img')
+                if (inPara && elemName != 'i' && elemName != 'b' && elemName != 'em' && elemName != 'strong' && elemName != 'img')
                     closeTag('p');
 
                 switch (elemName) {

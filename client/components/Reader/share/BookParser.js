@@ -78,6 +78,10 @@ export default class BookParser {
                     resolve();
                 };
 
+                i.onerror = (e) => {
+                    reject(e);
+                };
+
                 i.src = `data:${binaryType};base64,${data}`;
                 await sleep(30*1000);
                 if (!resolved)
@@ -96,6 +100,10 @@ export default class BookParser {
                         h: i.height,
                     };
                     resolve();
+                };
+
+                i.onerror = (e) => {
+                    reject(e);
                 };
 
                 i.src = src;
@@ -641,9 +649,9 @@ export default class BookParser {
             //изображения
             if (part.image.id && !part.image.inline) {
                 parsed.visible = this.showImages;
-                const bin = this.binary[part.image.id];
+                let bin = this.binary[part.image.id];
                 if (!bin)
-                    continue;
+                    bin = {h: 0, w: 0};
 
                 let lineCount = this.imageHeightLines;
                 const c = Math.ceil(bin.h/this.lineHeight);
@@ -670,6 +678,7 @@ export default class BookParser {
                 line.last = true;
                 line.parts.push({style, text: ' ',
                     image: {local: part.image.local, inline: false, id: part.image.id, imageLine: i, lineCount, paraIndex}});
+                
                 continue;
             }
 
