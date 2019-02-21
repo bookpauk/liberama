@@ -231,6 +231,7 @@ class BookConverter {
         let tag = '';// eslint-disable-line no-unused-vars
 
         let inText = false;
+        let textFound = false;
         let node = {_a: pars};
 
         let inPara = false;
@@ -374,8 +375,10 @@ class BookConverter {
         };
 
         const onComment = (text) => {// eslint-disable-line no-unused-vars
-            if (text == '--------- Собственно произведение -------------')
+            if (text == '--------- Собственно произведение -------------') {
                 inText = true;
+                textFound = true;
+            }
             if (text == '-----------------------------------------------')
                 inText = false;
         };
@@ -417,6 +420,10 @@ class BookConverter {
             onStartNode, onEndNode, onTextNode, onComment,
             innerCut: new Set(['head', 'script', 'style'])
         });
+
+        //текст не найден на странице, обрабатываем как html
+        if (!textFound)
+            return this.convertHtml(data);
 
         const title = (titleInfo['book-title'] ? titleInfo['book-title'] : '');
         let author = '';
