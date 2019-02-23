@@ -66,7 +66,10 @@ class BookConverter {
             }
         }
 
-        return iconv.decode(data, selected);
+        if (selected.toLowerCase() != 'utf-8')
+            return iconv.decode(data, selected);
+        else
+            return data;
     }
 
     checkEncoding(data) {

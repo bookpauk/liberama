@@ -1,4 +1,4 @@
-function getEncoding(buf) {
+function getEncoding(buf, returnAll) {
     const lowerCase = 3;
     const upperCase = 1;
 
@@ -8,6 +8,7 @@ function getEncoding(buf) {
         'd': 'cp866',
         'i': 'ISO-8859-5',
         'm': 'maccyrillic',
+        'u': 'utf-8',
     };
 
     let charsets = {
@@ -15,38 +16,47 @@ function getEncoding(buf) {
         'w': 0,
         'd': 0,
         'i': 0,
-        'm': 0
+        'm': 0,
+        'u': 0,
     };
 
     const len = buf.length;
     const blockSize = (len > 5*3000 ? 3000 : len);
     let counter = 0;
     let i = 0;
+    let totalChecked = 0;
     while (i < len) {
         const char = buf[i];
+        const nextChar = (i < len - 1 ? buf[i + 1] : 0);
+        totalChecked++;
         i++;
         //non-russian characters
         if (char < 128 || char > 256)
             continue;
-        //CP866
-        if ((char > 159 && char < 176) || (char > 223 && char < 242)) charsets['d'] += lowerCase;
-        if ((char > 127 && char < 160)) charsets['d'] += upperCase;
+        //UTF-8
+        if ((char == 208 || char == 209) && nextChar >= 128 && nextChar <= 190)
+            charsets['u'] += lowerCase;
+        else {
+            //CP866
+            if ((char > 159 && char < 176) || (char > 223 && char < 242)) charsets['d'] += lowerCase;
+            if ((char > 127 && char < 160)) charsets['d'] += upperCase;
 
-        //KOI8-R
-        if ((char > 191 && char < 223)) charsets['k'] += lowerCase;
-        if ((char > 222 && char < 256)) charsets['k'] += upperCase;
+            //KOI8-R
+            if ((char > 191 && char < 223)) charsets['k'] += lowerCase;
+            if ((char > 222 && char < 256)) charsets['k'] += upperCase;
 
-        //WIN-1251
-        if (char > 223 && char < 256) charsets['w'] += lowerCase;
-        if (char > 191 && char < 224) charsets['w'] += upperCase;
+            //WIN-1251
+            if (char > 223 && char < 256) charsets['w'] += lowerCase;
+            if (char > 191 && char < 224) charsets['w'] += upperCase;
 
-        //MAC
-        if (char > 221 && char < 255) charsets['m'] += lowerCase;
-        if (char > 127 && char < 160) charsets['m'] += upperCase;
+            //MAC
+            if (char > 221 && char < 255) charsets['m'] += lowerCase;
+            if (char > 127 && char < 160) charsets['m'] += upperCase;
 
-        //ISO-8859-5
-        if (char > 207 && char < 240) charsets['i'] += lowerCase;
-        if (char > 175 && char < 208) charsets['i'] += upperCase;
+            //ISO-8859-5
+            if (char > 207 && char < 240) charsets['i'] += lowerCase;
+            if (char > 175 && char < 208) charsets['i'] += upperCase;
+        }
 
         counter++;
 
@@ -57,18 +67,24 @@ function getEncoding(buf) {
     }
 
     let sorted = Object.keys(charsets).map(function(key) {
-        return { codePage: codePage[key], c: charsets[key] };
+        return { codePage: codePage[key], c: charsets[key], totalChecked };
     });
 
     sorted.sort((a, b) => b.c - a.c);
 
-    if (sorted[0].c > 0)
+    if (returnAll)
+        return sorted;
+    else if (sorted[0].c > 0)
         return sorted[0].codePage;
     else
         return 'ISO-8859-5';
 }
 
 function checkIfText(buf) {
+    const enc = getEncoding(buf, true);
+    if (enc[0].c > enc[0].totalChecked*0.9)
+        return true;
+
     let spaceCount = 0;
     let crCount = 0;
     let lfCount = 0;
