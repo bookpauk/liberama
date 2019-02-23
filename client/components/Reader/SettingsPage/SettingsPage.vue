@@ -212,7 +212,9 @@
                                 </el-col>
                             </el-form-item>
                             <el-form-item label="">
-                                    Размер изображения
+                                    <el-col :span="12">
+                                        Размер не более
+                                    </el-col>
                                     <el-tooltip :open-delay="500" effect="light" placement="top">
                                         <template slot="content">
                                             Определяет высоту изображения количеством строк.<br>

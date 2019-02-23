@@ -43,6 +43,7 @@
                                 placeholder="Найти"/-->
                                 <div class="el-input el-input--mini">
                                     <input class="el-input__inner"
+                                        ref="input"
                                         placeholder="Найти"
                                         style="margin: 0; padding: 0; vertical-align: bottom; margin-top: 20px; padding: 0 10px 0 10px"
                                         :value="search" @input="search = $event.target.value"
@@ -118,9 +119,12 @@ class HistoryPage extends Vue {
     created() {
     }
 
-    mounted() {
+    init() {
         this.updateTableData();
         this.mostRecentBook = bookManager.mostRecentBook();
+        this.$nextTick(() => {
+            this.$refs.input.focus();
+        });
     }
 
     updateTableData() {
