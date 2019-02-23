@@ -91,7 +91,7 @@ export default class DrawHelper {
                 } else
                     text = part.text;
 
-                if (text.trim() == '')
+                if (text && text.trim() == '')
                     text = `<span style="white-space: pre">${text}</span>`;
 
                 lineText += `${tOpen}${text}${tClose}`;
