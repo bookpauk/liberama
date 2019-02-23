@@ -46,6 +46,7 @@ export default class BookParser {
         let space = 0;
         let inPara = false;
         let isFirstSection = true;
+        let isFirstTitlePara = false;
 
         this.binary = {};
         let binaryId = '';
@@ -202,6 +203,7 @@ export default class BookParser {
             if (path.indexOf('/fictionbook/body') == 0) {
                 if (tag == 'title') {
                     newParagraph(' ', 1);
+                    isFirstTitlePara = true;
                     bold = true;
                     center = true;
                 }
@@ -217,13 +219,15 @@ export default class BookParser {
                 }
 
                 if ((tag == 'p' || tag == 'empty-line' || tag == 'v')) {
-                    newParagraph(' ', 1);
-                    if (tag == 'p')
+                    if (!(tag == 'p' && center && isFirstTitlePara))
+                        newParagraph(' ', 1);
+                    if (tag == 'p') {
                         inPara = true;
+                        isFirstTitlePara = false;
+                    }
                 }
 
                 if (tag == 'subtitle') {
-                    newParagraph(' ', 1);
                     bold = true;
                 }
 

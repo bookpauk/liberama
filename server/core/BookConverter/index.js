@@ -263,12 +263,12 @@ class BookConverter {
         };
 
         const growParagraph = (text) => {
+            if (!node._p)
+                openTag('p');
             if (node._n == 'p' && node._a.length == 0)
                 text = text.trimLeft();
             node._a.push({_t: text});
         };
-
-        openTag('p');
 
         const onStartNode = (elemName, tail, singleTag, cutCounter, cutTag) => {// eslint-disable-line no-unused-vars
             if (elemName == '')
