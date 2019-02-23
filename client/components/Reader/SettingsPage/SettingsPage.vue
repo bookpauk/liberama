@@ -185,7 +185,7 @@
                                 <el-checkbox v-model="wordWrap">Перенос по слогам</el-checkbox>
                             </el-form-item>
                             <el-form-item label="Обработка">
-                                <el-checkbox v-model="cutEmptyParagraphs">Убирать пустые параграфы</el-checkbox>
+                                <el-checkbox v-model="cutEmptyParagraphs">Убирать пустые строки</el-checkbox>
                             </el-form-item>
                             <el-form-item label="">
                                 <el-col :span="12">
@@ -439,11 +439,12 @@ class SettingsPage extends Vue {
           '#000000',
           '#202020',
           '#ebe2c9',
+          '#cfdc99',
+          '#478355',
+          '#a6caf0',
           '#909080',
           '#808080',
           '#c8c8c8',
-          '#478355',
-          '#a6caf0',
         ];
     }
 

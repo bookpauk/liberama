@@ -28,7 +28,7 @@ export default class DrawHelper {
 
         let out = `<div style="width: ${this.w}px; height: ${this.h}px;` + 
             ` position: absolute; top: ${this.fontSize*this.textShift}px; color: ${this.textColor}; font: ${font}; ${justify}` +
-            ` line-height: ${this.lineHeight}px;">`;
+            ` line-height: ${this.lineHeight}px; white-space: nowrap;">`;
 
         let imageDrawn = new Set();
         let len = lines.length;
@@ -91,13 +91,13 @@ export default class DrawHelper {
                 } else
                     text = part.text;
 
-                if (text.trim() == '')
+                if (text && text.trim() == '')
                     text = `<span style="white-space: pre">${text}</span>`;
 
                 lineText += `${tOpen}${text}${tClose}`;
 
                 center = center || part.style.center;
-                space = (part.style.space > 0 ? part.style.space : space);
+                space = (part.style.space > space ? part.style.space : space);
 
                 //избражения
                 //image: {local: Boolean, inline: Boolean, id: String, imageLine: Number, lineCount: Number, paraIndex: Number},

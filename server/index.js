@@ -31,6 +31,7 @@ async function init() {
 }
 
 async function main() {
+    log(`${config.name} v${config.version}`);
     log('Initializing');
     await init();
 

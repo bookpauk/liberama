@@ -15,8 +15,14 @@
                     border
                     :default-sort = "{prop: 'touchDateTime', order: 'descending'}"
                     :header-cell-style = "headerCellStyle"
+                    :row-key = "rowKey"
                     >
 
+                    <el-table-column
+                        type="index"
+                        width="35px"
+                        >
+                    </el-table-column>
                     <el-table-column
                         prop="touchDateTime"
                         min-width="90px"
@@ -127,6 +133,10 @@ class HistoryPage extends Vue {
         });
     }
 
+    rowKey(row) {
+        return row.key;
+    }
+
     updateTableData() {
         let result = [];
 
@@ -176,13 +186,15 @@ class HistoryPage extends Vue {
         }
 
         const search = this.search;
-        this.tableData = result.filter(item => {
+        result = result.filter(item => {
             return !search ||
                 item.touchTime.includes(search) ||
                 item.touchDate.includes(search) ||
                 item.desc.title.toLowerCase().includes(search.toLowerCase()) ||
                 item.desc.author.toLowerCase().includes(search.toLowerCase())
         });
+
+        this.tableData = result;
     }
 
     headerCellStyle(cell) {

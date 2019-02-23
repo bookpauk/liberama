@@ -45,6 +45,9 @@ export default class BookParser {
         let italic = false;
         let space = 0;
         let inPara = false;
+        let isFirstBody = true;
+        let isFirstSection = true;
+        let isFirstTitlePara = false;
 
         this.binary = {};
         let binaryId = '';
@@ -185,7 +188,7 @@ export default class BookParser {
                 if (attrs.href && attrs.href.value) {
                     const href = attrs.href.value;
                     if (href[0] == '#') {//local
-                        if (inPara && !this.showInlineImagesInCenter)
+                        if (inPara && !this.showInlineImagesInCenter && !center)
                             growParagraph(`<image-inline href="${href}"></image-inline>`, 0);
                         else
                             newParagraph(`<image href="${href}">${' '.repeat(maxImageLineCount)}</image>`, maxImageLineCount);
@@ -199,14 +202,23 @@ export default class BookParser {
             }
 
             if (path.indexOf('/fictionbook/body') == 0) {
+                if (tag == 'body') {
+                    if (!isFirstBody)
+                        newParagraph(' ', 1);
+                    isFirstBody = false;
+                }
+
                 if (tag == 'title') {
                     newParagraph(' ', 1);
+                    isFirstTitlePara = true;
                     bold = true;
                     center = true;
                 }
 
                 if (tag == 'section') {
-                    newParagraph(' ', 1);
+                    if (!isFirstSection)
+                        newParagraph(' ', 1);
+                    isFirstSection = false;
                 }
 
                 if (tag == 'emphasis' || tag == 'strong') {
@@ -214,13 +226,17 @@ export default class BookParser {
                 }
 
                 if ((tag == 'p' || tag == 'empty-line' || tag == 'v')) {
-                    newParagraph(' ', 1);
-                    if (tag == 'p')
+                    if (!(tag == 'p' && isFirstTitlePara))
+                        newParagraph(' ', 1);
+                    if (tag == 'p') {
                         inPara = true;
+                        isFirstTitlePara = false;
+                    }
                 }
 
                 if (tag == 'subtitle') {
                     newParagraph(' ', 1);
+                    isFirstTitlePara = true;
                     bold = true;
                 }
 
@@ -248,6 +264,7 @@ export default class BookParser {
             
                 if (path.indexOf('/fictionbook/body') == 0) {
                     if (tag == 'title') {
+                        isFirstTitlePara = false;
                         bold = false;
                         center = false;
                     }
@@ -261,6 +278,7 @@ export default class BookParser {
                     }
 
                     if (tag == 'subtitle') {
+                        isFirstTitlePara = false;
                         bold = false;
                     }
 
@@ -293,10 +311,10 @@ export default class BookParser {
             text = text.replace(/>/g, '&gt;');
             text = text.replace(/</g, '&lt;');
 
-            if (text != ' ' && text.trim() == '')
-                text = text.trim();
+            if (text && text.trim() == '')
+                text = (text.indexOf(' ') >= 0 ? ' ' : '');
 
-            if (text == '')
+            if (!text)
                 return;
 
             text = text.replace(/[\t\n\r]/g, ' ');
@@ -348,13 +366,7 @@ export default class BookParser {
             }
 
             if (path.indexOf('/fictionbook/body/section') == 0) {
-                switch (tag) {
-                    case 'p':
-                        growParagraph(`${tOpen}${text}${tClose}`, text.length);
-                        break;
-                    default:
-                        growParagraph(`${tOpen}${text}${tClose}`, text.length);
-                }
+                growParagraph(`${tOpen}${text}${tClose}`, text.length);
             }
 
             if (binaryId) {

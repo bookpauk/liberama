@@ -10,6 +10,7 @@ const FileDetector = require('../FileDetector');
 
 const repSpaces = (text) => text.replace(/&nbsp;|[\t\n\r]/g, ' ');
 const repSpaces2 = (text) => text.replace(/[\n\r]/g, '');
+const repSpaces3 = (text) => text.replace(/&nbsp;/g, ' ');
 
 class BookConverter {
     constructor() {
@@ -66,7 +67,10 @@ class BookConverter {
             }
         }
 
-        return iconv.decode(data, selected);
+        if (selected.toLowerCase() != 'utf-8')
+            return iconv.decode(data, selected);
+        else
+            return data;
     }
 
     checkEncoding(data) {
@@ -108,19 +112,21 @@ class BookConverter {
         };
 
         const growParagraph = (text) => {
+            if (!pars.length)
+                newParagraph();
+
             const l = pars.length;
-            if (l) {
-                if (pars[l - 1]._t == '')
-                    text = text.trimLeft();
-                pars[l - 1]._t += text;
-            }
+            if (pars[l - 1]._t == '')
+                text = text.trimLeft();
+            pars[l - 1]._t += text;
 
             //посчитаем отступы у текста, чтобы выделить потом параграфы
             const lines = text.split('\n');
-            for (const line of lines) {
-                const sp = line.split(' ');
+            for (let line of lines) {
+                line = repSpaces2(line).replace(/\t/g, '    ');
+
                 let l = 0;
-                while (l < sp.length && sp[l].trim() == '') {
+                while (l < line.length && line[l] == ' ') {
                     l++;
                 }
                 if (!spaceCounter[l])
@@ -129,7 +135,6 @@ class BookConverter {
             }
         };
 
-        newParagraph();
         const newPara = new Set(['tr', 'br', 'br/', 'dd', 'p', 'title', '/title', 'h1', 'h2', 'h3', '/h1', '/h2', '/h3']);
 
         const onTextNode = (text, cutCounter, cutTag) => {// eslint-disable-line no-unused-vars
@@ -183,22 +188,28 @@ class BookConverter {
             };
 
             const growPar = (text) => {
+                if (!newPars.length)
+                    newPar();
+
                 const l = newPars.length;
-                if (l) {
-                    newPars[l - 1]._t += text;
-                }
+                newPars[l - 1]._t += text;
             }
 
+            i = 0;
             for (const par of pars) {
-                newPar();
+                if (i > 0)
+                    newPar();
+                i++;
 
                 const lines = par._t.split('\n');
-                for (const line of lines) {
-                    const sp = line.split(' ');
+                for (let line of lines) {
+                    line = repSpaces2(line).replace(/\t/g, '    ');
+
                     let l = 0;
-                    while (l < sp.length && sp[l].trim() == '') {
+                    while (l < line.length && line[l] == ' ') {
                         l++;
                     }
+
                     if (l >= parIndent)
                         newPar();
                     growPar(line.trim() + ' ');
@@ -227,6 +238,7 @@ class BookConverter {
         let inSubtitle = false;
         let inJustify = true;
         let inImage = false;
+        let isFirstPara = false;
         let path = '';
         let tag = '';// eslint-disable-line no-unused-vars
 
@@ -258,12 +270,16 @@ class BookConverter {
         };
 
         const growParagraph = (text) => {
+            if (!node._p) {
+                if (text.trim() != '')
+                    openTag('p');
+                else
+                    return;
+            }
             if (node._n == 'p' && node._a.length == 0)
                 text = text.trimLeft();
             node._a.push({_t: text});
         };
-
-        openTag('p');
 
         const onStartNode = (elemName, tail, singleTag, cutCounter, cutTag) => {// eslint-disable-line no-unused-vars
             if (elemName == '')
@@ -272,18 +288,25 @@ class BookConverter {
                 path += '/' + elemName;
                 tag = elemName;
             } else {
-                if (inPara && elemName != 'i' && elemName != 'b' && elemName != 'em' && elemName != 'strong' && elemName != 'img')
-                    closeTag('p');
-
                 switch (elemName) {
                     case 'li':
                     case 'p':
                     case 'dd':
+                    case 'br':
+                        if (!(inSubtitle && isFirstPara)) {
+                            if (inPara)
+                                closeTag('p');
+                            openTag('p');
+                        }
+                        isFirstPara = false;
+                        break;
                     case 'h1':
                     case 'h2':
                     case 'h3':
-                    case 'br':
+                        if (inPara)
+                            closeTag('p');
                         openTag('p');
+                        bold = true;
                         break;
                     case 'i':
                     case 'em':
@@ -294,9 +317,12 @@ class BookConverter {
                         bold = true;
                         break;
                     case 'div':
+                        if (inPara)
+                            closeTag('p');
                         if (tail.indexOf('align="center"') >= 0) {
                             openTag('subtitle');
                             inSubtitle = true;
+                            isFirstPara = true;
                         }
 
                         if (tail.indexOf('align="justify"') >= 0) {
@@ -306,6 +332,8 @@ class BookConverter {
 
                         break;
                     case 'img': {
+                        if (inPara)
+                            closeTag('p');
                         const attrs = sax.getAttrsSync(tail);
                         if (attrs.src && attrs.src.value) {
                             let href = attrs.src.value;
@@ -341,10 +369,13 @@ class BookConverter {
                     case 'li':
                     case 'p':
                     case 'dd':
+                        closeTag('p');
+                        break;
                     case 'h1':
                     case 'h2':
                     case 'h3':
                         closeTag('p');
+                        bold = false;
                         break;
                     case 'i':
                     case 'em':
@@ -358,6 +389,7 @@ class BookConverter {
                         if (inSubtitle) {
                             closeTag('subtitle');
                             inSubtitle = false;
+                            isFirstPara = false;
                         }
 
                         if (inJustify) {
@@ -384,10 +416,10 @@ class BookConverter {
         };
 
         const onTextNode = (text) => {// eslint-disable-line no-unused-vars
-            if (text != ' ' && text.trim() == '')
-                text = text.trim();
+            if (text && text.trim() == '')
+                text = (text.indexOf(' ') >= 0 ? ' ' : '');
 
-            if (text == '')
+            if (!text)
                 return;
 
             switch (path) {
@@ -416,7 +448,7 @@ class BookConverter {
                 growParagraph(`${tOpen}${text}${tClose}`);
         };
 
-        sax.parseSync(repSpaces(repSpaces2(this.decode(data).toString())), {
+        sax.parseSync(repSpaces3(this.decode(data).toString()), {
             onStartNode, onEndNode, onTextNode, onComment,
             innerCut: new Set(['head', 'script', 'style'])
         });
@@ -474,21 +506,29 @@ class BookConverter {
                 }
             }
 
+            let tOpen = '';
+            let tBody = '';
+            let tClose = '';
             if (name)
-                out += `<${name}${attrs}>`;
+                tOpen += `<${name}${attrs}>`;
             if (node.hasOwnProperty('_t'))
-                out += repSpaces(node._t);
+                tBody += repSpaces(node._t);
 
             for (let nodeName in node) {
                 if (nodeName && nodeName[0] == '_' && nodeName != '_a')
                     continue;
 
                 const n = node[nodeName];
-                out += this.formatFb2Node(n, nodeName);
+                tBody += this.formatFb2Node(n, nodeName);
             }
             
             if (name)
-                out += `</${name}>`;
+                tClose += `</${name}>`;
+
+            if (attrs == '' && name == 'p' && tBody.trim() == '')
+                out += '<empty-line/>'
+            else
+                out += `${tOpen}${tBody}${tClose}`;
         }
         return out;
     }
