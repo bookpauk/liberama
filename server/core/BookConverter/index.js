@@ -270,8 +270,12 @@ class BookConverter {
         };
 
         const growParagraph = (text) => {
-            if (!node._p)
-                openTag('p');
+            if (!node._p) {
+                if (text.trim() != '')
+                    openTag('p');
+                else
+                    return;
+            }
             if (node._n == 'p' && node._a.length == 0)
                 text = text.trimLeft();
             node._a.push({_t: text});
