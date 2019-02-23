@@ -45,6 +45,7 @@ export default class BookParser {
         let italic = false;
         let space = 0;
         let inPara = false;
+        let isFirstBody = true;
         let isFirstSection = true;
         let isFirstTitlePara = false;
 
@@ -201,6 +202,12 @@ export default class BookParser {
             }
 
             if (path.indexOf('/fictionbook/body') == 0) {
+                if (tag == 'body') {
+                    if (!isFirstBody)
+                        newParagraph(' ', 1);
+                    isFirstBody = false;
+                }
+
                 if (tag == 'title') {
                     newParagraph(' ', 1);
                     isFirstTitlePara = true;
