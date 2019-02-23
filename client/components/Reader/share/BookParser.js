@@ -188,7 +188,7 @@ export default class BookParser {
                 if (attrs.href && attrs.href.value) {
                     const href = attrs.href.value;
                     if (href[0] == '#') {//local
-                        if (inPara && !this.showInlineImagesInCenter)
+                        if (inPara && !this.showInlineImagesInCenter && !center)
                             growParagraph(`<image-inline href="${href}"></image-inline>`, 0);
                         else
                             newParagraph(`<image href="${href}">${' '.repeat(maxImageLineCount)}</image>`, maxImageLineCount);
