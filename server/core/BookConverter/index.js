@@ -111,19 +111,21 @@ class BookConverter {
         };
 
         const growParagraph = (text) => {
+            if (!pars.length)
+                newParagraph();
+
             const l = pars.length;
-            if (l) {
-                if (pars[l - 1]._t == '')
-                    text = text.trimLeft();
-                pars[l - 1]._t += text;
-            }
+            if (pars[l - 1]._t == '')
+                text = text.trimLeft();
+            pars[l - 1]._t += text;
 
             //посчитаем отступы у текста, чтобы выделить потом параграфы
             const lines = text.split('\n');
-            for (const line of lines) {
-                const sp = line.split(' ');
+            for (let line of lines) {
+                line = repSpaces2(line).replace(/\t/g, '    ');
+
                 let l = 0;
-                while (l < sp.length && sp[l].trim() == '') {
+                while (l < line.length && line[l] == ' ') {
                     l++;
                 }
                 if (!spaceCounter[l])
@@ -132,7 +134,6 @@ class BookConverter {
             }
         };
 
-        newParagraph();
         const newPara = new Set(['tr', 'br', 'br/', 'dd', 'p', 'title', '/title', 'h1', 'h2', 'h3', '/h1', '/h2', '/h3']);
 
         const onTextNode = (text, cutCounter, cutTag) => {// eslint-disable-line no-unused-vars
@@ -186,22 +187,23 @@ class BookConverter {
             };
 
             const growPar = (text) => {
+                if (!newPars.length)
+                    newPar();
+
                 const l = newPars.length;
-                if (l) {
-                    newPars[l - 1]._t += text;
-                }
+                newPars[l - 1]._t += text;
             }
 
             for (const par of pars) {
-                newPar();
-
                 const lines = par._t.split('\n');
-                for (const line of lines) {
-                    const sp = line.split(' ');
+                for (let line of lines) {
+                    line = repSpaces2(line).replace(/\t/g, '    ');
+
                     let l = 0;
-                    while (l < sp.length && sp[l].trim() == '') {
+                    while (l < line.length && line[l] == ' ') {
                         l++;
                     }
+
                     if (l >= parIndent)
                         newPar();
                     growPar(line.trim() + ' ');
