@@ -10,6 +10,7 @@ const FileDetector = require('../FileDetector');
 
 const repSpaces = (text) => text.replace(/&nbsp;|[\t\n\r]/g, ' ');
 const repSpaces2 = (text) => text.replace(/[\n\r]/g, '');
+const repSpaces3 = (text) => text.replace(/&nbsp;/g, ' ');
 
 class BookConverter {
     constructor() {
@@ -384,6 +385,7 @@ class BookConverter {
                         if (inSubtitle) {
                             closeTag('subtitle');
                             inSubtitle = false;
+                            isFirstPara = false;
                         }
 
                         if (inJustify) {
@@ -442,7 +444,7 @@ class BookConverter {
                 growParagraph(`${tOpen}${text}${tClose}`);
         };
 
-        sax.parseSync(repSpaces(this.decode(data).toString()), {
+        sax.parseSync(repSpaces3(this.decode(data).toString()), {
             onStartNode, onEndNode, onTextNode, onComment,
             innerCut: new Set(['head', 'script', 'style'])
         });
