@@ -97,7 +97,7 @@ export default class DrawHelper {
                 lineText += `${tOpen}${text}${tClose}`;
 
                 center = center || part.style.center;
-                space = (part.style.space > 0 ? part.style.space : space);
+                space = (part.style.space > space ? part.style.space : space);
 
                 //избражения
                 //image: {local: Boolean, inline: Boolean, id: String, imageLine: Number, lineCount: Number, paraIndex: Number},

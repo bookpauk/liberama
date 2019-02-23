@@ -366,13 +366,7 @@ export default class BookParser {
             }
 
             if (path.indexOf('/fictionbook/body/section') == 0) {
-                switch (tag) {
-                    case 'p':
-                        growParagraph(`${tOpen}${text}${tClose}`, text.length);
-                        break;
-                    default:
-                        growParagraph(`${tOpen}${text}${tClose}`, text.length);
-                }
+                growParagraph(`${tOpen}${text}${tClose}`, text.length);
             }
 
             if (binaryId) {
