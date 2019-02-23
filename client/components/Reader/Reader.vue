@@ -69,7 +69,7 @@
                 @stop-text-search="stopTextSearch">
             </SearchPage>
             <CopyTextPage v-if="copyTextActive" ref="copyTextPage" @copy-text-toggle="copyTextToggle"></CopyTextPage>            
-            <HistoryPage v-if="historyActive" ref="historyPage" @load-book="loadBook" @history-toggle="historyToggle"></HistoryPage>
+            <HistoryPage v-show="historyActive" ref="historyPage" @load-book="loadBook" @history-toggle="historyToggle"></HistoryPage>
             <SettingsPage v-if="settingsActive" ref="settingsPage" @settings-toggle="settingsToggle"></SettingsPage>
             <HelpPage v-if="helpActive" ref="helpPage" @help-toggle="helpToggle"></HelpPage>
             <ClickMapPage v-show="clickMapActive" ref="clickMapPage"></ClickMapPage>
@@ -415,6 +415,7 @@ class Reader extends Vue {
         this.historyActive = !this.historyActive;
         if (this.historyActive) {
             this.closeAllTextPages();
+            this.$refs.historyPage.init();
             this.historyActive = true;
         } else {
             this.historyActive = false;
@@ -831,6 +832,8 @@ class Reader extends Vue {
                             break;
                         case 'KeyX':
                             this.historyToggle();
+                            event.preventDefault();
+                            event.stopPropagation();
                             break;
                         case 'KeyS':
                             this.settingsToggle();
