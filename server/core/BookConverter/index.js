@@ -479,21 +479,29 @@ class BookConverter {
                 }
             }
 
+            let tOpen = '';
+            let tBody = '';
+            let tClose = '';
             if (name)
-                out += `<${name}${attrs}>`;
+                tOpen += `<${name}${attrs}>`;
             if (node.hasOwnProperty('_t'))
-                out += repSpaces(node._t);
+                tBody += repSpaces(node._t);
 
             for (let nodeName in node) {
                 if (nodeName && nodeName[0] == '_' && nodeName != '_a')
                     continue;
 
                 const n = node[nodeName];
-                out += this.formatFb2Node(n, nodeName);
+                tBody += this.formatFb2Node(n, nodeName);
             }
             
             if (name)
-                out += `</${name}>`;
+                tClose += `</${name}>`;
+
+            if (attrs == '' && name == 'p' && tBody.trim() == '')
+                out += '<empty-line/>'
+            else
+                out += `${tOpen}${tBody}${tClose}`;
         }
         return out;
     }
