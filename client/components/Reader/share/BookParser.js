@@ -219,7 +219,7 @@ export default class BookParser {
                 }
 
                 if ((tag == 'p' || tag == 'empty-line' || tag == 'v')) {
-                    if (!(tag == 'p' && center && isFirstTitlePara))
+                    if (!(tag == 'p' && isFirstTitlePara))
                         newParagraph(' ', 1);
                     if (tag == 'p') {
                         inPara = true;
@@ -228,6 +228,8 @@ export default class BookParser {
                 }
 
                 if (tag == 'subtitle') {
+                    newParagraph(' ', 1);
+                    isFirstTitlePara = true;
                     bold = true;
                 }
 
@@ -255,6 +257,7 @@ export default class BookParser {
             
                 if (path.indexOf('/fictionbook/body') == 0) {
                     if (tag == 'title') {
+                        isFirstTitlePara = false;
                         bold = false;
                         center = false;
                     }
@@ -268,6 +271,7 @@ export default class BookParser {
                     }
 
                     if (tag == 'subtitle') {
+                        isFirstTitlePara = false;
                         bold = false;
                     }
 
@@ -300,10 +304,10 @@ export default class BookParser {
             text = text.replace(/>/g, '&gt;');
             text = text.replace(/</g, '&lt;');
 
-            if (text != ' ' && text.trim() == '')
-                text = text.trim();
+            if (text && text.trim() == '')
+                text = (text.indexOf(' ') >= 0 ? ' ' : '');
 
-            if (text == '')
+            if (!text)
                 return;
 
             text = text.replace(/[\t\n\r]/g, ' ');

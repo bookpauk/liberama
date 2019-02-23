@@ -194,7 +194,12 @@ class BookConverter {
                 newPars[l - 1]._t += text;
             }
 
+            i = 0;
             for (const par of pars) {
+                if (i > 0)
+                    newPar();
+                i++;
+
                 const lines = par._t.split('\n');
                 for (let line of lines) {
                     line = repSpaces2(line).replace(/\t/g, '    ');
@@ -232,6 +237,7 @@ class BookConverter {
         let inSubtitle = false;
         let inJustify = true;
         let inImage = false;
+        let isFirstPara = false;
         let path = '';
         let tag = '';// eslint-disable-line no-unused-vars
 
@@ -277,18 +283,25 @@ class BookConverter {
                 path += '/' + elemName;
                 tag = elemName;
             } else {
-                if (inPara && elemName != 'i' && elemName != 'b' && elemName != 'em' && elemName != 'strong' && elemName != 'img')
-                    closeTag('p');
-
                 switch (elemName) {
                     case 'li':
                     case 'p':
                     case 'dd':
+                    case 'br':
+                        if (!(inSubtitle && isFirstPara)) {
+                            if (inPara)
+                                closeTag('p');
+                            openTag('p');
+                        }
+                        isFirstPara = false;
+                        break;
                     case 'h1':
                     case 'h2':
                     case 'h3':
-                    case 'br':
+                        if (inPara)
+                            closeTag('p');
                         openTag('p');
+                        bold = true;
                         break;
                     case 'i':
                     case 'em':
@@ -299,9 +312,12 @@ class BookConverter {
                         bold = true;
                         break;
                     case 'div':
+                        if (inPara)
+                            closeTag('p');
                         if (tail.indexOf('align="center"') >= 0) {
                             openTag('subtitle');
                             inSubtitle = true;
+                            isFirstPara = true;
                         }
 
                         if (tail.indexOf('align="justify"') >= 0) {
@@ -311,6 +327,8 @@ class BookConverter {
 
                         break;
                     case 'img': {
+                        if (inPara)
+                            closeTag('p');
                         const attrs = sax.getAttrsSync(tail);
                         if (attrs.src && attrs.src.value) {
                             let href = attrs.src.value;
@@ -346,10 +364,13 @@ class BookConverter {
                     case 'li':
                     case 'p':
                     case 'dd':
+                        closeTag('p');
+                        break;
                     case 'h1':
                     case 'h2':
                     case 'h3':
                         closeTag('p');
+                        bold = false;
                         break;
                     case 'i':
                     case 'em':
@@ -389,10 +410,10 @@ class BookConverter {
         };
 
         const onTextNode = (text) => {// eslint-disable-line no-unused-vars
-            if (text != ' ' && text.trim() == '')
-                text = text.trim();
+            if (text && text.trim() == '')
+                text = (text.indexOf(' ') >= 0 ? ' ' : '');
 
-            if (text == '')
+            if (!text)
                 return;
 
             switch (path) {
@@ -421,7 +442,7 @@ class BookConverter {
                 growParagraph(`${tOpen}${text}${tClose}`);
         };
 
-        sax.parseSync(repSpaces(repSpaces2(this.decode(data).toString())), {
+        sax.parseSync(repSpaces(this.decode(data).toString()), {
             onStartNode, onEndNode, onTextNode, onComment,
             innerCut: new Set(['head', 'script', 'style'])
         });
