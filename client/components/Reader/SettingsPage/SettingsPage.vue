@@ -185,7 +185,7 @@
                                 <el-checkbox v-model="wordWrap">Перенос по слогам</el-checkbox>
                             </el-form-item>
                             <el-form-item label="Обработка">
-                                <el-checkbox v-model="cutEmptyParagraphs">Убирать пустые параграфы</el-checkbox>
+                                <el-checkbox v-model="cutEmptyParagraphs">Убирать пустые строки</el-checkbox>
                             </el-form-item>
                             <el-form-item label="">
                                 <el-col :span="12">

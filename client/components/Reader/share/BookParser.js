@@ -45,6 +45,7 @@ export default class BookParser {
         let italic = false;
         let space = 0;
         let inPara = false;
+        let isFirstSection = true;
 
         this.binary = {};
         let binaryId = '';
@@ -206,7 +207,9 @@ export default class BookParser {
                 }
 
                 if (tag == 'section') {
-                    newParagraph(' ', 1);
+                    if (!isFirstSection)
+                        newParagraph(' ', 1);
+                    isFirstSection = false;
                 }
 
                 if (tag == 'emphasis' || tag == 'strong') {
