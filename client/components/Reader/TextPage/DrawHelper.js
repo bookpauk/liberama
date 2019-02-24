@@ -26,7 +26,7 @@ export default class DrawHelper {
         const font = this.fontByStyle({});
         const justify = (this.textAlignJustify ? 'text-align: justify; text-align-last: justify;' : '');
 
-        let out = `<div style="width: ${this.w}px; height: ${this.h}px;` + 
+        let out = `<div style="width: ${this.w}px; height: ${this.h + (isScrolling ? this.lineHeight : 0)}px;` + 
             ` position: absolute; top: ${this.fontSize*this.textShift}px; color: ${this.textColor}; font: ${font}; ${justify}` +
             ` line-height: ${this.lineHeight}px; white-space: nowrap; overflow: hidden;">`;
 
