@@ -669,13 +669,16 @@ export default class BookParser {
 
                 let lineCount = this.imageHeightLines;
                 let c = Math.ceil(bin.h/this.lineHeight);
+
+                const maxH = lineCount*this.lineHeight;
+                let maxH2 = maxH;
                 if (this.imageFitWidth && bin.w > this.w) {
-                    const newH = bin.h*this.w/bin.w;
-                    c = Math.ceil(newH/this.lineHeight);
+                    maxH2 = bin.h*this.w/bin.w;
+                    c = Math.ceil(maxH2/this.lineHeight);
                 }
                 lineCount = (c < lineCount ? c : lineCount);
 
-                let imageHeight = lineCount*this.lineHeight;
+                let imageHeight = (maxH2 < maxH ? maxH2 : maxH);
                 imageHeight = (imageHeight <= bin.h ? imageHeight : bin.h);
 
                 let imageWidth = (bin.h > imageHeight ? bin.w*imageHeight/bin.h : bin.w);
