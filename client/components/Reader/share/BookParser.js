@@ -609,7 +609,8 @@ export default class BookParser {
             para.parsed.cutEmptyParagraphs === this.cutEmptyParagraphs &&
             para.parsed.addEmptyParagraphs === this.addEmptyParagraphs &&
             para.parsed.showImages === this.showImages &&
-            para.parsed.imageHeightLines === this.imageHeightLines
+            para.parsed.imageHeightLines === this.imageHeightLines &&
+            para.parsed.imageFitWidth === this.imageFitWidth
             )
             return para.parsed;
 
@@ -623,6 +624,7 @@ export default class BookParser {
             addEmptyParagraphs: this.addEmptyParagraphs,
             showImages: this.showImages,
             imageHeightLines: this.imageHeightLines,
+            imageFitWidth: this.imageFitWidth,
             visible: !(
                 (this.cutEmptyParagraphs && para.cut) ||
                 (para.addIndex > this.addEmptyParagraphs)
@@ -638,7 +640,7 @@ export default class BookParser {
             last: Boolean,
             parts: array of {
                 style: {bold: Boolean, italic: Boolean, center: Boolean},
-                image: {local: Boolean, inline: Boolean, id: String, imageLine: Number, lineCount: Number, paraIndex: Number},
+                image: {local: Boolean, inline: Boolean, id: String, imageLine: Number, lineCount: Number, paraIndex: Number, w: Number, h: Number},
                 text: String,
             }
         }*/
@@ -666,8 +668,18 @@ export default class BookParser {
                     bin = {h: 0, w: 0};
 
                 let lineCount = this.imageHeightLines;
-                const c = Math.ceil(bin.h/this.lineHeight);
+                let c = Math.ceil(bin.h/this.lineHeight);
+                if (this.imageFitWidth && bin.w > this.w) {
+                    const newH = bin.h*this.w/bin.w;
+                    c = Math.ceil(newH/this.lineHeight);
+                }
                 lineCount = (c < lineCount ? c : lineCount);
+
+                let imageHeight = lineCount*this.lineHeight;
+                imageHeight = (imageHeight <= bin.h ? imageHeight : bin.h);
+
+                let imageWidth = (bin.h > imageHeight ? bin.w*imageHeight/bin.h : bin.w);
+
                 let i = 0;
                 for (; i < lineCount - 1; i++) {
                     line.end = para.offset + ofs;
@@ -679,7 +691,9 @@ export default class BookParser {
                         id: part.image.id,
                         imageLine: i,
                         lineCount,
-                        paraIndex
+                        paraIndex,
+                        w: imageWidth,
+                        h: imageHeight,
                     }});
                     lines.push(line);
                     line = {begin: line.end + 1, parts: []};
@@ -689,7 +703,9 @@ export default class BookParser {
                 line.first = (j == 0);
                 line.last = true;
                 line.parts.push({style, text: ' ',
-                    image: {local: part.image.local, inline: false, id: part.image.id, imageLine: i, lineCount, paraIndex}});
+                    image: {local: part.image.local, inline: false, id: part.image.id,
+                        imageLine: i, lineCount, paraIndex, w: imageWidth, h: imageHeight}
+                });
                 
                 continue;
             }
