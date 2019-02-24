@@ -164,6 +164,7 @@ const settingDefaults = {
         showImages: true,
         showInlineImagesInCenter: false,
         imageHeightLines: 100,
+        imageFitWidth: true,
 
         fontShifts: {},
 };

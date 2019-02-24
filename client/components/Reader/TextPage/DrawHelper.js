@@ -28,7 +28,7 @@ export default class DrawHelper {
 
         let out = `<div style="width: ${this.w}px; height: ${this.h}px;` + 
             ` position: absolute; top: ${this.fontSize*this.textShift}px; color: ${this.textColor}; font: ${font}; ${justify}` +
-            ` line-height: ${this.lineHeight}px; white-space: nowrap;">`;
+            ` line-height: ${this.lineHeight}px; white-space: nowrap; overflow: hidden;">`;
 
         let imageDrawn = new Set();
         let len = lines.length;
@@ -100,23 +100,18 @@ export default class DrawHelper {
                 space = (part.style.space > space ? part.style.space : space);
 
                 //избражения
-                //image: {local: Boolean, inline: Boolean, id: String, imageLine: Number, lineCount: Number, paraIndex: Number},
+                //image: {local: Boolean, inline: Boolean, id: String, imageLine: Number, lineCount: Number, paraIndex: Number, w: Number, h: Number},
                 const img = part.image;
                 if (img && img.id && !img.inline && !imageDrawn.has(img.paraIndex)) {
                     const bin = this.parsed.binary[img.id];
                     if (bin) {
-                        let imgH = img.lineCount*this.lineHeight;
-                        imgH = (imgH <= bin.h ? imgH : bin.h);
-                        let imgW = bin.w;
-
                         let resize = '';                        
-                        if (bin.h > imgH) {
-                            resize = `height: ${imgH}px`;
-                            imgW = imgW*imgH/bin.h;
+                        if (bin.h > img.h) {
+                            resize = `height: ${img.h}px`;
                         }
 
-                        const left = (this.w - imgW)/2;
-                        const top = ((img.lineCount*this.lineHeight - imgH)/2) + (i - img.imageLine)*this.lineHeight;
+                        const left = (this.w - img.w)/2;
+                        const top = ((img.lineCount*this.lineHeight - img.h)/2) + (i - img.imageLine)*this.lineHeight;
                         if (img.local) {
                             lineText += `<img src="data:${bin.type};base64,${bin.data}" style="position: absolute; left: ${left}px; top: ${top}px; ${resize}"/>`;
                         } else {

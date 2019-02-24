@@ -212,8 +212,11 @@
                                 </el-col>
                             </el-form-item>
                             <el-form-item label="">
+                                <el-checkbox v-model="imageFitWidth">Ширина не более размера экрана</el-checkbox>
+                            </el-form-item>
+                            <el-form-item label="">
                                     <el-col :span="12">
-                                        Размер не более
+                                        Высота не более
                                     </el-col>
                                     <el-tooltip :open-delay="500" effect="light" placement="top">
                                         <template slot="content">
