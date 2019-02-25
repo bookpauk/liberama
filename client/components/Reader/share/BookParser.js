@@ -317,7 +317,7 @@ export default class BookParser {
             if (!text)
                 return;
 
-            text = text.replace(/[\t\n\r]/g, ' ');
+            text = text.replace(/[\t\n\r\xa0]/g, ' ');
 
             switch (path) {
                 case '/fictionbook/description/title-info/author/first-name':
@@ -655,7 +655,6 @@ export default class BookParser {
         let style = {};
         let ofs = 0;//смещение от начала параграфа para.offset
         let imgW = 0;
-
         // тут начинается самый замес, перенос по слогам и стилизация, а также изображения
         for (const part of parts) {
             style = part.style;
