@@ -207,12 +207,12 @@
                                         <template slot="content">
                                             Выносить все изображения в центр экрана
                                         </template>
-                                        <el-checkbox v-model="showInlineImagesInCenter" @change="needReload">Инлайн в центр</el-checkbox>
+                                        <el-checkbox v-model="showInlineImagesInCenter" @change="needReload" :disabled="!showImages">Инлайн в центр</el-checkbox>
                                     </el-tooltip>
                                 </el-col>
                             </el-form-item>
                             <el-form-item label="">
-                                <el-checkbox v-model="imageFitWidth">Ширина не более размера экрана</el-checkbox>
+                                <el-checkbox v-model="imageFitWidth" :disabled="!showImages">Ширина не более размера экрана</el-checkbox>
                             </el-form-item>
                             <el-form-item label="">
                                     <el-col :span="12">
@@ -225,7 +225,7 @@
                                             уменьшено с сохранением пропорций так, чтобы<br>
                                             помещаться в указанное количество строк.
                                         </template>
-                                        <el-input-number v-model="imageHeightLines" :min="1" :max="100"></el-input-number>
+                                        <el-input-number v-model="imageHeightLines" :min="1" :max="100" :disabled="!showImages"></el-input-number>
                                     </el-tooltip>
                             </el-form-item>
                         </el-form>
