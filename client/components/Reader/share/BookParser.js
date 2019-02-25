@@ -664,7 +664,7 @@ export default class BookParser {
                 parsed.visible = this.showImages;
                 let bin = this.binary[part.image.id];
                 if (!bin)
-                    bin = {h: 0, w: 0};
+                    bin = {h: 1, w: 1};
 
                 let lineCount = this.imageHeightLines;
                 let c = Math.ceil(bin.h/this.lineHeight);
