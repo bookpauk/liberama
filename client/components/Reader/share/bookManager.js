@@ -3,7 +3,7 @@ import localForage from 'localforage';
 import * as utils from '../../../share/utils';
 import BookParser from './BookParser';
 
-const maxDataSize = 200*1024*1024;//chars, not bytes
+const maxDataSize = 500*1024*1024;//chars, not bytes
 
 const bmCacheStore = localForage.createInstance({
     name: 'bmCacheStore'
@@ -27,6 +27,8 @@ class BookManager {
 
         //this.booksCached нужен только для ускорения загрузки читалки
         this.booksCached = await bmCacheStore.getItem('books');
+        if (!this.booksCached)
+            this.booksCached = {};
         this.recent = await bmCacheStore.getItem('recent');
         this.books = Object.assign({}, this.booksCached);
 
@@ -67,7 +69,12 @@ class BookManager {
         }
 
         await this.cleanBooks();
-        this.booksCached = Object.assign({}, this.books);
+
+        this.booksCached = {};
+        for (const key in this.books) {
+            this.booksCached[key] = this.metaOnly(this.books[key]);
+        }
+        await bmCacheStore.setItem('books', this.booksCached);
     }
 
     async cleanBooks() {
