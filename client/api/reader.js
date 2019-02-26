@@ -11,7 +11,7 @@ const workerApi = axios.create({
 
 class Reader {
     async loadBook(url, callback) {
-        const refreshPause = 200;
+        const refreshPause = 300;
         if (!callback) callback = () => {};
 
         let response = await api.post('/load-book', {type: 'url', url});
