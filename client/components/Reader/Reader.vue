@@ -656,7 +656,7 @@ class Reader extends Vue {
 
                     // если есть в локальном кэше
                     if (bookParsed) {
-                        await bookManager.setRecentBook(Object.assign({bookPos, bookPosSeen, bookPosPercent}, bookManager.metaOnly(bookParsed)));
+                        await bookManager.setRecentBook(Object.assign({bookPos, bookPosSeen, bookPosPercent}, bookParsed));
                         this.mostRecentBook();
                         this.addAction(bookPos);
                         this.loaderActive = false;
@@ -699,7 +699,7 @@ class Reader extends Vue {
                 });
 
                 // добавляем в историю
-                await bookManager.setRecentBook(Object.assign({bookPos, bookPosSeen, bookPosPercent}, bookManager.metaOnly(addedBook)));
+                await bookManager.setRecentBook(Object.assign({bookPos, bookPosSeen, bookPosPercent}, addedBook));
                 this.mostRecentBook();
                 this.addAction(bookPos);
                 this.updateRoute(true);

@@ -226,7 +226,8 @@ class HistoryPage extends Vue {
         this.updateTableData();
 
         const newRecent = bookManager.mostRecentBook();
-        if (this.mostRecentBook != newRecent)
+
+        if (!(this.mostRecentBook && newRecent && this.mostRecentBook.key == newRecent.key))
             this.$emit('load-book', newRecent);
 
         this.mostRecentBook = newRecent;
