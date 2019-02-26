@@ -22,7 +22,7 @@ class ReaderWorker {
 
         this.down = new FileDownloader();
         this.decomp = new FileDecompressor();
-        this.bookConverter = new BookConverter();
+        this.bookConverter = new BookConverter(this.config);
 
         if (!singleCleanExecute) {
             this.periodicCleanDir(this.config.tempPublicDir, this.config.maxTempPublicDirSize, 60*60*1000);//1 раз в час
@@ -66,14 +66,14 @@ class ReaderWorker {
             const decompFilename = await this.decomp.decompressFile(downloadedFilename, decompDir);
             wState.set({progress: 100});
             
-            //parse book
+            //конвертирование в fb2
             wState.set({state: 'convert', step: 3, progress: 0});
             convertFilename = `${this.config.tempDownloadDir}/${tempFilename2}`;
             await this.bookConverter.convertToFb2(decompFilename, convertFilename, url, progress => {
                 wState.set({progress});
             });
 
-            //compress file to tmp dir, if not exists with the same hashname
+            //сжимаем файл в tmp, если там уже нет с тем же именем-sha256
             const compFilename = await this.decomp.gzipFileIfNotExists(convertFilename, `${this.config.tempPublicDir}`);
 
             wState.set({progress: 100});
