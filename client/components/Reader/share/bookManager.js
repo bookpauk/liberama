@@ -25,6 +25,7 @@ class BookManager {
     async init(settings) {
         this.settings = settings;
 
+        //this.booksCached нужен только для ускорения загрузки читалки
         this.booksCached = await bmCacheStore.getItem('books');
         this.recent = await bmCacheStore.getItem('recent');
         this.books = Object.assign({}, this.booksCached);
