@@ -3,7 +3,11 @@ import localForage from 'localforage';
 import * as utils from '../../../share/utils';
 import BookParser from './BookParser';
 
-const maxDataSize = 500*1024*1024;//chars, not bytes
+const maxDataSize = 200*1024*1024;//chars, not bytes
+
+const bmCacheStore = localForage.createInstance({
+    name: 'bmCacheStore'
+});
 
 const bmMetaStore = localForage.createInstance({
     name: 'bmMetaStore'
@@ -20,10 +24,27 @@ const bmRecentStore = localForage.createInstance({
 class BookManager {
     async init(settings) {
         this.settings = settings;
-        this.books = {};
-        this.recent = {};
+
+        this.booksCached = await bmCacheStore.getItem('books');
+        this.recent = await bmCacheStore.getItem('recent');
+        this.books = Object.assign({}, this.booksCached);
+
         this.recentChanged1 = true;
         this.recentChanged2 = true;
+
+        if (!this.books || !this.recent) {
+            this.books = {};
+            this.recent = {};
+            await this.loadMeta(true);
+        } else {
+            this.loadMeta(false);
+        }
+    }
+
+
+    async loadMeta(immediate) {
+        if (!immediate)
+            await utils.sleep(2000);
 
         let len = await bmMetaStore.length();
         for (let i = 0; i < len; i++) {
@@ -45,6 +66,7 @@ class BookManager {
         }
 
         await this.cleanBooks();
+        this.booksCached = Object.assign({}, this.books);
     }
 
     async cleanBooks() {
@@ -80,9 +102,11 @@ class BookManager {
         const result = await this.parseBook(meta, newBook.data, callback);
 
         this.books[meta.key] = result;
+        this.booksCached[meta.key] = this.metaOnly(result);
 
         await bmMetaStore.setItem(`bmMeta-${meta.key}`, this.metaOnly(result));
         await bmDataStore.setItem(`bmData-${meta.key}`, result.data);
+        await bmCacheStore.setItem('books', this.booksCached);
 
         return result;
     }
@@ -127,11 +151,15 @@ class BookManager {
         await bmDataStore.removeItem(`bmData-${meta.key}`);
 
         delete this.books[meta.key];
+        delete this.booksCached[meta.key];
+
+        await bmCacheStore.setItem('books', this.booksCached);
     }
 
     async parseBook(meta, data, callback) {
         if (!this.books) 
             await this.init();
+
         const parsed = new BookParser(this.settings);
 
         const parsedMeta = await parsed.parse(data, callback);
@@ -159,7 +187,7 @@ class BookManager {
     async setRecentBook(value, noTouch) {
         if (!this.recent) 
             await this.init();
-        const result = Object.assign({}, value);
+        const result = this.metaOnly(value);
         if (!noTouch)
             Object.assign(result, {touchTime: Date.now()});
 
@@ -170,6 +198,7 @@ class BookManager {
 
         await bmRecentStore.setItem(result.key, result);
         await this.cleanRecentBooks();
+        await bmCacheStore.setItem('recent', this.recent);
 
         this.recentChanged1 = true;
         this.recentChanged2 = true;
@@ -188,6 +217,8 @@ class BookManager {
 
         await bmRecentStore.removeItem(value.key);
         delete this.recent[value.key];
+        await bmCacheStore.setItem('recent', this.recent);
+
         this.recentChanged1 = true;
         this.recentChanged2 = true;
     }
