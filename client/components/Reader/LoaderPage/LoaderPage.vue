@@ -3,8 +3,9 @@
         <div class="part">
             <span class="greeting bold-font">{{ title }}</span>
             <span class="greeting">Добро пожаловать!</span>
-            <span class="greeting">Поддерживаются форматы: <b>fb2, fb2.zip, html, txt</b></span>
+            <span class="greeting">Поддерживаются форматы: <b>fb2, html, txt</b></span>
             <span v-if="isExternalConverter" class="greeting">...а также: <b>rtf, doc, docx</b>, и вскоре: pdf, epub, mobi</span>
+            <span class="greeting">...и распознается сжатие: <b>zip, bz2, gz</b></span>
         </div>
 
         <div class="part center">
