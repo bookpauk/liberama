@@ -5,7 +5,8 @@ const propsToSave = [
     'maxUploadFileSize',
     'maxTempPublicDirSize',
     'maxUploadPublicDirSize',
-
+    'useExternalBookConverter',
+    
     'servers',
 ];
 
