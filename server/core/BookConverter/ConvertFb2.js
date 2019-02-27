@@ -8,7 +8,7 @@ class ConvertFb2 extends ConvertBase {
         return (dataType && dataType.ext == 'xml' && data.toString().indexOf('<FictionBook') >= 0);
     }
 
-    run(data, opts) {
+    async run(data, opts) {
         if (!this.check(data, opts))
             return false;
 

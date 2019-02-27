@@ -3,7 +3,7 @@ const FileDetector = require('../FileDetector');
 
 //порядок важен
 const convertClassFactory = [
-    //require('./ConvertDocX'),
+    require('./ConvertDocX'),
     require('./ConvertFb2'),
     require('./ConvertSamlib'),
     require('./ConvertHtml'),
@@ -25,7 +25,7 @@ class BookConverter {
         const data = await fs.readFile(inputFiles.selectedFile);
         let result = false;
         for (const convert of this.convertFactory) {
-            result = convert.run(data, {inputFiles, url, callback, dataType: selectedFileType});
+            result = await convert.run(data, {inputFiles, url, callback, dataType: selectedFileType});
             if (result) {
                 await fs.writeFile(outputFile, result);
                 break;

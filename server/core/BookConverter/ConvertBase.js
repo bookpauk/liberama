@@ -1,3 +1,4 @@
+const fs = require('fs-extra');
 const iconv = require('iconv-lite');
 const chardet = require('chardet');
 const textUtils = require('./textUtils');
@@ -5,10 +6,25 @@ const textUtils = require('./textUtils');
 class ConvertBase {
     constructor(config) {
         this.config = config;
+
+        this.calibrePath = `${config.dataDir}/calibre/ebook-convert`;
+        this.sofficePath = '/usr/bin/soffice';
+        this.pdfToHtmlPath = '/usr/bin/pdftohtml';
     }
 
-    run(data, opts) {// eslint-disable-line no-unused-vars
+    async run(data, opts) {// eslint-disable-line no-unused-vars
         //override
+    }
+
+    async checkExternalConverterPresent() {
+        if (!await fs.pathExists(this.calibrePath))
+            throw new Error('Внешний конвертер calibre не найден');
+
+        if (!await fs.pathExists(this.sofficePath))
+            throw new Error('Внешний конвертер LibreOffice не найден');
+
+        if (!await fs.pathExists(this.pdfToHtmlPath))
+            throw new Error('Внешний конвертер pdftohtml не найден');
     }
 
     decode(data) {

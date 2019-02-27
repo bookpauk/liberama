@@ -19,8 +19,9 @@ class FileDecompressor {
 
         let result = {
             sourceFile: filename,
+            sourceFileType: fileType,
             selectedFile: filename,
-            fileType: fileType,
+            fileListDir: outputDir,
             fileList: []
         };
 
@@ -58,10 +59,9 @@ class FileDecompressor {
         if (files.length) {
             //ищем файл с максимальным размером
             for (let file of files) {
-                const path = `${outputDir}/${file.path}`;
-                fileList.push(path);
+                fileList.push(file.path);
                 if (file.data.length > max) {
-                    sel = path;
+                    sel = `${outputDir}/${file.path}`;
                     max = file.data.length;
                 }
             }

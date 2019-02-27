@@ -2,16 +2,29 @@ const ConvertBase = require('./ConvertBase');
 
 class ConvertDocX extends ConvertBase {
     check(data, opts) {
-        const {fileType} = opts;
+        const {inputFiles} = opts;
 
-        return (fileType && fileType.ext == 'docx' && this.config.useExternalBookConverter);
+        if (this.config.useExternalBookConverter && 
+            inputFiles.sourceFileType && inputFiles.sourceFileType.ext == 'zip') {
+            //ищем файл '[Content_Types].xml'
+            for (const file of inputFiles.fileList) {
+                if (file == '[Content_Types].xml') {
+                    return true;
+                }
+            }
+        }
+
+        return false;
     }
 
-    run(data, opts) {
+    async run(data, opts) {
         if (!this.check(data, opts))
             return false;
+        await this.checkExternalConverterPresent();
 
-        return data;
+        
+
+        return false;
     }
 }
 

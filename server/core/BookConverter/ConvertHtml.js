@@ -17,7 +17,7 @@ class ConvertHtml extends ConvertBase {
         return false;
     }
 
-    run(data, opts) {
+    async run(data, opts) {
         const checkResult = this.check(data, opts);
         if (!checkResult)
             return false;
