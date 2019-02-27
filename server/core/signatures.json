@@ -1,0 +1,726 @@
+[
+  {
+    "type": "xml",
+    "ext": "xml",
+    "mime": "application/xml",
+    "rules": [
+      { "type": "or", "rules":
+      [
+        { "type": "equal", "end": 19, "bytes": "3c3f786d6c2076657273696f6e3d22312e3022" }
+      ]
+      }
+    ]
+  },
+
+  {
+    "type": "docx",
+    "ext": "docx",
+    "mime": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+    "rules": [
+      { "type": "or", "rules":
+      [
+        { "type": "equal", "end": 4, "bytes": "504b0304" }
+      ]
+      }
+    ]
+  },
+
+  {
+    "type": "jpg",
+    "ext": "jpg",
+    "mime": "image/jpeg",
+    "rules": [
+      { "type": "equal", "start": 0, "end": 2, "bytes": "ffd8"  }
+    ]
+  },
+
+  {
+    "type": "png",
+    "ext": "png",
+    "mime": "image/png",
+    "rules": [
+      { "type": "equal", "start": 0,"end": 4, "bytes": "89504e47" }
+    ]
+  },
+
+  {
+    "type": "gif",
+    "ext": "gif",
+    "mime": "image/gif",
+    "rules": [
+      { "type": "equal", "start": 0,"end": 3, "bytes": "474946" }
+    ]
+  },
+
+  {
+    "type": "bmp",
+    "ext": "bmp",
+    "mime": "image/bmp",
+    "rules": [
+      { "type": "equal", "start": 0,"end": 2, "bytes": "424d" }
+    ]
+  },
+  {
+    "type": "webp",
+    "ext": "webp",
+    "mime": "image/webp",
+    "rules": [
+      { "type": "equal", "start": 8,"end": 12, "bytes": "57454250" }
+    ]
+  },
+
+  {
+    "type": "tif",
+    "ext": "tif",
+    "mime": "image/tiff",
+    "rules": [
+      { "type": "and", "rules":
+        [
+          { "type": "or", "rules":
+            [
+              { "type": "equal", "start": 0, "end": 4, "bytes": "49492a00" },
+              { "type": "equal", "start": 0, "end": 4,  "bytes": "4d4d002a" }
+            ]
+          },
+          { "type": "notEqual", "start": 8, "end": 10, "bytes": "4352" }
+        ]
+      }
+    ]
+  },
+
+  {
+    "type": "cr2",
+    "ext": "cr2",
+    "mime": "image/x-canon-cr2",
+    "rules": [
+      { "type": "and", "rules":
+        [
+          { "type": "or", "rules":
+            [
+              { "type": "equal", "start": 0, "end": 4, "bytes": "49492a00" },
+              { "type": "equal", "start": 0, "end": 4,  "bytes": "4d4d002a" }
+            ]
+          },
+          { "type": "equal", "start": 8, "end": 10, "bytes": "4352" }
+        ]
+      }
+    ]
+  },
+
+  {
+    "type": "jxr",
+    "ext": "jxr",
+    "mime": "image/vnd.ms-photo",
+    "rules": [
+      { "type": "equal", "start": 0, "end": 3, "bytes": "4949bc" }
+    ]
+  },
+
+  {
+    "type": "psd",
+    "ext": "psd",
+    "mime": "image/vnd.adobe.photoshop",
+    "rules": [
+      { "type": "equal", "start": 0, "end": 4, "bytes": "38425053" }
+    ]
+  },
+
+  {
+    "type": "flif",
+    "ext": "flif",
+    "mime": "image/flif",
+    "rules": [
+      { "type": "equal", "start": 0, "end": 4, "bytes": "464c4946" }
+    ]
+  },
+
+  {
+    "type": "zip",
+    "ext": "zip",
+    "mime": "application/zip",
+    "rules": [
+      { "type": "equal", "start": 0, "end": 2, "bytes": "504b" },
+      { "type": "or", "rules":
+        [
+          { "type": "equal", "start": 2, "end": 3, "bytes": "03" },
+          { "type": "equal", "start": 2, "end": 3, "bytes": "05" },
+          { "type": "equal", "start": 2, "end": 3, "bytes": "07" }
+        ]
+      },
+      { "type": "or", "rules":
+        [
+          { "type": "equal", "start": 3, "end": 4, "bytes": "04" },
+          { "type": "equal", "start": 3, "end": 4, "bytes": "06" },
+          { "type": "equal", "start": 3, "end": 4, "bytes": "08" }
+        ]
+      },
+      { "type": "notEqual", "start": 36, "end": 58, "bytes": "70656170706c69636174696f6e2f657075622b7a6970" },
+      { "type": "notEqual", "start": 30, "end": 50, "bytes": "4d4554412d494e462f6d6f7a696c6c612e727361" }
+    ]
+  },
+
+  {
+    "type": "epub",
+    "ext": "epub",
+    "mime": "application/epub+zip",
+    "rules": [
+      { "type": "equal", "start": 0, "end": 4, "bytes": "504b0304" },
+      { "type": "equal", "start": 36, "end": 58, "bytes": "70656170706c69636174696f6e2f657075622b7a6970" }
+    ]
+  },
+
+  {
+    "type": "xpi",
+    "ext": "xpi",
+    "mime": "application/x-xpinstall",
+    "rules": [
+      { "type": "equal", "start": 0, "end": 4, "bytes": "504b0304" },
+      { "type": "equal", "start": 30, "end": 50, "bytes": "4d4554412d494e462f6d6f7a696c6c612e727361" }
+    ]
+  },
+
+  {
+    "type": "tar",
+    "ext": "tar",
+    "mime": "application/x-tar",
+    "rules": [
+      { "type": "equal", "start": 257, "end": 262, "bytes": "7573746172" }
+    ]
+  },
+  {
+    "type": "rar",
+    "ext": "rar",
+    "mime": "application/x-rar-compressed",
+    "rules": [
+      { "type": "equal", "start": 0, "end": 6, "bytes": "526172211a07" },
+      { "type": "or", "rules":
+        [
+          { "type": "equal", "start": 6, "end": 7, "bytes": "00" },
+          { "type": "equal", "start": 6, "end": 7, "bytes": "01" }
+        ]
+      }
+    ]
+  },
+  {
+    "type": "gz",
+    "ext": "gz",
+    "mime": "application/gzip",
+    "rules": [
+      { "type": "equal", "start": 0, "end": 3, "bytes": "1f8b08" }
+    ]
+  },
+  {
+    "type": "bz2",
+    "ext": "bz2",
+    "mime": "application/x-bzip2",
+    "rules": [
+      { "type": "equal", "start": 0, "end": 3, "bytes": "425a68" }
+    ]
+  },
+  {
+    "type": "7z",
+    "ext": "7z",
+    "mime": "application/x-7z-compressed",
+    "rules": [
+      { "type": "equal", "start": 0, "end": 6, "bytes": "377abcaf271c" }
+    ]
+  },
+  {
+    "type": "dmg",
+    "ext": "dmg",
+    "mime": "application/x-apple-diskimage",
+    "rules": [
+      { "type": "equal", "start": 0, "end": 2, "bytes": "7801" }
+    ]
+  },
+
+  {
+    "type": "mp4",
+    "ext": "mp4",
+    "mime": "video/mp4",
+    "rules": [
+      { "type": "or", "rules":
+        [
+          { "type": "and", "rules":
+            [
+              { "type": "equal", "start": 0, "end": 3, "bytes": "000000" },
+              { "type": "or", "rules":
+                [
+                  { "type": "equal", "start": 3, "end": 4, "bytes": "18" },
+                  { "type": "equal", "start": 3, "end": 4, "bytes": "20" }
+                ]
+              },
+              { "type": "equal", "start": 4, "end": 8, "bytes": "66747970" }
+            ]
+          },
+          { "type": "equal", "start": 0, "end": 4, "bytes": "33677035" },
+          { "type": "and", "rules":
+            [
+              { "type": "equal", "start": 0, "end": 11, "bytes": "0000001c667479706d7034" },
+              { "type": "equal", "start": 16, "end": 28, "bytes": "6d7034316d70343269736f6d" }
+            ]
+          },
+          { "type": "equal", "start": 0, "end": 12, "bytes": "0000001c6674797069736f6d" },
+          { "type": "equal", "start": 0, "end": 16, "bytes": "0000001c667479706d70343200000000" }
+        ]
+      }
+    ]
+  },
+
+  {
+    "type": "m4v",
+    "ext": "m4v",
+    "mime": "video/x-m4v",
+    "rules": [
+      { "type": "equal", "start": 0, "end": 11, "bytes": "0000001c667479704d3456" }
+    ]
+  },
+
+  {
+    "type": "mid",
+    "ext": "mid",
+    "mime": "audio/midi",
+    "rules": [
+      { "type": "equal", "start": 0, "end": 4, "bytes": "4d546864" }
+    ]
+  },
+
+  {
+    "type": "mkv",
+    "ext": "mkv",
+    "mime": "video/x-matroska",
+    "rules": [
+      { "type": "equal", "start": 31, "end": 39, "bytes": "6d6174726f736b61" }
+    ]
+  },
+
+  {
+    "type": "webm",
+    "ext": "webm",
+    "mime": "video/webm",
+    "rules": [
+      { "type": "equal", "start": 0, "end": 4, "bytes": "1a45dfa3" },
+      { "type": "notEqual", "start": 31, "end": 39, "bytes": "6d6174726f736b61" }
+    ]
+  },
+
+  {
+    "type": "wmv",
+    "ext": "wmv",
+    "mime": "video/x-ms-wmv",
+    "rules": [
+      { "type": "equal", "start": 0, "end": 10, "bytes": "3026b2758e66cf11a6d9" }
+    ]
+  },
+
+  {
+    "type": "mpg",
+    "ext": "mpg",
+    "mime": "video/mpeg",
+    "rules": [
+      { "type": "equal", "start": 0, "end": 3, "bytes": "000001" },
+      { "type": "or", "rules":
+        [
+          { "type": "equal", "start": 3, "end": 4, "bytes": "b0"},
+          { "type": "equal", "start": 3, "end": 4, "bytes": "b1"},
+          { "type": "equal", "start": 3, "end": 4, "bytes": "b2"},
+          { "type": "equal", "start": 3, "end": 4, "bytes": "b3"},
+          { "type": "equal", "start": 3, "end": 4, "bytes": "b4"},
+          { "type": "equal", "start": 3, "end": 4, "bytes": "b5"},
+          { "type": "equal", "start": 3, "end": 4, "bytes": "b6"},
+          { "type": "equal", "start": 3, "end": 4, "bytes": "b7"},
+          { "type": "equal", "start": 3, "end": 4, "bytes": "b8"},
+          { "type": "equal", "start": 3, "end": 4, "bytes": "b9"},
+          { "type": "equal", "start": 3, "end": 4, "bytes": "ba"},
+          { "type": "equal", "start": 3, "end": 4, "bytes": "bb"},
+          { "type": "equal", "start": 3, "end": 4, "bytes": "bc"},
+          { "type": "equal", "start": 3, "end": 4, "bytes": "bd"},
+          { "type": "equal", "start": 3, "end": 4, "bytes": "be"},
+          { "type": "equal", "start": 3, "end": 4, "bytes": "bf"}
+        ]
+      }
+    ]
+  },
+
+  {
+    "type": "mp3",
+    "ext": "mp3",
+    "mime": "audio/mpeg",
+    "rules": [
+      { "type": "or", "rules":
+        [
+          { "type": "equal", "start": 0, "end": 3, "bytes": "494433" },
+          { "type": "equal", "start": 0, "end": 2, "bytes": "fffb" }
+        ]
+      }
+    ]
+  },
+
+  {
+    "type": "m4a",
+    "ext": "m4a",
+    "mime": "audio/m4a",
+    "rules": [
+      { "type": "or", "rules":
+        [
+          { "type": "equal", "start": 4, "end": 11, "bytes": "667479704d3441" },
+          { "type": "equal", "start": 0, "end": 4, "bytes": "4d344120" }
+        ]
+      }
+    ]
+  },
+
+  {
+    "type": "opus",
+    "ext": "opus",
+    "mime": "audio/opus",
+    "rules": [
+      { "type": "equal", "start": 28, "end": 36, "bytes": "4f70757348656164" }
+    ]
+  },
+
+  {
+    "type": "ogg",
+    "ext": "ogg",
+    "mime": "audio/ogg",
+    "rules": [
+      { "type": "equal", "start": 0, "end": 4, "bytes": "4f676753" },
+      { "type": "notEqual", "start": 28, "end": 36, "bytes": "4f70757348656164" }
+    ]
+  },
+
+  {
+    "type": "flac",
+    "ext": "flac",
+    "mime": "audio/x-flac",
+    "rules": [
+      { "type": "equal", "start": 0, "end": 4, "bytes": "664c6143" }
+    ]
+  },
+
+  {
+    "type": "wav",
+    "ext": "wav",
+    "mime": "audio/x-wav",
+    "rules": [
+      { "type": "equal", "start": 0, "end": 4, "bytes": "52494646" },
+      { "type": "equal", "start": 8, "end": 12, "bytes": "57415645" }
+    ]
+  },
+
+  {
+    "type": "amr",
+    "ext": "amr",
+    "mime": "audio/amr",
+    "rules": [
+      { "type": "equal", "start": 0, "end": 6, "bytes": "2321414d520a" }
+    ]
+  },
+
+  {
+    "type": "pdf",
+    "ext": "pdf",
+    "mime": "application/pdf",
+    "rules": [
+      { "type": "equal", "start": 0, "end": 4, "bytes": "25504446" }
+    ]
+  },
+
+  {
+    "type": "exe",
+    "ext": "exe",
+    "mime": "application/x-msdownload",
+    "iana": "application/vnd.microsoft.portable-executable",
+    "rules": [
+      { "type": "or", "rules":
+        [
+          { "type": "equal", "start": 0, "end": 2, "bytes": "4d5a" },
+          { "type": "equal", "start": 0, "end": 2, "bytes": "4d7a" },
+          { "type": "equal", "start": 0, "end": 2, "bytes": "6d7a" },
+          { "type": "equal", "start": 0, "end": 2, "bytes": "6d5a" }
+        ]
+      }
+    ]
+  },
+
+  {
+    "type": "swf",
+    "ext": "swf",
+    "mime": "application/x-shockwave-flash",
+    "iana": "application/vnd.adobe.flash.movie",
+    "rules": [
+      { "type": "or", "rules":
+        [
+          { "type": "equal", "start": 0, "end": 1, "bytes": "43" },
+          { "type": "equal", "start": 0, "end": 1, "bytes": "46" }
+        ]
+      },
+      { "type": "equal", "start": 1, "end": 3, "bytes": "5753" }
+    ]
+  },
+
+  {
+    "type": "rtf",
+    "ext": "rtf",
+    "mime": "application/rtf",
+    "rules": [
+      { "type": "equal", "start": 0, "end": 5, "bytes": "7b5c727466" }
+    ]
+  },
+
+  {
+    "type": "mov",
+    "ext": "mov",
+    "mime": "video/quicktime",
+    "rules": [
+      { "type": "equal", "start": 0, "end": 8, "bytes": "0000001466747970" }
+    ]
+  },
+
+  {
+    "type": "avi",
+    "ext": "avi",
+    "mime": "video/x-msvideo",
+    "rules": [
+      { "type": "equal", "start": 0, "end": 4, "bytes": "52494646" },
+      { "type": "equal", "start": 8, "end": 11, "bytes": "415649" }
+    ]
+  },
+
+  {
+    "type": "woff",
+    "ext": "woff",
+    "mime": "application/font-woff",
+    "rules": [
+      { "type": "equal", "start": 0, "end": 4, "bytes": "774f4646" },
+      { "type": "or", "rules":
+        [
+          { "type": "equal", "start": 4, "end": 8, "bytes": "00010000" },
+          { "type": "equal", "start": 4, "end": 8, "bytes": "4f54544f" }
+        ]
+      }
+    ]
+  },
+
+  {
+    "type": "woff2",
+    "ext": "woff2",
+    "mime": "application/font-woff",
+    "rules": [
+      { "type": "equal", "start": 0, "end": 4, "bytes": "774f4632" },
+      { "type": "or", "rules":
+        [
+          { "type": "equal", "start": 4, "end": 8, "bytes": "00010000" },
+          { "type": "equal", "start": 4, "end": 8, "bytes": "4f54544f" }
+        ]
+      }
+    ]
+  },
+
+  {
+    "type": "eot",
+    "ext": "eot",
+    "mime": "application/octet-stream",
+    "rules": [
+      { "type": "equal", "start": 34, "end": 36, "bytes": "4c50" },
+      { "type": "or", "rules":
+        [
+          { "type": "equal", "start": 8, "end": 11, "bytes": "000001" },
+          { "type": "equal", "start": 8, "end": 11, "bytes": "010002" },
+          { "type": "equal", "start": 8, "end": 11, "bytes": "020002" }
+        ]
+      }
+    ]
+  },
+
+  {
+    "type": "ttf",
+    "ext": "ttf",
+    "mime": "application/font-sfnt",
+    "rules": [
+      { "type": "equal", "start": 0, "end": 5, "bytes": "0001000000" }
+    ]
+  },
+
+  {
+    "type": "otf",
+    "ext": "otf",
+    "mime": "application/font-sfnt",
+    "rules": [
+      { "type": "equal", "start": 0, "end": 5, "bytes": "4f54544f00" }
+    ]
+  },
+
+  {
+    "type": "ico",
+    "ext": "ico",
+    "mime": "application/x-icon",
+    "iana": "image/vnd.microsoft.icon",
+    "rules": [
+      { "type": "equal", "start": 0, "end": 4, "bytes": "00000100" }
+    ]
+  },
+
+  {
+    "type": "flv",
+    "ext": "flv",
+    "mime": "application/x-flv",
+    "rules": [
+      { "type": "equal", "start": 0, "end": 4, "bytes": "464c5601" }
+    ]
+  },
+
+  {
+    "type": "ps",
+    "ext": "ps",
+    "mime": "application/postscript",
+    "rules": [
+      { "type": "equal", "start": 0, "end": 2, "bytes": "2521" }
+    ]
+  },
+
+  {
+    "type": "xz",
+    "ext": "xz",
+    "mime": "application/x-xz",
+    "rules": [
+      { "type": "equal", "start": 0, "end": 6, "bytes": "fd377a585a00" }
+    ]
+  },
+
+  {
+    "type": "sqlite",
+    "ext": "sqlite",
+    "mime": "application/x-sqlite3",
+    "iana": "application/vnd.sqlite3",
+    "rules": [
+      { "type": "equal", "start": 0, "end": 4, "bytes": "53514c69" }
+    ]
+  },
+
+  {
+    "type": "nes",
+    "ext": "nes",
+    "mime": "application/x-nintendo-nes-rom",
+    "rules": [
+      { "type": "equal", "start": 0, "end": 4, "bytes": "4e45531a" }
+    ]
+  },
+
+  {
+    "type": "crx",
+    "ext": "crx",
+    "mime": "application/x-google-chrome-extension",
+    "rules": [
+      { "type": "equal", "start": 0, "end": 4, "bytes": "43723234" }
+    ]
+  },
+
+  {
+    "type": "cab",
+    "ext": "cab",
+    "mime": "application/vnd.ms-cab-compressed",
+    "rules": [
+      { "type": "or", "rules":
+        [
+          { "type": "equal", "start": 0, "end": 4, "bytes": "4d534346" },
+          { "type": "equal", "start": 0, "end": 4, "bytes": "49536328" }
+        ]
+      }
+    ]
+  },
+
+  {
+    "type": "ar",
+    "ext": "ar",
+    "mime": "application/x-unix-archive",
+    "rules": [
+      { "type": "equal", "start": 0, "end": 7, "bytes": "213c617263683e" },
+      { "type": "notEqual", "start": 0, "end": 21, "bytes": "213c617263683e0a64656269616e2d62696e617279" }
+    ]
+  },
+
+  {
+    "type": "deb",
+    "ext": "deb",
+    "mime": "application/x-deb",
+    "rules": [
+      { "type": "equal", "start": 0, "end": 21, "bytes": "213c617263683e0a64656269616e2d62696e617279" }
+    ]
+  },
+
+  {
+    "type": "rpm",
+    "ext": "rpm",
+    "mime": "application/x-rpm",
+    "rules": [
+      { "type": "equal", "start": 0, "end": 4, "bytes": "edabeedb" }
+    ]
+  },
+
+  {
+    "type": "Z",
+    "ext": "Z",
+    "mime": "application/x-compress",
+    "rules": [
+      { "type": "or", "rules":
+        [
+          { "type": "equal", "start": 0, "end": 2, "bytes": "1fa0" },
+          { "type": "equal", "start": 0, "end": 2, "bytes": "1f9d" }
+        ]
+      }
+    ]
+  },
+
+  {
+    "type": "lz",
+    "ext": "lz",
+    "mime": "application/x-lzip",
+    "rules": [
+      { "type": "equal", "start": 0, "end": 4, "bytes": "4c5a4950" }
+    ]
+  },
+
+  {
+    "type": "msi",
+    "ext": "msi",
+    "mime": "application/x-msi",
+    "rules": [
+      { "type": "equal", "start": 0, "end": 8, "bytes": "d0cf11e0a1b11ae1" }
+    ]
+  },
+
+  {
+    "type": "svg",
+    "ext": "svg",
+    "mime": "image/svg+xml",
+    "rules": [
+      { "type": "contains", "bytes": "3c737667" }
+    ]
+  },
+
+  {
+    "type": "html",
+    "ext": "html",
+    "mime": "text/html",
+    "rules": [
+      { "type": "or", "rules":
+      [
+        { "type": "contains", "bytes": "3c68746d6c" },
+        { "type": "contains", "bytes": "3c00680074006d006c00" },
+        { "type": "equal", "end": 5, "bytes": "3c68746d6c" },
+        { "type": "equal", "end": 10, "bytes": "3c00680074006d006c00" },
+        { "type": "equal", "end": 9, "bytes": "3c21646f6374797065" },
+        { "type": "equal", "end": 5, "bytes": "3c626f6479" },
+        { "type": "equal", "end": 5, "bytes": "3c68656164" },
+        { "type": "equal", "end": 7, "bytes": "3c696672616d65" },
+        { "type": "equal", "end": 4, "bytes": "3c696d67" },
+        { "type": "equal", "end": 7, "bytes": "3c6f626a656374" },
+        { "type": "equal", "end": 7, "bytes": "3c736372697074" },
+        { "type": "equal", "end": 6, "bytes": "3c7461626c65" },
+        { "type": "equal", "end": 6, "bytes": "3c7469746c65" }
+      ]
+      }
+    ]
+  }
+]
