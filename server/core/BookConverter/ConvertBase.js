@@ -32,13 +32,20 @@ class ConvertBase {
     async execConverter(path, args, onData) {
         try {
             const result = await utils.spawnProcess(path, {args, onData});
-            if (result.code != 0)
-                throw new Error(`Внешний конвертер завершился с ошибкой: ${result.code}`);
+            if (result.code != 0) {
+                let error = result.code;
+                if (this.config.branch == 'development')
+                    error = `exec: ${path}, stdout: ${result.stdout}, stderr: ${result.stderr}`;
+                throw new Error(`Внешний конвертер завершился с ошибкой: ${error}`);
+            }
         } catch(e) {
-            if (e.status == 'killed')
+            if (e.status == 'killed') {
                 throw new Error('Слишком долгое ожидание конвертера');
-            else
+            } else if (e.status == 'error') {
                 throw new Error(e.error);
+            } else {
+                throw new Error(e);
+            }
         }
     }
 
