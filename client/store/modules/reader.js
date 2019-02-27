@@ -162,7 +162,7 @@ const settingDefaults = {
         addEmptyParagraphs: 0,
         blinkCachedLoad: true,
         showImages: true,
-        showInlineImagesInCenter: false,
+        showInlineImagesInCenter: true,
         imageHeightLines: 100,
         imageFitWidth: true,
 
