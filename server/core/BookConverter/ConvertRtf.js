@@ -3,12 +3,12 @@ const path = require('path');
 
 const ConvertDocX = require('./ConvertDocX');
 
-class ConvertDoc extends ConvertDocX {
+class ConvertRtf extends ConvertDocX {
     check(data, opts) {
         const {inputFiles} = opts;
 
         return this.config.useExternalBookConverter && 
-            inputFiles.sourceFileType && inputFiles.sourceFileType.ext == 'msi';
+            inputFiles.sourceFileType && inputFiles.sourceFileType.ext == 'rtf';
     }
 
     async run(data, opts) {
@@ -19,15 +19,15 @@ class ConvertDoc extends ConvertDocX {
         const {inputFiles, callback} = opts;
 
         const outFile = `${inputFiles.fileListDir}/${path.basename(inputFiles.sourceFile)}`;
-        const docFile = `${outFile}.doc`;
+        const rtfFile = `${outFile}.rtf`;
         const docxFile = `${outFile}.docx`;
         const fb2File = `${outFile}.fb2`;
 
-        await fs.copy(inputFiles.sourceFile, docFile);
-        await this.execConverter(this.sofficePath, ['--headless', '--convert-to', 'docx', '--outdir', inputFiles.fileListDir, docFile]);
+        await fs.copy(inputFiles.sourceFile, rtfFile);
+        await this.execConverter(this.sofficePath, ['--headless', '--convert-to', 'docx', '--outdir', inputFiles.fileListDir, rtfFile]);
 
         return await super.convert(docxFile, fb2File, callback);
     }
 }
 
-module.exports = ConvertDoc;
+module.exports = ConvertRtf;

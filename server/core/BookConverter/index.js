@@ -3,6 +3,7 @@ const FileDetector = require('../FileDetector');
 
 //порядок важен
 const convertClassFactory = [
+    require('./ConvertRtf'),
     require('./ConvertDocX'),
     require('./ConvertDoc'),
     require('./ConvertFb2'),
