@@ -22,7 +22,7 @@ function spawnProcess(cmd, opts) {
 
     return new Promise(async(resolve, reject) => {
         let resolved = false;
-        const proc = spawn(cmd, args);
+        const proc = spawn(cmd, args, {detached: true});
 
         let stdout = '';
         proc.stdout.on('data', (data) => {
@@ -46,8 +46,10 @@ function spawnProcess(cmd, opts) {
         });
 
         await sleep(killAfter);
-        if (!resolved)
+        if (!resolved) {
+            process.kill(proc.pid);
             reject({status: 'killed', stdout, stderr});
+        }
     });
 }
 
