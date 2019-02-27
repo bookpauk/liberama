@@ -3,8 +3,10 @@
         <div class="part">
             <span class="greeting bold-font">{{ title }}</span>
             <span class="greeting">Добро пожаловать!</span>
-            <span class="greeting">Поддерживаются форматы: fb2, fb2.zip, html, txt</span>
+            <span class="greeting">Поддерживаются форматы: <b>fb2, fb2.zip, html, txt</b></span>
+            <span v-if="isExternalConverter" class="greeting">...а также: <b>rtf, doc, docx</b>, и вскоре: pdf, epub, mobi</span>
         </div>
+
         <div class="part center">
             <el-input ref="input" placeholder="URL книги" v-model="bookUrl">
                 <el-button slot="append" icon="el-icon-check" @click="submitUrl"></el-button>
@@ -15,8 +17,9 @@
                 Загрузить файл с диска
             </el-button>
             <div class="space"></div>
-            <span v-if="config.mode == 'omnireader'" class="bottom-span clickable" @click="openComments">Комментарии</span>
+            <span v-if="mode == 'omnireader'" class="bottom-span clickable" @click="openComments">Комментарии</span>
         </div>
+
         <div class="part bottom">
             <span class="bottom-span clickable" @click="openHelp">Справка</span>
             <span class="bottom-span clickable" @click="openDonate">Помочь проекту</span>
@@ -38,7 +41,6 @@ class LoaderPage extends Vue {
 
     created() {
         this.commit = this.$store.commit;
-        this.config = this.$store.state.config;
     }
 
     mounted() {
@@ -50,14 +52,22 @@ class LoaderPage extends Vue {
     }
 
     get title() {
-        if (this.config.mode == 'omnireader')
+        if (this.$store.state.config.mode == 'omnireader')
             return 'Omni Reader - браузерная онлайн-читалка.';
         return 'Универсальная читалка книг и ресурсов интернета.';
 
     }
 
+    get mode() {
+        return this.$store.state.config.mode;
+    }
+
     get version() {
-        return `v${this.config.version}`;
+        return `v${this.$store.state.config.version}`;
+    }
+
+    get isExternalConverter() {
+        return this.$store.state.config.useExternalBookConverter;
     }
 
     submitUrl() {
