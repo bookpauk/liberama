@@ -1,8 +1,8 @@
 sudo bash
 
 mkdir /home/liberama
-chown www-data /home/liberama
-chgrp www-data /home/liberama
+chown www-data.www-data /home/liberama
+chown -R www-data.www-data /var/www
 
 ### oldreader
 # ubuntu 18
