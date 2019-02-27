@@ -3,9 +3,9 @@ const iconv = require('iconv-lite');
 
 class ConvertFb2 extends ConvertBase {
     check(data, opts) {
-        const {fileType} = opts;
+        const {dataType} = opts;
 
-        return (fileType && fileType.ext == 'xml' && data.toString().indexOf('<FictionBook') >= 0);
+        return (dataType && dataType.ext == 'xml' && data.toString().indexOf('<FictionBook') >= 0);
     }
 
     run(data, opts) {

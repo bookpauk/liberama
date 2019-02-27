@@ -63,13 +63,13 @@ class ReaderWorker {
             //decompress
             wState.set({state: 'decompress', step: 2, progress: 0});
             decompDir = `${this.config.tempDownloadDir}/${decompDirname}`;
-            const decompFilename = await this.decomp.decompressFile(downloadedFilename, decompDir);
+            const decompFiles = await this.decomp.decompressFile(downloadedFilename, decompDir);
             wState.set({progress: 100});
             
             //конвертирование в fb2
             wState.set({state: 'convert', step: 3, progress: 0});
             convertFilename = `${this.config.tempDownloadDir}/${tempFilename2}`;
-            await this.bookConverter.convertToFb2(decompFilename, convertFilename, url, progress => {
+            await this.bookConverter.convertToFb2(decompFiles, convertFilename, url, progress => {
                 wState.set({progress});
             });
 
@@ -83,8 +83,9 @@ class ReaderWorker {
             wState.finish({path: `/tmp/${finishFilename}`});
 
         } catch (e) {
+            if (this.config.branch == 'development')
+                console.error(e);
             wState.set({state: 'error', error: (errMes ? errMes : e.message)});
-
         } finally {
             //clean
             if (decompDir)

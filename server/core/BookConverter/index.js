@@ -19,13 +19,13 @@ class BookConverter {
         }
     }
 
-    async convertToFb2(inputFile, outputFile, url, callback) {
-        const fileType = await this.detector.detectFile(inputFile);
+    async convertToFb2(inputFiles, outputFile, url, callback) {
+        const selectedFileType = await this.detector.detectFile(inputFiles.selectedFile);
         
-        const data = await fs.readFile(inputFile);
+        const data = await fs.readFile(inputFiles.selectedFile);
         let result = false;
         for (const convert of this.convertFactory) {
-            result = convert.run(data, {inputFile, url, callback, fileType});
+            result = convert.run(data, {inputFiles, url, callback, dataType: selectedFileType});
             if (result) {
                 await fs.writeFile(outputFile, result);
                 break;
@@ -33,8 +33,8 @@ class BookConverter {
         }
 
         if (!result) {
-            if (fileType)
-                throw new Error(`Этот формат файла не поддерживается: ${fileType.mime}`);
+            if (selectedFileType)
+                throw new Error(`Этот формат файла не поддерживается: ${selectedFileType.mime}`);
             else {
                 throw new Error(`Не удалось определить формат файла: ${url}`);
             }
