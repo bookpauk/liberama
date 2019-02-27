@@ -1,1 +1,1 @@
-sudo -u www-data /home/liberama/liberama
+export HOME=/var/www; sudo -u www-data /home/liberama/liberama
