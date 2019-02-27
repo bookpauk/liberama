@@ -44,7 +44,7 @@ class Reader {
                 await sleep(refreshPause);
 
             i++;
-            if (i > 30*1000/refreshPause) {//30 сек ждем телодвижений воркера
+            if (i > 120*1000/refreshPause) {//2 мин ждем телодвижений воркера
                 throw new Error('Слишком долгое время ожидания');
             }
             //проверка воркера

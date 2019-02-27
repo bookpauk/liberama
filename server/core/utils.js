@@ -16,7 +16,7 @@ async function touchFile(filename) {
 
 function spawnProcess(cmd, opts) {
     let {args, killAfter, onData} = opts;
-    killAfter = (killAfter ? killAfter : 30*1000);
+    killAfter = (killAfter ? killAfter : 120*1000);
     onData = (onData ? onData : () => {});
     args = (args ? args : []);
 
