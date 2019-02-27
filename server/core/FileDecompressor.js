@@ -73,6 +73,10 @@ class FileDecompressor {
         result.selectedFile = sel;
         result.fileList = fileList;
 
+        if (sel != filename) {
+            result.nesting = await this.decompressFile(sel, `${outputDir}/${utils.randomHexString(10)}`);
+        }
+
         return result;
     }
 
