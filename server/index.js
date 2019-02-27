@@ -90,7 +90,7 @@ async function main() {
     try {
         await main();
     } catch (e) {
-        console.error(e.message);
+        console.error(e);
         process.exit(1);
     }
 })();
