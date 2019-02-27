@@ -1,3 +1,6 @@
+const fs = require('fs-extra');
+const path = require('path');
+
 const ConvertBase = require('./ConvertBase');
 
 class ConvertDocX extends ConvertBase {
@@ -22,9 +25,21 @@ class ConvertDocX extends ConvertBase {
             return false;
         await this.checkExternalConverterPresent();
 
-        
+        const {inputFiles, callback} = opts;
 
-        return false;
+        const outFile = `${inputFiles.fileListDir}/${path.basename(inputFiles.sourceFile)}`;
+        const docxFile = `${outFile}.docx`;
+        const fb2File = `${outFile}.fb2`;
+
+        await fs.copy(inputFiles.sourceFile, docxFile);
+
+        let perc = 0;
+        await this.execConverter(this.calibrePath, [docxFile, fb2File], () => {
+            perc = (perc < 100 ? perc + 5 : 50);
+            callback(perc);
+        });
+
+        return await fs.readFile(fb2File);
     }
 }
 
