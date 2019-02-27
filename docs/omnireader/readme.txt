@@ -15,6 +15,18 @@ chgrp www-data /home/oldreader
 sudo -u www-data cp -r ./old/* /home/oldreader
 ###
 
+### external converter
+# calibre releases https://download.calibre-ebook.com/
+# download, unpack to data/calibre
+# 3.39.1
+wget "https://download.calibre-ebook.com/3.39.1/calibre-3.39.1-x86_64.txz"
+sudo -u www-data mkdir -p /home/liberama/data/calibre
+sudo -u www-data tar xvf calibre-3.39.1-x86_64.txz -C /home/liberama/data/calibre
+
+apt install libreoffice
+apt install poppler-utils
+###
+
 apt install nginx
 
 cp omnireader /etc/nginx/sites-available/omnireader
