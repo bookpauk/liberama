@@ -19,7 +19,7 @@
 
         <p>В качестве URL можно задавать html-страничку с книгой, либо прямую ссылку 
         на файл из онлайн-библиотеки (например, скопировав адрес ссылки или кнопки "скачать fb2").</p>
-        <p>Поддерживаемые форматы: <strong>html, txt, fb2, fb2.zip</strong></p>
+        <p>Поддерживаемые форматы: <b>fb2, fb2.zip, html, txt</b> и другие</p>
 
         <div v-html="automationHtml"></div>
         <p>Связаться с разработчиком: <a href="mailto:bookpauk@gmail.com">bookpauk@gmail.com</a></p>
