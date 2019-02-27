@@ -2,7 +2,6 @@ sudo bash
 
 mkdir /home/liberama
 chown www-data.www-data /home/liberama
-chown -R www-data.www-data /var/www
 
 ### oldreader
 # ubuntu 18
@@ -33,6 +32,8 @@ cp omnireader /etc/nginx/sites-available/omnireader
 ln -s /etc/nginx/sites-available/omnireader /etc/nginx/sites-enabled/omnireader
 rm /etc/nginx/sites-enabled/default
 service nginx reload
+
+chown -R www-data.www-data /var/www
 
 exit
 
