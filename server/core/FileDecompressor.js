@@ -17,8 +17,17 @@ class FileDecompressor {
     async decompressFile(filename, outputDir) {
         const fileType = await this.detector.detectFile(filename);
 
-        if (!fileType || !(fileType.ext == 'zip' || fileType.ext == 'bz2' || fileType.ext == 'gz'))
-            return filename;
+        let result = {
+            sourceFile: filename,
+            sourceFileType: fileType,
+            selectedFile: filename,
+            fileListDir: outputDir,
+            fileList: []
+        };
+
+        if (!fileType || !(fileType.ext == 'zip' || fileType.ext == 'bz2' || fileType.ext == 'gz')) {
+            return result;
+        }
 
         //дурной decompress, поэтому в 2 этапа
         //этап 1
@@ -44,20 +53,29 @@ class FileDecompressor {
             }
         }
         
-        let result = filename;
+        let sel = filename;
+        let fileList = [];
         let max = 0;
         if (files.length) {
             //ищем файл с максимальным размером
             for (let file of files) {
+                fileList.push(file.path);
                 if (file.data.length > max) {
-                    result = `${outputDir}/${file.path}`;
+                    sel = `${outputDir}/${file.path}`;
                     max = file.data.length;
                 }
             }
         }
         //дурной decompress
-        if (result != filename)
-            await fs.chmod(result, 0o664);
+        if (sel != filename)
+            await fs.chmod(sel, 0o664);
+
+        result.selectedFile = sel;
+        result.fileList = fileList;
+
+        if (sel != filename) {
+            result.nesting = await this.decompressFile(sel, `${outputDir}/${utils.randomHexString(10)}`);
+        }
 
         return result;
     }

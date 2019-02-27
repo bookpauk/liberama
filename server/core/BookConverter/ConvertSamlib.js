@@ -6,19 +6,20 @@ const ConvertBase = require('./ConvertBase');
 
 class ConvertSamlib extends ConvertBase {
     check(data, opts) {
-        const {url} = opts;
+        const {url, dataType} = opts;
 
         const parsedUrl = new URL(url);
-        if (parsedUrl.hostname == 'samlib.ru' ||
+        if (dataType && dataType.ext == 'html' &&
+            (parsedUrl.hostname == 'samlib.ru' ||
             parsedUrl.hostname == 'budclub.ru' ||
-            parsedUrl.hostname == 'zhurnal.lib.ru') {
+            parsedUrl.hostname == 'zhurnal.lib.ru')) {
             return {hostname: parsedUrl.hostname};
         }
 
         return false;
     }
 
-    run(data, opts) {
+    async run(data, opts) {
         const checkResult = this.check(data, opts);
         if (!checkResult)
             return false;

@@ -21,6 +21,8 @@ module.exports = {
     maxTempPublicDirSize: 512*1024*1024,//512Мб
     maxUploadPublicDirSize: 200*1024*1024,//100Мб
 
+    useExternalBookConverter: false,
+
     servers: [
         {
             serverName: '1',

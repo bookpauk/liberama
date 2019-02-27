@@ -6,7 +6,9 @@ const api = axios.create({
 
 class Misc {
     async loadConfig() {
-        const response = await api.post('/config', {params: ['name', 'version', 'mode', 'maxUploadFileSize', 'branch']});
+        const response = await api.post('/config', {params: [
+            'name', 'version', 'mode', 'maxUploadFileSize', 'useExternalBookConverter', 'branch',
+        ]});
         return response.data;
     }
 }

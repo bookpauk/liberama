@@ -4,9 +4,9 @@ const textUtils = require('./textUtils');
 
 class ConvertHtml extends ConvertBase {
     check(data, opts) {
-        const {fileType} = opts;
+        const {dataType} = opts;
 
-        if (fileType && (fileType.ext == 'html' || fileType.ext == 'xml')) 
+        if (dataType && (dataType.ext == 'html' || dataType.ext == 'xml')) 
             return {isText: false};
 
         //может это чистый текст?
@@ -17,7 +17,7 @@ class ConvertHtml extends ConvertBase {
         return false;
     }
 
-    run(data, opts) {
+    async run(data, opts) {
         const checkResult = this.check(data, opts);
         if (!checkResult)
             return false;

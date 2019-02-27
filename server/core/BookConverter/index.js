@@ -3,6 +3,9 @@ const FileDetector = require('../FileDetector');
 
 //порядок важен
 const convertClassFactory = [
+    require('./ConvertRtf'),
+    require('./ConvertDocX'),
+    require('./ConvertDoc'),
     require('./ConvertFb2'),
     require('./ConvertSamlib'),
     require('./ConvertHtml'),
@@ -18,22 +21,37 @@ class BookConverter {
         }
     }
 
-    async convertToFb2(inputFile, outputFile, url, callback) {
-        const fileType = await this.detector.detectFile(inputFile);
+    async convertToFb2(inputFiles, outputFile, url, callback) {
+        const selectedFileType = await this.detector.detectFile(inputFiles.selectedFile);
+        const data = await fs.readFile(inputFiles.selectedFile);
+
+        let selectedFileType2 = null;
+        let data2 = null;
+        if (inputFiles.nesting) {
+            selectedFileType2 = await this.detector.detectFile(inputFiles.nesting.selectedFile);
+            data2 = await fs.readFile(inputFiles.nesting.selectedFile);
+        }
         
-        const data = await fs.readFile(inputFile);
         let result = false;
         for (const convert of this.convertFactory) {
-            result = convert.run(data, {inputFile, url, callback, fileType});
+            result = await convert.run(data, {inputFiles, url, callback, dataType: selectedFileType});
             if (result) {
                 await fs.writeFile(outputFile, result);
                 break;
             }
+
+            if (inputFiles.nesting) {
+                result = await convert.run(data2, {inputFiles: inputFiles.nesting, url, callback, dataType: selectedFileType2});
+                if (result) {
+                    await fs.writeFile(outputFile, result);
+                    break;
+                }
+            }
         }
 
         if (!result) {
-            if (fileType)
-                throw new Error(`Этот формат файла не поддерживается: ${fileType.mime}`);
+            if (selectedFileType)
+                throw new Error(`Этот формат файла не поддерживается: ${selectedFileType.mime}`);
             else {
                 throw new Error(`Не удалось определить формат файла: ${url}`);
             }
