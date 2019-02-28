@@ -15,6 +15,8 @@ class FileDecompressor {
     }
 
     async decompressFile(filename, outputDir) {
+        await fs.ensureDir(outputDir);
+        
         const fileType = await this.detector.detectFile(filename);
 
         let result = {
