@@ -28,6 +28,7 @@ class ConvertHtml extends ConvertBase {
         } else {
             isText = opts.isText;
         }
+        const {cutTitle} = opts;
 
         let titleInfo = {};
         let desc = {_n: 'description', 'title-info': titleInfo};
@@ -73,7 +74,7 @@ class ConvertHtml extends ConvertBase {
         const newPara = new Set(['tr', 'br', 'br/', 'dd', 'p', 'title', '/title', 'h1', 'h2', 'h3', '/h1', '/h2', '/h3']);
 
         const onTextNode = (text, cutCounter, cutTag) => {// eslint-disable-line no-unused-vars
-            if (!cutCounter) {
+            if (!cutCounter && !(cutTitle && inTitle)) {
                 growParagraph(text);
             }
 
@@ -111,7 +112,9 @@ class ConvertHtml extends ConvertBase {
             for (let i = 0; i < spaceCounter.length; i++) {
                 total += (spaceCounter[i] ? spaceCounter[i] : 0);
             }
-            total /= 10;
+
+            total /= 20;
+            
             let i = spaceCounter.length - 1;
             while (i > 0 && (!spaceCounter[i] || spaceCounter[i] < total)) i--;
 

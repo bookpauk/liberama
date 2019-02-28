@@ -45,15 +45,20 @@ class ConvertPdf extends ConvertHtml {
         const onStartNode = (tag, tail, singleTag, cutCounter, cutTag) => {// eslint-disable-line no-unused-vars
             if (!cutCounter) {
                 if (tag == 'text' && !inText) {
-                    inText = true;
-                    i++;
-
                     let attrs = sax.getAttrsSync(tail);
-                    lines[i] = {
+                    const line = {
                         text: '',
                         top: (attrs.top && attrs.top.value ? attrs.top.value : null),
                         left: (attrs.left && attrs.left.value ? attrs.left.value : null),
+                        width: (attrs.width && attrs.width.value ? attrs.width.value : null),
+                        height: (attrs.height && attrs.height.value ? attrs.height.value : null),
                     };
+
+                    if (line.width !== '0' || line.height !== '0') {
+                        inText = true;
+                        i++;
+                        lines[i] = line;
+                    }
                 }
             }
         };
@@ -69,12 +74,40 @@ class ConvertPdf extends ConvertHtml {
         });
 
         //найдем параграфы и отступы
-console.log(lines.length);
-        //формируем текст
-        let text = ''
+        const indents = [];
+        for (const line of lines) {
+            const top = parseInt(line.top);
+            const left = parseInt(line.left);
 
-        text = title + "\n" + text;
-        return await super.run(Buffer.from(text), {skipCheck: true, isText: true});
+            if (!isNaN(top)) {
+                line.top = top;
+            }
+
+            if (!isNaN(left)) {
+                indents[left] = 1;
+                line.left = left;
+            }
+        }
+
+        let j = 0;
+        for (let i = 0; i < indents.length; i++) {
+            if (indents[i]) {
+                j++;
+                indents[i] = j;
+            }
+        }
+        indents[0] = 0;
+
+        //формируем текст
+        let text = `<title>${title}</title>`;
+        for (const line of lines) {
+            const left = line.left || 0;
+            const sp = ' '.repeat(indents[left]);
+
+            text += sp + line.text + "\n";
+        }
+
+        return await super.run(Buffer.from(text), {skipCheck: true, isText: true, cutTitle: true});
     }
 }
 
