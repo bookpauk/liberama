@@ -100,12 +100,25 @@ class ConvertPdf extends ConvertHtml {
 
         //формируем текст
         let text = `<title>${title}</title>`;
+        let concat = '';
+        let sp = '';
         for (const line of lines) {
-            const left = line.left || 0;
-            const sp = ' '.repeat(indents[left]);
+            if (concat == '') {
+                const left = line.left || 0;
+                sp = ' '.repeat(indents[left]);
+            }
 
-            text += sp + line.text + "\n";
+            let t = line.text.trim();
+            if (t.substr(-1) == '-') {
+                t = t.substr(0, t.length - 1);
+                concat += t;
+            } else {
+                text += sp + concat + t + "\n";
+                concat = '';
+            }
         }
+        if (concat)
+            text += sp + concat + "\n";
 
         return await super.run(Buffer.from(text), {skipCheck: true, isText: true, cutTitle: true});
     }
