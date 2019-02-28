@@ -5,10 +5,6 @@ import BookParser from './BookParser';
 
 const maxDataSize = 500*1024*1024;//chars, not bytes
 
-const bmCacheStore = localForage.createInstance({
-    name: 'bmCacheStore'
-});
-
 const bmMetaStore = localForage.createInstance({
     name: 'bmMetaStore'
 });
@@ -19,6 +15,11 @@ const bmDataStore = localForage.createInstance({
 
 const bmRecentStore = localForage.createInstance({
     name: 'bmRecentStore'
+});
+
+//bmCacheStore нужен только для ускорения загрузки читалки
+const bmCacheStore = localForage.createInstance({
+    name: 'bmCacheStore'
 });
 
 class BookManager {
