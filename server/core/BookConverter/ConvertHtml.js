@@ -52,14 +52,14 @@ class ConvertHtml extends ConvertBase {
                 newParagraph();
 
             const l = pars.length;
-            if (pars[l - 1]._t == '')
-                text = text.trimLeft();
             pars[l - 1]._t += text;
 
             //посчитаем отступы у текста, чтобы выделить потом параграфы
             const lines = text.split('\n');
             for (let line of lines) {
-                line = repCrLfTab(line)
+                if (line.trim() == '')
+                    continue;
+                line = repCrLfTab(line);
 
                 let l = 0;
                 while (l < line.length && line[l] == ' ') {
@@ -114,7 +114,6 @@ class ConvertHtml extends ConvertBase {
             }
 
             total /= 20;
-            
             let i = spaceCounter.length - 1;
             while (i > 0 && (!spaceCounter[i] || spaceCounter[i] < total)) i--;
 
