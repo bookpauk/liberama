@@ -25,11 +25,15 @@ class BookManager {
     async init(settings) {
         this.settings = settings;
 
-        //this.booksCached нужен только для ускорения загрузки читалки
+        //bmCacheStore нужен только для ускорения загрузки читалки
         this.booksCached = await bmCacheStore.getItem('books');
         if (!this.booksCached)
             this.booksCached = {};
         this.recent = await bmCacheStore.getItem('recent');
+        this.recentLast = await bmCacheStore.getItem('recent-last');
+        if (this.recentLast)
+            this.recent[this.recentLast.key] = this.recentLast;
+
         this.books = Object.assign({}, this.booksCached);
 
         this.recentChanged1 = true;
@@ -69,12 +73,14 @@ class BookManager {
         }
 
         await this.cleanBooks();
+        await this.cleanRecentBooks();
 
         this.booksCached = {};
         for (const key in this.books) {
             this.booksCached[key] = this.metaOnly(this.books[key]);
         }
         await bmCacheStore.setItem('books', this.booksCached);
+        await bmCacheStore.setItem('recent', this.recent);
     }
 
     async cleanBooks() {
@@ -205,8 +211,13 @@ class BookManager {
         this.recent[result.key] = result;
 
         await bmRecentStore.setItem(result.key, result);
-        await this.cleanRecentBooks();
-        await bmCacheStore.setItem('recent', this.recent);
+
+        //кэшируем, аккуратно
+        if (!(this.recentLast && this.recentLast.key == result.key)) {
+            await bmCacheStore.setItem('recent', this.recent);
+        }
+        this.recentLast = result;
+        await bmCacheStore.setItem('recent-last', this.recentLast);
 
         this.recentChanged1 = true;
         this.recentChanged2 = true;
