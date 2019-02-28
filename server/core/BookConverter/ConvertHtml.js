@@ -18,11 +18,17 @@ class ConvertHtml extends ConvertBase {
     }
 
     async run(data, opts) {
-        const checkResult = this.check(data, opts);
-        if (!checkResult)
-            return false;
+        let isText = false;
+        if (!opts.skipCheck) {
+            const checkResult = this.check(data, opts);
+            if (!checkResult)
+                return false;
 
-        let {isText} = checkResult;
+            isText = checkResult.isText;
+        } else {
+            isText = opts.isText;
+        }
+
         let titleInfo = {};
         let desc = {_n: 'description', 'title-info': titleInfo};
         let pars = [];
