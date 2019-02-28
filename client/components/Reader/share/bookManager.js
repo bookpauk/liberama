@@ -17,7 +17,6 @@ const bmRecentStore = localForage.createInstance({
     name: 'bmRecentStore'
 });
 
-//bmCacheStore нужен только для ускорения загрузки читалки
 const bmCacheStore = localForage.createInstance({
     name: 'bmCacheStore'
 });
@@ -26,7 +25,6 @@ class BookManager {
     async init(settings) {
         this.settings = settings;
 
-        //bmCacheStore нужен только для ускорения загрузки читалки
         this.booksCached = await bmCacheStore.getItem('books');
         if (!this.booksCached)
             this.booksCached = {};
@@ -49,7 +47,9 @@ class BookManager {
         }
     }
 
-
+    //долгая загрузка из хранилища
+    //bmMetaStore и bmRecentStore в будущем можно будет убрать
+    //bmCacheStore достаточно
     async loadMeta(immediate) {
         if (!immediate)
             await utils.sleep(2000);
@@ -62,7 +62,13 @@ class BookManager {
             if (keySplit.length == 2 && keySplit[0] == 'bmMeta') {
                 let meta = await bmMetaStore.getItem(key);
 
+                const oldBook = this.books[meta.key];
                 this.books[meta.key] = meta;
+
+                if (oldBook && oldBook.data && oldBook.parsed) {
+                    this.books[meta.key].data = oldBook.data;
+                    this.books[meta.key].parsed = oldBook.parsed;
+                }
             }
         }
 
