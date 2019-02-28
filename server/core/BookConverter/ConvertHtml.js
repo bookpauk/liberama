@@ -109,16 +109,23 @@ class ConvertHtml extends ConvertBase {
         //подозрение на чистый текст, надо разбить на параграфы
         if (isText || pars.length < buf.length/2000) {
             let total = 0;
-            let max = 0;
+            let count = 1;
             for (let i = 0; i < spaceCounter.length; i++) {
                 const sc = (spaceCounter[i] ? spaceCounter[i] : 0);
-                max = (sc > max ? sc : max);
+                if (sc) count++;
                 total += sc;
             }
 
+            let d = 0;
+            const mid = total/count;
+            for (let i = 0; i < spaceCounter.length; i++) {
+                const sc = (spaceCounter[i] ? spaceCounter[i] : 0);
+                if (sc > mid) d++;
+            }
+
             let i = 0;
-            //если разброс не слишком большой
-            if (total < max*2) {
+            //если разброс не слишком большой, выделяем параграфы
+            if (d < 10 && spaceCounter.length) {
                 total /= 20;
                 i = spaceCounter.length - 1;
                 while (i > 0 && (!spaceCounter[i] || spaceCounter[i] < total)) i--;
