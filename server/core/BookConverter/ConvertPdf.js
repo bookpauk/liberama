@@ -22,16 +22,21 @@ class ConvertPdf extends ConvertHtml {
         const outFile = `${inputFiles.fileListDir}/${utils.randomHexString(10)}.xml`;
 
         //конвертируем в xml
-        await this.execConverter(this.pdfToHtmlPath, ['-c', '-s', '-xml', inputFiles.sourceFile, outFile]);
-        callback(50);
+        let perc = 0;
+        await this.execConverter(this.pdfToHtmlPath, ['-c', '-s', '-xml', inputFiles.sourceFile, outFile], () => {
+            perc = (perc < 80 ? perc + 10 : 40);
+            callback(perc);
+        });
+        callback(80);
 
         const data = await fs.readFile(outFile);
-        callback(60);
+        callback(90);
 
         //парсим xml
         let lines = [];
         let inText = false;
         let title = '';
+        let prevTop = 0;
         let i = -1;
 
         const onTextNode = (text, cutCounter, cutTag) => {// eslint-disable-line no-unused-vars
@@ -48,16 +53,19 @@ class ConvertPdf extends ConvertHtml {
                     let attrs = sax.getAttrsSync(tail);
                     const line = {
                         text: '',
-                        top: (attrs.top && attrs.top.value ? attrs.top.value : null),
-                        left: (attrs.left && attrs.left.value ? attrs.left.value : null),
-                        width: (attrs.width && attrs.width.value ? attrs.width.value : null),
-                        height: (attrs.height && attrs.height.value ? attrs.height.value : null),
+                        top: parseInt((attrs.top && attrs.top.value ? attrs.top.value : null), 10),
+                        left: parseInt((attrs.left && attrs.left.value ? attrs.left.value : null), 10),
+                        width: parseInt((attrs.width && attrs.width.value ? attrs.width.value : null), 10),
+                        height: parseInt((attrs.height && attrs.height.value ? attrs.height.value : null), 10),
                     };
 
                     if (line.width !== '0' || line.height !== '0') {
                         inText = true;
-                        i++;
-                        lines[i] = line;
+                        if (isNaN(line.top) || isNaN(prevTop) || (Math.abs(prevTop - line.top) > 3)) {
+                            i++;
+                            lines[i] = line;
+                        }
+                        prevTop = line.top;
                     }
                 }
             }
@@ -76,16 +84,8 @@ class ConvertPdf extends ConvertHtml {
         //найдем параграфы и отступы
         const indents = [];
         for (const line of lines) {
-            const top = parseInt(line.top);
-            const left = parseInt(line.left);
-
-            if (!isNaN(top)) {
-                line.top = top;
-            }
-
-            if (!isNaN(left)) {
-                indents[left] = 1;
-                line.left = left;
+            if (!isNaN(line.left)) {
+                indents[line.left] = 1;
             }
         }
 
