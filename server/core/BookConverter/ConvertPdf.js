@@ -19,7 +19,7 @@ class ConvertPdf extends ConvertHtml {
 
         const {inputFiles, callback} = opts;
 
-        const outFile = `${inputFiles.fileListDir}/${utils.randomHexString(10)}.xml`;
+        const outFile = `${inputFiles.filesDir}/${utils.randomHexString(10)}.xml`;
 
         //конвертируем в xml
         let perc = 0;

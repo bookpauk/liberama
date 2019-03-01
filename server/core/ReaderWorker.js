@@ -63,7 +63,14 @@ class ReaderWorker {
             //decompress
             wState.set({state: 'decompress', step: 2, progress: 0});
             decompDir = `${this.config.tempDownloadDir}/${decompDirname}`;
-            const decompFiles = await this.decomp.decompressFile(downloadedFilename, decompDir);
+            let decompFiles = {};
+            try {
+                decompFiles = await this.decomp.decompressNested(downloadedFilename, decompDir);
+            } catch (e) {
+                if (this.config.branch == 'development')
+                    console.error(e);
+                throw new Error('Ошибка распаковки');
+            }
             wState.set({progress: 100});
             
             //конвертирование в fb2

@@ -3,9 +3,8 @@ const zlib = require('zlib');
 const crypto = require('crypto');
 const path = require('path');
 const utils = require('./utils');
-const decompress = require('decompress');
-const decompressGz = require('decompress-gz');
-const decompressBzip2 = require('decompress-bzip2');
+const extractZip = require('extract-zip');
+const unbzip2Stream = require('unbzip2-stream');
 
 const FileDetector = require('./FileDetector');
 
@@ -14,7 +13,7 @@ class FileDecompressor {
         this.detector = new FileDetector();
     }
 
-    async decompressFile(filename, outputDir) {
+    async decompressNested(filename, outputDir) {
         await fs.ensureDir(outputDir);
         
         const fileType = await this.detector.detectFile(filename);
@@ -23,63 +22,86 @@ class FileDecompressor {
             sourceFile: filename,
             sourceFileType: fileType,
             selectedFile: filename,
-            fileListDir: outputDir,
-            fileList: []
+            filesDir: outputDir,
+            files: []
         };
 
         if (!fileType || !(fileType.ext == 'zip' || fileType.ext == 'bz2' || fileType.ext == 'gz')) {
             return result;
         }
 
-        //дурной decompress, поэтому в 2 этапа
-        //этап 1
-        let files = [];
-        try {
-            files = await decompress(filename, outputDir);
-        } catch (e) {
-            //
-        }
+        result.files = await this.decompressTar(fileType.ext, filename, outputDir);
 
-        //этап 2
-        if (files.length == 0) {
-            try {
-                files = await decompress(filename, outputDir, {
-                    inputFile: filename,
-                    plugins: [
-                        decompressGz(),
-                        decompressBzip2({path: path.basename(filename)}),
-                    ]
-                });
-            } catch (e) {
-                //
-            }
-        }
-        
         let sel = filename;
-        let fileList = [];
         let max = 0;
-        if (files.length) {
+        if (result.files.length) {
             //ищем файл с максимальным размером
-            for (let file of files) {
-                fileList.push(file.path);
-                if (file.data.length > max) {
+            for (let file of result.files) {
+                if (file.size > max) {
                     sel = `${outputDir}/${file.path}`;
-                    max = file.data.length;
+                    max = file.size;
                 }
             }
         }
-        //дурной decompress
-        if (sel != filename)
-            await fs.chmod(sel, 0o664);
-
         result.selectedFile = sel;
-        result.fileList = fileList;
 
         if (sel != filename) {
-            result.nesting = await this.decompressFile(sel, `${outputDir}/${utils.randomHexString(10)}`);
+            result.nesting = await this.decompressNested(sel, `${outputDir}/${utils.randomHexString(10)}`);
         }
 
         return result;
+    }
+
+    async decompressTar(fileExt, filename, outputDir) {
+        return await this.decompress(fileExt, filename, outputDir);
+    }
+
+    async decompress(fileExt, filename, outputDir) {
+        let files = [];
+
+        switch (fileExt) {
+            case 'zip':
+                files = await this.unZip(filename, outputDir);
+                break;
+            /*case 'bz2':
+                files = await this.unBz2(filename, outputDir);
+                break;
+            case 'gz':
+                files = await this.unGz(filename, outputDir);
+                break;
+            case 'tar':
+                files = await this.unTar(filename, outputDir);
+                break;*/
+            default:
+                throw new Error(`FileDecompressor: неизвестный формат файла '${fileExt}'`);
+        }
+
+        return files;
+    }
+
+    async unZip(filename, outputDir) {
+        return new Promise((resolve, reject) => {
+            const files = [];
+            extractZip(filename, {
+                dir: outputDir,
+                onEntry: (entry) => {
+                    files.push({path: entry.fileName, size: entry.uncompressedSize});
+                }
+            }, (err) => {
+                if (err)
+                    reject(err);
+                resolve(files);
+            });
+        });
+    }
+
+    async unBz2(filename, outputDir) {
+    }
+
+    async unGz(filename, outputDir) {
+    }
+
+    async unTar(filename, outputDir) {
     }
 
     async gzipBuffer(buf) {
