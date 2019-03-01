@@ -6,7 +6,6 @@ const ConvertBase = require('./ConvertBase');
 class ConvertDocX extends ConvertBase {
     check(data, opts) {
         const {inputFiles} = opts;
-console.log(inputFiles);
         if (this.config.useExternalBookConverter && 
             inputFiles.sourceFileType && inputFiles.sourceFileType.ext == 'zip') {
             //ищем файл '[Content_Types].xml'
