@@ -164,9 +164,13 @@ class FileDecompressor {
     }
 
     decompressByStream(stream, filename, outputDir) {
-        return new Promise((resolve, reject) => {
-            const file = {path: path.basename(filename)};
-            const outFilename = `${outputDir}/${file.path}`;
+        return new Promise(async(resolve, reject) => {
+            const file = {path: path.parse(filename).name};
+            let outFilename = `${outputDir}/${file.path}`;
+            if (await fs.pathExists(outFilename)) {
+                file.path = `${utils.randomHexString(10)}-${file.path}`;
+                outFilename = `${outputDir}/${file.path}`;
+            }
         
             const inputStream = fs.createReadStream(filename);
             const outputStream = fs.createWriteStream(outFilename);
