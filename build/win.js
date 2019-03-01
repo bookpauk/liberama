@@ -5,8 +5,7 @@ const stream = require('stream');
 const pipeline = util.promisify(stream.pipeline);
 
 const got = require('got');
-const decompress = require('decompress');
-const decompressTargz = require('decompress-targz');
+const FileDecompressor = require('../server/core/FileDecompressor');
 
 const distDir = path.resolve(__dirname, '../dist');
 const publicDir = `${distDir}/tmp/public`;
@@ -15,6 +14,8 @@ const outDir = `${distDir}/win`;
 const tempDownloadDir = `${distDir}/tmp/download`;
 
 async function main() {
+    const decomp = new FileDecompressor();
+
     await fs.emptyDir(outDir);
     // перемещаем public на место
     if (await fs.pathExists(publicDir))
@@ -32,11 +33,7 @@ async function main() {
         console.log(`done downloading ${sqliteRemoteUrl}`);
 
         //распаковываем
-        await decompress(`${tempDownloadDir}/sqlite.tar.gz`, `${tempDownloadDir}`, {
-            plugins: [
-                decompressTargz()
-            ]
-        });
+        console.log(await decomp.unpackTarZZ(`${tempDownloadDir}/sqlite.tar.gz`, tempDownloadDir));
         console.log('files decompressed');
     }
     // копируем в дистрибутив
@@ -53,7 +50,7 @@ async function main() {
         console.log(`done downloading ${ipfsRemoteUrl}`);
 
         //распаковываем
-        await decompress(`${tempDownloadDir}/ipfs.zip`, `${tempDownloadDir}`);
+        console.log(await decomp.unpack(`${tempDownloadDir}/ipfs.zip`, tempDownloadDir));
         console.log('files decompressed');
     }
     // копируем в дистрибутив
