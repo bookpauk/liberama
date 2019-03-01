@@ -5,6 +5,8 @@ const chardet = require('chardet');
 const textUtils = require('./textUtils');
 const utils = require('../utils');
 
+let execConverterCounter = 0;
+
 class ConvertBase {
     constructor(config) {
         this.config = config;
@@ -30,7 +32,11 @@ class ConvertBase {
     }
 
     async execConverter(path, args, onData) {
+        execConverterCounter++;
         try {
+            if (execConverterCounter > 10)
+                throw new Error('Слишком большая очередь конвертирования. Пожалуйста, попробуйте позже.');
+
             const result = await utils.spawnProcess(path, {args, onData});
             if (result.code != 0) {
                 let error = result.code;
@@ -46,6 +52,8 @@ class ConvertBase {
             } else {
                 throw new Error(e);
             }
+        } finally {
+            execConverterCounter--;
         }
     }
 

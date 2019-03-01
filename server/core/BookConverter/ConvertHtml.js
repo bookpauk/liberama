@@ -18,11 +18,18 @@ class ConvertHtml extends ConvertBase {
     }
 
     async run(data, opts) {
-        const checkResult = this.check(data, opts);
-        if (!checkResult)
-            return false;
+        let isText = false;
+        if (!opts.skipCheck) {
+            const checkResult = this.check(data, opts);
+            if (!checkResult)
+                return false;
 
-        let {isText} = checkResult;
+            isText = checkResult.isText;
+        } else {
+            isText = opts.isText;
+        }
+        const {cutTitle} = opts;
+
         let titleInfo = {};
         let desc = {_n: 'description', 'title-info': titleInfo};
         let pars = [];
@@ -45,14 +52,14 @@ class ConvertHtml extends ConvertBase {
                 newParagraph();
 
             const l = pars.length;
-            if (pars[l - 1]._t == '')
-                text = text.trimLeft();
             pars[l - 1]._t += text;
 
             //посчитаем отступы у текста, чтобы выделить потом параграфы
             const lines = text.split('\n');
             for (let line of lines) {
-                line = repCrLfTab(line)
+                if (line.trim() == '')
+                    continue;
+                line = repCrLfTab(line);
 
                 let l = 0;
                 while (l < line.length && line[l] == ' ') {
@@ -67,7 +74,7 @@ class ConvertHtml extends ConvertBase {
         const newPara = new Set(['tr', 'br', 'br/', 'dd', 'p', 'title', '/title', 'h1', 'h2', 'h3', '/h1', '/h2', '/h3']);
 
         const onTextNode = (text, cutCounter, cutTag) => {// eslint-disable-line no-unused-vars
-            if (!cutCounter) {
+            if (!cutCounter && !(cutTitle && inTitle)) {
                 growParagraph(text);
             }
 
@@ -102,12 +109,27 @@ class ConvertHtml extends ConvertBase {
         //подозрение на чистый текст, надо разбить на параграфы
         if (isText || pars.length < buf.length/2000) {
             let total = 0;
+            let count = 1;
             for (let i = 0; i < spaceCounter.length; i++) {
-                total += (spaceCounter[i] ? spaceCounter[i] : 0);
+                const sc = (spaceCounter[i] ? spaceCounter[i] : 0);
+                if (sc) count++;
+                total += sc;
             }
-            total /= 10;
-            let i = spaceCounter.length - 1;
-            while (i > 0 && (!spaceCounter[i] || spaceCounter[i] < total)) i--;
+
+            let d = 0;
+            const mid = total/count;
+            for (let i = 0; i < spaceCounter.length; i++) {
+                const sc = (spaceCounter[i] ? spaceCounter[i] : 0);
+                if (sc > mid) d++;
+            }
+
+            let i = 0;
+            //если разброс не слишком большой, выделяем параграфы
+            if (d < 10 && spaceCounter.length) {
+                total /= 20;
+                i = spaceCounter.length - 1;
+                while (i > 0 && (!spaceCounter[i] || spaceCounter[i] < total)) i--;
+            }
 
             const parIndent = (i > 0 ? i : 0);
 

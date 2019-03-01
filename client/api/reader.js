@@ -49,8 +49,9 @@ class Reader {
             }
             //проверка воркера
             const prevProgress = response.data.progress;
+            const prevState = response.data.state;
             response = await workerApi.post('/get-state', {workerId});
-            i = (prevProgress != response.data.progress ? 1 : i);
+            i = (prevProgress != response.data.progress || prevState != response.data.state ? 1 : i);
         }
     }
 
