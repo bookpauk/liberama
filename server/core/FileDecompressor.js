@@ -63,7 +63,7 @@ class FileDecompressor {
             case 'zip':
                 files = await this.unZip(filename, outputDir);
                 break;
-            /*case 'bz2':
+            case 'bz2':
                 files = await this.unBz2(filename, outputDir);
                 break;
             case 'gz':
@@ -71,7 +71,7 @@ class FileDecompressor {
                 break;
             case 'tar':
                 files = await this.unTar(filename, outputDir);
-                break;*/
+                break;
             default:
                 throw new Error(`FileDecompressor: неизвестный формат файла '${fileExt}'`);
         }
@@ -96,6 +96,32 @@ class FileDecompressor {
     }
 
     async unBz2(filename, outputDir) {
+        return new Promise((resolve, reject) => {
+            const file = {path: path.basename(filename)};
+            const outFilename = `${outputDir}/${file.path}`;
+        
+            const inputStream = fs.createReadStream(filename);
+            const outputStream = fs.createWriteStream(outFilename);
+
+            outputStream.on('close', async() => {
+                try {
+                    file.size = (await fs.stat(outFilename)).size;
+                } catch (e) {
+                    reject(e);
+                }
+                resolve([file]);
+            });
+
+            inputStream.on('error', (err) => {
+                reject(err);
+            });
+
+            outputStream.on('error', (err) => {
+                reject(err);
+            });
+        
+            inputStream.pipe(unbzip2Stream()).pipe(outputStream);
+        });
     }
 
     async unGz(filename, outputDir) {
