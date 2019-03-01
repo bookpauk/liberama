@@ -31,7 +31,7 @@ class FileDecompressor {
             return result;
         }
 
-        result.files = await this.decompressTar(fileType.ext, filename, outputDir);
+        result.files = await this.decompressTarZZ(fileType.ext, filename, outputDir);
 
         let sel = filename;
         let max = 0;
@@ -53,8 +53,39 @@ class FileDecompressor {
         return result;
     }
 
-    async decompressTar(fileExt, filename, outputDir) {
-        return await this.decompress(fileExt, filename, outputDir);
+    async unpack(filename, outputDir) {
+        const fileType = await this.detector.detectFile(filename);
+        if (!fileType)
+            throw new Error('Не удалось определить формат файла');
+
+        return await this.decompress(fileType.ext, filename, outputDir);
+    }
+
+    async unpackTarZZ(filename, outputDir) {
+        const fileType = await this.detector.detectFile(filename);
+        if (!fileType)
+            throw new Error('Не удалось определить формат файла');
+
+        return await this.decompressTarZZ(fileType.ext, filename, outputDir);
+    }
+
+    async decompressTarZZ(fileExt, filename, outputDir) {
+        const files = await this.decompress(fileExt, filename, outputDir);
+        if (fileExt == 'tar' || files.length != 1)
+            return files;
+
+        const tarFilename = `${outputDir}/${files[0].path}`;
+        const fileType = await this.detector.detectFile(tarFilename);
+        if (!fileType || fileType.ext != 'tar')
+            return files;
+
+        const newTarFilename = `${outputDir}/${utils.randomHexString(30)}`;
+        await fs.rename(tarFilename, newTarFilename);
+        
+        const tarFiles = await this.decompress('tar', newTarFilename, outputDir);
+        await fs.remove(newTarFilename);
+
+        return tarFiles;
     }
 
     async decompress(fileExt, filename, outputDir) {
