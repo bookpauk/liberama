@@ -128,18 +128,7 @@
           { "type": "equal", "start": 3, "end": 4, "bytes": "08" }
         ]
       },
-      { "type": "notEqual", "start": 36, "end": 58, "bytes": "70656170706c69636174696f6e2f657075622b7a6970" },
       { "type": "notEqual", "start": 30, "end": 50, "bytes": "4d4554412d494e462f6d6f7a696c6c612e727361" }
-    ]
-  },
-
-  {
-    "type": "epub",
-    "ext": "epub",
-    "mime": "application/epub+zip",
-    "rules": [
-      { "type": "equal", "start": 0, "end": 4, "bytes": "504b0304" },
-      { "type": "equal", "start": 36, "end": 58, "bytes": "70656170706c69636174696f6e2f657075622b7a6970" }
     ]
   },
 
