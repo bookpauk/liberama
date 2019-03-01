@@ -11,8 +11,8 @@ class ConvertEpub extends ConvertBase {
             inputFiles.sourceFileType && inputFiles.sourceFileType.ext == 'zip') {
             //ищем файл 'mimetype'
             for (const file of inputFiles.files) {
-                if (file == 'mimetype') {
-                    const mt = await fs.readFile(`${inputFiles.filesDir}/${file}`);
+                if (file.path == 'mimetype') {
+                    const mt = await fs.readFile(`${inputFiles.filesDir}/${file.path}`);
                     if (mt.toString().trim() == 'application/epub+zip')
                         return true;
                     break;
