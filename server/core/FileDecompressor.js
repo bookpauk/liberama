@@ -2,10 +2,11 @@ const fs = require('fs-extra');
 const zlib = require('zlib');
 const crypto = require('crypto');
 const path = require('path');
-const utils = require('./utils');
 const extractZip = require('extract-zip');
 const unbzip2Stream = require('unbzip2-stream');
+const tar = require('tar-fs')
 
+const utils = require('./utils');
 const FileDetector = require('./FileDetector');
 
 class FileDecompressor {
@@ -26,7 +27,7 @@ class FileDecompressor {
             files: []
         };
 
-        if (!fileType || !(fileType.ext == 'zip' || fileType.ext == 'bz2' || fileType.ext == 'gz')) {
+        if (!fileType || !(fileType.ext == 'zip' || fileType.ext == 'bz2' || fileType.ext == 'gz' || fileType.ext == 'tar')) {
             return result;
         }
 
@@ -95,7 +96,43 @@ class FileDecompressor {
         });
     }
 
-    async unBz2(filename, outputDir) {
+    unBz2(filename, outputDir) {
+        return this.decompressByStream(unbzip2Stream(), filename, outputDir);
+    }
+
+    unGz(filename, outputDir) {
+        return this.decompressByStream(zlib.createGunzip(), filename, outputDir);
+    }
+
+    unTar(filename, outputDir) {
+        return new Promise((resolve, reject) => {
+            const files = [];
+
+            const tarExtract = tar.extract(outputDir, {
+                map: (header) => {
+                    files.push({path: header.name, size: header.size});
+                    return header;
+                }
+            });
+
+            tarExtract.on('finish', () => {
+                resolve(files);
+            });
+
+            tarExtract.on('error', (err) => {
+                reject(err);
+            });
+
+            const inputStream = fs.createReadStream(filename);
+            inputStream.on('error', (err) => {
+                reject(err);
+            });
+
+            inputStream.pipe(tarExtract);
+        });
+    }
+
+    decompressByStream(stream, filename, outputDir) {
         return new Promise((resolve, reject) => {
             const file = {path: path.basename(filename)};
             const outFilename = `${outputDir}/${file.path}`;
@@ -103,7 +140,7 @@ class FileDecompressor {
             const inputStream = fs.createReadStream(filename);
             const outputStream = fs.createWriteStream(outFilename);
 
-            outputStream.on('close', async() => {
+            outputStream.on('finish', async() => {
                 try {
                     file.size = (await fs.stat(outFilename)).size;
                 } catch (e) {
@@ -120,15 +157,9 @@ class FileDecompressor {
                 reject(err);
             });
         
-            inputStream.pipe(unbzip2Stream()).pipe(outputStream);
+            inputStream.pipe(stream).pipe(outputStream);
         });
-    }
-
-    async unGz(filename, outputDir) {
-    }
-
-    async unTar(filename, outputDir) {
-    }
+   }
 
     async gzipBuffer(buf) {
         return new Promise((resolve, reject) => {
