@@ -8,6 +8,7 @@ const convertClassFactory = [
     require('./ConvertRtf'),
     require('./ConvertDocX'),
     require('./ConvertDoc'),
+    require('./ConvertMobi'),
     require('./ConvertFb2'),
     require('./ConvertSamlib'),
     require('./ConvertHtml'),

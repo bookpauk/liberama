@@ -711,6 +711,15 @@
       ]
       }
     ]
+  },
+
+  {
+    "type": "mobi",
+    "ext": "mobi",
+    "mime": "application/x-mobipocket-ebook",
+    "rules": [
+      { "type": "equal", "start": 64, "end": 68, "bytes": "4d4f4249" }
+    ]
   }
 
 ]
