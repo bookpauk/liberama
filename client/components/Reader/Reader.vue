@@ -340,8 +340,8 @@ class Reader extends Vue {
             this.setPositionActive = true;
 
             this.$nextTick(() => {
-                this.$refs.setPositionPage.sliderMax = this.mostRecentBook().textLength - 1;
-                this.$refs.setPositionPage.sliderValue = this.mostRecentBook().bookPos;
+                const recent = this.mostRecentBook();
+                this.$refs.setPositionPage.init(recent.bookPos, recent.textLength - 1);
             });
         } else {
             this.setPositionActive = false;

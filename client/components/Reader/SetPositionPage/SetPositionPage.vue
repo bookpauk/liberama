@@ -18,7 +18,6 @@
 //-----------------------------------------------------------------------------
 import Vue from 'vue';
 import Component from 'vue-class-component';
-import _ from 'lodash';
 
 import Window from '../../share/Window.vue';
 
@@ -28,7 +27,8 @@ export default @Component({
     },
     watch: {
         sliderValue: function(newValue) {
-            this.$emit('book-pos-changed', {bookPos: newValue});
+            if (this.initialized)
+                this.$emit('book-pos-changed', {bookPos: newValue});
         },
     },
 })
@@ -39,6 +39,13 @@ class SetPositionPage extends Vue {
     created() {
         this.commit = this.$store.commit;
         this.reader = this.$store.state.reader;
+        this.initialized = false;
+    }
+
+    init(sliderValue, sliderMax) {
+        this.sliderMax = sliderMax;
+        this.sliderValue = sliderValue;
+        this.initialized = true;
     }
 
     formatTooltip(val) {
