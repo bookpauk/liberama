@@ -34,10 +34,15 @@ class ConvertHtml extends ConvertBase {
         let desc = {_n: 'description', 'title-info': titleInfo};
         let pars = [];
         let body = {_n: 'body', section: {_a: []}};
-        let fb2 = [desc, body];
+        let binary = [];
+        let fb2 = [desc, body, binary];
 
         let title = '';
         let inTitle = false;
+        let inImage = false;
+        let image = {};
+        let bold = false;
+        let italic = false;
 
         let spaceCounter = [];
 
@@ -71,37 +76,93 @@ class ConvertHtml extends ConvertBase {
             }
         };
 
-        const newPara = new Set(['tr', 'br', 'br/', 'dd', 'p', 'title', '/title', 'h1', 'h2', 'h3', '/h1', '/h2', '/h3']);
+        const newPara = new Set(['tr', '/table', 'hr', 'br', 'br/', 'li', 'dt', 'dd', 'p', 'title', '/title', 'h1', 'h2', 'h3', '/h1', '/h2', '/h3']);
 
         const onTextNode = (text, cutCounter, cutTag) => {// eslint-disable-line no-unused-vars
             if (!cutCounter && !(cutTitle && inTitle)) {
-                growParagraph(text);
+                let tOpen = (bold ? '<strong>' : '');
+                tOpen += (italic ? '<emphasis>' : '');
+                let tClose = (italic ? '</emphasis>' : '');
+                tClose += (bold ? '</strong>' : '');
+
+                growParagraph(`${tOpen}${text}${tClose}`);
             }
 
             if (inTitle && !title)
                 title = text;
+
+            if (inImage) {
+                image._t = text;
+                binary.push(image);
+
+                pars.push({_n: 'image', _attrs: {'l:href': '#' + image._attrs.id}, _t: ''});
+                newParagraph();
+            }
+
         };
 
         const onStartNode = (tag, tail, singleTag, cutCounter, cutTag) => {// eslint-disable-line no-unused-vars
             if (!cutCounter) {
                 if (newPara.has(tag))
                     newParagraph();
+
+                switch (tag) {
+                    case 'i':
+                    case 'em':
+                        italic = true;
+                        break;
+                    case 'b':
+                    case 'strong':
+                    case 'h1':
+                    case 'h2':
+                    case 'h3':
+                        bold = true;
+                        break;
+                }
             }
 
             if (tag == 'title')
                 inTitle = true;
+
+            if (tag == 'fb2-image') {
+                inImage = true;
+                const attrs = sax.getAttrsSync(tail);
+                image = {_n: 'binary', _attrs: {id: attrs.name.value, 'content-type': attrs.type.value}, _t: ''};
+            }
         };
 
         const onEndNode = (tag, tail, singleTag, cutCounter, cutTag) => {// eslint-disable-line no-unused-vars
+            if (!cutCounter) {
+                if (newPara.has('/' + tag))
+                    newParagraph();
+
+                switch (tag) {
+                    case 'i':
+                    case 'em':
+                        italic = false;
+                        break;
+                    case 'b':
+                    case 'strong':
+                    case 'h1':
+                    case 'h2':
+                    case 'h3':
+                        bold = false;
+                        break;
+                }
+            }
+
             if (tag == 'title')
                 inTitle = false;
+
+            if (tag == 'fb2-image')
+                inImage = false;
         };
 
         let buf = this.decode(data).toString();
 
         sax.parseSync(buf, {
             onStartNode, onEndNode, onTextNode,
-            innerCut: new Set(['head', 'script', 'style', 'binary'])
+            innerCut: new Set(['head', 'script', 'style', 'binary', 'fb2-image'])
         });
 
         titleInfo['book-title'] = title;
@@ -148,10 +209,16 @@ class ConvertHtml extends ConvertBase {
 
             i = 0;
             for (const par of pars) {
+                if (par._n != 'p') {
+                    newPars.push(par);
+                    continue;
+                }
+
                 if (i > 0)
                     newPar();
                 i++;
 
+                let j = 0;
                 const lines = par._t.split('\n');
                 for (let line of lines) {
                     line = repCrLfTab(line);
@@ -161,8 +228,11 @@ class ConvertHtml extends ConvertBase {
                         l++;
                     }
 
-                    if (l >= parIndent)
-                        newPar();
+                    if (l >= parIndent) {
+                        if (j > 0)
+                            newPar();
+                        j++;
+                    }
                     growPar(line.trim() + ' ');
                 }
             }
@@ -173,6 +243,7 @@ class ConvertHtml extends ConvertBase {
         }
 
         //убираем лишнее
+        pars = body.section._a[0];
         for (let i = 0; i < pars.length; i++)
             pars[i]._t = this.repSpaces(pars[i]._t).trim();
 

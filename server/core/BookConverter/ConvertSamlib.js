@@ -135,7 +135,7 @@ class ConvertSamlib extends ConvertBase {
                             let href = attrs.src.value;
                             if (href[0] == '/')
                                 href = `http://${hostname}${href}`;
-                            openTag('image', {href});
+                            openTag('image', {'l:href': href});
                             inImage = true;
                         }
                         break;
