@@ -38,6 +38,8 @@ class ConvertPdf extends ConvertHtml {
         let images = [];
         let loading = [];
         let inText = false;
+        let bold = false;
+        let italic = false;
         let title = '';
         let prevTop = 0;
         let i = -1;
@@ -68,7 +70,12 @@ class ConvertPdf extends ConvertHtml {
 
         const onTextNode = (text, cutCounter, cutTag) => {// eslint-disable-line no-unused-vars
             if (!cutCounter && inText) {
-                lines[i].text += text + ' ';
+                let tOpen = (bold ? '<b>' : '');
+                tOpen += (italic ? '<i>' : '');
+                let tClose = (italic ? '</i>' : '');
+                tClose += (bold ? '</b>' : '');
+
+                lines[i].text += `${tOpen}${text}${tClose} `;
                 if (i < 2)
                     title += text + ' ';
             }
@@ -76,6 +83,17 @@ class ConvertPdf extends ConvertHtml {
 
         const onStartNode = (tag, tail, singleTag, cutCounter, cutTag) => {// eslint-disable-line no-unused-vars
             if (!cutCounter) {
+                if (inText) {
+                    switch (tag) {
+                        case 'i':
+                            italic = true;
+                            break;
+                        case 'b':
+                            bold = true;
+                            break;
+                    }
+                }
+
                 if (tag == 'text' && !inText) {
                     let attrs = sax.getAttrsSync(tail);
                     const line = {
@@ -121,6 +139,17 @@ class ConvertPdf extends ConvertHtml {
         };
 
         const onEndNode = (tag, tail, singleTag, cutCounter, cutTag) => {// eslint-disable-line no-unused-vars
+            if (inText) {
+                switch (tag) {
+                    case 'i':
+                        italic = false;
+                        break;
+                    case 'b':
+                        bold = false;
+                        break;
+                }
+            }
+
             if (tag == 'text')
                 inText = false;
         };

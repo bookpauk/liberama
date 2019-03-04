@@ -76,7 +76,7 @@ class ConvertHtml extends ConvertBase {
             }
         };
 
-        const newPara = new Set(['tr', '/table', 'hr', 'br', 'br/', 'dd', 'p', 'title', '/title', 'h1', 'h2', 'h3', '/h1', '/h2', '/h3']);
+        const newPara = new Set(['tr', '/table', 'hr', 'br', 'br/', 'li', 'dt', 'dd', 'p', 'title', '/title', 'h1', 'h2', 'h3', '/h1', '/h2', '/h3']);
 
         const onTextNode = (text, cutCounter, cutTag) => {// eslint-disable-line no-unused-vars
             if (!cutCounter && !(cutTitle && inTitle)) {
