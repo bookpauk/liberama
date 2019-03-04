@@ -111,6 +111,11 @@ class ConvertHtml extends ConvertBase {
         };
 
         const onEndNode = (tag, tail, singleTag, cutCounter, cutTag) => {// eslint-disable-line no-unused-vars
+            if (!cutCounter) {
+                if (newPara.has('/' + tag))
+                    newParagraph();
+            }
+
             if (tag == 'title')
                 inTitle = false;
 
@@ -178,6 +183,7 @@ class ConvertHtml extends ConvertBase {
                     newPar();
                 i++;
 
+                let j = 0;
                 const lines = par._t.split('\n');
                 for (let line of lines) {
                     line = repCrLfTab(line);
@@ -187,8 +193,11 @@ class ConvertHtml extends ConvertBase {
                         l++;
                     }
 
-                    if (l >= parIndent)
-                        newPar();
+                    if (l >= parIndent) {
+                        if (j > 0)
+                            newPar();
+                        j++;
+                    }
                     growPar(line.trim() + ' ');
                 }
             }
@@ -199,6 +208,7 @@ class ConvertHtml extends ConvertBase {
         }
 
         //убираем лишнее
+        pars = body.section._a[0];
         for (let i = 0; i < pars.length; i++)
             pars[i]._t = this.repSpaces(pars[i]._t).trim();
 
