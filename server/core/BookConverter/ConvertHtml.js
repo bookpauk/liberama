@@ -41,6 +41,8 @@ class ConvertHtml extends ConvertBase {
         let inTitle = false;
         let inImage = false;
         let image = {};
+        let bold = false;
+        let italic = false;
 
         let spaceCounter = [];
 
@@ -74,11 +76,16 @@ class ConvertHtml extends ConvertBase {
             }
         };
 
-        const newPara = new Set(['tr', 'br', 'br/', 'dd', 'p', 'title', '/title', 'h1', 'h2', 'h3', '/h1', '/h2', '/h3']);
+        const newPara = new Set(['tr', '/table', 'hr', 'br', 'br/', 'dd', 'p', 'title', '/title', 'h1', 'h2', 'h3', '/h1', '/h2', '/h3']);
 
         const onTextNode = (text, cutCounter, cutTag) => {// eslint-disable-line no-unused-vars
             if (!cutCounter && !(cutTitle && inTitle)) {
-                growParagraph(text);
+                let tOpen = (bold ? '<strong>' : '');
+                tOpen += (italic ? '<emphasis>' : '');
+                let tClose = (italic ? '</emphasis>' : '');
+                tClose += (bold ? '</strong>' : '');
+
+                growParagraph(`${tOpen}${text}${tClose}`);
             }
 
             if (inTitle && !title)
@@ -98,6 +105,20 @@ class ConvertHtml extends ConvertBase {
             if (!cutCounter) {
                 if (newPara.has(tag))
                     newParagraph();
+
+                switch (tag) {
+                    case 'i':
+                    case 'em':
+                        italic = true;
+                        break;
+                    case 'b':
+                    case 'strong':
+                    case 'h1':
+                    case 'h2':
+                    case 'h3':
+                        bold = true;
+                        break;
+                }
             }
 
             if (tag == 'title')
@@ -114,6 +135,20 @@ class ConvertHtml extends ConvertBase {
             if (!cutCounter) {
                 if (newPara.has('/' + tag))
                     newParagraph();
+
+                switch (tag) {
+                    case 'i':
+                    case 'em':
+                        italic = false;
+                        break;
+                    case 'b':
+                    case 'strong':
+                    case 'h1':
+                    case 'h2':
+                    case 'h3':
+                        bold = false;
+                        break;
+                }
             }
 
             if (tag == 'title')
