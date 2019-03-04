@@ -34,10 +34,13 @@ class ConvertHtml extends ConvertBase {
         let desc = {_n: 'description', 'title-info': titleInfo};
         let pars = [];
         let body = {_n: 'body', section: {_a: []}};
-        let fb2 = [desc, body];
+        let binary = [];
+        let fb2 = [desc, body, binary];
 
         let title = '';
         let inTitle = false;
+        let inImage = false;
+        let image = {};
 
         let spaceCounter = [];
 
@@ -80,6 +83,15 @@ class ConvertHtml extends ConvertBase {
 
             if (inTitle && !title)
                 title = text;
+
+            if (inImage) {
+                image._t = text;
+                binary.push(image);
+
+                pars.push({_n: 'image', _attrs: {'l:href': '#' + image._attrs.id}, _t: ''});
+                newParagraph();
+            }
+
         };
 
         const onStartNode = (tag, tail, singleTag, cutCounter, cutTag) => {// eslint-disable-line no-unused-vars
@@ -90,18 +102,27 @@ class ConvertHtml extends ConvertBase {
 
             if (tag == 'title')
                 inTitle = true;
+
+            if (tag == 'fb2-image') {
+                inImage = true;
+                const attrs = sax.getAttrsSync(tail);
+                image = {_n: 'binary', _attrs: {id: attrs.name.value, 'content-type': attrs.type.value}, _t: ''};
+            }
         };
 
         const onEndNode = (tag, tail, singleTag, cutCounter, cutTag) => {// eslint-disable-line no-unused-vars
             if (tag == 'title')
                 inTitle = false;
+
+            if (tag == 'fb2-image')
+                inImage = false;
         };
 
         let buf = this.decode(data).toString();
 
         sax.parseSync(buf, {
             onStartNode, onEndNode, onTextNode,
-            innerCut: new Set(['head', 'script', 'style', 'binary'])
+            innerCut: new Set(['head', 'script', 'style', 'binary', 'fb2-image'])
         });
 
         titleInfo['book-title'] = title;
@@ -148,6 +169,11 @@ class ConvertHtml extends ConvertBase {
 
             i = 0;
             for (const par of pars) {
+                if (par._n != 'p') {
+                    newPars.push(par);
+                    continue;
+                }
+
                 if (i > 0)
                     newPar();
                 i++;

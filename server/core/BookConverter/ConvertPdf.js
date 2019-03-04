@@ -86,7 +86,7 @@ class ConvertPdf extends ConvertHtml {
                         height: parseInt((attrs.height && attrs.height.value ? attrs.height.value : null), 10),
                     };
 
-                    if (line.width !== '0' || line.height !== '0') {
+                    if (line.width != 0 || line.height != 0) {
                         inText = true;
                         if (isNaN(line.top) || isNaN(prevTop) || (Math.abs(prevTop - line.top) > 3)) {
                             putImage(line.top);
@@ -98,7 +98,7 @@ class ConvertPdf extends ConvertHtml {
                 }
 
                 if (tag == 'image') {
-                    let attrs = sax.getAttrsSync(tail);
+                    const attrs = sax.getAttrsSync(tail);
                     const src = (attrs.src && attrs.src.value ? attrs.src.value : '');
                     if (src) {
                         const image = {
