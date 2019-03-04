@@ -25,6 +25,7 @@ class BookManager {
     async init(settings) {
         this.settings = settings;
 
+        //bmCacheStore нужен только для ускорения загрузки читалки
         this.booksCached = await bmCacheStore.getItem('books');
         if (!this.booksCached)
             this.booksCached = {};
@@ -47,9 +48,9 @@ class BookManager {
         }
     }
 
-    //долгая загрузка из хранилища
-    //bmMetaStore и bmRecentStore в будущем можно будет убрать
-    //bmCacheStore достаточно
+    //долгая загрузка из хранилища,
+    //хранение в отдельных записях дает относительно
+    //нормальное поведение при нескольких вкладках с читалкой в браузере
     async loadMeta(immediate) {
         if (!immediate)
             await utils.sleep(2000);
