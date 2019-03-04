@@ -1,4 +1,5 @@
 const fs = require('fs-extra');
+const path = require('path');
 
 const sax = require('./sax');
 const utils = require('../utils');
@@ -34,10 +35,36 @@ class ConvertPdf extends ConvertHtml {
 
         //парсим xml
         let lines = [];
+        let images = [];
+        let loading = [];
         let inText = false;
         let title = '';
         let prevTop = 0;
         let i = -1;
+
+        const loadImage = async(image) => {
+            const src = path.parse(image.src);
+            let type = 'unknown';
+            switch (src.ext) {
+                case '.jpg': type = 'image/jpeg'; break;
+                case '.png': type = 'image/png'; break;
+            }
+            if (type != 'unknown') {
+                image.data = (await fs.readFile(image.src)).toString('base64');
+                image.type = type;
+                image.name = src.base;
+            }
+        }
+
+        const putImage = (curTop) => {
+            if (!isNaN(curTop) && images.length) {
+                while (images.length && images[0].top < curTop) {
+                    i++;
+                    lines[i] = images[0];
+                    images.shift();
+                }
+            }
+        }
 
         const onTextNode = (text, cutCounter, cutTag) => {// eslint-disable-line no-unused-vars
             if (!cutCounter && inText) {
@@ -62,11 +89,33 @@ class ConvertPdf extends ConvertHtml {
                     if (line.width !== '0' || line.height !== '0') {
                         inText = true;
                         if (isNaN(line.top) || isNaN(prevTop) || (Math.abs(prevTop - line.top) > 3)) {
+                            putImage(line.top);
                             i++;
                             lines[i] = line;
                         }
                         prevTop = line.top;
                     }
+                }
+
+                if (tag == 'image') {
+                    let attrs = sax.getAttrsSync(tail);
+                    const src = (attrs.src && attrs.src.value ? attrs.src.value : '');
+                    if (src) {
+                        const image = {
+                            isImage: true,
+                            src,
+                            data: '',
+                            type: '',
+                            top: parseInt((attrs.top && attrs.top.value ? attrs.top.value : null), 10) || 0,
+                        };
+                        loading.push(loadImage(image));
+                        images.push(image);
+                        images.sort((a, b) => a.top - b.top)
+                    }
+                }
+
+                if (tag == 'page') {
+                    putImage(100000);
                 }
             }
         };
@@ -81,9 +130,15 @@ class ConvertPdf extends ConvertHtml {
             onStartNode, onEndNode, onTextNode
         });
 
+        putImage(100000);
+
+        await Promise.all(loading);
+
         //найдем параграфы и отступы
         const indents = [];
         for (const line of lines) {
+            if (line.isImage)
+                continue;
             if (!isNaN(line.left)) {
                 indents[line.left] = 1;
             }
@@ -103,6 +158,11 @@ class ConvertPdf extends ConvertHtml {
         let concat = '';
         let sp = '';
         for (const line of lines) {
+            if (line.isImage) {
+                text += `<fb2-image type="${line.type}" name="${line.name}">${line.data}</fb2-image>`;
+                continue;
+            }
+
             if (concat == '') {
                 const left = line.left || 0;
                 sp = ' '.repeat(indents[left]);
