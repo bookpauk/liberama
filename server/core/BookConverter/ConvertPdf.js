@@ -43,6 +43,7 @@ class ConvertPdf extends ConvertHtml {
         let title = '';
         let prevTop = 0;
         let i = -1;
+        let titleCount = 0;
 
         const loadImage = async(image) => {
             const src = path.parse(image.src);
@@ -76,8 +77,10 @@ class ConvertPdf extends ConvertHtml {
                 tClose += (bold ? '</b>' : '');
 
                 lines[i].text += `${tOpen}${text}${tClose} `;
-                if (i < 2)
-                    title += text + ' ';
+                if (titleCount < 2 && text.trim() != '') {
+                    title += text + (titleCount ? '' : ' - ');
+                    titleCount++;
+                }
             }
         };
 
