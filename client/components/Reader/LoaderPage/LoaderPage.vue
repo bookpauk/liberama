@@ -2,9 +2,10 @@
     <div ref="main" class="main">
         <div class="part">
             <span class="greeting bold-font">{{ title }}</span>
+            <div class="space"></div>
             <span class="greeting">Добро пожаловать!</span>
             <span class="greeting">Поддерживаются форматы: <b>fb2, html, txt</b> и сжатие: <b>zip, bz2, gz</b></span>
-            <span v-if="isExternalConverter" class="greeting">...а также: <b>rtf, doc, docx, pdf, epub, mobi</b></span>
+            <span v-if="isExternalConverter" class="greeting">...а также форматы: <b>rtf, doc, docx, pdf, epub, mobi</b></span>
         </div>
 
         <div class="part center">
@@ -129,6 +130,7 @@ class LoaderPage extends Vue {
     flex: 1;
     display: flex;
     flex-direction: column;
+    min-height: 340px;
 }
 
 .part {
@@ -140,8 +142,8 @@ class LoaderPage extends Vue {
 }
 
 .greeting {
-    font-size: 130%;
-    line-height: 170%;
+    font-size: 120%;
+    line-height: 160%;
 }
 
 .bold-font {

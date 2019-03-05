@@ -251,7 +251,7 @@
                         <el-form :model="form" size="mini" label-width="120px" @submit.native.prevent>
                             <div class="partHeader">Анимация</div>
 
-                            <el-form-item label="Вид">
+                            <el-form-item label="Тип">
                                 <el-col :span="11">
                                     <el-select v-model="pageChangeAnimation">
                                         <el-option label="Нет" value=""></el-option>
