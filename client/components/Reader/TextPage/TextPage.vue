@@ -4,13 +4,13 @@
             <div v-html="background"></div>
             <!-- img -->
         </div>
-        <div ref="scrollBox1" class="layout" style="overflow: hidden" @wheel.prevent.stop="onMouseWheel">
-            <div ref="scrollingPage1" class="layout" @transitionend="onPage1TransitionEnd" @animationend="onPage1AnimationEnd">
+        <div ref="scrollBox1" class="layout over-hidden" @wheel.prevent.stop="onMouseWheel">
+            <div ref="scrollingPage1" class="layout over-hidden" @transitionend="onPage1TransitionEnd" @animationend="onPage1AnimationEnd">
                 <div v-html="page1"></div>
             </div>
         </div>
-        <div ref="scrollBox2" class="layout" style="overflow: hidden" @wheel.prevent.stop="onMouseWheel">
-            <div ref="scrollingPage2" class="layout" @transitionend="onPage2TransitionEnd" @animationend="onPage2AnimationEnd">
+        <div ref="scrollBox2" class="layout over-hidden" @wheel.prevent.stop="onMouseWheel">
+            <div ref="scrollingPage2" class="layout over-hidden" @transitionend="onPage2TransitionEnd" @animationend="onPage2AnimationEnd">
                 <div v-html="page2"></div>
             </div>
         </div>
@@ -157,9 +157,11 @@ class TextPage extends Vue {
         this.$refs.layoutEvents.style.height = this.realHeight + 'px';
 
         this.w = this.realWidth - 2*this.indentLR;
-        this.h = this.realHeight - (this.showStatusBar ? this.statusBarHeight : 0) - 2*this.indentTB;
+        this.scrollHeight = this.realHeight - (this.showStatusBar ? this.statusBarHeight : 0);
+        this.h = this.scrollHeight - 2*this.indentTB;
         this.lineHeight = this.fontSize + this.lineInterval;
-        this.pageLineCount = 1 + Math.floor((this.h - this.fontSize)/this.lineHeight);
+        this.pageLineCount = 1 + Math.floor((this.h - this.lineHeight + this.lineInterval/2)/this.lineHeight);
+        this.pageSpace = this.scrollHeight - this.pageLineCount*this.lineHeight;
 
         this.$refs.scrollingPage1.style.width = this.w + 'px';
         this.$refs.scrollingPage2.style.width = this.w + 'px';
@@ -193,6 +195,7 @@ class TextPage extends Vue {
         this.drawHelper.indentLR = this.indentLR;
         this.drawHelper.textAlignJustify = this.textAlignJustify;
         this.drawHelper.lineHeight = this.lineHeight;
+        this.drawHelper.pageSpace = this.pageSpace;
         this.drawHelper.context = this.context;
 
         //сообщение "Загрузка шрифтов..."
@@ -232,20 +235,26 @@ class TextPage extends Vue {
         this.statusBarClickable = this.drawHelper.statusBarClickable(this.statusBarTop, this.statusBarHeight);
 
         //scrolling page
-        const pageDelta = this.h - (this.pageLineCount*this.lineHeight - this.lineInterval);
-        let y = this.indentTB + pageDelta/2;
+        let y = this.pageSpace/2;
         if (this.showStatusBar)
             y += this.statusBarHeight*(this.statusBarTop ? 1 : 0);
-        const page1 = this.$refs.scrollBox1;
-        const page2 = this.$refs.scrollBox2;
-        page1.style.width = this.w + 'px';
-        page2.style.width = this.w + 'px';
-        page1.style.height = (this.h - pageDelta) + 'px';
-        page2.style.height = (this.h - pageDelta) + 'px';
+        let page1 = this.$refs.scrollBox1;
+        let page2 = this.$refs.scrollBox2;
+        page1.style.width = this.w + this.indentLR + 'px';
+        page2.style.width = this.w + this.indentLR + 'px';
+        page1.style.height = this.scrollHeight - (this.pageSpace > 0 ? this.pageSpace : 0) + 'px';
+        page2.style.height = this.scrollHeight - (this.pageSpace > 0 ? this.pageSpace : 0) + 'px';
         page1.style.top = y + 'px';
         page2.style.top = y + 'px';
         page1.style.left = this.indentLR + 'px';
         page2.style.left = this.indentLR + 'px';
+
+        page1 = this.$refs.scrollingPage1;
+        page2 = this.$refs.scrollingPage2;
+        page1.style.width = this.w + this.indentLR + 'px';
+        page2.style.width = this.w + this.indentLR + 'px';
+        page1.style.height = this.scrollHeight + this.lineHeight + 'px';
+        page2.style.height = this.scrollHeight + this.lineHeight + 'px';
     }
 
     async checkLoadedFonts() {
@@ -633,8 +642,14 @@ class TextPage extends Vue {
                         duration, this.pageChangeDirectionDown, transition1Finish);
                     break;
                 case 'downShift':
+                    page1.style.height = this.scrollHeight + 'px';
+                    page2.style.height = this.scrollHeight + 'px';
+
                     await this.drawHelper.doPageAnimationDownShift(page1, page2, 
                         duration, this.pageChangeDirectionDown, transition1Finish);
+
+                    page1.style.height = this.scrollHeight + this.lineHeight + 'px';
+                    page2.style.height = this.scrollHeight + this.lineHeight + 'px';
                     break;
             }
             
@@ -1096,6 +1111,10 @@ class TextPage extends Vue {
     padding: 0;
     position: absolute;
     z-index: 10;
+}
+
+.over-hidden {
+    overflow: hidden;
 }
 
 .back {
