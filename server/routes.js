@@ -26,6 +26,7 @@ function initRoutes(app, config) {
     const routes = [
         ['POST', '/api/config', misc.getConfig.bind(misc), [aAll], {}],
         ['POST', '/api/reader/load-book', reader.loadBook.bind(reader), [aAll], {}],
+        ['POST', '/api/reader/storage', reader.storage.bind(reader), [aAll], {}],
         ['POST', '/api/reader/upload-file', [upload.single('file'), reader.uploadFile.bind(reader)], [aAll], {}],
         ['POST', '/api/worker/get-state', worker.getState.bind(worker), [aAll], {}],
     ];
@@ -60,7 +61,7 @@ function initRoutes(app, config) {
             };
         }
         callbacks.push(callback);
-        
+
         switch (httpMethod) {
             case 'GET' :
                 app.get(path, ...callbacks);
