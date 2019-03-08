@@ -1,4 +1,10 @@
 const SqliteConnectionPool = require('./SqliteConnectionPool');
+const log = require('../core/getLogger').getLog();
+
+const migrations = {
+    'app': require('./migrations/app'),
+    'readerStorage': require('./migrations/readerStorage'),
+};
 
 class ConnManager {
     constructor() {
@@ -7,10 +13,21 @@ class ConnManager {
 
     async init(config) {
         this.config = config;
+
+        const force = (config.branch == 'development' ? 'last' : null);
+
         for (const poolConfig of this.config.db) {
             const dbFileName = this.config.dataDir + '/' + poolConfig.fileName;
             const connPool = new SqliteConnectionPool();
             await connPool.open(poolConfig.connCount, dbFileName);
+
+            log(`Opened database "${poolConfig.poolName}"`);
+            //миграции
+            const migs = migrations[poolConfig.poolName];
+            if (migs && migs.data.length) {
+                const applied = await connPool.migrate(migs.data, migs.table, force);
+                log(`Applied ${applied} migrations to "${poolConfig.poolName}"`);
+            }
 
             this._pool[poolConfig.poolName] = connPool;
         }

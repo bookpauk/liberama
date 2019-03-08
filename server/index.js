@@ -11,7 +11,7 @@ const path = require('path');
 const express = require('express');
 const compression = require('compression');
 
-const connManager = require('./core/connManager');
+const connManager = require('./db/connManager');
 
 async function init() {
     await fs.ensureDir(config.dataDir);
@@ -35,9 +35,7 @@ async function main() {
     log('Initializing');
     await init();
 
-    log('Opening databases');
     await connManager.init(config);
-    log(`Opened databases: ${Object.keys(connManager.pool).join(', ')}`);
 
     //servers
     for (let server of config.servers) {
