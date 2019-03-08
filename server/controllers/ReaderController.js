@@ -5,8 +5,8 @@ const workerState =  require('../core/workerState');
 //const _ = require('lodash');
 
 class ReaderController extends BaseController {
-    constructor(connPool, config) {
-        super(connPool, config);
+    constructor(config) {
+        super(config);
         this.readerWorker = new ReaderWorker(config);
     }
 

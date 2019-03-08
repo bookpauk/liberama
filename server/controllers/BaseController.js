@@ -1,6 +1,5 @@
 class BaseController {
-    constructor(connPool, config) {
-        this.connPool = connPool;
+    constructor(config) {
         this.config = config;
     }
 }

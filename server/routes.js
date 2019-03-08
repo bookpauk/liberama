@@ -2,10 +2,10 @@ const c = require('./controllers');
 const utils = require('./core/utils');
 const multer = require('multer');
 
-function initRoutes(app, connPool, config) {
-    const misc = new c.MiscController(connPool, config);
-    const reader = new c.ReaderController(connPool, config);
-    const worker = new c.WorkerController(connPool, config);
+function initRoutes(app, config) {
+    const misc = new c.MiscController(config);
+    const reader = new c.ReaderController(config);
+    const worker = new c.WorkerController(config);
 
     //access
     const [aAll, aNormal, aSite, aReader, aOmnireader] = // eslint-disable-line no-unused-vars
@@ -60,7 +60,7 @@ function initRoutes(app, connPool, config) {
             };
         }
         callbacks.push(callback);
-
+        
         switch (httpMethod) {
             case 'GET' :
                 app.get(path, ...callbacks);

@@ -4,20 +4,18 @@ const sqlite = require('sqlite');
 const waitingDelay = 100; //ms
 
 class SqliteConnectionPool {
-    constructor(connCount, config) {
-        this.connCount = connCount;
-        this.config = config;
+    constructor() {
+        this.closed = true;
     }
 
-    async init() {
-        const dbFileName = this.config.dataDir + '/' + this.config.dbFileName;
-
+    async open(connCount, dbFileName) {
+        if (!Number.isInteger(connCount) || connCount <= 0)
+            return;
         this.connections = [];
         this.taken = new Set();
         this.freed = new Set();
 
-        for (let i = 0; i < this.connCount; i++) {
-
+        for (let i = 0; i < connCount; i++) {
             let client = await sqlite.open(dbFileName);
             client.configure('busyTimeout', 10000); //ms
 
@@ -29,6 +27,7 @@ class SqliteConnectionPool {
             this.freed.add(i);
             this.connections[i] = client;
         }
+        this.closed = false;
     }
 
     _setImmediate() {
