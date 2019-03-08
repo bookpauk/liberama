@@ -26,7 +26,7 @@ class ConnManager {
             const migs = migrations[poolConfig.poolName];
             if (migs && migs.data.length) {
                 const applied = await connPool.migrate(migs.data, migs.table, force);
-                log(`Applied ${applied} migrations to "${poolConfig.poolName}"`);
+                log(`Applied ${applied.length} migrations to "${poolConfig.poolName}"`);
             }
 
             this._pool[poolConfig.poolName] = connPool;

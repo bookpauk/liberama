@@ -140,15 +140,18 @@ class SqliteConnectionPool {
         for (const migration of dbMigrations.slice().sort((a, b) => Math.sign(b.id - a.id))) {
             if (!migrations.some(x => x.id === migration.id) ||
                 (force === 'last' && migration.id === lastMigration.id)) {
-                await this.run('BEGIN');
+                const dbh = await this.get();
+                await dbh.run('BEGIN');
                 try {
-                    await this.exec(migration.down);
-                    await this.run(SQL`DELETE FROM "`.append(table).append(SQL`" WHERE id = ${migration.id}`));
-                    await this.run('COMMIT');
+                    await dbh.exec(migration.down);
+                    await dbh.run(SQL`DELETE FROM "`.append(table).append(SQL`" WHERE id = ${migration.id}`));
+                    await dbh.run('COMMIT');
                     dbMigrations = dbMigrations.filter(x => x.id !== migration.id);
                 } catch (err) {
-                    await this.run('ROLLBACK');
+                    await dbh.run('ROLLBACK');
                     throw err;
+                } finally {
+                    dbh.ret();
                 }
             } else {
                 break;
@@ -160,17 +163,20 @@ class SqliteConnectionPool {
         const lastMigrationId = dbMigrations.length ? dbMigrations[dbMigrations.length - 1].id : 0;
         for (const migration of migrations) {
             if (migration.id > lastMigrationId) {
-                await this.run('BEGIN');
+                const dbh = await this.get();
+                await dbh.run('BEGIN');
                 try {
-                    await this.exec(migration.up);
-                    await this.run(SQL`INSERT INTO "`.append(table).append(
+                    await dbh.exec(migration.up);
+                    await dbh.run(SQL`INSERT INTO "`.append(table).append(
                         SQL`" (id, name, up, down) VALUES (${migration.id}, ${migration.name}, ${migration.up}, ${migration.down})`)
                     );
-                    await this.run('COMMIT');
+                    await dbh.run('COMMIT');
                     applied.push(migration.id);
                 } catch (err) {
-                    await this.run('ROLLBACK');
+                    await dbh.run('ROLLBACK');
                     throw err;
+                } finally {
+                    dbh.ret();
                 }
             }
         }
