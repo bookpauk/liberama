@@ -6,6 +6,7 @@ const connManager = require('../db/connManager');
 class ReaderStorage {
     constructor() {
         this.storagePool = connManager.pool.readerStorage;
+        this.cache = {};
     }
 
     async doAction(act) {
@@ -33,9 +34,14 @@ class ReaderStorage {
         const dbh = await this.storagePool.get();
         try {
             for (const id of Object.keys(items)) {
-                const rows = await dbh.all(SQL`SELECT rev FROM storage WHERE id = ${id}`);
-                const rev = (rows.length && rows[0].rev ? rows[0].rev : 0);
-                result.items[id] = {rev};
+                if (this.cache[id]) {
+                    result.items[id] = this.cache[id];
+                } else {
+                    const rows = await dbh.all(SQL`SELECT rev FROM storage WHERE id = ${id}`);
+                    const rev = (rows.length && rows[0].rev ? rows[0].rev : 0);
+                    result.items[id] = {rev};
+                    this.cache[id] = result.items[id];
+                }
             }
         } finally {
             dbh.ret();
@@ -78,6 +84,7 @@ class ReaderStorage {
         try {
             for (const id of Object.keys(items)) {
                 await dbh.run(SQL`INSERT OR REPLACE INTO storage (id, rev, data) VALUES (${id}, ${items[id].rev}, ${items[id].data})`);
+                this.cache[id] = {rev: items[id].rev};
             }
         } finally {
             dbh.ret();

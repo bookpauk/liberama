@@ -14,7 +14,7 @@ class ConnManager {
     async init(config) {
         this.config = config;
 
-        const force = (config.branch == 'development' ? 'last' : null);
+        const force = null;//(config.branch == 'development' ? 'last' : null);
 
         for (const poolConfig of this.config.db) {
             const dbFileName = this.config.dataDir + '/' + poolConfig.fileName;
