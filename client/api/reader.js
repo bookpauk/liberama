@@ -106,6 +106,28 @@ class Reader {
 
         return url;
     }
+
+    async storage(request) {
+        let response = await api.post('/storage', request);
+
+        const state = response.data.state;
+        if (!state)
+            throw new Error('Неверный ответ api');
+
+        return response.data;
+    }
+
+    storageCheck(items) {
+        return this.storage({action: 'check', items});
+    }
+
+    storageGet(items) {
+        return this.storage({action: 'get', items});
+    }
+
+    storageSet(items, force) {
+        return this.storage({action: 'set', force, items});
+    }
 }
 
 export default new Reader();

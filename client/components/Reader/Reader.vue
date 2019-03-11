@@ -73,6 +73,7 @@
             <SettingsPage v-if="settingsActive" ref="settingsPage" @settings-toggle="settingsToggle"></SettingsPage>
             <HelpPage v-if="helpActive" ref="helpPage" @help-toggle="helpToggle"></HelpPage>
             <ClickMapPage v-show="clickMapActive" ref="clickMapPage"></ClickMapPage>
+            <ServerStorage v-show="hidden" ref="serverStorage"></ServerStorage>
         </el-main>
     </el-container>
 </template>
@@ -92,6 +93,7 @@ import HistoryPage from './HistoryPage/HistoryPage.vue';
 import SettingsPage from './SettingsPage/SettingsPage.vue';
 import HelpPage from './HelpPage/HelpPage.vue';
 import ClickMapPage from './ClickMapPage/ClickMapPage.vue';
+import ServerStorage from './ServerStorage/ServerStorage.vue';
 
 import bookManager from './share/bookManager';
 import readerApi from '../../api/reader';
@@ -112,6 +114,7 @@ export default @Component({
         SettingsPage,
         HelpPage,
         ClickMapPage,
+        ServerStorage,
     },
     watch: {
         bookPos: function(newValue) {
@@ -166,6 +169,7 @@ class Reader extends Vue {
 
     actionList = [];
     actionCur = -1;
+    hidden = false;
 
     created() {
         this.loading = true;
@@ -201,6 +205,7 @@ class Reader extends Vue {
 
     mounted() {
         (async() => {
+            this.$refs.serverStorage.init();
             await bookManager.init(this.settings);
             await restoreOldSettings(this.settings, bookManager, this.commit);
 
