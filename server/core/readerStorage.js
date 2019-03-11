@@ -6,7 +6,7 @@ const connManager = require('../db/connManager');
 class ReaderStorage {
     constructor() {
         this.storagePool = connManager.pool.readerStorage;
-        this.cache = {};
+        this.periodicCleanCache(3*3600*1000);//1 раз в 3 часа
     }
 
     async doAction(act) {
@@ -91,6 +91,14 @@ class ReaderStorage {
         }
 
         return {state: 'success'};
+    }
+
+    periodicCleanCache(timeout) {
+        this.cache = {};
+
+        setTimeout(() => {
+            this.periodicCleanCache(timeout);
+        }, timeout);
     }
 }
 
