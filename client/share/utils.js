@@ -23,7 +23,7 @@ export function hexToString(str) {
 
 export function randomArray(len) {
     const a = new Uint8Array(len);
-    crypto.getRandomValues(a);
+    window.crypto.getRandomValues(a);
     return a;
 }
 

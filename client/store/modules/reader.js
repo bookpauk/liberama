@@ -177,6 +177,7 @@ for (const font of webFonts)
 // initial state
 const state = {
     toolBarActive: true,
+    serverStorageKey: '',
     settings: Object.assign({}, settingDefaults),
 };
 
@@ -190,6 +191,9 @@ const actions = {};
 const mutations = {
     setToolBarActive(state, value) {
         state.toolBarActive = value;
+    },
+    setServerStorageKey(state, value) {
+        state.serverStorageKey = value;
     },
     setSettings(state, value) {
         state.settings = Object.assign({}, state.settings, value);
