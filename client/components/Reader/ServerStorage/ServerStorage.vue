@@ -72,7 +72,7 @@ class ServerStorage extends Vue {
             let encrypted = null;
             try {
                 encrypted = await cryptoUtils.aesEncrypt(comp, this.serverStorageKey);
-            } catch(e) {
+            } catch (e) {
                 throw new Error('encrypt failed');
             }
             encoded.data = '1' + utils.toBase64(Buffer.from(encrypted));
@@ -102,7 +102,7 @@ class ServerStorage extends Vue {
                 let decrypted = null;
                 try {
                     decrypted = await cryptoUtils.aesDecrypt(a, this.serverStorageKey);
-                } catch(e) {
+                } catch (e) {
                     throw new Error('decrypt failed');
                 }
                 decoded.data = JSON.parse(utils.pako.inflate(decrypted, {to: 'string'}));
