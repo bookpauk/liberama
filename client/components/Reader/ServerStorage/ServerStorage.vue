@@ -6,9 +6,11 @@
 //-----------------------------------------------------------------------------
 import Vue from 'vue';
 import Component from 'vue-class-component';
+import {Buffer} from 'safe-buffer';
 
 import bookManager from '../share/bookManager';
 import readerApi from '../../../api/reader';
+import * as utils from '../../../share/utils';
 
 export default @Component({
 })
@@ -18,10 +20,6 @@ class ServerStorage extends Vue {
     }
 
     async init() {
-        /*const items = {
-            '1': {rev: 1, data: 1},
-        };
-        console.log(await readerApi.storageSet(items));*/
     }
 
     get settings() {

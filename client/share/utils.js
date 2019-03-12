@@ -1,21 +1,34 @@
+import baseX from 'base-x';
+import PAKO from 'pako';
+import {Buffer} from 'safe-buffer';
+
+export const pako = PAKO;
+
+const BASE58 = '123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz';
+const BASE64 = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
+const bs58 = baseX(BASE58);
+const bs64 = baseX(BASE64);
+
 export function sleep(ms) {
     return new Promise(resolve => setTimeout(resolve, ms));
 }
 
 export function stringToHex(str) {
-    let result = '';
-    for (let i = 0; i < str.length; i++) {
-        result += str.charCodeAt(i).toString(16);
-    }
-    return result;
+    return Buffer.from(str).toString('hex');
 }
 
 export function hexToString(str) {
-    let result = '';
-    for (let i = 0; i < str.length; i += 2) {
-        result += String.fromCharCode(parseInt(str.substr(i, 2), 16));
-    }
-    return result;
+    return Buffer.from(str, 'hex').toString();
+}
+
+export function randomArray(len) {
+    const a = new Uint8Array(len);
+    crypto.getRandomValues(a);
+    return a;
+}
+
+export function randomHexString(len) {
+    return Buffer.from(randomArray(len)).toString('hex');
 }
 
 export function formatDate(d, format) {
@@ -62,4 +75,20 @@ export async function copyTextToClipboard(text) {
     }
 
     return result;
+}
+
+export function toBase58(data) {
+    return bs58.encode(data);
+}
+
+export function fromBase58(data) {
+    return bs58.decode(data);
+}
+
+export function toBase64(data) {
+    return bs64.encode(data);
+}
+
+export function fromBase64(data) {
+    return bs64.decode(data);
 }
