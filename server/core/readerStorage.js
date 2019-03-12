@@ -10,6 +10,9 @@ class ReaderStorage {
     }
 
     async doAction(act) {
+        if (!_.isObject(act.items))
+            throw new Error('items is not an object');
+
         let result = {};
         switch (act.action) {
             case 'check':
