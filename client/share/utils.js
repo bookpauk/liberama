@@ -78,7 +78,7 @@ export async function copyTextToClipboard(text) {
 }
 
 export function toBase58(data) {
-    return bs58.encode(data);
+    return bs58.encode(Buffer.from(data));
 }
 
 export function fromBase58(data) {
@@ -86,7 +86,7 @@ export function fromBase58(data) {
 }
 
 export function toBase64(data) {
-    return bs64.encode(data);
+    return bs64.encode(Buffer.from(data));
 }
 
 export function fromBase64(data) {

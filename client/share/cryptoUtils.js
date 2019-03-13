@@ -64,3 +64,7 @@ export async function aesDecrypt(data, password) {
         data //ArrayBuffer of the data
     );
 }
+
+export async function sha256(data) {
+    return await crypto.subtle.digest("SHA-256", Buffer.from(data));
+}
