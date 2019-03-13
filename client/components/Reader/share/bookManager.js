@@ -3,7 +3,7 @@ import localForage from 'localforage';
 import * as utils from '../../../share/utils';
 import BookParser from './BookParser';
 
-const maxDataSize = 500*1024*1024;//chars, not bytes
+const maxDataSize = 300*1024*1024;//compressed bytes
 
 const bmMetaStore = localForage.createInstance({
     name: 'bmMetaStore'
@@ -97,7 +97,8 @@ class BookManager {
             let toDel = null;
             for (let key in this.books) {
                 let book = this.books[key];
-                size += (book.length ? book.length : 0);
+                const bookLength = (book.length ? book.length : 0);
+                size += (book.dataCompressedLength ? book.dataCompressedLength : bookLength);
 
                 if (book.addTime < min) {
                     toDel = book;
@@ -120,15 +121,29 @@ class BookManager {
         meta.key = this.keyFromUrl(meta.url);
         meta.addTime = Date.now();
 
-        const result = await this.parseBook(meta, newBook.data, callback);
+        const cb = (perc) => {
+            const p = Math.round(80*perc/100);
+            callback(p);
+        };
+
+        const result = await this.parseBook(meta, newBook.data, cb);
+        result.dataCompressed = true;
+
+        let data = newBook.data;
+        if (result.dataCompressed) {
+            data = utils.pako.deflate(data, {level: 9});
+            result.dataCompressedLength = data.byteLength;
+        }
+        callback(90);
 
         this.books[meta.key] = result;
         this.booksCached[meta.key] = this.metaOnly(result);
 
         await bmMetaStore.setItem(`bmMeta-${meta.key}`, this.metaOnly(result));
-        await bmDataStore.setItem(`bmData-${meta.key}`, newBook.data);
+        await bmDataStore.setItem(`bmData-${meta.key}`, data);
         await bmCacheStore.setItem('books', this.booksCached);
 
+        callback(100);
         return result;
     }
 
@@ -149,11 +164,25 @@ class BookManager {
         let result = undefined;
         if (!meta.key)
             meta.key = this.keyFromUrl(meta.url);
+
         result = this.books[meta.key];
 
         if (result && !result.parsed) {
-            const data = await bmDataStore.getItem(`bmData-${meta.key}`);
-            result = await this.parseBook(result, data, callback);
+            let data = await bmDataStore.getItem(`bmData-${meta.key}`);
+            callback(10);
+            await utils.sleep(10);
+
+            if (result.dataCompressed) {
+                data = utils.pako.inflate(data, {to: 'string'});
+            }
+            callback(20);
+
+            const cb = (perc) => {
+                const p = 20 + Math.round(80*perc/100);
+                callback(p);
+            };
+
+            result = await this.parseBook(result, data, cb);
             this.books[meta.key] = result;
         }
 
