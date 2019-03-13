@@ -11,7 +11,7 @@ function parseSync(xstr, options) {
 
     let i = 0;
     const len = xstr.length;
-    const progStep = len/10;
+    const progStep = len/20;
     let nextProg = 0;
 
     let cutCounter = 0;
@@ -151,7 +151,7 @@ async function parse(xstr, options) {
 
     let i = 0;
     const len = xstr.length;
-    const progStep = len/10;
+    const progStep = len/20;
     let nextProg = 0;
 
     let cutCounter = 0;
