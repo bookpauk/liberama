@@ -66,8 +66,7 @@ class BookManager {
                 const oldBook = this.books[meta.key];
                 this.books[meta.key] = meta;
 
-                if (oldBook && oldBook.data && oldBook.parsed) {
-                    this.books[meta.key].data = oldBook.data;
+                if (oldBook && oldBook.parsed) {
                     this.books[meta.key].parsed = oldBook.parsed;
                 }
             }
@@ -127,7 +126,7 @@ class BookManager {
         this.booksCached[meta.key] = this.metaOnly(result);
 
         await bmMetaStore.setItem(`bmMeta-${meta.key}`, this.metaOnly(result));
-        await bmDataStore.setItem(`bmData-${meta.key}`, result.data);
+        await bmDataStore.setItem(`bmData-${meta.key}`, newBook.data);
         await bmCacheStore.setItem('books', this.booksCached);
 
         return result;
@@ -152,13 +151,9 @@ class BookManager {
             meta.key = this.keyFromUrl(meta.url);
         result = this.books[meta.key];
 
-        if (result && !result.data) {
-            result.data = await bmDataStore.getItem(`bmData-${meta.key}`);
-            this.books[meta.key] = result;
-        }
-
         if (result && !result.parsed) {
-            result = await this.parseBook(result, result.data, callback);
+            const data = await bmDataStore.getItem(`bmData-${meta.key}`);
+            result = await this.parseBook(result, data, callback);
             this.books[meta.key] = result;
         }
 
@@ -188,7 +183,6 @@ class BookManager {
         const result = Object.assign({}, meta, parsedMeta, {
             length: data.length,
             textLength: parsed.textLength,
-            data,
             parsed
         });
 
@@ -197,7 +191,7 @@ class BookManager {
 
     metaOnly(book) {
         let result = Object.assign({}, book);
-        delete result.data;
+        delete result.data;//можно будет убрать эту строку со временем
         delete result.parsed;
         return result;
     }
