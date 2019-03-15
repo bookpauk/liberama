@@ -53,6 +53,10 @@ class ServerStorage extends Vue {
         return this.$store.state.reader.profilesRev;
     }
 
+    get currentProfile() {
+        return this.$store.state.reader.currentProfile;
+    }
+
     notifySuccessIfNeeded(rev1, rev2) {
         if (rev1 != rev2)
             this.$notify.success({message: 'Данные синхронизированы с сервером'});
@@ -67,6 +71,9 @@ class ServerStorage extends Vue {
     }
 
     async loadProfiles() {
+        if (!this.currentProfile)
+            return;
+
         let prof = await this.storageGet({'profiles': {}});
 
         if (prof.state == 'success') {
@@ -83,6 +90,9 @@ class ServerStorage extends Vue {
     }
 
     async saveProfiles() {
+        if (!this.currentProfile)
+            return;
+
         if (!this.savingProfiles) {
             this.savingProfiles = true;
 

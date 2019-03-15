@@ -7,7 +7,68 @@
                 </template>
 
                 <el-tabs type="border-card" tab-position="left" v-model="selectedTab">
-                    <!--------------------------------------------------------------------------->
+                    <!-- Профили ------------------------------------------------------------------------->
+                    <el-tab-pane label="Профили">
+                        <el-form :model="form" size="small" label-width="100px" @submit.native.prevent>
+                            <div class="partHeader">Профили устройств</div>
+
+                            <el-form-item label="">
+                                <div class="text">
+                                    Выберите или добавьте профиль устройства, чтобы начать синхронизацию данных с сервером.
+                                    При выборе "Нет" синхронизация отключается.
+                                </div>
+                            </el-form-item>
+
+                            <el-form-item label="Устройство">
+                                <el-select v-model="currentProfile" placeholder="">
+                                    <el-option label="Нет" value=""></el-option>
+                                    <el-option v-for="item in profilesArray"
+                                        :key="item"
+                                        :label="item"
+                                        :value="item">
+                                    </el-option>
+                                </el-select>
+                            </el-form-item>
+
+                            <el-form-item label="">
+                                    <el-button @click="addProfile">Добавить</el-button>
+                                    <el-button @click="delProfile">Удалить</el-button>
+                            </el-form-item>
+                        </el-form>
+
+                        <el-form :model="form" size="small" label-width="100px" @submit.native.prevent>
+                            <div class="partHeader">Ключ доступа</div>
+
+                            <el-form-item label="">
+                                <div class="text">
+                                    Ключ доступа позволяет восстановить профили с настройками и список читаемых книг
+                                    на другом устройстве. Для этого необходимо передать его через почту, мессенджер или другим способом.
+                                </div>
+                                <div>
+                                    <b>{{ partialStorageKey }}</b> (часть вашего ключа)
+                                </div>
+                            </el-form-item>
+                            <el-form-item label="">
+                                    <el-button style="width: 250px" @click="showServerStorageKey">Показать ключ доступа/ссылку</el-button>
+                            </el-form-item>
+                            <el-form-item label="">
+                                    <el-button style="width: 250px" @click="enterServerStorageKey">Ввести ключ доступа</el-button>
+                            </el-form-item>
+                            <el-form-item label="">
+                                    <el-button style="width: 250px" @click="generateServerStorageKey">Сгенерировать новый ключ</el-button>
+                            </el-form-item>
+
+                            <el-form-item label="">
+                                <div class="text">
+                                    Рекомендуется сохранить ключ в надежном месте, чтобы всегда иметь возможность восстановить настройки,
+                                    например, после переустановки ОС или чистки/смены браузера.<br>
+                                    ПРЕДУПРЕЖДЕНИЕ! При утере ключа, НИКТО не сможет восстановить ваши настройки, т.к. все данные сжимаются
+                                    и шифруются ключом доступа перед отправкой на сервер.
+                                </div>
+                            </el-form-item>
+                        </el-form>
+                    </el-tab-pane>
+                    <!-- Вид ------------------------------------------------------------------------->                    
                     <el-tab-pane label="Вид">
 
                         <el-form :model="form" size="small" label-width="120px" @submit.native.prevent>
@@ -246,7 +307,7 @@
                         </el-form>
                     </el-tab-pane>
 
-                    <!--------------------------------------------------------------------------->
+                    <!-- Листание ------------------------------------------------------------------------->
                     <el-tab-pane label="Листание">
                         <el-form :model="form" size="mini" label-width="120px" @submit.native.prevent>
                             <div class="partHeader">Анимация</div>
@@ -283,7 +344,7 @@
                         </el-form>
                         
                     </el-tab-pane>
-                    <!--------------------------------------------------------------------------->
+                    <!-- Прочее ------------------------------------------------------------------------->
                     <el-tab-pane label="Прочее">
                         <el-form :model="form" size="mini" label-width="120px" @submit.native.prevent>
                             <el-form-item label="Управление">
@@ -340,7 +401,7 @@
                             </el-form-item>
                         </el-form>
                     </el-tab-pane>
-                    <!--------------------------------------------------------------------------->
+                    <!-- Сброс ------------------------------------------------------------------------->
                     <el-tab-pane label="Сброс">
                         <el-button @click="setDefaults">Установить по-умолчанию</el-button>
                     </el-tab-pane>
@@ -401,6 +462,8 @@ class SettingsPage extends Vue {
     webFonts = [];
     fonts = [];
 
+    currentProfile = '';
+
     created() {
         this.commit = this.$store.commit;
         this.reader = this.$store.state.reader;
@@ -423,6 +486,22 @@ class SettingsPage extends Vue {
 
     get settings() {
         return this.$store.state.reader.settings;
+    }
+
+    get profiles() {
+        return this.$store.state.reader.profiles;
+    }
+
+    get profilesArray() {
+        return Object.keys(this.profiles);
+    }
+
+    get partialStorageKey() {
+        return this.serverStorageKey.substr(0, 7) + '***';
+    }
+
+    get serverStorageKey() {
+        return this.$store.state.reader.serverStorageKey;
     }
 
     get predefineTextColors() {
@@ -476,6 +555,12 @@ class SettingsPage extends Vue {
         }
     }
 
+    addProfile() {
+    }
+
+    delProfile() {
+    }
+
     keyHook(event) {
         if (event.type == 'keydown' && event.code == 'Escape') {
             this.close();
@@ -502,6 +587,11 @@ class SettingsPage extends Vue {
     height: 70%;
     display: flex;
     position: relative;
+}
+
+.text {
+    font-size: 90%;
+    line-height: 130%;
 }
 
 .el-form {
