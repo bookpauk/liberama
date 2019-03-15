@@ -1,4 +1,5 @@
-import sjcl from 'sjcl';
+//sjcl.js подправлен (убран лишний require, добавлявший +400kb к bundle) и скопирован локально
+import sjcl from './sjcl';
 
 //везде недоработки...
 
