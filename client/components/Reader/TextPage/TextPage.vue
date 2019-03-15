@@ -377,13 +377,17 @@ class TextPage extends Vue {
                 this.meta = bookManager.metaOnly(this.book);
                 this.fb2 = this.meta.fb2;
 
-                const authorName = _.compact([
-                    this.fb2.lastName,
-                    this.fb2.firstName,
-                    this.fb2.middleName
-                ]).join(' ');
+                let authorNames = [];
+                if (this.fb2.author) {
+                    authorNames = this.fb2.author.map(a => _.compact([
+                        a.lastName,
+                        a.firstName,
+                        a.middleName
+                    ]).join(' '));
+                }
+
                 this.title = _.compact([
-                    authorName,
+                    authorNames.join(', '),
                     this.fb2.bookTitle
                 ]).join(' - ');
 
