@@ -27,7 +27,7 @@ class ServerStorage extends Vue {
         }
         this.hashedStorageKey = utils.toBase58(await cryptoUtils.sha256(this.serverStorageKey));
         
-        //console.log(await this.storageSet({'id1': {rev: 3, data: {test: 123}}}));
+        //console.log(await this.storageSet({'id1': {rev: 1, data: {test: 123}}}));
         //console.log(await this.storageGet({'id1': {}}));
         //console.log(await this.storageCheck({'id1': {rev: 1, data: {test: 123}}}));
     }
@@ -75,9 +75,6 @@ class ServerStorage extends Vue {
         let result = Object.assign({}, request);
         let items = {};
         for (const id of Object.keys(request.items)) {
-            if (id.indexOf('.') >= 0)
-                throw new Error(`encodeStorageItems: bad id - ${id}`);
-
             const item = request.items[id];
             if (request.action == 'set' && !_.isObject(item.data))
                 throw new Error('encodeStorageItems: data is not an object');
@@ -94,7 +91,7 @@ class ServerStorage extends Vue {
                 }
                 encoded.data = '1' + utils.toBase64(encrypted);
             }
-            items[`${this.hashedStorageKey}.${id}`] = encoded;
+            items[`${this.hashedStorageKey}.${utils.toBase58(id)}`] = encoded;
         }
 
         result.items = items;
@@ -133,7 +130,7 @@ class ServerStorage extends Vue {
                 const ids = id.split('.');
                 if (!(ids.length == 2) || !(ids[0] == this.hashedStorageKey))
                     throw new Error(`decodeStorageItems: bad id - ${id}`);
-                items[ids[1]] = decoded;
+                items[utils.fromBase58(ids[1])] = decoded;
             }
         }
 
