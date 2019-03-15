@@ -1,3 +1,4 @@
+//WebCrypto API (crypto.subtle) не работает без https, поэтому приходится извращаться через sjcl
 import sjclWrapper from './sjclWrapper';
 
 //не менять
