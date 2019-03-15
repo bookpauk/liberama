@@ -13,7 +13,14 @@ import readerApi from '../../../api/reader';
 import * as utils from '../../../share/utils';
 import * as cryptoUtils from '../../../share/cryptoUtils';
 
+const maxSetTries = 5;
+
 export default @Component({
+    watch: {
+        profiles: function() {
+            this.saveProfiles();
+        },
+    },
 })
 class ServerStorage extends Vue {
     created() {
@@ -27,9 +34,7 @@ class ServerStorage extends Vue {
         }
         this.hashedStorageKey = utils.toBase58(await cryptoUtils.sha256(this.serverStorageKey));
         
-        //console.log(await this.storageSet({'id1': {rev: 1, data: {test: 123}}}));
-        //console.log(await this.storageGet({'id1': {}}));
-        //console.log(await this.storageCheck({'id1': {rev: 1, data: {test: 123}}}));
+        await this.loadProfiles();
     }
 
     get settings() {
@@ -38,6 +43,73 @@ class ServerStorage extends Vue {
 
     get serverStorageKey() {
         return this.$store.state.reader.serverStorageKey;
+    }
+
+    get profiles() {
+        return this.$store.state.reader.profiles;
+    }
+
+    get profilesRev() {
+        return this.$store.state.reader.profilesRev;
+    }
+
+    notifySuccessIfNeeded(rev1, rev2) {
+        if (rev1 != rev2)
+            this.$notify.success({message: 'Данные синхронизированы с сервером'});
+    }
+
+    warning(message) {
+        this.$notify.warning({message});
+    }
+
+    error(message) {
+        this.$notify.error({message});
+    }
+
+    async loadProfiles() {
+        let prof = await this.storageGet({'profiles': {}});
+
+        if (prof.state == 'success') {
+            const oldRev = this.profilesRev;
+            prof = prof.items.profiles;
+            this.commit('reader/setProfiles', prof.data);
+            this.commit('reader/setProfilesRev', prof.rev);
+
+            this.oldProfiles = this.profiles;
+            this.notifySuccessIfNeeded(oldRev, prof.rev);
+        } else {
+            this.warning(`Неверный ответ сервера: ${prof.state}`);
+        }
+    }
+
+    async saveProfiles() {
+        if (!this.savingProfiles) {
+            this.savingProfiles = true;
+
+            const diff = utils.getObjDiff(this.oldProfiles, this.profiles);
+            let result = {state: ''};
+            let tries = 0;
+            while (result.state != 'success' && tries < maxSetTries) {
+                result = await this.storageSet({'profiles': {rev: this.profilesRev + 1, data: this.profiles}});
+
+                if (result.state == 'reject') {
+                    await this.loadProfiles();
+                    const newProfiles = utils.applyObjDiff(this.profiles, diff);
+                    this.commit('reader/setProfiles', newProfiles);
+                    this.commit('reader/setProfilesRev', result.items.profiles.rev);
+                }
+
+                tries++;
+            }
+
+            this.commit('reader/setProfilesRev', this.profilesRev + 1);
+
+            if (tries >= maxSetTries) {
+                throw new Error('Не удалось отправить данные на сервер');
+            }
+
+            this.savingProfiles = false;
+        }
     }
 
     generateNewServerStorageKey() {

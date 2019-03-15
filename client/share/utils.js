@@ -1,3 +1,4 @@
+import _ from 'lodash';
 import baseX from 'base-x';
 import PAKO from 'pako';
 import {Buffer} from 'safe-buffer';
@@ -91,4 +92,68 @@ export function toBase64(data) {
 
 export function fromBase64(data) {
     return bs64.decode(data);
+}
+
+export function getObjDiff(oldObj, newObj) {
+    const result = {__isDiff: true, change: {}, add: {}, del: []};
+
+    for (const key of Object.keys(oldObj)) {
+        if (newObj.hasOwnProperty(key)) {
+            if (!_.isEqual(oldObj[key], newObj[key])) {
+                if (_.isObject(oldObj[key]) && _.isObject(newObj[key])) {
+                    result.change[key] = getObjDiff(oldObj[key], newObj[key]);
+                } else {
+                    result.change[key] = _.cloneDeep(newObj[key]);
+                }
+            }
+        } else {
+            result.del.push(key);
+        }
+    }
+
+    for (const key of Object.keys(newObj)) {
+        if (!oldObj.hasOwnProperty(key)) {
+            result.add[key] = _.cloneDeep(newObj[key]);
+        }
+    }
+
+    return result;
+}
+
+export function isEmptyObjDiff(diff) {
+    return (!_.isObject(diff) || !diff.__isDiff ||
+        (!Object.keys(diff.change).length &&
+            !Object.keys(diff.add).length &&
+            !diff.del.length
+        )
+    );
+}
+
+export function applyObjDiff(obj, diff, isAddChanged) {
+    const result = _.cloneDeep(obj);
+    if (!diff.__isDiff)
+        return result;
+
+    const change = diff.change;
+    for (const key of Object.keys(change)) {
+        if (result.hasOwnProperty(key)) {
+            if (_.isObject(change[key])) {
+                result[key] = applyObjDiff(result[key], change[key], isAddChanged);
+            } else {
+                result[key] = _.cloneDeep(change[key]);
+            }
+        } else if (isAddChanged) {
+            result[key] = _.cloneDeep(change[key]);
+        }
+    }
+
+    for (const key of Object.keys(diff.add)) {
+        result[key] = _.cloneDeep(diff.add[key]);
+    }
+
+    for (const key of diff.del) {
+        delete result[key];
+    }
+
+    return result;
 }
