@@ -205,9 +205,9 @@ class Reader extends Vue {
 
     mounted() {
         (async() => {
-            this.$refs.serverStorage.init();
             await bookManager.init(this.settings);
             await restoreOldSettings(this.settings, bookManager, this.commit);
+            await this.$refs.serverStorage.init();
 
             if (this.$root.rootRoute == '/reader') {
                 if (this.routeParamUrl) {

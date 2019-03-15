@@ -90,36 +90,34 @@ class ServerStorage extends Vue {
     }
 
     async saveProfiles() {
-        if (!this.currentProfile)
+        if (!this.currentProfile || this.savingProfiles)
             return;
 
-        if (!this.savingProfiles) {
-            this.savingProfiles = true;
+        this.savingProfiles = true;
 
-            const diff = utils.getObjDiff(this.oldProfiles, this.profiles);
-            let result = {state: ''};
-            let tries = 0;
-            while (result.state != 'success' && tries < maxSetTries) {
-                result = await this.storageSet({'profiles': {rev: this.profilesRev + 1, data: this.profiles}});
+        const diff = utils.getObjDiff(this.oldProfiles, this.profiles);
+        let result = {state: ''};
+        let tries = 0;
+        while (result.state != 'success' && tries < maxSetTries) {
+            result = await this.storageSet({'profiles': {rev: this.profilesRev + 1, data: this.profiles}});
 
-                if (result.state == 'reject') {
-                    await this.loadProfiles();
-                    const newProfiles = utils.applyObjDiff(this.profiles, diff);
-                    this.commit('reader/setProfiles', newProfiles);
-                    this.commit('reader/setProfilesRev', result.items.profiles.rev);
-                }
-
-                tries++;
+            if (result.state == 'reject') {
+                await this.loadProfiles();
+                const newProfiles = utils.applyObjDiff(this.profiles, diff);
+                this.commit('reader/setProfiles', newProfiles);
+                this.commit('reader/setProfilesRev', result.items.profiles.rev);
             }
 
-            this.commit('reader/setProfilesRev', this.profilesRev + 1);
-
-            if (tries >= maxSetTries) {
-                throw new Error('Не удалось отправить данные на сервер');
-            }
-
-            this.savingProfiles = false;
+            tries++;
         }
+
+        this.commit('reader/setProfilesRev', this.profilesRev + 1);
+
+        if (tries >= maxSetTries) {
+            throw new Error('Не удалось отправить данные на сервер');
+        }
+
+        this.savingProfiles = false;
     }
 
     generateNewServerStorageKey() {
