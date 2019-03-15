@@ -74,6 +74,7 @@
     "pako": "^1.0.10",
     "path-browserify": "^1.0.0",
     "safe-buffer": "^5.1.2",
+    "sjcl": "^1.0.8",
     "sql-template-strings": "^2.2.2",
     "sqlite": "^3.0.0",
     "tar-fs": "^2.0.0",
