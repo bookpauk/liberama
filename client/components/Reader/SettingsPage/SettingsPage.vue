@@ -555,10 +555,30 @@ class SettingsPage extends Vue {
         }
     }
 
-    addProfile() {
+    async addProfile() {
+        try {
+            const result = await this.$prompt('Введите произвольное имя для профиля устройства', '', {
+              confirmButtonText: 'OK',
+              cancelButtonText: 'Отмена'
+            });
+            if (result.value) {
+                
+            }
+        } catch (e) {
+            //
+        }
     }
 
-    delProfile() {
+    async delProfile() {
+    }
+
+    async showServerStorageKey() {
+    }
+
+    async enterServerStorageKey() {
+    }
+
+    async generateServerStorageKey() {
     }
 
     keyHook(event) {
