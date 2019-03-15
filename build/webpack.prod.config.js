@@ -32,7 +32,15 @@ module.exports = merge(baseWpConfig, {
     },
     optimization: {
         minimizer: [
-            new TerserPlugin(),
+            new TerserPlugin({
+                cache: true,
+                parallel: true,
+                terserOptions: {
+                    output: {
+                        comments: false,
+                    },
+                },
+            }),
             new OptimizeCSSAssetsPlugin()
         ]
     },
