@@ -86,7 +86,7 @@ class ReaderStorage {
         const dbh = await this.storagePool.get();
         try {
             for (const id of Object.keys(items)) {
-                await dbh.run(SQL`INSERT OR REPLACE INTO storage (id, rev, data) VALUES (${id}, ${items[id].rev}, ${items[id].data})`);
+                await dbh.run(SQL`INSERT OR REPLACE INTO storage (id, rev, time, data) VALUES (${id}, ${items[id].rev}, strftime('%s','now'), ${items[id].data})`);
                 this.cache[id] = {rev: items[id].rev};
             }
         } finally {
