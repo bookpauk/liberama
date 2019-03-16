@@ -82,7 +82,7 @@ class ConvertBase {
     }
 
     escapeEntities(text) {
-        return he.escape(text);
+        return he.escape(he.decode(text));
     }
 
     formatFb2(fb2) {
