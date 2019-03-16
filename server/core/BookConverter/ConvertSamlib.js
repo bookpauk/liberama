@@ -218,6 +218,8 @@ class ConvertSamlib extends ConvertBase {
             if (!text)
                 return;
 
+            text = this.escapeEntities(text);
+
             switch (path) {
                 case '/html/body/center/h2':
                     titleInfo['book-title'] = text;

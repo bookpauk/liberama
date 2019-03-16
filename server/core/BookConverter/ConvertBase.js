@@ -1,6 +1,7 @@
 const fs = require('fs-extra');
 const iconv = require('iconv-lite');
 const chardet = require('chardet');
+const he = require('he');
 
 const textUtils = require('./textUtils');
 const utils = require('../utils');
@@ -78,6 +79,10 @@ class ConvertBase {
 
     repSpaces(text) {
         return text.replace(/&nbsp;|[\t\n\r]/g, ' ');
+    }
+
+    escapeEntities(text) {
+        return he.escape(text);
     }
 
     formatFb2(fb2) {

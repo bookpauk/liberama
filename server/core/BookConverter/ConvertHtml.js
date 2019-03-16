@@ -79,6 +79,8 @@ class ConvertHtml extends ConvertBase {
         const newPara = new Set(['tr', '/table', 'hr', 'br', 'br/', 'li', 'dt', 'dd', 'p', 'title', '/title', 'h1', 'h2', 'h3', '/h1', '/h2', '/h3']);
 
         const onTextNode = (text, cutCounter, cutTag) => {// eslint-disable-line no-unused-vars
+            text = this.escapeEntities(text);
+
             if (!cutCounter && !(cutTitle && inTitle)) {
                 let tOpen = (bold ? '<strong>' : '');
                 tOpen += (italic ? '<emphasis>' : '');
