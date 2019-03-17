@@ -36,6 +36,7 @@ class ServerStorage extends Vue {
 
         this.oldProfiles = this.profiles;
         await this.loadProfiles();
+        this.checkCurrentProfile();
     }
 
     get settings() {
@@ -56,6 +57,12 @@ class ServerStorage extends Vue {
 
     get currentProfile() {
         return this.$store.state.reader.currentProfile;
+    }
+
+    checkCurrentProfile() {
+        if (!this.profiles[this.currentProfile]) {
+            this.commit('reader/setCurrentProfile', '');
+        }
     }
 
     notifySuccessIfNeeded(rev1, rev2) {
@@ -89,10 +96,6 @@ class ServerStorage extends Vue {
 
             this.oldProfiles = this.profiles;
 
-            if (!this.profiles[this.currentProfile]) {
-                this.commit('reader/setCurrentProfile', '');
-            }
-
             this.notifySuccessIfNeeded(oldRev, prof.rev);
         } else {
             this.warning(`Неверный ответ сервера: ${prof.state}`);
@@ -125,9 +128,7 @@ class ServerStorage extends Vue {
 
             if (tries >= maxSetTries) {
                 this.commit('reader/setProfiles', this.oldProfiles);
-                if (!this.profiles[this.currentProfile]) {
-                    this.commit('reader/setCurrentProfile', '');
-                }
+                this.checkCurrentProfile();
                 this.error('Не удалось отправить данные на сервер');
             } else {
                 this.oldProfiles = this.profiles;
