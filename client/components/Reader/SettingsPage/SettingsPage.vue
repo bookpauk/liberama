@@ -577,7 +577,7 @@ class SettingsPage extends Vue {
     }
 
     get setStorageKeyLink() {
-        return 'http://omnireader.ru/#/reader?setStorageKey=' + utils.toBase58(this.serverStorageKey);
+        return `http://${window.location.host}/#/reader?setStorageAccessKey=${utils.toBase58(this.serverStorageKey)}`;
     }
 
     get predefineTextColors() {
@@ -721,7 +721,7 @@ class SettingsPage extends Vue {
         this.serverStorageKeyVisible = !this.serverStorageKeyVisible;
     }
 
-    async enterServerStorageKey() {
+    async enterServerStorageKey(key) {
         try {
             const result = await this.$prompt(`<b>Предупреждение!</b> Изменение ключа доступа приведет к потере всех профилей и читаемых книг, привязанных к предыдущему ключу.` +
                     `<br><br>Введите новый ключ доступа:`, '', {
@@ -729,6 +729,7 @@ class SettingsPage extends Vue {
                 confirmButtonText: 'OK',
                 cancelButtonText: 'Отмена',
                 inputValidator: (str) => { if (str && str.length == 44) return true; else return 'Неверный формат ключа'; },
+                inputValue: (key && _.isString(key) ? key : null),
                 type: 'warning'
             });
 

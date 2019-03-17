@@ -82,6 +82,9 @@
 //-----------------------------------------------------------------------------
 import Vue from 'vue';
 import Component from 'vue-class-component';
+import _ from 'lodash';
+import {Buffer} from 'safe-buffer';
+
 import LoaderPage from './LoaderPage/LoaderPage.vue';
 import TextPage from './TextPage/TextPage.vue';
 import ProgressPage from './ProgressPage/ProgressPage.vue';
@@ -97,8 +100,7 @@ import ServerStorage from './ServerStorage/ServerStorage.vue';
 
 import bookManager from './share/bookManager';
 import readerApi from '../../api/reader';
-import _ from 'lodash';
-import {sleep} from '../../share/utils';
+import * as utils from '../../share/utils';
 import restoreOldSettings from './share/restoreOldSettings';
 
 export default @Component({
@@ -216,6 +218,8 @@ class Reader extends Vue {
                     this.loaderActive = true;
                 }
             }
+
+            this.checkSetStorageAccessKey();
             this.loading = false;
         })();
     }
@@ -227,6 +231,20 @@ class Reader extends Vue {
         this.showClickMapPage = settings.showClickMapPage;
         this.clickControl = settings.clickControl;
         this.blinkCachedLoad = settings.blinkCachedLoad;
+    }
+
+    checkSetStorageAccessKey() {
+        const q = this.$route.query;
+
+        if (q['setStorageAccessKey']) {
+            this.$router.replace(`/reader`);
+            this.settingsToggle();
+            this.$nextTick(() => {
+                this.$refs.settingsPage.enterServerStorageKey(
+                    Buffer.from(utils.fromBase58(q['setStorageAccessKey'])).toString()
+                );
+            });
+        }
     }
 
     get routeParamPos() {
@@ -242,6 +260,8 @@ class Reader extends Vue {
     }
 
     updateRoute(isNewRoute) {
+        if (this.loading)
+            return;
         const recent = this.mostRecentBook();
         const pos = (recent && recent.bookPos && this.allowUrlParamBookPos ? `__p=${recent.bookPos}&` : '');
         const url = (recent ? `url=${recent.url}` : '');
@@ -762,7 +782,7 @@ class Reader extends Vue {
                     this.showRefreshIcon = !this.showRefreshIcon;
                     if (page.blinkCachedLoadMessage)
                         page.blinkCachedLoadMessage(this.showRefreshIcon);
-                    await sleep(500);
+                    await utils.sleep(500);
                     if (this.stopBlink)
                         break;
                     this.blinkCount--;
