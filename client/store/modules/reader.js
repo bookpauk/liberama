@@ -183,6 +183,7 @@ const state = {
     profilesRev: 0,
     currentProfile: '',
     settings: Object.assign({}, settingDefaults),
+    settingsRev: {},
 };
 
 // getters
@@ -213,7 +214,10 @@ const mutations = {
     },
     setSettings(state, value) {
         state.settings = Object.assign({}, state.settings, value);
-    }
+    },
+    setSettingsRev(state, value) {
+        state.settingsRev = Object.assign({}, state.settingsRev, value);
+    },
 };
 
 export default {

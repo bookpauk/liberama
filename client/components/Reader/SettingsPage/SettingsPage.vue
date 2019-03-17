@@ -99,7 +99,7 @@
                                 <div class="text">
                                     Рекомендуется сохранить ключ в надежном месте, чтобы всегда иметь возможность восстановить настройки,
                                     например, после переустановки ОС или чистки/смены браузера.<br>
-                                    <b>ПРЕДУПРЕЖДЕНИЕ!</b> При утере ключа, НИКТО не сможет восстановить ваши настройки, т.к. все данные сжимаются
+                                    <b>ПРЕДУПРЕЖДЕНИЕ!</b> При утере ключа, НИКТО не сможет восстановить ваши данные, т.к. они сжимаются
                                     и шифруются ключом доступа перед отправкой на сервер.
                                 </div>
                             </el-form-item>
@@ -454,7 +454,7 @@
 //-----------------------------------------------------------------------------
 import Vue from 'vue';
 import Component from 'vue-class-component';
-//import _ from 'lodash';
+import _ from 'lodash';
 
 import {copyTextToClipboard} from '../../../share/utils';
 import Window from '../../share/Window.vue';
@@ -468,6 +468,9 @@ export default @Component({
         return Object.assign({}, rstore.settingDefaults);
     },
     watch: {
+        settings: function() {
+            this.settingsChanged();
+        },
         form: function(newValue) {
             this.commit('reader/setSettings', newValue);
         },
@@ -508,6 +511,13 @@ class SettingsPage extends Vue {
         this.commit = this.$store.commit;
         this.reader = this.$store.state.reader;
 
+        this.form = {};
+        this.settingsChanged();
+    }
+
+    settingsChanged() {
+        if (_.isEqual(this.form, this.settings))
+            return;
         this.form = Object.assign({}, this.settings);
         for (let prop in rstore.settingDefaults) {
             this[prop] = this.form[prop];
@@ -545,7 +555,9 @@ class SettingsPage extends Vue {
     }
 
     get profilesArray() {
-        return Object.keys(this.profiles);
+        const result = Object.keys(this.profiles)
+        result.sort();
+        return result;
     }
 
     get currentProfile() {

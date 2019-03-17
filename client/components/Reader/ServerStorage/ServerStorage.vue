@@ -20,8 +20,14 @@ export default @Component({
         serverStorageKey: function() {
             this.serverStorageKeyChanged();
         },
+        settings: function() {
+            this.saveSettings();
+        },
         profiles: function() {
             this.saveProfiles();
+        },
+        currentProfile: function() {
+            this.currentProfileChanged();
         },
     },
 })
@@ -30,6 +36,9 @@ class ServerStorage extends Vue {
         this.commit = this.$store.commit;
         this.prevServerStorageKey = null;
         this.$root.$on('generateNewServerStorageKey', () => {this.generateNewServerStorageKey()});
+
+        this.oldProfiles = {};
+        this.oldSettings = {};
     }
 
     async init() {
@@ -39,6 +48,7 @@ class ServerStorage extends Vue {
         } else {
             await this.serverStorageKeyChanged();
         }
+        await this.currentProfileChanged();
     }
 
     async serverStorageKeyChanged() {
@@ -51,12 +61,23 @@ class ServerStorage extends Vue {
         }
     }
 
+    async currentProfileChanged() {
+        if (!this.currentProfile)
+            return;
+
+        await this.loadSettings();
+    }
+
     get serverSyncEnabled() {
         return this.$store.state.reader.serverSyncEnabled;
     }
 
     get settings() {
         return this.$store.state.reader.settings;
+    }
+
+    get settingsRev() {
+        return this.$store.state.reader.settingsRev;
     }
 
     get serverStorageKey() {
@@ -92,6 +113,68 @@ class ServerStorage extends Vue {
 
     error(message) {
         this.$notify.error({message});
+    }
+
+    async loadSettings() {
+        if (!this.serverSyncEnabled || !this.currentProfile)
+            return;
+
+        const setsId = `settings-${this.currentProfile}`;
+        let sets = await this.storageGet({[setsId]: {}});
+
+        if (sets.state == 'success') {
+            const oldRev = this.settingsRev[setsId] || 0;
+            sets = sets.items[setsId];
+
+            if (sets.rev == 0)
+                sets.data = {};
+
+            this.oldSettings = sets.data;
+            this.commit('reader/setSettings', sets.data);
+            this.commit('reader/setSettingsRev', {[setsId]: sets.rev});
+
+            this.notifySuccessIfNeeded(oldRev, sets.rev);
+        } else {
+            this.warning(`Неверный ответ сервера: ${sets.state}`);
+        }
+    }
+
+    async saveSettings() {
+        if (!this.serverSyncEnabled || !this.currentProfile || this.savingSettings)
+            return;
+
+        const diff = utils.getObjDiff(this.oldSettings, this.settings);
+        if (utils.isEmptyObjDiff(diff))
+            return;
+
+        this.savingSettings = true;
+        try {
+            const setsId = `settings-${this.currentProfile}`;
+            let result = {state: ''};
+            let tries = 0;
+            while (result.state != 'success' && tries < maxSetTries) {
+                const oldRev = this.settingsRev[setsId] || 0;
+                result = await this.storageSet({[setsId]: {rev: oldRev + 1, data: this.settings}});
+
+                if (result.state == 'reject') {
+                    await this.loadSettings();
+                    const newSettings = utils.applyObjDiff(this.settings, diff);
+                    this.commit('reader/setSettings', newSettings);
+                }
+
+                tries++;
+            }
+
+            if (tries >= maxSetTries) {
+                this.commit('reader/setSettings', this.oldSettings);
+                this.error('Не удалось отправить данные на сервер');
+            } else {
+                this.oldSettings = this.settings;
+                this.commit('reader/setSettingsRev', {[setsId]: this.settingsRev[setsId] + 1});
+            }
+        } finally {
+            this.savingSettings = false;
+        }
     }
 
     async loadProfiles() {
