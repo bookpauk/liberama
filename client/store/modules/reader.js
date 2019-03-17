@@ -177,6 +177,7 @@ for (const font of webFonts)
 // initial state
 const state = {
     toolBarActive: true,
+    serverSyncEnabled: false,
     serverStorageKey: '',
     profiles: {},
     profilesRev: 0,
@@ -194,6 +195,9 @@ const actions = {};
 const mutations = {
     setToolBarActive(state, value) {
         state.toolBarActive = value;
+    },
+    setServerSyncEnabled(state, value) {
+        state.serverSyncEnabled = value;
     },
     setServerStorageKey(state, value) {
         state.serverStorageKey = value;

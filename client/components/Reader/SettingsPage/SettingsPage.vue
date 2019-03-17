@@ -9,13 +9,21 @@
                 <el-tabs type="border-card" tab-position="left" v-model="selectedTab">
                     <!-- Профили ------------------------------------------------------------------------->
                     <el-tab-pane label="Профили">
-                        <el-form :model="form" size="small" label-width="100px" @submit.native.prevent>
+                        <el-form :model="form" size="small" label-width="80px" @submit.native.prevent>
+                            <div class="partHeader">Управление синхронизацией настроек</div>
+                            <el-form-item label="">
+                                <el-checkbox v-model="serverSyncEnabled">Включить синхронизацию с сервером</el-checkbox>
+                            </el-form-item>
+                        </el-form>
+
+                        <div v-show="serverSyncEnabled">
+                        <el-form :model="form" size="small" label-width="80px" @submit.native.prevent>
                             <div class="partHeader">Профили устройств</div>
 
                             <el-form-item label="">
                                 <div class="text">
-                                    Выберите или добавьте профиль устройства, чтобы начать синхронизацию данных с сервером.
-                                    При выборе "Нет" синхронизация отключается.
+                                    Выберите или добавьте профиль устройства, чтобы начать синхронизацию настроек с сервером.
+                                    <br>При выборе "Нет" синхронизация настроек (но не книг) отключается.
                                 </div>
                             </el-form-item>
 
@@ -37,13 +45,13 @@
                             </el-form-item>
                         </el-form>
 
-                        <el-form :model="form" size="small" label-width="100px" @submit.native.prevent>
+                        <el-form :model="form" size="small" label-width="80px" @submit.native.prevent>
                             <div class="partHeader">Ключ доступа</div>
 
                             <el-form-item label="">
                                 <div class="text">
-                                    Ключ доступа позволяет восстановить профили с настройками и список читаемых книг
-                                    на другом устройстве. Для этого необходимо передать его через почту, мессенджер или другим способом.
+                                    Ключ доступа позволяет восстановить профили с настройками и список читаемых книг.
+                                    Для этого необходимо передать ключ на устройство через почту, мессенджер или другим способом.
                                 </div>
                             </el-form-item>
 
@@ -57,11 +65,13 @@
 
                             <el-form-item label="">
                                 <div v-if="!serverStorageKeyVisible">
+                                    <hr/>
                                     <b>{{ partialStorageKey }}</b> (часть вашего ключа)
+                                    <hr/>
                                 </div>
                                 <div v-else style="line-height: 100%">
                                     <hr/>
-                                    <div style="width: 300px; overflow-wrap: break-word;"><b>{{ serverStorageKey }}</b></div>
+                                    <div style="width: 300px; padding-top: 5px; overflow-wrap: break-word;"><b>{{ serverStorageKey }}</b></div>
                                     <br><div class="center">
                                         <el-button size="mini" class="copy-button" @click="copyToClip(serverStorageKey, 'Ключ')">Скопировать ключ</el-button>
                                     </div>
@@ -94,6 +104,7 @@
                                 </div>
                             </el-form-item>
                         </el-form>
+                        </div>
                     </el-tab-pane>
                     <!-- Вид ------------------------------------------------------------------------->                    
                     <el-tab-pane label="Вид">
@@ -521,6 +532,14 @@ class SettingsPage extends Vue {
         return this.$store.state.reader.settings;
     }
 
+    get serverSyncEnabled() {
+        return this.$store.state.reader.serverSyncEnabled;
+    }
+
+    set serverSyncEnabled(newValue) {
+        this.commit('reader/setServerSyncEnabled', newValue);
+    }
+
     get profiles() {
         return this.$store.state.reader.profiles;
     }
@@ -615,10 +634,9 @@ class SettingsPage extends Vue {
                 if (this.profiles[result.value]) {
                     this.$alert('Такой профиль уже существует', 'Ошибка');
                 } else {
-                    this.currentProfile = result.value;
-                    await this.$nextTick();//даем возможность обновить currentProfile
                     const newProfiles = Object.assign({}, this.profiles, {[result.value]: 1});
                     this.commit('reader/setProfiles', newProfiles);
+                    this.currentProfile = result.value;
                 }
             }
         } catch (e) {
@@ -646,7 +664,6 @@ class SettingsPage extends Vue {
                     const newProfiles = Object.assign({}, this.profiles);
                     delete newProfiles[this.currentProfile];
                     this.commit('reader/setProfiles', newProfiles);
-                    await this.$nextTick();//даем возможность сохранить profiles
                     this.currentProfile = '';
                 }
             }
@@ -670,11 +687,7 @@ class SettingsPage extends Vue {
             });
 
             if (result.value && result.value.toLowerCase() == 'да') {
-                if (!this.currentProfile)
-                    this.currentProfile = Object.keys(this.profiles)[0];
-                await this.$nextTick();//даем возможность обновить currentProfile
                 this.commit('reader/setProfiles', {});
-                await this.$nextTick();//даем возможность сохранить profiles
                 this.currentProfile = '';
             }
         } catch (e) {
@@ -697,6 +710,22 @@ class SettingsPage extends Vue {
     }
 
     async enterServerStorageKey() {
+        try {
+            const result = await this.$prompt(`<b>Предупреждение!</b> Изменение ключа доступа приведет к потере всех профилей и читаемых книг, привязанных к предыдущему ключу.` +
+                    `<br><br>Введите новый ключ доступа:`, '', {
+                dangerouslyUseHTMLString: true,
+                confirmButtonText: 'OK',
+                cancelButtonText: 'Отмена',
+                inputValidator: (str) => { if (str && str.length == 44) return true; else return 'Неверный формат ключа'; },
+                type: 'warning'
+            });
+
+            if (result.value && result.value.length == 44) {
+                this.commit('reader/setServerStorageKey', result.value);
+            }
+        } catch (e) {
+            //
+        }
     }
 
     async generateServerStorageKey() {

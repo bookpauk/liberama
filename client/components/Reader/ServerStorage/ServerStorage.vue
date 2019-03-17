@@ -34,9 +34,12 @@ class ServerStorage extends Vue {
         }
         this.hashedStorageKey = utils.toBase58(cryptoUtils.sha256(this.serverStorageKey));
 
-        this.oldProfiles = this.profiles;
         await this.loadProfiles();
         this.checkCurrentProfile();
+    }
+
+    get serverSyncEnabled() {
+        return this.$store.state.reader.serverSyncEnabled;
     }
 
     get settings() {
@@ -79,7 +82,7 @@ class ServerStorage extends Vue {
     }
 
     async loadProfiles() {
-        if (!this.currentProfile)
+        if (!this.serverSyncEnabled)
             return;
 
         let prof = await this.storageGet({'profiles': {}});
@@ -103,7 +106,7 @@ class ServerStorage extends Vue {
     }
 
     async saveProfiles() {
-        if (!this.currentProfile || this.savingProfiles)
+        if (!this.serverSyncEnabled || this.savingProfiles)
             return;
 
         const diff = utils.getObjDiff(this.oldProfiles, this.profiles);
