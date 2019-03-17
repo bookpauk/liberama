@@ -33,6 +33,7 @@
                             <el-form-item label="">
                                     <el-button @click="addProfile">Добавить</el-button>
                                     <el-button @click="delProfile">Удалить</el-button>
+                                    <el-button @click="delAllProfiles">Удалить все</el-button>
                             </el-form-item>
                         </el-form>
 
@@ -547,7 +548,7 @@ class SettingsPage extends Vue {
 
     async setDefaults() {
         try {
-            if (await this.$confirm('Подтвердите установку настроек по-умолчанию', '', {
+            if (await this.$confirm('Подтвердите установку настроек по-умолчанию:', '', {
                 confirmButtonText: 'OK',
                 cancelButtonText: 'Отмена',
                 type: 'warning'
@@ -564,17 +565,21 @@ class SettingsPage extends Vue {
 
     async addProfile() {
         try {
-            const result = await this.$prompt('Введите произвольное название для профиля устройства', '', {
+            if (Object.keys(this.profiles).length >= 100) {
+                this.$alert('Достигнут предел количества профилей', 'Ошибка');
+                return;
+            }
+            const result = await this.$prompt('Введите произвольное название для профиля устройства:', '', {
                 confirmButtonText: 'OK',
                 cancelButtonText: 'Отмена',
-                inputValidator: (str) => { if (str.length > 50) return 'Слишком длинное название'; else return true; },
+                inputValidator: (str) => { if (!str) return 'Название не должно быть пустым'; else if (str.length > 50) return 'Слишком длинное название'; else return true; },
             });
             if (result.value) {
                 if (this.profiles[result.value]) {
                     this.$alert('Такой профиль уже существует', 'Ошибка');
                 } else {
                     this.currentProfile = result.value;
-                    await this.$nextTick();
+                    await this.$nextTick();//даем возможность обновить currentProfile
                     const newProfiles = Object.assign({}, this.profiles, {[result.value]: 1});
                     this.commit('reader/setProfiles', newProfiles);
                 }
@@ -585,9 +590,63 @@ class SettingsPage extends Vue {
     }
 
     async delProfile() {
+        if (!this.currentProfile)
+            return;
+
+        try {
+            const result = await this.$prompt(`<b>Предупреждение!</b> Удаление профиля '${this.currentProfile}' необратимо.` +
+                    `<br>Все настройки профиля будут потеряны,<br>однако список читаемых книг сохранится.` +
+                    `<br><br>Введите 'да' для подтверждения удаления:`, '', {
+                dangerouslyUseHTMLString: true,
+                confirmButtonText: 'OK',
+                cancelButtonText: 'Отмена',
+                inputValidator: (str) => { if (str && str.toLowerCase() === 'да') return true; else return 'Удаление не подтверждено'; },
+                type: 'warning'
+            });
+
+            if (result.value && result.value.toLowerCase() == 'да') {
+                if (this.profiles[this.currentProfile]) {
+                    const newProfiles = Object.assign({}, this.profiles);
+                    delete newProfiles[this.currentProfile];
+                    this.commit('reader/setProfiles', newProfiles);
+                    await this.$nextTick();//даем возможность сохранить profiles
+                    this.currentProfile = '';
+                }
+            }
+        } catch (e) {
+            //
+        }
+    }
+
+    async delAllProfiles() {
+        if (!Object.keys(this.profiles).length)
+            return;
+
+        try {
+            const result = await this.$prompt(`<b>Предупреждение!</b> Удаление ВСЕХ профилей необратимо.` +
+                    `<br><br>Введите 'да' для подтверждения удаления:`, '', {
+                dangerouslyUseHTMLString: true,
+                confirmButtonText: 'OK',
+                cancelButtonText: 'Отмена',
+                inputValidator: (str) => { if (str && str.toLowerCase() === 'да') return true; else return 'Удаление не подтверждено'; },
+                type: 'warning'
+            });
+
+            if (result.value && result.value.toLowerCase() == 'да') {
+                if (!this.currentProfile)
+                    this.currentProfile = Object.keys(this.profiles)[0];
+                await this.$nextTick();//даем возможность обновить currentProfile
+                this.commit('reader/setProfiles', {});
+                await this.$nextTick();//даем возможность сохранить profiles
+                this.currentProfile = '';
+            }
+        } catch (e) {
+            //
+        }
     }
 
     async showServerStorageKey() {
+
     }
 
     async enterServerStorageKey() {

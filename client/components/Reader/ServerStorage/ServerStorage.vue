@@ -128,7 +128,7 @@ class ServerStorage extends Vue {
                 if (!this.profiles[this.currentProfile]) {
                     this.commit('reader/setCurrentProfile', '');
                 }
-                this.warning('Не удалось отправить данные на сервер');
+                this.error('Не удалось отправить данные на сервер');
             } else {
                 this.oldProfiles = this.profiles;
                 this.commit('reader/setProfilesRev', this.profilesRev + 1);        
