@@ -21,7 +21,7 @@ export default @Component({
             this.serverStorageKeyChanged();
         },
         settings: function() {
-            this.saveSettings();
+            this.debouncedSaveSettings();
         },
         profiles: function() {
             this.saveProfiles();
@@ -36,6 +36,10 @@ class ServerStorage extends Vue {
         this.commit = this.$store.commit;
         this.prevServerStorageKey = null;
         this.$root.$on('generateNewServerStorageKey', () => {this.generateNewServerStorageKey()});
+
+        this.debouncedSaveSettings = _.debounce(() => {
+            this.saveSettings();
+        }, 500);
 
         this.oldProfiles = {};
         this.oldSettings = {};
