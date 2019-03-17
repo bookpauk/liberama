@@ -17,6 +17,9 @@ const maxSetTries = 5;
 
 export default @Component({
     watch: {
+        serverStorageKey: function() {
+            this.serverStorageKeyChanged();
+        },
         profiles: function() {
             this.saveProfiles();
         },
@@ -25,17 +28,27 @@ export default @Component({
 class ServerStorage extends Vue {
     created() {
         this.commit = this.$store.commit;
+        this.prevServerStorageKey = null;
+        this.$root.$on('generateNewServerStorageKey', () => {this.generateNewServerStorageKey()});
     }
 
     async init() {
         if (!this.serverStorageKey) {
             //генерируем новый ключ
-            this.generateNewServerStorageKey();
+            await this.generateNewServerStorageKey();
+        } else {
+            await this.serverStorageKeyChanged();
         }
-        this.hashedStorageKey = utils.toBase58(cryptoUtils.sha256(this.serverStorageKey));
+    }
 
-        await this.loadProfiles();
-        this.checkCurrentProfile();
+    async serverStorageKeyChanged() {
+        if (this.prevServerStorageKey != this.serverStorageKey) {
+            this.prevServerStorageKey = this.serverStorageKey;
+            this.hashedStorageKey = utils.toBase58(cryptoUtils.sha256(this.serverStorageKey));
+
+            await this.loadProfiles();
+            this.checkCurrentProfile();
+        }
     }
 
     get serverSyncEnabled() {
@@ -94,10 +107,9 @@ class ServerStorage extends Vue {
             if (prof.rev == 0)
                 prof.data = {};
 
+            this.oldProfiles = prof.data;
             this.commit('reader/setProfiles', prof.data);
             this.commit('reader/setProfilesRev', prof.rev);
-
-            this.oldProfiles = this.profiles;
 
             this.notifySuccessIfNeeded(oldRev, prof.rev);
         } else {
@@ -142,9 +154,10 @@ class ServerStorage extends Vue {
         }
     }
 
-    generateNewServerStorageKey() {
+    async generateNewServerStorageKey() {
         const key = utils.toBase58(utils.randomArray(32));
         this.commit('reader/setServerStorageKey', key);
+        await this.serverStorageKeyChanged();
     }
 
     async storageCheck(items) {

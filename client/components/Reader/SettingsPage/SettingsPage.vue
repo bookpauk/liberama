@@ -10,7 +10,7 @@
                     <!-- Профили ------------------------------------------------------------------------->
                     <el-tab-pane label="Профили">
                         <el-form :model="form" size="small" label-width="80px" @submit.native.prevent>
-                            <div class="partHeader">Управление синхронизацией настроек</div>
+                            <div class="partHeader">Управление синхронизацией данных</div>
                             <el-form-item label="">
                                 <el-checkbox v-model="serverSyncEnabled">Включить синхронизацию с сервером</el-checkbox>
                             </el-form-item>
@@ -51,7 +51,7 @@
                             <el-form-item label="">
                                 <div class="text">
                                     Ключ доступа позволяет восстановить профили с настройками и список читаемых книг.
-                                    Для этого необходимо передать ключ на устройство через почту, мессенджер или другим способом.
+                                    Для этого необходимо передать ключ на новое устройство через почту, мессенджер или другим способом.
                                 </div>
                             </el-form-item>
 
@@ -729,6 +729,23 @@ class SettingsPage extends Vue {
     }
 
     async generateServerStorageKey() {
+        try {
+            const result = await this.$prompt(`<b>Предупреждение!</b> Изменение ключа доступа приведет к потере всех профилей и читаемых книг, привязанных к предыдущему ключу.` +
+                    `<br><br>Введите 'да' для подтверждения генерации нового ключа:`, '', {
+                dangerouslyUseHTMLString: true,
+                confirmButtonText: 'OK',
+                cancelButtonText: 'Отмена',
+                inputValidator: (str) => { if (str && str.toLowerCase() === 'да') return true; else return 'Генерация не подтверждена'; },
+                type: 'warning'
+            });
+
+            if (result.value && result.value.toLowerCase() == 'да') {
+                this.$root.$emit('generateNewServerStorageKey');
+            }
+        } catch (e) {
+            //
+        }
+
     }
 
     keyHook(event) {
