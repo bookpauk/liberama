@@ -609,6 +609,11 @@ class Reader extends Vue {
             this.$root.$emit('set-app-title');
         }
 
+        // на LoaderPage всегда показываем toolBar
+        if (result == 'LoaderPage' && !this.toolBarActive) {
+            this.toolBarToggle();
+        }
+
         if (this.lastActivePage != result && result == 'TextPage') {
             //акивируем страницу с текстом
             this.$nextTick(async() => {
