@@ -59,7 +59,7 @@
                                     <el-button style="width: 250px" @click="showServerStorageKey">
                                         <span v-show="serverStorageKeyVisible">Скрыть</span>
                                         <span v-show="!serverStorageKeyVisible">Показать</span>
-                                        ключ доступа/ссылку
+                                        ключ доступа
                                  </el-button>
                             </el-form-item>
 
@@ -456,7 +456,7 @@ import Vue from 'vue';
 import Component from 'vue-class-component';
 import _ from 'lodash';
 
-import {copyTextToClipboard} from '../../../share/utils';
+import * as utils from '../../../share/utils';
 import Window from '../../share/Window.vue';
 import rstore from '../../../store/modules/reader';
 
@@ -577,7 +577,7 @@ class SettingsPage extends Vue {
     }
 
     get setStorageKeyLink() {
-        return 'http://omnireader.ru/#/reader?setStorageKey=' + this.serverStorageKey;
+        return 'http://omnireader.ru/#/reader?setStorageKey=' + utils.toBase58(this.serverStorageKey);
     }
 
     get predefineTextColors() {
@@ -708,7 +708,7 @@ class SettingsPage extends Vue {
     }
 
     async copyToClip(text, prefix) {
-        const result = await copyTextToClipboard(text);
+        const result = await utils.copyTextToClipboard(text);
         const suf = (prefix.substr(-1) == 'а' ? 'а' : '');
         const msg = (result ? `${prefix} успешно скопирован${suf} в буфер обмена` : 'Копирование не удалось');
         if (result)
