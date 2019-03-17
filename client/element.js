@@ -86,6 +86,9 @@ import './theme/form-item.css';
 import ElColorPicker from 'element-ui/lib/color-picker';
 import './theme/color-picker.css';
 
+//import ElDialog from 'element-ui/lib/dialog';
+//import './theme/dialog.css';
+
 import Notification from 'element-ui/lib/notification';
 import './theme/notification.css';
 

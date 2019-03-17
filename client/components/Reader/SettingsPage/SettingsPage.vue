@@ -45,13 +45,39 @@
                                     Ключ доступа позволяет восстановить профили с настройками и список читаемых книг
                                     на другом устройстве. Для этого необходимо передать его через почту, мессенджер или другим способом.
                                 </div>
-                                <div>
+                            </el-form-item>
+
+                            <el-form-item label="">
+                                    <el-button style="width: 250px" @click="showServerStorageKey">
+                                        <span v-show="serverStorageKeyVisible">Скрыть</span>
+                                        <span v-show="!serverStorageKeyVisible">Показать</span>
+                                        ключ доступа/ссылку
+                                 </el-button>
+                            </el-form-item>
+
+                            <el-form-item label="">
+                                <div v-if="!serverStorageKeyVisible">
                                     <b>{{ partialStorageKey }}</b> (часть вашего ключа)
                                 </div>
+                                <div v-else style="line-height: 100%">
+                                    <hr/>
+                                    <div style="width: 300px; overflow-wrap: break-word;"><b>{{ serverStorageKey }}</b></div>
+                                    <br><div class="center">
+                                        <el-button size="mini" class="copy-button" @click="copyToClip(serverStorageKey, 'Ключ')">Скопировать ключ</el-button>
+                                    </div>
+                                    <div v-if="mode == 'omnireader'">
+                                        <br>Переход по ссылке позволит автоматически ввести ключ доступа:
+                                        <br><div class="center" style="margin-top: 5px">
+                                            <a :href="setStorageKeyLink" target="_blank">Ссылка для ввода ключа</a>
+                                        </div>
+                                        <br><div class="center">
+                                            <el-button size="mini" class="copy-button" @click="copyToClip(setStorageKeyLink, 'Ссылка')">Скопировать ссылку</el-button>
+                                        </div>
+                                    </div>
+                                    <hr/>
+                                </div>
                             </el-form-item>
-                            <el-form-item label="">
-                                    <el-button style="width: 250px" @click="showServerStorageKey">Показать ключ доступа/ссылку</el-button>
-                            </el-form-item>
+
                             <el-form-item label="">
                                     <el-button style="width: 250px" @click="enterServerStorageKey">Ввести ключ доступа</el-button>
                             </el-form-item>
@@ -63,7 +89,7 @@
                                 <div class="text">
                                     Рекомендуется сохранить ключ в надежном месте, чтобы всегда иметь возможность восстановить настройки,
                                     например, после переустановки ОС или чистки/смены браузера.<br>
-                                    ПРЕДУПРЕЖДЕНИЕ! При утере ключа, НИКТО не сможет восстановить ваши настройки, т.к. все данные сжимаются
+                                    <b>ПРЕДУПРЕЖДЕНИЕ!</b> При утере ключа, НИКТО не сможет восстановить ваши настройки, т.к. все данные сжимаются
                                     и шифруются ключом доступа перед отправкой на сервер.
                                 </div>
                             </el-form-item>
@@ -419,6 +445,7 @@ import Vue from 'vue';
 import Component from 'vue-class-component';
 //import _ from 'lodash';
 
+import {copyTextToClipboard} from '../../../share/utils';
 import Window from '../../share/Window.vue';
 import rstore from '../../../store/modules/reader';
 
@@ -464,6 +491,8 @@ class SettingsPage extends Vue {
     webFonts = [];
     fonts = [];
 
+    serverStorageKeyVisible = false;
+
     created() {
         this.commit = this.$store.commit;
         this.reader = this.$store.state.reader;
@@ -482,6 +511,10 @@ class SettingsPage extends Vue {
         this.webFonts = rstore.webFonts;
         const font = (this.webFontName ? this.webFontName : this.fontName);
         this.vertShift = this.fontShifts[font] || 0;
+    }
+
+    get mode() {
+        return this.$store.state.config.mode;
     }
 
     get settings() {
@@ -510,6 +543,10 @@ class SettingsPage extends Vue {
 
     get serverStorageKey() {
         return this.$store.state.reader.serverStorageKey;
+    }
+
+    get setStorageKeyLink() {
+        return 'http://omnireader.ru/#/reader?setStorageKey=' + this.serverStorageKey;
     }
 
     get predefineTextColors() {
@@ -645,8 +682,18 @@ class SettingsPage extends Vue {
         }
     }
 
-    async showServerStorageKey() {
+    async copyToClip(text, prefix) {
+        const result = await copyTextToClipboard(text);
+        const suf = (prefix.substr(-1) == 'а' ? 'а' : '');
+        const msg = (result ? `${prefix} успешно скопирован${suf} в буфер обмена` : 'Копирование не удалось');
+        if (result)
+            this.$notify.success({message: msg});
+        else
+            this.$notify.error({message: msg});
+    }
 
+    async showServerStorageKey() {
+        this.serverStorageKeyVisible = !this.serverStorageKeyVisible;
     }
 
     async enterServerStorageKey() {
@@ -724,4 +771,7 @@ class SettingsPage extends Vue {
     padding: 15px;
 }
 
+.center {
+    text-align: center;
+}
 </style>
