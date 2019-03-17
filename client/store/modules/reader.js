@@ -178,7 +178,7 @@ for (const font of webFonts)
 const state = {
     toolBarActive: true,
     serverStorageKey: '',
-    profiles: [],
+    profiles: {},
     profilesRev: 0,
     currentProfile: '',
     settings: Object.assign({}, settingDefaults),

@@ -416,6 +416,7 @@
 //-----------------------------------------------------------------------------
 import Vue from 'vue';
 import Component from 'vue-class-component';
+//import _ from 'lodash';
 
 import Window from '../../share/Window.vue';
 import rstore from '../../../store/modules/reader';
@@ -462,8 +463,6 @@ class SettingsPage extends Vue {
     webFonts = [];
     fonts = [];
 
-    currentProfile = '';
-
     created() {
         this.commit = this.$store.commit;
         this.reader = this.$store.state.reader;
@@ -494,6 +493,14 @@ class SettingsPage extends Vue {
 
     get profilesArray() {
         return Object.keys(this.profiles);
+    }
+
+    get currentProfile() {
+        return this.$store.state.reader.currentProfile;
+    }
+
+    set currentProfile(newValue) {
+        this.commit('reader/setCurrentProfile', newValue);
     }
 
     get partialStorageKey() {
@@ -541,9 +548,9 @@ class SettingsPage extends Vue {
     async setDefaults() {
         try {
             if (await this.$confirm('Подтвердите установку настроек по-умолчанию', '', {
-              confirmButtonText: 'OK',
-              cancelButtonText: 'Отмена',
-              type: 'warning'
+                confirmButtonText: 'OK',
+                cancelButtonText: 'Отмена',
+                type: 'warning'
             })) {
                 this.form = Object.assign({}, rstore.settingDefaults);
                 for (let prop in rstore.settingDefaults) {
@@ -557,12 +564,20 @@ class SettingsPage extends Vue {
 
     async addProfile() {
         try {
-            const result = await this.$prompt('Введите произвольное имя для профиля устройства', '', {
-              confirmButtonText: 'OK',
-              cancelButtonText: 'Отмена'
+            const result = await this.$prompt('Введите произвольное название для профиля устройства', '', {
+                confirmButtonText: 'OK',
+                cancelButtonText: 'Отмена',
+                inputValidator: (str) => { if (str.length > 50) return 'Слишком длинное название'; else return true; },
             });
             if (result.value) {
-                
+                if (this.profiles[result.value]) {
+                    this.$alert('Такой профиль уже существует', 'Ошибка');
+                } else {
+                    this.currentProfile = result.value;
+                    await this.$nextTick();
+                    const newProfiles = Object.assign({}, this.profiles, {[result.value]: 1});
+                    this.commit('reader/setProfiles', newProfiles);
+                }
             }
         } catch (e) {
             //

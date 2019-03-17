@@ -34,6 +34,7 @@ class ServerStorage extends Vue {
         }
         this.hashedStorageKey = utils.toBase58(cryptoUtils.sha256(this.serverStorageKey));
 
+        this.oldProfiles = this.profiles;
         await this.loadProfiles();
     }
 
@@ -79,10 +80,19 @@ class ServerStorage extends Vue {
         if (prof.state == 'success') {
             const oldRev = this.profilesRev;
             prof = prof.items.profiles;
+
+            if (prof.rev == 0)
+                prof.data = {};
+
             this.commit('reader/setProfiles', prof.data);
             this.commit('reader/setProfilesRev', prof.rev);
 
             this.oldProfiles = this.profiles;
+
+            if (!this.profiles[this.currentProfile]) {
+                this.commit('reader/setCurrentProfile', '');
+            }
+
             this.notifySuccessIfNeeded(oldRev, prof.rev);
         } else {
             this.warning(`Неверный ответ сервера: ${prof.state}`);
@@ -93,31 +103,39 @@ class ServerStorage extends Vue {
         if (!this.currentProfile || this.savingProfiles)
             return;
 
-        this.savingProfiles = true;
-
         const diff = utils.getObjDiff(this.oldProfiles, this.profiles);
-        let result = {state: ''};
-        let tries = 0;
-        while (result.state != 'success' && tries < maxSetTries) {
-            result = await this.storageSet({'profiles': {rev: this.profilesRev + 1, data: this.profiles}});
+        if (utils.isEmptyObjDiff(diff))
+            return;
 
-            if (result.state == 'reject') {
-                await this.loadProfiles();
-                const newProfiles = utils.applyObjDiff(this.profiles, diff);
-                this.commit('reader/setProfiles', newProfiles);
-                this.commit('reader/setProfilesRev', result.items.profiles.rev);
+        this.savingProfiles = true;
+        try {
+            let result = {state: ''};
+            let tries = 0;
+            while (result.state != 'success' && tries < maxSetTries) {
+                result = await this.storageSet({'profiles': {rev: this.profilesRev + 1, data: this.profiles}});
+
+                if (result.state == 'reject') {
+                    await this.loadProfiles();
+                    const newProfiles = utils.applyObjDiff(this.profiles, diff);
+                    this.commit('reader/setProfiles', newProfiles);
+                }
+
+                tries++;
             }
 
-            tries++;
+            if (tries >= maxSetTries) {
+                this.commit('reader/setProfiles', this.oldProfiles);
+                if (!this.profiles[this.currentProfile]) {
+                    this.commit('reader/setCurrentProfile', '');
+                }
+                this.warning('Не удалось отправить данные на сервер');
+            } else {
+                this.oldProfiles = this.profiles;
+                this.commit('reader/setProfilesRev', this.profilesRev + 1);        
+            }
+        } finally {
+            this.savingProfiles = false;
         }
-
-        this.commit('reader/setProfilesRev', this.profilesRev + 1);
-
-        if (tries >= maxSetTries) {
-            throw new Error('Не удалось отправить данные на сервер');
-        }
-
-        this.savingProfiles = false;
     }
 
     generateNewServerStorageKey() {
@@ -165,7 +183,7 @@ class ServerStorage extends Vue {
                 const comp = utils.pako.deflate(JSON.stringify(item.data), {level: 1});
                 let encrypted = null;
                 try {
-                    encrypted = await cryptoUtils.aesEncrypt(comp, this.serverStorageKey);
+                    encrypted = cryptoUtils.aesEncrypt(comp, this.serverStorageKey);
                 } catch (e) {
                     throw new Error('encrypt failed');
                 }
@@ -200,7 +218,7 @@ class ServerStorage extends Vue {
                     const a = utils.fromBase64(item.data.substr(1));
                     let decrypted = null;
                     try {
-                        decrypted = await cryptoUtils.aesDecrypt(a, this.serverStorageKey);
+                        decrypted = cryptoUtils.aesDecrypt(a, this.serverStorageKey);
                     } catch (e) {
                         throw new Error('decrypt failed');
                     }

@@ -95,6 +95,9 @@ import './theme/loading.css';
 import MessageBox from 'element-ui/lib/message-box';
 import './theme/message-box.css';
 
+//import Message from 'element-ui/lib/message';
+//import './theme/message.css';
+
 const components = {
     ElMenu, ElMenuItem, ElButton, ElButtonGroup, ElCheckbox, ElTabs, ElTabPane, ElTooltip,
     ElCol, ElContainer, ElAside, ElMain, ElHeader,
