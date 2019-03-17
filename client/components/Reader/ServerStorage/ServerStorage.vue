@@ -17,6 +17,9 @@ const maxSetTries = 5;
 
 export default @Component({
     watch: {
+        serverSyncEnabled: function() {
+            this.serverSyncEnabledChanged();
+        },
         serverStorageKey: function() {
             this.serverStorageKeyChanged();
         },
@@ -53,6 +56,13 @@ class ServerStorage extends Vue {
             await this.serverStorageKeyChanged();
         }
         await this.currentProfileChanged();
+    }
+
+    async serverSyncEnabledChanged() {
+        if (this.serverSyncEnabled) {
+            this.prevServerStorageKey = null;
+            await this.serverStorageKeyChanged();
+        }
     }
 
     async serverStorageKeyChanged() {
