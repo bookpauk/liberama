@@ -238,7 +238,7 @@ class BookManager {
             await this.init();
         const result = this.metaOnly(value);
         if (!noTouch)
-            Object.assign(result, {touchTime: Date.now()});
+            result.touchTime = Date.now();
 
         if (result.textLength && !result.bookPos && result.bookPosPercent)
             result.bookPos = Math.round(result.bookPosPercent*result.textLength);
@@ -331,7 +331,6 @@ class BookManager {
         this.recentChanged2 = false;
         return result;
     }
-
 
 }
 
