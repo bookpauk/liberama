@@ -101,7 +101,6 @@ import ServerStorage from './ServerStorage/ServerStorage.vue';
 import bookManager from './share/bookManager';
 import readerApi from '../../api/reader';
 import * as utils from '../../share/utils';
-import restoreOldSettings from './share/restoreOldSettings';
 
 export default @Component({
     components: {
@@ -208,7 +207,6 @@ class Reader extends Vue {
     mounted() {
         (async() => {
             await bookManager.init(this.settings);
-            await restoreOldSettings(this.settings, bookManager, this.commit);
             await this.$refs.serverStorage.init();
 
             if (this.$root.rootRoute == '/reader') {
@@ -674,7 +672,6 @@ class Reader extends Vue {
                 wasOpened = (wasOpened ? wasOpened : {});
                 const bookPos = (opts.bookPos !== undefined ? opts.bookPos : wasOpened.bookPos);
                 const bookPosSeen = (opts.bookPos !== undefined ? opts.bookPos : wasOpened.bookPosSeen);
-                const bookPosPercent = wasOpened.bookPosPercent;
 
                 let book = null;
 
@@ -686,7 +683,7 @@ class Reader extends Vue {
 
                     // если есть в локальном кэше
                     if (bookParsed) {
-                        await bookManager.setRecentBook(Object.assign({bookPos, bookPosSeen, bookPosPercent}, bookParsed));
+                        await bookManager.setRecentBook(Object.assign({bookPos, bookPosSeen}, bookParsed));
                         this.mostRecentBook();
                         this.addAction(bookPos);
                         this.loaderActive = false;
@@ -729,7 +726,7 @@ class Reader extends Vue {
                 });
 
                 // добавляем в историю
-                await bookManager.setRecentBook(Object.assign({bookPos, bookPosSeen, bookPosPercent}, addedBook));
+                await bookManager.setRecentBook(Object.assign({bookPos, bookPosSeen}, addedBook));
                 this.mostRecentBook();
                 this.addAction(bookPos);
                 this.updateRoute(true);
