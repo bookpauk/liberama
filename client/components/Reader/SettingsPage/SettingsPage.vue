@@ -689,7 +689,7 @@ class SettingsPage extends Vue {
             return;
 
         try {
-            const result = await this.$prompt(`<b>Предупреждение!</b> Удаление ВСЕХ профилей необратимо.` +
+            const result = await this.$prompt(`<b>Предупреждение!</b> Удаление ВСЕХ профилей с настройками необратимо.` +
                     `<br><br>Введите 'да' для подтверждения удаления:`, '', {
                 dangerouslyUseHTMLString: true,
                 confirmButtonText: 'OK',
@@ -723,7 +723,7 @@ class SettingsPage extends Vue {
 
     async enterServerStorageKey(key) {
         try {
-            const result = await this.$prompt(`<b>Предупреждение!</b> Изменение ключа доступа приведет к потере всех профилей и читаемых книг, привязанных к предыдущему ключу.` +
+            const result = await this.$prompt(`<b>Предупреждение!</b> Изменение ключа доступа приведет к замене всех профилей и читаемых книг в читалке.` +
                     `<br><br>Введите новый ключ доступа:`, '', {
                 dangerouslyUseHTMLString: true,
                 confirmButtonText: 'OK',
@@ -743,7 +743,7 @@ class SettingsPage extends Vue {
 
     async generateServerStorageKey() {
         try {
-            const result = await this.$prompt(`<b>Предупреждение!</b> Изменение ключа доступа приведет к потере всех профилей и читаемых книг, привязанных к предыдущему ключу.` +
+            const result = await this.$prompt(`<b>Предупреждение!</b> Генерация нового ключа доступа приведет к удалению всех профилей и читаемых книг в читалке.` +
                     `<br><br>Введите 'да' для подтверждения генерации нового ключа:`, '', {
                 dangerouslyUseHTMLString: true,
                 confirmButtonText: 'OK',
