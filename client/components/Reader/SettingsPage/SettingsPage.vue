@@ -406,7 +406,7 @@
                                     <el-checkbox v-model="blinkCachedLoad">Предупреждать о загрузке из кэша</el-checkbox>
                                 </el-tooltip>
                             </el-form-item>
-                            <el-form-item label="Подсказка">
+                            <el-form-item label="Уведомления">
                                 <el-tooltip :open-delay="500" effect="light">
                                     <template slot="content">
                                         Показывать уведомления и ошибки от<br>
