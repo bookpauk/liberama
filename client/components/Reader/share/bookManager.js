@@ -107,7 +107,7 @@ class BookManager {
             }
 
             if (size > maxDataSize && toDel) {
-                await this.delBook(toDel);
+                await this._delBook(toDel);
             } else {
                 break;
             }
@@ -189,15 +189,19 @@ class BookManager {
         return result;
     }
 
-    async delBook(meta) {
-        if (!this.books) 
-            await this.init();
-
+    async _delBook(meta) {
         await bmMetaStore.removeItem(`bmMeta-${meta.key}`);
         await bmDataStore.removeItem(`bmData-${meta.key}`);
 
         delete this.books[meta.key];
         delete this.booksCached[meta.key];
+    }
+
+    async delBook(meta) {
+        if (!this.books) 
+            await this.init();
+
+        await this._delBook(meta);
 
         await bmCacheStore.setItem('books', this.booksCached);
     }
