@@ -141,9 +141,11 @@ class HistoryPage extends Vue {
         let result = [];
 
         const sorted = bookManager.getSortedRecent();
-        const len = (sorted.length < 100 ? sorted.length : 100);
-        for (let i = 0; i < len; i++) {
+        for (let i = 0; i < sorted.length; i++) {
             const book = sorted[i];
+            if (book.deleted)
+                continue;
+
             let d = new Date();
             d.setTime(book.touchTime);
             const t = formatDate(d).split(' ');
@@ -193,6 +195,8 @@ class HistoryPage extends Vue {
                 path: book.path,
                 key: book.key,
             });
+            if (result.length >= 100)
+                break;
         }
 
         const search = this.search;

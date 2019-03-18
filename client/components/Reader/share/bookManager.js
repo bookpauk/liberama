@@ -233,11 +233,20 @@ class BookManager {
         return utils.stringToHex(url);
     }
 
-    async setRecentBook(value, noTouch) {
+    async setRecentBook(value) {
         if (!this.recent) 
             await this.init();
         const result = this.metaOnly(value);
         result.touchTime = Date.now();
+        result.deleted = 0;
+
+        if (this.recent[result.key] && this.recent[result.key].deleted) {
+            //восстановим из небытия пользовательские данные
+            if (!result.bookPos)
+                result.bookPos = this.recent[result.key].bookPos;
+            if (!result.bookPosSeen)
+                result.bookPosSeen = this.recent[result.key].bookPosSeen;
+        }
 
         this.recent[result.key] = result;
 
@@ -265,8 +274,8 @@ class BookManager {
         if (!this.recent) 
             await this.init();
 
-        await bmRecentStore.removeItem(value.key);
-        delete this.recent[value.key];
+        this.recent[value.key].deleted = 1;
+        await bmRecentStore.setItem(value.key, this.recent[value.key].deleted);
         await bmCacheStore.setItem('recent', this.recent);
 
         this.recentChanged1 = true;
@@ -289,7 +298,9 @@ class BookManager {
             }
 
             if (found) {
-                await this.delRecentBook(found);
+                await bmRecentStore.removeItem(found.key);
+                delete this.recent[found.key];
+
                 await this.cleanRecentBooks();
             }
         }
@@ -304,7 +315,7 @@ class BookManager {
         let result = null;
         for (let key in this.recent) {
             const book = this.recent[key];
-            if (book.touchTime > max) {
+            if (!book.deleted && book.touchTime > max) {
                 max = book.touchTime;
                 result = book;
             }
