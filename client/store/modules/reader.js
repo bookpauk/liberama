@@ -165,6 +165,7 @@ const settingDefaults = {
     showInlineImagesInCenter: true,
     imageHeightLines: 100,
     imageFitWidth: true,
+    showServerStorageMessages: true,
 
     fontShifts: {},
 };

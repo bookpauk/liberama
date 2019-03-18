@@ -110,6 +110,10 @@ class ServerStorage extends Vue {
         return this.$store.state.reader.currentProfile;
     }
 
+    get showServerStorageMessages() {
+        return this.settings.showServerStorageMessages;
+    }
+
     checkCurrentProfile() {
         if (!this.profiles[this.currentProfile]) {
             this.commit('reader/setCurrentProfile', '');
@@ -118,15 +122,22 @@ class ServerStorage extends Vue {
 
     notifySuccessIfNeeded(rev1, rev2) {
         if (rev1 != rev2)
-            this.$notify.success({message: 'Данные синхронизированы с сервером'});
+            this.success('Данные синхронизированы с сервером');
+    }
+
+    success(message) {
+        if (this.showServerStorageMessages)
+            this.$notify.success({message});
     }
 
     warning(message) {
-        this.$notify.warning({message});
+        if (this.showServerStorageMessages)
+            this.$notify.warning({message});
     }
 
     error(message) {
-        this.$notify.error({message});
+        if (this.showServerStorageMessages)
+            this.$notify.error({message});
     }
 
     async loadSettings() {

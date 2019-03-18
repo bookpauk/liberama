@@ -388,6 +388,7 @@
                             <el-form-item label="Управление">
                                 <el-checkbox v-model="clickControl">Включить управление кликом</el-checkbox>
                             </el-form-item>
+
                             <el-form-item label="Подсказка">
                                 <el-tooltip :open-delay="500" effect="light">
                                     <template slot="content">
@@ -405,6 +406,16 @@
                                     <el-checkbox v-model="blinkCachedLoad">Предупреждать о загрузке из кэша</el-checkbox>
                                 </el-tooltip>
                             </el-form-item>
+                            <el-form-item label="Подсказка">
+                                <el-tooltip :open-delay="500" effect="light">
+                                    <template slot="content">
+                                        Показывать уведомления и ошибки от<br>
+                                        синхронизатора данных с сервером
+                                    </template>
+                                    <el-checkbox v-model="showServerStorageMessages">Показывать сообщения синхронизации</el-checkbox>
+                                </el-tooltip>
+                            </el-form-item>
+
                             <el-form-item label="URL">
                                 <el-tooltip :open-delay="500" effect="light">
                                     <template slot="content">
