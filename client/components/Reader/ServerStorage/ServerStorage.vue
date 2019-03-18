@@ -134,7 +134,13 @@ class ServerStorage extends Vue {
             return;
 
         const setsId = `settings-${this.currentProfile}`;
-        let sets = await this.storageGet({[setsId]: {}});
+        let sets = null;
+        try {
+            sets = await this.storageGet({[setsId]: {}});
+        } catch(e) {
+            this.error(`Ошибка соединения с сервером: ${e.message}`);
+            return;
+        }
 
         if (sets.state == 'success') {
             const oldRev = this.settingsRev[setsId] || 0;
@@ -143,7 +149,7 @@ class ServerStorage extends Vue {
             if (sets.rev == 0)
                 sets.data = {};
 
-            this.oldSettings = sets.data;
+            this.oldSettings = _.cloneDeep(sets.data);
             this.commit('reader/setSettings', sets.data);
             this.commit('reader/setSettingsRev', {[setsId]: sets.rev});
 
@@ -168,7 +174,13 @@ class ServerStorage extends Vue {
             let tries = 0;
             while (result.state != 'success' && tries < maxSetTries) {
                 const oldRev = this.settingsRev[setsId] || 0;
-                result = await this.storageSet({[setsId]: {rev: oldRev + 1, data: this.settings}});
+                try {
+                    result = await this.storageSet({[setsId]: {rev: oldRev + 1, data: this.settings}});
+                } catch(e) {
+                    this.savingSettings = false;
+                    this.error(`Ошибка соединения с сервером (${e.message}). Данные не сохранены и могут быть перезаписаны.`);
+                    return;
+                }
 
                 if (result.state == 'reject') {
                     await this.loadSettings();
@@ -180,10 +192,11 @@ class ServerStorage extends Vue {
             }
 
             if (tries >= maxSetTries) {
-                this.commit('reader/setSettings', this.oldSettings);
-                this.error('Не удалось отправить данные на сервер');
+                //отменять изменения не будем, просто предупредим
+                //this.commit('reader/setSettings', this.oldSettings);
+                this.error('Не удалось отправить настройки на сервер. Данные не сохранены и могут быть перезаписаны.');
             } else {
-                this.oldSettings = this.settings;
+                this.oldSettings = _.cloneDeep(this.settings);
                 this.commit('reader/setSettingsRev', {[setsId]: this.settingsRev[setsId] + 1});
             }
         } finally {
@@ -195,7 +208,13 @@ class ServerStorage extends Vue {
         if (!this.serverSyncEnabled)
             return;
 
-        let prof = await this.storageGet({'profiles': {}});
+        let prof = null;
+        try {
+            prof = await this.storageGet({'profiles': {}});
+        } catch(e) {
+            this.error(`Ошибка соединения с сервером: ${e.message}`);
+            return;
+        }
 
         if (prof.state == 'success') {
             const oldRev = this.profilesRev;
@@ -204,7 +223,7 @@ class ServerStorage extends Vue {
             if (prof.rev == 0)
                 prof.data = {};
 
-            this.oldProfiles = prof.data;
+            this.oldProfiles = _.cloneDeep(prof.data);
             this.commit('reader/setProfiles', prof.data);
             this.commit('reader/setProfilesRev', prof.rev);
 
@@ -227,7 +246,15 @@ class ServerStorage extends Vue {
             let result = {state: ''};
             let tries = 0;
             while (result.state != 'success' && tries < maxSetTries) {
-                result = await this.storageSet({'profiles': {rev: this.profilesRev + 1, data: this.profiles}});
+                try {
+                    result = await this.storageSet({'profiles': {rev: this.profilesRev + 1, data: this.profiles}});
+                } catch(e) {
+                    this.savingProfiles = false;
+                    this.commit('reader/setProfiles', this.oldProfiles);
+                    this.checkCurrentProfile();
+                    this.error(`Ошибка соединения с сервером: (${e.message}). Изменения отменены.`);
+                    return;
+                }
 
                 if (result.state == 'reject') {
                     await this.loadProfiles();
@@ -241,9 +268,9 @@ class ServerStorage extends Vue {
             if (tries >= maxSetTries) {
                 this.commit('reader/setProfiles', this.oldProfiles);
                 this.checkCurrentProfile();
-                this.error('Не удалось отправить данные на сервер');
+                this.error('Не удалось отправить данные на сервер. Изменения отменены.');
             } else {
-                this.oldProfiles = this.profiles;
+                this.oldProfiles = _.cloneDeep(this.profiles);
                 this.commit('reader/setProfilesRev', this.profilesRev + 1);        
             }
         } finally {
