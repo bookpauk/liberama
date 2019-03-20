@@ -84,11 +84,19 @@ class ReaderStorage {
         }
 
         const dbh = await this.storagePool.get();
+        await dbh.run('BEGIN');
         try {
+            const newRev = {};
             for (const id of Object.keys(items)) {
                 await dbh.run(SQL`INSERT OR REPLACE INTO storage (id, rev, time, data) VALUES (${id}, ${items[id].rev}, strftime('%s','now'), ${items[id].data})`);
-                this.cache[id] = {rev: items[id].rev};
+                newRev[id] = {rev: items[id].rev};
             }
+            await dbh.run('COMMIT');
+            
+            Object.assign(this.cache, newRev);
+        } catch (e) {
+            await dbh.run('ROLLBACK');
+            throw e;
         } finally {
             dbh.ret();
         }

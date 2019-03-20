@@ -205,6 +205,7 @@ class ServerStorage extends Vue {
             if (tries >= maxSetTries) {
                 //отменять изменения не будем, просто предупредим
                 //this.commit('reader/setSettings', this.oldSettings);
+                console.error(result);
                 this.error('Не удалось отправить настройки на сервер. Данные не сохранены и могут быть перезаписаны.');
             } else {
                 this.oldSettings = _.cloneDeep(this.settings);
@@ -279,6 +280,7 @@ class ServerStorage extends Vue {
             if (tries >= maxSetTries) {
                 this.commit('reader/setProfiles', this.oldProfiles);
                 this.checkCurrentProfile();
+                console.error(result);
                 this.error('Не удалось отправить данные на сервер. Изменения отменены.');
             } else {
                 this.oldProfiles = _.cloneDeep(this.profiles);

@@ -39,8 +39,8 @@ class ReaderController extends BaseController {
         } catch (e) {
             error = e.message;
         }
-        //bad request
-        res.status(400).send({error});
+        //error
+        res.status(500).send({error});
         return false;
     }
 
