@@ -300,7 +300,7 @@ class BookManager {
             await this.init();
 
         this.recent[value.key].deleted = 1;
-        await bmRecentStore.setItem(value.key, this.recent[value.key].deleted);
+        await bmRecentStore.setItem(value.key, this.recent[value.key]);
         await bmCacheStore.setItem('recent', this.recent);
 
         this.mostRecentCached = null;
