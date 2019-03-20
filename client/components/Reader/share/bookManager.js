@@ -39,7 +39,6 @@ class BookManager {
         this.recentLastRev = bmRecentStore.getItem('recent-last-rev') || 0;
         this.books = Object.assign({}, this.booksCached);
 
-        this.recentChanged1 = true;
         this.recentChanged2 = true;
 
         if (!this.books || !this.recent) {
@@ -264,7 +263,7 @@ class BookManager {
         await bmCacheStore.setItem('recent-last', this.recentLast);
         this.emit('recent-last-changed');
 
-        this.recentChanged1 = true;
+        this.mostRecentCached = result;
         this.recentChanged2 = true;
         return result;
     }
@@ -284,7 +283,7 @@ class BookManager {
         await bmCacheStore.setItem('recent', this.recent);
         this.emit('recent-changed');
 
-        this.recentChanged1 = true;
+        this.mostRecentCached = null;
         this.recentChanged2 = true;
     }
 
@@ -313,7 +312,7 @@ class BookManager {
     }
 
     mostRecentBook() {
-        if (!this.recentChanged1 && this.mostRecentCached) {
+        if (this.mostRecentCached) {
             return this.mostRecentCached;
         }
 
@@ -327,7 +326,6 @@ class BookManager {
             }
         }
         this.mostRecentCached = result;
-        this.recentChanged1 = false;
         return result;
     }
 

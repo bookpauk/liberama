@@ -46,6 +46,7 @@ class ServerStorage extends Vue {
 
         this.oldProfiles = {};
         this.oldSettings = {};
+        this.oldRecent = {};
     }
 
     async init() {
@@ -243,7 +244,7 @@ class ServerStorage extends Vue {
         //проверим ревизию на сервере
         if (!force) {
             try {
-                const revs = await this.storageCheck({'profiles': {}});
+                const revs = await this.storageCheck({profiles: {}});
                 if (revs.state == 'success' && revs.items.profiles.rev == oldRev) {
                     return;
                 }
@@ -255,7 +256,7 @@ class ServerStorage extends Vue {
 
         let prof = null;
         try {
-            prof = await this.storageGet({'profiles': {}});
+            prof = await this.storageGet({profiles: {}});
         } catch(e) {
             this.error(`Ошибка соединения с сервером: ${e.message}`);
             return;
@@ -297,7 +298,7 @@ class ServerStorage extends Vue {
             let tries = 0;
             while (result.state != 'success' && tries < maxSetTries) {
                 try {
-                    result = await this.storageSet({'profiles': {rev: this.profilesRev + 1, data: this.profiles}});
+                    result = await this.storageSet({profiles: {rev: this.profilesRev + 1, data: this.profiles}});
                 } catch(e) {
                     this.savingProfiles = false;
                     this.commit('reader/setProfiles', this.oldProfiles);
@@ -329,7 +330,46 @@ class ServerStorage extends Vue {
         }
     }
 
-    async loadRecent() {
+    async loadRecent(force) {
+        if (!this.serverSyncEnabled)
+            return;
+
+        const oldRev = bookManager.recentRev;
+        //проверим ревизию на сервере
+        if (!force) {
+            try {
+                const revs = await this.storageCheck({recent: {}});
+                if (revs.state == 'success' && revs.items.recent.rev == oldRev) {
+                    return;
+                }
+            } catch(e) {
+                this.error(`Ошибка соединения с сервером: ${e.message}`);
+                return;
+            }
+        }
+
+        let recent = null;
+        try {
+            recent = await this.storageGet({recent: {}});
+        } catch(e) {
+            this.error(`Ошибка соединения с сервером: ${e.message}`);
+            return;
+        }
+
+        if (recent.state == 'success') {
+            recent = recent.items.recent;
+
+            if (recent.rev == 0)
+                recent.data = {};
+
+            this.oldRecent = _.cloneDeep(recent.data);
+            bookManager.setRecent(recent.data);
+            bookManager.setRecentRev(recent.rev);
+
+            this.notifySuccessIfNeeded(oldRev, recent.rev);
+        } else {
+            this.warning(`Неверный ответ сервера: ${recent.state}`);
+        }
     }
 
     async storageCheck(items) {
