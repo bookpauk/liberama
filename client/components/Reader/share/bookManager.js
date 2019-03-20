@@ -1,4 +1,5 @@
 import localForage from 'localforage';
+import _ from 'lodash';
 
 import * as utils from '../../../share/utils';
 import BookParser from './BookParser';
@@ -65,11 +66,15 @@ class BookManager {
             if (keySplit.length == 2 && keySplit[0] == 'bmMeta') {
                 let meta = await bmMetaStore.getItem(key);
 
-                const oldBook = this.books[meta.key];
-                this.books[meta.key] = meta;
+                if (_.isObject(meta)) {
+                    const oldBook = this.books[meta.key];
+                    this.books[meta.key] = meta;
 
-                if (oldBook && oldBook.parsed) {
-                    this.books[meta.key].parsed = oldBook.parsed;
+                    if (oldBook && oldBook.parsed) {
+                        this.books[meta.key].parsed = oldBook.parsed;
+                    }
+                } else {
+                    await bmMetaStore.removeItem(key);
                 }
             }
         }
@@ -78,7 +83,11 @@ class BookManager {
         for (let i = 0; i < len; i++) {
             const key = await bmRecentStore.key(i);
             let r = await bmRecentStore.getItem(key);
-            this.recent[r.key] = r;
+            if (_.isObject(r)) {
+                this.recent[r.key] = r;
+            } else {
+                await bmRecentStore.removeItem(key);
+            }
         }
 
         await this.cleanBooks();
@@ -296,24 +305,14 @@ class BookManager {
         if (!this.recent) 
             await this.init();
 
-        if (Object.keys(this.recent).length > 1000) {
-            let min = Date.now();
-            let found = null;
-            for (let key in this.recent) {
-                const book = this.recent[key];
-                if (book.touchTime < min) {
-                    min = book.touchTime;
-                    found = book;
-                }
-            }
+        const sorted = this.getSortedRecent();
 
-            if (found) {
-                await bmRecentStore.removeItem(found.key);
-                delete this.recent[found.key];
-
-                await this.cleanRecentBooks();
-            }
+        for (let i = 1000; i < sorted.length; i++) {
+            await bmRecentStore.removeItem(sorted[i].key);
+            delete this.recent[sorted[i].key];
         }
+
+        this.sortedRecentCached = null;
     }
 
     mostRecentBook() {
