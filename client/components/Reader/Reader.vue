@@ -207,6 +207,7 @@ class Reader extends Vue {
     mounted() {
         (async() => {
             await bookManager.init(this.settings);
+            bookManager.addEventListener(this.bookManagerEvent);
             await this.$refs.serverStorage.init();
 
             if (this.$root.rootRoute == '/reader') {
@@ -286,6 +287,17 @@ class Reader extends Vue {
             this.bookPosSeen = event.bookPosSeen;
         this.bookPos = event.bookPos;
         this.debouncedUpdateRoute();
+    }
+
+    bookManagerEvent(eventName) {
+        if (eventName == 'recent-changed') {
+            const oldBook = this.mostRecentBookReactive;
+            const newBook = bookManager.mostRecentBook();
+
+            if (oldBook && newBook && oldBook.key != newBook.key) {
+                this.loadBook(newBook);
+            }
+        }
     }
 
     get toolBarActive() {

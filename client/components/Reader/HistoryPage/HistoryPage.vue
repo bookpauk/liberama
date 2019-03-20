@@ -127,7 +127,6 @@ class HistoryPage extends Vue {
 
     init() {
         this.updateTableData();
-        this.mostRecentBook = bookManager.mostRecentBook();
         this.$nextTick(() => {
             this.$refs.input.focus();
         });
@@ -239,13 +238,7 @@ class HistoryPage extends Vue {
         await bookManager.delRecentBook({key});
         this.updateTableData();
 
-        const newRecent = bookManager.mostRecentBook();
-
-        if (!(this.mostRecentBook && newRecent && this.mostRecentBook.key == newRecent.key))
-            this.$emit('load-book', newRecent);
-
-        this.mostRecentBook = newRecent;
-        if (!this.mostRecentBook)
+        if (!bookManager.mostRecentBook())
             this.close();
     }
 

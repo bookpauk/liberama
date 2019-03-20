@@ -255,16 +255,20 @@ class BookManager {
         await bmRecentStore.setItem(result.key, result);
 
         //кэшируем, аккуратно
+        let saveRecent = false;
         if (!(this.recentLast && this.recentLast.key == result.key)) {
             await bmCacheStore.setItem('recent', this.recent);
-            this.emit('recent-changed');
+            saveRecent = true;
         }
         this.recentLast = result;
         await bmCacheStore.setItem('recent-last', this.recentLast);
-        this.emit('recent-last-changed');
 
         this.mostRecentCached = result;
         this.recentChanged2 = true;
+
+        if (saveRecent)
+            this.emit('save-recent');
+        this.emit('recent-changed');
         return result;
     }
 
@@ -281,10 +285,11 @@ class BookManager {
         this.recent[value.key].deleted = 1;
         await bmRecentStore.setItem(value.key, this.recent[value.key].deleted);
         await bmCacheStore.setItem('recent', this.recent);
-        this.emit('recent-changed');
 
         this.mostRecentCached = null;
         this.recentChanged2 = true;
+
+        this.emit('recent-changed');
     }
 
     async cleanRecentBooks() {
