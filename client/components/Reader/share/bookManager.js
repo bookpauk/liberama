@@ -79,9 +79,10 @@ class BookManager {
             }
         }
 
+        let key = null;
         len = await bmRecentStore.length();
         for (let i = 0; i < len; i++) {
-            const key = await bmRecentStore.key(i);
+            key = await bmRecentStore.key(i);
             let r = await bmRecentStore.getItem(key);
             if (_.isObject(r)) {
                 this.recent[r.key] = r;
@@ -90,6 +91,13 @@ class BookManager {
             }
         }
 
+        //размножение для дебага
+        /*if (key) {
+            for (let i = 0; i < 1000; i++) {
+                const k = this.keyFromUrl(i.toString());
+                this.recent[k] = Object.assign({}, _.cloneDeep(this.recent[key]), {key: k, touchTime: Date.now() - 1000000});
+            }
+        }*/
         await this.cleanBooks();
         await this.cleanRecentBooks();
 
