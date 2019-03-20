@@ -658,7 +658,11 @@ class SettingsPage extends Vue {
                     this.$alert('Такой профиль уже существует', 'Ошибка');
                 } else {
                     const newProfiles = Object.assign({}, this.profiles, {[result.value]: 1});
+                    this.commit('reader/setAllowProfilesSave', true);
+                    await this.$nextTick();//ждем обработчики watch
                     this.commit('reader/setProfiles', newProfiles);
+                    await this.$nextTick();//ждем обработчики watch
+                    this.commit('reader/setAllowProfilesSave', false);
                     this.currentProfile = result.value;
                 }
             }
@@ -686,7 +690,11 @@ class SettingsPage extends Vue {
                 if (this.profiles[this.currentProfile]) {
                     const newProfiles = Object.assign({}, this.profiles);
                     delete newProfiles[this.currentProfile];
+                    this.commit('reader/setAllowProfilesSave', true);
+                    await this.$nextTick();//ждем обработчики watch
                     this.commit('reader/setProfiles', newProfiles);
+                    await this.$nextTick();//ждем обработчики watch
+                    this.commit('reader/setAllowProfilesSave', false);
                     this.currentProfile = '';
                 }
             }
@@ -710,7 +718,11 @@ class SettingsPage extends Vue {
             });
 
             if (result.value && result.value.toLowerCase() == 'да') {
+                this.commit('reader/setAllowProfilesSave', true);
+                await this.$nextTick();//ждем обработчики watch
                 this.commit('reader/setProfiles', {});
+                await this.$nextTick();//ждем обработчики watch
+                this.commit('reader/setAllowProfilesSave', false);
                 this.currentProfile = '';
             }
         } catch (e) {

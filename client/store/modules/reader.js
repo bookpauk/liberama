@@ -182,6 +182,7 @@ const state = {
     serverStorageKey: '',
     profiles: {},
     profilesRev: 0,
+    allowProfilesSave: false,//подстраховка для разработки
     currentProfile: '',
     settings: Object.assign({}, settingDefaults),
     settingsRev: {},
@@ -209,6 +210,9 @@ const mutations = {
     },
     setProfilesRev(state, value) {
         state.profilesRev = value;
+    },
+    setAllowProfilesSave(state, value) {
+        state.allowProfilesSave = value;
     },
     setCurrentProfile(state, value) {
         state.currentProfile = value;

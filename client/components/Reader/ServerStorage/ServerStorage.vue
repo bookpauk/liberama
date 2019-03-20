@@ -21,7 +21,7 @@ export default @Component({
             this.serverSyncEnabledChanged();
         },
         serverStorageKey: function() {
-            this.serverStorageKeyChanged();
+            this.serverStorageKeyChanged(true);
         },
         settings: function() {
             this.debouncedSaveSettings();
@@ -30,7 +30,7 @@ export default @Component({
             this.saveProfiles();
         },
         currentProfile: function() {
-            this.currentProfileChanged();
+            this.currentProfileChanged(true);
         },
     },
 })
@@ -58,28 +58,34 @@ class ServerStorage extends Vue {
         await this.currentProfileChanged();
     }
 
+    async generateNewServerStorageKey() {
+        const key = utils.toBase58(utils.randomArray(32));
+        this.commit('reader/setServerStorageKey', key);
+        await this.serverStorageKeyChanged();
+    }
+
     async serverSyncEnabledChanged() {
         if (this.serverSyncEnabled) {
             this.prevServerStorageKey = null;
-            await this.serverStorageKeyChanged();
+            await this.serverStorageKeyChanged(true);
         }
     }
 
-    async serverStorageKeyChanged() {
+    async serverStorageKeyChanged(force) {
         if (this.prevServerStorageKey != this.serverStorageKey) {
             this.prevServerStorageKey = this.serverStorageKey;
             this.hashedStorageKey = utils.toBase58(cryptoUtils.sha256(this.serverStorageKey));
 
-            await this.loadProfiles();
+            await this.loadProfiles(force);
             this.checkCurrentProfile();
         }
     }
 
-    async currentProfileChanged() {
+    async currentProfileChanged(force) {
         if (!this.currentProfile)
             return;
 
-        await this.loadSettings();
+        await this.loadSettings(force);
     }
 
     get serverSyncEnabled() {
@@ -140,11 +146,25 @@ class ServerStorage extends Vue {
             this.$notify.error({message});
     }
 
-    async loadSettings() {
+    async loadSettings(force) {
         if (!this.serverSyncEnabled || !this.currentProfile)
             return;
 
         const setsId = `settings-${this.currentProfile}`;
+        const oldRev = this.settingsRev[setsId] || 0;
+        //проверим ревизию на сервере
+        if (!force) {
+            try {
+                const revs = await this.storageCheck({[setsId]: {}});
+                if (revs.state == 'success' && revs.items[setsId].rev == oldRev) {
+                    return;
+                }
+            } catch(e) {
+                this.error(`Ошибка соединения с сервером: ${e.message}`);
+                return;
+            }
+        }
+
         let sets = null;
         try {
             sets = await this.storageGet({[setsId]: {}});
@@ -154,7 +174,6 @@ class ServerStorage extends Vue {
         }
 
         if (sets.state == 'success') {
-            const oldRev = this.settingsRev[setsId] || 0;
             sets = sets.items[setsId];
 
             if (sets.rev == 0)
@@ -194,7 +213,7 @@ class ServerStorage extends Vue {
                 }
 
                 if (result.state == 'reject') {
-                    await this.loadSettings();
+                    await this.loadSettings(true);
                     const newSettings = utils.applyObjDiff(this.settings, diff);
                     this.commit('reader/setSettings', newSettings);
                 }
@@ -216,9 +235,23 @@ class ServerStorage extends Vue {
         }
     }
 
-    async loadProfiles() {
+    async loadProfiles(force) {
         if (!this.serverSyncEnabled)
             return;
+
+        const oldRev = this.profilesRev;
+        //проверим ревизию на сервере
+        if (!force) {
+            try {
+                const revs = await this.storageCheck({'profiles': {}});
+                if (revs.state == 'success' && revs.items.profiles.rev == oldRev) {
+                    return;
+                }
+            } catch(e) {
+                this.error(`Ошибка соединения с сервером: ${e.message}`);
+                return;
+            }
+        }
 
         let prof = null;
         try {
@@ -229,7 +262,6 @@ class ServerStorage extends Vue {
         }
 
         if (prof.state == 'success') {
-            const oldRev = this.profilesRev;
             prof = prof.items.profiles;
 
             if (prof.rev == 0)
@@ -253,6 +285,12 @@ class ServerStorage extends Vue {
         if (utils.isEmptyObjDiff(diff))
             return;
 
+        //обнуляются профили во время разработки, подстраховка
+        if (!this.$store.state.reader.allowProfilesSave) {
+            console.error('Сохранение профилей не санкционировано');
+            return;
+        }
+
         this.savingProfiles = true;
         try {
             let result = {state: ''};
@@ -269,7 +307,7 @@ class ServerStorage extends Vue {
                 }
 
                 if (result.state == 'reject') {
-                    await this.loadProfiles();
+                    await this.loadProfiles(true);
                     const newProfiles = utils.applyObjDiff(this.profiles, diff);
                     this.commit('reader/setProfiles', newProfiles);
                 }
@@ -291,10 +329,7 @@ class ServerStorage extends Vue {
         }
     }
 
-    async generateNewServerStorageKey() {
-        const key = utils.toBase58(utils.randomArray(32));
-        this.commit('reader/setServerStorageKey', key);
-        await this.serverStorageKeyChanged();
+    async loadRecent() {
     }
 
     async storageCheck(items) {
