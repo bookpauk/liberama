@@ -36,6 +36,7 @@ export default @Component({
 })
 class ServerStorage extends Vue {
     created() {
+        this.inited = false;
         this.commit = this.$store.commit;
         this.prevServerStorageKey = null;
         this.$root.$on('generateNewServerStorageKey', () => {this.generateNewServerStorageKey()});
@@ -50,14 +51,18 @@ class ServerStorage extends Vue {
     }
 
     async init() {
-        if (!this.serverStorageKey) {
-            //генерируем новый ключ
-            await this.generateNewServerStorageKey();
-        } else {
-            await this.serverStorageKeyChanged();
+        try {
+            if (!this.serverStorageKey) {
+                //генерируем новый ключ
+                await this.generateNewServerStorageKey();
+            } else {
+                await this.serverStorageKeyChanged();
+            }
+            await this.currentProfileChanged();
+            await this.loadRecent();
+        } finally {
+            this.inited = true;
         }
-        await this.currentProfileChanged();
-        await this.loadRecent();
     }
 
     async generateNewServerStorageKey() {

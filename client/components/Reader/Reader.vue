@@ -197,6 +197,12 @@ class Reader extends Vue {
             }
         }, 500);
 
+        this.debouncedSaveRecent = _.debounce(async() => {
+            const serverStorage = this.$refs.serverStorage;
+            while (!serverStorage.inited) await utils.sleep(1000);
+            await serverStorage.saveRecent();
+        }, 1000);
+
         document.addEventListener('fullscreenchange', () => {
             this.fullScreenActive = (document.fullscreenElement !== null);
         });
@@ -303,7 +309,7 @@ class Reader extends Vue {
                     await this.loadBook(newBook);
                 }
 
-                await serverStorage.saveRecent();
+                this.debouncedSaveRecent();
             })();
         }
     }
