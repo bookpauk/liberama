@@ -62,7 +62,7 @@ class ServerStorage extends Vue {
             await this.currentProfileChanged();
             await this.loadRecent();
             this.oldRecent = _.cloneDeep(bookManager.recent);
-            this.oldRecentLast = _.cloneDeep(bookManager.recentLast);
+            this.oldRecentLast = _.cloneDeep(bookManager.recentLast) || {};
         } finally {
             this.inited = true;
         }
@@ -71,7 +71,7 @@ class ServerStorage extends Vue {
     async generateNewServerStorageKey() {
         const key = utils.toBase58(utils.randomArray(32));
         this.commit('reader/setServerStorageKey', key);
-        await this.serverStorageKeyChanged();
+        await this.serverStorageKeyChanged(true);
     }
 
     async serverSyncEnabledChanged() {
@@ -89,6 +89,8 @@ class ServerStorage extends Vue {
             await this.loadProfiles(force);
             this.checkCurrentProfile();
             await this.loadRecent();
+            if (force)
+                await this.saveRecent();
         }
     }
 
@@ -462,6 +464,7 @@ class ServerStorage extends Vue {
         const bm = bookManager;
         let recentLast = bm.recentLast;
         recentLast = (recentLast ? recentLast : {});
+        let lastRev = bm.recentLastRev;
 
         const diff = utils.getObjDiff(this.oldRecentLast, recentLast);
         if (utils.isEmptyObjDiff(diff))
@@ -472,8 +475,19 @@ class ServerStorage extends Vue {
             let result = {state: ''};
             let tries = 0;
             while (result.state != 'success' && tries < maxSetTries) {
+                if (force) {
+                    try {
+                        const revs = await this.storageCheck({recentLast: {}});
+                        if (revs.items.recentLast.rev)
+                            lastRev = revs.items.recentLast.rev;
+                    } catch(e) {
+                        this.error(`Ошибка соединения с сервером: ${e.message}`);
+                        return;
+                    }
+                }
+
                 try {
-                    result = await this.storageSet({recentLast: {rev: bm.recentLastRev + 1, data: recentLast}}, force);
+                    result = await this.storageSet({recentLast: {rev: lastRev + 1, data: recentLast}}, force);
                 } catch(e) {
                     this.savingRecentLast = false;
                     this.error(`Ошибка соединения с сервером: (${e.message}). Изменения не сохранены.`);
@@ -494,7 +508,7 @@ class ServerStorage extends Vue {
                 this.error('Не удалось отправить данные на сервер. Данные не сохранены и могут быть перезаписаны.');
             } else {
                 this.oldRecentLast = _.cloneDeep(recentLast);
-                await bm.setRecentLastRev(bm.recentLastRev + 1);
+                await bm.setRecentLastRev(lastRev + 1);
             }
         } finally {
             this.savingRecentLast = false;
