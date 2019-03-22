@@ -83,10 +83,12 @@ class BookManager {
         len = await bmRecentStore.length();
         for (let i = 0; i < len; i++) {
             key = await bmRecentStore.key(i);
-            let r = await bmRecentStore.getItem(key);
-            if (_.isObject(r)) {
-                this.recent[r.key] = r;
-            } else {
+            if (key) {
+                let r = await bmRecentStore.getItem(key);
+                if (_.isObject(r) && r.key) {
+                    this.recent[r.key] = r;
+                }
+            } else  {
                 await bmRecentStore.removeItem(key);
             }
         }
@@ -309,7 +311,7 @@ class BookManager {
         this.mostRecentCached = null;
         this.recentChanged2 = true;
 
-        this.emit('recent-changed');
+        this.emit('save-recent');
     }
 
     async cleanRecentBooks() {
@@ -379,7 +381,7 @@ class BookManager {
         await bmCacheStore.setItem('recent', this.recent);
 
         this.recentLast = null;
-        await bmCacheStore.setItem('recent-last', null);
+        await bmCacheStore.setItem('recent-last', this.recentLast);
 
         this.mostRecentCached = null;
         this.emit('recent-changed');
@@ -391,7 +393,19 @@ class BookManager {
     }
 
     async setRecentLast(value) {
+        if (!value.key)
+            value = null;
+
         this.recentLast = value;
+        await bmCacheStore.setItem('recent-last', this.recentLast);
+        if (value && value.key) {
+            this.recent[value.key] = value;
+            await bmRecentStore.setItem(value.key, value);
+            await bmCacheStore.setItem('recent', this.recent);
+        }
+
+        this.mostRecentCached = null;
+        this.emit('recent-changed');
     }
 
     async setRecentLastRev(value) {
