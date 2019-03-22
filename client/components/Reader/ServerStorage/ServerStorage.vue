@@ -57,6 +57,7 @@ class ServerStorage extends Vue {
             await this.serverStorageKeyChanged();
         }
         await this.currentProfileChanged();
+        await this.loadRecent();
     }
 
     async generateNewServerStorageKey() {
@@ -363,12 +364,56 @@ class ServerStorage extends Vue {
                 recent.data = {};
 
             this.oldRecent = _.cloneDeep(recent.data);
-            bookManager.setRecent(recent.data);
-            bookManager.setRecentRev(recent.rev);
+            await bookManager.setRecent(recent.data);
+            await bookManager.setRecentRev(recent.rev);
 
             this.notifySuccessIfNeeded(oldRev, recent.rev);
         } else {
             this.warning(`Неверный ответ сервера: ${recent.state}`);
+        }
+    }
+
+    async saveRecent() {
+        if (!this.serverSyncEnabled || this.savingRecent)
+            return;
+
+        const bm = bookManager;
+
+        const diff = utils.getObjDiff(this.oldRecent, bm.recent);
+        if (utils.isEmptyObjDiff(diff))
+            return;
+
+        this.savingRecent = true;
+        try {
+            let result = {state: ''};
+            let tries = 0;
+            while (result.state != 'success' && tries < maxSetTries) {
+                try {
+                    result = await this.storageSet({recent: {rev: bm.recentRev + 1, data: bm.recent}});
+                } catch(e) {
+                    this.savingRecent = false;
+                    this.error(`Ошибка соединения с сервером: (${e.message}). Изменения не сохранены.`);
+                    return;
+                }
+
+                if (result.state == 'reject') {
+                    await this.loadRecent(true);
+                    const newRecent = utils.applyObjDiff(bm.recent, diff);
+                    await bm.setRecent(newRecent);
+                }
+
+                tries++;
+            }
+
+            if (tries >= maxSetTries) {
+                console.error(result);
+                this.error('Не удалось отправить данные на сервер. Данные не сохранены и могут быть перезаписаны.');
+            } else {
+                this.oldRecent = _.cloneDeep(bm.recent);
+                await bm.setRecentRev(bm.recentRev + 1);
+            }
+        } finally {
+            this.savingRecent = false;
         }
     }
 

@@ -36,8 +36,8 @@ class BookManager {
         this.recentLast = await bmCacheStore.getItem('recent-last');
         if (this.recentLast)
             this.recent[this.recentLast.key] = this.recentLast;
-        this.recentRev = bmRecentStore.getItem('recent-rev') || 0;
-        this.recentLastRev = bmRecentStore.getItem('recent-last-rev') || 0;
+        this.recentRev = await bmRecentStore.getItem('recent-rev') || 0;
+        this.recentLastRev = await bmRecentStore.getItem('recent-last-rev') || 0;
         this.books = Object.assign({}, this.booksCached);
 
         this.recentChanged2 = true;
@@ -355,20 +355,35 @@ class BookManager {
         return result;
     }
 
-    setRecent(newRecent) {
-        this.recent = newRecent;
+    async setRecent(newRecent) {
+        //this.recent = newRecent;
+        const mergedRecent = _.cloneDeep(this.recent);
+
+        Object.assign(mergedRecent, newRecent);
+        for (const rec of Object.values(mergedRecent)) {
+            await bmRecentStore.setItem(rec.key, rec);
+        }
+
+        this.recent = mergedRecent;
+        await bmCacheStore.setItem('recent', this.recent);
+
+        this.recentLast = null;
+        await bmCacheStore.setItem('recent-last', null);
+
+        this.mostRecentCached = null;
+        this.emit('recent-changed');
     }
 
-    setRecentLast(newRecentLast) {
-        this.recentLast = newRecentLast;
-    }
-
-    setRecentRev(newRecentRev) {
-        bmRecentStore.setItem('recent-rev', newRecentRev);
+    async setRecentRev(newRecentRev) {
+        await bmRecentStore.setItem('recent-rev', newRecentRev);
         this.recentRev = newRecentRev;
     }
 
-    setRecentLastRev(newRecentLastRev) {
+    async setRecentLast(newRecentLast) {
+        this.recentLast = newRecentLast;
+    }
+
+    async setRecentLastRev(newRecentLastRev) {
         bmRecentStore.setItem('recent-last-rev', newRecentLastRev);
         this.recentLastRev = newRecentLastRev;
     }
