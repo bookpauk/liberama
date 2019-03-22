@@ -208,11 +208,10 @@ class Reader extends Vue {
         (async() => {
             await bookManager.init(this.settings);
             bookManager.addEventListener(this.bookManagerEvent);
-            await this.$refs.serverStorage.init();
 
             if (this.$root.rootRoute == '/reader') {
                 if (this.routeParamUrl) {
-                    this.loadBook({url: this.routeParamUrl, bookPos: this.routeParamPos});
+                    await this.loadBook({url: this.routeParamUrl, bookPos: this.routeParamPos});
                 } else {
                     this.loaderActive = true;
                 }
@@ -290,13 +289,22 @@ class Reader extends Vue {
     }
 
     bookManagerEvent(eventName) {
-        if (eventName == 'recent-changed') {
-            const oldBook = this.mostRecentBookReactive;
-            const newBook = bookManager.mostRecentBook();
+        const serverStorage = this.$refs.serverStorage;
+        if (eventName == 'load-meta-finish') {
+            serverStorage.init();
+        }
 
-            if (oldBook && newBook && oldBook.key != newBook.key) {
-                this.loadBook(newBook);
-            }
+        if (eventName == 'recent-changed') {
+            (async() => {
+                const oldBook = this.mostRecentBookReactive;
+                const newBook = bookManager.mostRecentBook();
+
+                if (oldBook && newBook && oldBook.key != newBook.key) {
+                    await this.loadBook(newBook);
+                }
+
+                await serverStorage.saveRecent();
+            })();
         }
     }
 
@@ -649,7 +657,7 @@ class Reader extends Vue {
         return result;
     }
 
-    loadBook(opts) {
+    async loadBook(opts) {
         if (!opts || !opts.url) {
             this.mostRecentBook();
             return;
@@ -668,118 +676,120 @@ class Reader extends Vue {
         }
 
         this.progressActive = true;
-        this.$nextTick(async() => {
-            const progress = this.$refs.page;
 
-            this.actionList = [];
-            this.actionCur = -1;
+        await this.$nextTick()
 
-            try {
-                progress.show();
-                progress.setState({state: 'parse'});
+        const progress = this.$refs.page;
 
-                // есть ли среди недавних
-                const key = bookManager.keyFromUrl(url);
-                let wasOpened = await bookManager.getRecentBook({key});
-                wasOpened = (wasOpened ? wasOpened : {});
-                const bookPos = (opts.bookPos !== undefined ? opts.bookPos : wasOpened.bookPos);
-                const bookPosSeen = (opts.bookPos !== undefined ? opts.bookPos : wasOpened.bookPosSeen);
+        this.actionList = [];
+        this.actionCur = -1;
 
-                let book = null;
+        try {
+            progress.show();
+            progress.setState({state: 'parse'});
 
-                if (!opts.force) {
-                    // пытаемся загрузить и распарсить книгу в менеджере из локального кэша
-                    const bookParsed = await bookManager.getBook({url}, (prog) => {
-                        progress.setState({progress: prog});
-                    });
+            // есть ли среди недавних
+            const key = bookManager.keyFromUrl(url);
+            let wasOpened = await bookManager.getRecentBook({key});
+            wasOpened = (wasOpened ? wasOpened : {});
+            const bookPos = (opts.bookPos !== undefined ? opts.bookPos : wasOpened.bookPos);
+            const bookPosSeen = (opts.bookPos !== undefined ? opts.bookPos : wasOpened.bookPosSeen);
 
-                    // если есть в локальном кэше
-                    if (bookParsed) {
-                        await bookManager.setRecentBook(Object.assign({bookPos, bookPosSeen}, bookParsed));
-                        this.mostRecentBook();
-                        this.addAction(bookPos);
-                        this.loaderActive = false;
-                        progress.hide(); this.progressActive = false;
-                        this.blinkCachedLoadMessage();
+            let book = null;
 
-                        await this.activateClickMapPage();
-                        return;
-                    }
-
-                    // иначе идем на сервер
-                    // пытаемся загрузить готовый файл с сервера
-                    if (wasOpened.path) {
-                        try {
-                            const resp = await readerApi.loadCachedBook(wasOpened.path, (state) => {
-                                progress.setState(state);
-                            });
-                            book = Object.assign({}, wasOpened, {data: resp.data});
-                        } catch (e) {
-                            //молчим
-                        }
-                    }
-                }
-
-                progress.setState({totalSteps: 5});
-
-                // не удалось, скачиваем книгу полностью с конвертацией
-                let loadCached = true;
-                if (!book) {
-                    book = await readerApi.loadBook(url, (state) => {
-                        progress.setState(state);
-                    });
-                    loadCached = false;
-                }
-
-                // добавляем в bookManager
-                progress.setState({state: 'parse', step: 5});
-                const addedBook = await bookManager.addBook(book, (prog) => {
+            if (!opts.force) {
+                // пытаемся загрузить и распарсить книгу в менеджере из локального кэша
+                const bookParsed = await bookManager.getBook({url}, (prog) => {
                     progress.setState({progress: prog});
                 });
 
-                // добавляем в историю
-                await bookManager.setRecentBook(Object.assign({bookPos, bookPosSeen}, addedBook));
-                this.mostRecentBook();
-                this.addAction(bookPos);
-                this.updateRoute(true);
-
-                this.loaderActive = false;
-                progress.hide(); this.progressActive = false;
-                if (loadCached) {
+                // если есть в локальном кэше
+                if (bookParsed) {
+                    await bookManager.setRecentBook(Object.assign({bookPos, bookPosSeen}, bookParsed));
+                    this.mostRecentBook();
+                    this.addAction(bookPos);
+                    this.loaderActive = false;
+                    progress.hide(); this.progressActive = false;
                     this.blinkCachedLoadMessage();
-                } else
-                    this.stopBlink = true;
 
-                await this.activateClickMapPage();
-            } catch (e) {
-                progress.hide(); this.progressActive = false;
-                this.loaderActive = true;
-                this.$alert(e.message, 'Ошибка', {type: 'error'});
+                    await this.activateClickMapPage();
+                    return;
+                }
+
+                // иначе идем на сервер
+                // пытаемся загрузить готовый файл с сервера
+                if (wasOpened.path) {
+                    try {
+                        const resp = await readerApi.loadCachedBook(wasOpened.path, (state) => {
+                            progress.setState(state);
+                        });
+                        book = Object.assign({}, wasOpened, {data: resp.data});
+                    } catch (e) {
+                        //молчим
+                    }
+                }
             }
-        });
-    }
 
-    loadFile(opts) {
-        this.progressActive = true;
-        this.$nextTick(async() => {
-            const progress = this.$refs.page;
-            try {
-                progress.show();
-                progress.setState({state: 'upload'});
+            progress.setState({totalSteps: 5});
 
-                const url = await readerApi.uploadFile(opts.file, this.config.maxUploadFileSize, (state) => {
+            // не удалось, скачиваем книгу полностью с конвертацией
+            let loadCached = true;
+            if (!book) {
+                book = await readerApi.loadBook(url, (state) => {
                     progress.setState(state);
                 });
-
-                progress.hide(); this.progressActive = false;
-
-                this.loadBook({url});
-            } catch (e) {
-                progress.hide(); this.progressActive = false;
-                this.loaderActive = true;
-                this.$alert(e.message, 'Ошибка', {type: 'error'});
+                loadCached = false;
             }
-        });
+
+            // добавляем в bookManager
+            progress.setState({state: 'parse', step: 5});
+            const addedBook = await bookManager.addBook(book, (prog) => {
+                progress.setState({progress: prog});
+            });
+
+            // добавляем в историю
+            await bookManager.setRecentBook(Object.assign({bookPos, bookPosSeen}, addedBook));
+            this.mostRecentBook();
+            this.addAction(bookPos);
+            this.updateRoute(true);
+
+            this.loaderActive = false;
+            progress.hide(); this.progressActive = false;
+            if (loadCached) {
+                this.blinkCachedLoadMessage();
+            } else
+                this.stopBlink = true;
+
+            await this.activateClickMapPage();
+        } catch (e) {
+            progress.hide(); this.progressActive = false;
+            this.loaderActive = true;
+            this.$alert(e.message, 'Ошибка', {type: 'error'});
+        }
+    }
+
+    async loadFile(opts) {
+        this.progressActive = true;
+
+        await this.$nextTick();
+
+        const progress = this.$refs.page;
+        try {
+            progress.show();
+            progress.setState({state: 'upload'});
+
+            const url = await readerApi.uploadFile(opts.file, this.config.maxUploadFileSize, (state) => {
+                progress.setState(state);
+            });
+
+            progress.hide(); this.progressActive = false;
+
+            await this.loadBook({url});
+        } catch (e) {
+            progress.hide(); this.progressActive = false;
+            this.loaderActive = true;
+            this.$alert(e.message, 'Ошибка', {type: 'error'});
+        }
     }
 
     blinkCachedLoadMessage() {

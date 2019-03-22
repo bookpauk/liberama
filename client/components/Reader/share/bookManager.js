@@ -107,6 +107,7 @@ class BookManager {
         }
         await bmCacheStore.setItem('books', this.booksCached);
         await bmCacheStore.setItem('recent', this.recent);
+        this.emit('load-meta-finish');
     }
 
     async cleanBooks() {
