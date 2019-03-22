@@ -294,10 +294,13 @@ class Reader extends Vue {
         this.debouncedUpdateRoute();
     }
 
-    bookManagerEvent(eventName) {
+    async bookManagerEvent(eventName) {
         const serverStorage = this.$refs.serverStorage;
         if (eventName == 'load-meta-finish') {
             serverStorage.init();
+            const result = await bookManager.cleanRecentBooks();
+            if (result)
+                this.debouncedSaveRecent();
         }
 
         if (eventName == 'recent-changed') {
@@ -305,8 +308,12 @@ class Reader extends Vue {
                 const oldBook = this.mostRecentBookReactive;
                 const newBook = bookManager.mostRecentBook();
 
-                if (oldBook && newBook && oldBook.key != newBook.key) {
-                    await this.loadBook(newBook);
+                if (oldBook && newBook) {
+                    if (oldBook.key != newBook.key) {
+                        await this.loadBook(newBook);
+                    } else if (oldBook.bookPos != newBook.bookPos) {
+                        this.bookPosChanged({bookPos: newBook.bookPos});
+                    }
                 }
 
                 this.debouncedSaveRecent();

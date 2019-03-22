@@ -99,7 +99,9 @@ class BookManager {
             }
         }*/
         await this.cleanBooks();
-        await this.cleanRecentBooks();
+
+        //очистка позже
+        //await this.cleanRecentBooks();
 
         this.booksCached = {};
         for (const key in this.books) {
@@ -316,12 +318,17 @@ class BookManager {
 
         const sorted = this.getSortedRecent();
 
+        let isDel = false;
         for (let i = 1000; i < sorted.length; i++) {
             await bmRecentStore.removeItem(sorted[i].key);
             delete this.recent[sorted[i].key];
+            isDel = true;
         }
 
         this.sortedRecentCached = null;
+        await bmCacheStore.setItem('recent', this.recent);
+
+        return isDel;
     }
 
     mostRecentBook() {
@@ -356,16 +363,19 @@ class BookManager {
         return result;
     }
 
-    async setRecent(newRecent) {
-        //this.recent = newRecent;
+    async setRecent(value) {
         const mergedRecent = _.cloneDeep(this.recent);
 
-        Object.assign(mergedRecent, newRecent);
+        Object.assign(mergedRecent, value);
+        const newRecent = {};
         for (const rec of Object.values(mergedRecent)) {
-            await bmRecentStore.setItem(rec.key, rec);
+            if (rec.key) {
+                await bmRecentStore.setItem(rec.key, rec);
+                newRecent[rec.key] = rec;
+            }
         }
 
-        this.recent = mergedRecent;
+        this.recent = newRecent;
         await bmCacheStore.setItem('recent', this.recent);
 
         this.recentLast = null;
@@ -375,18 +385,18 @@ class BookManager {
         this.emit('recent-changed');
     }
 
-    async setRecentRev(newRecentRev) {
-        await bmRecentStore.setItem('recent-rev', newRecentRev);
-        this.recentRev = newRecentRev;
+    async setRecentRev(value) {
+        await bmRecentStore.setItem('recent-rev', value);
+        this.recentRev = value;
     }
 
-    async setRecentLast(newRecentLast) {
-        this.recentLast = newRecentLast;
+    async setRecentLast(value) {
+        this.recentLast = value;
     }
 
-    async setRecentLastRev(newRecentLastRev) {
-        bmRecentStore.setItem('recent-last-rev', newRecentLastRev);
-        this.recentLastRev = newRecentLastRev;
+    async setRecentLastRev(value) {
+        bmRecentStore.setItem('recent-last-rev', value);
+        this.recentLastRev = value;
     }
 
     addEventListener(listener) {

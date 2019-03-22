@@ -403,8 +403,9 @@ class ServerStorage extends Vue {
 
                 if (result.state == 'reject') {
                     await this.loadRecent(true);
-                    const newRecent = utils.applyObjDiff(bm.recent, diff);
-                    await bm.setRecent(newRecent);
+                    //похоже это лишнее
+                    /*const newRecent = utils.applyObjDiff(bm.recent, diff);
+                    await bm.setRecent(newRecent);*/
                 }
 
                 tries++;
