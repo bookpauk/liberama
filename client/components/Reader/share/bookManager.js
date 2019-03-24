@@ -371,9 +371,19 @@ class BookManager {
 
         Object.assign(mergedRecent, value);
         const newRecent = {};
+        
+        //"ленивое" обновление хранилища
+        (async() => {
+            for (const rec of Object.values(mergedRecent)) {
+                if (rec.key) {
+                    await bmRecentStore.setItem(rec.key, rec);
+                    await utils.sleep(1);
+                }
+            }
+        })();
+
         for (const rec of Object.values(mergedRecent)) {
             if (rec.key) {
-                await bmRecentStore.setItem(rec.key, rec);
                 newRecent[rec.key] = rec;
             }
         }
