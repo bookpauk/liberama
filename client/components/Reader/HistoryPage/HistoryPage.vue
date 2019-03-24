@@ -248,7 +248,10 @@ class HistoryPage extends Vue {
     }
 
     isUrl(url) {
-        return (url.indexOf('file://') != 0);
+        if (url)
+            return (url.indexOf('file://') != 0);
+        else
+            return false;
     }
 
     close() {

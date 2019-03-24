@@ -97,9 +97,10 @@ class BookManager {
         /*if (key) {
             for (let i = 0; i < 1000; i++) {
                 const k = this.keyFromUrl(i.toString());
-                this.recent[k] = Object.assign({}, _.cloneDeep(this.recent[key]), {key: k, touchTime: Date.now() - 1000000});
+                this.recent[k] = Object.assign({}, _.cloneDeep(this.recent[key]), {key: k, touchTime: Date.now() - 1000000, url: utils.randomHexString(300)});
             }
         }*/
+        
         await this.cleanBooks();
 
         //очистка позже
@@ -370,9 +371,19 @@ class BookManager {
 
         Object.assign(mergedRecent, value);
         const newRecent = {};
+        
+        //"ленивое" обновление хранилища
+        (async() => {
+            for (const rec of Object.values(mergedRecent)) {
+                if (rec.key) {
+                    await bmRecentStore.setItem(rec.key, rec);
+                    await utils.sleep(1);
+                }
+            }
+        })();
+
         for (const rec of Object.values(mergedRecent)) {
             if (rec.key) {
-                await bmRecentStore.setItem(rec.key, rec);
                 newRecent[rec.key] = rec;
             }
         }
