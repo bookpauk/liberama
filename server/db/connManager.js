@@ -22,7 +22,8 @@ class ConnManager {
             const dbFileName = this.config.dataDir + '/' + poolConfig.fileName;
 
             //бэкап
-            await fs.copy(dbFileName, `${dbFileName}.bak`);
+            if (await fs.pathExists(dbFileName))
+                await fs.copy(dbFileName, `${dbFileName}.bak`);
 
             const connPool = new SqliteConnectionPool();
             await connPool.open(poolConfig.connCount, dbFileName);
