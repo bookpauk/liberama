@@ -1,3 +1,5 @@
+const fs = require('fs-extra');
+
 const SqliteConnectionPool = require('./SqliteConnectionPool');
 const log = require('../core/getLogger').getLog();
 
@@ -18,6 +20,10 @@ class ConnManager {
 
         for (const poolConfig of this.config.db) {
             const dbFileName = this.config.dataDir + '/' + poolConfig.fileName;
+
+            //бэкап
+            await fs.copy(dbFileName, `${dbFileName}.bak`);
+
             const connPool = new SqliteConnectionPool();
             await connPool.open(poolConfig.connCount, dbFileName);
 
