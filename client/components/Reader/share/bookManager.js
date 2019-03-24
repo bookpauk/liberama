@@ -97,9 +97,10 @@ class BookManager {
         /*if (key) {
             for (let i = 0; i < 1000; i++) {
                 const k = this.keyFromUrl(i.toString());
-                this.recent[k] = Object.assign({}, _.cloneDeep(this.recent[key]), {key: k, touchTime: Date.now() - 1000000});
+                this.recent[k] = Object.assign({}, _.cloneDeep(this.recent[key]), {key: k, touchTime: Date.now() - 1000000, url: utils.randomHexString(300)});
             }
         }*/
+        
         await this.cleanBooks();
 
         //очистка позже

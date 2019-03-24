@@ -51,7 +51,7 @@ async function main() {
             }
 
             app.use(compression({ level: 1 }));
-            app.use(express.json());
+            app.use(express.json({limit: '10mb'}));
             if (devModule)
                 devModule.logQueries(app);
 
