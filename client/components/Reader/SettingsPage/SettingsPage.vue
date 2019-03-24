@@ -751,12 +751,12 @@ class SettingsPage extends Vue {
                 dangerouslyUseHTMLString: true,
                 confirmButtonText: 'OK',
                 cancelButtonText: 'Отмена',
-                inputValidator: (str) => { if (str && str.length == 44) return true; else return 'Неверный формат ключа'; },
+                inputValidator: (str) => { if (str && utils.fromBase58(str).length == 32) return true; else return 'Неверный формат ключа'; },
                 inputValue: (key && _.isString(key) ? key : null),
                 type: 'warning'
             });
 
-            if (result.value && result.value.length == 44) {
+            if (result.value && utils.fromBase58(result.value).length == 32) {
                 this.commit('reader/setServerStorageKey', result.value);
             }
         } catch (e) {
