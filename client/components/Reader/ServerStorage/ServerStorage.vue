@@ -75,7 +75,12 @@ class ServerStorage extends Vue {
     async serverSyncEnabledChanged() {
         if (this.serverSyncEnabled) {
             this.prevServerStorageKey = null;
-            await this.serverStorageKeyChanged(true);
+            if (!this.serverStorageKey) {
+                //генерируем новый ключ
+                await this.generateNewServerStorageKey();
+            } else {
+                await this.serverStorageKeyChanged(true);
+            }
         }
     }
 
