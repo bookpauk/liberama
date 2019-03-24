@@ -59,8 +59,6 @@ class ServerStorage extends Vue {
             } else {
                 await this.serverStorageKeyChanged();
             }
-            await this.currentProfileChanged();
-            await this.loadRecent();
             this.oldRecent = _.cloneDeep(bookManager.recent);
             this.oldRecentLast = _.cloneDeep(bookManager.recentLast) || {};
         } finally {
@@ -88,7 +86,8 @@ class ServerStorage extends Vue {
 
             await this.loadProfiles(force);
             this.checkCurrentProfile();
-            await this.loadRecent();
+            await this.currentProfileChanged(force);
+            await this.loadRecent(force);
             if (force)
                 await this.saveRecent();
         }
