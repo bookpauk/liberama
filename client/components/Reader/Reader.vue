@@ -314,30 +314,28 @@ class Reader extends Vue {
                 this.$refs.historyPage.updateTableData();
             }
 
-            (async() => {
-                const oldBook = this.mostRecentBookReactive;
-                const newBook = bookManager.mostRecentBook();
+            const oldBook = this.mostRecentBookReactive;
+            const newBook = bookManager.mostRecentBook();
 
-                if (oldBook && newBook) {
-                    if (oldBook.key != newBook.key) {
-                        this.loadingBook = true;
-                        try {
-                            await this.loadBook(newBook);
-                        } finally {
-                            this.loadingBook = false;
-                        }
-                    } else if (oldBook.bookPos != newBook.bookPos) {
-                        while (this.loadingBook) await utils.sleep(100);
-                        this.bookPosChanged({bookPos: newBook.bookPos});
+            if (oldBook && newBook) {
+                if (oldBook.key != newBook.key) {
+                    this.loadingBook = true;
+                    try {
+                        await this.loadBook(newBook);
+                    } finally {
+                        this.loadingBook = false;
                     }
+                } else if (oldBook.bookPos != newBook.bookPos) {
+                    while (this.loadingBook) await utils.sleep(100);
+                    this.bookPosChanged({bookPos: newBook.bookPos});
                 }
+            }
 
-                if (eventName == 'recent-changed') {
-                    this.debouncedSaveRecentLast();
-                } else {
-                    this.debouncedSaveRecent();
-                }
-            })();
+            if (eventName == 'recent-changed') {
+                this.debouncedSaveRecentLast();
+            } else {
+                this.debouncedSaveRecent();
+            }
         }
     }
 
