@@ -11,7 +11,7 @@ const path = require('path');
 const express = require('express');
 const compression = require('compression');
 
-const SqliteConnectionPool = require('./core/SqliteConnectionPool');
+const connManager = require('./db/connManager');
 
 async function init() {
     await fs.ensureDir(config.dataDir);
@@ -35,9 +35,7 @@ async function main() {
     log('Initializing');
     await init();
 
-    log('Opening database');
-    const connPool = new SqliteConnectionPool(20, config);
-    await connPool.init();
+    await connManager.init(config);
 
     //servers
     for (let server of config.servers) {
@@ -67,7 +65,7 @@ async function main() {
                 }               
             }));
 
-            require('./routes').initRoutes(app, connPool, serverConfig);
+            require('./routes').initRoutes(app, serverConfig);
 
             if (devModule) {
                 devModule.logErrors(app);

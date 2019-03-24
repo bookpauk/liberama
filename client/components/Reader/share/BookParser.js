@@ -201,6 +201,12 @@ export default class BookParser {
                 }
             }
 
+            if (elemName == 'author' && path.indexOf('/fictionbook/description/title-info/author') == 0) {
+                if (!fb2.author)
+                    fb2.author = [];
+                fb2.author.push({});
+            }
+
             if (path.indexOf('/fictionbook/body') == 0) {
                 if (tag == 'body') {
                     if (!isFirstBody)
@@ -319,15 +325,19 @@ export default class BookParser {
 
             text = text.replace(/[\t\n\r\xa0]/g, ' ');
 
+            const authorLength = (fb2.author && fb2.author.length ? fb2.author.length : 0);
             switch (path) {
                 case '/fictionbook/description/title-info/author/first-name':
-                    fb2.firstName = text;
+                    if (authorLength)
+                        fb2.author[authorLength - 1].firstName = text;
                     break;
                 case '/fictionbook/description/title-info/author/middle-name':
-                    fb2.middleName = text;
+                    if (authorLength)
+                        fb2.author[authorLength - 1].middleName = text;
                     break;
                 case '/fictionbook/description/title-info/author/last-name':
-                    fb2.lastName = text;
+                    if (authorLength)
+                        fb2.author[authorLength - 1].lastName = text;
                     break;
                 case '/fictionbook/description/title-info/genre':
                     fb2.genre = text;

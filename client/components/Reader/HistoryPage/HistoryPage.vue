@@ -127,7 +127,6 @@ class HistoryPage extends Vue {
 
     init() {
         this.updateTableData();
-        this.mostRecentBook = bookManager.mostRecentBook();
         this.$nextTick(() => {
             this.$refs.input.focus();
         });
@@ -141,9 +140,11 @@ class HistoryPage extends Vue {
         let result = [];
 
         const sorted = bookManager.getSortedRecent();
-        const len = (sorted.length < 100 ? sorted.length : 100);
-        for (let i = 0; i < len; i++) {
+        for (let i = 0; i < sorted.length; i++) {
             const book = sorted[i];
+            if (book.deleted)
+                continue;
+
             let d = new Date();
             d.setTime(book.touchTime);
             const t = formatDate(d).split(' ');
@@ -164,11 +165,21 @@ class HistoryPage extends Vue {
             else
                 title = '';
 
-            let author = _.compact([
-                fb2.lastName,
-                fb2.firstName,
-                fb2.middleName
-            ]).join(' ');
+            let author = '';
+            if (fb2.author) {
+                const authorNames = fb2.author.map(a => _.compact([
+                    a.lastName,
+                    a.firstName,
+                    a.middleName
+                ]).join(' '));
+                author = authorNames.join(', ');
+            } else {
+                author = _.compact([
+                    fb2.lastName,
+                    fb2.firstName,
+                    fb2.middleName
+                ]).join(' ');
+            }
             author = (author ? author : (fb2.bookTitle ? fb2.bookTitle : book.url));
 
             result.push({
@@ -183,6 +194,8 @@ class HistoryPage extends Vue {
                 path: book.path,
                 key: book.key,
             });
+            if (result.length >= 100)
+                break;
         }
 
         const search = this.search;
@@ -225,13 +238,7 @@ class HistoryPage extends Vue {
         await bookManager.delRecentBook({key});
         this.updateTableData();
 
-        const newRecent = bookManager.mostRecentBook();
-
-        if (!(this.mostRecentBook && newRecent && this.mostRecentBook.key == newRecent.key))
-            this.$emit('load-book', newRecent);
-
-        this.mostRecentBook = newRecent;
-        if (!this.mostRecentBook)
+        if (!bookManager.mostRecentBook())
             this.close();
     }
 

@@ -1,12 +1,11 @@
 const BaseController = require('./BaseController');
-const ReaderWorker =  require('../core/ReaderWorker');
-const workerState =  require('../core/workerState');
-//const log = require('../core/getLogger').getLog();
-//const _ = require('lodash');
+const ReaderWorker = require('../core/ReaderWorker');
+const readerStorage = require('../core/readerStorage');
+const workerState = require('../core/workerState');
 
 class ReaderController extends BaseController {
-    constructor(connPool, config) {
-        super(connPool, config);
+    constructor(config) {
+        super(config);
         this.readerWorker = new ReaderWorker(config);
     }
 
@@ -24,6 +23,24 @@ class ReaderController extends BaseController {
         }
         //bad request
         res.status(400).send({error});
+        return false;
+    }
+
+    async storage(req, res) {
+        const request = req.body;
+        let error = '';
+        try {
+            if (!request.action) 
+                throw new Error(`key 'action' is empty`);
+            if (!request.items || Array.isArray(request.data)) 
+                throw new Error(`key 'items' is empty`);
+
+            return await readerStorage.doAction(request);
+        } catch (e) {
+            error = e.message;
+        }
+        //error
+        res.status(500).send({error});
         return false;
     }
 

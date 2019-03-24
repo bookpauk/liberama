@@ -7,7 +7,106 @@
                 </template>
 
                 <el-tabs type="border-card" tab-position="left" v-model="selectedTab">
-                    <!--------------------------------------------------------------------------->
+                    <!-- Профили ------------------------------------------------------------------------->
+                    <el-tab-pane label="Профили">
+                        <el-form :model="form" size="small" label-width="80px" @submit.native.prevent>
+                            <div class="partHeader">Управление синхронизацией данных</div>
+                            <el-form-item label="">
+                                <el-checkbox v-model="serverSyncEnabled">Включить синхронизацию с сервером</el-checkbox>
+                            </el-form-item>
+                        </el-form>
+
+                        <div v-show="serverSyncEnabled">
+                        <el-form :model="form" size="small" label-width="80px" @submit.native.prevent>
+                            <div class="partHeader">Профили устройств</div>
+
+                            <el-form-item label="">
+                                <div class="text">
+                                    Выберите или добавьте профиль устройства, чтобы начать синхронизацию настроек с сервером.
+                                    <br>При выборе "Нет" синхронизация настроек (но не книг) отключается.
+                                </div>
+                            </el-form-item>
+
+                            <el-form-item label="Устройство">
+                                <el-select v-model="currentProfile" placeholder="">
+                                    <el-option label="Нет" value=""></el-option>
+                                    <el-option v-for="item in profilesArray"
+                                        :key="item"
+                                        :label="item"
+                                        :value="item">
+                                    </el-option>
+                                </el-select>
+                            </el-form-item>
+
+                            <el-form-item label="">
+                                    <el-button @click="addProfile">Добавить</el-button>
+                                    <el-button @click="delProfile">Удалить</el-button>
+                                    <el-button @click="delAllProfiles">Удалить все</el-button>
+                            </el-form-item>
+                        </el-form>
+
+                        <el-form :model="form" size="small" label-width="80px" @submit.native.prevent>
+                            <div class="partHeader">Ключ доступа</div>
+
+                            <el-form-item label="">
+                                <div class="text">
+                                    Ключ доступа позволяет восстановить профили с настройками и список читаемых книг.
+                                    Для этого необходимо передать ключ на новое устройство через почту, мессенджер или другим способом.
+                                </div>
+                            </el-form-item>
+
+                            <el-form-item label="">
+                                    <el-button style="width: 250px" @click="showServerStorageKey">
+                                        <span v-show="serverStorageKeyVisible">Скрыть</span>
+                                        <span v-show="!serverStorageKeyVisible">Показать</span>
+                                        ключ доступа
+                                 </el-button>
+                            </el-form-item>
+
+                            <el-form-item label="">
+                                <div v-if="!serverStorageKeyVisible">
+                                    <hr/>
+                                    <b>{{ partialStorageKey }}</b> (часть вашего ключа)
+                                    <hr/>
+                                </div>
+                                <div v-else style="line-height: 100%">
+                                    <hr/>
+                                    <div style="width: 300px; padding-top: 5px; overflow-wrap: break-word;"><b>{{ serverStorageKey }}</b></div>
+                                    <br><div class="center">
+                                        <el-button size="mini" class="copy-button" @click="copyToClip(serverStorageKey, 'Ключ')">Скопировать ключ</el-button>
+                                    </div>
+                                    <div v-if="mode == 'omnireader'">
+                                        <br>Переход по ссылке позволит автоматически ввести ключ доступа:
+                                        <br><div class="center" style="margin-top: 5px">
+                                            <a :href="setStorageKeyLink" target="_blank">Ссылка для ввода ключа</a>
+                                        </div>
+                                        <br><div class="center">
+                                            <el-button size="mini" class="copy-button" @click="copyToClip(setStorageKeyLink, 'Ссылка')">Скопировать ссылку</el-button>
+                                        </div>
+                                    </div>
+                                    <hr/>
+                                </div>
+                            </el-form-item>
+
+                            <el-form-item label="">
+                                    <el-button style="width: 250px" @click="enterServerStorageKey">Ввести ключ доступа</el-button>
+                            </el-form-item>
+                            <el-form-item label="">
+                                    <el-button style="width: 250px" @click="generateServerStorageKey">Сгенерировать новый ключ</el-button>
+                            </el-form-item>
+
+                            <el-form-item label="">
+                                <div class="text">
+                                    Рекомендуется сохранить ключ в надежном месте, чтобы всегда иметь возможность восстановить настройки,
+                                    например, после переустановки ОС или чистки/смены браузера.<br>
+                                    <b>ПРЕДУПРЕЖДЕНИЕ!</b> При утере ключа, НИКТО не сможет восстановить ваши данные, т.к. они сжимаются
+                                    и шифруются ключом доступа перед отправкой на сервер.
+                                </div>
+                            </el-form-item>
+                        </el-form>
+                        </div>
+                    </el-tab-pane>
+                    <!-- Вид ------------------------------------------------------------------------->                    
                     <el-tab-pane label="Вид">
 
                         <el-form :model="form" size="small" label-width="120px" @submit.native.prevent>
@@ -246,7 +345,7 @@
                         </el-form>
                     </el-tab-pane>
 
-                    <!--------------------------------------------------------------------------->
+                    <!-- Листание ------------------------------------------------------------------------->
                     <el-tab-pane label="Листание">
                         <el-form :model="form" size="mini" label-width="120px" @submit.native.prevent>
                             <div class="partHeader">Анимация</div>
@@ -283,12 +382,13 @@
                         </el-form>
                         
                     </el-tab-pane>
-                    <!--------------------------------------------------------------------------->
+                    <!-- Прочее ------------------------------------------------------------------------->
                     <el-tab-pane label="Прочее">
                         <el-form :model="form" size="mini" label-width="120px" @submit.native.prevent>
                             <el-form-item label="Управление">
                                 <el-checkbox v-model="clickControl">Включить управление кликом</el-checkbox>
                             </el-form-item>
+
                             <el-form-item label="Подсказка">
                                 <el-tooltip :open-delay="500" effect="light">
                                     <template slot="content">
@@ -306,6 +406,16 @@
                                     <el-checkbox v-model="blinkCachedLoad">Предупреждать о загрузке из кэша</el-checkbox>
                                 </el-tooltip>
                             </el-form-item>
+                            <el-form-item label="Уведомления">
+                                <el-tooltip :open-delay="500" effect="light">
+                                    <template slot="content">
+                                        Показывать уведомления и ошибки от<br>
+                                        синхронизатора данных с сервером
+                                    </template>
+                                    <el-checkbox v-model="showServerStorageMessages">Показывать сообщения синхронизации</el-checkbox>
+                                </el-tooltip>
+                            </el-form-item>
+
                             <el-form-item label="URL">
                                 <el-tooltip :open-delay="500" effect="light">
                                     <template slot="content">
@@ -340,7 +450,7 @@
                             </el-form-item>
                         </el-form>
                     </el-tab-pane>
-                    <!--------------------------------------------------------------------------->
+                    <!-- Сброс ------------------------------------------------------------------------->
                     <el-tab-pane label="Сброс">
                         <el-button @click="setDefaults">Установить по-умолчанию</el-button>
                     </el-tab-pane>
@@ -355,7 +465,9 @@
 //-----------------------------------------------------------------------------
 import Vue from 'vue';
 import Component from 'vue-class-component';
+import _ from 'lodash';
 
+import * as utils from '../../../share/utils';
 import Window from '../../share/Window.vue';
 import rstore from '../../../store/modules/reader';
 
@@ -367,6 +479,9 @@ export default @Component({
         return Object.assign({}, rstore.settingDefaults);
     },
     watch: {
+        settings: function() {
+            this.settingsChanged();
+        },
         form: function(newValue) {
             this.commit('reader/setSettings', newValue);
         },
@@ -401,10 +516,19 @@ class SettingsPage extends Vue {
     webFonts = [];
     fonts = [];
 
+    serverStorageKeyVisible = false;
+
     created() {
         this.commit = this.$store.commit;
         this.reader = this.$store.state.reader;
 
+        this.form = {};
+        this.settingsChanged();
+    }
+
+    settingsChanged() {
+        if (_.isEqual(this.form, this.settings))
+            return;
         this.form = Object.assign({}, this.settings);
         for (let prop in rstore.settingDefaults) {
             this[prop] = this.form[prop];
@@ -421,8 +545,50 @@ class SettingsPage extends Vue {
         this.vertShift = this.fontShifts[font] || 0;
     }
 
+    get mode() {
+        return this.$store.state.config.mode;
+    }
+
     get settings() {
         return this.$store.state.reader.settings;
+    }
+
+    get serverSyncEnabled() {
+        return this.$store.state.reader.serverSyncEnabled;
+    }
+
+    set serverSyncEnabled(newValue) {
+        this.commit('reader/setServerSyncEnabled', newValue);
+    }
+
+    get profiles() {
+        return this.$store.state.reader.profiles;
+    }
+
+    get profilesArray() {
+        const result = Object.keys(this.profiles)
+        result.sort();
+        return result;
+    }
+
+    get currentProfile() {
+        return this.$store.state.reader.currentProfile;
+    }
+
+    set currentProfile(newValue) {
+        this.commit('reader/setCurrentProfile', newValue);
+    }
+
+    get partialStorageKey() {
+        return this.serverStorageKey.substr(0, 7) + '***';
+    }
+
+    get serverStorageKey() {
+        return this.$store.state.reader.serverStorageKey;
+    }
+
+    get setStorageKeyLink() {
+        return `http://${window.location.host}/#/reader?setStorageAccessKey=${utils.toBase58(this.serverStorageKey)}`;
     }
 
     get predefineTextColors() {
@@ -461,10 +627,10 @@ class SettingsPage extends Vue {
 
     async setDefaults() {
         try {
-            if (await this.$confirm('Подтвердите установку настроек по-умолчанию', '', {
-              confirmButtonText: 'OK',
-              cancelButtonText: 'Отмена',
-              type: 'warning'
+            if (await this.$confirm('Подтвердите установку настроек по-умолчанию:', '', {
+                confirmButtonText: 'OK',
+                cancelButtonText: 'Отмена',
+                type: 'warning'
             })) {
                 this.form = Object.assign({}, rstore.settingDefaults);
                 for (let prop in rstore.settingDefaults) {
@@ -474,6 +640,148 @@ class SettingsPage extends Vue {
         } catch (e) {
             //
         }
+    }
+
+    async addProfile() {
+        try {
+            if (Object.keys(this.profiles).length >= 100) {
+                this.$alert('Достигнут предел количества профилей', 'Ошибка');
+                return;
+            }
+            const result = await this.$prompt('Введите произвольное название для профиля устройства:', '', {
+                confirmButtonText: 'OK',
+                cancelButtonText: 'Отмена',
+                inputValidator: (str) => { if (!str) return 'Название не должно быть пустым'; else if (str.length > 50) return 'Слишком длинное название'; else return true; },
+            });
+            if (result.value) {
+                if (this.profiles[result.value]) {
+                    this.$alert('Такой профиль уже существует', 'Ошибка');
+                } else {
+                    const newProfiles = Object.assign({}, this.profiles, {[result.value]: 1});
+                    this.commit('reader/setAllowProfilesSave', true);
+                    await this.$nextTick();//ждем обработчики watch
+                    this.commit('reader/setProfiles', newProfiles);
+                    await this.$nextTick();//ждем обработчики watch
+                    this.commit('reader/setAllowProfilesSave', false);
+                    this.currentProfile = result.value;
+                }
+            }
+        } catch (e) {
+            //
+        }
+    }
+
+    async delProfile() {
+        if (!this.currentProfile)
+            return;
+
+        try {
+            const result = await this.$prompt(`<b>Предупреждение!</b> Удаление профиля '${this.currentProfile}' необратимо.` +
+                    `<br>Все настройки профиля будут потеряны,<br>однако список читаемых книг сохранится.` +
+                    `<br><br>Введите 'да' для подтверждения удаления:`, '', {
+                dangerouslyUseHTMLString: true,
+                confirmButtonText: 'OK',
+                cancelButtonText: 'Отмена',
+                inputValidator: (str) => { if (str && str.toLowerCase() === 'да') return true; else return 'Удаление не подтверждено'; },
+                type: 'warning'
+            });
+
+            if (result.value && result.value.toLowerCase() == 'да') {
+                if (this.profiles[this.currentProfile]) {
+                    const newProfiles = Object.assign({}, this.profiles);
+                    delete newProfiles[this.currentProfile];
+                    this.commit('reader/setAllowProfilesSave', true);
+                    await this.$nextTick();//ждем обработчики watch
+                    this.commit('reader/setProfiles', newProfiles);
+                    await this.$nextTick();//ждем обработчики watch
+                    this.commit('reader/setAllowProfilesSave', false);
+                    this.currentProfile = '';
+                }
+            }
+        } catch (e) {
+            //
+        }
+    }
+
+    async delAllProfiles() {
+        if (!Object.keys(this.profiles).length)
+            return;
+
+        try {
+            const result = await this.$prompt(`<b>Предупреждение!</b> Удаление ВСЕХ профилей с настройками необратимо.` +
+                    `<br><br>Введите 'да' для подтверждения удаления:`, '', {
+                dangerouslyUseHTMLString: true,
+                confirmButtonText: 'OK',
+                cancelButtonText: 'Отмена',
+                inputValidator: (str) => { if (str && str.toLowerCase() === 'да') return true; else return 'Удаление не подтверждено'; },
+                type: 'warning'
+            });
+
+            if (result.value && result.value.toLowerCase() == 'да') {
+                this.commit('reader/setAllowProfilesSave', true);
+                await this.$nextTick();//ждем обработчики watch
+                this.commit('reader/setProfiles', {});
+                await this.$nextTick();//ждем обработчики watch
+                this.commit('reader/setAllowProfilesSave', false);
+                this.currentProfile = '';
+            }
+        } catch (e) {
+            //
+        }
+    }
+
+    async copyToClip(text, prefix) {
+        const result = await utils.copyTextToClipboard(text);
+        const suf = (prefix.substr(-1) == 'а' ? 'а' : '');
+        const msg = (result ? `${prefix} успешно скопирован${suf} в буфер обмена` : 'Копирование не удалось');
+        if (result)
+            this.$notify.success({message: msg});
+        else
+            this.$notify.error({message: msg});
+    }
+
+    async showServerStorageKey() {
+        this.serverStorageKeyVisible = !this.serverStorageKeyVisible;
+    }
+
+    async enterServerStorageKey(key) {
+        try {
+            const result = await this.$prompt(`<b>Предупреждение!</b> Изменение ключа доступа приведет к замене всех профилей и читаемых книг в читалке.` +
+                    `<br><br>Введите новый ключ доступа:`, '', {
+                dangerouslyUseHTMLString: true,
+                confirmButtonText: 'OK',
+                cancelButtonText: 'Отмена',
+                inputValidator: (str) => { if (str && str.length == 44) return true; else return 'Неверный формат ключа'; },
+                inputValue: (key && _.isString(key) ? key : null),
+                type: 'warning'
+            });
+
+            if (result.value && result.value.length == 44) {
+                this.commit('reader/setServerStorageKey', result.value);
+            }
+        } catch (e) {
+            //
+        }
+    }
+
+    async generateServerStorageKey() {
+        try {
+            const result = await this.$prompt(`<b>Предупреждение!</b> Генерация нового ключа доступа приведет к удалению всех профилей и читаемых книг в читалке.` +
+                    `<br><br>Введите 'да' для подтверждения генерации нового ключа:`, '', {
+                dangerouslyUseHTMLString: true,
+                confirmButtonText: 'OK',
+                cancelButtonText: 'Отмена',
+                inputValidator: (str) => { if (str && str.toLowerCase() === 'да') return true; else return 'Генерация не подтверждена'; },
+                type: 'warning'
+            });
+
+            if (result.value && result.value.toLowerCase() == 'да') {
+                this.$root.$emit('generateNewServerStorageKey');
+            }
+        } catch (e) {
+            //
+        }
+
     }
 
     keyHook(event) {
@@ -502,6 +810,11 @@ class SettingsPage extends Vue {
     height: 70%;
     display: flex;
     position: relative;
+}
+
+.text {
+    font-size: 90%;
+    line-height: 130%;
 }
 
 .el-form {
@@ -540,4 +853,7 @@ class SettingsPage extends Vue {
     padding: 15px;
 }
 
+.center {
+    text-align: center;
+}
 </style>

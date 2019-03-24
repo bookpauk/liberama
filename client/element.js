@@ -86,6 +86,9 @@ import './theme/form-item.css';
 import ElColorPicker from 'element-ui/lib/color-picker';
 import './theme/color-picker.css';
 
+//import ElDialog from 'element-ui/lib/dialog';
+//import './theme/dialog.css';
+
 import Notification from 'element-ui/lib/notification';
 import './theme/notification.css';
 
@@ -94,6 +97,9 @@ import './theme/loading.css';
 
 import MessageBox from 'element-ui/lib/message-box';
 import './theme/message-box.css';
+
+//import Message from 'element-ui/lib/message';
+//import './theme/message.css';
 
 const components = {
     ElMenu, ElMenuItem, ElButton, ElButtonGroup, ElCheckbox, ElTabs, ElTabPane, ElTooltip,

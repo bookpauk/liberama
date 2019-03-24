@@ -1,5 +1,8 @@
+import _ from 'lodash';
 import axios from 'axios';
-import {sleep} from '../share/utils';
+import {Buffer} from 'safe-buffer';
+
+import * as utils from '../share/utils';
 
 const api = axios.create({
   baseURL: '/api/reader'
@@ -41,7 +44,7 @@ class Reader {
                 throw new Error(errMes);
             }
             if (i > 0)
-                await sleep(refreshPause);
+                await utils.sleep(refreshPause);
 
             i++;
             if (i > 120*1000/refreshPause) {//2 мин ждем телодвижений воркера
@@ -105,6 +108,16 @@ class Reader {
             throw new Error('Неверный ответ api');
 
         return url;
+    }
+
+    async storage(request) {
+        let response = await api.post('/storage', request);
+
+        const state = response.data.state;
+        if (!state)
+            throw new Error('Неверный ответ api');
+
+        return response.data;
     }
 }
 

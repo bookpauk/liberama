@@ -2,10 +2,10 @@ const c = require('./controllers');
 const utils = require('./core/utils');
 const multer = require('multer');
 
-function initRoutes(app, connPool, config) {
-    const misc = new c.MiscController(connPool, config);
-    const reader = new c.ReaderController(connPool, config);
-    const worker = new c.WorkerController(connPool, config);
+function initRoutes(app, config) {
+    const misc = new c.MiscController(config);
+    const reader = new c.ReaderController(config);
+    const worker = new c.WorkerController(config);
 
     //access
     const [aAll, aNormal, aSite, aReader, aOmnireader] = // eslint-disable-line no-unused-vars
@@ -26,6 +26,7 @@ function initRoutes(app, connPool, config) {
     const routes = [
         ['POST', '/api/config', misc.getConfig.bind(misc), [aAll], {}],
         ['POST', '/api/reader/load-book', reader.loadBook.bind(reader), [aAll], {}],
+        ['POST', '/api/reader/storage', reader.storage.bind(reader), [aAll], {}],
         ['POST', '/api/reader/upload-file', [upload.single('file'), reader.uploadFile.bind(reader)], [aAll], {}],
         ['POST', '/api/worker/get-state', worker.getState.bind(worker), [aAll], {}],
     ];

@@ -123,50 +123,51 @@ const webFonts = [
 ];
 
 const settingDefaults = {
-        textColor: '#000000',
-        backgroundColor: '#EBE2C9',
-        wallpaper: '',
-        fontStyle: '',// 'italic'
-        fontWeight: '',// 'bold'
-        fontSize: 20,// px
-        fontName: 'ReaderDefault',
-        webFontName: '',
-        fontVertShift: 0,
-        textVertShift: -20,
+    textColor: '#000000',
+    backgroundColor: '#EBE2C9',
+    wallpaper: '',
+    fontStyle: '',// 'italic'
+    fontWeight: '',// 'bold'
+    fontSize: 20,// px
+    fontName: 'ReaderDefault',
+    webFontName: '',
+    fontVertShift: 0,
+    textVertShift: -20,
 
-        lineInterval: 3,// px, межстрочный интервал
-        textAlignJustify: true,// выравнивание по ширине
-        p: 25,// px, отступ параграфа
-        indentLR: 15,// px, отступ всего текста слева и справа
-        indentTB: 0,// px, отступ всего текста сверху и снизу
-        wordWrap: true,//перенос по слогам
-        keepLastToFirst: true,// перенос последней строки в первую при листании
+    lineInterval: 3,// px, межстрочный интервал
+    textAlignJustify: true,// выравнивание по ширине
+    p: 25,// px, отступ параграфа
+    indentLR: 15,// px, отступ всего текста слева и справа
+    indentTB: 0,// px, отступ всего текста сверху и снизу
+    wordWrap: true,//перенос по слогам
+    keepLastToFirst: true,// перенос последней строки в первую при листании
 
-        showStatusBar: true,
-        statusBarTop: false,// top, bottom
-        statusBarHeight: 19,// px
-        statusBarColorAlpha: 0.4,
+    showStatusBar: true,
+    statusBarTop: false,// top, bottom
+    statusBarHeight: 19,// px
+    statusBarColorAlpha: 0.4,
 
-        scrollingDelay: 3000,// замедление, ms
-        scrollingType: 'ease-in-out', //linear, ease, ease-in, ease-out, ease-in-out
+    scrollingDelay: 3000,// замедление, ms
+    scrollingType: 'ease-in-out', //linear, ease, ease-in, ease-out, ease-in-out
 
-        pageChangeAnimation: 'blink',// '' - нет, downShift, rightShift, thaw - протаивание, blink - мерцание
-        pageChangeAnimationSpeed: 80, //0-100%
+    pageChangeAnimation: 'blink',// '' - нет, downShift, rightShift, thaw - протаивание, blink - мерцание
+    pageChangeAnimationSpeed: 80, //0-100%
 
-        allowUrlParamBookPos: false,
-        lazyParseEnabled: false,
-        copyFullText: false,
-        showClickMapPage: true,
-        clickControl: true,
-        cutEmptyParagraphs: false,
-        addEmptyParagraphs: 0,
-        blinkCachedLoad: true,
-        showImages: true,
-        showInlineImagesInCenter: true,
-        imageHeightLines: 100,
-        imageFitWidth: true,
+    allowUrlParamBookPos: false,
+    lazyParseEnabled: false,
+    copyFullText: false,
+    showClickMapPage: true,
+    clickControl: true,
+    cutEmptyParagraphs: false,
+    addEmptyParagraphs: 0,
+    blinkCachedLoad: true,
+    showImages: true,
+    showInlineImagesInCenter: true,
+    imageHeightLines: 100,
+    imageFitWidth: true,
+    showServerStorageMessages: true,
 
-        fontShifts: {},
+    fontShifts: {},
 };
 
 for (const font of fonts)
@@ -177,7 +178,14 @@ for (const font of webFonts)
 // initial state
 const state = {
     toolBarActive: true,
+    serverSyncEnabled: false,
+    serverStorageKey: '',
+    profiles: {},
+    profilesRev: 0,
+    allowProfilesSave: false,//подстраховка для разработки
+    currentProfile: '',
     settings: Object.assign({}, settingDefaults),
+    settingsRev: {},
 };
 
 // getters
@@ -191,9 +199,30 @@ const mutations = {
     setToolBarActive(state, value) {
         state.toolBarActive = value;
     },
+    setServerSyncEnabled(state, value) {
+        state.serverSyncEnabled = value;
+    },
+    setServerStorageKey(state, value) {
+        state.serverStorageKey = value;
+    },
+    setProfiles(state, value) {
+        state.profiles = value;
+    },
+    setProfilesRev(state, value) {
+        state.profilesRev = value;
+    },
+    setAllowProfilesSave(state, value) {
+        state.allowProfilesSave = value;
+    },
+    setCurrentProfile(state, value) {
+        state.currentProfile = value;
+    },
     setSettings(state, value) {
         state.settings = Object.assign({}, state.settings, value);
-    }
+    },
+    setSettingsRev(state, value) {
+        state.settingsRev = Object.assign({}, state.settingsRev, value);
+    },
 };
 
 export default {

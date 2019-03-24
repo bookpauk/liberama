@@ -79,6 +79,8 @@ class ConvertHtml extends ConvertBase {
         const newPara = new Set(['tr', '/table', 'hr', 'br', 'br/', 'li', 'dt', 'dd', 'p', 'title', '/title', 'h1', 'h2', 'h3', '/h1', '/h2', '/h3']);
 
         const onTextNode = (text, cutCounter, cutTag) => {// eslint-disable-line no-unused-vars
+            text = this.escapeEntities(text);
+
             if (!cutCounter && !(cutTitle && inTitle)) {
                 let tOpen = (bold ? '<strong>' : '');
                 tOpen += (italic ? '<emphasis>' : '');
@@ -242,10 +244,49 @@ class ConvertHtml extends ConvertBase {
             body.section._a[0] = pars;
         }
 
-        //убираем лишнее
+        //убираем лишнее, делаем валидный fb2, т.к. в рез-те разбиения на параграфы бьются теги
+        bold = false;
+        italic = false;
         pars = body.section._a[0];
-        for (let i = 0; i < pars.length; i++)
+        for (let i = 0; i < pars.length; i++) {
+            if (pars[i]._n != 'p')
+                continue;
+
             pars[i]._t = this.repSpaces(pars[i]._t).trim();
+
+            if (pars[i]._t.indexOf('<') >= 0) {
+                const t = pars[i]._t;
+                let a = [];
+
+                const onTextNode = (text) => {
+                    let tOpen = (bold ? '<strong>' : '');
+                    tOpen += (italic ? '<emphasis>' : '');
+                    let tClose = (italic ? '</emphasis>' : '');
+                    tClose += (bold ? '</strong>' : '');
+
+                    a.push(`${tOpen}${text}${tClose}`);
+                }
+
+                const onStartNode = (tag) => {
+                    if (tag == 'strong')
+                        bold = true;
+                    if (tag == 'emphasis')
+                        italic = true;
+                }
+
+                const onEndNode = (tag) => {
+                    if (tag == 'strong')
+                        bold = false;
+                    if (tag == 'emphasis')
+                        italic = false;
+                }
+
+                sax.parseSync(t, { onStartNode, onEndNode, onTextNode });
+
+                pars[i]._t = '';
+                pars[i]._a = a;
+            }
+        }
 
         return this.formatFb2(fb2);
     }

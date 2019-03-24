@@ -73,6 +73,7 @@
             <SettingsPage v-if="settingsActive" ref="settingsPage" @settings-toggle="settingsToggle"></SettingsPage>
             <HelpPage v-if="helpActive" ref="helpPage" @help-toggle="helpToggle"></HelpPage>
             <ClickMapPage v-show="clickMapActive" ref="clickMapPage"></ClickMapPage>
+            <ServerStorage v-show="hidden" ref="serverStorage"></ServerStorage>
         </el-main>
     </el-container>
 </template>
@@ -81,6 +82,9 @@
 //-----------------------------------------------------------------------------
 import Vue from 'vue';
 import Component from 'vue-class-component';
+import _ from 'lodash';
+import {Buffer} from 'safe-buffer';
+
 import LoaderPage from './LoaderPage/LoaderPage.vue';
 import TextPage from './TextPage/TextPage.vue';
 import ProgressPage from './ProgressPage/ProgressPage.vue';
@@ -92,12 +96,11 @@ import HistoryPage from './HistoryPage/HistoryPage.vue';
 import SettingsPage from './SettingsPage/SettingsPage.vue';
 import HelpPage from './HelpPage/HelpPage.vue';
 import ClickMapPage from './ClickMapPage/ClickMapPage.vue';
+import ServerStorage from './ServerStorage/ServerStorage.vue';
 
 import bookManager from './share/bookManager';
 import readerApi from '../../api/reader';
-import _ from 'lodash';
-import {sleep} from '../../share/utils';
-import restoreOldSettings from './share/restoreOldSettings';
+import * as utils from '../../share/utils';
 
 export default @Component({
     components: {
@@ -112,6 +115,7 @@ export default @Component({
         SettingsPage,
         HelpPage,
         ClickMapPage,
+        ServerStorage,
     },
     watch: {
         bookPos: function(newValue) {
@@ -166,6 +170,7 @@ class Reader extends Vue {
 
     actionList = [];
     actionCur = -1;
+    hidden = false;
 
     created() {
         this.loading = true;
@@ -192,6 +197,18 @@ class Reader extends Vue {
             }
         }, 500);
 
+        this.debouncedSaveRecent = _.debounce(async() => {
+            const serverStorage = this.$refs.serverStorage;
+            while (!serverStorage.inited) await utils.sleep(1000);
+            await serverStorage.saveRecent();
+        }, 1000);
+
+        this.debouncedSaveRecentLast = _.debounce(async() => {
+            const serverStorage = this.$refs.serverStorage;
+            while (!serverStorage.inited) await utils.sleep(1000);
+            await serverStorage.saveRecentLast();
+        }, 1000);
+
         document.addEventListener('fullscreenchange', () => {
             this.fullScreenActive = (document.fullscreenElement !== null);
         });
@@ -202,15 +219,17 @@ class Reader extends Vue {
     mounted() {
         (async() => {
             await bookManager.init(this.settings);
-            await restoreOldSettings(this.settings, bookManager, this.commit);
+            bookManager.addEventListener(this.bookManagerEvent);
 
             if (this.$root.rootRoute == '/reader') {
                 if (this.routeParamUrl) {
-                    this.loadBook({url: this.routeParamUrl, bookPos: this.routeParamPos});
+                    await this.loadBook({url: this.routeParamUrl, bookPos: this.routeParamPos});
                 } else {
                     this.loaderActive = true;
                 }
             }
+
+            this.checkSetStorageAccessKey();
             this.loading = false;
         })();
     }
@@ -222,6 +241,20 @@ class Reader extends Vue {
         this.showClickMapPage = settings.showClickMapPage;
         this.clickControl = settings.clickControl;
         this.blinkCachedLoad = settings.blinkCachedLoad;
+    }
+
+    checkSetStorageAccessKey() {
+        const q = this.$route.query;
+
+        if (q['setStorageAccessKey']) {
+            this.$router.replace(`/reader`);
+            this.settingsToggle();
+            this.$nextTick(() => {
+                this.$refs.settingsPage.enterServerStorageKey(
+                    Buffer.from(utils.fromBase58(q['setStorageAccessKey'])).toString()
+                );
+            });
+        }
     }
 
     get routeParamPos() {
@@ -237,6 +270,8 @@ class Reader extends Vue {
     }
 
     updateRoute(isNewRoute) {
+        if (this.loading)
+            return;
         const recent = this.mostRecentBook();
         const pos = (recent && recent.bookPos && this.allowUrlParamBookPos ? `__p=${recent.bookPos}&` : '');
         const url = (recent ? `url=${recent.url}` : '');
@@ -263,6 +298,45 @@ class Reader extends Vue {
             this.bookPosSeen = event.bookPosSeen;
         this.bookPos = event.bookPos;
         this.debouncedUpdateRoute();
+    }
+
+    async bookManagerEvent(eventName) {
+        const serverStorage = this.$refs.serverStorage;
+        if (eventName == 'load-meta-finish') {
+            serverStorage.init();
+            const result = await bookManager.cleanRecentBooks();
+            if (result)
+                this.debouncedSaveRecent();
+        }
+
+        if (eventName == 'recent-changed' || eventName == 'save-recent') {
+            if (this.historyActive) {
+                this.$refs.historyPage.updateTableData();
+            }
+
+            const oldBook = this.mostRecentBookReactive;
+            const newBook = bookManager.mostRecentBook();
+
+            if (oldBook && newBook) {
+                if (oldBook.key != newBook.key) {
+                    this.loadingBook = true;
+                    try {
+                        await this.loadBook(newBook);
+                    } finally {
+                        this.loadingBook = false;
+                    }
+                } else if (oldBook.bookPos != newBook.bookPos) {
+                    while (this.loadingBook) await utils.sleep(100);
+                    this.bookPosChanged({bookPos: newBook.bookPos});
+                }
+            }
+
+            if (eventName == 'recent-changed') {
+                this.debouncedSaveRecentLast();
+            } else {
+                this.debouncedSaveRecent();
+            }
+        }
     }
 
     get toolBarActive() {
@@ -584,6 +658,11 @@ class Reader extends Vue {
             this.$root.$emit('set-app-title');
         }
 
+        // на LoaderPage всегда показываем toolBar
+        if (result == 'LoaderPage' && !this.toolBarActive) {
+            this.toolBarToggle();
+        }
+
         if (this.lastActivePage != result && result == 'TextPage') {
             //акивируем страницу с текстом
             this.$nextTick(async() => {
@@ -609,7 +688,7 @@ class Reader extends Vue {
         return result;
     }
 
-    loadBook(opts) {
+    async loadBook(opts) {
         if (!opts || !opts.url) {
             this.mostRecentBook();
             return;
@@ -628,119 +707,120 @@ class Reader extends Vue {
         }
 
         this.progressActive = true;
-        this.$nextTick(async() => {
-            const progress = this.$refs.page;
 
-            this.actionList = [];
-            this.actionCur = -1;
+        await this.$nextTick()
 
-            try {
-                progress.show();
-                progress.setState({state: 'parse'});
+        const progress = this.$refs.page;
 
-                // есть ли среди недавних
-                const key = bookManager.keyFromUrl(url);
-                let wasOpened = await bookManager.getRecentBook({key});
-                wasOpened = (wasOpened ? wasOpened : {});
-                const bookPos = (opts.bookPos !== undefined ? opts.bookPos : wasOpened.bookPos);
-                const bookPosSeen = (opts.bookPos !== undefined ? opts.bookPos : wasOpened.bookPosSeen);
-                const bookPosPercent = wasOpened.bookPosPercent;
+        this.actionList = [];
+        this.actionCur = -1;
 
-                let book = null;
+        try {
+            progress.show();
+            progress.setState({state: 'parse'});
 
-                if (!opts.force) {
-                    // пытаемся загрузить и распарсить книгу в менеджере из локального кэша
-                    const bookParsed = await bookManager.getBook({url}, (prog) => {
-                        progress.setState({progress: prog});
-                    });
+            // есть ли среди недавних
+            const key = bookManager.keyFromUrl(url);
+            let wasOpened = await bookManager.getRecentBook({key});
+            wasOpened = (wasOpened ? wasOpened : {});
+            const bookPos = (opts.bookPos !== undefined ? opts.bookPos : wasOpened.bookPos);
+            const bookPosSeen = (opts.bookPos !== undefined ? opts.bookPos : wasOpened.bookPosSeen);
 
-                    // если есть в локальном кэше
-                    if (bookParsed) {
-                        await bookManager.setRecentBook(Object.assign({bookPos, bookPosSeen, bookPosPercent}, bookParsed));
-                        this.mostRecentBook();
-                        this.addAction(bookPos);
-                        this.loaderActive = false;
-                        progress.hide(); this.progressActive = false;
-                        this.blinkCachedLoadMessage();
+            let book = null;
 
-                        await this.activateClickMapPage();
-                        return;
-                    }
-
-                    // иначе идем на сервер
-                    // пытаемся загрузить готовый файл с сервера
-                    if (wasOpened.path) {
-                        try {
-                            const resp = await readerApi.loadCachedBook(wasOpened.path, (state) => {
-                                progress.setState(state);
-                            });
-                            book = Object.assign({}, wasOpened, {data: resp.data});
-                        } catch (e) {
-                            //молчим
-                        }
-                    }
-                }
-
-                progress.setState({totalSteps: 5});
-
-                // не удалось, скачиваем книгу полностью с конвертацией
-                let loadCached = true;
-                if (!book) {
-                    book = await readerApi.loadBook(url, (state) => {
-                        progress.setState(state);
-                    });
-                    loadCached = false;
-                }
-
-                // добавляем в bookManager
-                progress.setState({state: 'parse', step: 5});
-                const addedBook = await bookManager.addBook(book, (prog) => {
+            if (!opts.force) {
+                // пытаемся загрузить и распарсить книгу в менеджере из локального кэша
+                const bookParsed = await bookManager.getBook({url}, (prog) => {
                     progress.setState({progress: prog});
                 });
 
-                // добавляем в историю
-                await bookManager.setRecentBook(Object.assign({bookPos, bookPosSeen, bookPosPercent}, addedBook));
-                this.mostRecentBook();
-                this.addAction(bookPos);
-                this.updateRoute(true);
-
-                this.loaderActive = false;
-                progress.hide(); this.progressActive = false;
-                if (loadCached) {
+                // если есть в локальном кэше
+                if (bookParsed) {
+                    await bookManager.setRecentBook(Object.assign({bookPos, bookPosSeen}, bookParsed));
+                    this.mostRecentBook();
+                    this.addAction(bookPos);
+                    this.loaderActive = false;
+                    progress.hide(); this.progressActive = false;
                     this.blinkCachedLoadMessage();
-                } else
-                    this.stopBlink = true;
 
-                await this.activateClickMapPage();
-            } catch (e) {
-                progress.hide(); this.progressActive = false;
-                this.loaderActive = true;
-                this.$alert(e.message, 'Ошибка', {type: 'error'});
+                    await this.activateClickMapPage();
+                    return;
+                }
+
+                // иначе идем на сервер
+                // пытаемся загрузить готовый файл с сервера
+                if (wasOpened.path) {
+                    try {
+                        const resp = await readerApi.loadCachedBook(wasOpened.path, (state) => {
+                            progress.setState(state);
+                        });
+                        book = Object.assign({}, wasOpened, {data: resp.data});
+                    } catch (e) {
+                        //молчим
+                    }
+                }
             }
-        });
-    }
 
-    loadFile(opts) {
-        this.progressActive = true;
-        this.$nextTick(async() => {
-            const progress = this.$refs.page;
-            try {
-                progress.show();
-                progress.setState({state: 'upload'});
+            progress.setState({totalSteps: 5});
 
-                const url = await readerApi.uploadFile(opts.file, this.config.maxUploadFileSize, (state) => {
+            // не удалось, скачиваем книгу полностью с конвертацией
+            let loadCached = true;
+            if (!book) {
+                book = await readerApi.loadBook(url, (state) => {
                     progress.setState(state);
                 });
-
-                progress.hide(); this.progressActive = false;
-
-                this.loadBook({url});
-            } catch (e) {
-                progress.hide(); this.progressActive = false;
-                this.loaderActive = true;
-                this.$alert(e.message, 'Ошибка', {type: 'error'});
+                loadCached = false;
             }
-        });
+
+            // добавляем в bookManager
+            progress.setState({state: 'parse', step: 5});
+            const addedBook = await bookManager.addBook(book, (prog) => {
+                progress.setState({progress: prog});
+            });
+
+            // добавляем в историю
+            await bookManager.setRecentBook(Object.assign({bookPos, bookPosSeen}, addedBook));
+            this.mostRecentBook();
+            this.addAction(bookPos);
+            this.updateRoute(true);
+
+            this.loaderActive = false;
+            progress.hide(); this.progressActive = false;
+            if (loadCached) {
+                this.blinkCachedLoadMessage();
+            } else
+                this.stopBlink = true;
+
+            await this.activateClickMapPage();
+        } catch (e) {
+            progress.hide(); this.progressActive = false;
+            this.loaderActive = true;
+            this.$alert(e.message, 'Ошибка', {type: 'error'});
+        }
+    }
+
+    async loadFile(opts) {
+        this.progressActive = true;
+
+        await this.$nextTick();
+
+        const progress = this.$refs.page;
+        try {
+            progress.show();
+            progress.setState({state: 'upload'});
+
+            const url = await readerApi.uploadFile(opts.file, this.config.maxUploadFileSize, (state) => {
+                progress.setState(state);
+            });
+
+            progress.hide(); this.progressActive = false;
+
+            await this.loadBook({url});
+        } catch (e) {
+            progress.hide(); this.progressActive = false;
+            this.loaderActive = true;
+            this.$alert(e.message, 'Ошибка', {type: 'error'});
+        }
     }
 
     blinkCachedLoadMessage() {
@@ -757,7 +837,7 @@ class Reader extends Vue {
                     this.showRefreshIcon = !this.showRefreshIcon;
                     if (page.blinkCachedLoadMessage)
                         page.blinkCachedLoadMessage(this.showRefreshIcon);
-                    await sleep(500);
+                    await utils.sleep(500);
                     if (this.stopBlink)
                         break;
                     this.blinkCount--;

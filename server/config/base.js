@@ -14,7 +14,6 @@ module.exports = {
     logDir: `${dataDir}/log`,
     publicDir: `${execDir}/public`,
     uploadDir: `${execDir}/public/upload`,
-    dbFileName: 'db.sqlite',
     loggingEnabled: true,
 
     maxUploadFileSize: 50*1024*1024,//50Мб
@@ -22,6 +21,19 @@ module.exports = {
     maxUploadPublicDirSize: 200*1024*1024,//100Мб
 
     useExternalBookConverter: false,
+
+    db: [
+        {
+            poolName: 'app',
+            connCount: 20,
+            fileName: 'app.sqlite',
+        },
+        {
+            poolName: 'readerStorage',
+            connCount: 20,
+            fileName: 'reader-storage.sqlite',            
+        }
+    ],
 
     servers: [
         {
