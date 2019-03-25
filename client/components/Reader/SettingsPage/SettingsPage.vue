@@ -452,7 +452,7 @@
                     </el-tab-pane>
                     <!-- Сброс ------------------------------------------------------------------------->
                     <el-tab-pane label="Сброс">
-                        <el-button @click="setDefaults">Установить по-умолчанию</el-button>
+                        <el-button @click="setDefaults">Установить по умолчанию</el-button>
                     </el-tab-pane>
 
                 </el-tabs>
