@@ -37,6 +37,7 @@ export default @Component({
 class ServerStorage extends Vue {
     created() {
         this.inited = false;
+        this.keyInited = false;
         this.commit = this.$store.commit;
         this.prevServerStorageKey = null;
         this.$root.$on('generateNewServerStorageKey', () => {this.generateNewServerStorageKey()});
@@ -88,7 +89,8 @@ class ServerStorage extends Vue {
         if (this.prevServerStorageKey != this.serverStorageKey) {
             this.prevServerStorageKey = this.serverStorageKey;
             this.hashedStorageKey = utils.toBase58(cryptoUtils.sha256(this.serverStorageKey));
-
+            this.keyInited = true;
+            
             await this.loadProfiles(force);
             this.checkCurrentProfile();
             await this.currentProfileChanged(force);
@@ -163,7 +165,7 @@ class ServerStorage extends Vue {
     }
 
     async loadSettings(force) {
-        if (!this.serverSyncEnabled || !this.currentProfile)
+        if (!this.keyInited || !this.serverSyncEnabled || !this.currentProfile)
             return;
 
         const setsId = `settings-${this.currentProfile}`;
@@ -206,7 +208,7 @@ class ServerStorage extends Vue {
     }
 
     async saveSettings() {
-        if (!this.serverSyncEnabled || !this.currentProfile || this.savingSettings)
+        if (!this.keyInited || !this.serverSyncEnabled || !this.currentProfile || this.savingSettings)
             return;
 
         const diff = utils.getObjDiff(this.oldSettings, this.settings);
@@ -252,7 +254,7 @@ class ServerStorage extends Vue {
     }
 
     async loadProfiles(force) {
-        if (!this.serverSyncEnabled)
+        if (!this.keyInited || !this.serverSyncEnabled)
             return;
 
         const oldRev = this.profilesRev;
@@ -294,7 +296,7 @@ class ServerStorage extends Vue {
     }
 
     async saveProfiles() {
-        if (!this.serverSyncEnabled || this.savingProfiles)
+        if (!this.keyInited || !this.serverSyncEnabled || this.savingProfiles)
             return;
 
         const diff = utils.getObjDiff(this.oldProfiles, this.profiles);
@@ -346,7 +348,7 @@ class ServerStorage extends Vue {
     }
 
     async loadRecent(force) {
-        if (!this.serverSyncEnabled)
+        if (!this.keyInited || !this.serverSyncEnabled)
             return;
 
         const oldRev = bookManager.recentRev;
@@ -416,7 +418,7 @@ class ServerStorage extends Vue {
     }
 
     async saveRecent() {
-        if (!this.serverSyncEnabled || this.savingRecent)
+        if (!this.keyInited || !this.serverSyncEnabled || this.savingRecent)
             return;
 
         const bm = bookManager;
@@ -462,7 +464,7 @@ class ServerStorage extends Vue {
     }
 
     async saveRecentLast(force = false) {
-        if (!this.serverSyncEnabled || this.savingRecentLast)
+        if (!this.keyInited || !this.serverSyncEnabled || this.savingRecentLast)
             return;
 
         const bm = bookManager;
