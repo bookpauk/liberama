@@ -79,19 +79,22 @@ class BookManager {
             }
         }
 
-        let key = null;
-        len = await bmRecentStore.length();
-        for (let i = 0; i < len; i++) {
-            key = await bmRecentStore.key(i);
-            if (key) {
-                let r = await bmRecentStore.getItem(key);
-                if (_.isObject(r) && r.key) {
-                    this.recent[r.key] = r;
+        //"ленивая" загрузка
+        (async() => {
+            let key = null;
+            len = await bmRecentStore.length();
+            for (let i = 0; i < len; i++) {
+                key = await bmRecentStore.key(i);
+                if (key) {
+                    let r = await bmRecentStore.getItem(key);
+                    if (_.isObject(r) && r.key) {
+                        this.recent[r.key] = r;
+                    }
+                } else  {
+                    await bmRecentStore.removeItem(key);
                 }
-            } else  {
-                await bmRecentStore.removeItem(key);
             }
-        }
+        })();
 
         //размножение для дебага
         /*if (key) {
@@ -410,6 +413,11 @@ class BookManager {
         this.recentLast = value;
         await bmCacheStore.setItem('recent-last', this.recentLast);
         if (value && value.key) {
+            //гарантия переключения книги
+            const mostRecent = this.mostRecentBook();
+            if (mostRecent)
+                this.recent[mostRecent.key].touchTime = value.touchTime - 1;
+
             this.recent[value.key] = value;
             await bmRecentStore.setItem(value.key, value);
             await bmCacheStore.setItem('recent', this.recent);

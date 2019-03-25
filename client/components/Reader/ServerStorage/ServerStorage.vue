@@ -90,7 +90,7 @@ class ServerStorage extends Vue {
             this.prevServerStorageKey = this.serverStorageKey;
             this.hashedStorageKey = utils.toBase58(cryptoUtils.sha256(this.serverStorageKey));
             this.keyInited = true;
-            
+
             await this.loadProfiles(force);
             this.checkCurrentProfile();
             await this.currentProfileChanged(force);
