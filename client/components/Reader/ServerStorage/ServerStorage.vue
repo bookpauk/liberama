@@ -412,9 +412,11 @@ class ServerStorage extends Vue {
                 if (recentLastDiff.rev == 0)
                     recentLastDiff.data = {};
 
+                this.oldRecentLastDiff = _.cloneDeep(recentLastDiff.data);
+                this.oldRecentLast = _.cloneDeep(recentLast.data);
+
                 recentLast.data = utils.applyObjDiff(recentLast.data, recentLastDiff.data);
 
-                this.oldRecentLast = _.cloneDeep(recentLast.data);
                 await bookManager.setRecentLast(recentLast.data);
                 await bookManager.setRecentLastRev(recentLast.rev);
                 await bookManager.setRecentLastDiffRev(recentLastDiff.rev);
@@ -485,7 +487,7 @@ class ServerStorage extends Vue {
         if (utils.isEmptyObjDiff(diff))
             return;
 
-        if (JSON.stringify(recentLast) > JSON.stringify(diff)) {
+        if (this.oldRecentLast.key == recentLast.key && JSON.stringify(recentLast) > JSON.stringify(diff)) {
             await this.saveRecentLastDiff(diff, force);
             return;
         }
@@ -529,6 +531,7 @@ class ServerStorage extends Vue {
             } else {
                 this.oldRecentLast = _.cloneDeep(recentLast);
                 await bm.setRecentLastRev(lastRev + 1);
+                await this.saveRecentLastDiff({}, true);
             }
         } finally {
             this.savingRecentLast = false;
