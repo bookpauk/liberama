@@ -113,10 +113,13 @@ class App extends Vue {
         this.dispatch('config/loadConfig');
         this.$watch('apiError', function(newError) {
             if (newError) {
+                let mes = newError.message;
+                if (newError.response && newError.response.config)
+                    mes = newError.response.config.url + '<br>' + newError.response.statusText;
                 this.$notify.error({
                     title: 'Ошибка API',
                     dangerouslyUseHTMLString: true,
-                    message: newError.response.config.url + '<br>' + newError.response.statusText
+                    message: mes
                 });
             }
         });
