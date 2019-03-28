@@ -38,6 +38,7 @@ class BookManager {
             this.recent[this.recentLast.key] = this.recentLast;
         this.recentRev = await bmRecentStore.getItem('recent-rev') || 0;
         this.recentLastRev = await bmRecentStore.getItem('recent-last-rev') || 0;
+        this.recentLastDiffRev = await bmRecentStore.getItem('recent-last-diff-rev') || 0;
         this.books = Object.assign({}, this.booksCached);
 
         this.recentChanged2 = true;
@@ -428,8 +429,13 @@ class BookManager {
     }
 
     async setRecentLastRev(value) {
-        bmRecentStore.setItem('recent-last-rev', value);
+        await bmRecentStore.setItem('recent-last-rev', value);
         this.recentLastRev = value;
+    }
+
+    async setRecentLastDiffRev(value) {
+        await bmRecentStore.setItem('recent-last-diff-rev', value);
+        this.recentLastDiffRev = value;
     }
 
     addEventListener(listener) {
