@@ -18,9 +18,15 @@
             <li>поддерживаемые браузеры: Google Chrome, Mozilla Firefox последних версий</li>
         </ul>
 
-        <p>В качестве URL можно задавать html-страничку с книгой, либо прямую ссылку 
+        <p>В качестве URL книги можно задавать html-страничку с книгой, либо прямую ссылку 
         на файл из онлайн-библиотеки (например, скопировав адрес ссылки или кнопки "скачать fb2").</p>
-        <p>Поддерживаемые форматы: <b>fb2, fb2.zip, html, txt</b> и другие</p>
+        <p>Поддерживаемые форматы: <b>fb2, fb2.zip, html, txt</b> и другие.</p>
+
+        <p>Для автономной загрузки читалки (без интернета):<br>
+        В Google Chrome можно установить флаг <span class="clickable" @click="copyText('chrome://flags/#show-saved-copy')">chrome://flags/#show-saved-copy</span>
+           в значение "Primary". В этом случае на стандартной странице "нет соединения" появится кнопка для автономной загрузки сайта из кэша.<br>
+        В Mozilla Firefox в автономном режиме сайт загружается из кэша автоматически. Если этого не происходит, можно установить опцию
+        "Веб-разработка" -> "Работать автономно".</p>
 
         <div v-html="automationHtml"></div>
         <p>Связаться с разработчиком: <a href="mailto:bookpauk@gmail.com">bookpauk@gmail.com</a></p>
@@ -32,6 +38,8 @@
 import Vue from 'vue';
 import Component from 'vue-class-component';
 
+import {copyTextToClipboard} from '../../../../share/utils';
+
 export default @Component({
 })
 class CommonHelpPage extends Vue {
@@ -41,12 +49,21 @@ class CommonHelpPage extends Vue {
 
     get automationHtml() {
         if (this.config.mode == 'omnireader') {
-            return `<p>Вы можете добавить в свой браузер закладку, указав в ее свойствах вместо адреса следующий код:
+            return `<p>Вы также можете добавить в свой браузер закладку, указав в ее свойствах вместо адреса следующий код:
                     <br><strong>javascript:location.href='http://omnireader.ru/?url='+location.href;</strong>
                     <br>Тогда, нажав на получившуюся кнопку на любой странице интернета, вы автоматически откроете ее в Omni Reader.</p>`;
         } else {
             return '';
         }
+    }
+
+    async copyText(text) {
+        const result = await copyTextToClipboard(text);
+        const msg = (result ? `Ссылка на флаг успешно скопирована в буфер обмена. Можно открыть ее в новой вкладке.` : 'Копирование не удалось');
+        if (result)
+            this.$notify.success({message: msg});
+        else
+            this.$notify.error({message: msg});
     }
 }
 //-----------------------------------------------------------------------------
@@ -63,5 +80,11 @@ class CommonHelpPage extends Vue {
 
 h4 {
     margin: 0;
+}
+
+.clickable {
+    color: blue;
+    text-decoration: underline;
+    cursor: pointer;
 }
 </style>
