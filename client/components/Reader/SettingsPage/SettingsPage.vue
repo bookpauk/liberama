@@ -345,6 +345,17 @@
                         </el-form>
                     </el-tab-pane>
 
+                    <!-- Управление ------------------------------------------------------------------------->
+                    <el-tab-pane label="Управление">
+                        <el-form :model="form" size="mini" label-width="120px" @submit.native.prevent>
+                            <div class="partHeader">Управление</div>
+
+                            <el-form-item label="">
+                                <el-checkbox v-model="clickControl">Включить управление кликом</el-checkbox>
+                            </el-form-item>
+                        </el-form>
+                    </el-tab-pane>
+
                     <!-- Листание ------------------------------------------------------------------------->
                     <el-tab-pane label="Листание">
                         <el-form :model="form" size="mini" label-width="120px" @submit.native.prevent>
@@ -385,9 +396,7 @@
                     <!-- Прочее ------------------------------------------------------------------------->
                     <el-tab-pane label="Прочее">
                         <el-form :model="form" size="mini" label-width="120px" @submit.native.prevent>
-                            <el-form-item label="Управление">
-                                <el-checkbox v-model="clickControl">Включить управление кликом</el-checkbox>
-                            </el-form-item>
+                            <div class="partHeader">Подсказки, уведомления</div>
 
                             <el-form-item label="Подсказка">
                                 <el-tooltip :open-delay="500" effect="light">
@@ -415,8 +424,12 @@
                                     <el-checkbox v-model="showServerStorageMessages">Показывать сообщения синхронизации</el-checkbox>
                                 </el-tooltip>
                             </el-form-item>
+                        </el-form>
 
-                            <el-form-item label="URL">
+                        <el-form :model="form" size="mini" label-width="120px" @submit.native.prevent>
+                            <div class="partHeader">Прочее</div>
+
+                            <el-form-item label="Парам. в URL">
                                 <el-tooltip :open-delay="500" effect="light">
                                     <template slot="content">
                                         Добавление параметра "__p" в строке браузера<br>
