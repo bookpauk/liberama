@@ -166,6 +166,7 @@ const settingDefaults = {
     imageHeightLines: 100,
     imageFitWidth: true,
     showServerStorageMessages: true,
+    showWhatsNewDialog: true,
 
     fontShifts: {},
 };

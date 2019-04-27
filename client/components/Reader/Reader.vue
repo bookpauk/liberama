@@ -262,6 +262,7 @@ class Reader extends Vue {
         this.showClickMapPage = settings.showClickMapPage;
         this.clickControl = settings.clickControl;
         this.blinkCachedLoad = settings.blinkCachedLoad;
+        this.showWhatsNewDialog = settings.showWhatsNewDialog;
     }
 
     checkSetStorageAccessKey() {
@@ -282,7 +283,8 @@ class Reader extends Vue {
         await utils.sleep(2000);
 
         const whatsNew = versionHistory[0];
-        if (whatsNew.showUntil >= utils.formatDate(new Date(), 'coDate') &&
+        if (this.showWhatsNewDialog &&
+            whatsNew.showUntil >= utils.formatDate(new Date(), 'coDate') &&
             utils.stringToHex(cryptoUtils.sha256(whatsNew.content)) != this.whatsNewContentHash) {
             this.whatsNewContent = whatsNew.content;
             this.whatsNewVisible = true;

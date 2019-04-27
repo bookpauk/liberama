@@ -106,6 +106,7 @@
                         </el-form>
                         </div>
                     </el-tab-pane>
+
                     <!-- Вид ------------------------------------------------------------------------->                    
                     <el-tab-pane label="Вид">
 
@@ -391,8 +392,8 @@
                                 </el-tooltip>
                             </el-form-item>
                         </el-form>
-                        
                     </el-tab-pane>
+
                     <!-- Прочее ------------------------------------------------------------------------->
                     <el-tab-pane label="Прочее">
                         <el-form :model="form" size="mini" label-width="120px" @submit.native.prevent>
@@ -415,13 +416,22 @@
                                     <el-checkbox v-model="blinkCachedLoad">Предупреждать о загрузке из кэша</el-checkbox>
                                 </el-tooltip>
                             </el-form-item>
-                            <el-form-item label="Уведомления">
+                            <el-form-item label="Уведомление">
                                 <el-tooltip :open-delay="500" effect="light">
                                     <template slot="content">
                                         Показывать уведомления и ошибки от<br>
                                         синхронизатора данных с сервером
                                     </template>
                                     <el-checkbox v-model="showServerStorageMessages">Показывать сообщения синхронизации</el-checkbox>
+                                </el-tooltip>
+                            </el-form-item>
+                            <el-form-item label="Уведомление">
+                                <el-tooltip :open-delay="500" effect="light">
+                                    <template slot="content">
+                                        Показывать уведомления "Что нового"<br>
+                                        при каждом выходе новой версии читалки
+                                    </template>
+                                    <el-checkbox v-model="showWhatsNewDialog">Показывать уведомление "Что нового"</el-checkbox>
                                 </el-tooltip>
                             </el-form-item>
                         </el-form>
@@ -463,6 +473,7 @@
                             </el-form-item>
                         </el-form>
                     </el-tab-pane>
+
                     <!-- Сброс ------------------------------------------------------------------------->
                     <el-tab-pane label="Сброс">
                         <el-button @click="setDefaults">Установить по умолчанию</el-button>
