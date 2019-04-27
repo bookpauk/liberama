@@ -214,6 +214,8 @@ class TextPage extends Vue {
             fontsLoadingStyle.fontSize = this.fontSize + 'px';
             fontsLoadingStyle.top = (this.realHeight/2 - 2*this.fontSize) + 'px';
             fontsLoadingStyle.left = (this.realWidth - this.drawHelper.measureText(flText, {}))/2 + 'px';
+            await sleep(10500);
+            this.$refs.fontsLoading.innerHTML = '';
         })();
 
         //parsed
