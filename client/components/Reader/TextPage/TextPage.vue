@@ -171,6 +171,13 @@ class TextPage extends Vue {
         this.fontShift = this.fontVertShift/100;
         this.textShift = this.textVertShift/100 + this.fontShift;
 
+        //statusBar
+        this.$refs.statusBar.style.left = '0px';
+        this.$refs.statusBar.style.top = (this.statusBarTop ? 1 : this.realHeight - this.statusBarHeight) + 'px';
+
+        this.statusBarColor = this.hex2rgba(this.textColor || '#000000', this.statusBarColorAlpha);
+        this.statusBarClickable = this.drawHelper.statusBarClickable(this.statusBarTop, this.statusBarHeight);
+
         //drawHelper
         this.drawHelper.realWidth = this.realWidth;
         this.drawHelper.realHeight = this.realHeight;
@@ -224,13 +231,6 @@ class TextPage extends Vue {
             this.parsed.imageHeightLines = this.imageHeightLines;
             this.parsed.imageFitWidth = this.imageFitWidth;
         }
-
-        //statusBar
-        this.$refs.statusBar.style.left = '0px';
-        this.$refs.statusBar.style.top = (this.statusBarTop ? 1 : this.realHeight - this.statusBarHeight) + 'px';
-
-        this.statusBarColor = this.hex2rgba(this.textColor || '#000000', this.statusBarColorAlpha);
-        this.statusBarClickable = this.drawHelper.statusBarClickable(this.statusBarTop, this.statusBarHeight);
 
         //scrolling page
         const pageSpace = this.scrollHeight - this.pageLineCount*this.lineHeight;
