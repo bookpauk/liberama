@@ -204,13 +204,17 @@ class TextPage extends Vue {
         this.drawHelper.context = this.context;
 
         //сообщение "Загрузка шрифтов..."
-        const flText = 'Загрузка шрифта...';
-        this.$refs.fontsLoading.innerHTML = flText;
-        const fontsLoadingStyle = this.$refs.fontsLoading.style;
-        fontsLoadingStyle.position = 'absolute';
-        fontsLoadingStyle.fontSize = this.fontSize + 'px';
-        fontsLoadingStyle.top = (this.realHeight/2 - 2*this.fontSize) + 'px';
-        fontsLoadingStyle.left = (this.realWidth - this.drawHelper.measureText(flText, {}))/2 + 'px';
+        this.$refs.fontsLoading.innerHTML = '';
+        (async() => {
+            await sleep(500);
+            const flText = 'Загрузка шрифта';
+            this.$refs.fontsLoading.innerHTML = flText + ' &nbsp;<i class="el-icon-loading"></i>';
+            const fontsLoadingStyle = this.$refs.fontsLoading.style;
+            fontsLoadingStyle.position = 'absolute';
+            fontsLoadingStyle.fontSize = this.fontSize + 'px';
+            fontsLoadingStyle.top = (this.realHeight/2 - 2*this.fontSize) + 'px';
+            fontsLoadingStyle.left = (this.realWidth - this.drawHelper.measureText(flText, {}))/2 + 'px';
+        })();
 
         //parsed
         if (this.parsed) {
