@@ -183,6 +183,7 @@ const state = {
     profiles: {},
     profilesRev: 0,
     allowProfilesSave: false,//подстраховка для разработки
+    whatsNewContentHash: '',
     currentProfile: '',
     settings: Object.assign({}, settingDefaults),
     settingsRev: {},
@@ -213,6 +214,9 @@ const mutations = {
     },
     setAllowProfilesSave(state, value) {
         state.allowProfilesSave = value;
+    },
+    setWhatsNewContentHash(state, value) {
+        state.whatsNewContentHash = value;
     },
     setCurrentProfile(state, value) {
         state.currentProfile = value;

@@ -74,7 +74,21 @@
             <HelpPage v-if="helpActive" ref="helpPage" @help-toggle="helpToggle"></HelpPage>
             <ClickMapPage v-show="clickMapActive" ref="clickMapPage"></ClickMapPage>
             <ServerStorage v-show="hidden" ref="serverStorage"></ServerStorage>
+
+            <el-dialog
+                title="Что нового:"
+                :visible.sync="whatsNewVisible"
+                width="60%">
+                <div v-html="whatsNewContent"></div>
+
+                <span class="clickable" @click="openVersionHistory">Посмотреть историю версий</span>
+                <span slot="footer" class="dialog-footer">
+                    <el-button @click="whatsNewDisable">Больше не показывать</el-button>
+                </span>
+            </el-dialog>
+
         </el-main>
+
     </el-container>
 </template>
 
@@ -101,6 +115,8 @@ import ServerStorage from './ServerStorage/ServerStorage.vue';
 import bookManager from './share/bookManager';
 import readerApi from '../../api/reader';
 import * as utils from '../../share/utils';
+import * as cryptoUtils from '../../share/cryptoUtils';
+import {versionHistory} from './versionHistory';
 
 export default @Component({
     components: {
@@ -172,6 +188,9 @@ class Reader extends Vue {
     actionCur = -1;
     hidden = false;
 
+    whatsNewVisible = false;
+    whatsNewContent = '';
+
     created() {
         this.loading = true;
         this.commit = this.$store.commit;
@@ -231,6 +250,8 @@ class Reader extends Vue {
 
             this.checkSetStorageAccessKey();
             this.loading = false;
+
+            await this.showWhatsNew();
         })();
     }
 
@@ -255,6 +276,28 @@ class Reader extends Vue {
                 );
             });
         }
+    }
+
+    async showWhatsNew() {
+        await utils.sleep(2000);
+
+        const whatsNew = versionHistory[0];
+        if (whatsNew.showUntil >= utils.formatDate(new Date(), 'coDate') &&
+            utils.stringToHex(cryptoUtils.sha256(whatsNew.content)) != this.whatsNewContentHash) {
+            this.whatsNewContent = whatsNew.content;
+            this.whatsNewVisible = true;
+        }
+    }
+
+    openVersionHistory() {
+        this.whatsNewVisible = false;
+        this.versionHistoryToggle();
+    }
+
+    whatsNewDisable() {
+        this.whatsNewVisible = false;
+        const whatsNew = versionHistory[0];
+        this.commit('reader/setWhatsNewContentHash', utils.stringToHex(cryptoUtils.sha256(whatsNew.content)));
     }
 
     get routeParamPos() {
@@ -351,6 +394,10 @@ class Reader extends Vue {
 
     get settings() {
         return this.$store.state.reader.settings;
+    }
+
+    get whatsNewContentHash() {
+        return this.$store.state.reader.whatsNewContentHash;
     }
 
     addAction(pos) {
@@ -519,6 +566,15 @@ class Reader extends Vue {
         if (this.helpActive) {
             this.$nextTick(() => {
                 this.$refs.helpPage.activateDonateHelpPage();
+            });
+        }
+    }
+
+    versionHistoryToggle() {
+        this.helpToggle();
+        if (this.helpActive) {
+            this.$nextTick(() => {
+                this.$refs.helpPage.activateVersionHistoryHelpPage();
             });
         }
     }
@@ -1009,5 +1065,11 @@ i {
 
 .clear {
     color: rgba(0,0,0,0);
+}
+
+.clickable {
+    color: blue;
+    text-decoration: underline;
+    cursor: pointer;
 }
 </style>
