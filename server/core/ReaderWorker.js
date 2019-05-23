@@ -131,32 +131,34 @@ class ReaderWorker {
         return `file://${hash}`;
     }
 
-    async periodicCleanDir(dir, maxSize, timeout) {        
-        const list = await fs.readdir(dir);
+    async periodicCleanDir(dir, maxSize, timeout) {
+        try {
+            const list = await fs.readdir(dir);
 
-        let size = 0;
-        let files = [];
-        for (const name of list) {
-            const stat = await fs.stat(`${dir}/${name}`);
-            if (!stat.isDirectory()) {
-                size += stat.size;
-                files.push({name, stat});
+            let size = 0;
+            let files = [];
+            for (const name of list) {
+                const stat = await fs.stat(`${dir}/${name}`);
+                if (!stat.isDirectory()) {
+                    size += stat.size;
+                    files.push({name, stat});
+                }
             }
+
+            files.sort((a, b) => a.stat.mtimeMs - b.stat.mtimeMs);
+
+            let i = 0;
+            while (i < files.length && size > maxSize) {
+                const file = files[i];
+                await fs.remove(`${dir}/${file.name}`);
+                size -= file.stat.size;
+                i++;
+            }
+        } finally {
+            setTimeout(() => {
+                this.periodicCleanDir(dir, maxSize, timeout);
+            }, timeout);
         }
-
-        files.sort((a, b) => a.stat.mtimeMs - b.stat.mtimeMs);
-
-        let i = 0;
-        while (i < files.length && size > maxSize) {
-            const file = files[i];
-            await fs.remove(`${dir}/${file.name}`);
-            size -= file.stat.size;
-            i++;
-        }
-
-        setTimeout(() => {
-            this.periodicCleanDir(dir, maxSize, timeout);
-        }, timeout);
     }
 }
 
