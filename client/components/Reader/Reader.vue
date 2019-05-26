@@ -249,6 +249,7 @@ class Reader extends Vue {
             }
 
             this.checkSetStorageAccessKey();
+            this.checkActivateDonateHelpPage();
             this.loading = false;
 
             await this.showWhatsNew();
@@ -279,14 +280,27 @@ class Reader extends Vue {
         }
     }
 
+    checkActivateDonateHelpPage() {
+        const q = this.$route.query;
+
+        if (q['donate']) {
+            this.$router.replace(`/reader`);
+            this.helpToggle();
+            this.$nextTick(() => {
+                this.$refs.helpPage.activateDonateHelpPage();
+            });
+        }
+    }
+
     async showWhatsNew() {
         await utils.sleep(2000);
 
         const whatsNew = versionHistory[0];
+        const content = 'Версия ' + whatsNew.header + whatsNew.content;
         if (this.showWhatsNewDialog &&
             whatsNew.showUntil >= utils.formatDate(new Date(), 'coDate') &&
-            utils.stringToHex(cryptoUtils.sha256(whatsNew.content)) != this.whatsNewContentHash) {
-            this.whatsNewContent = whatsNew.content;
+            utils.stringToHex(cryptoUtils.sha256(content)) != this.whatsNewContentHash) {
+            this.whatsNewContent = content;
             this.whatsNewVisible = true;
         }
     }
