@@ -7,35 +7,35 @@
                 </el-tooltip>
 
                 <div>
-                    <el-tooltip content="Действие назад" :open-delay="1000" effect="light">
+                    <el-tooltip v-show="showToolButton['undoAction']" content="Действие назад" :open-delay="1000" effect="light">
                         <el-button ref="undoAction" class="tool-button" :class="buttonActiveClass('undoAction')" @click="buttonClick('undoAction')" ><i class="el-icon-arrow-left"></i></el-button>
                     </el-tooltip>
-                    <el-tooltip content="Действие вперед" :open-delay="1000" effect="light">
+                    <el-tooltip v-show="showToolButton['redoAction']" content="Действие вперед" :open-delay="1000" effect="light">
                         <el-button ref="redoAction" class="tool-button" :class="buttonActiveClass('redoAction')" @click="buttonClick('redoAction')" ><i class="el-icon-arrow-right"></i></el-button>
                     </el-tooltip>
                     <div class="space"></div>
-                    <el-tooltip content="На весь экран" :open-delay="1000" effect="light">
+                    <el-tooltip v-show="showToolButton['fullScreen']" content="На весь экран" :open-delay="1000" effect="light">
                         <el-button ref="fullScreen" class="tool-button" :class="buttonActiveClass('fullScreen')" @click="buttonClick('fullScreen')"><i class="el-icon-rank"></i></el-button>
                     </el-tooltip>
-                    <el-tooltip content="Плавный скроллинг" :open-delay="1000" effect="light">
+                    <el-tooltip v-show="showToolButton['scrolling']" content="Плавный скроллинг" :open-delay="1000" effect="light">
                         <el-button ref="scrolling" class="tool-button" :class="buttonActiveClass('scrolling')" @click="buttonClick('scrolling')"><i class="el-icon-sort"></i></el-button>
                     </el-tooltip>
-                    <el-tooltip content="Перелистнуть" :open-delay="1000" effect="light">
+                    <el-tooltip v-show="showToolButton['setPosition']" content="На страницу" :open-delay="1000" effect="light">
                         <el-button ref="setPosition" class="tool-button" :class="buttonActiveClass('setPosition')" @click="buttonClick('setPosition')"><i class="el-icon-d-arrow-right"></i></el-button>
                     </el-tooltip>
-                    <el-tooltip content="Найти в тексте" :open-delay="1000" effect="light">
+                    <el-tooltip v-show="showToolButton['search']" content="Найти в тексте" :open-delay="1000" effect="light">
                         <el-button ref="search" class="tool-button" :class="buttonActiveClass('search')" @click="buttonClick('search')"><i class="el-icon-search"></i></el-button>
                     </el-tooltip>
-                    <el-tooltip content="Скопировать текст со страницы" :open-delay="1000" effect="light">
+                    <el-tooltip v-show="showToolButton['copyText']" content="Скопировать текст со страницы" :open-delay="1000" effect="light">
                         <el-button ref="copyText" class="tool-button" :class="buttonActiveClass('copyText')" @click="buttonClick('copyText')"><i class="el-icon-edit-outline"></i></el-button>
                     </el-tooltip>
-                    <el-tooltip content="Принудительно обновить книгу в обход кэша" :open-delay="1000" effect="light">
+                    <el-tooltip v-show="showToolButton['refresh']" content="Принудительно обновить книгу в обход кэша" :open-delay="1000" effect="light">
                         <el-button ref="refresh" class="tool-button" :class="buttonActiveClass('refresh')" @click="buttonClick('refresh')">
                             <i class="el-icon-refresh" :class="{clear: !showRefreshIcon}"></i>
                         </el-button>
                     </el-tooltip>
                     <div class="space"></div>
-                    <el-tooltip content="Открыть недавние" :open-delay="1000" effect="light">
+                    <el-tooltip v-show="showToolButton['history']" content="Открыть недавние" :open-delay="1000" effect="light">
                         <el-button ref="history" class="tool-button" :class="buttonActiveClass('history')" @click="buttonClick('history')"><i class="el-icon-document"></i></el-button>
                     </el-tooltip>
                 </div>
@@ -115,7 +115,6 @@ import ServerStorage from './ServerStorage/ServerStorage.vue';
 import bookManager from './share/bookManager';
 import readerApi from '../../api/reader';
 import * as utils from '../../share/utils';
-import * as cryptoUtils from '../../share/cryptoUtils';
 import {versionHistory} from './versionHistory';
 
 export default @Component({
@@ -183,6 +182,7 @@ class Reader extends Vue {
     allowUrlParamBookPos = false;
     showRefreshIcon = true;
     mostRecentBookReactive = null;
+    showToolButton = {};
 
     actionList = [];
     actionCur = -1;
@@ -264,6 +264,7 @@ class Reader extends Vue {
         this.clickControl = settings.clickControl;
         this.blinkCachedLoad = settings.blinkCachedLoad;
         this.showWhatsNewDialog = settings.showWhatsNewDialog;
+        this.showToolButton = settings.showToolButton;
     }
 
     checkSetStorageAccessKey() {
@@ -296,11 +297,10 @@ class Reader extends Vue {
         await utils.sleep(2000);
 
         const whatsNew = versionHistory[0];
-        const content = 'Версия ' + whatsNew.header + whatsNew.content;
         if (this.showWhatsNewDialog &&
             whatsNew.showUntil >= utils.formatDate(new Date(), 'coDate') &&
-            utils.stringToHex(cryptoUtils.sha256(content)) != this.whatsNewContentHash) {
-            this.whatsNewContent = content;
+            whatsNew.header != this.whatsNewContentHash) {
+            this.whatsNewContent = 'Версия ' + whatsNew.header + whatsNew.content;
             this.whatsNewVisible = true;
         }
     }
@@ -313,7 +313,7 @@ class Reader extends Vue {
     whatsNewDisable() {
         this.whatsNewVisible = false;
         const whatsNew = versionHistory[0];
-        this.commit('reader/setWhatsNewContentHash', utils.stringToHex(cryptoUtils.sha256(whatsNew.content)));
+        this.commit('reader/setWhatsNewContentHash', whatsNew.header);
     }
 
     get routeParamPos() {

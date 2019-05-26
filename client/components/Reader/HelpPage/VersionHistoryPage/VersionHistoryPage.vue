@@ -1,6 +1,6 @@
 <template>
     <div id="versionHistoryPage" class="page">
-        <span class="clickable" v-for="item in versionHeader" :key="item" @click="showRelease(item)">
+        <span class="clickable" v-for="(item, index) in versionHeader" :key="index" @click="showRelease(item)">
             <p>
             {{ item }}
             </p>

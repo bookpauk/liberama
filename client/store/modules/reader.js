@@ -1,3 +1,16 @@
+//занчение toolButtons.name не должно совпадать с settingDefaults-propertyName
+const toolButtons = [
+    {name: 'undoAction',  show: true, text: 'Действие назад'},
+    {name: 'redoAction',  show: true, text: 'Действие вперед'},
+    {name: 'fullScreen',  show: true, text: 'На весь экран'},
+    {name: 'scrolling',   show: false, text: 'Плавный скроллинг'},
+    {name: 'setPosition', show: true, text: 'На страницу'},
+    {name: 'search',      show: true, text: 'Найти в тексте'},
+    {name: 'copyText',    show: false, text: 'Скопировать текст со страницы'},
+    {name: 'refresh',     show: true, text: 'Принудительно обновить книгу'},
+    {name: 'history',     show: true, text: 'Открыть недавние'},
+];
+
 const fonts = [
     {name: 'ReaderDefault', label: 'По-умолчанию', fontVertShift: 0},
     {name: 'GEO_1', label: 'BPG Arial', fontVertShift: 10},
@@ -169,12 +182,15 @@ const settingDefaults = {
     showWhatsNewDialog: true,
 
     fontShifts: {},
+    showToolButton: {},
 };
 
 for (const font of fonts)
     settingDefaults.fontShifts[font.name] = font.fontVertShift;
 for (const font of webFonts)
     settingDefaults.fontShifts[font.name] = font.fontVertShift;
+for (const button of toolButtons)
+    settingDefaults.showToolButton[button.name] = button.show;
 
 // initial state
 const state = {
@@ -231,6 +247,7 @@ const mutations = {
 };
 
 export default {
+    toolButtons,
     fonts,
     webFonts,
     settingDefaults,

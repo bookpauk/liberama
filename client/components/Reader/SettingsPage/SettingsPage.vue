@@ -346,6 +346,17 @@
                         </el-form>
                     </el-tab-pane>
 
+                    <!-- Кнопки ------------------------------------------------------------------------->
+                    <el-tab-pane label="Кнопки">
+                        <el-form :model="form" size="mini" label-width="120px" @submit.native.prevent>
+                            <div class="partHeader">Показывать кнопки панели</div>
+
+                            <el-form-item label="" v-for="item in toolButtons" :key="item.name">
+                                <el-checkbox @change="changeShowToolButton(item.name)" :value="showToolButton[item.name]">{{item.text}}</el-checkbox>
+                            </el-form-item>
+                        </el-form>
+                    </el-tab-pane>
+
                     <!-- Управление ------------------------------------------------------------------------->
                     <el-tab-pane label="Управление">
                         <el-form :model="form" size="mini" label-width="120px" @submit.native.prevent>
@@ -541,12 +552,14 @@ class SettingsPage extends Vue {
     fonts = [];
 
     serverStorageKeyVisible = false;
+    toolButtons = [];
 
     created() {
         this.commit = this.$store.commit;
         this.reader = this.$store.state.reader;
 
         this.form = {};
+        this.toolButtons = rstore.toolButtons;
         this.settingsChanged();
     }
 
@@ -560,6 +573,7 @@ class SettingsPage extends Vue {
                 this.form = Object.assign({}, this.form, {[prop]: newValue});
             });
         }
+
         this.fontBold = (this.fontWeight == 'bold');
         this.fontItalic = (this.fontStyle == 'italic');
 
@@ -664,6 +678,10 @@ class SettingsPage extends Vue {
         } catch (e) {
             //
         }
+    }
+
+    changeShowToolButton(buttonName) {
+        this.showToolButton = Object.assign({}, this.showToolButton, {[buttonName]: !this.showToolButton[buttonName]});
     }
 
     async addProfile() {
