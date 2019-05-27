@@ -68,7 +68,7 @@
                 @start-text-search="startTextSearch"
                 @stop-text-search="stopTextSearch">
             </SearchPage>
-            <CopyTextPage v-if="copyTextActive" ref="copyTextPage" @copy-text-toggle="copyTextToggle"></CopyTextPage>            
+            <CopyTextPage v-if="copyTextActive" ref="copyTextPage" @copy-text-toggle="copyTextToggle"></CopyTextPage>
             <HistoryPage v-show="historyActive" ref="historyPage" @load-book="loadBook" @history-toggle="historyToggle"></HistoryPage>
             <SettingsPage v-if="settingsActive" ref="settingsPage" @settings-toggle="settingsToggle"></SettingsPage>
             <HelpPage v-if="helpActive" ref="helpPage" @help-toggle="helpToggle"></HelpPage>
@@ -780,7 +780,7 @@ class Reader extends Vue {
 
         this.progressActive = true;
 
-        await this.$nextTick()
+        await this.$nextTick();
 
         const progress = this.$refs.page;
 
