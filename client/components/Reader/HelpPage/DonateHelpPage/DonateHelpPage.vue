@@ -53,11 +53,10 @@ class DonateHelpPage extends Vue {
 
     async copyAddress(address, prefix) {
         const result = await copyTextToClipboard(address);
-        const msg = (result ? `${prefix}-адрес ${address} успешно скопирован в буфер обмена` : 'Копирование не удалось');
         if (result)
-            this.$notify.success({message: msg});
+            this.$notify.success({message: `${prefix}-адрес ${address} успешно скопирован в буфер обмена`});
         else
-            this.$notify.error({message: msg});
+            this.$notify.error({message: 'Копирование не удалось'});
     }
 }
 //-----------------------------------------------------------------------------
