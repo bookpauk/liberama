@@ -5,10 +5,15 @@
                 <template slot="header">
                     Вставьте текст и нажмите
                     <el-button size="mini" style="font-size: 120%; color: blue" @click="loadBuffer">Загрузить</el-button>
+
                     или F2
                 </template>
 
-                <textarea ref="textArea" class="text"></textarea>
+                <div>
+                    <el-input placeholder="Введите название текста" class="input" v-model="bookTitle"></el-input>
+                </div>
+                <hr/>
+                <textarea ref="textArea" class="text" @paste="calcTitle"></textarea>
             </Window>
         </div>
     </div>
@@ -20,6 +25,7 @@ import Vue from 'vue';
 import Component from 'vue-class-component';
 
 import Window from '../../../share/Window.vue';
+import _ from 'lodash';
 
 export default @Component({
     components: {
@@ -27,6 +33,8 @@ export default @Component({
     },
 })
 class PasteTextPage extends Vue {
+    bookTitle = '';
+
     created() {
     }
 
@@ -34,8 +42,35 @@ class PasteTextPage extends Vue {
         this.$refs.textArea.focus();
     }
 
+    getNonEmptyLine(text, count) {
+        let result = '';
+        const lines = text.split("\n");
+        let i = 0;
+        while (i < lines.length) {
+            if (lines[i].trim() != '') {
+                count--;
+                if (count <= 0) {
+                    result = lines[i];
+                    break;
+                }
+            }
+            i++;
+        }
+        return result;
+    }
+
+    calcTitle(event) {
+        if (this.bookTitle == '') {
+            let text = event.clipboardData.getData('text');
+            this.bookTitle = _.compact([
+                this.getNonEmptyLine(text, 1),
+                this.getNonEmptyLine(text, 2)
+            ]).join(' - ');
+        }
+    }
+
     loadBuffer() {
-        this.$emit('load-buffer', {buffer: this.$refs.textArea.value});
+        this.$emit('load-buffer', {buffer: `<title>${this.bookTitle}</title>${this.$refs.textArea.value}`});
         this.close();
     }
 
@@ -89,5 +124,10 @@ class PasteTextPage extends Vue {
 
 .text:focus {
     outline: none;
+}
+
+hr {
+    margin: 0;
+    padding: 0;
 }
 </style>
