@@ -293,6 +293,21 @@ class Reader extends Vue {
         }
     }
 
+    checkBookPosPercent() {
+        const q = this.$route.query;
+        if (q['__pp']) {
+            let pp = q['__pp'];
+            if (pp) {
+                pp = parseFloat(pp) || 0;
+                const recent = this.mostRecentBook();
+                (async() => {
+                    await utils.sleep(100);
+                    this.bookPos = Math.floor(recent.textLength*pp/100);
+                })();
+            }
+        }
+    }
+
     async showWhatsNew() {
         await utils.sleep(2000);
 
@@ -820,6 +835,7 @@ class Reader extends Vue {
                     progress.hide(); this.progressActive = false;
                     this.blinkCachedLoadMessage();
 
+                    this.checkBookPosPercent();
                     await this.activateClickMapPage();
                     return;
                 }
@@ -868,6 +884,7 @@ class Reader extends Vue {
             } else
                 this.stopBlink = true;
 
+            this.checkBookPosPercent();
             await this.activateClickMapPage();
         } catch (e) {
             progress.hide(); this.progressActive = false;
