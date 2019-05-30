@@ -78,7 +78,7 @@
             <el-dialog
                 title="Что нового:"
                 :visible.sync="whatsNewVisible"
-                width="60%">
+                width="80%">
                 <div style="line-height: 20px" v-html="whatsNewContent"></div>
 
                 <span class="clickable" @click="openVersionHistory">Посмотреть историю версий</span>
