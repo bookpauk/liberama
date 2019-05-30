@@ -16,6 +16,9 @@
                     <el-tab-pane label="Мышь/тачпад">
                         <MouseHelpPage></MouseHelpPage>
                     </el-tab-pane>
+                    <el-tab-pane label="История версий" name="releases">
+                        <VersionHistoryPage></VersionHistoryPage>
+                    </el-tab-pane>
                     <el-tab-pane label="Помочь проекту" name="donate">
                         <DonateHelpPage></DonateHelpPage>
                     </el-tab-pane>
@@ -36,6 +39,7 @@ import CommonHelpPage from './CommonHelpPage/CommonHelpPage.vue';
 import HotkeysHelpPage from './HotkeysHelpPage/HotkeysHelpPage.vue';
 import MouseHelpPage from './MouseHelpPage/MouseHelpPage.vue';
 import DonateHelpPage from './DonateHelpPage/DonateHelpPage.vue';
+import VersionHistoryPage from './VersionHistoryPage/VersionHistoryPage.vue';
 
 export default @Component({
     components: {
@@ -44,6 +48,7 @@ export default @Component({
         HotkeysHelpPage,
         MouseHelpPage,
         DonateHelpPage,
+        VersionHistoryPage,
     },
 })
 class HelpPage extends Vue {
@@ -55,6 +60,10 @@ class HelpPage extends Vue {
 
     activateDonateHelpPage() {
         this.selectedTab = 'donate';
+    }
+
+    activateVersionHistoryHelpPage() {
+        this.selectedTab = 'releases';
     }
 
     keyHook(event) {

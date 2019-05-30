@@ -18,6 +18,10 @@
                 Загрузить файл с диска
             </el-button>
             <div class="space"></div>
+            <el-button size="mini" @click="loadBufferClick">
+                Из буфера обмена
+            </el-button>
+            <div class="space"></div>
             <span v-if="mode == 'omnireader'" class="bottom-span clickable" @click="openComments">Комментарии</span>
         </div>
 
@@ -26,6 +30,8 @@
             <span class="bottom-span clickable" @click="openDonate">Помочь проекту</span>
             <span class="bottom-span">{{ version }}</span>
         </div>
+
+        <PasteTextPage v-if="pasteTextActive" ref="pasteTextPage" @paste-text-toggle="pasteTextToggle" @load-buffer="loadBuffer"></PasteTextPage>
     </div>
 </template>
 
@@ -33,12 +39,17 @@
 //-----------------------------------------------------------------------------
 import Vue from 'vue';
 import Component from 'vue-class-component';
+import PasteTextPage from './PasteTextPage/PasteTextPage.vue';
 
 export default @Component({
+    components: {
+        PasteTextPage,
+    },
 })
 class LoaderPage extends Vue {
     bookUrl = null;
     loadPercent = 0;
+    pasteTextActive = false;
 
     created() {
         this.commit = this.$store.commit;
@@ -83,10 +94,25 @@ class LoaderPage extends Vue {
     }
 
     loadFile() {
-        const file = this.$refs.file.files[0];
+        const file = this.$refs.file.files[0];        
         this.$refs.file.value = '';
         if (file)
             this.$emit('load-file', {file});
+    }
+
+    loadBufferClick() {
+        this.pasteTextToggle();
+    }
+
+    loadBuffer(opts) {
+        if (opts.buffer.length) {
+            const file = new File([opts.buffer], 'dummyName-PasteFromClipboard');
+            this.$emit('load-file', {file});
+        }
+    }
+
+    pasteTextToggle() {
+        this.pasteTextActive = !this.pasteTextActive;
     }
 
     openHelp() {
@@ -102,6 +128,10 @@ class LoaderPage extends Vue {
     }
 
     keyHook(event) {
+        if (this.pasteTextActive) {
+            return this.$refs.pasteTextPage.keyHook(event);
+        }
+
         //недостатки сторонних ui
         const input = this.$refs.input.$refs.input;
         if (document.activeElement === input && event.type == 'keydown' && event.code == 'Enter') {

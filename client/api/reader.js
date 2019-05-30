@@ -5,11 +5,11 @@ import {Buffer} from 'safe-buffer';
 import * as utils from '../share/utils';
 
 const api = axios.create({
-  baseURL: '/api/reader'
+    baseURL: '/api/reader'
 });
 
 const workerApi = axios.create({
-  baseURL: '/api/worker'
+    baseURL: '/api/worker'
 });
 
 class Reader {

@@ -106,6 +106,7 @@
                         </el-form>
                         </div>
                     </el-tab-pane>
+
                     <!-- Вид ------------------------------------------------------------------------->                    
                     <el-tab-pane label="Вид">
 
@@ -345,6 +346,28 @@
                         </el-form>
                     </el-tab-pane>
 
+                    <!-- Кнопки ------------------------------------------------------------------------->
+                    <el-tab-pane label="Кнопки">
+                        <el-form :model="form" size="mini" label-width="120px" @submit.native.prevent>
+                            <div class="partHeader">Показывать кнопки панели</div>
+
+                            <el-form-item label="" v-for="item in toolButtons" :key="item.name">
+                                <el-checkbox @change="changeShowToolButton(item.name)" :value="showToolButton[item.name]">{{item.text}}</el-checkbox>
+                            </el-form-item>
+                        </el-form>
+                    </el-tab-pane>
+
+                    <!-- Управление ------------------------------------------------------------------------->
+                    <el-tab-pane label="Управление">
+                        <el-form :model="form" size="mini" label-width="120px" @submit.native.prevent>
+                            <div class="partHeader">Управление</div>
+
+                            <el-form-item label="">
+                                <el-checkbox v-model="clickControl">Включить управление кликом</el-checkbox>
+                            </el-form-item>
+                        </el-form>
+                    </el-tab-pane>
+
                     <!-- Листание ------------------------------------------------------------------------->
                     <el-tab-pane label="Листание">
                         <el-form :model="form" size="mini" label-width="120px" @submit.native.prevent>
@@ -380,14 +403,12 @@
                                 </el-tooltip>
                             </el-form-item>
                         </el-form>
-                        
                     </el-tab-pane>
+
                     <!-- Прочее ------------------------------------------------------------------------->
                     <el-tab-pane label="Прочее">
                         <el-form :model="form" size="mini" label-width="120px" @submit.native.prevent>
-                            <el-form-item label="Управление">
-                                <el-checkbox v-model="clickControl">Включить управление кликом</el-checkbox>
-                            </el-form-item>
+                            <div class="partHeader">Подсказки, уведомления</div>
 
                             <el-form-item label="Подсказка">
                                 <el-tooltip :open-delay="500" effect="light">
@@ -406,7 +427,7 @@
                                     <el-checkbox v-model="blinkCachedLoad">Предупреждать о загрузке из кэша</el-checkbox>
                                 </el-tooltip>
                             </el-form-item>
-                            <el-form-item label="Уведомления">
+                            <el-form-item label="Уведомление">
                                 <el-tooltip :open-delay="500" effect="light">
                                     <template slot="content">
                                         Показывать уведомления и ошибки от<br>
@@ -415,8 +436,21 @@
                                     <el-checkbox v-model="showServerStorageMessages">Показывать сообщения синхронизации</el-checkbox>
                                 </el-tooltip>
                             </el-form-item>
+                            <el-form-item label="Уведомление">
+                                <el-tooltip :open-delay="500" effect="light">
+                                    <template slot="content">
+                                        Показывать уведомления "Что нового"<br>
+                                        при каждом выходе новой версии читалки
+                                    </template>
+                                    <el-checkbox v-model="showWhatsNewDialog">Показывать уведомление "Что нового"</el-checkbox>
+                                </el-tooltip>
+                            </el-form-item>
+                        </el-form>
 
-                            <el-form-item label="URL">
+                        <el-form :model="form" size="mini" label-width="120px" @submit.native.prevent>
+                            <div class="partHeader">Прочее</div>
+
+                            <el-form-item label="Парам. в URL">
                                 <el-tooltip :open-delay="500" effect="light">
                                     <template slot="content">
                                         Добавление параметра "__p" в строке браузера<br>
@@ -450,6 +484,7 @@
                             </el-form-item>
                         </el-form>
                     </el-tab-pane>
+
                     <!-- Сброс ------------------------------------------------------------------------->
                     <el-tab-pane label="Сброс">
                         <el-button @click="setDefaults">Установить по умолчанию</el-button>
@@ -517,12 +552,14 @@ class SettingsPage extends Vue {
     fonts = [];
 
     serverStorageKeyVisible = false;
+    toolButtons = [];
 
     created() {
         this.commit = this.$store.commit;
         this.reader = this.$store.state.reader;
 
         this.form = {};
+        this.toolButtons = rstore.toolButtons;
         this.settingsChanged();
     }
 
@@ -536,6 +573,7 @@ class SettingsPage extends Vue {
                 this.form = Object.assign({}, this.form, {[prop]: newValue});
             });
         }
+
         this.fontBold = (this.fontWeight == 'bold');
         this.fontItalic = (this.fontStyle == 'italic');
 
@@ -640,6 +678,10 @@ class SettingsPage extends Vue {
         } catch (e) {
             //
         }
+    }
+
+    changeShowToolButton(buttonName) {
+        this.showToolButton = Object.assign({}, this.showToolButton, {[buttonName]: !this.showToolButton[buttonName]});
     }
 
     async addProfile() {

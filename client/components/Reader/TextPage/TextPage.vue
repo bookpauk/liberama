@@ -171,6 +171,13 @@ class TextPage extends Vue {
         this.fontShift = this.fontVertShift/100;
         this.textShift = this.textVertShift/100 + this.fontShift;
 
+        //statusBar
+        this.$refs.statusBar.style.left = '0px';
+        this.$refs.statusBar.style.top = (this.statusBarTop ? 1 : this.realHeight - this.statusBarHeight) + 'px';
+
+        this.statusBarColor = this.hex2rgba(this.textColor || '#000000', this.statusBarColorAlpha);
+        this.statusBarClickable = this.drawHelper.statusBarClickable(this.statusBarTop, this.statusBarHeight);
+
         //drawHelper
         this.drawHelper.realWidth = this.realWidth;
         this.drawHelper.realHeight = this.realHeight;
@@ -197,13 +204,19 @@ class TextPage extends Vue {
         this.drawHelper.context = this.context;
 
         //сообщение "Загрузка шрифтов..."
-        const flText = 'Загрузка шрифта...';
-        this.$refs.fontsLoading.innerHTML = flText;
-        const fontsLoadingStyle = this.$refs.fontsLoading.style;
-        fontsLoadingStyle.position = 'absolute';
-        fontsLoadingStyle.fontSize = this.fontSize + 'px';
-        fontsLoadingStyle.top = (this.realHeight/2 - 2*this.fontSize) + 'px';
-        fontsLoadingStyle.left = (this.realWidth - this.drawHelper.measureText(flText, {}))/2 + 'px';
+        this.$refs.fontsLoading.innerHTML = '';
+        (async() => {
+            await sleep(500);
+            const flText = 'Загрузка шрифта';
+            this.$refs.fontsLoading.innerHTML = flText + ' &nbsp;<i class="el-icon-loading"></i>';
+            const fontsLoadingStyle = this.$refs.fontsLoading.style;
+            fontsLoadingStyle.position = 'absolute';
+            fontsLoadingStyle.fontSize = this.fontSize + 'px';
+            fontsLoadingStyle.top = (this.realHeight/2 - 2*this.fontSize) + 'px';
+            fontsLoadingStyle.left = (this.realWidth - this.drawHelper.measureText(flText, {}))/2 + 'px';
+            await sleep(10500);
+            this.$refs.fontsLoading.innerHTML = '';
+        })();
 
         //parsed
         if (this.parsed) {
@@ -224,13 +237,6 @@ class TextPage extends Vue {
             this.parsed.imageHeightLines = this.imageHeightLines;
             this.parsed.imageFitWidth = this.imageFitWidth;
         }
-
-        //statusBar
-        this.$refs.statusBar.style.left = '0px';
-        this.$refs.statusBar.style.top = (this.statusBarTop ? 1 : this.realHeight - this.statusBarHeight) + 'px';
-
-        this.statusBarColor = this.hex2rgba(this.textColor || '#000000', this.statusBarColorAlpha);
-        this.statusBarClickable = this.drawHelper.statusBarClickable(this.statusBarTop, this.statusBarHeight);
 
         //scrolling page
         const pageSpace = this.scrollHeight - this.pageLineCount*this.lineHeight;
