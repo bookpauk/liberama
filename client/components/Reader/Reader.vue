@@ -79,7 +79,7 @@
                 title="Что нового:"
                 :visible.sync="whatsNewVisible"
                 width="60%">
-                <div v-html="whatsNewContent"></div>
+                <div style="line-height: 20px" v-html="whatsNewContent"></div>
 
                 <span class="clickable" @click="openVersionHistory">Посмотреть историю версий</span>
                 <span slot="footer" class="dialog-footer">
@@ -242,7 +242,7 @@ class Reader extends Vue {
 
             if (this.$root.rootRoute == '/reader') {
                 if (this.routeParamUrl) {
-                    await this.loadBook({url: this.routeParamUrl, bookPos: this.routeParamPos});
+                    await this.loadBook({url: this.routeParamUrl, bookPos: this.routeParamPos, force: this.routeParamRefresh});
                 } else {
                     this.loaderActive = true;
                 }
@@ -350,6 +350,11 @@ class Reader extends Vue {
         }
         
         return decodeURIComponent(result);
+    }
+
+    get routeParamRefresh() {
+        const q = this.$route.query;
+        return !!q['__refresh'];
     }
 
     bookPosChanged(event) {
