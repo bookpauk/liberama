@@ -2,9 +2,9 @@ const fs = require('fs-extra');
 const zlib = require('zlib');
 const crypto = require('crypto');
 const path = require('path');
-const extractZip = require('extract-zip');
 const unbzip2Stream = require('unbzip2-stream');
-const tar = require('tar-fs')
+const tar = require('tar-fs');
+const DecompressZip = require('decompress-zip');
 
 const utils = require('./utils');
 const FileDetector = require('./FileDetector');
@@ -114,15 +114,23 @@ class FileDecompressor {
     async unZip(filename, outputDir) {
         return new Promise((resolve, reject) => {
             const files = [];
-            extractZip(filename, {
-                dir: outputDir,
-                onEntry: (entry) => {
-                    files.push({path: entry.fileName, size: entry.uncompressedSize});
-                }
-            }, (err) => {
-                if (err)
-                    reject(err);
+            const unzipper = new DecompressZip(filename);
+
+            unzipper.on('error', function(err) {
+                reject(err);
+            });
+
+            unzipper.on('extract', function() {
                 resolve(files);
+            });
+
+            unzipper.extract({
+                path: outputDir,
+                filter: function(file) {
+                    if (file.type == 'File')
+                        files.push({path: file.path, size: file.uncompressedSize});
+                    return true;
+                }
             });
         });
     }
@@ -182,6 +190,10 @@ class FileDecompressor {
                     reject(e);
                 }
                 resolve([file]);
+            });
+
+            stream.on('error', (err) => {
+                reject(err);
             });
 
             inputStream.on('error', (err) => {
