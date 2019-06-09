@@ -23,7 +23,6 @@
             oncontextmenu="return false;">
             <div v-show="showStatusBar" v-html="statusBarClickable" @mousedown.prevent.stop @touchstart.stop
                 @click.prevent.stop="onStatusBarClick"></div>
-            <div v-show="fontsLoading" ref="fontsLoading"></div>
         </div>
         <div v-show="!clickControl && showStatusBar" class="layout" v-html="statusBarClickable" @mousedown.prevent.stop @touchstart.stop
             @click.prevent.stop="onStatusBarClick"></div>
@@ -77,7 +76,6 @@ class TextPage extends Vue {
     page2 = null;
     statusBar = null;
     statusBarClickable = null;
-    fontsLoading = null;
 
     lastBook = null;
     bookPos = 0;
@@ -203,21 +201,6 @@ class TextPage extends Vue {
         this.drawHelper.lineHeight = this.lineHeight;
         this.drawHelper.context = this.context;
 
-        //сообщение "Загрузка шрифтов..."
-        this.$refs.fontsLoading.innerHTML = '';
-        (async() => {
-            await sleep(500);
-            const flText = 'Загрузка шрифта';
-            this.$refs.fontsLoading.innerHTML = flText + ' &nbsp;<i class="el-icon-loading"></i>';
-            const fontsLoadingStyle = this.$refs.fontsLoading.style;
-            fontsLoadingStyle.position = 'absolute';
-            fontsLoadingStyle.fontSize = this.fontSize + 'px';
-            fontsLoadingStyle.top = (this.realHeight/2 - 2*this.fontSize) + 'px';
-            fontsLoadingStyle.left = (this.realWidth - this.drawHelper.measureText(flText, {}))/2 + 'px';
-            await sleep(10500);
-            this.$refs.fontsLoading.innerHTML = '';
-        })();
-
         //parsed
         if (this.parsed) {
             this.parsed.p = this.p;
@@ -274,6 +257,18 @@ class TextPage extends Vue {
     async loadFonts() {
         this.fontsLoading = true;
 
+        let inst = null;
+        (async() => {
+            await sleep(500);
+            if (this.fontsLoading)
+                inst = this.$notify({
+                  title: '',
+                  dangerouslyUseHTMLString: true,
+                  message: 'Загрузка шрифта &nbsp;<i class="el-icon-loading"></i>',
+                  duration: 0
+                });
+        })();
+
         if (!this.fontsLoaded)
             this.fontsLoaded = {};
         //загрузка дин.шрифта
@@ -304,6 +299,8 @@ class TextPage extends Vue {
         }
 
         this.fontsLoading = false;
+        if (inst)
+            inst.close();
     }
 
     getSettings() {
@@ -1124,6 +1121,10 @@ class TextPage extends Vue {
 
 .over-hidden {
     overflow: hidden;
+}
+
+.on-top {
+    z-index: 100;
 }
 
 .back {
