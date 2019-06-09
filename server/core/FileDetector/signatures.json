@@ -707,7 +707,8 @@
     "rules": [
       { "type": "or", "rules":
       [
-        { "type": "equal", "end": 19, "bytes": "3c3f786d6c2076657273696f6e3d22312e3022" }
+        { "type": "equal", "end": 19, "bytes": "3c3f786d6c2076657273696f6e3d22312e3022" },
+        { "type": "equal", "end": 22, "bytes": "efbbbf3c3f786d6c2076657273696f6e3d22312e3022" }
       ]
       }
     ]
