@@ -145,11 +145,13 @@ class BookManager {
 
 
     async deflateWithProgress(data, callback) {
-        const chunkSize = 16384;
-        const deflator = new utils.pako.Deflate({level: 9});
+        const chunkSize = 128*1024;
+        const deflator = new utils.pako.Deflate({level: 5});
 
         let chunkTotal = 1 + Math.floor(data.length/chunkSize);
         let chunkNum = 0;
+        let perc = 0;
+        let prevPerc = 0;
 
         for (var i = 0; i < data.length; i += chunkSize) {
             if ((i + chunkSize) >= data.length) {
@@ -158,8 +160,13 @@ class BookManager {
                 deflator.push(data.substring(i, i + chunkSize), false);
             }
             chunkNum++;
-            callback(Math.round(chunkNum/chunkTotal*100));
-            await utils.sleep(1);
+
+            perc = Math.round(chunkNum/chunkTotal*100);
+            if (perc != prevPerc) {
+                callback(perc);
+                await utils.sleep(1);
+                prevPerc = perc;
+            }
         }
 
         if (deflator.err) {
