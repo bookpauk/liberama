@@ -22,7 +22,15 @@
                 Из буфера обмена
             </el-button>
             <div class="space"></div>
-            <span v-if="mode == 'omnireader'" class="bottom-span clickable" @click="openComments">Комментарии</span>
+            <div class="space"></div>
+            <div v-if="mode == 'omnireader'" ref="yaShare2" class="ya-share2" 
+                data-services="collections,vkontakte,facebook,odnoklassniki,twitter,telegram"
+                data-description="Чтение fb2-книг онлайн. Загрузка любой страницы интернета одним кликом, синхронизация между устройствами, удобное управление, регистрация не требуется."
+                data-title="Omni Reader - браузерная онлайн-читалка"
+                data-url="http://omnireader.ru">
+            </div>
+            <div class="space"></div>
+            <span v-if="mode == 'omnireader'" class="bottom-span clickable" @click="openComments">Отзывы о читалке</span>
         </div>
 
         <div class="part bottom">
@@ -57,6 +65,8 @@ class LoaderPage extends Vue {
 
     mounted() {
         this.progress = this.$refs.progress;
+        if (this.mode == 'omnireader')
+            Ya.share2(this.$refs.yaShare2);// eslint-disable-line no-undef
     }
 
     activated() {
@@ -64,7 +74,7 @@ class LoaderPage extends Vue {
     }
 
     get title() {
-        if (this.$store.state.config.mode == 'omnireader')
+        if (this.mode == 'omnireader')
             return 'Omni Reader - браузерная онлайн-читалка.';
         return 'Универсальная читалка книг и ресурсов интернета.';
 
@@ -160,7 +170,7 @@ class LoaderPage extends Vue {
     flex: 1;
     display: flex;
     flex-direction: column;
-    min-height: 340px;
+    min-height: 400px;
 }
 
 .part {
