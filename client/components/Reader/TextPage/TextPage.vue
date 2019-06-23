@@ -229,8 +229,8 @@ class TextPage extends Vue {
         let page1 = this.$refs.scrollBox1;
         let page2 = this.$refs.scrollBox2;
         
-        page1.style.perspective = '1200px';
-        page2.style.perspective = '1200px';
+        page1.style.perspective = '3072px';
+        page2.style.perspective = '3072px';
 
         page1.style.width = this.w + this.indentLR + 'px';
         page2.style.width = this.w + this.indentLR + 'px';
@@ -664,6 +664,10 @@ class TextPage extends Vue {
                 case 'rotate':
                     await this.drawHelper.doPageAnimationRotate(page1, page2, 
                         duration, this.pageChangeDirectionDown, transition1Finish, transition2Finish);
+                    break;
+                case 'flip':
+                    await this.drawHelper.doPageAnimationFlip(page1, page2, 
+                        duration, this.pageChangeDirectionDown, transition1Finish, transition2Finish, this.backgroundColor);
                     break;
             }
             

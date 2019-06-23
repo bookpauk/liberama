@@ -382,6 +382,7 @@
                                         <el-option label="Протаивание" value="thaw"></el-option>
                                         <el-option label="Мерцание" value="blink"></el-option>
                                         <el-option label="Вращение" value="rotate"></el-option>
+                                        <el-option v-show="wallpaper == ''" label="Листание" value="flip"></el-option>
                                     </el-select>
                                 </el-col>
                             </el-form-item>
@@ -539,6 +540,10 @@ export default @Component({
         webFontName: function(newValue) {
             const font = (newValue ? newValue : this.fontName);
             this.vertShift = this.fontShifts[font] || 0;
+        },
+        wallpaper: function(newValue) {
+            if (newValue != '' && this.pageChangeAnimation == 'flip')
+                this.pageChangeAnimation = '';
         },
     },
 })

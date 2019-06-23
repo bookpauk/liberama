@@ -346,5 +346,29 @@ export default class DrawHelper {
         }
     }
 
+    async doPageAnimationFlip(page1, page2, duration, isDown, animation1Finish, animation2Finish, backgroundColor) {
+        page2.style.background = backgroundColor;
+
+        if (isDown) {
+            page2.style.transformOrigin = '10%';
+            await sleep(30);
+
+            page2.style.transformOrigin = '0%';
+            page2.style.transition = `${duration}ms ease-in-out`;
+            page2.style.transform = `rotateY(-120deg)`;
+            await animation2Finish(duration);
+        } else {
+            page2.style.transformOrigin = '90%';
+            await sleep(30);
+
+            page2.style.transformOrigin = '100%';
+            page2.style.transition = `${duration}ms ease-in-out`;
+            page2.style.transform = `rotateY(120deg)`;
+            await animation2Finish(duration);
+        }
+
+        page2.style.transformOrigin = 'center';
+        page2.style.background = '';
+    }
 
 }
