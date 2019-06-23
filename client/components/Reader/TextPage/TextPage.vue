@@ -228,6 +228,10 @@ class TextPage extends Vue {
             y += this.statusBarHeight*(this.statusBarTop ? 1 : 0);
         let page1 = this.$refs.scrollBox1;
         let page2 = this.$refs.scrollBox2;
+        
+        page1.style.perspective = '1200px';
+        page2.style.perspective = '1200px';
+
         page1.style.width = this.w + this.indentLR + 'px';
         page2.style.width = this.w + this.indentLR + 'px';
         page1.style.height = this.scrollHeight - (pageSpace > 0 ? pageSpace : 0) + 'px';
@@ -628,7 +632,7 @@ class TextPage extends Vue {
             const animation1Finish = this.generateWaitingFunc('resolveAnimation1Finish', 'stopAnimation');
             const animation2Finish = this.generateWaitingFunc('resolveAnimation2Finish', 'stopAnimation');
             const transition1Finish = this.generateWaitingFunc('resolveTransition1Finish', 'stopAnimation');
-            //const transition2Finish = this.generateWaitingFunc('resolveTransition2Finish', 'stopAnimation');
+            const transition2Finish = this.generateWaitingFunc('resolveTransition2Finish', 'stopAnimation');
             
             const duration = Math.round(3000*(1 - this.pageChangeAnimationSpeed/100));
             let page1 = this.$refs.scrollingPage1;
@@ -656,6 +660,10 @@ class TextPage extends Vue {
 
                     page1.style.height = this.scrollHeight + this.lineHeight + 'px';
                     page2.style.height = this.scrollHeight + this.lineHeight + 'px';
+                    break;
+                case 'rotate':
+                    await this.drawHelper.doPageAnimationRotate(page1, page2, 
+                        duration, this.pageChangeDirectionDown, transition1Finish, transition2Finish);
                     break;
             }
             
@@ -1192,4 +1200,5 @@ class TextPage extends Vue {
     0%   { opacity: 1; }
     100% { opacity: 0; }
 }
+
 </style>

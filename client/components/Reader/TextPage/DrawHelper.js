@@ -317,4 +317,34 @@ export default class DrawHelper {
             await animation1Finish(duration);
         }
     }
+
+    async doPageAnimationRotate(page1, page2, duration, isDown, animation1Finish, animation2Finish) {
+        if (isDown) {
+            page1.style.transform = `rotateY(90deg)`;
+            await sleep(30);
+
+            page2.style.transition = `${duration/2}ms ease-in`;
+            page2.style.transform = `rotateY(-90deg)`;
+
+            await animation2Finish(duration/2);
+
+            page1.style.transition = `${duration/2}ms ease-out`;
+            page1.style.transform = `rotateY(0deg)`;
+            await animation1Finish(duration/2);
+        } else {
+            page1.style.transform = `rotateY(-90deg)`;
+            await sleep(30);
+
+            page2.style.transition = `${duration/2}ms ease-in`;
+            page2.style.transform = `rotateY(90deg)`;
+
+            await animation2Finish(duration/2);
+
+            page1.style.transition = `${duration/2}ms ease-out`;
+            page1.style.transform = `rotateY(0deg)`;
+            await animation1Finish(duration/2);
+        }
+    }
+
+
 }

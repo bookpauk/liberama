@@ -381,6 +381,7 @@
                                         <el-option label="Вправо-влево" value="rightShift"></el-option>
                                         <el-option label="Протаивание" value="thaw"></el-option>
                                         <el-option label="Мерцание" value="blink"></el-option>
+                                        <el-option label="Вращение" value="rotate"></el-option>
                                     </el-select>
                                 </el-col>
                             </el-form-item>
