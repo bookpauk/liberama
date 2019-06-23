@@ -28,7 +28,7 @@ class ConvertHtml extends ConvertBase {
         } else {
             isText = opts.isText;
         }
-        const {cutTitle} = opts;
+        let {cutTitle} = opts;
 
         let titleInfo = {};
         let desc = {_n: 'description', 'title-info': titleInfo};
@@ -123,8 +123,11 @@ class ConvertHtml extends ConvertBase {
                 }
             }
 
-            if (tag == 'title')
+            if (tag == 'title' || tag == 'cut-title') {
                 inTitle = true;
+                if (tag == 'cut-title')
+                    cutTitle = true;
+            }
 
             if (tag == 'fb2-image') {
                 inImage = true;
@@ -153,7 +156,7 @@ class ConvertHtml extends ConvertBase {
                 }
             }
 
-            if (tag == 'title')
+            if (tag == 'title' || tag == 'cut-title')
                 inTitle = false;
 
             if (tag == 'fb2-image')

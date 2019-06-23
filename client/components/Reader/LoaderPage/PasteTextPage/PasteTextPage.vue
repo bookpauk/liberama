@@ -26,6 +26,7 @@ import Component from 'vue-class-component';
 
 import Window from '../../../share/Window.vue';
 import _ from 'lodash';
+import * as utils from '../../../../share/utils';
 
 export default @Component({
     components: {
@@ -42,7 +43,7 @@ class PasteTextPage extends Vue {
         this.$refs.textArea.focus();
     }
 
-    getNonEmptyLine(text, count) {
+    getNonEmptyLine3words(text, count) {
         let result = '';
         const lines = text.split("\n");
         let i = 0;
@@ -56,21 +57,23 @@ class PasteTextPage extends Vue {
             }
             i++;
         }
-        return result;
+
+        result = result.trim().split(' ');
+        return result.slice(0, 3).join(' ');
     }
 
     calcTitle(event) {
         if (this.bookTitle == '') {
             let text = event.clipboardData.getData('text');
-            this.bookTitle = _.compact([
-                this.getNonEmptyLine(text, 1),
-                this.getNonEmptyLine(text, 2)
+            this.bookTitle = `Из буфера обмена ${utils.formatDate(new Date(), 'noDate')}: ` + _.compact([
+                this.getNonEmptyLine3words(text, 1),
+                this.getNonEmptyLine3words(text, 2)
             ]).join(' - ');
         }
     }
 
     loadBuffer() {
-        this.$emit('load-buffer', {buffer: `<title>${this.bookTitle}</title>${this.$refs.textArea.value}`});
+        this.$emit('load-buffer', {buffer: `<cut-title>${this.bookTitle}</cut-title>${this.$refs.textArea.value}`});
         this.close();
     }
 
