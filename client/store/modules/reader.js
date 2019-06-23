@@ -153,7 +153,7 @@ const settingDefaults = {
     indentLR: 15,// px, отступ всего текста слева и справа
     indentTB: 0,// px, отступ всего текста сверху и снизу
     wordWrap: true,//перенос по слогам
-    keepLastToFirst: true,// перенос последней строки в первую при листании
+    keepLastToFirst: false,// перенос последней строки в первую при листании
 
     showStatusBar: true,
     statusBarTop: false,// top, bottom
@@ -163,7 +163,7 @@ const settingDefaults = {
     scrollingDelay: 3000,// замедление, ms
     scrollingType: 'ease-in-out', //linear, ease, ease-in, ease-out, ease-in-out
 
-    pageChangeAnimation: 'blink',// '' - нет, downShift, rightShift, thaw - протаивание, blink - мерцание
+    pageChangeAnimation: 'flip',// '' - нет, downShift, rightShift, thaw - протаивание, blink - мерцание, rotate - вращение, flip - листание
     pageChangeAnimationSpeed: 80, //0-100%
 
     allowUrlParamBookPos: false,

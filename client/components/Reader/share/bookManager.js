@@ -143,6 +143,34 @@ class BookManager {
         }
     }
 
+
+    async deflateWithProgress(data, callback) {
+        const chunkSize = 16384;
+        const deflator = new utils.pako.Deflate({level: 9});
+
+        let chunkTotal = 1 + Math.floor(data.length/chunkSize);
+        let chunkNum = 0;
+
+        for (var i = 0; i < data.length; i += chunkSize) {
+            if ((i + chunkSize) >= data.length) {
+                deflator.push(data.substring(i, i + chunkSize), true);
+            } else {
+                deflator.push(data.substring(i, i + chunkSize), false);
+            }
+            chunkNum++;
+            callback(Math.round(chunkNum/chunkTotal*100));
+            await utils.sleep(1);
+        }
+
+        if (deflator.err) {
+            throw new Error(deflator.msg);
+        }
+        
+        callback(100);
+
+        return deflator.result;
+    }
+
     async addBook(newBook, callback) {
         if (!this.books) 
             await this.init();
@@ -151,7 +179,12 @@ class BookManager {
         meta.addTime = Date.now();
 
         const cb = (perc) => {
-            const p = Math.round(80*perc/100);
+            const p = Math.round(30*perc/100);
+            callback(p);
+        };
+
+        const cb2 = (perc) => {
+            const p = Math.round(30 + 65*perc/100);
             callback(p);
         };
 
@@ -160,10 +193,11 @@ class BookManager {
 
         let data = newBook.data;
         if (result.dataCompressed) {
-            data = utils.pako.deflate(data, {level: 9});
+            //data = utils.pako.deflate(data, {level: 9});
+            data = await this.deflateWithProgress(data, cb2);
             result.dataCompressedLength = data.byteLength;
         }
-        callback(90);
+        callback(95);
 
         this.books[meta.key] = result;
         this.booksCached[meta.key] = this.metaOnly(result);
@@ -202,7 +236,12 @@ class BookManager {
             await utils.sleep(10);
 
             if (result.dataCompressed) {
-                data = utils.pako.inflate(data, {to: 'string'});
+                try {
+                    data = utils.pako.inflate(data, {to: 'string'});
+                } catch (e) {
+                    this.delBook(meta);
+                    throw e;
+                }
             }
             callback(20);
 

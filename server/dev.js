@@ -20,7 +20,7 @@ function webpackDevMiddleware(app) {
 function logQueries(app) {
     app.use(function(req, res, next) {
         const start = Date.now();
-        log(`${req.method} ${req.originalUrl} ${JSON.stringify(req.body)}`);
+        log(`${req.method} ${req.originalUrl} ${JSON.stringify(req.body).substr(0, 2000)}`);
         //log(`${JSON.stringify(req.headers, null, 2)}`)
         res.once('finish', () => {
             log(`${Date.now() - start}ms`);

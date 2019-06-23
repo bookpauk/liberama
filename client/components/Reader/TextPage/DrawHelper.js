@@ -317,4 +317,58 @@ export default class DrawHelper {
             await animation1Finish(duration);
         }
     }
+
+    async doPageAnimationRotate(page1, page2, duration, isDown, animation1Finish, animation2Finish) {
+        if (isDown) {
+            page1.style.transform = `rotateY(90deg)`;
+            await sleep(30);
+
+            page2.style.transition = `${duration/2}ms ease-in`;
+            page2.style.transform = `rotateY(-90deg)`;
+
+            await animation2Finish(duration/2);
+
+            page1.style.transition = `${duration/2}ms ease-out`;
+            page1.style.transform = `rotateY(0deg)`;
+            await animation1Finish(duration/2);
+        } else {
+            page1.style.transform = `rotateY(-90deg)`;
+            await sleep(30);
+
+            page2.style.transition = `${duration/2}ms ease-in`;
+            page2.style.transform = `rotateY(90deg)`;
+
+            await animation2Finish(duration/2);
+
+            page1.style.transition = `${duration/2}ms ease-out`;
+            page1.style.transform = `rotateY(0deg)`;
+            await animation1Finish(duration/2);
+        }
+    }
+
+    async doPageAnimationFlip(page1, page2, duration, isDown, animation1Finish, animation2Finish, backgroundColor) {
+        page2.style.background = backgroundColor;
+
+        if (isDown) {
+            page2.style.transformOrigin = '10%';
+            await sleep(30);
+
+            page2.style.transformOrigin = '0%';
+            page2.style.transition = `${duration}ms ease-in-out`;
+            page2.style.transform = `rotateY(-120deg)`;
+            await animation2Finish(duration);
+        } else {
+            page2.style.transformOrigin = '90%';
+            await sleep(30);
+
+            page2.style.transformOrigin = '100%';
+            page2.style.transition = `${duration}ms ease-in-out`;
+            page2.style.transform = `rotateY(120deg)`;
+            await animation2Finish(duration);
+        }
+
+        page2.style.transformOrigin = 'center';
+        page2.style.background = '';
+    }
+
 }
