@@ -174,7 +174,6 @@ class TextPage extends Vue {
         this.$refs.statusBar.style.top = (this.statusBarTop ? 1 : this.realHeight - this.statusBarHeight) + 'px';
 
         this.statusBarColor = this.hex2rgba(this.textColor || '#000000', this.statusBarColorAlpha);
-        this.statusBarClickable = this.drawHelper.statusBarClickable(this.statusBarTop, this.statusBarHeight);
 
         //drawHelper
         this.drawHelper.realWidth = this.realWidth;
@@ -200,6 +199,9 @@ class TextPage extends Vue {
         this.drawHelper.textAlignJustify = this.textAlignJustify;
         this.drawHelper.lineHeight = this.lineHeight;
         this.drawHelper.context = this.context;
+
+        //statusBar
+        this.statusBarClickable = this.drawHelper.statusBarClickable(this.statusBarTop, this.statusBarHeight);
 
         //parsed
         if (this.parsed) {
