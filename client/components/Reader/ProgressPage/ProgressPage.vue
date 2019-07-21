@@ -94,6 +94,6 @@ class ProgressPage extends Vue {
 </style>
 <style>
 .el-progress__text {
-    color: lightgreen;
+    color: lightgreen !important;
 }
 </style>

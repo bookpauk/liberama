@@ -143,7 +143,6 @@ class BookManager {
         }
     }
 
-
     async deflateWithProgress(data, callback) {
         const chunkSize = 128*1024;
         const deflator = new utils.pako.Deflate({level: 5});
@@ -176,6 +175,40 @@ class BookManager {
         callback(100);
 
         return deflator.result;
+    }
+
+    async inflateWithProgress(data, callback) {
+        const chunkSize = 64*1024;
+        const inflator = new utils.pako.Inflate({to: 'string'});
+
+        let chunkTotal = 1 + Math.floor(data.length/chunkSize);
+        let chunkNum = 0;
+        let perc = 0;
+        let prevPerc = 0;
+
+        for (var i = 0; i < data.length; i += chunkSize) {
+            if ((i + chunkSize) >= data.length) {
+                inflator.push(data.subarray(i, i + chunkSize), true);
+            } else {
+                inflator.push(data.subarray(i, i + chunkSize), false);
+            }
+            chunkNum++;
+
+            perc = Math.round(chunkNum/chunkTotal*100);
+            if (perc != prevPerc) {
+                callback(perc);
+                await utils.sleep(1);
+                prevPerc = perc;
+            }
+        }
+
+        if (inflator.err) {
+            throw new Error(inflator.msg);
+        }
+        
+        callback(100);
+
+        return inflator.result;
     }
 
     async addBook(newBook, callback) {
@@ -239,12 +272,18 @@ class BookManager {
 
         if (result && !result.parsed) {
             let data = await bmDataStore.getItem(`bmData-${meta.key}`);
-            callback(10);
+            callback(5);
             await utils.sleep(10);
+
+            let cb = (perc) => {
+                const p = 5 + Math.round(15*perc/100);
+                callback(p);
+            };
 
             if (result.dataCompressed) {
                 try {
-                    data = utils.pako.inflate(data, {to: 'string'});
+                    //data = utils.pako.inflate(data, {to: 'string'});
+                    data = await this.inflateWithProgress(data, cb);
                 } catch (e) {
                     this.delBook(meta);
                     throw e;
@@ -252,7 +291,7 @@ class BookManager {
             }
             callback(20);
 
-            const cb = (perc) => {
+            cb = (perc) => {
                 const p = 20 + Math.round(80*perc/100);
                 callback(p);
             };

@@ -871,9 +871,9 @@ class SettingsPage extends Vue {
 }
 
 .el-form-item {
-    padding: 0;
-    margin: 0;
-    margin-bottom: 5px;
+    padding: 0 !important;
+    margin: 0 !important;
+    margin-bottom: 5px !important;
 }
 
 .color-picked {

@@ -47,14 +47,12 @@
 //-----------------------------------------------------------------------------
 import Vue from 'vue';
 import Component from 'vue-class-component';
+import * as utils from '../share/utils';
 
 export default @Component({
     watch: {
-        rootRoute: function() {
-            this.setAppTitle();
-            this.redirectIfNeeded();
-        },
         mode: function() {
+            this.setAppTitle();
             this.redirectIfNeeded();
         }
     },
@@ -123,6 +121,9 @@ class App extends Vue {
                 });
             }
         });
+
+        this.setAppTitle();
+        this.redirectIfNeeded();
     }
 
     toggleCollapse() {
@@ -201,15 +202,18 @@ class App extends Vue {
     }
 
     redirectIfNeeded() {
-        if ((this.mode == 'reader' || this.mode == 'omnireader') && (this.rootRoute != '/reader')) {
+        if ((this.mode == 'reader' || this.mode == 'omnireader') && (!this.isReaderActive)) {
             //старый url
             const search = window.location.search.substr(1);
-            const url = search.split('url=')[1] || '';
+            const s = search.split('url=');
+            const url = s[1] || '';
+            const q = utils.parseQuery(s[0] || '');
             if (url) {
-                window.location = `/#/reader?url=${url}`;
-            } else {
-                this.$router.replace('/reader');
+                q.url = decodeURIComponent(url);
             }
+
+            window.history.replaceState({}, '', '/');
+            this.$router.replace({ path: '/reader', query: q });
         }
 
         //yandex-метрика для omnireader
