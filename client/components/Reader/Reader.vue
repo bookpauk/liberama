@@ -1036,7 +1036,7 @@ class Reader extends Vue {
     overflow-x: auto;
     overflow-y: hidden;
 }
-  
+
 .header {
     display: flex;
     justify-content: space-between;
@@ -1062,6 +1062,10 @@ class Reader extends Vue {
     width: 38px;
     border: 0;
     box-shadow: 3px 3px 5px black;
+}
+
+.tool-button + .tool-button {
+    margin: 0 2px 0 2px;
 }
 
 .tool-button:hover {

@@ -2,21 +2,25 @@ import Vue from 'vue';
 import VueRouter from 'vue-router';
 import _ from 'lodash';
 
-import App from './components/App.vue';
+//немедленная загрузка
+import CardIndex from './components/CardIndex/CardIndex.vue';
+//const CardIndex = () => import('./components/CardIndex/CardIndex.vue');
 
-const CardIndex = () => import('./components/CardIndex/CardIndex.vue');
 const Search = () => import('./components/CardIndex/Search/Search.vue');
 const Card = () => import('./components/CardIndex/Card/Card.vue');
 const Book = () => import('./components/CardIndex/Book/Book.vue');
 const History = () => import('./components/CardIndex/History/History.vue');
 
-const Reader = () => import('./components/Reader/Reader.vue');
+//немедленная загрузка
+//const Reader = () => import('./components/Reader/Reader.vue');
+import Reader from './components/Reader/Reader.vue';
+
 //const Forum = () => import('./components/Forum/Forum.vue');
 const Income = () => import('./components/Income/Income.vue');
 const Sources = () => import('./components/Sources/Sources.vue');
 const Settings = () => import('./components/Settings/Settings.vue');
 const Help = () => import('./components/Help/Help.vue');
-const NotFound404 = () => import('./components/NotFound404/NotFound404.vue');
+//const NotFound404 = () => import('./components/NotFound404/NotFound404.vue');
 
 const myRoutes = [
     ['/', null, null, '/cardindex'],
