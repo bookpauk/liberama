@@ -381,16 +381,16 @@ class Reader extends Vue {
         this.debouncedUpdateRoute();
     }
 
-    async bookManagerEvent(/*eventName*/) {
+    async bookManagerEvent(eventName) {
         /*const serverStorage = this.$refs.serverStorage;
-        if (eventName == 'load-meta-finish') {
+        if (eventName == '') {
             serverStorage.init();
             const result = await bookManager.cleanRecentBooks();
             if (result)
                 this.debouncedSaveRecent();
-        }
+        }*/
 
-        if (eventName == 'recent-changed' || eventName == 'save-recent') {
+        if (eventName == 'recent-changed') {
             if (this.historyActive) {
                 this.$refs.historyPage.updateTableData();
             }
@@ -412,12 +412,12 @@ class Reader extends Vue {
                 }
             }
 
-            if (eventName == 'recent-changed') {
+            /*if (eventName == 'recent-changed') {
                 this.debouncedSaveRecentLast();
             } else {
                 this.debouncedSaveRecent();
-            }
-        }*/
+            }*/
+        }
     }
 
     get toolBarActive() {

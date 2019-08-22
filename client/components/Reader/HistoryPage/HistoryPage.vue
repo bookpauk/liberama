@@ -4,7 +4,7 @@
             <Window @close="close">
                 <template slot="header">
                     <span v-show="!loading">Последние {{tableData ? tableData.length : 0}} открытых книг</span>
-                    <span v-show="loading"><i class="el-icon-loading"></i> Список загружается</span>
+                    <span v-show="loading"><i class="el-icon-loading" style="font-size: 30px"></i> <span style="position: relative; top: -5px">Список загружается</span></span>
                 </template>
 
                 <el-table

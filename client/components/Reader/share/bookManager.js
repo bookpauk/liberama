@@ -44,7 +44,7 @@ class BookManager {
         await utils.sleep(2000);
 
         let len = await bmMetaStore.length();
-        for (let i = 0; i < len; i++) {
+        for (let i = len - 1; i >= 0; i--) {
             const key = await bmMetaStore.key(i);
             const keySplit = key.split('-');
 
@@ -67,7 +67,7 @@ class BookManager {
 
         let key = null;
         len = await bmRecentStore.length();
-        for (let i = 0; i < len; i++) {
+        for (let i = len - 1; i >= 0; i--) {
             key = await bmRecentStore.key(i);
             if (key) {
                 let r = await bmRecentStore.getItem(key);
@@ -339,6 +339,7 @@ class BookManager {
         await bmRecentStore.setItem('recent-last', this.recentLast);
 
         this.recentChanged = true;
+        this.emit('recent-changed');
         return result;
     }
 
@@ -355,10 +356,11 @@ class BookManager {
         this.recent[value.key].deleted = 1;
         await bmRecentStore.setItem(value.key, this.recent[value.key]);
 
-        this.recentLast = null;
-        await bmRecentStore.setItem('recent-last', this.recentLast);
-
-        this.recentChanged = true;
+        if (this.recentLast.key == value.key) {
+            this.recentLast = null;
+            await bmRecentStore.setItem('recent-last', this.recentLast);
+        }
+        this.emit('recent-changed');
     }
 
     async cleanRecentBooks() {
@@ -374,6 +376,7 @@ class BookManager {
 
         this.sortedRecentCached = null;
 
+        this.emit('recent-changed');
         return isDel;
     }
 
@@ -394,6 +397,7 @@ class BookManager {
         this.recentLast = result;
         bmRecentStore.setItem('recent-last', this.recentLast);//no await
 
+        this.emit('recent-changed');
         return result;
     }
 
@@ -423,8 +427,13 @@ class BookManager {
     }
 
     emit(eventName, value) {
-        for (const listener of this.eventListeners)
-            listener(eventName, value);
+        if (this.eventListeners) {
+            (async() => {
+                await utils.sleep(1);
+                for (const listener of this.eventListeners)
+                    listener(eventName, value);
+            })();
+        }
     }
 
 }
