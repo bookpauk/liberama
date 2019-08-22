@@ -122,28 +122,33 @@ export default @Component({
 class HistoryPage extends Vue {
     loading = false;
     search = null;
-    tableData = null;
+    tableData = [];
+    key = 0;
 
     created() {
     }
 
     init() {
-        bookManager.addEventListener(this.bookManagerEvent);
-        this.updateTableData(5);
         this.$nextTick(() => {
             //this.$refs.input.focus();
         });
         (async() => {//отбражение подгрузки списка
-            await utils.sleep(1000);
-            if (this.bookManagerLoaded)
-                this.updateTableData();
-            else {
+            if (this.initing)
+                return;
+            this.initing = true;
+
+            await this.updateTableData(5);
+            await utils.sleep(200);
+            await this.updateTableData(15);
+            await utils.sleep(800);
+
+            if (!bookManager.loaded) {
                 let i = 0;
                 let j = 5;
-                while (i < 500 && !this.bookManagerLoaded) {
+                while (i < 500 && !bookManager.loaded) {
                     if (i % j == 0) {
                         bookManager.sortedRecentCached = null;
-                        this.updateTableData(100);
+                        await this.updateTableData(100);
                         j *= 2;
                     }
 
@@ -151,21 +156,19 @@ class HistoryPage extends Vue {
                     i++;
                 }
             }
+            await this.updateTableData();
+            this.initing = false;
         })();
     }
 
-    bookManagerEvent(eventName) {
-        if (eventName == 'load-stored-finish') {
-            this.updateTableData();
-            this.bookManagerLoaded = true;
-        }
-    }
-
     rowKey(row) {
-        return row.key;
+        return row.rowKey;
     }
 
-    updateTableData(limit) {
+    async updateTableData(limit) {
+        while (this.updating) await utils.sleep(100);
+        this.updating = true;
+        this.key++;
         let result = [];
 
         this.loading = !!limit;
@@ -227,6 +230,7 @@ class HistoryPage extends Vue {
                 url: book.url,
                 path: book.path,
                 key: book.key,
+                rowKey: book.key + this.key.toString(),
             });
             if (result.length >= 100)
                 break;
@@ -241,7 +245,16 @@ class HistoryPage extends Vue {
                 item.desc.author.toLowerCase().includes(search.toLowerCase())
         });
 
+        /*for (let i = 0; i < result.length; i++) {
+            if (!_.isEqual(this.tableData[i], result[i])) {
+                this.$set(this.tableData, i, result[i]);
+                await utils.sleep(10);
+            }
+        }
+        if (this.tableData.length > result.length)
+            this.tableData.splice(result.length);*/
         this.tableData = result;
+        this.updating = false;
     }
 
     headerCellStyle(cell) {

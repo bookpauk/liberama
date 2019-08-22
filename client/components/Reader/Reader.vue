@@ -392,7 +392,7 @@ class Reader extends Vue {
 
         if (eventName == 'recent-changed') {
             if (this.historyActive) {
-                this.$refs.historyPage.updateTableData();
+                await this.$refs.historyPage.updateTableData();
             }
 
             const oldBook = this.mostRecentBookReactive;
