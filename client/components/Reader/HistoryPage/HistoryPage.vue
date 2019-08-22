@@ -3,7 +3,8 @@
         <div class="mainWindow" @click.stop>
             <Window @close="close">
                 <template slot="header">
-                    Последние 100 открытых книг
+                    <span v-show="!loading">Последние {{tableData ? tableData.length : 0}} открытых книг</span>
+                    <span v-show="loading"><i class="el-icon-loading"></i> Список загружается</span>
                 </template>
 
                 <el-table
@@ -104,7 +105,7 @@ import Component from 'vue-class-component';
 import path from 'path';
 import _ from 'lodash';
 
-import {formatDate} from '../../../share/utils';
+import * as utils from '../../../share/utils';
 import Window from '../../share/Window.vue';
 import bookManager from '../share/bookManager';
 
@@ -119,6 +120,7 @@ export default @Component({
     },
 })
 class HistoryPage extends Vue {
+    loading = false;
     search = null;
     tableData = null;
 
@@ -126,28 +128,60 @@ class HistoryPage extends Vue {
     }
 
     init() {
-        this.updateTableData();
+        bookManager.addEventListener(this.bookManagerEvent);
+        this.updateTableData(5);
         this.$nextTick(() => {
-            this.$refs.input.focus();
+            //this.$refs.input.focus();
         });
+        (async() => {//отбражение подгрузки списка
+            await utils.sleep(1000);
+            if (this.bookManagerLoaded)
+                this.updateTableData();
+            else {
+                let i = 0;
+                let j = 5;
+                while (i < 500 && !this.bookManagerLoaded) {
+                    if (i % j == 0) {
+                        bookManager.sortedRecentCached = null;
+                        this.updateTableData(100);
+                        j *= 2;
+                    }
+
+                    await utils.sleep(100);
+                    i++;
+                }
+            }
+        })();
+    }
+
+    bookManagerEvent(eventName) {
+        if (eventName == 'load-stored-finish') {
+            this.updateTableData();
+            this.bookManagerLoaded = true;
+        }
     }
 
     rowKey(row) {
         return row.key;
     }
 
-    updateTableData() {
+    updateTableData(limit) {
         let result = [];
 
+        this.loading = !!limit;
         const sorted = bookManager.getSortedRecent();
+
         for (let i = 0; i < sorted.length; i++) {
             const book = sorted[i];
             if (book.deleted)
                 continue;
 
+            if (limit && result.length >= limit)
+                break;
+
             let d = new Date();
             d.setTime(book.touchTime);
-            const t = formatDate(d).split(' ');
+            const t = utils.formatDate(d).split(' ');
 
             let perc = '';
             let textLen = '';

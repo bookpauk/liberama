@@ -73,7 +73,7 @@
             <SettingsPage v-if="settingsActive" ref="settingsPage" @settings-toggle="settingsToggle"></SettingsPage>
             <HelpPage v-if="helpActive" ref="helpPage" @help-toggle="helpToggle"></HelpPage>
             <ClickMapPage v-show="clickMapActive" ref="clickMapPage"></ClickMapPage>
-            <ServerStorage v-show="hidden" ref="serverStorage"></ServerStorage>
+            <!--ServerStorage v-show="hidden" ref="serverStorage"></ServerStorage-->
 
             <el-dialog
                 title="Что нового:"
@@ -110,7 +110,7 @@ import HistoryPage from './HistoryPage/HistoryPage.vue';
 import SettingsPage from './SettingsPage/SettingsPage.vue';
 import HelpPage from './HelpPage/HelpPage.vue';
 import ClickMapPage from './ClickMapPage/ClickMapPage.vue';
-import ServerStorage from './ServerStorage/ServerStorage.vue';
+//import ServerStorage from './ServerStorage/ServerStorage.vue';
 
 import bookManager from './share/bookManager';
 import readerApi from '../../api/reader';
@@ -130,7 +130,7 @@ export default @Component({
         SettingsPage,
         HelpPage,
         ClickMapPage,
-        ServerStorage,
+        //ServerStorage,
     },
     watch: {
         bookPos: function(newValue) {
@@ -157,10 +157,12 @@ export default @Component({
             this.updateRoute();
         },
         loaderActive: function(newValue) {
-            const recent = this.mostRecentBook();
-            if (!newValue && !this.loading && recent && !bookManager.hasBookParsed(recent)) {
-                this.loadBook(recent);
-            }
+            (async() => {
+                const recent = this.mostRecentBook();
+                if (!newValue && !this.loading && recent && !await bookManager.hasBookParsed(recent)) {
+                    this.loadBook(recent);
+                }
+            })();
         },
     },
 })
@@ -216,7 +218,7 @@ class Reader extends Vue {
             }
         }, 500);
 
-        this.debouncedSaveRecent = _.debounce(async() => {
+        /*this.debouncedSaveRecent = _.debounce(async() => {
             const serverStorage = this.$refs.serverStorage;
             while (!serverStorage.inited) await utils.sleep(1000);
             await serverStorage.saveRecent();
@@ -226,7 +228,7 @@ class Reader extends Vue {
             const serverStorage = this.$refs.serverStorage;
             while (!serverStorage.inited) await utils.sleep(1000);
             await serverStorage.saveRecentLast();
-        }, 1000);
+        }, 1000);*/
 
         document.addEventListener('fullscreenchange', () => {
             this.fullScreenActive = (document.fullscreenElement !== null);
@@ -379,8 +381,8 @@ class Reader extends Vue {
         this.debouncedUpdateRoute();
     }
 
-    async bookManagerEvent(eventName) {
-        const serverStorage = this.$refs.serverStorage;
+    async bookManagerEvent(/*eventName*/) {
+        /*const serverStorage = this.$refs.serverStorage;
         if (eventName == 'load-meta-finish') {
             serverStorage.init();
             const result = await bookManager.cleanRecentBooks();
@@ -415,7 +417,7 @@ class Reader extends Vue {
             } else {
                 this.debouncedSaveRecent();
             }
-        }
+        }*/
     }
 
     get toolBarActive() {
@@ -759,7 +761,8 @@ class Reader extends Vue {
             //акивируем страницу с текстом
             this.$nextTick(async() => {
                 const last = this.mostRecentBookReactive;
-                const isParsed = bookManager.hasBookParsed(last);
+                const isParsed = await bookManager.hasBookParsed(last);
+
                 if (!isParsed) {
                     this.$root.$emit('set-app-title');
                     return;
@@ -793,7 +796,7 @@ class Reader extends Vue {
 
         // уже просматривается сейчас
         const lastBook = (this.$refs.page ? this.$refs.page.lastBook : null);
-        if (!opts.force && lastBook && lastBook.url == url && bookManager.hasBookParsed(lastBook)) {
+        if (!opts.force && lastBook && lastBook.url == url && await bookManager.hasBookParsed(lastBook)) {
             this.loaderActive = false;
             return;
         }
