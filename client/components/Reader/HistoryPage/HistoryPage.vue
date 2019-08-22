@@ -137,9 +137,9 @@ class HistoryPage extends Vue {
                 return;
             this.initing = true;
 
-            await this.updateTableData(5);
+            await this.updateTableData(10);
             await utils.sleep(200);
-            await this.updateTableData(15);
+            await this.updateTableData(20);
             await utils.sleep(800);
 
             if (!bookManager.loaded) {
