@@ -142,7 +142,8 @@ class HistoryPage extends Vue {
 
             if (bookManager.loaded) {
                 await this.updateTableData(10);
-                await utils.sleep(1800);
+                if (bookManager.getSortedRecent().length > 10)
+                    await utils.sleep(1800);
             } else {
                 let i = 0;
                 let j = 5;
