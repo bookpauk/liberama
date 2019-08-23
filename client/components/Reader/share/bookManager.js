@@ -377,7 +377,8 @@ class BookManager {
 
         this.sortedRecentCached = null;
 
-        this.emit('recent-changed');
+        if (isDel)
+            this.emit('recent-changed');
         return isDel;
     }
 
@@ -385,6 +386,7 @@ class BookManager {
         if (this.recentLast) {
             return this.recentLast;
         }
+        const oldRecentLast = this.recentLast;
 
         let max = 0;
         let result = null;
@@ -398,7 +400,8 @@ class BookManager {
         this.recentLast = result;
         bmRecentStore.setItem('recent-last', this.recentLast);//no await
 
-        this.emit('recent-changed');
+        if (this.recentLast !== oldRecentLast)
+            this.emit('recent-changed');
         return result;
     }
 
@@ -431,8 +434,10 @@ class BookManager {
         if (this.eventListeners) {
             (async() => {
                 await utils.sleep(1);
-                for (const listener of this.eventListeners)
+                for (const listener of this.eventListeners) {
+                    //console.log(eventName);
                     listener(eventName, value);
+                }
             })();
         }
     }
