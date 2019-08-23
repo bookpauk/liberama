@@ -90,6 +90,7 @@ class BookManager {
         await this.cleanBooks();
         await this.cleanRecentBooks();
 
+        this.recentChanged = true;
         this.loaded = true;
         this.emit('load-stored-finish');
     }
