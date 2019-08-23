@@ -123,7 +123,6 @@ class HistoryPage extends Vue {
     loading = false;
     search = null;
     tableData = [];
-    key = 0;
 
     created() {
     }
@@ -164,13 +163,12 @@ class HistoryPage extends Vue {
     }
 
     rowKey(row) {
-        return row.rowKey;
+        return row.key;
     }
 
     async updateTableData(limit) {
         while (this.updating) await utils.sleep(100);
         this.updating = true;
-        this.key++;
         let result = [];
 
         this.loading = !!limit;
@@ -232,7 +230,6 @@ class HistoryPage extends Vue {
                 url: book.url,
                 path: book.path,
                 key: book.key,
-                rowKey: book.key + this.key.toString(),
             });
             if (result.length >= 100)
                 break;
