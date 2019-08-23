@@ -284,6 +284,19 @@
                                 <el-checkbox v-model="textAlignJustify">По ширине</el-checkbox>
                                 <el-checkbox v-model="wordWrap">Перенос по слогам</el-checkbox>
                             </el-form-item>
+                            <el-form-item label="">
+                                <el-col :span="12">
+                                    Компактность
+                                </el-col>
+                                <el-tooltip :open-delay="500" effect="light" placement="top">
+                                    <template slot="content">
+                                        Степень компактности текста в процентах.<br>
+                                        Чем больше компактность, тем хуже выравнивание<br>
+                                        по правому краю.
+                                    </template>
+                                    <el-input-number v-model="compactTextPerc" :min="0" :max="100"></el-input-number>
+                                </el-tooltip>
+                            </el-form-item>
                             <el-form-item label="Обработка">
                                 <el-checkbox v-model="cutEmptyParagraphs">Убирать пустые строки</el-checkbox>
                             </el-form-item>

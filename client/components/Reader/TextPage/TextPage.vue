@@ -221,6 +221,7 @@ class TextPage extends Vue {
             this.parsed.showInlineImagesInCenter = this.showInlineImagesInCenter;
             this.parsed.imageHeightLines = this.imageHeightLines;
             this.parsed.imageFitWidth = this.imageFitWidth;
+            this.parsed.compactTextPerc = this.compactTextPerc;
         }
 
         //scrolling page

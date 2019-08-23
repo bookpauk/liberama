@@ -176,6 +176,7 @@ const settingDefaults = {
     blinkCachedLoad: true,
     showImages: true,
     showInlineImagesInCenter: true,
+    compactTextPerc: 0,
     imageHeightLines: 100,
     imageFitWidth: true,
     showServerStorageMessages: true,
