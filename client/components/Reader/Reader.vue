@@ -35,8 +35,8 @@
                         </el-button>
                     </el-tooltip>
                     <div class="space"></div>
-                    <el-tooltip v-show="showToolButton['history']" content="Открыть недавние" :open-delay="1000" effect="light">
-                        <el-button ref="history" class="tool-button" :class="buttonActiveClass('history')" @click="buttonClick('history')"><i class="el-icon-document"></i></el-button>
+                    <el-tooltip v-show="showToolButton['recentBooks']" content="Открыть недавние" :open-delay="1000" effect="light">
+                        <el-button ref="recentBooks" class="tool-button" :class="buttonActiveClass('recentBooks')" @click="buttonClick('recentBooks')"><i class="el-icon-document"></i></el-button>
                     </el-tooltip>
                 </div>
 
@@ -69,7 +69,7 @@
                 @stop-text-search="stopTextSearch">
             </SearchPage>
             <CopyTextPage v-if="copyTextActive" ref="copyTextPage" @copy-text-toggle="copyTextToggle"></CopyTextPage>
-            <HistoryPage v-show="historyActive" ref="historyPage" @load-book="loadBook" @history-toggle="historyToggle"></HistoryPage>
+            <RecentBooksPage v-show="recentBooksActive" ref="recentBooksPage" @load-book="loadBook" @recent-books-toggle="recentBooksToggle"></RecentBooksPage>
             <SettingsPage v-if="settingsActive" ref="settingsPage" @settings-toggle="settingsToggle"></SettingsPage>
             <HelpPage v-if="helpActive" ref="helpPage" @help-toggle="helpToggle"></HelpPage>
             <ClickMapPage v-show="clickMapActive" ref="clickMapPage"></ClickMapPage>
@@ -106,7 +106,7 @@ import ProgressPage from './ProgressPage/ProgressPage.vue';
 import SetPositionPage from './SetPositionPage/SetPositionPage.vue';
 import SearchPage from './SearchPage/SearchPage.vue';
 import CopyTextPage from './CopyTextPage/CopyTextPage.vue';
-import HistoryPage from './HistoryPage/HistoryPage.vue';
+import RecentBooksPage from './RecentBooksPage/RecentBooksPage.vue';
 import SettingsPage from './SettingsPage/SettingsPage.vue';
 import HelpPage from './HelpPage/HelpPage.vue';
 import ClickMapPage from './ClickMapPage/ClickMapPage.vue';
@@ -126,7 +126,7 @@ export default @Component({
         SetPositionPage,
         SearchPage,
         CopyTextPage,
-        HistoryPage,
+        RecentBooksPage,
         SettingsPage,
         HelpPage,
         ClickMapPage,
@@ -175,7 +175,7 @@ class Reader extends Vue {
     setPositionActive = false;
     searchActive = false;
     copyTextActive = false;
-    historyActive = false;
+    recentBooksActive = false;
     settingsActive = false;
     helpActive = false;
     clickMapActive = false;
@@ -391,8 +391,8 @@ class Reader extends Vue {
         }*/
 
         if (eventName == 'recent-changed') {
-            if (this.historyActive) {
-                await this.$refs.historyPage.updateTableData();
+            if (this.recentBooksActive) {
+                await this.$refs.recentBooksPage.updateTableData();
             }
 
             const oldBook = this.mostRecentBookReactive;
@@ -478,7 +478,7 @@ class Reader extends Vue {
     closeAllTextPages() {
         this.setPositionActive = false;
         this.copyTextActive = false;
-        this.historyActive = false;
+        this.recentBooksActive = false;
         this.settingsActive = false;
         this.stopScrolling();
         this.stopSearch();
@@ -570,14 +570,14 @@ class Reader extends Vue {
         }
     }
 
-    historyToggle() {
-        this.historyActive = !this.historyActive;
-        if (this.historyActive) {
+    recentBooksToggle() {
+        this.recentBooksActive = !this.recentBooksActive;
+        if (this.recentBooksActive) {
             this.closeAllTextPages();
-            this.$refs.historyPage.init();
-            this.historyActive = true;
+            this.$refs.recentBooksPage.init();
+            this.recentBooksActive = true;
         } else {
-            this.historyActive = false;
+            this.recentBooksActive = false;
         }
     }
 
@@ -662,8 +662,8 @@ class Reader extends Vue {
             case 'copyText':
                 this.copyTextToggle();
                 break;
-            case 'history':
-                this.historyToggle();
+            case 'recentBooks':
+                this.recentBooksToggle();
                 break;
             case 'refresh':
                 this.refreshBook();
@@ -686,7 +686,7 @@ class Reader extends Vue {
             case 'scrolling':
             case 'search':
             case 'copyText':
-            case 'history':
+            case 'recentBooks':
             case 'settings':
                 if (this[`${button}Active`])
                     classResult = classActive;
@@ -714,7 +714,7 @@ class Reader extends Vue {
                 case 'copyText':
                     classResult = classDisabled;
                     break;
-                case 'history':
+                case 'recentBooks':
                 case 'refresh':
                     if (!this.mostRecentBook())
                         classResult = classDisabled;
@@ -957,8 +957,8 @@ class Reader extends Vue {
             if (!handled && this.settingsActive)
                 handled = this.$refs.settingsPage.keyHook(event);
 
-            if (!handled && this.historyActive)
-                handled = this.$refs.historyPage.keyHook(event);
+            if (!handled && this.recentBooksActive)
+                handled = this.$refs.recentBooksPage.keyHook(event);
 
             if (!handled && this.setPositionActive)
                 handled = this.$refs.setPositionPage.keyHook(event);
@@ -1008,7 +1008,7 @@ class Reader extends Vue {
                             this.refreshBook();
                             break;
                         case 'KeyX':
-                            this.historyToggle();
+                            this.recentBooksToggle();
                             event.preventDefault();
                             event.stopPropagation();
                             break;

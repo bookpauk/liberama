@@ -119,7 +119,7 @@ export default @Component({
         }
     },
 })
-class HistoryPage extends Vue {
+class RecentBooksPage extends Vue {
     loading = false;
     search = null;
     tableData = [];
@@ -301,7 +301,7 @@ class HistoryPage extends Vue {
     }
 
     close() {
-        this.$emit('history-toggle');
+        this.$emit('recent-books-toggle');
     }
 
     keyHook(event) {

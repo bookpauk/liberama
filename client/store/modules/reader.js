@@ -8,7 +8,7 @@ const toolButtons = [
     {name: 'search',      show: true, text: 'Найти в тексте'},
     {name: 'copyText',    show: false, text: 'Скопировать текст со страницы'},
     {name: 'refresh',     show: true, text: 'Принудительно обновить книгу'},
-    {name: 'history',     show: true, text: 'Открыть недавние'},
+    {name: 'recentBooks', show: true, text: 'Открыть недавние'},
 ];
 
 const fonts = [
