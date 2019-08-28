@@ -131,7 +131,6 @@ class TextPage extends Vue {
         }, 10);
 
         this.$root.$on('resize', () => {this.$nextTick(this.onResize)});
-        this.mobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry/i.test(navigator.userAgent);
     }
 
     mounted() {
@@ -1007,7 +1006,7 @@ class TextPage extends Vue {
     }
 
     onTouchStart(event) {
-        if (!this.mobile)
+        if (!this.$isMobileDevice)
             return;
         this.endClickRepeat();
         if (event.touches.length == 1) {
@@ -1023,19 +1022,19 @@ class TextPage extends Vue {
     }
 
     onTouchEnd() {
-        if (!this.mobile)
+        if (!this.$isMobileDevice)
             return;
         this.endClickRepeat();
     }
 
     onTouchCancel() {
-        if (!this.mobile)
+        if (!this.$isMobileDevice)
             return;
         this.endClickRepeat();
     }
 
     onMouseDown(event) {
-        if (this.mobile)
+        if (this.$isMobileDevice)
             return;
         this.endClickRepeat();
         if (event.button == 0) {
@@ -1051,13 +1050,13 @@ class TextPage extends Vue {
     }
 
     onMouseUp() {
-        if (this.mobile)
+        if (this.$isMobileDevice)
             return;
         this.endClickRepeat();
     }
 
     onMouseWheel(event) {
-        if (this.mobile)
+        if (this.$isMobileDevice)
             return;
         if (event.deltaY > 0) {
             this.doDown();

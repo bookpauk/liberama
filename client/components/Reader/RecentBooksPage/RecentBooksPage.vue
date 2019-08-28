@@ -1,101 +1,97 @@
 <template>
-    <div ref="main" class="main" @click="close">
-        <div class="mainWindow" @click.stop>
-            <Window @close="close">
-                <template slot="header">
-                    <span v-show="!loading">Последние {{tableData ? tableData.length : 0}} открытых книг</span>
-                    <span v-show="loading"><i class="el-icon-loading" style="font-size: 30px"></i> <span style="position: relative; top: -5px">Список загружается</span></span>
+    <Window width="600px" ref="window" @close="close">
+        <template slot="header">
+            <span v-show="!loading">Последние {{tableData ? tableData.length : 0}} открытых книг</span>
+            <span v-show="loading"><i class="el-icon-loading" style="font-size: 25px"></i> <span style="position: relative; top: -4px">Список загружается</span></span>
+        </template>
+
+        <el-table
+            :data="tableData"
+            style="width: 100%"
+            size="mini"
+            height="1px"
+            stripe
+            border
+            :default-sort = "{prop: 'touchDateTime', order: 'descending'}"
+            :header-cell-style = "headerCellStyle"
+            :row-key = "rowKey"
+            >
+
+            <el-table-column
+                type="index"
+                width="35px"
+                >
+            </el-table-column>
+            <el-table-column
+                prop="touchDateTime"
+                min-width="90px"
+                sortable
+                >
+                <template slot="header" slot-scope="scope"><!-- eslint-disable-line vue/no-unused-vars -->
+                    <span style="font-size: 90%">Время<br>просм.</span>
+                </template>
+                <template slot-scope="scope"><!-- eslint-disable-line vue/no-unused-vars -->
+                    <div class="desc" @click="loadBook(scope.row.url)">
+                        {{ scope.row.touchDate }}<br>
+                        {{ scope.row.touchTime }}
+                    </div>
+                </template>
+            </el-table-column>
+
+            <el-table-column
+                >
+                <template slot="header" slot-scope="scope"><!-- eslint-disable-line vue/no-unused-vars -->
+                    <!--el-input ref="input"
+                        :value="search" @input="search = $event"
+                        size="mini"
+                        style="margin: 0; padding: 0; vertical-align: bottom; margin-top: 10px"
+                        placeholder="Найти"/-->
+                        <div class="el-input el-input--mini">
+                            <input class="el-input__inner"
+                                ref="input"
+                                placeholder="Найти"
+                                style="margin: 0; vertical-align: bottom; margin-top: 20px; padding: 0 10px 0 10px"
+                                :value="search" @input="search = $event.target.value"
+                            />
+                        </div>
                 </template>
 
-                <el-table
-                    :data="tableData"
-                    style="width: 100%"
-                    size="mini"
-                    height="1px"
-                    stripe
-                    border
-                    :default-sort = "{prop: 'touchDateTime', order: 'descending'}"
-                    :header-cell-style = "headerCellStyle"
-                    :row-key = "rowKey"
+                <el-table-column
+                    min-width="300px"
                     >
+                    <template slot-scope="scope">
+                        <div class="desc" @click="loadBook(scope.row.url)">
+                            <span style="color: green">{{ scope.row.desc.author }}</span><br>
+                            <span>{{ scope.row.desc.title }}</span>
+                        </div>
+                    </template>
+                </el-table-column>
 
-                    <el-table-column
-                        type="index"
-                        width="35px"
-                        >
-                    </el-table-column>
-                    <el-table-column
-                        prop="touchDateTime"
-                        min-width="90px"
-                        sortable
-                        >
-                        <template slot="header" slot-scope="scope"><!-- eslint-disable-line vue/no-unused-vars -->
-                            <span style="font-size: 90%">Время<br>просм.</span>
-                        </template>
-                        <template slot-scope="scope"><!-- eslint-disable-line vue/no-unused-vars -->
-                            <div class="desc" @click="loadBook(scope.row.url)">
-                                {{ scope.row.touchDate }}<br>
-                                {{ scope.row.touchTime }}
-                            </div>
-                        </template>
-                    </el-table-column>
+                <el-table-column
+                    min-width="100px"
+                    >
+                    <template slot-scope="scope">
+                        <a v-show="isUrl(scope.row.url)" :href="scope.row.url" target="_blank">Оригинал</a><br>
+                        <a :href="scope.row.path" :download="getFileNameFromPath(scope.row.path)">Скачать FB2</a>
+                    </template>
+                </el-table-column>
 
-                    <el-table-column
-                        >
-                        <template slot="header" slot-scope="scope"><!-- eslint-disable-line vue/no-unused-vars -->
-                            <!--el-input ref="input"
-                                :value="search" @input="search = $event"
-                                size="mini"
-                                style="margin: 0; padding: 0; vertical-align: bottom; margin-top: 10px"
-                                placeholder="Найти"/-->
-                                <div class="el-input el-input--mini">
-                                    <input class="el-input__inner"
-                                        ref="input"
-                                        placeholder="Найти"
-                                        style="margin: 0; padding: 0; vertical-align: bottom; margin-top: 20px; padding: 0 10px 0 10px"
-                                        :value="search" @input="search = $event.target.value"
-                                    />
-                                </div>
-                        </template>
+                <el-table-column
+                    width="60px"
+                    >
+                    <template slot-scope="scope">
+                        <el-button
+                            size="mini"
+                            style="width: 30px; padding: 7px 0 7px 0; margin-left: 4px"
+                            @click="handleDel(scope.row.key)"><i class="el-icon-close"></i>
+                        </el-button>
+                    </template>
+                </el-table-column>
 
-                        <el-table-column
-                            min-width="300px"
-                            >
-                            <template slot-scope="scope">
-                                <div class="desc" @click="loadBook(scope.row.url)">
-                                    <span style="color: green">{{ scope.row.desc.author }}</span><br>
-                                    <span>{{ scope.row.desc.title }}</span>
-                                </div>
-                            </template>
-                        </el-table-column>
+            </el-table-column>
 
-                        <el-table-column
-                            min-width="100px"
-                            >
-                            <template slot-scope="scope">
-                                <a v-show="isUrl(scope.row.url)" :href="scope.row.url" target="_blank">Оригинал</a><br>
-                                <a :href="scope.row.path" :download="getFileNameFromPath(scope.row.path)">Скачать FB2</a>
-                            </template>
-                        </el-table-column>
-
-                        <el-table-column
-                            width="60px"
-                            >
-                            <template slot-scope="scope">
-                                <el-button
-                                    size="mini"
-                                    style="width: 30px; padding: 7px 0 7px 0; margin-left: 4px"
-                                    @click="handleDel(scope.row.key)"><i class="el-icon-close"></i>
-                                </el-button>
-                            </template>
-                        </el-table-column>
-
-                    </el-table-column>
-
-                </el-table>
-            </Window>
-        </div>
-    </div>
+        </el-table>
+    </Window>
 </template>
 
 <script>
@@ -128,6 +124,8 @@ class RecentBooksPage extends Vue {
     }
 
     init() {
+        this.$refs.window.init();
+
         this.$nextTick(() => {
             //this.$refs.input.focus();
         });
@@ -315,21 +313,6 @@ class RecentBooksPage extends Vue {
 </script>
 
 <style scoped>
-.main {
-    position: absolute;
-    width: 100%;
-    height: 100%;
-    z-index: 50;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-}
-
-.mainWindow {
-    height: 100%;
-    display: flex;
-}
-
 .desc {
     cursor: pointer;
 }

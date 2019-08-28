@@ -6,6 +6,7 @@ import './element';
 
 import App from './components/App.vue';
 //Vue.config.productionTip = false;
+Vue.prototype.$isMobileDevice = /Android|webOS|iPhone|iPad|iPod|BlackBerry/i.test(navigator.userAgent);
 
 new Vue({
     router,

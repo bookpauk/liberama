@@ -870,7 +870,6 @@ class SettingsPage extends Vue {
 .mainWindow {
     height: 70%;
     display: flex;
-    position: relative;
 }
 
 .text {
