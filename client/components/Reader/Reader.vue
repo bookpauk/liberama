@@ -1,7 +1,7 @@
 <template>
     <el-container>
         <el-header v-show="toolBarActive" height='50px'>
-            <div class="header">
+            <div ref="header" class="header">
                 <el-tooltip content="Загрузить книгу" :open-delay="1000" effect="light">
                     <el-button ref="loader" class="tool-button" :class="buttonActiveClass('loader')" @click="buttonClick('loader')"><i class="el-icon-back"></i></el-button>
                 </el-tooltip>
@@ -235,9 +235,19 @@ class Reader extends Vue {
         });
 
         this.loadSettings();
+
+        //TODO: убрать в будущем
+        if (this.showToolButton['history']) {
+            const newShowToolButton = Object.assign({}, this.showToolButton);
+            delete newShowToolButton['history'];
+            const newSettings = Object.assign({}, this.settings, { showToolButton: newShowToolButton });
+            this.commit('reader/setSettings', newSettings);
+        }
     }
 
     mounted() {
+        this.updateHeaderMinWidth();
+        
         (async() => {
             await bookManager.init(this.settings);
             bookManager.addEventListener(this.bookManagerEvent);
@@ -267,6 +277,14 @@ class Reader extends Vue {
         this.blinkCachedLoad = settings.blinkCachedLoad;
         this.showWhatsNewDialog = settings.showWhatsNewDialog;
         this.showToolButton = settings.showToolButton;
+
+        this.updateHeaderMinWidth();
+    }
+
+    updateHeaderMinWidth() {
+        const showButtonCount = Object.values(this.showToolButton).reduce((a, b) => a + (b ? 1 : 0), 0);
+        if (this.$refs.header)
+            this.$refs.header.style.minWidth = 65*showButtonCount + 'px';
     }
 
     checkSetStorageAccessKey() {
@@ -586,6 +604,10 @@ class Reader extends Vue {
         if (this.settingsActive) {
             this.closeAllTextPages();
             this.settingsActive = true;
+
+            this.$nextTick(() => {
+                this.$refs.settingsPage.init();
+            });
         } else {
             this.settingsActive = false;
         }
@@ -1043,7 +1065,6 @@ class Reader extends Vue {
 .header {
     display: flex;
     justify-content: space-between;
-    min-width: 550px;
 }
 
 .el-main {

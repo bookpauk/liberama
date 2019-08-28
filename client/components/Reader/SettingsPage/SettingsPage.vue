@@ -1,514 +1,510 @@
 <template>
-    <div ref="main" class="main" @click="close">
-        <div class="mainWindow" @click.stop>
-            <Window @close="close">
-                <template slot="header">
-                    Настройки
-                </template>
+    <Window ref="window" height="70%" width="600px" @close="close">
+        <template slot="header">
+            Настройки
+        </template>
 
-                <el-tabs type="border-card" tab-position="left" v-model="selectedTab">
-                    <!-- Профили ------------------------------------------------------------------------->
-                    <el-tab-pane label="Профили">
-                        <el-form :model="form" size="small" label-width="80px" @submit.native.prevent>
-                            <div class="partHeader">Управление синхронизацией данных</div>
-                            <el-form-item label="">
-                                <el-checkbox v-model="serverSyncEnabled">Включить синхронизацию с сервером</el-checkbox>
-                            </el-form-item>
-                        </el-form>
+        <el-tabs type="border-card" tab-position="left" v-model="selectedTab">
+            <!-- Профили ------------------------------------------------------------------------->
+            <el-tab-pane label="Профили">
+                <el-form :model="form" size="small" label-width="80px" @submit.native.prevent>
+                    <div class="partHeader">Управление синхронизацией данных</div>
+                    <el-form-item label="">
+                        <el-checkbox v-model="serverSyncEnabled">Включить синхронизацию с сервером</el-checkbox>
+                    </el-form-item>
+                </el-form>
 
-                        <div v-show="serverSyncEnabled">
-                        <el-form :model="form" size="small" label-width="80px" @submit.native.prevent>
-                            <div class="partHeader">Профили устройств</div>
+                <div v-show="serverSyncEnabled">
+                <el-form :model="form" size="small" label-width="80px" @submit.native.prevent>
+                    <div class="partHeader">Профили устройств</div>
 
-                            <el-form-item label="">
-                                <div class="text">
-                                    Выберите или добавьте профиль устройства, чтобы начать синхронизацию настроек с сервером.
-                                    <br>При выборе "Нет" синхронизация настроек (но не книг) отключается.
+                    <el-form-item label="">
+                        <div class="text">
+                            Выберите или добавьте профиль устройства, чтобы начать синхронизацию настроек с сервером.
+                            <br>При выборе "Нет" синхронизация настроек (но не книг) отключается.
+                        </div>
+                    </el-form-item>
+
+                    <el-form-item label="Устройство">
+                        <el-select v-model="currentProfile" placeholder="">
+                            <el-option label="Нет" value=""></el-option>
+                            <el-option v-for="item in profilesArray"
+                                :key="item"
+                                :label="item"
+                                :value="item">
+                            </el-option>
+                        </el-select>
+                    </el-form-item>
+
+                    <el-form-item label="">
+                            <el-button @click="addProfile">Добавить</el-button>
+                            <el-button @click="delProfile">Удалить</el-button>
+                            <el-button @click="delAllProfiles">Удалить все</el-button>
+                    </el-form-item>
+                </el-form>
+
+                <el-form :model="form" size="small" label-width="80px" @submit.native.prevent>
+                    <div class="partHeader">Ключ доступа</div>
+
+                    <el-form-item label="">
+                        <div class="text">
+                            Ключ доступа позволяет восстановить профили с настройками и список читаемых книг.
+                            Для этого необходимо передать ключ на новое устройство через почту, мессенджер или другим способом.
+                        </div>
+                    </el-form-item>
+
+                    <el-form-item label="">
+                            <el-button style="width: 250px" @click="showServerStorageKey">
+                                <span v-show="serverStorageKeyVisible">Скрыть</span>
+                                <span v-show="!serverStorageKeyVisible">Показать</span>
+                                ключ доступа
+                         </el-button>
+                    </el-form-item>
+
+                    <el-form-item label="">
+                        <div v-if="!serverStorageKeyVisible">
+                            <hr/>
+                            <b>{{ partialStorageKey }}</b> (часть вашего ключа)
+                            <hr/>
+                        </div>
+                        <div v-else style="line-height: 100%">
+                            <hr/>
+                            <div style="width: 300px; padding-top: 5px; overflow-wrap: break-word;"><b>{{ serverStorageKey }}</b></div>
+                            <br><div class="center">
+                                <el-button size="mini" class="copy-button" @click="copyToClip(serverStorageKey, 'Ключ')">Скопировать ключ</el-button>
+                            </div>
+                            <div v-if="mode == 'omnireader'">
+                                <br>Переход по ссылке позволит автоматически ввести ключ доступа:
+                                <br><div class="center" style="margin-top: 5px">
+                                    <a :href="setStorageKeyLink" target="_blank">Ссылка для ввода ключа</a>
                                 </div>
-                            </el-form-item>
+                                <br><div class="center">
+                                    <el-button size="mini" class="copy-button" @click="copyToClip(setStorageKeyLink, 'Ссылка')">Скопировать ссылку</el-button>
+                                </div>
+                            </div>
+                            <hr/>
+                        </div>
+                    </el-form-item>
 
-                            <el-form-item label="Устройство">
-                                <el-select v-model="currentProfile" placeholder="">
+                    <el-form-item label="">
+                            <el-button style="width: 250px" @click="enterServerStorageKey">Ввести ключ доступа</el-button>
+                    </el-form-item>
+                    <el-form-item label="">
+                            <el-button style="width: 250px" @click="generateServerStorageKey">Сгенерировать новый ключ</el-button>
+                    </el-form-item>
+
+                    <el-form-item label="">
+                        <div class="text">
+                            Рекомендуется сохранить ключ в надежном месте, чтобы всегда иметь возможность восстановить настройки,
+                            например, после переустановки ОС или чистки/смены браузера.<br>
+                            <b>ПРЕДУПРЕЖДЕНИЕ!</b> При утере ключа, НИКТО не сможет восстановить ваши данные, т.к. они сжимаются
+                            и шифруются ключом доступа перед отправкой на сервер.
+                        </div>
+                    </el-form-item>
+                </el-form>
+                </div>
+            </el-tab-pane>
+
+            <!-- Вид ------------------------------------------------------------------------->                    
+            <el-tab-pane label="Вид">
+
+                <el-form :model="form" size="small" label-width="120px" @submit.native.prevent>
+                    <div class="partHeader">Цвет</div>
+
+                    <el-form-item label="Текст">
+                        <el-col :span="12">
+                            <el-color-picker v-model="textColor" color-format="hex" :predefine="predefineTextColors"></el-color-picker>
+                            <span class="color-picked"><b>{{ textColor }}</b></span>
+                        </el-col>
+                        <el-col :span="5">
+                            <span style="position: relative; top: 20px;">Обои:</span>
+                        </el-col>
+                    </el-form-item>
+
+                    <el-form-item label="Фон">
+                        <el-col :span="12">
+                            <el-color-picker v-model="backgroundColor" color-format="hex" :predefine="predefineBackgroundColors" :disabled="wallpaper != ''"></el-color-picker>
+                            <span v-show="wallpaper == ''" class="color-picked"><b>{{ backgroundColor }}</b></span>
+                        </el-col>
+
+                        <el-col :span="11">
+                            <el-select v-model="wallpaper">
+                                <el-option label="Нет" value=""></el-option>
+                                <el-option label="1" value="paper1"></el-option>
+                                <el-option label="2" value="paper2"></el-option>
+                                <el-option label="3" value="paper3"></el-option>
+                                <el-option label="4" value="paper4"></el-option>
+                                <el-option label="5" value="paper5"></el-option>
+                                <el-option label="6" value="paper6"></el-option>
+                                <el-option label="7" value="paper7"></el-option>
+                                <el-option label="8" value="paper8"></el-option>
+                                <el-option label="9" value="paper9"></el-option>
+                            </el-select>
+                        </el-col>
+                    </el-form-item>
+                </el-form>
+
+                <el-form :model="form" size="mini" label-width="120px" @submit.native.prevent>
+                    <div class="partHeader">Шрифт</div>
+
+                    <el-form-item label="Локальный/веб">
+                        <el-col :span="11">
+                            <el-select v-model="fontName" placeholder="Шрифт" :disabled="webFontName != ''">
+                                <el-option v-for="item in fonts"
+                                    :key="item.name"
+                                    :label="item.label"
+                                    :value="item.name">
+                                </el-option>
+                            </el-select>
+                        </el-col>
+                        <el-col :span="1">
+                            &nbsp;
+                        </el-col>
+                        <el-col :span="11">
+                            <el-tooltip :open-delay="500" effect="light" placement="top">
+                                <template slot="content">
+                                    Веб шрифты дают большое разнообразие,<br>
+                                    однако есть шанс, что шрифт будет загружаться<br>
+                                    очень медленно или вовсе не загрузится
+                                </template>
+                                <el-select v-model="webFontName">
                                     <el-option label="Нет" value=""></el-option>
-                                    <el-option v-for="item in profilesArray"
-                                        :key="item"
-                                        :label="item"
-                                        :value="item">
+                                    <el-option v-for="item in webFonts"
+                                        :key="item.name"
+                                        :value="item.name">
                                     </el-option>
                                 </el-select>
-                            </el-form-item>
+                            </el-tooltip>
+                        </el-col>
+                    </el-form-item>
+                    <el-form-item label="Размер">
+                        <el-col :span="17">
+                            <el-input-number v-model="fontSize" :min="5" :max="200"></el-input-number>
+                        </el-col>
+                        <el-col :span="1">
+                            <a href="https://fonts.google.com/?subset=cyrillic" target="_blank">Примеры</a>
+                        </el-col>
+                    </el-form-item>
+                    <el-form-item label="Сдвиг">
+                        <el-tooltip :open-delay="500" effect="light">
+                            <template slot="content">
+                                Сдвиг шрифта по вертикали в процентах от размера.<br>
+                                Отрицательное значение сдвигает вверх, положительное -<br>
+                                вниз. Значение зависит от метрики шрифта.
+                            </template>
+                            <el-input-number v-model="vertShift" :min="-100" :max="100"></el-input-number>
+                        </el-tooltip>
+                    </el-form-item>
 
-                            <el-form-item label="">
-                                    <el-button @click="addProfile">Добавить</el-button>
-                                    <el-button @click="delProfile">Удалить</el-button>
-                                    <el-button @click="delAllProfiles">Удалить все</el-button>
-                            </el-form-item>
-                        </el-form>
+                    <el-form-item label="Стиль">
+                        <el-col :span="8">
+                            <el-checkbox v-model="fontBold">Жирный</el-checkbox>
+                        </el-col>
+                        <el-col :span="8">
+                            <el-checkbox v-model="fontItalic">Курсив</el-checkbox>
+                        </el-col>
+                    </el-form-item>
+                </el-form>
 
-                        <el-form :model="form" size="small" label-width="80px" @submit.native.prevent>
-                            <div class="partHeader">Ключ доступа</div>
+                <el-form :model="form" size="mini" label-width="120px" @submit.native.prevent>
+                    <div class="partHeader">Текст</div>
 
-                            <el-form-item label="">
-                                <div class="text">
-                                    Ключ доступа позволяет восстановить профили с настройками и список читаемых книг.
-                                    Для этого необходимо передать ключ на новое устройство через почту, мессенджер или другим способом.
-                                </div>
-                            </el-form-item>
+                    <el-form-item label="Интервал">
+                        <el-input-number v-model="lineInterval" :min="0" :max="200"></el-input-number>
+                    </el-form-item>
+                    <el-form-item label="Параграф">
+                        <el-input-number v-model="p" :min="0" :max="2000"></el-input-number>
+                    </el-form-item>
+                    <el-form-item label="Отступ">
+                        <el-col :span="11">
+                            <el-tooltip :open-delay="500" effect="light">
+                                <template slot="content">
+                                    Слева/справа
+                                </template>
+                                <el-input-number v-model="indentLR" :min="0" :max="2000"></el-input-number>
+                            </el-tooltip>
+                        </el-col>
+                        <el-col :span="1">
+                            &nbsp;
+                        </el-col>
+                        <el-col :span="11">
+                            <el-tooltip :open-delay="500" effect="light">
+                                <template slot="content">
+                                    Сверху/снизу
+                                </template>
+                                <el-input-number v-model="indentTB" :min="0" :max="2000"></el-input-number>
+                            </el-tooltip>
+                        </el-col>
+                    </el-form-item>
+                    <el-form-item label="Сдвиг">
+                        <el-tooltip :open-delay="500" effect="light">
+                            <template slot="content">
+                                Сдвиг текста по вертикали в процентах от размера шрифта.<br>
+                                Отрицательное значение сдвигает вверх, положительное -<br>
+                                вниз.
+                            </template>
+                            <el-input-number v-model="textVertShift" :min="-100" :max="100"></el-input-number>
+                        </el-tooltip>
+                    </el-form-item>
+                    <el-form-item label="Скроллинг">
+                        <el-col :span="11">
+                            <el-tooltip :open-delay="500" effect="light">
+                                <template slot="content">
+                                    Замедление скроллинга в миллисекундах.<br>
+                                    Определяет время, за которое текст<br>
+                                    прокручивается на одну строку.
+                                </template>
+                                <el-input-number v-model="scrollingDelay" :min="1" :max="10000"></el-input-number>
+                            </el-tooltip>
+                        </el-col>
+                        <el-col :span="1">
+                            &nbsp;
+                        </el-col>
+                        <el-col :span="11">
+                            <el-tooltip :open-delay="500" effect="light" placement="top">
+                                <template slot="content">
+                                    Вид скроллинга: линейный,<br>
+                                    ускорение-замедление и пр.
+                                </template>
 
-                            <el-form-item label="">
-                                    <el-button style="width: 250px" @click="showServerStorageKey">
-                                        <span v-show="serverStorageKeyVisible">Скрыть</span>
-                                        <span v-show="!serverStorageKeyVisible">Показать</span>
-                                        ключ доступа
-                                 </el-button>
-                            </el-form-item>
+                                <el-select v-model="scrollingType">
+                                    <el-option value="linear"></el-option>
+                                    <el-option value="ease"></el-option>
+                                    <el-option value="ease-in"></el-option>
+                                    <el-option value="ease-out"></el-option>
+                                    <el-option value="ease-in-out"></el-option>
+                                </el-select>
+                            </el-tooltip>
+                        </el-col>
 
-                            <el-form-item label="">
-                                <div v-if="!serverStorageKeyVisible">
-                                    <hr/>
-                                    <b>{{ partialStorageKey }}</b> (часть вашего ключа)
-                                    <hr/>
-                                </div>
-                                <div v-else style="line-height: 100%">
-                                    <hr/>
-                                    <div style="width: 300px; padding-top: 5px; overflow-wrap: break-word;"><b>{{ serverStorageKey }}</b></div>
-                                    <br><div class="center">
-                                        <el-button size="mini" class="copy-button" @click="copyToClip(serverStorageKey, 'Ключ')">Скопировать ключ</el-button>
-                                    </div>
-                                    <div v-if="mode == 'omnireader'">
-                                        <br>Переход по ссылке позволит автоматически ввести ключ доступа:
-                                        <br><div class="center" style="margin-top: 5px">
-                                            <a :href="setStorageKeyLink" target="_blank">Ссылка для ввода ключа</a>
-                                        </div>
-                                        <br><div class="center">
-                                            <el-button size="mini" class="copy-button" @click="copyToClip(setStorageKeyLink, 'Ссылка')">Скопировать ссылку</el-button>
-                                        </div>
-                                    </div>
-                                    <hr/>
-                                </div>
-                            </el-form-item>
+                    </el-form-item>
+                    <el-form-item label="Выравнивание">
+                        <el-checkbox v-model="textAlignJustify">По ширине</el-checkbox>
+                        <el-checkbox v-model="wordWrap">Перенос по слогам</el-checkbox>
+                    </el-form-item>
+                    <el-form-item label="">
+                        <el-col :span="12">
+                            Компактность
+                        </el-col>
+                        <el-tooltip :open-delay="500" effect="light" placement="top">
+                            <template slot="content">
+                                Степень компактности текста в процентах.<br>
+                                Чем больше компактность, тем хуже выравнивание<br>
+                                по правому краю.
+                            </template>
+                            <el-input-number v-model="compactTextPerc" :min="0" :max="100"></el-input-number>
+                        </el-tooltip>
+                    </el-form-item>
+                    <el-form-item label="Обработка">
+                        <el-checkbox v-model="cutEmptyParagraphs">Убирать пустые строки</el-checkbox>
+                    </el-form-item>
+                    <el-form-item label="">
+                        <el-col :span="12">
+                            Добавлять пустые
+                        </el-col>
+                        <el-input-number v-model="addEmptyParagraphs" :min="0" :max="2"></el-input-number>
+                    </el-form-item>
+                    
+                    <el-form-item label="Изображения">
+                        <el-col :span="11">
+                            <el-checkbox v-model="showImages">Показывать</el-checkbox>
+                        </el-col>
 
-                            <el-form-item label="">
-                                    <el-button style="width: 250px" @click="enterServerStorageKey">Ввести ключ доступа</el-button>
-                            </el-form-item>
-                            <el-form-item label="">
-                                    <el-button style="width: 250px" @click="generateServerStorageKey">Сгенерировать новый ключ</el-button>
-                            </el-form-item>
+                        <el-col :span="1">
+                            &nbsp;
+                        </el-col>
+                        <el-col :span="11">
+                            <el-tooltip :open-delay="500" effect="light" placement="top">
+                                <template slot="content">
+                                    Выносить все изображения в центр экрана
+                                </template>
+                                <el-checkbox v-model="showInlineImagesInCenter" @change="needReload" :disabled="!showImages">Инлайн в центр</el-checkbox>
+                            </el-tooltip>
+                        </el-col>
+                    </el-form-item>
+                    <el-form-item label="">
+                        <el-checkbox v-model="imageFitWidth" :disabled="!showImages">Ширина не более размера экрана</el-checkbox>
+                    </el-form-item>
+                    <el-form-item label="">
+                            <el-col :span="12">
+                                Высота не более
+                            </el-col>
+                            <el-tooltip :open-delay="500" effect="light" placement="top">
+                                <template slot="content">
+                                    Определяет высоту изображения количеством строк.<br>
+                                    В случае превышения высоты, изображение будет<br>
+                                    уменьшено с сохранением пропорций так, чтобы<br>
+                                    помещаться в указанное количество строк.
+                                </template>
+                                <el-input-number v-model="imageHeightLines" :min="1" :max="100" :disabled="!showImages"></el-input-number>
+                            </el-tooltip>
+                    </el-form-item>
+                </el-form>
 
-                            <el-form-item label="">
-                                <div class="text">
-                                    Рекомендуется сохранить ключ в надежном месте, чтобы всегда иметь возможность восстановить настройки,
-                                    например, после переустановки ОС или чистки/смены браузера.<br>
-                                    <b>ПРЕДУПРЕЖДЕНИЕ!</b> При утере ключа, НИКТО не сможет восстановить ваши данные, т.к. они сжимаются
-                                    и шифруются ключом доступа перед отправкой на сервер.
-                                </div>
-                            </el-form-item>
-                        </el-form>
-                        </div>
-                    </el-tab-pane>
+                <el-form :model="form" size="mini" label-width="120px" @submit.native.prevent>
+                    <div class="partHeader">Строка статуса</div>
 
-                    <!-- Вид ------------------------------------------------------------------------->                    
-                    <el-tab-pane label="Вид">
+                    <el-form-item label="Статус">
+                        <el-checkbox v-model="showStatusBar">Показывать</el-checkbox>
+                        <el-checkbox v-model="statusBarTop" :disabled="!showStatusBar">Вверху/внизу</el-checkbox>
+                    </el-form-item>
+                    <el-form-item label="Высота">
+                        <el-input-number v-model="statusBarHeight" :min="5" :max="100" :disabled="!showStatusBar"></el-input-number>
+                    </el-form-item>
+                    <el-form-item label="Прозрачность">
+                        <el-input-number v-model="statusBarColorAlpha" :min="0" :max="1" :precision="2" :step="0.1" :disabled="!showStatusBar"></el-input-number>
+                    </el-form-item>
+                </el-form>
+            </el-tab-pane>
 
-                        <el-form :model="form" size="small" label-width="120px" @submit.native.prevent>
-                            <div class="partHeader">Цвет</div>
+            <!-- Кнопки ------------------------------------------------------------------------->
+            <el-tab-pane label="Кнопки">
+                <el-form :model="form" size="mini" label-width="120px" @submit.native.prevent>
+                    <div class="partHeader">Показывать кнопки панели</div>
 
-                            <el-form-item label="Текст">
-                                <el-col :span="12">
-                                    <el-color-picker v-model="textColor" color-format="hex" :predefine="predefineTextColors"></el-color-picker>
-                                    <span class="color-picked"><b>{{ textColor }}</b></span>
-                                </el-col>
-                                <el-col :span="5">
-                                    <span style="position: relative; top: 20px;">Обои:</span>
-                                </el-col>
-                            </el-form-item>
+                    <el-form-item label="" v-for="item in toolButtons" :key="item.name">
+                        <el-checkbox @change="changeShowToolButton(item.name)" :value="showToolButton[item.name]">{{item.text}}</el-checkbox>
+                    </el-form-item>
+                </el-form>
+            </el-tab-pane>
 
-                            <el-form-item label="Фон">
-                                <el-col :span="12">
-                                    <el-color-picker v-model="backgroundColor" color-format="hex" :predefine="predefineBackgroundColors" :disabled="wallpaper != ''"></el-color-picker>
-                                    <span v-show="wallpaper == ''" class="color-picked"><b>{{ backgroundColor }}</b></span>
-                                </el-col>
+            <!-- Управление ------------------------------------------------------------------------->
+            <el-tab-pane label="Управление">
+                <el-form :model="form" size="mini" label-width="120px" @submit.native.prevent>
+                    <div class="partHeader">Управление</div>
 
-                                <el-col :span="11">
-                                    <el-select v-model="wallpaper">
-                                        <el-option label="Нет" value=""></el-option>
-                                        <el-option label="1" value="paper1"></el-option>
-                                        <el-option label="2" value="paper2"></el-option>
-                                        <el-option label="3" value="paper3"></el-option>
-                                        <el-option label="4" value="paper4"></el-option>
-                                        <el-option label="5" value="paper5"></el-option>
-                                        <el-option label="6" value="paper6"></el-option>
-                                        <el-option label="7" value="paper7"></el-option>
-                                        <el-option label="8" value="paper8"></el-option>
-                                        <el-option label="9" value="paper9"></el-option>
-                                    </el-select>
-                                </el-col>
-                            </el-form-item>
-                        </el-form>
+                    <el-form-item label="">
+                        <el-checkbox v-model="clickControl">Включить управление кликом</el-checkbox>
+                    </el-form-item>
+                </el-form>
+            </el-tab-pane>
 
-                        <el-form :model="form" size="mini" label-width="120px" @submit.native.prevent>
-                            <div class="partHeader">Шрифт</div>
+            <!-- Листание ------------------------------------------------------------------------->
+            <el-tab-pane label="Листание">
+                <el-form :model="form" size="mini" label-width="120px" @submit.native.prevent>
+                    <div class="partHeader">Анимация</div>
 
-                            <el-form-item label="Локальный/веб">
-                                <el-col :span="11">
-                                    <el-select v-model="fontName" placeholder="Шрифт" :disabled="webFontName != ''">
-                                        <el-option v-for="item in fonts"
-                                            :key="item.name"
-                                            :label="item.label"
-                                            :value="item.name">
-                                        </el-option>
-                                    </el-select>
-                                </el-col>
-                                <el-col :span="1">
-                                    &nbsp;
-                                </el-col>
-                                <el-col :span="11">
-                                    <el-tooltip :open-delay="500" effect="light" placement="top">
-                                        <template slot="content">
-                                            Веб шрифты дают большое разнообразие,<br>
-                                            однако есть шанс, что шрифт будет загружаться<br>
-                                            очень медленно или вовсе не загрузится
-                                        </template>
-                                        <el-select v-model="webFontName">
-                                            <el-option label="Нет" value=""></el-option>
-                                            <el-option v-for="item in webFonts"
-                                                :key="item.name"
-                                                :value="item.name">
-                                            </el-option>
-                                        </el-select>
-                                    </el-tooltip>
-                                </el-col>
-                            </el-form-item>
-                            <el-form-item label="Размер">
-                                <el-col :span="17">
-                                    <el-input-number v-model="fontSize" :min="5" :max="200"></el-input-number>
-                                </el-col>
-                                <el-col :span="1">
-                                    <a href="https://fonts.google.com/?subset=cyrillic" target="_blank">Примеры</a>
-                                </el-col>
-                            </el-form-item>
-                            <el-form-item label="Сдвиг">
-                                <el-tooltip :open-delay="500" effect="light">
-                                    <template slot="content">
-                                        Сдвиг шрифта по вертикали в процентах от размера.<br>
-                                        Отрицательное значение сдвигает вверх, положительное -<br>
-                                        вниз. Значение зависит от метрики шрифта.
-                                    </template>
-                                    <el-input-number v-model="vertShift" :min="-100" :max="100"></el-input-number>
-                                </el-tooltip>
-                            </el-form-item>
+                    <el-form-item label="Тип">
+                        <el-col :span="11">
+                            <el-select v-model="pageChangeAnimation">
+                                <el-option label="Нет" value=""></el-option>
+                                <el-option label="Вверх-вниз" value="downShift"></el-option>
+                                <el-option label="Вправо-влево" value="rightShift"></el-option>
+                                <el-option label="Протаивание" value="thaw"></el-option>
+                                <el-option label="Мерцание" value="blink"></el-option>
+                                <el-option label="Вращение" value="rotate"></el-option>
+                                <el-option v-show="wallpaper == ''" label="Листание" value="flip"></el-option>
+                            </el-select>
+                        </el-col>
+                    </el-form-item>
 
-                            <el-form-item label="Стиль">
-                                <el-col :span="8">
-                                    <el-checkbox v-model="fontBold">Жирный</el-checkbox>
-                                </el-col>
-                                <el-col :span="8">
-                                    <el-checkbox v-model="fontItalic">Курсив</el-checkbox>
-                                </el-col>
-                            </el-form-item>
-                        </el-form>
+                    <el-form-item label="Скорость">
+                        <el-input-number v-model="pageChangeAnimationSpeed" :min="0" :max="100" :disabled="pageChangeAnimation == ''"></el-input-number>
+                    </el-form-item>
+                </el-form>
 
-                        <el-form :model="form" size="mini" label-width="120px" @submit.native.prevent>
-                            <div class="partHeader">Текст</div>
+                <el-form :model="form" size="mini" label-width="120px" @submit.native.prevent>
+                    <div class="partHeader">Другое</div>
 
-                            <el-form-item label="Интервал">
-                                <el-input-number v-model="lineInterval" :min="0" :max="200"></el-input-number>
-                            </el-form-item>
-                            <el-form-item label="Параграф">
-                                <el-input-number v-model="p" :min="0" :max="2000"></el-input-number>
-                            </el-form-item>
-                            <el-form-item label="Отступ">
-                                <el-col :span="11">
-                                    <el-tooltip :open-delay="500" effect="light">
-                                        <template slot="content">
-                                            Слева/справа
-                                        </template>
-                                        <el-input-number v-model="indentLR" :min="0" :max="2000"></el-input-number>
-                                    </el-tooltip>
-                                </el-col>
-                                <el-col :span="1">
-                                    &nbsp;
-                                </el-col>
-                                <el-col :span="11">
-                                    <el-tooltip :open-delay="500" effect="light">
-                                        <template slot="content">
-                                            Сверху/снизу
-                                        </template>
-                                        <el-input-number v-model="indentTB" :min="0" :max="2000"></el-input-number>
-                                    </el-tooltip>
-                                </el-col>
-                            </el-form-item>
-                            <el-form-item label="Сдвиг">
-                                <el-tooltip :open-delay="500" effect="light">
-                                    <template slot="content">
-                                        Сдвиг текста по вертикали в процентах от размера шрифта.<br>
-                                        Отрицательное значение сдвигает вверх, положительное -<br>
-                                        вниз.
-                                    </template>
-                                    <el-input-number v-model="textVertShift" :min="-100" :max="100"></el-input-number>
-                                </el-tooltip>
-                            </el-form-item>
-                            <el-form-item label="Скроллинг">
-                                <el-col :span="11">
-                                    <el-tooltip :open-delay="500" effect="light">
-                                        <template slot="content">
-                                            Замедление скроллинга в миллисекундах.<br>
-                                            Определяет время, за которое текст<br>
-                                            прокручивается на одну строку.
-                                        </template>
-                                        <el-input-number v-model="scrollingDelay" :min="1" :max="10000"></el-input-number>
-                                    </el-tooltip>
-                                </el-col>
-                                <el-col :span="1">
-                                    &nbsp;
-                                </el-col>
-                                <el-col :span="11">
-                                    <el-tooltip :open-delay="500" effect="light" placement="top">
-                                        <template slot="content">
-                                            Вид скроллинга: линейный,<br>
-                                            ускорение-замедление и пр.
-                                        </template>
+                    <el-form-item label="Страница">
+                        <el-tooltip :open-delay="500" effect="light">
+                            <template slot="content">
+                                Переносить последнюю строку страницы<br>
+                                в начало следующей при листании
+                            </template>
+                            <el-checkbox v-model="keepLastToFirst">Переносить последнюю строку</el-checkbox>
+                        </el-tooltip>
+                    </el-form-item>
+                </el-form>
+            </el-tab-pane>
 
-                                        <el-select v-model="scrollingType">
-                                            <el-option value="linear"></el-option>
-                                            <el-option value="ease"></el-option>
-                                            <el-option value="ease-in"></el-option>
-                                            <el-option value="ease-out"></el-option>
-                                            <el-option value="ease-in-out"></el-option>
-                                        </el-select>
-                                    </el-tooltip>
-                                </el-col>
+            <!-- Прочее ------------------------------------------------------------------------->
+            <el-tab-pane label="Прочее">
+                <el-form :model="form" size="mini" label-width="120px" @submit.native.prevent>
+                    <div class="partHeader">Подсказки, уведомления</div>
 
-                            </el-form-item>
-                            <el-form-item label="Выравнивание">
-                                <el-checkbox v-model="textAlignJustify">По ширине</el-checkbox>
-                                <el-checkbox v-model="wordWrap">Перенос по слогам</el-checkbox>
-                            </el-form-item>
-                            <el-form-item label="">
-                                <el-col :span="12">
-                                    Компактность
-                                </el-col>
-                                <el-tooltip :open-delay="500" effect="light" placement="top">
-                                    <template slot="content">
-                                        Степень компактности текста в процентах.<br>
-                                        Чем больше компактность, тем хуже выравнивание<br>
-                                        по правому краю.
-                                    </template>
-                                    <el-input-number v-model="compactTextPerc" :min="0" :max="100"></el-input-number>
-                                </el-tooltip>
-                            </el-form-item>
-                            <el-form-item label="Обработка">
-                                <el-checkbox v-model="cutEmptyParagraphs">Убирать пустые строки</el-checkbox>
-                            </el-form-item>
-                            <el-form-item label="">
-                                <el-col :span="12">
-                                    Добавлять пустые
-                                </el-col>
-                                <el-input-number v-model="addEmptyParagraphs" :min="0" :max="2"></el-input-number>
-                            </el-form-item>
-                            
-                            <el-form-item label="Изображения">
-                                <el-col :span="11">
-                                    <el-checkbox v-model="showImages">Показывать</el-checkbox>
-                                </el-col>
+                    <el-form-item label="Подсказка">
+                        <el-tooltip :open-delay="500" effect="light">
+                            <template slot="content">
+                                Показывать или нет подсказку при каждой загрузке книги
+                            </template>
+                            <el-checkbox v-model="showClickMapPage" :disabled="!clickControl">Показывать области управления кликом</el-checkbox>
+                        </el-tooltip>
+                    </el-form-item>
+                    <el-form-item label="Подсказка">
+                        <el-tooltip :open-delay="500" effect="light">
+                            <template slot="content">
+                                Мерцать сообщением в строке статуса и на кнопке<br>
+                                обновления при загрузке книги из кэша
+                            </template>
+                            <el-checkbox v-model="blinkCachedLoad">Предупреждать о загрузке из кэша</el-checkbox>
+                        </el-tooltip>
+                    </el-form-item>
+                    <el-form-item label="Уведомление">
+                        <el-tooltip :open-delay="500" effect="light">
+                            <template slot="content">
+                                Показывать уведомления и ошибки от<br>
+                                синхронизатора данных с сервером
+                            </template>
+                            <el-checkbox v-model="showServerStorageMessages">Показывать сообщения синхронизации</el-checkbox>
+                        </el-tooltip>
+                    </el-form-item>
+                    <el-form-item label="Уведомление">
+                        <el-tooltip :open-delay="500" effect="light">
+                            <template slot="content">
+                                Показывать уведомления "Что нового"<br>
+                                при каждом выходе новой версии читалки
+                            </template>
+                            <el-checkbox v-model="showWhatsNewDialog">Показывать уведомление "Что нового"</el-checkbox>
+                        </el-tooltip>
+                    </el-form-item>
+                </el-form>
 
-                                <el-col :span="1">
-                                    &nbsp;
-                                </el-col>
-                                <el-col :span="11">
-                                    <el-tooltip :open-delay="500" effect="light" placement="top">
-                                        <template slot="content">
-                                            Выносить все изображения в центр экрана
-                                        </template>
-                                        <el-checkbox v-model="showInlineImagesInCenter" @change="needReload" :disabled="!showImages">Инлайн в центр</el-checkbox>
-                                    </el-tooltip>
-                                </el-col>
-                            </el-form-item>
-                            <el-form-item label="">
-                                <el-checkbox v-model="imageFitWidth" :disabled="!showImages">Ширина не более размера экрана</el-checkbox>
-                            </el-form-item>
-                            <el-form-item label="">
-                                    <el-col :span="12">
-                                        Высота не более
-                                    </el-col>
-                                    <el-tooltip :open-delay="500" effect="light" placement="top">
-                                        <template slot="content">
-                                            Определяет высоту изображения количеством строк.<br>
-                                            В случае превышения высоты, изображение будет<br>
-                                            уменьшено с сохранением пропорций так, чтобы<br>
-                                            помещаться в указанное количество строк.
-                                        </template>
-                                        <el-input-number v-model="imageHeightLines" :min="1" :max="100" :disabled="!showImages"></el-input-number>
-                                    </el-tooltip>
-                            </el-form-item>
-                        </el-form>
+                <el-form :model="form" size="mini" label-width="120px" @submit.native.prevent>
+                    <div class="partHeader">Прочее</div>
 
-                        <el-form :model="form" size="mini" label-width="120px" @submit.native.prevent>
-                            <div class="partHeader">Строка статуса</div>
+                    <el-form-item label="Парам. в URL">
+                        <el-tooltip :open-delay="500" effect="light">
+                            <template slot="content">
+                                Добавление параметра "__p" в строке браузера<br>
+                                позволяет передавать ссылку на книгу в читалке<br>
+                                без потери текущей позиции. Однако в этом случае<br>
+                                при листании забивается история браузера, т.к. на<br>
+                                каждое изменение позиции происходит смена URL.
+                            </template>
+                            <el-checkbox v-model="allowUrlParamBookPos">Добавлять параметр "__p"</el-checkbox>
+                        </el-tooltip>
+                    </el-form-item>
+                    <el-form-item label="Парсинг">
+                        <el-tooltip :open-delay="500" effect="light">
+                            <template slot="content">
+                                Включение этой опции позволяет делать предварительную<br>
+                                обработку текста в ленивом режиме сразу после загрузки<br>
+                                книги. Это может повысить отзывчивость читалки, но<br>
+                                нагружает процессор каждый раз при открытии книги.
+                            </template>
+                            <el-checkbox v-model="lazyParseEnabled">Предварительная обработка текста</el-checkbox>
+                        </el-tooltip>
+                    </el-form-item>
+                    <el-form-item label="Копирование">
+                        <el-tooltip :open-delay="500" effect="light">
+                            <template slot="content">
+                                Загружать весь текст в окно<br>
+                                копирования текста со страницы
+                            </template>
+                            <el-checkbox v-model="copyFullText">Загружать весь текст</el-checkbox>
+                        </el-tooltip>
+                    </el-form-item>
+                </el-form>
+            </el-tab-pane>
 
-                            <el-form-item label="Статус">
-                                <el-checkbox v-model="showStatusBar">Показывать</el-checkbox>
-                                <el-checkbox v-model="statusBarTop" :disabled="!showStatusBar">Вверху/внизу</el-checkbox>
-                            </el-form-item>
-                            <el-form-item label="Высота">
-                                <el-input-number v-model="statusBarHeight" :min="5" :max="100" :disabled="!showStatusBar"></el-input-number>
-                            </el-form-item>
-                            <el-form-item label="Прозрачность">
-                                <el-input-number v-model="statusBarColorAlpha" :min="0" :max="1" :precision="2" :step="0.1" :disabled="!showStatusBar"></el-input-number>
-                            </el-form-item>
-                        </el-form>
-                    </el-tab-pane>
+            <!-- Сброс ------------------------------------------------------------------------->
+            <el-tab-pane label="Сброс">
+                <el-button @click="setDefaults">Установить по умолчанию</el-button>
+            </el-tab-pane>
 
-                    <!-- Кнопки ------------------------------------------------------------------------->
-                    <el-tab-pane label="Кнопки">
-                        <el-form :model="form" size="mini" label-width="120px" @submit.native.prevent>
-                            <div class="partHeader">Показывать кнопки панели</div>
-
-                            <el-form-item label="" v-for="item in toolButtons" :key="item.name">
-                                <el-checkbox @change="changeShowToolButton(item.name)" :value="showToolButton[item.name]">{{item.text}}</el-checkbox>
-                            </el-form-item>
-                        </el-form>
-                    </el-tab-pane>
-
-                    <!-- Управление ------------------------------------------------------------------------->
-                    <el-tab-pane label="Управление">
-                        <el-form :model="form" size="mini" label-width="120px" @submit.native.prevent>
-                            <div class="partHeader">Управление</div>
-
-                            <el-form-item label="">
-                                <el-checkbox v-model="clickControl">Включить управление кликом</el-checkbox>
-                            </el-form-item>
-                        </el-form>
-                    </el-tab-pane>
-
-                    <!-- Листание ------------------------------------------------------------------------->
-                    <el-tab-pane label="Листание">
-                        <el-form :model="form" size="mini" label-width="120px" @submit.native.prevent>
-                            <div class="partHeader">Анимация</div>
-
-                            <el-form-item label="Тип">
-                                <el-col :span="11">
-                                    <el-select v-model="pageChangeAnimation">
-                                        <el-option label="Нет" value=""></el-option>
-                                        <el-option label="Вверх-вниз" value="downShift"></el-option>
-                                        <el-option label="Вправо-влево" value="rightShift"></el-option>
-                                        <el-option label="Протаивание" value="thaw"></el-option>
-                                        <el-option label="Мерцание" value="blink"></el-option>
-                                        <el-option label="Вращение" value="rotate"></el-option>
-                                        <el-option v-show="wallpaper == ''" label="Листание" value="flip"></el-option>
-                                    </el-select>
-                                </el-col>
-                            </el-form-item>
-
-                            <el-form-item label="Скорость">
-                                <el-input-number v-model="pageChangeAnimationSpeed" :min="0" :max="100" :disabled="pageChangeAnimation == ''"></el-input-number>
-                            </el-form-item>
-                        </el-form>
-
-                        <el-form :model="form" size="mini" label-width="120px" @submit.native.prevent>
-                            <div class="partHeader">Другое</div>
-
-                            <el-form-item label="Страница">
-                                <el-tooltip :open-delay="500" effect="light">
-                                    <template slot="content">
-                                        Переносить последнюю строку страницы<br>
-                                        в начало следующей при листании
-                                    </template>
-                                    <el-checkbox v-model="keepLastToFirst">Переносить последнюю строку</el-checkbox>
-                                </el-tooltip>
-                            </el-form-item>
-                        </el-form>
-                    </el-tab-pane>
-
-                    <!-- Прочее ------------------------------------------------------------------------->
-                    <el-tab-pane label="Прочее">
-                        <el-form :model="form" size="mini" label-width="120px" @submit.native.prevent>
-                            <div class="partHeader">Подсказки, уведомления</div>
-
-                            <el-form-item label="Подсказка">
-                                <el-tooltip :open-delay="500" effect="light">
-                                    <template slot="content">
-                                        Показывать или нет подсказку при каждой загрузке книги
-                                    </template>
-                                    <el-checkbox v-model="showClickMapPage" :disabled="!clickControl">Показывать области управления кликом</el-checkbox>
-                                </el-tooltip>
-                            </el-form-item>
-                            <el-form-item label="Подсказка">
-                                <el-tooltip :open-delay="500" effect="light">
-                                    <template slot="content">
-                                        Мерцать сообщением в строке статуса и на кнопке<br>
-                                        обновления при загрузке книги из кэша
-                                    </template>
-                                    <el-checkbox v-model="blinkCachedLoad">Предупреждать о загрузке из кэша</el-checkbox>
-                                </el-tooltip>
-                            </el-form-item>
-                            <el-form-item label="Уведомление">
-                                <el-tooltip :open-delay="500" effect="light">
-                                    <template slot="content">
-                                        Показывать уведомления и ошибки от<br>
-                                        синхронизатора данных с сервером
-                                    </template>
-                                    <el-checkbox v-model="showServerStorageMessages">Показывать сообщения синхронизации</el-checkbox>
-                                </el-tooltip>
-                            </el-form-item>
-                            <el-form-item label="Уведомление">
-                                <el-tooltip :open-delay="500" effect="light">
-                                    <template slot="content">
-                                        Показывать уведомления "Что нового"<br>
-                                        при каждом выходе новой версии читалки
-                                    </template>
-                                    <el-checkbox v-model="showWhatsNewDialog">Показывать уведомление "Что нового"</el-checkbox>
-                                </el-tooltip>
-                            </el-form-item>
-                        </el-form>
-
-                        <el-form :model="form" size="mini" label-width="120px" @submit.native.prevent>
-                            <div class="partHeader">Прочее</div>
-
-                            <el-form-item label="Парам. в URL">
-                                <el-tooltip :open-delay="500" effect="light">
-                                    <template slot="content">
-                                        Добавление параметра "__p" в строке браузера<br>
-                                        позволяет передавать ссылку на книгу в читалке<br>
-                                        без потери текущей позиции. Однако в этом случае<br>
-                                        при листании забивается история браузера, т.к. на<br>
-                                        каждое изменение позиции происходит смена URL.
-                                    </template>
-                                    <el-checkbox v-model="allowUrlParamBookPos">Добавлять параметр "__p"</el-checkbox>
-                                </el-tooltip>
-                            </el-form-item>
-                            <el-form-item label="Парсинг">
-                                <el-tooltip :open-delay="500" effect="light">
-                                    <template slot="content">
-                                        Включение этой опции позволяет делать предварительную<br>
-                                        обработку текста в ленивом режиме сразу после загрузки<br>
-                                        книги. Это может повысить отзывчивость читалки, но<br>
-                                        нагружает процессор каждый раз при открытии книги.
-                                    </template>
-                                    <el-checkbox v-model="lazyParseEnabled">Предварительная обработка текста</el-checkbox>
-                                </el-tooltip>
-                            </el-form-item>
-                            <el-form-item label="Копирование">
-                                <el-tooltip :open-delay="500" effect="light">
-                                    <template slot="content">
-                                        Загружать весь текст в окно<br>
-                                        копирования текста со страницы
-                                    </template>
-                                    <el-checkbox v-model="copyFullText">Загружать весь текст</el-checkbox>
-                                </el-tooltip>
-                            </el-form-item>
-                        </el-form>
-                    </el-tab-pane>
-
-                    <!-- Сброс ------------------------------------------------------------------------->
-                    <el-tab-pane label="Сброс">
-                        <el-button @click="setDefaults">Установить по умолчанию</el-button>
-                    </el-tab-pane>
-
-                </el-tabs>
-            </Window>
-        </div>
-    </div>
+        </el-tabs>
+    </Window>
 </template>
 
 <script>
@@ -580,6 +576,10 @@ class SettingsPage extends Vue {
         this.form = {};
         this.toolButtons = rstore.toolButtons;
         this.settingsChanged();
+    }
+
+    init() {
+        this.$refs.window.init();
     }
 
     settingsChanged() {
@@ -856,22 +856,6 @@ class SettingsPage extends Vue {
 </script>
 
 <style scoped>
-.main {
-    position: absolute;
-    width: 100%;
-    height: 100%;
-    z-index: 60;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-}
-
-.mainWindow {
-    height: 70%;
-    display: flex;
-}
-
 .text {
     font-size: 90%;
     line-height: 130%;
