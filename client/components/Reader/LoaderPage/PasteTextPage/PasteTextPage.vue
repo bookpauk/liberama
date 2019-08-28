@@ -1,22 +1,19 @@
 <template>
-    <div ref="main" class="main" @click="close">
-        <div class="mainWindow" @click.stop>
-            <Window @close="close">
-                <template slot="header">
-                    Вставьте текст и нажмите
-                    <el-button size="mini" style="font-size: 120%; color: blue" @click="loadBuffer">Загрузить</el-button>
+    <Window @close="close">
+        <template slot="header">
+            <span style="position: relative; top: -3px">
+                Вставьте текст и нажмите
+                <span class="clickable" style="font-size: 150%; position: relative; top: 1px" @click="loadBuffer">загрузить</span>
+                или F2
+            </span>
+        </template>
 
-                    или F2
-                </template>
-
-                <div>
-                    <el-input placeholder="Введите название текста" class="input" v-model="bookTitle"></el-input>
-                </div>
-                <hr/>
-                <textarea ref="textArea" class="text" @paste="calcTitle"></textarea>
-            </Window>
+        <div>
+            <el-input placeholder="Введите название текста" class="input" v-model="bookTitle"></el-input>
         </div>
-    </div>
+        <hr/>
+        <textarea ref="textArea" class="text" @paste="calcTitle"></textarea>
+    </Window>
 </template>
 
 <script>
@@ -99,23 +96,6 @@ class PasteTextPage extends Vue {
 </script>
 
 <style scoped>
-.main {
-    position: absolute;
-    width: 100%;
-    height: 100%;
-    z-index: 40;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-}
-
-.mainWindow {
-    width: 100%;
-    height: 100%;
-    display: flex;
-}
-
 .text {
     flex: 1;
     overflow-wrap: anywhere;
@@ -123,6 +103,7 @@ class PasteTextPage extends Vue {
     padding: 0 10px 0 10px;
     position: relative;
     font-size: 120%;
+    min-width: 400px;
 }
 
 .text:focus {
@@ -133,4 +114,10 @@ hr {
     margin: 0;
     padding: 0;
 }
+
+.clickable {
+    color: blue;
+    cursor: pointer;
+}
+
 </style>
