@@ -145,7 +145,7 @@ const settingDefaults = {
     fontName: 'ReaderDefault',
     webFontName: '',
     fontVertShift: 0,
-    textVertShift: -20,
+    textVertShift: 0,
 
     lineInterval: 3,// px, межстрочный интервал
     textAlignJustify: true,// выравнивание по ширине
