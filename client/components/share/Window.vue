@@ -22,6 +22,8 @@ export default @Component({
     props: {
         height: { type: String, default: '100%' },
         width: { type: String, default: '100%' },
+        maxWidth: { type: String, default: '' },
+        topShift: { type: Number, default: 0 },
     }
 })
 class Window extends Vue {
@@ -29,9 +31,11 @@ class Window extends Vue {
         this.$nextTick(() => {
             this.$refs.windowBox.style.height = this.height;
             this.$refs.windowBox.style.width = this.width;
+            if (this.maxWidth)
+                this.$refs.windowBox.style.maxWidth = this.maxWidth;
 
             const left = (this.$refs.main.offsetWidth - this.$refs.windowBox.offsetWidth)/2;
-            const top = (this.$refs.main.offsetHeight - this.$refs.windowBox.offsetHeight)/2;
+            const top = (this.$refs.main.offsetHeight - this.$refs.windowBox.offsetHeight)/2 + this.topShift;
             this.$refs.windowBox.style.left = (left > 0 ? left : 0) + 'px';
             this.$refs.windowBox.style.top = (top > 0 ? top : 0) + 'px';
         });
