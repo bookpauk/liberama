@@ -1,5 +1,5 @@
 <template>
-    <div ref="main" class="main" @click="close" @mouseup.prevent.stop="onMouseUp" @mousemove.prevent.stop="onMouseMove">
+    <div ref="main" class="main" @click="close" @mouseup="onMouseUp" @mousemove="onMouseMove">
         <div ref="windowBox" class="windowBox" @click.stop>
             <div class="window">
                 <div ref="header" class="header" @mousedown.prevent.stop="onMouseDown"
