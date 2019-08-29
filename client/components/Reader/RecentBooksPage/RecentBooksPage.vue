@@ -129,7 +129,7 @@ class RecentBooksPage extends Vue {
         this.$nextTick(() => {
             //this.$refs.input.focus();
         });
-        (async() => {//отбражение подгрузки списка
+        (async() => {//отбражение подгрузки списка, иначе тормозит
             if (this.initing)
                 return;
             this.initing = true;
@@ -138,9 +138,10 @@ class RecentBooksPage extends Vue {
             await utils.sleep(200);
 
             if (bookManager.loaded) {
+                const t = Date.now();
                 await this.updateTableData(10);
                 if (bookManager.getSortedRecent().length > 10)
-                    await utils.sleep(1800);
+                    await utils.sleep(10*(Date.now() - t));
             } else {
                 let i = 0;
                 let j = 5;
