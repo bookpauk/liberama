@@ -7,7 +7,7 @@
 
         <el-table
             :data="tableData"
-            style="width: 100%"
+            style="width: 570px"
             size="mini"
             height="1px"
             stripe
@@ -24,7 +24,7 @@
             </el-table-column>
             <el-table-column
                 prop="touchDateTime"
-                min-width="90px"
+                min-width="85px"
                 sortable
                 >
                 <template slot="header" slot-scope="scope"><!-- eslint-disable-line vue/no-unused-vars -->
@@ -57,7 +57,7 @@
                 </template>
 
                 <el-table-column
-                    min-width="300px"
+                    min-width="280px"
                     >
                     <template slot-scope="scope">
                         <div class="desc" @click="loadBook(scope.row.url)">
@@ -68,7 +68,7 @@
                 </el-table-column>
 
                 <el-table-column
-                    min-width="100px"
+                    min-width="90px"
                     >
                     <template slot-scope="scope">
                         <a v-show="isUrl(scope.row.url)" :href="scope.row.url" target="_blank">Оригинал</a><br>
