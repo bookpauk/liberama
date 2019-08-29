@@ -55,6 +55,7 @@
     "webpack-merge": "^4.1.5"
   },
   "dependencies": {
+    "appcache-webpack-plugin": "^1.4.0",
     "axios": "^0.18.0",
     "base-x": "^3.0.5",
     "chardet": "^0.7.0",
