@@ -87,6 +87,87 @@
                 </span>
             </el-dialog>
 
+            <el-dialog
+                title="Внимание!"
+                :visible.sync="migrationVisible1"
+                width="90%">
+                <div>
+                    Появилась httpS-версия сайта по адресу <a href="https://omnireader.ru" target="_blank">https://omnireader.ru</a><br>
+                    Работа по httpS-протоколу, помимо безопасности соединения, позволяет воспользоваться всеми возможностями
+                    современных браузеров, а именно, применительно к нашему ресурсу:
+
+                    <ul>
+                        <li>возможность автономной работы с читалкой (без доступа к интернету), кеширование сайта через appcache</li>
+                        <li>безопасная передача на сервер данных о настройках и читаемых книгах при включенной синхронизации; все данные шифруются на стороне
+                            браузера ключом доступа и никто (в т.ч. администратор) не имеет возможности их прочитать
+                        <li>использование встроенных в JS функций шифрования и других</li>
+                    </ul>
+
+                    Для того, чтобы перейти на новую версию с сохранением настроек и читаемых книг необходимо сделать следующее:
+                    <ul>
+                        <li>зайти в "Настройки"->"Профили" и поставить галочку "Включить синхронизацию с сервером"</li>
+                        <li>там же добавить профиль устройства с любым именем для синхронизации настроек<br>
+                            <span style="margin-left: 20px"><i style="font-size: 90%" class="el-icon-info"></i>
+                                после этого все данные будут автоматически сохранены на сервер
+                            </span>
+                        </li>
+                        <li>далее нажать на кнопку "Показать ключ доступа" и кликнуть по ссылке "Ссылка для ввода ключа"<br>
+                            <span style="margin-left: 20px"><i style="font-size: 90%" class="el-icon-info"></i>
+                                произойдет переход на https-версию читалки и откроется окно для ввода ключа
+                            </span><br>
+                            <span style="margin-left: 20px"><i style="font-size: 90%" class="el-icon-info"></i>
+                                подтвердив ввод ключа нажатием "OK" и выбрав профиль устройства, вы восстановите все ваши настройки в новой версии
+                            </span>
+                        </li>
+                    </ul>
+
+
+                    Старая http-версия сайта будет доступна до конца 2019 года.<br>
+                    Приносим извинения за доставленные неудобства.
+                </div>
+
+                <span slot="footer" class="dialog-footer">
+                    <el-button @click="migrationDialogDisable">Больше не показывать</el-button>
+                    <el-button @click="migrationDialogRemind">Напомнить позже</el-button>
+                </span>
+            </el-dialog>
+
+            <el-dialog
+                title="Внимание!"
+                :visible.sync="migrationVisible2"
+                width="90%">
+                <div>
+                    Информация для пользователей старой версии читалки по адресу <a href="http://omnireader.ru" target="_blank">http://omnireader.ru</a><br>
+                    Для того, чтобы перейти на новую httpS-версию с сохранением настроек и читаемых книг необходимо сделать следующее:
+                    <ul>
+                        <li>перейти на старую версию ресурса <a href="http://omnireader.ru" target="_blank">http://omnireader.ru</a></li>
+                        <li>зайти в "Настройки"->"Профили" и поставить галочку "Включить синхронизацию с сервером"</li>
+                        <li>там же добавить профиль устройства с любым именем для синхронизации настроек<br>
+                            <span style="margin-left: 20px"><i style="font-size: 90%" class="el-icon-info"></i>
+                                после этого все данные будут автоматически сохранены на сервер
+                            </span>
+                        </li>
+                        <li>далее нажать на кнопку "Показать ключ доступа" и кликнуть по ссылке "Ссылка для ввода ключа"<br>
+                            <span style="margin-left: 20px"><i style="font-size: 90%" class="el-icon-info"></i>
+                                произойдет переход на https-версию читалки и откроется окно для ввода ключа
+                            </span><br>
+                            <span style="margin-left: 20px"><i style="font-size: 90%" class="el-icon-info"></i>
+                                подтвердив ввод ключа нажатием "OK" и выбрав профиль устройства, вы восстановите все ваши настройки в новой версии
+                            </span>
+                        </li>
+                    </ul>
+
+
+                    Старая http-версия сайта будет доступна до конца 2019 года.<br>
+                    Приносим извинения за доставленные неудобства.
+                </div>
+
+                <span slot="footer" class="dialog-footer">
+                    <el-button @click="migrationDialogDisable">Больше не показывать</el-button>
+                    <el-button @click="migrationDialogRemind">Напомнить позже</el-button>
+                </span>
+            </el-dialog>
+
         </el-main>
 
     </el-container>
@@ -192,6 +273,8 @@ class Reader extends Vue {
 
     whatsNewVisible = false;
     whatsNewContent = '';
+    migrationVisible1 = false;
+    migrationVisible2 = false;
 
     created() {
         this.loading = true;
@@ -265,6 +348,7 @@ class Reader extends Vue {
             this.loading = false;
 
             await this.showWhatsNew();
+            await this.showMigration();
         })();
     }
 
@@ -276,6 +360,7 @@ class Reader extends Vue {
         this.clickControl = settings.clickControl;
         this.blinkCachedLoad = settings.blinkCachedLoad;
         this.showWhatsNewDialog = settings.showWhatsNewDialog;
+        this.showMigrationDialog = settings.showMigrationDialog;
         this.showToolButton = settings.showToolButton;
 
         this.updateHeaderMinWidth();
@@ -340,6 +425,33 @@ class Reader extends Vue {
         }
     }
 
+    async showMigration() {
+        await utils.sleep(3000);
+        if (!this.settingsActive &&
+            this.mode == 'omnireader' && this.showMigrationDialog && this.migrationRemindDate != utils.formatDate(new Date(), 'coDate')) {
+            if (window.location.protocol == 'http:') {
+                this.migrationVisible1 = true;
+            } else if (window.location.protocol == 'https:') {
+                this.migrationVisible2 = true;
+            }
+        }
+    }
+
+    migrationDialogDisable() {
+        this.migrationVisible1 = false;
+        this.migrationVisible2 = false;
+        if (this.showMigrationDialog) {
+            const newSettings = Object.assign({}, this.settings, { showMigrationDialog: false });
+            this.commit('reader/setSettings', newSettings);
+        }
+    }
+
+    migrationDialogRemind() {
+        this.migrationVisible1 = false;
+        this.migrationVisible2 = false;
+        this.commit('reader/setMigrationRemindDate', utils.formatDate(new Date(), 'coDate'));
+    }
+
     openVersionHistory() {
         this.whatsNewVisible = false;
         this.versionHistoryToggle();
@@ -374,6 +486,10 @@ class Reader extends Vue {
         else
             this.$router.replace(`/reader?${pos}${url}`);
 
+    }
+
+    get mode() {
+        return this.$store.state.config.mode;
     }
 
     get routeParamUrl() {
@@ -454,6 +570,10 @@ class Reader extends Vue {
 
     get whatsNewContentHash() {
         return this.$store.state.reader.whatsNewContentHash;
+    }
+
+    get migrationRemindDate() {
+        return this.$store.state.reader.migrationRemindDate;
     }
 
     addAction(pos) {

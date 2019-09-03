@@ -458,6 +458,14 @@
                             <el-checkbox v-model="showWhatsNewDialog">Показывать уведомление "Что нового"</el-checkbox>
                         </el-tooltip>
                     </el-form-item>
+                    <el-form-item label="Уведомление">
+                        <el-tooltip :open-delay="500" effect="light">
+                            <template slot="content">
+                                Показывать диалог о переходе на httpS-версию
+                            </template>
+                            <el-checkbox v-model="showMigrationDialog">Уведомлять о переходе на httpS-версию</el-checkbox>
+                        </el-tooltip>
+                    </el-form-item>
                 </el-form>
 
                 <el-form :model="form" size="mini" label-width="120px" @submit.native.prevent>
@@ -645,7 +653,7 @@ class SettingsPage extends Vue {
     }
 
     get setStorageKeyLink() {
-        return `http://${window.location.host}/#/reader?setStorageAccessKey=${utils.toBase58(this.serverStorageKey)}`;
+        return `https://${window.location.host}/#/reader?setStorageAccessKey=${utils.toBase58(this.serverStorageKey)}`;
     }
 
     get predefineTextColors() {
