@@ -482,9 +482,9 @@ class Reader extends Vue {
         const pos = (recent && recent.bookPos && this.allowUrlParamBookPos ? `__p=${recent.bookPos}&` : '');
         const url = (recent ? `url=${recent.url}` : '');
         if (isNewRoute)
-            this.$router.push(`/reader?${pos}${url}`);
+            this.$router.push(`/reader?${pos}${url}`).catch(() => {});
         else
-            this.$router.replace(`/reader?${pos}${url}`);
+            this.$router.replace(`/reader?${pos}${url}`).catch(() => {});
 
     }
 
