@@ -444,10 +444,25 @@ class ServerStorage extends Vue {
         if (utils.isEmptyObjDiff(diff))
             return;
 
+        //вычисление критерия сохранения целиком
+        let forceSaveRecent = JSON.stringify(diff).length > 1000;
+        if (!forceSaveRecent && itemKey) {
+            if (!this.sameKeyCount)
+                this.sameKeyCount = 0;
+            if (this.prevItemKey == itemKey)
+                this.sameKeyCount++;
+
+            forceSaveRecent = this.sameKeyCount > 5 && (Object.keys(diff.change).length > 1);
+
+            this.sameKeyCount = (!forceSaveRecent ? this.sameKeyCount : 0);
+            this.prevItemKey = itemKey;
+        }
+
+        //сохранение
         this.recentDiff = diff;
         this.savingRecent = true;        
         try {
-            if (JSON.stringify(this.recentDiff).length > 1000) {//сохраняем recent целиком
+            if (forceSaveRecent) {//сохраняем recent целиком
                 let result = {state: ''};
 
                 try {
