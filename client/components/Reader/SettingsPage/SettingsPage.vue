@@ -1,5 +1,5 @@
 <template>
-    <Window ref="window" height="70%" width="600px" @close="close">
+    <Window ref="window" height="95%" width="600px" @close="close">
         <template slot="header">
             Настройки
         </template>
@@ -537,7 +537,8 @@ export default @Component({
             this.settingsChanged();
         },
         form: function(newValue) {
-            this.commit('reader/setSettings', newValue);
+            if (this.inited)
+                this.commit('reader/setSettings', newValue);
         },
         fontBold: function(newValue) {
             this.fontWeight = (newValue ? 'bold' : '');
@@ -588,6 +589,7 @@ class SettingsPage extends Vue {
 
     init() {
         this.$refs.window.init();
+        this.inited = true;
     }
 
     settingsChanged() {

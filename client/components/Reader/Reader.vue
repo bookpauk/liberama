@@ -73,7 +73,7 @@
             <SettingsPage v-if="settingsActive" ref="settingsPage" @settings-toggle="settingsToggle"></SettingsPage>
             <HelpPage v-if="helpActive" ref="helpPage" @help-toggle="helpToggle"></HelpPage>
             <ClickMapPage v-show="clickMapActive" ref="clickMapPage"></ClickMapPage>
-            <!--ServerStorage v-show="hidden" ref="serverStorage"></ServerStorage-->
+            <ServerStorage v-show="hidden" ref="serverStorage"></ServerStorage>
 
             <el-dialog
                 title="Что нового:"
@@ -191,7 +191,7 @@ import RecentBooksPage from './RecentBooksPage/RecentBooksPage.vue';
 import SettingsPage from './SettingsPage/SettingsPage.vue';
 import HelpPage from './HelpPage/HelpPage.vue';
 import ClickMapPage from './ClickMapPage/ClickMapPage.vue';
-//import ServerStorage from './ServerStorage/ServerStorage.vue';
+import ServerStorage from './ServerStorage/ServerStorage.vue';
 
 import bookManager from './share/bookManager';
 import readerApi from '../../api/reader';
@@ -211,7 +211,7 @@ export default @Component({
         SettingsPage,
         HelpPage,
         ClickMapPage,
-        //ServerStorage,
+        ServerStorage,
     },
     watch: {
         bookPos: function(newValue) {
@@ -301,18 +301,6 @@ class Reader extends Vue {
             }
         }, 500);
 
-        /*this.debouncedSaveRecent = _.debounce(async() => {
-            const serverStorage = this.$refs.serverStorage;
-            while (!serverStorage.inited) await utils.sleep(1000);
-            await serverStorage.saveRecent();
-        }, 1000);
-
-        this.debouncedSaveRecentLast = _.debounce(async() => {
-            const serverStorage = this.$refs.serverStorage;
-            while (!serverStorage.inited) await utils.sleep(1000);
-            await serverStorage.saveRecentLast();
-        }, 1000);*/
-
         document.addEventListener('fullscreenchange', () => {
             this.fullScreenActive = (document.fullscreenElement !== null);
         });
@@ -347,6 +335,7 @@ class Reader extends Vue {
             this.checkActivateDonateHelpPage();
             this.loading = false;
 
+            await this.$refs.serverStorage.init();
             await this.showWhatsNew();
             await this.showMigration();
         })();
@@ -516,14 +505,6 @@ class Reader extends Vue {
     }
 
     async bookManagerEvent(eventName) {
-        /*const serverStorage = this.$refs.serverStorage;
-        if (eventName == '') {
-            serverStorage.init();
-            const result = await bookManager.cleanRecentBooks();
-            if (result)
-                this.debouncedSaveRecent();
-        }*/
-
         if (eventName == 'recent-changed') {
             if (this.recentBooksActive) {
                 await this.$refs.recentBooksPage.updateTableData();
@@ -545,12 +526,6 @@ class Reader extends Vue {
                     this.bookPosChanged({bookPos: newBook.bookPos});
                 }
             }
-
-            /*if (eventName == 'recent-changed') {
-                this.debouncedSaveRecentLast();
-            } else {
-                this.debouncedSaveRecent();
-            }*/
         }
     }
 

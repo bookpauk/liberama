@@ -31,6 +31,9 @@ class BookManager {
         if (this.recentLast)
             this.recent[this.recentLast.key] = this.recentLast;
 
+        this.recentRev = await bmRecentStore.getItem('recent-rev') || 0;
+        this.recentDiffRev = await bmRecentStore.getItem('recent-diff-rev') || 0;
+
         this.recentChanged = true;
 
         this.loadStored();//no await
@@ -419,6 +422,41 @@ class BookManager {
         return result;
     }
 
+    async setRecent(value) {
+        const mergedRecent = _.cloneDeep(this.recent);
+
+        Object.assign(mergedRecent, value);
+        
+        //"ленивое" обновление хранилища
+        (async() => {
+            for (const rec of Object.values(mergedRecent)) {
+                if (rec.key) {
+                    await bmRecentStore.setItem(rec.key, rec);
+                    await utils.sleep(1);
+                }
+            }
+        })();
+
+        this.recent = mergedRecent;
+
+        this.recentLast = null;
+        await bmRecentStore.setItem('recent-last', this.recentLast);
+
+        this.recentChanged = true;
+        this.emit('recent-changed');
+    }
+
+    async setRecentRev(value) {
+        await bmRecentStore.setItem('recent-rev', value);
+        this.recentRev = value;
+    }
+
+    async setRecentDiffRev(value) {
+        await bmRecentStore.setItem('recent-diff-rev', value);
+        this.recentDiffRev = value;
+    }
+
+
     addEventListener(listener) {
         if (this.eventListeners.indexOf(listener) < 0)
             this.eventListeners.push(listener);        
@@ -433,7 +471,7 @@ class BookManager {
     emit(eventName, value) {
         if (this.eventListeners) {
             (async() => {
-                await utils.sleep(1);
+                await utils.sleep(1);//неблокирующая рассылка сообщений
                 for (const listener of this.eventListeners) {
                     //console.log(eventName);
                     listener(eventName, value);
