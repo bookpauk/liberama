@@ -343,7 +343,7 @@ class BookManager {
         await bmRecentStore.setItem('recent-last', this.recentLast);
 
         this.recentChanged = true;
-        this.emit('recent-changed');
+        this.emit('recent-changed', result.key);
         return result;
     }
 
@@ -364,7 +364,7 @@ class BookManager {
             this.recentLast = null;
             await bmRecentStore.setItem('recent-last', this.recentLast);
         }
-        this.emit('recent-changed');
+        this.emit('recent-changed', value.key);
     }
 
     async cleanRecentBooks() {

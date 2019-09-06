@@ -44,8 +44,8 @@ class ServerStorage extends Vue {
             this.saveSettings();
         }, 500);
 
-        this.debouncedSaveRecent = _.debounce(() => {
-            this.saveRecent();
+        this.debouncedSaveRecent = _.debounce((itemKey) => {
+            this.saveRecent(itemKey);
         }, 1000);
 
         this.debouncedNotifySuccess = _.debounce(() => {
@@ -54,8 +54,7 @@ class ServerStorage extends Vue {
 
         this.oldProfiles = {};
         this.oldSettings = {};
-        this.oldRecent = {};
-        this.oldRecentDiff = {};
+        this.oldRecent = null;
     }
 
     async init() {
@@ -72,18 +71,9 @@ class ServerStorage extends Vue {
         }
     }
 
-    async bookManagerEvent(eventName) {
-        if (eventName == 'load-stored-finish') {
-            this.oldRecent = _.cloneDeep(bookManager.recent);
-            this.oldRecentLast = _.cloneDeep(bookManager.recentLast) || {};
-        }
-
+    async bookManagerEvent(eventName, itemKey) {
         if (eventName == 'recent-changed') {
-            let i = 0;
-            while (!bookManager.loaded && i++ < 1000) await utils.sleep(100);
-            i = 0;
-            while (!this.inited && i++ < 1000) await utils.sleep(100);
-            this.debouncedSaveRecent();
+            this.debouncedSaveRecent(itemKey);
         }
     }
 
@@ -356,7 +346,6 @@ class ServerStorage extends Vue {
             }
         }
 
-console.log('load');
         let recentDiff = null;
         if (force || revs.items.recentDiff.rev != oldRecentDiffRev) {
             try {
@@ -371,8 +360,6 @@ console.log('load');
 
                 if (recentDiff.rev == 0)
                     recentDiff.data = {};
-
-                this.oldRecentDiff = _.cloneDeep(recentDiff.data);
 
                 await bookManager.setRecentDiffRev(recentDiff.rev);
             } else {
@@ -403,44 +390,95 @@ console.log('load');
                     newRecent = recent.data;
                 }
 
-                this.oldRecent = _.cloneDeep(newRecent);
+                this.oldRecent = _.cloneDeep(recent.data);//!!!
                 await bookManager.setRecent(newRecent);
                 await bookManager.setRecentRev(recent.rev);
             } else {
                 this.warning(`Неверный ответ сервера: ${recent.state}`);
             }
+        } else if (revs.items.recent.rev == oldRecentRev && recentDiff && recentDiff.data) {
+            let i = 0;
+            while (!bookManager.loaded && i++ < 1000) utils.sleep(100);
+            const newRecent = utils.applyObjDiff(bookManager.recent, recentDiff.data);
+            await bookManager.setRecent(newRecent);
         }
 
         if (doNotifySuccess)
             this.debouncedNotifySuccess();
     }
 
-    async saveRecent() {
+    async saveRecent(itemKey) {
         if (!this.keyInited || !this.serverSyncEnabled || this.savingRecent)
             return;
 
         const bm = bookManager;
 
-        const diff = utils.getObjDiff(this.oldRecent, bm.recent);
+        //несколько замудреная инициализация oldRecent
+        if (!this.oldRecent) {
+            this.oldRecent = _.cloneDeep(bookManager.recent);
+        }
+
+        if (bookManager.loaded && !this.oldRecentInited) {
+            this.oldRecent = _.cloneDeep(bookManager.recent);
+            this.oldRecentInited = true;
+        }
+
+        //вычисляем дифф
+        let diff = null;
+        if (itemKey) {
+            //ускорение вычисления диффа
+            const itemDiff = utils.getObjDiff({[itemKey]: (this.oldRecentInited ? this.oldRecent[itemKey] : {})}, {[itemKey]: bm.recent[itemKey]});
+            if (this.recentDiff) {
+                diff = this.recentDiff;
+                diff.change[itemKey] = itemDiff.change[itemKey];
+            } else {
+                diff = itemDiff;
+            }
+        } else {
+            if (this.oldRecentInited) {
+                diff = utils.getObjDiff(this.oldRecent, bm.recent);
+            } else
+                return;
+        }
+
         if (utils.isEmptyObjDiff(diff))
             return;
-console.log('save');
-        this.savingRecent = true;
+
+        this.recentDiff = diff;
+        this.savingRecent = true;        
         try {
-            let result = {state: ''};
+            if (JSON.stringify(this.recentDiff).length > 1000) {//сохраняем recent целиком
+                let result = {state: ''};
 
-            try {
-                result = await this.storageSet({recent: {rev: bm.recentRev + 1, data: bm.recent}});
-            } catch(e) {
-                this.error(`Ошибка соединения с сервером (${e.message}). Данные не сохранены и могут быть перезаписаны.`);
-            }
+                try {
+                    result = await this.storageSet({recent: {rev: bm.recentRev + 1, data: bm.recent}});
+                } catch(e) {
+                    this.error(`Ошибка соединения с сервером (${e.message}). Данные не сохранены и могут быть перезаписаны.`);
+                }
 
-            if (result.state == 'reject') {
-                await this.loadRecent(true, false);
-                this.warning(`Последние изменения отменены. Данные синхронизированы с сервером.`);
-            } else if (result.state == 'success') {
-                this.oldRecent = _.cloneDeep(bm.recent);
-                await bm.setRecentRev(bm.recentRev + 1);
+                if (result.state == 'reject') {
+                    await this.loadRecent(true, false);
+                    this.warning(`Последние изменения отменены. Данные синхронизированы с сервером.`);
+                } else if (result.state == 'success') {
+                    this.oldRecent = _.cloneDeep(bm.recent);
+                    this.recentDiff = null;
+                    await bm.setRecentRev(bm.recentRev + 1);
+                }
+            } else {//сохраняем только дифф
+                let result = {state: ''};
+
+                try {
+                    result = await this.storageSet({recentDiff: {rev: bm.recentDiffRev + 1, data: this.recentDiff}});
+                } catch(e) {
+                    this.error(`Ошибка соединения с сервером (${e.message}). Данные не сохранены и могут быть перезаписаны.`);
+                }
+
+                if (result.state == 'reject') {
+                    await this.loadRecent(false, false);
+                    this.warning(`Последние изменения отменены. Данные синхронизированы с сервером.`);
+                } else if (result.state == 'success') {
+                    await bm.setRecentDiffRev(bm.recentDiffRev + 1);
+                }
             }
         } finally {
             this.savingRecent = false;
