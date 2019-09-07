@@ -821,7 +821,7 @@ class Reader extends Vue {
                 break;
         }
 
-        if (this.activePage == 'LoaderPage' || !this.mostRecentBook()) {
+        if (this.activePage == 'LoaderPage' || !this.mostRecentBookReactive) {
             switch (button) {
                 case 'undoAction':
                 case 'redoAction':
@@ -833,7 +833,7 @@ class Reader extends Vue {
                     break;
                 case 'recentBooks':
                 case 'refresh':
-                    if (!this.mostRecentBook())
+                    if (!this.mostRecentBookReactive)
                         classResult = classDisabled;
                     break;
             }
