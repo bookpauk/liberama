@@ -28,8 +28,10 @@ class BookManager {
         this.recent = {};
 
         this.recentLast = await bmRecentStore.getItem('recent-last');
-        if (this.recentLast)
+        if (this.recentLast) {
             this.recent[this.recentLast.key] = this.recentLast;
+//                let meta = await bmMetaStore.getItem(key);
+        }
 
         this.recentRev = await bmRecentStore.getItem('recent-rev') || 0;
         this.recentDiffRev = await bmRecentStore.getItem('recent-diff-rev') || 0;
@@ -470,13 +472,10 @@ class BookManager {
 
     emit(eventName, value) {
         if (this.eventListeners) {
-            (async() => {
-                await utils.sleep(1);//неблокирующая рассылка сообщений
-                for (const listener of this.eventListeners) {
-                    //console.log(eventName);
-                    listener(eventName, value);
-                }
-            })();
+            for (const listener of this.eventListeners) {
+                //console.log(eventName);
+                listener(eventName, value);
+            }
         }
     }
 
