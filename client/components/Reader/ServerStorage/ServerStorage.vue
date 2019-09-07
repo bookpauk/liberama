@@ -374,6 +374,10 @@ class ServerStorage extends Vue {
                 }
 
 
+                if (!bookManager.loaded) {
+                    this.warning('Ожидание загрузки списка книг перед синхронизацией');
+                    while (!bookManager.loaded) await utils.sleep(100);
+                }
                 await bookManager.setRecent(newRecent);
                 await bookManager.setRecentRev(recent.rev);
                 await bookManager.setRecentDiffRev(recentDiff.rev);
