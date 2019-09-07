@@ -1,17 +1,13 @@
 <template>
-    <div ref="main" class="main" @click="close">
-        <div class="mainWindow" @click.stop>
-            <Window @close="close">
-                <template slot="header">
-                    Скопировать текст
-                </template>
+    <Window @close="close">
+        <template slot="header">
+            Скопировать текст
+        </template>
 
-                <div ref="text" class="text" tabindex="-1">
-                    <div v-html="text"></div>
-                </div>
-            </Window>
+        <div ref="text" class="text" tabindex="-1">
+            <div v-html="text"></div>
         </div>
-    </div>
+    </Window>
 </template>
 
 <script>
@@ -109,23 +105,6 @@ class CopyTextPage extends Vue {
 </script>
 
 <style scoped>
-.main {
-    position: absolute;
-    width: 100%;
-    height: 100%;
-    z-index: 40;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-}
-
-.mainWindow {
-    width: 100%;
-    height: 100%;
-    display: flex;
-}
-
 .text {
     flex: 1;
     overflow-wrap: anywhere;

@@ -1,4 +1,35 @@
 server {
+  listen 443 ssl; # managed by Certbot
+  ssl_certificate /etc/letsencrypt/live/omnireader.ru/fullchain.pem; # managed by Certbot
+  ssl_certificate_key /etc/letsencrypt/live/omnireader.ru/privkey.pem; # managed by Certbot
+  include /etc/letsencrypt/options-ssl-nginx.conf; # managed by Certbot
+  ssl_dhparam /etc/letsencrypt/ssl-dhparams.pem; # managed by Certbot
+
+  server_name omnireader.ru;
+
+  client_max_body_size 50m;
+
+  gzip on;
+  gzip_min_length 1024;
+  gzip_proxied expired no-cache no-store private auth;
+  gzip_types *;
+
+  location /api {
+    proxy_pass http://localhost:44081;
+  }
+
+  location /tmp {
+    root /home/liberama/public;
+    add_header Content-Type text/xml;
+    add_header Content-Encoding gzip;
+  }
+
+  location / {
+    root /home/liberama/public;
+  }
+}
+
+server {
   listen 80;
   server_name omnireader.ru;
 

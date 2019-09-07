@@ -350,20 +350,18 @@ export default class DrawHelper {
         page2.style.background = backgroundColor;
 
         if (isDown) {
-            page2.style.transformOrigin = '10%';
+            page2.style.transformOrigin = '5%';
             await sleep(30);
 
-            page2.style.transformOrigin = '0%';
             page2.style.transition = `${duration}ms ease-in-out`;
-            page2.style.transform = `rotateY(-120deg)`;
+            page2.style.transform = `rotateY(-120deg) translateX(${this.w/4}px)`;
             await animation2Finish(duration);
         } else {
-            page2.style.transformOrigin = '90%';
+            page2.style.transformOrigin = '95%';
             await sleep(30);
 
-            page2.style.transformOrigin = '100%';
             page2.style.transition = `${duration}ms ease-in-out`;
-            page2.style.transform = `rotateY(120deg)`;
+            page2.style.transform = `rotateY(120deg) translateX(-${this.w/4}px)`;
             await animation2Finish(duration);
         }
 

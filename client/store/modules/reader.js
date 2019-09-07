@@ -8,7 +8,7 @@ const toolButtons = [
     {name: 'search',      show: true, text: 'Найти в тексте'},
     {name: 'copyText',    show: false, text: 'Скопировать текст со страницы'},
     {name: 'refresh',     show: true, text: 'Принудительно обновить книгу'},
-    {name: 'history',     show: true, text: 'Открыть недавние'},
+    {name: 'recentBooks', show: true, text: 'Открыть недавние'},
 ];
 
 const fonts = [
@@ -145,7 +145,7 @@ const settingDefaults = {
     fontName: 'ReaderDefault',
     webFontName: '',
     fontVertShift: 0,
-    textVertShift: -20,
+    textVertShift: 0,
 
     lineInterval: 3,// px, межстрочный интервал
     textAlignJustify: true,// выравнивание по ширине
@@ -176,10 +176,12 @@ const settingDefaults = {
     blinkCachedLoad: true,
     showImages: true,
     showInlineImagesInCenter: true,
+    compactTextPerc: 0,
     imageHeightLines: 100,
     imageFitWidth: true,
     showServerStorageMessages: true,
     showWhatsNewDialog: true,
+    showMigrationDialog: true,
 
     fontShifts: {},
     showToolButton: {},
@@ -201,6 +203,7 @@ const state = {
     profilesRev: 0,
     allowProfilesSave: false,//подстраховка для разработки
     whatsNewContentHash: '',
+    migrationRemindDate: '',
     currentProfile: '',
     settings: Object.assign({}, settingDefaults),
     settingsRev: {},
@@ -234,6 +237,9 @@ const mutations = {
     },
     setWhatsNewContentHash(state, value) {
         state.whatsNewContentHash = value;
+    },
+    setMigrationRemindDate(state, value) {
+        state.migrationRemindDate = value;
     },
     setCurrentProfile(state, value) {
         state.currentProfile = value;

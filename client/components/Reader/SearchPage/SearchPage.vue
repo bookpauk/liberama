@@ -1,28 +1,24 @@
 <template>
-    <div ref="main" class="main" @click="close">
-        <div class="mainWindow" @click.stop>
-            <Window @close="close">
-                <template slot="header">
-                    {{ header }}
-                </template>
+    <Window ref="window" height="125px" max-width="600px" :top-shift="-50" @close="close">
+        <template slot="header">
+            {{ header }}
+        </template>
 
-                <div class="content">
-                    <span v-show="initStep">{{ initPercentage }}%</span>
+        <div class="content">
+            <span v-show="initStep">{{ initPercentage }}%</span>
 
-                    <div v-show="!initStep" class="input">
-                        <input ref="input" class="el-input__inner"
-                            placeholder="что ищем"
-                            :value="needle" @input="needle = $event.target.value"/>
-                        <div style="position: absolute; right: 10px; margin-top: 10px; font-size: 16px;">{{ foundText }}</div>
-                    </div>
-                    <el-button-group v-show="!initStep" class="button-group">
-                        <el-button @click="showNext"><i class="el-icon-arrow-down"></i></el-button>
-                        <el-button @click="showPrev"><i class="el-icon-arrow-up"></i></el-button>
-                    </el-button-group>
-                </div>
-            </Window>
+            <div v-show="!initStep" class="input">
+                <input ref="input" class="el-input__inner"
+                    placeholder="что ищем"
+                    :value="needle" @input="needle = $event.target.value"/>
+                <div style="position: absolute; right: 10px; margin-top: 10px; font-size: 16px;">{{ foundText }}</div>
+            </div>
+            <el-button-group v-show="!initStep" class="button-group">
+                <el-button @click="showNext"><i class="el-icon-arrow-down"></i></el-button>
+                <el-button @click="showPrev"><i class="el-icon-arrow-up"></i></el-button>
+            </el-button-group>
         </div>
-    </div>
+    </Window>
 </template>
 
 <script>
@@ -61,6 +57,8 @@ class SearchPage extends Vue {
     }
 
     async init(parsed) {
+        this.$refs.window.init();
+
         if (this.parsed != parsed) {
             this.initStep = true;
             this.stopInit = false;
@@ -178,32 +176,13 @@ class SearchPage extends Vue {
 </script>
 
 <style scoped>
-.main {
-    position: absolute;
-    width: 100%;
-    height: 100%;
-    z-index: 40;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-}
-
-.mainWindow {
-    width: 100%;
-    max-width: 500px;
-    height: 125px;
-    display: flex;
-    position: relative;
-    top: -50px;
-}
-
 .content {
     flex: 1;
     display: flex;
     justify-content: center;
     align-items: center;
     padding: 10px;
+    min-width: 430px;
 }
 
 .input {

@@ -23,12 +23,19 @@
         <p>Поддерживаемые форматы: <b>fb2, fb2.zip, html, txt</b> и другие.</p>
 
         <p>Для автономной загрузки читалки (без интернета):<br>
-        В Google Chrome можно установить флаг <span class="clickable" @click="copyText('chrome://flags/#show-saved-copy')">chrome://flags/#show-saved-copy</span>
+        В Google Chrome можно установить флаг <span class="clickable" @click="copyText('chrome://flags/#show-saved-copy', 'Ссылка на флаг успешно скопирована в буфер обмена. Можно открыть ее в новой вкладке.')">chrome://flags/#show-saved-copy</span>
            в значение "Primary". В этом случае на стандартной странице "нет соединения" появится кнопка для автономной загрузки сайта из кэша.<br>
         В Mozilla Firefox в автономном режиме сайт загружается из кэша автоматически. Если этого не происходит, можно установить опцию
         "Веб-разработка" -> "Работать автономно".</p>
 
-        <div v-html="automationHtml"></div>
+        <div v-show="mode == 'omnireader'">
+            <p>Вы также можете добавить в свой браузер закладку, указав в ее свойствах вместо адреса следующий код:
+                <br><span class="clickable" @click="copyText('javascript:location.href=\'https://omnireader.ru/?url=\'+location.href;', 'Код для адреса закладки успешно скопирован в буфер обмена')">
+                    <strong>javascript:location.href='https://omnireader.ru/?url='+location.href;</strong>
+                </span>
+                <br>Тогда, нажав на получившуюся кнопку на любой странице интернета, вы автоматически откроете ее в Omni Reader.
+            </p>
+        </div>
         <p>Связаться с разработчиком: <a href="mailto:bookpauk@gmail.com">bookpauk@gmail.com</a></p>
     </div>
 </template>
@@ -44,22 +51,15 @@ export default @Component({
 })
 class CommonHelpPage extends Vue {
     created() {
-        this.config = this.$store.state.config;
     }
 
-    get automationHtml() {
-        if (this.config.mode == 'omnireader') {
-            return `<p>Вы также можете добавить в свой браузер закладку, указав в ее свойствах вместо адреса следующий код:
-                    <br><strong>javascript:location.href='http://omnireader.ru/?url='+location.href;</strong>
-                    <br>Тогда, нажав на получившуюся кнопку на любой странице интернета, вы автоматически откроете ее в Omni Reader.</p>`;
-        } else {
-            return '';
-        }
+    get mode() {
+        return this.$store.state.config.mode;
     }
 
-    async copyText(text) {
+    async copyText(text, mes) {
         const result = await copyTextToClipboard(text);
-        const msg = (result ? `Ссылка на флаг успешно скопирована в буфер обмена. Можно открыть ее в новой вкладке.` : 'Копирование не удалось');
+        const msg = (result ? mes : 'Копирование не удалось');
         if (result)
             this.$notify.success({message: msg});
         else

@@ -1,7 +1,7 @@
 <template>
     <el-container>
         <el-header v-show="toolBarActive" height='50px'>
-            <div class="header">
+            <div ref="header" class="header">
                 <el-tooltip content="Загрузить книгу" :open-delay="1000" effect="light">
                     <el-button ref="loader" class="tool-button" :class="buttonActiveClass('loader')" @click="buttonClick('loader')"><i class="el-icon-back"></i></el-button>
                 </el-tooltip>
@@ -35,8 +35,8 @@
                         </el-button>
                     </el-tooltip>
                     <div class="space"></div>
-                    <el-tooltip v-show="showToolButton['history']" content="Открыть недавние" :open-delay="1000" effect="light">
-                        <el-button ref="history" class="tool-button" :class="buttonActiveClass('history')" @click="buttonClick('history')"><i class="el-icon-document"></i></el-button>
+                    <el-tooltip v-show="showToolButton['recentBooks']" content="Открыть недавние" :open-delay="1000" effect="light">
+                        <el-button ref="recentBooks" class="tool-button" :class="buttonActiveClass('recentBooks')" @click="buttonClick('recentBooks')"><i class="el-icon-document"></i></el-button>
                     </el-tooltip>
                 </div>
 
@@ -69,7 +69,7 @@
                 @stop-text-search="stopTextSearch">
             </SearchPage>
             <CopyTextPage v-if="copyTextActive" ref="copyTextPage" @copy-text-toggle="copyTextToggle"></CopyTextPage>
-            <HistoryPage v-show="historyActive" ref="historyPage" @load-book="loadBook" @history-toggle="historyToggle"></HistoryPage>
+            <RecentBooksPage v-show="recentBooksActive" ref="recentBooksPage" @load-book="loadBook" @recent-books-toggle="recentBooksToggle"></RecentBooksPage>
             <SettingsPage v-if="settingsActive" ref="settingsPage" @settings-toggle="settingsToggle"></SettingsPage>
             <HelpPage v-if="helpActive" ref="helpPage" @help-toggle="helpToggle"></HelpPage>
             <ClickMapPage v-show="clickMapActive" ref="clickMapPage"></ClickMapPage>
@@ -84,6 +84,87 @@
                 <span class="clickable" @click="openVersionHistory">Посмотреть историю версий</span>
                 <span slot="footer" class="dialog-footer">
                     <el-button @click="whatsNewDisable">Больше не показывать</el-button>
+                </span>
+            </el-dialog>
+
+            <el-dialog
+                title="Внимание!"
+                :visible.sync="migrationVisible1"
+                width="90%">
+                <div>
+                    Появилась httpS-версия сайта по адресу <a href="https://omnireader.ru" target="_blank">https://omnireader.ru</a><br>
+                    Работа по httpS-протоколу, помимо безопасности соединения, позволяет воспользоваться всеми возможностями
+                    современных браузеров, а именно, применительно к нашему ресурсу:
+
+                    <ul>
+                        <li>возможность автономной работы с читалкой (без доступа к интернету), кеширование сайта через appcache</li>
+                        <li>безопасная передача на сервер данных о настройках и читаемых книгах при включенной синхронизации; все данные шифруются на стороне
+                            браузера ключом доступа и никто (в т.ч. администратор) не имеет возможности их прочитать
+                        <li>использование встроенных в JS функций шифрования и других</li>
+                    </ul>
+
+                    Для того, чтобы перейти на новую версию с сохранением настроек и читаемых книг необходимо синхронизировать обе читалки:
+                    <ul>
+                        <li>зайти в "Настройки"->"Профили" и поставить галочку "Включить синхронизацию с сервером"</li>
+                        <li>там же добавить профиль устройства с любым именем для синхронизации настроек<br>
+                            <span style="margin-left: 20px"><i style="font-size: 90%" class="el-icon-info"></i>
+                                после этого все данные будут автоматически сохранены на сервер
+                            </span>
+                        </li>
+                        <li>далее нажать на кнопку "Показать ключ доступа" и кликнуть по ссылке "Ссылка для ввода ключа"<br>
+                            <span style="margin-left: 20px"><i style="font-size: 90%" class="el-icon-info"></i>
+                                произойдет переход на https-версию читалки и откроется окно для ввода ключа
+                            </span><br>
+                            <span style="margin-left: 20px"><i style="font-size: 90%" class="el-icon-info"></i>
+                                подтвердив ввод ключа нажатием "OK", включив синхронизацию с сервером и выбрав профиль устройства, вы восстановите все ваши настройки в новой версии
+                            </span>
+                        </li>
+                    </ul>
+
+
+                    Старая http-версия сайта будет доступна до конца 2019 года.<br>
+                    Приносим извинения за доставленные неудобства.
+                </div>
+
+                <span slot="footer" class="dialog-footer">
+                    <el-button @click="migrationDialogDisable">Больше не показывать</el-button>
+                    <el-button @click="migrationDialogRemind">Напомнить позже</el-button>
+                </span>
+            </el-dialog>
+
+            <el-dialog
+                title="Внимание!"
+                :visible.sync="migrationVisible2"
+                width="90%">
+                <div>
+                    Информация для пользователей старой версии читалки по адресу <a href="http://omnireader.ru" target="_blank">http://omnireader.ru</a><br>
+                    Для того, чтобы перейти на новую httpS-версию с сохранением настроек и читаемых книг необходимо синхронизировать обе читалки:
+                    <ul>
+                        <li>перейти на старую версию ресурса <a href="http://omnireader.ru" target="_blank">http://omnireader.ru</a></li>
+                        <li>зайти в "Настройки"->"Профили" и поставить галочку "Включить синхронизацию с сервером"</li>
+                        <li>там же добавить профиль устройства с любым именем для синхронизации настроек<br>
+                            <span style="margin-left: 20px"><i style="font-size: 90%" class="el-icon-info"></i>
+                                после этого все данные будут автоматически сохранены на сервер
+                            </span>
+                        </li>
+                        <li>далее нажать на кнопку "Показать ключ доступа" и кликнуть по ссылке "Ссылка для ввода ключа"<br>
+                            <span style="margin-left: 20px"><i style="font-size: 90%" class="el-icon-info"></i>
+                                произойдет переход на https-версию читалки и откроется окно для ввода ключа
+                            </span><br>
+                            <span style="margin-left: 20px"><i style="font-size: 90%" class="el-icon-info"></i>
+                                подтвердив ввод ключа нажатием "OK", включив синхронизацию с сервером и выбрав профиль устройства, вы восстановите все ваши настройки в новой версии
+                            </span>
+                        </li>
+                    </ul>
+
+
+                    Старая http-версия сайта будет доступна до конца 2019 года.<br>
+                    Приносим извинения за доставленные неудобства.
+                </div>
+
+                <span slot="footer" class="dialog-footer">
+                    <el-button @click="migrationDialogDisable">Больше не показывать</el-button>
+                    <el-button @click="migrationDialogRemind">Напомнить позже</el-button>
                 </span>
             </el-dialog>
 
@@ -106,7 +187,7 @@ import ProgressPage from './ProgressPage/ProgressPage.vue';
 import SetPositionPage from './SetPositionPage/SetPositionPage.vue';
 import SearchPage from './SearchPage/SearchPage.vue';
 import CopyTextPage from './CopyTextPage/CopyTextPage.vue';
-import HistoryPage from './HistoryPage/HistoryPage.vue';
+import RecentBooksPage from './RecentBooksPage/RecentBooksPage.vue';
 import SettingsPage from './SettingsPage/SettingsPage.vue';
 import HelpPage from './HelpPage/HelpPage.vue';
 import ClickMapPage from './ClickMapPage/ClickMapPage.vue';
@@ -126,7 +207,7 @@ export default @Component({
         SetPositionPage,
         SearchPage,
         CopyTextPage,
-        HistoryPage,
+        RecentBooksPage,
         SettingsPage,
         HelpPage,
         ClickMapPage,
@@ -157,10 +238,12 @@ export default @Component({
             this.updateRoute();
         },
         loaderActive: function(newValue) {
-            const recent = this.mostRecentBook();
-            if (!newValue && !this.loading && recent && !bookManager.hasBookParsed(recent)) {
-                this.loadBook(recent);
-            }
+            (async() => {
+                const recent = this.mostRecentBook();
+                if (!newValue && !this.loading && recent && !await bookManager.hasBookParsed(recent)) {
+                    this.loadBook(recent);
+                }
+            })();
         },
     },
 })
@@ -173,7 +256,7 @@ class Reader extends Vue {
     setPositionActive = false;
     searchActive = false;
     copyTextActive = false;
-    historyActive = false;
+    recentBooksActive = false;
     settingsActive = false;
     helpActive = false;
     clickMapActive = false;
@@ -190,6 +273,8 @@ class Reader extends Vue {
 
     whatsNewVisible = false;
     whatsNewContent = '';
+    migrationVisible1 = false;
+    migrationVisible2 = false;
 
     created() {
         this.loading = true;
@@ -216,26 +301,25 @@ class Reader extends Vue {
             }
         }, 500);
 
-        this.debouncedSaveRecent = _.debounce(async() => {
-            const serverStorage = this.$refs.serverStorage;
-            while (!serverStorage.inited) await utils.sleep(1000);
-            await serverStorage.saveRecent();
-        }, 1000);
-
-        this.debouncedSaveRecentLast = _.debounce(async() => {
-            const serverStorage = this.$refs.serverStorage;
-            while (!serverStorage.inited) await utils.sleep(1000);
-            await serverStorage.saveRecentLast();
-        }, 1000);
-
         document.addEventListener('fullscreenchange', () => {
             this.fullScreenActive = (document.fullscreenElement !== null);
         });
 
         this.loadSettings();
+
+        //TODO: убрать в будущем
+        if (this.showToolButton['history']) {
+            const newShowToolButton = Object.assign({}, this.showToolButton);
+            newShowToolButton['recentBooks'] = true;
+            delete newShowToolButton['history'];
+            const newSettings = Object.assign({}, this.settings, { showToolButton: newShowToolButton });
+            this.commit('reader/setSettings', newSettings);
+        }
     }
 
     mounted() {
+        this.updateHeaderMinWidth();
+
         (async() => {
             await bookManager.init(this.settings);
             bookManager.addEventListener(this.bookManagerEvent);
@@ -252,7 +336,9 @@ class Reader extends Vue {
             this.checkActivateDonateHelpPage();
             this.loading = false;
 
+            await this.$refs.serverStorage.init();
             await this.showWhatsNew();
+            await this.showMigration();
         })();
     }
 
@@ -264,7 +350,16 @@ class Reader extends Vue {
         this.clickControl = settings.clickControl;
         this.blinkCachedLoad = settings.blinkCachedLoad;
         this.showWhatsNewDialog = settings.showWhatsNewDialog;
+        this.showMigrationDialog = settings.showMigrationDialog;
         this.showToolButton = settings.showToolButton;
+
+        this.updateHeaderMinWidth();
+    }
+
+    updateHeaderMinWidth() {
+        const showButtonCount = Object.values(this.showToolButton).reduce((a, b) => a + (b ? 1 : 0), 0);
+        if (this.$refs.header)
+            this.$refs.header.style.minWidth = 65*showButtonCount + 'px';
     }
 
     checkSetStorageAccessKey() {
@@ -320,6 +415,33 @@ class Reader extends Vue {
         }
     }
 
+    async showMigration() {
+        await utils.sleep(3000);
+        if (!this.settingsActive &&
+            this.mode == 'omnireader' && this.showMigrationDialog && this.migrationRemindDate != utils.formatDate(new Date(), 'coDate')) {
+            if (window.location.protocol == 'http:') {
+                this.migrationVisible1 = true;
+            } else if (window.location.protocol == 'https:') {
+                this.migrationVisible2 = true;
+            }
+        }
+    }
+
+    migrationDialogDisable() {
+        this.migrationVisible1 = false;
+        this.migrationVisible2 = false;
+        if (this.showMigrationDialog) {
+            const newSettings = Object.assign({}, this.settings, { showMigrationDialog: false });
+            this.commit('reader/setSettings', newSettings);
+        }
+    }
+
+    migrationDialogRemind() {
+        this.migrationVisible1 = false;
+        this.migrationVisible2 = false;
+        this.commit('reader/setMigrationRemindDate', utils.formatDate(new Date(), 'coDate'));
+    }
+
     openVersionHistory() {
         this.whatsNewVisible = false;
         this.versionHistoryToggle();
@@ -350,10 +472,14 @@ class Reader extends Vue {
         const pos = (recent && recent.bookPos && this.allowUrlParamBookPos ? `__p=${recent.bookPos}&` : '');
         const url = (recent ? `url=${recent.url}` : '');
         if (isNewRoute)
-            this.$router.push(`/reader?${pos}${url}`);
+            this.$router.push(`/reader?${pos}${url}`).catch(() => {});
         else
-            this.$router.replace(`/reader?${pos}${url}`);
+            this.$router.replace(`/reader?${pos}${url}`).catch(() => {});
 
+    }
+
+    get mode() {
+        return this.$store.state.config.mode;
     }
 
     get routeParamUrl() {
@@ -380,22 +506,13 @@ class Reader extends Vue {
     }
 
     async bookManagerEvent(eventName) {
-        const serverStorage = this.$refs.serverStorage;
-        if (eventName == 'load-meta-finish') {
-            serverStorage.init();
-            const result = await bookManager.cleanRecentBooks();
-            if (result)
-                this.debouncedSaveRecent();
-        }
-
-        if (eventName == 'recent-changed' || eventName == 'save-recent') {
-            if (this.historyActive) {
-                this.$refs.historyPage.updateTableData();
+        if (eventName == 'recent-changed') {
+            if (this.recentBooksActive) {
+                await this.$refs.recentBooksPage.updateTableData();
             }
 
             const oldBook = this.mostRecentBookReactive;
             const newBook = bookManager.mostRecentBook();
-
             if (oldBook && newBook) {
                 if (oldBook.key != newBook.key) {
                     this.loadingBook = true;
@@ -408,12 +525,6 @@ class Reader extends Vue {
                     while (this.loadingBook) await utils.sleep(100);
                     this.bookPosChanged({bookPos: newBook.bookPos});
                 }
-            }
-
-            if (eventName == 'recent-changed') {
-                this.debouncedSaveRecentLast();
-            } else {
-                this.debouncedSaveRecent();
             }
         }
     }
@@ -434,6 +545,10 @@ class Reader extends Vue {
 
     get whatsNewContentHash() {
         return this.$store.state.reader.whatsNewContentHash;
+    }
+
+    get migrationRemindDate() {
+        return this.$store.state.reader.migrationRemindDate;
     }
 
     addAction(pos) {
@@ -476,7 +591,7 @@ class Reader extends Vue {
     closeAllTextPages() {
         this.setPositionActive = false;
         this.copyTextActive = false;
-        this.historyActive = false;
+        this.recentBooksActive = false;
         this.settingsActive = false;
         this.stopScrolling();
         this.stopSearch();
@@ -568,14 +683,14 @@ class Reader extends Vue {
         }
     }
 
-    historyToggle() {
-        this.historyActive = !this.historyActive;
-        if (this.historyActive) {
+    recentBooksToggle() {
+        this.recentBooksActive = !this.recentBooksActive;
+        if (this.recentBooksActive) {
             this.closeAllTextPages();
-            this.$refs.historyPage.init();
-            this.historyActive = true;
+            this.$refs.recentBooksPage.init();
+            this.recentBooksActive = true;
         } else {
-            this.historyActive = false;
+            this.recentBooksActive = false;
         }
     }
 
@@ -584,6 +699,10 @@ class Reader extends Vue {
         if (this.settingsActive) {
             this.closeAllTextPages();
             this.settingsActive = true;
+
+            this.$nextTick(() => {
+                this.$refs.settingsPage.init();
+            });
         } else {
             this.settingsActive = false;
         }
@@ -660,8 +779,8 @@ class Reader extends Vue {
             case 'copyText':
                 this.copyTextToggle();
                 break;
-            case 'history':
-                this.historyToggle();
+            case 'recentBooks':
+                this.recentBooksToggle();
                 break;
             case 'refresh':
                 this.refreshBook();
@@ -684,7 +803,7 @@ class Reader extends Vue {
             case 'scrolling':
             case 'search':
             case 'copyText':
-            case 'history':
+            case 'recentBooks':
             case 'settings':
                 if (this[`${button}Active`])
                     classResult = classActive;
@@ -702,7 +821,7 @@ class Reader extends Vue {
                 break;
         }
 
-        if (this.activePage == 'LoaderPage' || !this.mostRecentBook()) {
+        if (this.activePage == 'LoaderPage' || !this.mostRecentBookReactive) {
             switch (button) {
                 case 'undoAction':
                 case 'redoAction':
@@ -712,9 +831,9 @@ class Reader extends Vue {
                 case 'copyText':
                     classResult = classDisabled;
                     break;
-                case 'history':
+                case 'recentBooks':
                 case 'refresh':
-                    if (!this.mostRecentBook())
+                    if (!this.mostRecentBookReactive)
                         classResult = classDisabled;
                     break;
             }
@@ -759,7 +878,8 @@ class Reader extends Vue {
             //акивируем страницу с текстом
             this.$nextTick(async() => {
                 const last = this.mostRecentBookReactive;
-                const isParsed = bookManager.hasBookParsed(last);
+                const isParsed = await bookManager.hasBookParsed(last);
+
                 if (!isParsed) {
                     this.$root.$emit('set-app-title');
                     return;
@@ -793,7 +913,7 @@ class Reader extends Vue {
 
         // уже просматривается сейчас
         const lastBook = (this.$refs.page ? this.$refs.page.lastBook : null);
-        if (!opts.force && lastBook && lastBook.url == url && bookManager.hasBookParsed(lastBook)) {
+        if (!opts.force && lastBook && lastBook.url == url && await bookManager.hasBookParsed(lastBook)) {
             this.loaderActive = false;
             return;
         }
@@ -954,8 +1074,8 @@ class Reader extends Vue {
             if (!handled && this.settingsActive)
                 handled = this.$refs.settingsPage.keyHook(event);
 
-            if (!handled && this.historyActive)
-                handled = this.$refs.historyPage.keyHook(event);
+            if (!handled && this.recentBooksActive)
+                handled = this.$refs.recentBooksPage.keyHook(event);
 
             if (!handled && this.setPositionActive)
                 handled = this.$refs.setPositionPage.keyHook(event);
@@ -1005,7 +1125,7 @@ class Reader extends Vue {
                             this.refreshBook();
                             break;
                         case 'KeyX':
-                            this.historyToggle();
+                            this.recentBooksToggle();
                             event.preventDefault();
                             event.stopPropagation();
                             break;
@@ -1040,7 +1160,6 @@ class Reader extends Vue {
 .header {
     display: flex;
     justify-content: space-between;
-    min-width: 550px;
 }
 
 .el-main {

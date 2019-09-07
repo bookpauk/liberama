@@ -179,7 +179,7 @@ export default class BookParser {
             if (tag == 'binary') {
                 let attrs = sax.getAttrsSync(tail);
                 binaryType = (attrs['content-type'] && attrs['content-type'].value ? attrs['content-type'].value : '');
-                if (binaryType == 'image/jpeg' || binaryType == 'image/png')
+                if (binaryType == 'image/jpeg' || binaryType == 'image/png' || binaryType == 'application/octet-stream')
                     binaryId = (attrs.id.value ? attrs.id.value : '');
             }
 
@@ -620,7 +620,8 @@ export default class BookParser {
             para.parsed.addEmptyParagraphs === this.addEmptyParagraphs &&
             para.parsed.showImages === this.showImages &&
             para.parsed.imageHeightLines === this.imageHeightLines &&
-            para.parsed.imageFitWidth === this.imageFitWidth
+            para.parsed.imageFitWidth === this.imageFitWidth &&
+            para.parsed.compactTextPerc === this.compactTextPerc
             )
             return para.parsed;
 
@@ -635,6 +636,7 @@ export default class BookParser {
             showImages: this.showImages,
             imageHeightLines: this.imageHeightLines,
             imageFitWidth: this.imageFitWidth,
+            compactTextPerc: this.compactTextPerc,
             visible: !(
                 (this.cutEmptyParagraphs && para.cut) ||
                 (para.addIndex > this.addEmptyParagraphs)
@@ -665,6 +667,7 @@ export default class BookParser {
         let style = {};
         let ofs = 0;//смещение от начала параграфа para.offset
         let imgW = 0;
+        const compactWidth = this.measureText('W', {})*this.compactTextPerc/100;
         // тут начинается самый замес, перенос по слогам и стилизация, а также изображения
         for (const part of parts) {
             style = part.style;
@@ -749,7 +752,7 @@ export default class BookParser {
                 p = (style.space ? p + parsed.p*style.space : p);
                 let w = this.measureText(str, style) + p;
                 let wordTail = word;
-                if (w > parsed.w && prevStr != '') {
+                if (w > parsed.w + compactWidth && prevStr != '') {
                     if (parsed.wordWrap) {//по слогам
                         let slogi = this.splitToSlogi(word);
 
@@ -762,7 +765,7 @@ export default class BookParser {
                             for (let k = 0; k < slogiLen - 1; k++) {
                                 let slog = slogi[0];
                                 let ww = this.measureText(s + slog + (slog[slog.length - 1] == '-' ? '' : '-'), style) + p;
-                                if (ww <= parsed.w) {
+                                if (ww <= parsed.w + compactWidth) {
                                     s += slog;
                                     ss += slog;
                                 } else 

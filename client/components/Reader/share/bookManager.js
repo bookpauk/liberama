@@ -18,49 +18,41 @@ const bmRecentStore = localForage.createInstance({
     name: 'bmRecentStore'
 });
 
-const bmCacheStore = localForage.createInstance({
-    name: 'bmCacheStore'
-});
-
 class BookManager {
     async init(settings) {
+        this.loaded = false;
         this.settings = settings;
 
         this.eventListeners = [];
+        this.books = {};
+        this.recent = {};
 
-        //bmCacheStore нужен только для ускорения загрузки читалки
-        this.booksCached = await bmCacheStore.getItem('books');
-        if (!this.booksCached)
-            this.booksCached = {};
-        this.recent = await bmCacheStore.getItem('recent');
-        this.recentLast = await bmCacheStore.getItem('recent-last');
-        if (this.recentLast)
+        this.recentLast = await bmRecentStore.getItem('recent-last');
+        if (this.recentLast) {
             this.recent[this.recentLast.key] = this.recentLast;
-        this.recentRev = await bmRecentStore.getItem('recent-rev') || 0;
-        this.recentLastRev = await bmRecentStore.getItem('recent-last-rev') || 0;
-        this.recentLastDiffRev = await bmRecentStore.getItem('recent-last-diff-rev') || 0;
-        this.books = Object.assign({}, this.booksCached);
-
-        this.recentChanged2 = true;
-
-        if (!this.books || !this.recent) {
-            this.books = {};
-            this.recent = {};
-            await this.loadMeta(true);
-        } else {
-            this.loadMeta(false);
+            const meta = await bmMetaStore.getItem(`bmMeta-${this.recentLast.key}`);
+            if (_.isObject(meta)) {
+                this.books[meta.key] = meta;
+            }
         }
+
+        this.recentRev = await bmRecentStore.getItem('recent-rev') || 0;
+        this.recentDiffRev = await bmRecentStore.getItem('recent-diff-rev') || 0;
+
+        this.recentChanged = true;
+
+        this.loadStored();//no await
     }
 
-    //долгая загрузка из хранилища,
-    //хранение в отдельных записях дает относительно
-    //нормальное поведение при нескольких вкладках с читалкой в браузере
-    async loadMeta(immediate) {
-        if (!immediate)
-            await utils.sleep(2000);
+    //Долгая асинхронная загрузка из хранилища.
+    //Хранение в отдельных записях дает относительно
+    //нормальное поведение при нескольких вкладках с читалкой в браузере.
+    async loadStored() {
+        //даем время для загрузки последней читаемой книги, чтобы не блокировать приложение
+        await utils.sleep(2000);
 
         let len = await bmMetaStore.length();
-        for (let i = 0; i < len; i++) {
+        for (let i = len - 1; i >= 0; i--) {
             const key = await bmMetaStore.key(i);
             const keySplit = key.split('-');
 
@@ -68,6 +60,7 @@ class BookManager {
                 let meta = await bmMetaStore.getItem(key);
 
                 if (_.isObject(meta)) {
+                    //уже может быть распарсена книга
                     const oldBook = this.books[meta.key];
                     this.books[meta.key] = meta;
 
@@ -80,22 +73,19 @@ class BookManager {
             }
         }
 
-        //"ленивая" загрузка
-        (async() => {
-            let key = null;
-            len = await bmRecentStore.length();
-            for (let i = 0; i < len; i++) {
-                key = await bmRecentStore.key(i);
-                if (key) {
-                    let r = await bmRecentStore.getItem(key);
-                    if (_.isObject(r) && r.key) {
-                        this.recent[r.key] = r;
-                    }
-                } else  {
-                    await bmRecentStore.removeItem(key);
+        let key = null;
+        len = await bmRecentStore.length();
+        for (let i = len - 1; i >= 0; i--) {
+            key = await bmRecentStore.key(i);
+            if (key) {
+                let r = await bmRecentStore.getItem(key);
+                if (_.isObject(r) && r.key) {
+                    this.recent[r.key] = r;
                 }
+            } else  {
+                await bmRecentStore.removeItem(key);
             }
-        })();
+        }
 
         //размножение для дебага
         /*if (key) {
@@ -106,17 +96,11 @@ class BookManager {
         }*/
         
         await this.cleanBooks();
+        await this.cleanRecentBooks();
 
-        //очистка позже
-        //await this.cleanRecentBooks();
-
-        this.booksCached = {};
-        for (const key in this.books) {
-            this.booksCached[key] = this.metaOnly(this.books[key]);
-        }
-        await bmCacheStore.setItem('books', this.booksCached);
-        await bmCacheStore.setItem('recent', this.recent);
-        this.emit('load-meta-finish');
+        this.recentChanged = true;
+        this.loaded = true;
+        this.emit('load-stored-finish');
     }
 
     async cleanBooks() {
@@ -136,7 +120,7 @@ class BookManager {
             }
 
             if (size > maxDataSize && toDel) {
-                await this._delBook(toDel);
+                await this.delBook(toDel);
             } else {
                 break;
             }
@@ -211,9 +195,7 @@ class BookManager {
         return inflator.result;
     }
 
-    async addBook(newBook, callback) {
-        if (!this.books) 
-            await this.init();
+    async addBook(newBook, callback) {        
         let meta = {url: newBook.url, path: newBook.path};
         meta.key = this.keyFromUrl(meta.url);
         meta.addTime = Date.now();
@@ -233,42 +215,52 @@ class BookManager {
 
         let data = newBook.data;
         if (result.dataCompressed) {
-            //data = utils.pako.deflate(data, {level: 9});
+            //data = utils.pako.deflate(data, {level: 5});
             data = await this.deflateWithProgress(data, cb2);
             result.dataCompressedLength = data.byteLength;
         }
         callback(95);
 
         this.books[meta.key] = result;
-        this.booksCached[meta.key] = this.metaOnly(result);
 
         await bmMetaStore.setItem(`bmMeta-${meta.key}`, this.metaOnly(result));
         await bmDataStore.setItem(`bmData-${meta.key}`, data);
-        await bmCacheStore.setItem('books', this.booksCached);
 
         callback(100);
         return result;
     }
 
-    hasBookParsed(meta) {
+    async hasBookParsed(meta) {
         if (!this.books) 
             return false;
         if (!meta.url)
             return false;
         if (!meta.key)
             meta.key = this.keyFromUrl(meta.url);
+
         let book = this.books[meta.key];
+
+        if (!book && !this.loaded) {
+            book = await bmDataStore.getItem(`bmMeta-${meta.key}`);
+            if (book)
+                this.books[meta.key] = book;
+        }
+
         return !!(book && book.parsed);
     }
 
     async getBook(meta, callback) {
-        if (!this.books) 
-            await this.init();
         let result = undefined;
         if (!meta.key)
             meta.key = this.keyFromUrl(meta.url);
 
         result = this.books[meta.key];
+
+        if (!result) {
+            result = await bmDataStore.getItem(`bmMeta-${meta.key}`);
+            if (result)
+                this.books[meta.key] = result;
+        }
 
         if (result && !result.parsed) {
             let data = await bmDataStore.getItem(`bmData-${meta.key}`);
@@ -303,27 +295,14 @@ class BookManager {
         return result;
     }
 
-    async _delBook(meta) {
+    async delBook(meta) {
         await bmMetaStore.removeItem(`bmMeta-${meta.key}`);
         await bmDataStore.removeItem(`bmData-${meta.key}`);
 
         delete this.books[meta.key];
-        delete this.booksCached[meta.key];
-    }
-
-    async delBook(meta) {
-        if (!this.books) 
-            await this.init();
-
-        await this._delBook(meta);
-
-        await bmCacheStore.setItem('books', this.booksCached);
     }
 
     async parseBook(meta, data, callback) {
-        if (!this.books) 
-            await this.init();
-
         const parsed = new BookParser(this.settings);
 
         const parsedMeta = await parsed.parse(data, callback);
@@ -347,9 +326,8 @@ class BookManager {
         return utils.stringToHex(url);
     }
 
+    //-- recent --------------------------------------------------------------
     async setRecentBook(value) {
-        if (!this.recent) 
-            await this.init();
         const result = this.metaOnly(value);
         result.touchTime = Date.now();
         result.deleted = 0;
@@ -366,67 +344,57 @@ class BookManager {
 
         await bmRecentStore.setItem(result.key, result);
 
-        //кэшируем, аккуратно
-        let saveRecent = false;
-        if (!(this.recentLast && this.recentLast.key == result.key)) {
-            await bmCacheStore.setItem('recent', this.recent);
-            saveRecent = true;
-        }
         this.recentLast = result;
-        await bmCacheStore.setItem('recent-last', this.recentLast);
+        await bmRecentStore.setItem('recent-last', this.recentLast);
 
-        this.mostRecentCached = result;
-        this.recentChanged2 = true;
-
-        if (saveRecent)
-            this.emit('save-recent');
-        this.emit('recent-changed');
+        this.recentChanged = true;
+        this.emit('recent-changed', result.key);
         return result;
     }
 
     async getRecentBook(value) {
-        if (!this.recent) 
-            await this.init();
-        return this.recent[value.key];
+        let result = this.recent[value.key];
+        if (!result) {
+            result = await bmRecentStore.getItem(value.key);
+            this.recent[value.key] = result;
+        }
+        return result;
     }
 
     async delRecentBook(value) {
-        if (!this.recent) 
-            await this.init();
-
         this.recent[value.key].deleted = 1;
         await bmRecentStore.setItem(value.key, this.recent[value.key]);
-        await bmCacheStore.setItem('recent', this.recent);
 
-        this.mostRecentCached = null;
-        this.recentChanged2 = true;
-
-        this.emit('save-recent');
+        if (this.recentLast.key == value.key) {
+            this.recentLast = null;
+            await bmRecentStore.setItem('recent-last', this.recentLast);
+        }
+        this.emit('recent-changed', value.key);
     }
 
     async cleanRecentBooks() {
-        if (!this.recent) 
-            await this.init();
-
         const sorted = this.getSortedRecent();
 
         let isDel = false;
         for (let i = 1000; i < sorted.length; i++) {
             await bmRecentStore.removeItem(sorted[i].key);
             delete this.recent[sorted[i].key];
+            await bmRecentStore.removeItem(sorted[i].key);
             isDel = true;
         }
 
         this.sortedRecentCached = null;
-        await bmCacheStore.setItem('recent', this.recent);
 
+        if (isDel)
+            this.emit('recent-changed');
         return isDel;
     }
 
     mostRecentBook() {
-        if (this.mostRecentCached) {
-            return this.mostRecentCached;
+        if (this.recentLast) {
+            return this.recentLast;
         }
+        const oldRecentLast = this.recentLast;
 
         let max = 0;
         let result = null;
@@ -437,12 +405,16 @@ class BookManager {
                 result = book;
             }
         }
-        this.mostRecentCached = result;
+        this.recentLast = result;
+        bmRecentStore.setItem('recent-last', this.recentLast);//no await
+
+        if (this.recentLast !== oldRecentLast)
+            this.emit('recent-changed');
         return result;
     }
 
     getSortedRecent() {
-        if (!this.recentChanged2 && this.sortedRecentCached) {
+        if (!this.recentChanged && this.sortedRecentCached) {
             return this.sortedRecentCached;
         }
 
@@ -451,7 +423,7 @@ class BookManager {
         result.sort((a, b) => b.touchTime - a.touchTime);
 
         this.sortedRecentCached = result;
-        this.recentChanged2 = false;
+        this.recentChanged = false;
         return result;
     }
 
@@ -459,7 +431,6 @@ class BookManager {
         const mergedRecent = _.cloneDeep(this.recent);
 
         Object.assign(mergedRecent, value);
-        const newRecent = {};
         
         //"ленивое" обновление хранилища
         (async() => {
@@ -471,19 +442,12 @@ class BookManager {
             }
         })();
 
-        for (const rec of Object.values(mergedRecent)) {
-            if (rec.key) {
-                newRecent[rec.key] = rec;
-            }
-        }
-
-        this.recent = newRecent;
-        await bmCacheStore.setItem('recent', this.recent);
+        this.recent = mergedRecent;
 
         this.recentLast = null;
-        await bmCacheStore.setItem('recent-last', this.recentLast);
+        await bmRecentStore.setItem('recent-last', this.recentLast);
 
-        this.mostRecentCached = null;
+        this.recentChanged = true;
         this.emit('recent-changed');
     }
 
@@ -492,36 +456,11 @@ class BookManager {
         this.recentRev = value;
     }
 
-    async setRecentLast(value) {
-        if (!value.key)
-            value = null;
-
-        this.recentLast = value;
-        await bmCacheStore.setItem('recent-last', this.recentLast);
-        if (value && value.key) {
-            //гарантия переключения книги
-            const mostRecent = this.mostRecentBook();
-            if (mostRecent)
-                this.recent[mostRecent.key].touchTime = value.touchTime - 1;
-
-            this.recent[value.key] = value;
-            await bmRecentStore.setItem(value.key, value);
-            await bmCacheStore.setItem('recent', this.recent);
-        }
-
-        this.mostRecentCached = null;
-        this.emit('recent-changed');
+    async setRecentDiffRev(value) {
+        await bmRecentStore.setItem('recent-diff-rev', value);
+        this.recentDiffRev = value;
     }
 
-    async setRecentLastRev(value) {
-        await bmRecentStore.setItem('recent-last-rev', value);
-        this.recentLastRev = value;
-    }
-
-    async setRecentLastDiffRev(value) {
-        await bmRecentStore.setItem('recent-last-diff-rev', value);
-        this.recentLastDiffRev = value;
-    }
 
     addEventListener(listener) {
         if (this.eventListeners.indexOf(listener) < 0)
@@ -535,8 +474,12 @@ class BookManager {
     }
 
     emit(eventName, value) {
-        for (const listener of this.eventListeners)
-            listener(eventName, value);
+        if (this.eventListeners) {
+            for (const listener of this.eventListeners) {
+                //console.log(eventName);
+                listener(eventName, value);
+            }
+        }
     }
 
 }
