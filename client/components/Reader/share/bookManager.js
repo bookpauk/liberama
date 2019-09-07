@@ -30,7 +30,10 @@ class BookManager {
         this.recentLast = await bmRecentStore.getItem('recent-last');
         if (this.recentLast) {
             this.recent[this.recentLast.key] = this.recentLast;
-//                let meta = await bmMetaStore.getItem(key);
+            const meta = await bmMetaStore.getItem(`bmMeta-${this.recentLast.key}`);
+            if (_.isObject(meta)) {
+                this.books[meta.key] = meta;
+            }
         }
 
         this.recentRev = await bmRecentStore.getItem('recent-rev') || 0;

@@ -512,7 +512,7 @@ class Reader extends Vue {
 
             const oldBook = this.mostRecentBookReactive;
             const newBook = bookManager.mostRecentBook();
-
+console.log(oldBook.bookPos, newBook.bookPos);
             if (oldBook && newBook) {
                 if (oldBook.key != newBook.key) {
                     this.loadingBook = true;
