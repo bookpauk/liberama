@@ -694,9 +694,10 @@ class SettingsPage extends Vue {
 
     async setDefaults() {
         try {
-            if (await this.$confirm('Подтвердите установку настроек по-умолчанию:', '', {
+            if (await this.$confirm('Подтвердите установку настроек по умолчанию:', '', {
                 confirmButtonText: 'OK',
                 cancelButtonText: 'Отмена',
+                customClass: 'prompt-dialog',
                 type: 'warning'
             })) {
                 this.form = Object.assign({}, rstore.settingDefaults);
@@ -723,6 +724,7 @@ class SettingsPage extends Vue {
                 confirmButtonText: 'OK',
                 cancelButtonText: 'Отмена',
                 inputValidator: (str) => { if (!str) return 'Название не должно быть пустым'; else if (str.length > 50) return 'Слишком длинное название'; else return true; },
+                customClass: 'prompt-dialog',
             });
             if (result.value) {
                 if (this.profiles[result.value]) {
@@ -754,7 +756,8 @@ class SettingsPage extends Vue {
                 confirmButtonText: 'OK',
                 cancelButtonText: 'Отмена',
                 inputValidator: (str) => { if (str && str.toLowerCase() === 'да') return true; else return 'Удаление не подтверждено'; },
-                type: 'warning'
+                customClass: 'prompt-dialog',
+                type: 'warning',
             });
 
             if (result.value && result.value.toLowerCase() == 'да') {
@@ -785,7 +788,8 @@ class SettingsPage extends Vue {
                 confirmButtonText: 'OK',
                 cancelButtonText: 'Отмена',
                 inputValidator: (str) => { if (str && str.toLowerCase() === 'да') return true; else return 'Удаление не подтверждено'; },
-                type: 'warning'
+                customClass: 'prompt-dialog',
+                type: 'warning',
             });
 
             if (result.value && result.value.toLowerCase() == 'да') {
@@ -824,7 +828,8 @@ class SettingsPage extends Vue {
                 cancelButtonText: 'Отмена',
                 inputValidator: (str) => { if (str && utils.fromBase58(str).length == 32) return true; else return 'Неверный формат ключа'; },
                 inputValue: (key && _.isString(key) ? key : null),
-                type: 'warning'
+                customClass: 'prompt-dialog',
+                type: 'warning',
             });
 
             if (result.value && utils.fromBase58(result.value).length == 32) {
@@ -843,7 +848,8 @@ class SettingsPage extends Vue {
                 confirmButtonText: 'OK',
                 cancelButtonText: 'Отмена',
                 inputValidator: (str) => { if (str && str.toLowerCase() === 'да') return true; else return 'Генерация не подтверждена'; },
-                type: 'warning'
+                customClass: 'prompt-dialog',
+                type: 'warning',
             });
 
             if (result.value && result.value.toLowerCase() == 'да') {
@@ -909,5 +915,12 @@ class SettingsPage extends Vue {
 
 .center {
     text-align: center;
+}
+</style>
+
+<style>
+.prompt-dialog {
+    width: 100% !important;
+    max-width: 450px;
 }
 </style>

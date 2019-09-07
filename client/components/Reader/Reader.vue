@@ -310,6 +310,7 @@ class Reader extends Vue {
         //TODO: убрать в будущем
         if (this.showToolButton['history']) {
             const newShowToolButton = Object.assign({}, this.showToolButton);
+            newShowToolButton['recentBooks'] = true;
             delete newShowToolButton['history'];
             const newSettings = Object.assign({}, this.settings, { showToolButton: newShowToolButton });
             this.commit('reader/setSettings', newSettings);
