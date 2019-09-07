@@ -392,10 +392,10 @@ class ServerStorage extends Vue {
 
         const bm = bookManager;
 
-        if (!bookManager.loaded) {
+        /*if (!bookManager.loaded) {
             this.warning('Функции сохранения на сервер пока недоступны');
             return;
-        }
+        }*/
 
         //несколько замудреная инициализация oldRecent
         if (!this.oldRecent) {
@@ -469,7 +469,6 @@ class ServerStorage extends Vue {
                     this.recentDiff = null;
                     await bm.setRecentRev(bm.recentRev + 1);
                     await bm.setRecentDiffRev(bm.recentDiffRev + 1);
-console.log('saved1');                    
                 }
             } else {//сохраняем только дифф
                 let result = {state: ''};
@@ -486,7 +485,6 @@ console.log('saved1');
                 } else if (result.state == 'success') {
                     await bm.setRecentDiffRev(bm.recentDiffRev + 1);
                 }
-console.log('saved2');                    
             }
         } finally {
             this.savingRecent = false;
