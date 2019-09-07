@@ -1,17 +1,13 @@
 <template>
-    <div ref="main" class="main" @click="close">
-        <div class="mainWindow" @click.stop>
-            <Window @close="close">
-                <template slot="header">
-                    Установить позицию
-                </template>
+    <Window ref="window" height="140px" max-width="600px" :top-shift="-50" @close="close">
+        <template slot="header">
+            Установить позицию
+        </template>
 
-                <div class="slider">
-                    <el-slider v-model="sliderValue" :max="sliderMax" :format-tooltip="formatTooltip"></el-slider>
-                </div>
-            </Window>
+        <div class="slider">
+            <el-slider v-model="sliderValue" :max="sliderMax" :format-tooltip="formatTooltip"></el-slider>
         </div>
-    </div>
+    </Window>
 </template>
 
 <script>
@@ -43,6 +39,8 @@ class SetPositionPage extends Vue {
     }
 
     init(sliderValue, sliderMax) {
+        this.$refs.window.init();
+        
         this.sliderMax = sliderMax;
         this.sliderValue = sliderValue;
         this.initialized = true;
@@ -70,26 +68,6 @@ class SetPositionPage extends Vue {
 </script>
 
 <style scoped>
-.main {
-    position: absolute;
-    width: 100%;
-    height: 100%;
-    z-index: 40;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-}
-
-.mainWindow {
-    width: 100%;
-    max-width: 600px;
-    height: 140px;
-    display: flex;
-    position: relative;
-    top: -50px;
-}
-
 .slider {
     margin: 20px;
     background-color: #efefef;

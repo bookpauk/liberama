@@ -24,8 +24,8 @@ async function main() {
     await fs.ensureDir(tempDownloadDir);
 
     //sqlite3
-    const sqliteRemoteUrl = 'https://mapbox-node-binary.s3.amazonaws.com/sqlite3/v4.0.4/node-v64-linux-x64.tar.gz';
-    const sqliteDecompressedFilename = `${tempDownloadDir}/node-v64-linux-x64/node_sqlite3.node`;
+    const sqliteRemoteUrl = 'https://mapbox-node-binary.s3.amazonaws.com/sqlite3/v4.1.0/node-v72-linux-x64.tar.gz';
+    const sqliteDecompressedFilename = `${tempDownloadDir}/node-v72-linux-x64/node_sqlite3.node`;
 
     if (!await fs.pathExists(sqliteDecompressedFilename)) {
         // Скачиваем node_sqlite3.node для винды, т.к. pkg не включает его в сборку

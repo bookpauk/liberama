@@ -129,6 +129,10 @@ export function getObjDiff(oldObj, newObj) {
     return result;
 }
 
+export function isObjDiff(diff) {
+    return (_.isObject(diff) && diff.__isDiff);
+}
+
 export function isEmptyObjDiff(diff) {
     return (!_.isObject(diff) || !diff.__isDiff ||
         (!Object.keys(diff.change).length &&

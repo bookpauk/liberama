@@ -27,7 +27,7 @@
                 data-services="collections,vkontakte,facebook,odnoklassniki,twitter,telegram"
                 data-description="Чтение fb2-книг онлайн. Загрузка любой страницы интернета одним кликом, синхронизация между устройствами, удобное управление, регистрация не требуется."
                 data-title="Omni Reader - браузерная онлайн-читалка"
-                data-url="http://omnireader.ru">
+                data-url="https://omnireader.ru">
             </div>
             <div class="space"></div>
             <span v-if="mode == 'omnireader'" class="bottom-span clickable" @click="openComments">Отзывы о читалке</span>
