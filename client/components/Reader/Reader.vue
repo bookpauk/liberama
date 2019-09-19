@@ -975,7 +975,6 @@ class Reader extends Vue {
             }
 
             progress.setState({totalSteps: 5});
-
             // не удалось, скачиваем книгу полностью с конвертацией
             let loadCached = true;
             if (!book) {

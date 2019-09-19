@@ -356,7 +356,8 @@ class BookManager {
         let result = this.recent[value.key];
         if (!result) {
             result = await bmRecentStore.getItem(value.key);
-            this.recent[value.key] = result;
+            if (result)
+                this.recent[value.key] = result;
         }
         return result;
     }
@@ -410,6 +411,7 @@ class BookManager {
 
         if (this.recentLast !== oldRecentLast)
             this.emit('recent-changed');
+
         return result;
     }
 
