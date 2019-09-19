@@ -450,6 +450,7 @@ class BookManager {
         await bmRecentStore.setItem('recent-last', this.recentLast);
 
         this.recentChanged = true;
+        this.emit('set-recent');
         this.emit('recent-changed');
     }
 

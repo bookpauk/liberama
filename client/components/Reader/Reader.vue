@@ -510,7 +510,9 @@ class Reader extends Vue {
             if (this.recentBooksActive) {
                 await this.$refs.recentBooksPage.updateTableData();
             }
+        }
 
+        if (eventName == 'set-recent') {
             const oldBook = this.mostRecentBookReactive;
             const newBook = bookManager.mostRecentBook();
             if (oldBook && newBook) {
