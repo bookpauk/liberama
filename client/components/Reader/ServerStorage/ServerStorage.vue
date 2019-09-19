@@ -390,7 +390,7 @@ class ServerStorage extends Vue {
             this.debouncedNotifySuccess();
     }
 
-    async saveRecent(itemKey) {
+    async saveRecent(itemKey, recurse) {
         if (!this.keyInited || !this.serverSyncEnabled || this.savingRecent)
             return;
 
@@ -468,6 +468,11 @@ class ServerStorage extends Vue {
                 if (result.state == 'reject') {
                     await this.loadRecent(true, false);
                     this.warning(`Последние изменения отменены. Данные синхронизированы с сервером.`);
+                    if (!recurse) {
+                        this.savingRecent = false;
+                        this.saveRecent(itemKey, true);
+                        return;
+                    }
                 } else if (result.state == 'success') {
                     this.oldRecent = _.cloneDeep(bm.recent);
                     this.recentDiff = null;
