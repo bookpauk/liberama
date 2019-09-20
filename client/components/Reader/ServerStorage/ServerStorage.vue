@@ -406,6 +406,7 @@ class ServerStorage extends Vue {
                     const key = recentDelta.data.diff.key;
                     if (newRecent[key])
                         newRecent[key] = utils.applyObjDiff(newRecent[key], recentDelta.data.diff);
+                    recentDelta.data = {};
                 } else {
                     newRecent = Object.assign(recent.data, recentDelta.data);
                 }
