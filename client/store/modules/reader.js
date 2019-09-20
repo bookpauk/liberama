@@ -9,6 +9,7 @@ const toolButtons = [
     {name: 'copyText',    show: false, text: 'Скопировать текст со страницы'},
     {name: 'refresh',     show: true, text: 'Принудительно обновить книгу'},
     {name: 'recentBooks', show: true, text: 'Открыть недавние'},
+    {name: 'offlineMode', show: false, text: 'Автономный режим (без интернета)'},
 ];
 
 const fonts = [

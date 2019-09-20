@@ -176,12 +176,12 @@ class ServerStorage extends Vue {
     }
 
     warning(message) {
-        if (this.showServerStorageMessages)
+        if (this.showServerStorageMessages && !this.offlineModeActive)
             this.$notify.warning({message});
     }
 
     error(message) {
-        if (this.showServerStorageMessages)
+        if (this.showServerStorageMessages && !this.offlineModeActive)
             this.$notify.error({message});
     }
 

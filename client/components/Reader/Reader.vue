@@ -38,6 +38,9 @@
                     <el-tooltip v-show="showToolButton['recentBooks']" content="Открыть недавние" :open-delay="1000" effect="light">
                         <el-button ref="recentBooks" class="tool-button" :class="buttonActiveClass('recentBooks')" @click="buttonClick('recentBooks')"><i class="el-icon-document"></i></el-button>
                     </el-tooltip>
+                    <el-tooltip v-show="showToolButton['offlineMode']" content="Автономный режим (без интернета)" :open-delay="1000" effect="light">
+                        <el-button ref="offlineMode" class="tool-button" :class="buttonActiveClass('offlineMode')" @click="buttonClick('offlineMode')"><i class="el-icon-connection"></i></el-button>
+                    </el-tooltip>
                 </div>
 
                 <el-tooltip content="Настроить" :open-delay="1000" effect="light">
@@ -257,6 +260,7 @@ class Reader extends Vue {
     searchActive = false;
     copyTextActive = false;
     recentBooksActive = false;
+    offlineModeActive = false;
     settingsActive = false;
     helpActive = false;
     clickMapActive = false;
@@ -696,6 +700,11 @@ class Reader extends Vue {
         }
     }
 
+    offlineModeToggle() {
+        this.offlineModeActive = !this.offlineModeActive;
+        this.$refs.serverStorage.offlineModeActive = this.offlineModeActive;
+    }
+
     settingsToggle() {
         this.settingsActive = !this.settingsActive;
         if (this.settingsActive) {
@@ -781,11 +790,14 @@ class Reader extends Vue {
             case 'copyText':
                 this.copyTextToggle();
                 break;
+            case 'refresh':
+                this.refreshBook();
+                break;
             case 'recentBooks':
                 this.recentBooksToggle();
                 break;
-            case 'refresh':
-                this.refreshBook();
+            case 'offlineMode':
+                this.offlineModeToggle();
                 break;
             case 'settings':
                 this.settingsToggle();
@@ -806,6 +818,7 @@ class Reader extends Vue {
             case 'search':
             case 'copyText':
             case 'recentBooks':
+            case 'offlineMode':
             case 'settings':
                 if (this[`${button}Active`])
                     classResult = classActive;
