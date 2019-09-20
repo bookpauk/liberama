@@ -71,7 +71,10 @@ class ServerStorage extends Vue {
     }
 
     async bookManagerEvent(eventName, itemKey) {
-        if (eventName == 'recent-changed') {
+        if (!this.serverSyncEnabled)
+            return;
+        
+        if (eventName == 'recent-changed') {            
             if (itemKey) {
                 if (!this.recentDeltaInited) {
                     this.warning('Функции сохранения на сервер пока недоступны');
