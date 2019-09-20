@@ -55,6 +55,6 @@ module.exports = merge(baseWpConfig, {
             filename: `${publicDir}/index.html`
         }),
         new CopyWebpackPlugin([{from: `${clientDir}/assets/*`, to: `${publicDir}/`, flatten: true}]),
-        //new AppCachePlugin({})
+        new AppCachePlugin({exclude: ['../index.html']})
     ]
 });
