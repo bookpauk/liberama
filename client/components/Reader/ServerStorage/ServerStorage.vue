@@ -73,7 +73,7 @@ class ServerStorage extends Vue {
     async bookManagerEvent(eventName, itemKey) {
         if (!this.serverSyncEnabled)
             return;
-        
+
         if (eventName == 'recent-changed') {            
             if (itemKey) {
                 if (!this.recentDeltaInited) {
@@ -458,7 +458,7 @@ class ServerStorage extends Vue {
         this.prevItemKey = itemKey;
 
         //дифф от дельты для уменьшения размера передаваемых данных в частном случае
-        if (this.makeDeltaDiff) {
+        /*if (this.makeDeltaDiff) {
             this.recentDelta.diff = utils.getObjDiff(this.prevSavedItem, bm.recent[itemKey]);
             this.recentDelta.diff.key = itemKey;
             delete this.recentDelta[itemKey];
@@ -470,7 +470,7 @@ class ServerStorage extends Vue {
                 this.recentDelta[key] = utils.applyObjDiff(this.prevSavedItem, this.recentDelta.diff);
             }
             delete this.recentDelta.diff;
-        }
+        }*/
 
         //сохранение
         this.savingRecent = true;        
