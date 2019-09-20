@@ -401,7 +401,14 @@ class ServerStorage extends Vue {
 
             let newRecent = {};
             if (recentDelta && recentDelta.data) {
-                newRecent = Object.assign(recent.data, recentDelta.data);
+                if (recentDelta.data.diff) {
+                    newRecent = recent.data;
+                    const key = recentDelta.data.diff.key;
+                    if (newRecent[key])
+                        newRecent[key] = utils.applyObjDiff(newRecent[key], recentDelta.data.diff);
+                } else {
+                    newRecent = Object.assign(recent.data, recentDelta.data);
+                }
                 this.recentDelta = recentDelta.data;
             } else {
                 newRecent = recent.data;
@@ -432,7 +439,6 @@ class ServerStorage extends Vue {
         const bm = bookManager;
 
         //вычисление критерия сохранения целиком
-        let forceSaveRecent = false;
         if (!this.sameKeyCount)
             this.sameKeyCount = 0;
         if (this.prevItemKey == itemKey) {
@@ -441,10 +447,23 @@ class ServerStorage extends Vue {
             this.sameKeyCount = 0;
         }
 
-        forceSaveRecent = this.sameKeyCount > 5 && (Object.keys(this.recentDelta).length > 1);
+        const l = Object.keys(this.recentDelta).length - (1*(!!this.recentDelta.diff));
+        this.makeDeltaDiff = (l == 1 && this.prevItemKey == itemKey ? this.makeDeltaDiff : false);
+        const forceSaveRecent =  l > 10 || (this.sameKeyCount > 5 && (l > 1)) || (l == 1 && this.sameKeyCount > 10 && !this.makeDeltaDiff);
 
         this.sameKeyCount = (!forceSaveRecent ? this.sameKeyCount : 0);
         this.prevItemKey = itemKey;
+
+        //дифф от дельты для уменьшения размера передаваемых данных в частном случае
+        if (this.makeDeltaDiff) {
+            this.recentDelta.diff = utils.getObjDiff(this.prevSavedItem, bm.recent[itemKey]);
+            this.recentDelta.diff.key = itemKey;
+            delete this.recentDelta[itemKey];
+        } else if (this.recentDelta.diff) {
+            const key = this.recentDelta.diff.key;
+            this.recentDelta[key] = utils.applyObjDiff(this.prevSavedItem, this.recentDelta.diff);
+            delete this.recentDelta.diff;
+        }
 
         this.savingRecent = true;        
         try {
@@ -467,7 +486,10 @@ class ServerStorage extends Vue {
                         return;
                     }
                 } else if (result.state == 'success') {
-                    this.recentDelta = null;
+                    this.makeDeltaDiff = true;
+                    this.prevSavedItem = _.cloneDeep(bm.recent[itemKey]);
+
+                    this.recentDelta = {};
                     await bm.setRecentRev(bm.recentRev + 1);
                     await bm.setRecentDeltaRev(bm.recentDeltaRev + 1);
                 }
