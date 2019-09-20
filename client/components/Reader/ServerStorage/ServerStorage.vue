@@ -361,7 +361,7 @@ class ServerStorage extends Vue {
         }
     }
 
-    async loadRecent(doNotifySuccess = true) {
+    async loadRecent(skipRevCheck = false, doNotifySuccess = true) {
         if (!this.keyInited || !this.serverSyncEnabled)
             return;
 
@@ -369,27 +369,24 @@ class ServerStorage extends Vue {
         const oldRecentDeltaRev = bookManager.recentDeltaRev;
         //проверим ревизию на сервере
         let revs = null;
-        try {
-            revs = await this.storageCheck({recent: {}, recentDelta: {}});
-            if (revs.state == 'success' && revs.items.recent.rev == oldRecentRev &&
-                revs.items.recentDelta.rev == oldRecentDeltaRev) {
-                if (!this.recentDeltaInited)
-                    await this.initRecentDelta();
+        if (!skipRevCheck) {
+            try {
+                revs = await this.storageCheck({recent: {}, recentDelta: {}});
+                if (revs.state == 'success' && revs.items.recent.rev == oldRecentRev &&
+                    revs.items.recentDelta.rev == oldRecentDeltaRev) {
+                    if (!this.recentDeltaInited)
+                        await this.initRecentDelta();
+                    return;
+                }
+            } catch(e) {
+                this.error(`Ошибка соединения с сервером: ${e.message}`);
                 return;
             }
-        } catch(e) {
-            this.error(`Ошибка соединения с сервером: ${e.message}`);
-            return;
         }
 
         let recent = null;
         try {
-            if (revs.items.recent.rev != oldRecentRev) {
-                recent = await this.storageGet({recent: {}, recentDelta: {}});
-            } else {
-                recent = await this.storageGet({recentDelta: {}});
-                recent.items.recent = {data: _.cloneDeep(bookManager.recent), rev: oldRecentRev};
-            }
+            recent = await this.storageGet({recent: {}, recentDelta: {}});
         } catch(e) {
             this.error(`Ошибка соединения с сервером: ${e.message}`);
             return;
@@ -458,7 +455,7 @@ class ServerStorage extends Vue {
         this.prevItemKey = itemKey;
 
         //дифф от дельты для уменьшения размера передаваемых данных в частном случае
-        /*if (this.makeDeltaDiff) {
+        if (this.makeDeltaDiff) {
             this.recentDelta.diff = utils.getObjDiff(this.prevSavedItem, bm.recent[itemKey]);
             this.recentDelta.diff.key = itemKey;
             delete this.recentDelta[itemKey];
@@ -470,8 +467,7 @@ class ServerStorage extends Vue {
                 this.recentDelta[key] = utils.applyObjDiff(this.prevSavedItem, this.recentDelta.diff);
             }
             delete this.recentDelta.diff;
-        }*/
-delete this.recentDelta.diff;
+        }
 
         //сохранение
         this.savingRecent = true;        
@@ -486,7 +482,9 @@ delete this.recentDelta.diff;
                 }
 
                 if (result.state == 'reject') {
-                    await this.loadRecent(false);
+
+                    await this.loadRecent(true, false);
+
                     this.warning(`Последние изменения отменены. Данные синхронизированы с сервером.`);
                     if (!recurse) {
                         this.savingRecent = false;
@@ -512,7 +510,9 @@ delete this.recentDelta.diff;
                 }
 
                 if (result.state == 'reject') {
-                    await this.loadRecent(false);
+
+                    await this.loadRecent(true, false);
+
                     this.warning(`Последние изменения отменены. Данные синхронизированы с сервером.`);
                     if (!recurse) {
                         this.savingRecent = false;
