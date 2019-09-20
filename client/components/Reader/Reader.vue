@@ -512,7 +512,7 @@ class Reader extends Vue {
             }
         }
 
-        if (eventName == 'set-recent') {
+        if (eventName == 'set-recent' || eventName == 'recent-deleted') {
             const oldBook = this.mostRecentBookReactive;
             const newBook = bookManager.mostRecentBook();
             if (oldBook && newBook) {
