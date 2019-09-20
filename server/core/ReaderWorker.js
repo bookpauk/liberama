@@ -7,6 +7,7 @@ const FileDownloader = require('./FileDownloader');
 const FileDecompressor = require('./FileDecompressor');
 const BookConverter = require('./BookConverter');
 const utils = require('./utils');
+const log = require('./getLogger').getLog();
 
 let singleCleanExecute = false;
 
@@ -133,6 +134,7 @@ class ReaderWorker {
 
     async periodicCleanDir(dir, maxSize, timeout) {
         try {
+            log(`Start clean dir: ${dir}, maxSize=${maxSize}`);
             const list = await fs.readdir(dir);
 
             let size = 0;
@@ -144,16 +146,21 @@ class ReaderWorker {
                     files.push({name, stat});
                 }
             }
+            log(`found ${files.length} files in dir ${dir}`);
 
             files.sort((a, b) => a.stat.mtimeMs - b.stat.mtimeMs);
 
             let i = 0;
             while (i < files.length && size > maxSize) {
                 const file = files[i];
+                log(`rm ${dir}/${file.name}`);
                 await fs.remove(`${dir}/${file.name}`);
                 size -= file.stat.size;
                 i++;
             }
+            log(`removed ${i} files`);
+        } catch(e) {
+            log(LM_ERR, e.message);
         } finally {
             setTimeout(() => {
                 this.periodicCleanDir(dir, maxSize, timeout);
