@@ -406,7 +406,6 @@ class ServerStorage extends Vue {
                     const key = recentDelta.data.diff.key;
                     if (newRecent[key])
                         newRecent[key] = utils.applyObjDiff(newRecent[key], recentDelta.data.diff);
-                    recentDelta.data = {};
                 } else {
                     newRecent = Object.assign(recent.data, recentDelta.data);
                 }
@@ -462,10 +461,15 @@ class ServerStorage extends Vue {
             delete this.recentDelta[itemKey];
         } else if (this.recentDelta.diff) {
             const key = this.recentDelta.diff.key;
-            this.recentDelta[key] = utils.applyObjDiff(this.prevSavedItem, this.recentDelta.diff);
+            if (!this.prevSavedItem && bm.recent[key])
+                this.prevSavedItem = _.cloneDeep(bm.recent[key]);
+            if (this.prevSavedItem) {
+                this.recentDelta[key] = utils.applyObjDiff(this.prevSavedItem, this.recentDelta.diff);
+            }
             delete this.recentDelta.diff;
         }
 
+        //сохранение
         this.savingRecent = true;        
         try {
             if (forceSaveRecent) {//сохраняем recent целиком
