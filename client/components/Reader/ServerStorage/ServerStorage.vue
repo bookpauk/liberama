@@ -471,6 +471,7 @@ class ServerStorage extends Vue {
             }
             delete this.recentDelta.diff;
         }*/
+delete this.recentDelta.diff;
 
         //сохранение
         this.savingRecent = true;        
