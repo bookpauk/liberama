@@ -1143,6 +1143,9 @@ class Reader extends Vue {
                             event.preventDefault();
                             event.stopPropagation();
                             break;
+                        case 'KeyO':
+                            this.offlineModeToggle();
+                            break;
                         case 'KeyS':
                             this.settingsToggle();
                             break;
