@@ -37,7 +37,7 @@ class BookManager {
         }
 
         this.recentRev = await bmRecentStore.getItem('recent-rev') || 0;
-        this.recentDiffRev = await bmRecentStore.getItem('recent-diff-rev') || 0;
+        this.recentDeltaRev = await bmRecentStore.getItem('recent-delta-rev') || 0;
 
         this.recentChanged = true;
 
@@ -459,11 +459,10 @@ class BookManager {
         this.recentRev = value;
     }
 
-    async setRecentDiffRev(value) {
-        await bmRecentStore.setItem('recent-diff-rev', value);
-        this.recentDiffRev = value;
+    async setRecentDeltaRev(value) {
+        await bmRecentStore.setItem('recent-delta-rev', value);
+        this.recentDeltaRev = value;
     }
-
 
     addEventListener(listener) {
         if (this.eventListeners.indexOf(listener) < 0)
