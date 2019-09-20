@@ -72,8 +72,19 @@ class ServerStorage extends Vue {
 
     async bookManagerEvent(eventName, itemKey) {
         if (eventName == 'recent-changed') {
-            if (itemKey)
+            if (itemKey) {
+                if (!this.recentDeltaInited) {
+                    this.warning('Функции сохранения на сервер пока недоступны');
+                    return;
+                }
+
+                if (!this.recentDelta)
+                    this.recentDelta = {};
+
+                this.recentDelta[itemKey] = _.cloneDeep(bookManager.recent[itemKey]);
+
                 this.debouncedSaveRecent(itemKey);
+            }
         }
     }
 
@@ -394,7 +405,7 @@ class ServerStorage extends Vue {
                 this.recentDelta = recentDelta.data;
             } else {
                 newRecent = recent.data;
-                this.recentDelta = null;
+                this.recentDelta = {};
             }
 
             this.recentDeltaInited = true;
@@ -420,29 +431,20 @@ class ServerStorage extends Vue {
 
         const bm = bookManager;
 
-        if (!this.recentDeltaInited) {
-            this.warning('Функции сохранения на сервер пока недоступны');
-            return;
-        }
-
-        if (!this.recentDelta)
-            this.recentDelta = {};
-
-        this.recentDelta[itemKey] = _.cloneDeep(bm.recent[itemKey]);
-
         //вычисление критерия сохранения целиком
         let forceSaveRecent = false;
-        if (!forceSaveRecent && itemKey) {
-            if (!this.sameKeyCount)
-                this.sameKeyCount = 0;
-            if (this.prevItemKey == itemKey)
-                this.sameKeyCount++;
-
-            forceSaveRecent = this.sameKeyCount > 5 && (Object.keys(this.recentDelta).length > 1);
-
-            this.sameKeyCount = (!forceSaveRecent ? this.sameKeyCount : 0);
-            this.prevItemKey = itemKey;
+        if (!this.sameKeyCount)
+            this.sameKeyCount = 0;
+        if (this.prevItemKey == itemKey) {
+            this.sameKeyCount++;
+        } else {
+            this.sameKeyCount = 0;
         }
+
+        forceSaveRecent = this.sameKeyCount > 5 && (Object.keys(this.recentDelta).length > 1);
+
+        this.sameKeyCount = (!forceSaveRecent ? this.sameKeyCount : 0);
+        this.prevItemKey = itemKey;
 
         this.savingRecent = true;        
         try {
@@ -460,6 +462,7 @@ class ServerStorage extends Vue {
                     this.warning(`Последние изменения отменены. Данные синхронизированы с сервером.`);
                     if (!recurse) {
                         this.savingRecent = false;
+                        this.recentDelta[itemKey] = _.cloneDeep(bm.recent[itemKey]);
                         this.saveRecent(itemKey, true);
                         return;
                     }
@@ -482,6 +485,7 @@ class ServerStorage extends Vue {
                     this.warning(`Последние изменения отменены. Данные синхронизированы с сервером.`);
                     if (!recurse) {
                         this.savingRecent = false;
+                        this.recentDelta[itemKey] = _.cloneDeep(bm.recent[itemKey]);
                         this.saveRecent(itemKey, true);
                         return;
                     }
