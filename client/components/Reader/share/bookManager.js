@@ -37,7 +37,7 @@ class BookManager {
         }
 
         this.recentRev = await bmRecentStore.getItem('recent-rev') || 0;
-        this.recentDiffRev = await bmRecentStore.getItem('recent-diff-rev') || 0;
+        this.recentDeltaRev = await bmRecentStore.getItem('recent-delta-rev') || 0;
 
         this.recentChanged = true;
 
@@ -356,7 +356,8 @@ class BookManager {
         let result = this.recent[value.key];
         if (!result) {
             result = await bmRecentStore.getItem(value.key);
-            this.recent[value.key] = result;
+            if (result)
+                this.recent[value.key] = result;
         }
         return result;
     }
@@ -369,6 +370,7 @@ class BookManager {
             this.recentLast = null;
             await bmRecentStore.setItem('recent-last', this.recentLast);
         }
+        this.emit('recent-deleted', value.key);
         this.emit('recent-changed', value.key);
     }
 
@@ -410,6 +412,7 @@ class BookManager {
 
         if (this.recentLast !== oldRecentLast)
             this.emit('recent-changed');
+
         return result;
     }
 
@@ -448,6 +451,7 @@ class BookManager {
         await bmRecentStore.setItem('recent-last', this.recentLast);
 
         this.recentChanged = true;
+        this.emit('set-recent');
         this.emit('recent-changed');
     }
 
@@ -456,11 +460,10 @@ class BookManager {
         this.recentRev = value;
     }
 
-    async setRecentDiffRev(value) {
-        await bmRecentStore.setItem('recent-diff-rev', value);
-        this.recentDiffRev = value;
+    async setRecentDeltaRev(value) {
+        await bmRecentStore.setItem('recent-delta-rev', value);
+        this.recentDeltaRev = value;
     }
-
 
     addEventListener(listener) {
         if (this.eventListeners.indexOf(listener) < 0)

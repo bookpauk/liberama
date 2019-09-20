@@ -510,7 +510,9 @@ class Reader extends Vue {
             if (this.recentBooksActive) {
                 await this.$refs.recentBooksPage.updateTableData();
             }
+        }
 
+        if (eventName == 'set-recent' || eventName == 'recent-deleted') {
             const oldBook = this.mostRecentBookReactive;
             const newBook = bookManager.mostRecentBook();
             if (oldBook && newBook) {
@@ -975,7 +977,6 @@ class Reader extends Vue {
             }
 
             progress.setState({totalSteps: 5});
-
             // не удалось, скачиваем книгу полностью с конвертацией
             let loadCached = true;
             if (!book) {
