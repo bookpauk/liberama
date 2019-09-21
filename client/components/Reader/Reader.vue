@@ -35,11 +35,11 @@
                         </el-button>
                     </el-tooltip>
                     <div class="space"></div>
-                    <el-tooltip v-show="showToolButton['recentBooks']" content="Открыть недавние" :open-delay="1000" effect="light">
-                        <el-button ref="recentBooks" class="tool-button" :class="buttonActiveClass('recentBooks')" @click="buttonClick('recentBooks')"><i class="el-icon-document"></i></el-button>
-                    </el-tooltip>
                     <el-tooltip v-show="showToolButton['offlineMode']" content="Автономный режим (без интернета)" :open-delay="1000" effect="light">
                         <el-button ref="offlineMode" class="tool-button" :class="buttonActiveClass('offlineMode')" @click="buttonClick('offlineMode')"><i class="el-icon-connection"></i></el-button>
+                    </el-tooltip>
+                    <el-tooltip v-show="showToolButton['recentBooks']" content="Открыть недавние" :open-delay="1000" effect="light">
+                        <el-button ref="recentBooks" class="tool-button" :class="buttonActiveClass('recentBooks')" @click="buttonClick('recentBooks')"><i class="el-icon-document"></i></el-button>
                     </el-tooltip>
                 </div>
 
