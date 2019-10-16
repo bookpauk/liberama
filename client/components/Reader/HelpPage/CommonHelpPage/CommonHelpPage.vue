@@ -24,10 +24,14 @@
 
         <div v-show="mode == 'omnireader'">
             <p>Вы можете добавить в свой браузер закладку, указав в ее свойствах вместо адреса следующий код:
-                <br><span class="clickable" @click="copyText('javascript:location.href=\'https://omnireader.ru/?url=\'+location.href;', 'Код для адреса закладки успешно скопирован в буфер обмена')">
-                    <strong>javascript:location.href='https://omnireader.ru/?url='+location.href;</strong>
+                <br><strong>javascript:location.href='https://omnireader.ru/?url='+location.href;</strong>
+                &nbsp;
+                <span class="clickable" @click="copyText('javascript:location.href=\'https://omnireader.ru/?url=\'+location.href;', 'Код для адреса закладки успешно скопирован в буфер обмена')">
+                    (скопировать)
                 </span>
-                <br>Тогда, активировав получившуюся закладку на любой странице интернета, вы автоматически откроете ее в Omni Reader.
+                <br>или перетащив на панель закладок следующую ссылку:
+                <br><a style="margin-left: 50px" href="javascript:location.href='https://omnireader.ru/?url='+location.href;">Omni Reader</a>
+                <br>Тогда, активировав получившуюся закладку на любой странице интернета, вы автоматически загрузите эту страницу в Omni Reader.
                 <br>В Chrome для Android можно вызывать такую закладку по имени прямо в адресной строке браузера (имя стоит сделать попроще).
             </p>
         </div>
