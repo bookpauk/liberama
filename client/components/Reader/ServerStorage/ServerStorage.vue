@@ -455,7 +455,7 @@ class ServerStorage extends Vue {
 
         const l = Object.keys(this.recentDelta).length - (1*(!!this.recentDelta.diff));
         this.makeDeltaDiff = (l == 1 && this.prevItemKey == itemKey ? this.makeDeltaDiff : false);
-        const forceSaveRecent =  l > 10 || (this.sameKeyCount > 5 && (l > 1)) || (l == 1 && this.sameKeyCount > 10 && !this.makeDeltaDiff);
+        const forceSaveRecent =  l > 20 || (this.sameKeyCount > 5 && (l > 1)) || (l == 1 && this.sameKeyCount > 10 && !this.makeDeltaDiff);
 
         this.sameKeyCount = (!forceSaveRecent ? this.sameKeyCount : 0);
         this.prevItemKey = itemKey;
