@@ -31,6 +31,7 @@
             </div>
             <div class="space"></div>
             <span v-if="mode == 'omnireader'" class="bottom-span clickable" @click="openComments">Отзывы о читалке</span>
+            <span v-if="mode == 'omnireader'" class="bottom-span clickable" @click="openOldVersion">Старая версия</span>
         </div>
 
         <div class="part bottom">
@@ -135,6 +136,10 @@ class LoaderPage extends Vue {
     
     openComments() {
         window.open('http://samlib.ru/comment/b/bookpauk/bookpauk_reader', '_blank');
+    }
+
+    openOldVersion() {
+        window.open('http://old.omnireader.ru', '_blank');
     }
 
     keyHook(event) {
