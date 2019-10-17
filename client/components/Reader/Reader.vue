@@ -512,6 +512,7 @@ class Reader extends Vue {
     async bookManagerEvent(eventName) {
         if (eventName == 'set-recent' || eventName == 'recent-deleted') {
             const oldBook = (this.textPage ? this.textPage.lastBook : null);
+            const oldPos = (this.textPage ? this.textPage.bookPos : null);
             const newBook = bookManager.mostRecentBook();
 
             if (!(oldBook && newBook && oldBook.key == newBook.key)) {
@@ -526,7 +527,7 @@ class Reader extends Vue {
                     } finally {
                         this.loadingBook = false;
                     }
-                } else if (oldBook.bookPos != newBook.bookPos) {
+                } else if (oldPos != newBook.bookPos) {
                     while (this.loadingBook) await utils.sleep(100);
                     this.bookPosChanged({bookPos: newBook.bookPos});
                 }
