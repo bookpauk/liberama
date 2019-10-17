@@ -511,7 +511,7 @@ class Reader extends Vue {
 
     async bookManagerEvent(eventName) {
         if (eventName == 'set-recent' || eventName == 'recent-deleted') {
-            const oldBook = this.mostRecentBookReactive;
+            const oldBook = (this.textPage ? this.textPage.lastBook : null);
             const newBook = bookManager.mostRecentBook();
 
             if (!(oldBook && newBook && oldBook.key == newBook.key)) {
@@ -908,6 +908,7 @@ class Reader extends Vue {
                 this.updateRoute();
                 const textPage = this.$refs.page;
                 if (textPage.showBook) {
+                    this.textPage = textPage;
                     textPage.lastBook = last;
                     textPage.bookPos = (last.bookPos !== undefined ? last.bookPos : 0);
 
@@ -932,7 +933,7 @@ class Reader extends Vue {
             url = 'http://' + url;
 
         // уже просматривается сейчас
-        const lastBook = (this.$refs.page ? this.$refs.page.lastBook : null);
+        const lastBook = (this.textPage ? this.textPage.lastBook : null);
         if (!opts.force && lastBook && lastBook.url == url && await bookManager.hasBookParsed(lastBook)) {
             this.loaderActive = false;
             return;
