@@ -984,6 +984,7 @@ class Reader extends Vue {
                 // иначе идем на сервер
                 // пытаемся загрузить готовый файл с сервера
                 if (wasOpened.path) {
+                    progress.setState({totalSteps: 5});
                     try {
                         const resp = await readerApi.loadCachedBook(wasOpened.path, (state) => {
                             progress.setState(state);
