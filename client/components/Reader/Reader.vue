@@ -519,7 +519,7 @@ class Reader extends Vue {
             }
 
             if (oldBook && newBook) {
-                if (oldBook.key != newBook.key) {
+                if (oldBook.key != newBook.key || oldBook.path != newBook.path) {
                     this.loadingBook = true;
                     try {
                         await this.loadBook(newBook);
@@ -934,7 +934,9 @@ class Reader extends Vue {
 
         // уже просматривается сейчас
         const lastBook = (this.textPage ? this.textPage.lastBook : null);
-        if (!opts.force && lastBook && lastBook.url == url && await bookManager.hasBookParsed(lastBook)) {
+        if (!opts.force && lastBook && lastBook.url == url && 
+                (!opts.path || opts.path == lastBook.path) && 
+                await bookManager.hasBookParsed(lastBook)) {
             this.loaderActive = false;
             return;
         }
@@ -963,7 +965,7 @@ class Reader extends Vue {
 
             if (!opts.force) {
                 // пытаемся загрузить и распарсить книгу в менеджере из локального кэша
-                const bookParsed = await bookManager.getBook({url}, (prog) => {
+                const bookParsed = await bookManager.getBook({url, path: opts.path}, (prog) => {
                     progress.setState({progress: prog});
                 });
 
