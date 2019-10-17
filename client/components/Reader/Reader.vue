@@ -510,15 +510,14 @@ class Reader extends Vue {
     }
 
     async bookManagerEvent(eventName) {
-        if (eventName == 'recent-changed') {
-            if (this.recentBooksActive) {
-                await this.$refs.recentBooksPage.updateTableData();
-            }
-        }
-
         if (eventName == 'set-recent' || eventName == 'recent-deleted') {
             const oldBook = this.mostRecentBookReactive;
             const newBook = bookManager.mostRecentBook();
+
+            if (!(oldBook && newBook && oldBook.key == newBook.key)) {
+                this.mostRecentBook();
+            }
+
             if (oldBook && newBook) {
                 if (oldBook.key != newBook.key) {
                     this.loadingBook = true;
@@ -531,6 +530,12 @@ class Reader extends Vue {
                     while (this.loadingBook) await utils.sleep(100);
                     this.bookPosChanged({bookPos: newBook.bookPos});
                 }
+            }
+        }
+
+        if (eventName == 'recent-changed') {
+            if (this.recentBooksActive) {
+                await this.$refs.recentBooksPage.updateTableData();
             }
         }
     }
@@ -1063,7 +1068,7 @@ class Reader extends Vue {
                 let page = this.$refs.page;
                 while (this.blinkCount) {
                     this.showRefreshIcon = !this.showRefreshIcon;
-                    if (page.blinkCachedLoadMessage)
+                    if (page && page.blinkCachedLoadMessage)
                         page.blinkCachedLoadMessage(this.showRefreshIcon);
                     await utils.sleep(500);
                     if (this.stopBlink)
@@ -1073,7 +1078,7 @@ class Reader extends Vue {
                 }
                 this.showRefreshIcon = true;
                 this.inBlink = false;
-                if (page.blinkCachedLoadMessage)
+                if (page && page.blinkCachedLoadMessage)
                     page.blinkCachedLoadMessage('finish');
             });
         }
