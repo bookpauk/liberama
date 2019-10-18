@@ -11,6 +11,7 @@ const convertClassFactory = [
     require('./ConvertMobi'),
     require('./ConvertFb2'),
     require('./ConvertSamlib'),
+    require('./ConvertSites'),
     require('./ConvertHtml'),
 ];
 
