@@ -141,8 +141,8 @@ class ServerStorage extends Vue {
             await this.loadProfiles(force);
             this.checkCurrentProfile();
             await this.currentProfileChanged(force);
-            await this.loadRecent();
-            if (force)
+            const loadSuccess = await this.loadRecent();
+            if (loadSuccess && force)
                 await this.saveRecent();
         }
     }
@@ -381,7 +381,7 @@ class ServerStorage extends Vue {
                         } else if (revs.items.recentMod.rev != this.cachedRecentMod.rev) {
                             query = {recentMod: {}};
                         } else
-                            return;
+                            return true;
                     }
                 } catch(e) {
                     this.error(`Ошибка соединения с сервером: ${e.message}`);
@@ -402,20 +402,25 @@ class ServerStorage extends Vue {
                 let newRecentPatch = recent.items.recentPatch;
                 let newRecentMod = recent.items.recentMod;
 
-                if (!newRecent)
+                if (!newRecent) {
                     newRecent = _.cloneDeep(this.cachedRecent);
-                if (!newRecentPatch)
+                }
+                if (!newRecentPatch) {
                     newRecentPatch = _.cloneDeep(this.cachedRecentPatch);
-                if (!newRecentMod)
+                }
+                if (!newRecentMod) {
                     newRecentMod = _.cloneDeep(this.cachedRecentMod);
+                }
 
                 if (newRecent.rev == 0) newRecent.data = {};
                 if (newRecentPatch.rev == 0) newRecentPatch.data = {};
                 if (newRecentMod.rev == 0) newRecentMod.data = {};
 
                 let result = Object.assign({}, newRecent.data, newRecentPatch.data);
-                if (newRecentMod.key && result[newRecentMod.key])
-                    result[newRecentMod.key] = utils.applyObjDiff(result[newRecentMod.key], newRecentMod.mod);
+
+                const md = newRecentMod.data;
+                if (md.key && result[md.key])
+                    result[md.key] = utils.applyObjDiff(result[md.key], md.mod);
 
                 if (newRecent.rev != this.cachedRecent.rev)
                     await this.setCachedRecent(newRecent);
@@ -432,6 +437,7 @@ class ServerStorage extends Vue {
                 await bookManager.setRecent(result);
             } else {
                 this.warning(`Неверный ответ сервера: ${recent.state}`);
+                return;
             }
 
             if (doNotifySuccess)
@@ -439,6 +445,7 @@ class ServerStorage extends Vue {
         } finally {
             this.loadingRecent = false;
         }
+        return true;
     }
 
     async saveRecent(itemKey, recurse) {
@@ -449,18 +456,52 @@ class ServerStorage extends Vue {
 
         let needSaveRecent = false;
         let needSaveRecentPatch = false;
-        let needSaveRecentMod = true;
+        let needSaveRecentMod = false;
 
-        let newRecentMod = _.cloneDeep(this.cachedRecentPatch);
-        newRecentMod.rev++;
+        let applyMod = null;
 
-        let newRecentPatch = _.cloneDeep(this.cachedRecentPatch);
-        newRecentPatch.data[itemKey] = bm.recent[itemKey];
-        newRecentPatch.rev++;
-        needSaveRecentPatch = true;
+        //newRecentMod
+        let newRecentMod = {};
 
-        let newRecent = {rev: this.cachedRecent.rev + 1, data: bm.recent};
+        if (itemKey && this.cachedRecentPatch.data[itemKey]) {            
+            if (this.prevItemKey == itemKey) {//сохраняем только дифф
+                newRecentMod = _.cloneDeep(this.cachedRecentMod);
+                newRecentMod.rev++;
 
+                newRecentMod.data.key = itemKey;
+                newRecentMod.data.mod = utils.getObjDiff(this.cachedRecentPatch.data[itemKey], bm.recent[itemKey]);
+                needSaveRecentMod = true;
+            } else {//ключ не совпадает, надо сохранять патч
+                applyMod = newRecentMod.data;
+            }
+        }
+        this.prevItemKey = itemKey;
+
+        //newRecentPatch
+        let newRecentPatch = {};
+        if (itemKey && !needSaveRecentMod) {
+            newRecentPatch = _.cloneDeep(this.cachedRecentPatch);
+            newRecentPatch.rev++;
+            newRecentPatch.data[itemKey] = bm.recent[itemKey];
+            if (applyMod && applyMod.key && newRecentPatch.data[applyMod.key])
+                newRecentPatch.data[applyMod.key] = utils.applyObjDiff(newRecentPatch.data[applyMod.key], applyMod.mod);
+            newRecentMod = {rev: this.cachedRecentMod.rev + 1, data: {}};
+            needSaveRecentPatch = true;
+            needSaveRecentMod = true;
+        }
+
+        //newRecent
+        let newRecent = {};
+        if (!itemKey || (needSaveRecentPatch && Object.keys(newRecentPatch.data).length > 2)) {
+            newRecent = {rev: this.cachedRecent.rev + 1, data: bm.recent};
+            newRecentPatch = {rev: this.cachedRecentPatch.rev + 1, data: {}};
+            newRecentMod = {rev: this.cachedRecentMod.rev + 1, data: {}};
+            needSaveRecent = true;
+            needSaveRecentPatch = true;
+            needSaveRecentMod = true;
+        }
+
+        //query
         let query = {};
         if (needSaveRecent) {
             query = {recent: newRecent, recentPatch: newRecentPatch, recentMod: newRecentMod};
@@ -483,10 +524,10 @@ class ServerStorage extends Vue {
 
             if (result.state == 'reject') {
 
-                await this.loadRecent(true, false);
+                await this.loadRecent(false, false);
 
                 this.warning(`Последние изменения отменены. Данные синхронизированы с сервером.`);
-                if (!recurse) {
+                if (!recurse && itemKey) {
                     this.savingRecent = false;
                     this.saveRecent(itemKey, true);
                     return;
@@ -494,11 +535,11 @@ class ServerStorage extends Vue {
             } else if (result.state == 'success') {
                 //this.prevSavedItem = _.cloneDeep(bm.recent[itemKey]);
 
-                if (needSaveRecent)
+                if (needSaveRecent && newRecent.rev)
                     await this.setCachedRecent(newRecent);
-                if (needSaveRecentPatch)
+                if (needSaveRecentPatch && newRecentPatch.rev)
                     await this.setCachedRecentPatch(newRecentPatch);
-                if (needSaveRecentMod)
+                if (needSaveRecentMod && newRecentMod.rev)
                     await this.setCachedRecentMod(newRecentMod);
             }
         } finally {

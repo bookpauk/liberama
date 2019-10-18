@@ -437,7 +437,7 @@ class BookManager {
 
         Object.assign(mergedRecent, value);
 
-        //подстраховка
+        //подстраховка от hotReload
         for (let i of Object.keys(mergedRecent)) {
             if (!mergedRecent[i].key || mergedRecent[i].key !== i)
                 delete mergedRecent[i];
