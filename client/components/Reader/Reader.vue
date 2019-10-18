@@ -356,6 +356,7 @@ class Reader extends Vue {
         this.showWhatsNewDialog = settings.showWhatsNewDialog;
         this.showMigrationDialog = settings.showMigrationDialog;
         this.showToolButton = settings.showToolButton;
+        this.enableSitesFilter = settings.enableSitesFilter;
 
         this.updateHeaderMinWidth();
     }
@@ -1003,7 +1004,7 @@ class Reader extends Vue {
             // не удалось, скачиваем книгу полностью с конвертацией
             let loadCached = true;
             if (!book) {
-                book = await readerApi.loadBook(url, (state) => {
+                book = await readerApi.loadBook({url, enableSitesFilter: this.enableSitesFilter}, (state) => {
                     progress.setState(state);
                 });
                 loadCached = false;

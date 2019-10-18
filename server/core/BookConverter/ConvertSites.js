@@ -29,6 +29,9 @@ class ConvertSites extends ConvertHtml {
     }
 
     async run(data, opts) {
+        if (!opts.enableSitesFilter)
+            return false;
+        
         const checkResult = this.check(data, opts);
         if (!checkResult)
             return false;

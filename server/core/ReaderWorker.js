@@ -32,7 +32,8 @@ class ReaderWorker {
         }
     }
 
-    async loadBook(url, wState) {
+    async loadBook(opts, wState) {
+        const url = opts.url;
         let errMes = '';
         let decompDir = '';
         let downloadedFilename = '';
@@ -77,7 +78,7 @@ class ReaderWorker {
             //конвертирование в fb2
             wState.set({state: 'convert', step: 3, progress: 0});
             convertFilename = `${this.config.tempDownloadDir}/${tempFilename2}`;
-            await this.bookConverter.convertToFb2(decompFiles, convertFilename, url, progress => {
+            await this.bookConverter.convertToFb2(decompFiles, convertFilename, opts, progress => {
                 wState.set({progress});
             });
 
@@ -105,12 +106,12 @@ class ReaderWorker {
         }
     }
 
-    loadBookUrl(url) {
+    loadBookUrl(opts) {
         const workerId = workerState.generateWorkerId();
         const wState = workerState.getControl(workerId);
         wState.set({state: 'start'});
 
-        this.loadBook(url, wState);
+        this.loadBook(opts, wState);
 
         return workerId;
     }

@@ -183,6 +183,7 @@ const settingDefaults = {
     showServerStorageMessages: true,
     showWhatsNewDialog: true,
     showMigrationDialog: true,
+    enableSitesFilter: true,
 
     fontShifts: {},
     showToolButton: {},

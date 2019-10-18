@@ -11,11 +11,11 @@ const workerApi = axios.create({
 });
 
 class Reader {
-    async loadBook(url, callback) {
+    async loadBook(opts, callback) {
         const refreshPause = 300;
         if (!callback) callback = () => {};
 
-        let response = await api.post('/load-book', {type: 'url', url});
+        let response = await api.post('/load-book', opts);
 
         const workerId = response.data.workerId;
         if (!workerId)

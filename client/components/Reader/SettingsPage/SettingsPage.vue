@@ -304,6 +304,19 @@
                         </el-col>
                         <el-input-number v-model="addEmptyParagraphs" :min="0" :max="2"></el-input-number>
                     </el-form-item>
+                    <el-form-item label="">
+                        <el-tooltip :open-delay="500" effect="light" placement="top">
+                            <template slot="content">
+                                Html-фильтр вырезает лишние элементы со<br>
+                                страницы для определенных сайтов, таких как:<br>
+                                samlib.ru<br>
+                                www.fanfiction.net<br>
+                                archiveofourown.org<br>
+                                и других
+                            </template>
+                            <el-checkbox v-model="enableSitesFilter" @change="needTextReload">Включить html-фильтр для сайтов</el-checkbox>
+                        </el-tooltip>
+                    </el-form-item>
                     
                     <el-form-item label="Изображения">
                         <el-col :span="11">
@@ -686,6 +699,10 @@ class SettingsPage extends Vue {
 
     needReload() {
         this.$notify.warning({message: 'Необходимо обновить страницу (F5), чтобы изменения возымели эффект'});
+    }
+
+    needTextReload() {
+        this.$notify.warning({message: 'Необходимо обновить книгу в обход кэша, чтобы изменения возымели эффект'});
     }
 
     close() {
