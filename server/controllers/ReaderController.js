@@ -15,7 +15,10 @@ class ReaderController extends BaseController {
         try {
             if (!request.url) 
                 throw new Error(`key 'url' is empty`);
-            const workerId = this.readerWorker.loadBookUrl(request.url);
+            const workerId = this.readerWorker.loadBookUrl({
+                url: request.url, 
+                enableSitesFilter: (request.hasOwnProperty('enableSitesFilter') ? request.enableSitesFilter : true)
+            });
             const state = workerState.getState(workerId);
             return (state ? state : {});
         } catch (e) {

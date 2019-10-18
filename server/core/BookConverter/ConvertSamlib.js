@@ -20,6 +20,9 @@ class ConvertSamlib extends ConvertBase {
     }
 
     async run(data, opts) {
+        if (!opts.enableSitesFilter)
+            return false;
+
         const checkResult = this.check(data, opts);
         if (!checkResult)
             return false;

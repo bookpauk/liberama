@@ -11,6 +11,7 @@ const convertClassFactory = [
     require('./ConvertMobi'),
     require('./ConvertFb2'),
     require('./ConvertSamlib'),
+    require('./ConvertSites'),
     require('./ConvertHtml'),
 ];
 
@@ -24,13 +25,14 @@ class BookConverter {
         }
     }
 
-    async convertToFb2(inputFiles, outputFile, url, callback) {
+    async convertToFb2(inputFiles, outputFile, opts, callback) {
         const selectedFileType = await this.detector.detectFile(inputFiles.selectedFile);
         const data = await fs.readFile(inputFiles.selectedFile);
 
+        const convertOpts = Object.assign({}, opts, {inputFiles, callback, dataType: selectedFileType});
         let result = false;
         for (const convert of this.convertFactory) {
-            result = await convert.run(data, {inputFiles, url, callback, dataType: selectedFileType});
+            result = await convert.run(data, convertOpts);
             if (result) {
                 await fs.writeFile(outputFile, result);
                 break;
@@ -38,14 +40,14 @@ class BookConverter {
         }
 
         if (!result && inputFiles.nesting) {
-            result = await this.convertToFb2(inputFiles.nesting, outputFile, url, callback);
+            result = await this.convertToFb2(inputFiles.nesting, outputFile, opts, callback);
         }
 
         if (!result) {
             if (selectedFileType)
                 throw new Error(`Этот формат файла не поддерживается: ${selectedFileType.mime}`);
             else {
-                throw new Error(`Не удалось определить формат файла: ${url}`);
+                throw new Error(`Не удалось определить формат файла: ${opts.url}`);
             }
         }
 
