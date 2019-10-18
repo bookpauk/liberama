@@ -251,6 +251,7 @@ class RecentBooksPage extends Vue {
         }
         if (this.tableData.length > result.length)
             this.tableData.splice(result.length);*/
+
         this.tableData = result;
         this.updating = false;
     }

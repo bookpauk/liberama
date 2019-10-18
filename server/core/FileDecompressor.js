@@ -4,7 +4,7 @@ const crypto = require('crypto');
 const path = require('path');
 const unbzip2Stream = require('unbzip2-stream');
 const tar = require('tar-fs');
-const DecompressZip = require('decompress-zip');
+const AdmZip = require('adm-zip');
 
 const utils = require('./utils');
 const FileDetector = require('./FileDetector');
@@ -112,26 +112,17 @@ class FileDecompressor {
     }
 
     async unZip(filename, outputDir) {
-        return new Promise((resolve, reject) => {
+        return new Promise((resolve) => {
             const files = [];
-            const unzipper = new DecompressZip(filename);
+            const zip = new AdmZip(filename);
 
-            unzipper.on('error', function(err) {
-                reject(err);
+            zip.getEntries().forEach(function(zipEntry) {
+                files.push({path: zipEntry.entryName, size: zipEntry.header.size});
             });
 
-            unzipper.on('extract', function() {
-                resolve(files);
-            });
+            zip.extractAllTo(outputDir, true);
 
-            unzipper.extract({
-                path: outputDir,
-                filter: function(file) {
-                    if (file.type == 'File')
-                        files.push({path: file.path, size: file.uncompressedSize});
-                    return true;
-                }
-            });
+            resolve(files);
         });
     }
 

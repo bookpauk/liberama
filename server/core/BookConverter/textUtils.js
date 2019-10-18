@@ -74,7 +74,7 @@ function getEncoding(buf, returnAll) {
 
     if (returnAll)
         return sorted;
-    else if (sorted[0].c > 0)
+    else if (sorted[0].c > 0 && sorted[0].c > sorted[0].totalChecked/2)
         return sorted[0].codePage;
     else
         return 'ISO-8859-5';

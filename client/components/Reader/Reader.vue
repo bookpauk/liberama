@@ -510,27 +510,33 @@ class Reader extends Vue {
     }
 
     async bookManagerEvent(eventName) {
-        if (eventName == 'recent-changed') {
-            if (this.recentBooksActive) {
-                await this.$refs.recentBooksPage.updateTableData();
-            }
-        }
-
         if (eventName == 'set-recent' || eventName == 'recent-deleted') {
-            const oldBook = this.mostRecentBookReactive;
+            const oldBook = (this.textPage ? this.textPage.lastBook : null);
+            const oldPos = (this.textPage ? this.textPage.bookPos : null);
             const newBook = bookManager.mostRecentBook();
+
+            if (!(oldBook && newBook && oldBook.key == newBook.key)) {
+                this.mostRecentBook();
+            }
+
             if (oldBook && newBook) {
-                if (oldBook.key != newBook.key) {
+                if (oldBook.key != newBook.key || oldBook.path != newBook.path) {
                     this.loadingBook = true;
                     try {
                         await this.loadBook(newBook);
                     } finally {
                         this.loadingBook = false;
                     }
-                } else if (oldBook.bookPos != newBook.bookPos) {
+                } else if (oldPos != newBook.bookPos) {
                     while (this.loadingBook) await utils.sleep(100);
                     this.bookPosChanged({bookPos: newBook.bookPos});
                 }
+            }
+        }
+
+        if (eventName == 'recent-changed') {
+            if (this.recentBooksActive) {
+                await this.$refs.recentBooksPage.updateTableData();
             }
         }
     }
@@ -903,6 +909,7 @@ class Reader extends Vue {
                 this.updateRoute();
                 const textPage = this.$refs.page;
                 if (textPage.showBook) {
+                    this.textPage = textPage;
                     textPage.lastBook = last;
                     textPage.bookPos = (last.bookPos !== undefined ? last.bookPos : 0);
 
@@ -927,8 +934,10 @@ class Reader extends Vue {
             url = 'http://' + url;
 
         // уже просматривается сейчас
-        const lastBook = (this.$refs.page ? this.$refs.page.lastBook : null);
-        if (!opts.force && lastBook && lastBook.url == url && await bookManager.hasBookParsed(lastBook)) {
+        const lastBook = (this.textPage ? this.textPage.lastBook : null);
+        if (!opts.force && lastBook && lastBook.url == url && 
+                (!opts.path || opts.path == lastBook.path) && 
+                await bookManager.hasBookParsed(lastBook)) {
             this.loaderActive = false;
             return;
         }
@@ -957,7 +966,7 @@ class Reader extends Vue {
 
             if (!opts.force) {
                 // пытаемся загрузить и распарсить книгу в менеджере из локального кэша
-                const bookParsed = await bookManager.getBook({url}, (prog) => {
+                const bookParsed = await bookManager.getBook({url, path: opts.path}, (prog) => {
                     progress.setState({progress: prog});
                 });
 
@@ -978,6 +987,7 @@ class Reader extends Vue {
                 // иначе идем на сервер
                 // пытаемся загрузить готовый файл с сервера
                 if (wasOpened.path) {
+                    progress.setState({totalSteps: 5});
                     try {
                         const resp = await readerApi.loadCachedBook(wasOpened.path, (state) => {
                             progress.setState(state);
@@ -1063,7 +1073,7 @@ class Reader extends Vue {
                 let page = this.$refs.page;
                 while (this.blinkCount) {
                     this.showRefreshIcon = !this.showRefreshIcon;
-                    if (page.blinkCachedLoadMessage)
+                    if (page && page.blinkCachedLoadMessage)
                         page.blinkCachedLoadMessage(this.showRefreshIcon);
                     await utils.sleep(500);
                     if (this.stopBlink)
@@ -1073,7 +1083,7 @@ class Reader extends Vue {
                 }
                 this.showRefreshIcon = true;
                 this.inBlink = false;
-                if (page.blinkCachedLoadMessage)
+                if (page && page.blinkCachedLoadMessage)
                     page.blinkCachedLoadMessage('finish');
             });
         }

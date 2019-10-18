@@ -262,6 +262,11 @@ class BookManager {
                 this.books[meta.key] = result;
         }
 
+        //Если файл на сервере изменился, считаем, что в кеше его нету
+        if (meta.path && result && meta.path != result.path) {
+            return;
+        }
+
         if (result && !result.parsed) {
             let data = await bmDataStore.getItem(`bmData-${meta.key}`);
             callback(5);
@@ -434,6 +439,12 @@ class BookManager {
         const mergedRecent = _.cloneDeep(this.recent);
 
         Object.assign(mergedRecent, value);
+
+        //подстраховка
+        for (let i of Object.keys(mergedRecent)) {
+            if (!mergedRecent[i].key || mergedRecent[i].key !== i)
+                delete mergedRecent[i];
+        }
         
         //"ленивое" обновление хранилища
         (async() => {

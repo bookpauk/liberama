@@ -1,6 +1,4 @@
-import _ from 'lodash';
 import axios from 'axios';
-import {Buffer} from 'safe-buffer';
 
 import * as utils from '../share/utils';
 
@@ -66,12 +64,13 @@ class Reader {
             estSize = response.headers['content-length'];
         }
 
+        callback({state: 'loading', progress: 0});
         const options = {
             onDownloadProgress: progress => {
                 while (progress.loaded > estSize) estSize *= 1.5;
 
                 if (callback)
-                    callback({state: 'loading', progress: Math.round((progress.loaded*100)/estSize)});
+                    callback({progress: Math.round((progress.loaded*100)/estSize)});
             }
         }
         //загрузка
