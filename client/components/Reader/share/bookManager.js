@@ -36,9 +36,6 @@ class BookManager {
             }
         }
 
-        this.recentRev = await bmRecentStore.getItem('recent-rev') || 0;
-        this.recentDeltaRev = await bmRecentStore.getItem('recent-delta-rev') || 0;
-
         this.recentChanged = true;
 
         this.loadStored();//no await
@@ -440,7 +437,7 @@ class BookManager {
 
         Object.assign(mergedRecent, value);
 
-        //подстраховка
+        //подстраховка от hotReload
         for (let i of Object.keys(mergedRecent)) {
             if (!mergedRecent[i].key || mergedRecent[i].key !== i)
                 delete mergedRecent[i];
@@ -464,16 +461,6 @@ class BookManager {
         this.recentChanged = true;
         this.emit('set-recent');
         this.emit('recent-changed');
-    }
-
-    async setRecentRev(value) {
-        await bmRecentStore.setItem('recent-rev', value);
-        this.recentRev = value;
-    }
-
-    async setRecentDeltaRev(value) {
-        await bmRecentStore.setItem('recent-delta-rev', value);
-        this.recentDeltaRev = value;
     }
 
     addEventListener(listener) {
