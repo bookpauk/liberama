@@ -533,8 +533,6 @@ class ServerStorage extends Vue {
                     return;
                 }
             } else if (result.state == 'success') {
-                //this.prevSavedItem = _.cloneDeep(bm.recent[itemKey]);
-
                 if (needSaveRecent && newRecent.rev)
                     await this.setCachedRecent(newRecent);
                 if (needSaveRecentPatch && newRecentPatch.rev)
