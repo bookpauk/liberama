@@ -439,6 +439,12 @@ class BookManager {
         const mergedRecent = _.cloneDeep(this.recent);
 
         Object.assign(mergedRecent, value);
+
+        //подстраховка
+        for (let i of Object.keys(mergedRecent)) {
+            if (!mergedRecent[i].key || mergedRecent[i].key !== i)
+                delete mergedRecent[i];
+        }
         
         //"ленивое" обновление хранилища
         (async() => {
