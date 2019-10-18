@@ -492,7 +492,7 @@ class ServerStorage extends Vue {
 
         //newRecent
         let newRecent = {};
-        if (!itemKey || (needSaveRecentPatch && Object.keys(newRecentPatch.data).length > 2)) {
+        if (!itemKey || (needSaveRecentPatch && Object.keys(newRecentPatch.data).length > 10)) {
             newRecent = {rev: this.cachedRecent.rev + 1, data: bm.recent};
             newRecentPatch = {rev: this.cachedRecentPatch.rev + 1, data: {}};
             newRecentMod = {rev: this.cachedRecentMod.rev + 1, data: {}};
