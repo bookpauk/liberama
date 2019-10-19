@@ -458,22 +458,15 @@ class ServerStorage extends Vue {
         let needSaveRecentPatch = false;
         let needSaveRecentMod = false;
 
-        let applyMod = null;
-
         //newRecentMod
         let newRecentMod = {};
+        if (itemKey && this.cachedRecentPatch.data[itemKey] && this.prevItemKey == itemKey) {
+            newRecentMod = _.cloneDeep(this.cachedRecentMod);
+            newRecentMod.rev++;
 
-        if (itemKey && this.cachedRecentPatch.data[itemKey]) {            
-            if (this.prevItemKey == itemKey) {//сохраняем только дифф
-                newRecentMod = _.cloneDeep(this.cachedRecentMod);
-                newRecentMod.rev++;
-
-                newRecentMod.data.key = itemKey;
-                newRecentMod.data.mod = utils.getObjDiff(this.cachedRecentPatch.data[itemKey], bm.recent[itemKey]);
-                needSaveRecentMod = true;
-            } else {//ключ не совпадает, надо сохранять патч
-                applyMod = newRecentMod.data;
-            }
+            newRecentMod.data.key = itemKey;
+            newRecentMod.data.mod = utils.getObjDiff(this.cachedRecentPatch.data[itemKey], bm.recent[itemKey]);
+            needSaveRecentMod = true;
         }
         this.prevItemKey = itemKey;
 
@@ -483,8 +476,11 @@ class ServerStorage extends Vue {
             newRecentPatch = _.cloneDeep(this.cachedRecentPatch);
             newRecentPatch.rev++;
             newRecentPatch.data[itemKey] = bm.recent[itemKey];
+
+            let applyMod = this.cachedRecentMod.data;
             if (applyMod && applyMod.key && newRecentPatch.data[applyMod.key])
                 newRecentPatch.data[applyMod.key] = utils.applyObjDiff(newRecentPatch.data[applyMod.key], applyMod.mod);
+
             newRecentMod = {rev: this.cachedRecentMod.rev + 1, data: {}};
             needSaveRecentPatch = true;
             needSaveRecentMod = true;
