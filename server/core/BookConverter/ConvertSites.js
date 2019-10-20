@@ -59,7 +59,7 @@ class ConvertSites extends ConvertHtml {
 
     cutter(text, opts) {
         const title = this.getTitle(text);
-        const l = text.indexOf(opts.begin);
+        const l = text.indexOf(opts.begin) + opts.begin.length;
         const r = text.indexOf(opts.end);
         if (l < 0 || r < 0 || r <= l)
             return false;
