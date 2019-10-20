@@ -327,7 +327,8 @@ class Reader extends Vue {
         (async() => {
             await bookManager.init(this.settings);
             bookManager.addEventListener(this.bookManagerEvent);
-
+            await this.$refs.serverStorage.init();
+            
             if (this.$root.rootRoute == '/reader') {
                 if (this.routeParamUrl) {
                     await this.loadBook({url: this.routeParamUrl, bookPos: this.routeParamPos, force: this.routeParamRefresh});
@@ -340,7 +341,6 @@ class Reader extends Vue {
             this.checkActivateDonateHelpPage();
             this.loading = false;
 
-            await this.$refs.serverStorage.init();
             await this.showWhatsNew();
             await this.showMigration();
         })();
