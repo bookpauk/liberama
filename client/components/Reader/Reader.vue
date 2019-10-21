@@ -543,6 +543,7 @@ class Reader extends Vue {
             if (value) {
                 await utils.sleep(500);
                 while (!this.$refs.serverStorage.inited) await utils.sleep(100);
+                while (!bookManager.loaded) await utils.sleep(100);
 
                 this.$refs.serverStorage.saveRecent(value);
             }
