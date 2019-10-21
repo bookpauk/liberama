@@ -327,7 +327,6 @@ class Reader extends Vue {
         (async() => {
             await bookManager.init(this.settings);
             bookManager.addEventListener(this.bookManagerEvent);
-            await this.$refs.serverStorage.init();
             
             if (this.$root.rootRoute == '/reader') {
                 if (this.routeParamUrl) {
@@ -337,6 +336,7 @@ class Reader extends Vue {
                 }
             }
 
+            await this.$refs.serverStorage.init();
             this.checkSetStorageAccessKey();
             this.checkActivateDonateHelpPage();
             this.loading = false;
@@ -510,7 +510,7 @@ class Reader extends Vue {
         this.debouncedUpdateRoute();
     }
 
-    async bookManagerEvent(eventName) {
+    async bookManagerEvent(eventName, value) {
         if (eventName == 'set-recent' || eventName == 'recent-deleted') {
             const oldBook = (this.textPage ? this.textPage.lastBook : null);
             const oldPos = (this.textPage ? this.textPage.bookPos : null);
@@ -538,6 +538,13 @@ class Reader extends Vue {
         if (eventName == 'recent-changed') {
             if (this.recentBooksActive) {
                 await this.$refs.recentBooksPage.updateTableData();
+            }
+
+            if (value) {
+                await utils.sleep(500);
+                while (!this.$refs.serverStorage.inited) await utils.sleep(100);
+
+                this.$refs.serverStorage.saveRecent(value);
             }
         }
     }
