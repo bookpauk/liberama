@@ -1,5 +1,16 @@
 export const versionHistory = [
 {
+    showUntil: '2019-10-20',
+    header: '0.7.4 (2019-10-21)',
+    content:
+`
+<ul>
+    <li>исправления багов</li>
+</ul>
+`
+},
+
+{
     showUntil: '2019-10-17',
     header: '0.7.3 (2019-10-18)',
     content:
