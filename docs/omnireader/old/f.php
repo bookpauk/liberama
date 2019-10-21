@@ -309,6 +309,42 @@
 	  while($code);
 	  return $curlResult;
 	}
+
+	function tryNewApi($curlOptions, $url) {
+		try {
+			$api = 'http://127.0.0.1:44081/api/';
+			$host = 'http://127.0.0.1';
+
+			$curlOptions[CURLOPT_URL] = $api . 'reader/load-book';
+			$out = curlExec($curlOptions, array('Content-type: application/json'), "{\"url\": \"$url\"}");
+
+			$out = json_decode($out, true);
+			if (!$out)
+				return false;
+
+			$workerId = $out['workerId'];
+			$i = 0;
+			while ($out['state'] != 'finish') {
+				usleep(500*1000);
+				$curlOptions[CURLOPT_URL] = $api . 'worker/get-state';
+				$out = curlExec($curlOptions, array('Content-type: application/json'), "{\"workerId\": \"$workerId\"}");
+				$out = json_decode($out, true);
+				if (!$out || $i > 250)
+					return false;
+				$i++;
+			}
+
+			$path = $out['path'];
+			
+			$curlOptions[CURLOPT_URL] = $host . $path;
+			$out = curlExec($curlOptions);
+			$out = gzdecode($out);
+
+			return $out;
+		} catch (Exception $e) {
+			return false;
+		}
+	}
 {
 	set_error_handler("myErrorHandler");
 //	set_time_limit(300);
@@ -335,7 +371,6 @@
 		$options = array(
 			CURLOPT_RETURNTRANSFER => TRUE,
 			CURLOPT_TIMEOUT => 300,
-			CURLOPT_URL => $url,
 			CURLOPT_BUFFERSIZE => 1024*128,
 			CURLOPT_NOPROGRESS => FALSE,
 			CURLOPT_USERAGENT => "Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US; rv:1.8.1.6) Gecko/20070725 Firefox/2.0.0.6",
@@ -347,7 +382,11 @@
 			}
 		);
 
-		$out = curlExec($options);
+		$out = tryNewApi($options, $url);
+		if (!$out) {
+			$options[CURLOPT_URL] = $url;
+			$out = curlExec($options);
+		}
 
 		$meta_info['time_curl'] = microtime_float() - $time;
 		$time = microtime_float();
