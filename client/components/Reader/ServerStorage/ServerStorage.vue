@@ -49,10 +49,6 @@ class ServerStorage extends Vue {
             this.saveSettings();
         }, 500);
 
-        this.debouncedSaveRecent = _.debounce((itemKey) => {
-            this.saveRecent(itemKey);
-        }, 1000);
-
         this.debouncedNotifySuccess = _.debounce(() => {
             this.success('Данные синхронизированы с сервером');
         }, 1000);
@@ -81,8 +77,6 @@ class ServerStorage extends Vue {
             } else {
                 await this.serverStorageKeyChanged();
             }
-
-            bookManager.addEventListener(this.bookManagerEvent);
         } finally {
             this.inited = true;
         }
@@ -101,17 +95,6 @@ class ServerStorage extends Vue {
     async setCachedRecentMod(value) {
         await ssCacheStore.setItem('recent-mod', value);
         this.cachedRecentMod = value;
-    }
-
-    async bookManagerEvent(eventName, itemKey) {
-        if (!this.serverSyncEnabled)
-            return;
-
-        if (eventName == 'recent-changed') {            
-            if (itemKey) {
-                this.debouncedSaveRecent(itemKey);
-            }
-        }
     }
 
     async generateNewServerStorageKey() {
