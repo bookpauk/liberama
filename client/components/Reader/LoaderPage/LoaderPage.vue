@@ -37,7 +37,9 @@
         <div class="part bottom">
             <span class="bottom-span clickable" @click="openHelp">Справка</span>
             <span class="bottom-span clickable" @click="openDonate">Помочь проекту</span>
-            <span class="bottom-span">{{ version }}</span>
+
+            <span v-if="version == clientVersion" class="bottom-span">v{{ version }}</span>
+            <span v-else class="bottom-span">Версия сервера {{ version }}, версия клиента {{ clientVersion }}, необходимо обновить страницу</span>
         </div>
 
         <PasteTextPage v-if="pasteTextActive" ref="pasteTextPage" @paste-text-toggle="pasteTextToggle" @load-buffer="loadBuffer"></PasteTextPage>
@@ -49,6 +51,7 @@
 import Vue from 'vue';
 import Component from 'vue-class-component';
 import PasteTextPage from './PasteTextPage/PasteTextPage.vue';
+import {versionHistory} from '../versionHistory';
 
 export default @Component({
     components: {
@@ -86,11 +89,17 @@ class LoaderPage extends Vue {
     }
 
     get version() {
-        return `v${this.$store.state.config.version}`;
+        return this.$store.state.config.version;
     }
 
     get isExternalConverter() {
         return this.$store.state.config.useExternalBookConverter;
+    }
+
+    get clientVersion() {
+        let v = versionHistory[0].header;
+        v = v.split(' ')[0];
+        return v;
     }
 
     submitUrl() {
