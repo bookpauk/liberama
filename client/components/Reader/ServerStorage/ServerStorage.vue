@@ -432,67 +432,74 @@ class ServerStorage extends Vue {
     }
 
     async saveRecent(itemKey, recurse) {
+        while (!this.inited || this.savingRecent)
+            await utils.sleep(100);
+
         if (!this.keyInited || !this.serverSyncEnabled || this.savingRecent)
             return;
 
-        const bm = bookManager;
+        this.savingRecent = true;
+        try {        
+            const bm = bookManager;
 
-        let needSaveRecent = false;
-        let needSaveRecentPatch = false;
-        let needSaveRecentMod = false;
+            let needSaveRecent = false;
+            let needSaveRecentPatch = false;
+            let needSaveRecentMod = false;
 
-        //newRecentMod
-        let newRecentMod = {};
-        if (itemKey && this.cachedRecentPatch.data[itemKey] && this.prevItemKey == itemKey) {
-            newRecentMod = _.cloneDeep(this.cachedRecentMod);
-            newRecentMod.rev++;
+            //newRecentMod
+            let newRecentMod = {};
+            if (itemKey && this.cachedRecentPatch.data[itemKey] && this.prevItemKey == itemKey) {
+                newRecentMod = _.cloneDeep(this.cachedRecentMod);
+                newRecentMod.rev++;
 
-            newRecentMod.data.key = itemKey;
-            newRecentMod.data.mod = utils.getObjDiff(this.cachedRecentPatch.data[itemKey], bm.recent[itemKey]);
-            needSaveRecentMod = true;
-        }
-        this.prevItemKey = itemKey;
+                newRecentMod.data.key = itemKey;
+                newRecentMod.data.mod = utils.getObjDiff(this.cachedRecentPatch.data[itemKey], bm.recent[itemKey]);
+                needSaveRecentMod = true;
+            }
+            this.prevItemKey = itemKey;
 
-        //newRecentPatch
-        let newRecentPatch = {};
-        if (itemKey && !needSaveRecentMod) {
-            newRecentPatch = _.cloneDeep(this.cachedRecentPatch);
-            newRecentPatch.rev++;
-            newRecentPatch.data[itemKey] = bm.recent[itemKey];
+            //newRecentPatch
+            let newRecentPatch = {};
+            if (itemKey && !needSaveRecentMod) {
+                newRecentPatch = _.cloneDeep(this.cachedRecentPatch);
+                newRecentPatch.rev++;
+                newRecentPatch.data[itemKey] = bm.recent[itemKey];
 
-            let applyMod = this.cachedRecentMod.data;
-            if (applyMod && applyMod.key && newRecentPatch.data[applyMod.key])
-                newRecentPatch.data[applyMod.key] = utils.applyObjDiff(newRecentPatch.data[applyMod.key], applyMod.mod);
+                let applyMod = this.cachedRecentMod.data;
+                if (applyMod && applyMod.key && newRecentPatch.data[applyMod.key])
+                    newRecentPatch.data[applyMod.key] = utils.applyObjDiff(newRecentPatch.data[applyMod.key], applyMod.mod);
 
-            newRecentMod = {rev: this.cachedRecentMod.rev + 1, data: {}};
-            needSaveRecentPatch = true;
-            needSaveRecentMod = true;
-        }
+                newRecentMod = {rev: this.cachedRecentMod.rev + 1, data: {}};
+                needSaveRecentPatch = true;
+                needSaveRecentMod = true;
+            }
 
-        //newRecent
-        let newRecent = {};
-        if (!itemKey || (needSaveRecentPatch && Object.keys(newRecentPatch.data).length > 10)) {
-            newRecent = {rev: this.cachedRecent.rev + 1, data: bm.recent};
-            newRecentPatch = {rev: this.cachedRecentPatch.rev + 1, data: {}};
-            newRecentMod = {rev: this.cachedRecentMod.rev + 1, data: {}};
-            needSaveRecent = true;
-            needSaveRecentPatch = true;
-            needSaveRecentMod = true;
-        }
+            //newRecent
+            let newRecent = {};
+            if (!itemKey || (needSaveRecentPatch && Object.keys(newRecentPatch.data).length > 10)) {
+                //ждем весь bm.recent
+                while (!bookManager.loaded)
+                    await utils.sleep(100);
 
-        //query
-        let query = {};
-        if (needSaveRecent) {
-            query = {recent: newRecent, recentPatch: newRecentPatch, recentMod: newRecentMod};
-        } else if (needSaveRecentPatch) {
-            query = {recentPatch: newRecentPatch, recentMod: newRecentMod};
-        } else {
-            query = {recentMod: newRecentMod};
-        }
+                newRecent = {rev: this.cachedRecent.rev + 1, data: bm.recent};
+                newRecentPatch = {rev: this.cachedRecentPatch.rev + 1, data: {}};
+                newRecentMod = {rev: this.cachedRecentMod.rev + 1, data: {}};
+                needSaveRecent = true;
+                needSaveRecentPatch = true;
+                needSaveRecentMod = true;
+            }
 
-        //сохранение
-        this.savingRecent = true;        
-        try {
+            //query
+            let query = {};
+            if (needSaveRecent) {
+                query = {recent: newRecent, recentPatch: newRecentPatch, recentMod: newRecentMod};
+            } else if (needSaveRecentPatch) {
+                query = {recentPatch: newRecentPatch, recentMod: newRecentMod};
+            } else {
+                query = {recentMod: newRecentMod};
+            }
+
+            //сохранение
             let result = {state: ''};
 
             try {
