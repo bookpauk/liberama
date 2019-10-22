@@ -432,6 +432,9 @@ class ServerStorage extends Vue {
     }
 
     async saveRecent(itemKey, recurse) {
+        while (!this.inited || this.savingRecent)
+            await utils.sleep(100);
+
         if (!this.keyInited || !this.serverSyncEnabled || this.savingRecent)
             return;
 
@@ -474,6 +477,10 @@ class ServerStorage extends Vue {
             //newRecent
             let newRecent = {};
             if (!itemKey || (needSaveRecentPatch && Object.keys(newRecentPatch.data).length > 10)) {
+                //ждем весь bm.recent
+                while (!bookManager.loaded)
+                    await utils.sleep(100);
+
                 newRecent = {rev: this.cachedRecent.rev + 1, data: bm.recent};
                 newRecentPatch = {rev: this.cachedRecentPatch.rev + 1, data: {}};
                 newRecentMod = {rev: this.cachedRecentMod.rev + 1, data: {}};

@@ -540,13 +540,9 @@ class Reader extends Vue {
                 await this.$refs.recentBooksPage.updateTableData();
             }
 
+            //сохранение в serverStorage
             if (value) {
                 await utils.sleep(500);
-                while (!this.$refs.serverStorage.inited || 
-                    !bookManager.loaded ||
-                    this.$refs.serverStorage.savingRecent)
-                    await utils.sleep(100);
-
                 await this.$refs.serverStorage.saveRecent(value);
             }
         }
