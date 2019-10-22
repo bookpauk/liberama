@@ -405,17 +405,17 @@ class ServerStorage extends Vue {
                 if (md.key && result[md.key])
                     result[md.key] = utils.applyObjDiff(result[md.key], md.mod);
 
+                if (!bookManager.loaded) {
+                    this.warning('Ожидание загрузки списка книг перед синхронизацией');
+                    while (!bookManager.loaded) await utils.sleep(100);
+                }
+
                 if (newRecent.rev != this.cachedRecent.rev)
                     await this.setCachedRecent(newRecent);
                 if (newRecentPatch.rev != this.cachedRecentPatch.rev)
                     await this.setCachedRecentPatch(newRecentPatch);
                 if (newRecentMod.rev != this.cachedRecentMod.rev)
                     await this.setCachedRecentMod(newRecentMod);
-
-                if (!bookManager.loaded) {
-                    this.warning('Ожидание загрузки списка книг перед синхронизацией');
-                    while (!bookManager.loaded) await utils.sleep(100);
-                }
 
                 await bookManager.setRecent(result);
             } else {
