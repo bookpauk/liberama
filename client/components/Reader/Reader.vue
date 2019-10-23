@@ -220,14 +220,19 @@ export default @Component({
         bookPos: function(newValue) {
             if (newValue !== undefined && this.activePage == 'TextPage') {
                 const textPage = this.$refs.page;
+
                 if (textPage.bookPos != newValue) {
                     textPage.bookPos = newValue;
                 }
-                this.debouncedSetRecentBook(newValue);
+
+                if (!this.scrollingActive)
+                    this.debouncedSetRecentBook(newValue);
+                else
+                    this.scrollingSetRecentBook(newValue);
             }
         },
         routeParamPos: function(newValue) {
-            if (newValue !== undefined && newValue != this.bookPos) {
+            if (!this.paramPosIgnore && newValue !== undefined && newValue != this.bookPos) {
                 this.bookPos = newValue;
             }
         },
@@ -291,21 +296,24 @@ class Reader extends Vue {
 
         this.lastActivePage = false;
 
-        this.debouncedUpdateRoute = _.debounce(() => {
-            this.updateRoute();
-        }, 1000);
-
-        this.debouncedSetRecentBook = _.throttle(async(newValue) => {
-            await utils.sleep(300);
-            
+        this.debouncedSetRecentBook = _.debounce(async(newValue) => {
             const recent = this.mostRecentBook();
             if (recent && (recent.bookPos != newValue || recent.bookPosSeen !== this.bookPosSeen)) {
                 await bookManager.setRecentBook(Object.assign({}, recent, {bookPos: newValue, bookPosSeen: this.bookPosSeen}));
 
                 if (this.actionCur < 0 || (this.actionCur >= 0 && this.actionList[this.actionCur] != newValue))
                     this.addAction(newValue);
+
+                this.paramPosIgnore = true;
+                this.updateRoute();
+                await this.$nextTick();
+                this.paramPosIgnore = false;
             }
-        }, 500);
+        }, 500, {'maxWait':5000});
+
+        this.scrollingSetRecentBook = _.debounce((newValue) => {
+            this.debouncedSetRecentBook(newValue);
+        }, 15000, {'maxWait':20000});
 
         document.addEventListener('fullscreenchange', () => {
             this.fullScreenActive = (document.fullscreenElement !== null);
@@ -345,6 +353,8 @@ class Reader extends Vue {
 
             await this.showWhatsNew();
             await this.showMigration();
+
+            this.updateRoute();
         })();
     }
 
@@ -509,7 +519,6 @@ class Reader extends Vue {
         if (event.bookPosSeen !== undefined)
             this.bookPosSeen = event.bookPosSeen;
         this.bookPos = event.bookPos;
-        this.debouncedUpdateRoute();
     }
 
     async bookManagerEvent(eventName, value) {
@@ -655,6 +664,10 @@ class Reader extends Vue {
             } else {
                 page.stopTextScrolling();
             }
+        }
+
+        if (!this.scrollingActive) {
+            this.scrollingSetRecentBook.flush();
         }
     }
 
