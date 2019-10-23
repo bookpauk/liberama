@@ -295,7 +295,9 @@ class Reader extends Vue {
             this.updateRoute();
         }, 1000);
 
-        this.debouncedSetRecentBook = _.debounce(async(newValue) => {
+        this.debouncedSetRecentBook = _.throttle(async(newValue) => {
+            await utils.sleep(300);
+            
             const recent = this.mostRecentBook();
             if (recent && (recent.bookPos != newValue || recent.bookPosSeen !== this.bookPosSeen)) {
                 await bookManager.setRecentBook(Object.assign({}, recent, {bookPos: newValue, bookPosSeen: this.bookPosSeen}));
