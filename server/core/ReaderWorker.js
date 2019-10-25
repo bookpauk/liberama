@@ -1,6 +1,5 @@
 const fs = require('fs-extra');
 const path = require('path');
-const crypto = require('crypto');
 
 const workerState = require('./workerState');
 const FileDownloader = require('./FileDownloader');
@@ -8,6 +7,8 @@ const FileDecompressor = require('./FileDecompressor');
 const BookConverter = require('./BookConverter');
 const utils = require('./utils');
 const log = require('./getLogger').getLog();
+
+const LibSharedStorage = require('./LibSharedStorage');
 
 let singleCleanExecute = false;
 
@@ -30,6 +31,12 @@ class ReaderWorker {
             this.periodicCleanDir(this.config.uploadDir, this.config.maxUploadPublicDirSize, 60*60*1000);//1 раз в час
             singleCleanExecute = true;
         }
+
+        (async() => {
+            const libSharedStorage = new LibSharedStorage();
+            await libSharedStorage.init(config);
+            libSharedStorage.filenameToStoragePath('/home/sizikov/Downloads/15/1.zip');
+        })();
     }
 
     async loadBook(opts, wState) {
@@ -117,10 +124,7 @@ class ReaderWorker {
     }
 
     async saveFile(file) {
-        const buf = await fs.readFile(file.path);
-
-        const hash = crypto.createHash('sha256').update(buf).digest('hex');
-
+        const hash = await utils.getFileHash(file.path, 'sha256', 'hex');
         const outFilename = `${this.config.uploadDir}/${hash}`;
 
         if (!await fs.pathExists(outFilename)) {

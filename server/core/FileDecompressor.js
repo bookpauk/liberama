@@ -1,6 +1,5 @@
 const fs = require('fs-extra');
 const zlib = require('zlib');
-const crypto = require('crypto');
 const path = require('path');
 const unbzip2Stream = require('unbzip2-stream');
 const tar = require('tar-fs');
@@ -208,15 +207,26 @@ class FileDecompressor {
         });
     }
 
-    async gzipFileIfNotExists(filename, outDir) {
-        const buf = await fs.readFile(filename);
+    async gzipFile(inputFile, outputFile) {
+        return new Promise((resolve, reject) => {
+            const gzip = zlib.createGzip({level: 1});
+            const input = fs.createReadStream(inputFile);
+            const output = fs.createWriteStream(outputFile);
 
-        const hash = crypto.createHash('sha256').update(buf).digest('hex');
+            input.pipe(gzip).pipe(output).on('finish', (err) => {
+                if (err) reject(err);
+                else resolve();
+            });
+        });
+    }
+
+    async gzipFileIfNotExists(filename, outDir) {
+        const hash = await utils.getFileHash(filename, 'sha256', 'hex');
 
         const outFilename = `${outDir}/${hash}`;
 
         if (!await fs.pathExists(outFilename)) {
-            await fs.writeFile(outFilename, await this.gzipBuffer(buf))
+            await this.gzipFile(filename, outFilename);
         } else {
             await utils.touchFile(outFilename);
         }
