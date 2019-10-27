@@ -8,8 +8,6 @@ const BookConverter = require('./BookConverter');
 const utils = require('./utils');
 const log = require('./getLogger').getLog();
 
-const LibSharedStorage = require('./LibSharedStorage');
-
 let singleCleanExecute = false;
 
 class ReaderWorker {
@@ -31,12 +29,6 @@ class ReaderWorker {
             this.periodicCleanDir(this.config.uploadDir, this.config.maxUploadPublicDirSize, 60*60*1000);//1 раз в час
             singleCleanExecute = true;
         }
-
-        (async() => {
-            const libSharedStorage = new LibSharedStorage();
-            await libSharedStorage.init(config);
-            libSharedStorage.filenameToStoragePath('/home/sizikov/Downloads/15/1.zip');
-        })();
     }
 
     async loadBook(opts, wState) {
