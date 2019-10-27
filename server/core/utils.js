@@ -42,7 +42,7 @@ function spawnProcess(cmd, opts) {
     onData = (onData ? onData : () => {});
     args = (args ? args : []);
 
-    return new Promise(async(resolve, reject) => {
+    return new Promise((resolve, reject) => { (async() => {
         let resolved = false;
         const proc = spawn(cmd, args, {detached: true});
 
@@ -72,7 +72,7 @@ function spawnProcess(cmd, opts) {
             process.kill(proc.pid);
             reject({status: 'killed', stdout, stderr});
         }
-    });
+    })().catch(reject); });
 }
 
 module.exports = {
