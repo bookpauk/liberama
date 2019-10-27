@@ -477,7 +477,7 @@ class TextPage extends Vue {
 
     generateWaitingFunc(waitingHandlerName, stopPropertyName) {
         const func = (timeout) => {
-            return new Promise(async(resolve) => {
+            return new Promise((resolve, reject) => { (async() => {
                 this[waitingHandlerName] = resolve;
                 let wait = (timeout + 201)/100;
                 while (wait > 0 && !this[stopPropertyName]) {
@@ -485,7 +485,7 @@ class TextPage extends Vue {
                     await sleep(100);
                 }
                 resolve();
-            });
+            })().catch(reject); });
         };
         return func;
     }
