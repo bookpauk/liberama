@@ -162,7 +162,7 @@ class FileDecompressor {
     }
 
     decompressByStream(stream, filename, outputDir) {
-        return new Promise(async(resolve, reject) => {
+        return new Promise((resolve, reject) => { (async() => {
             const file = {path: path.parse(filename).name};
             let outFilename = `${outputDir}/${file.path}`;
             if (await fs.pathExists(outFilename)) {
@@ -182,20 +182,12 @@ class FileDecompressor {
                 resolve([file]);
             });
 
-            stream.on('error', (err) => {
-                reject(err);
-            });
-
-            inputStream.on('error', (err) => {
-                reject(err);
-            });
-
-            outputStream.on('error', (err) => {
-                reject(err);
-            });
+            stream.on('error', reject);
+            inputStream.on('error', reject);
+            outputStream.on('error', reject);
         
             inputStream.pipe(stream).pipe(outputStream);
-        });
+        })().catch(reject); });
    }
 
     async gzipBuffer(buf) {
