@@ -1,7 +1,7 @@
 const config = require('./config');
-const logger = require('./core/getLogger');
-logger.initLogger(config);
-const log = logger.getLog();
+const appLogger = new (require('./core/AppLogger'))();//singleton
+appLogger.init(config);
+const log = appLogger.log;
 
 const configSaver = require('./config/configSaver');
 const argv = require('minimist')(process.argv.slice(2));

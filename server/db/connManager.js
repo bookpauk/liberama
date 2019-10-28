@@ -1,7 +1,7 @@
 const fs = require('fs-extra');
 
 const SqliteConnectionPool = require('./SqliteConnectionPool');
-const log = require('../core/getLogger').getLog();
+const log = new (require('../core/AppLogger'))().log;//singleton
 
 const migrations = {
     'app': require('./migrations/app'),

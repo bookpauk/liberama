@@ -6,7 +6,7 @@ const FileDownloader = require('./FileDownloader');
 const FileDecompressor = require('./FileDecompressor');
 const BookConverter = require('./BookConverter');
 const utils = require('./utils');
-const log = require('./getLogger').getLog();
+const log = new (require('./AppLogger'))().log;//singleton
 
 let singleCleanExecute = false;
 
