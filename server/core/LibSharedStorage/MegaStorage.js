@@ -6,15 +6,27 @@ const utils = require('../utils');
 
 class MegaStorage {
     constructor() {
-        this.readingFiles = false;
-        this.stats = null;
+        this.inited = false;
     }
 
     async init(config) {
         this.config = config;
         this.megaStorageDir = config.megaStorageDir;
+        this.statsPath = `${this.megaStorageDir}/stats.json`;
         this.compressLevel = (config.compressLevel ? config.compressLevel : 4);
         await fs.ensureDir(this.megaStorageDir);
+
+        this.readingFiles = false;
+        this.stats = {};
+
+        if (await fs.pathExists(this.statsPath)) {
+            this.stats = Object.assign({},
+                JSON.parse(await fs.readFile(this.statsPath, 'utf8')),
+                this.stats
+            );
+        }
+
+        this.inited = true;
     }
 
     async nameHash(filename) {
@@ -63,17 +75,18 @@ class MegaStorage {
         if (!dir)
             dir = this.megaStorageDir;
 
+        let result;
         const files = await fs.readdir(dir, { withFileTypes: true });
         for (const file of files) {
             if (!this.readingFiles)
                 return;
             const found = path.resolve(dir, file.name);
             if (file.isDirectory())
-                await this._findFiles(callback, found);
+                result = await this._findFiles(callback, found);
             else
                 callback(found);
         }
-        return true;
+        return result;
     }
 
     async startFindFiles(callback, dir) {
