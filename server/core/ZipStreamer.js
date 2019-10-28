@@ -52,7 +52,26 @@ class ZipStreamer {
         })().catch(reject); });
     }
 
-    unpack(zipFile, entryCallback) {
+    unpack(zipFile, outputDir, entryCallback) {
+        return new Promise((resolve, reject) => {
+            entryCallback = (entryCallback ? entryCallback : () => {});
+            const unzip = new unzipStream({file: zipFile});
+
+            let files = [];
+            unzip.on('extract', (en) => {
+                const entry = {path: en.name, size: en.size, compressedSize: en.compressedSize};
+                entryCallback(entry);
+                files.push(entry);
+            });
+
+            unzip.on('ready', () => {
+                unzip.extract(null, outputDir, (err) => {
+                    if (err) reject(err);
+                    unzip.close();
+                    resolve(files);
+                });
+            });            
+        });
     }
 }
 
