@@ -8,28 +8,32 @@ const BookConverter = require('./BookConverter');
 const utils = require('./utils');
 const log = new (require('./AppLogger'))().log;//singleton
 
-let singleCleanExecute = false;
+let instance = null;
 
+//singleton
 class ReaderWorker {
     constructor(config) {
-        this.config = Object.assign({}, config);
-        
-        this.config.tempDownloadDir = `${config.tempDir}/download`;
-        fs.ensureDirSync(this.config.tempDownloadDir);
+        if (!instance) {
+            this.config = Object.assign({}, config);
+            
+            this.config.tempDownloadDir = `${config.tempDir}/download`;
+            fs.ensureDirSync(this.config.tempDownloadDir);
 
-        this.config.tempPublicDir = `${config.publicDir}/tmp`;
-        fs.ensureDirSync(this.config.tempPublicDir);
+            this.config.tempPublicDir = `${config.publicDir}/tmp`;
+            fs.ensureDirSync(this.config.tempPublicDir);
 
-        this.workerState = new WorkerState();
-        this.down = new FileDownloader();
-        this.decomp = new FileDecompressor();
-        this.bookConverter = new BookConverter(this.config);
+            this.workerState = new WorkerState();
+            this.down = new FileDownloader();
+            this.decomp = new FileDecompressor();
+            this.bookConverter = new BookConverter(this.config);
 
-        if (!singleCleanExecute) {
             this.periodicCleanDir(this.config.tempPublicDir, this.config.maxTempPublicDirSize, 60*60*1000);//1 раз в час
             this.periodicCleanDir(this.config.uploadDir, this.config.maxUploadPublicDirSize, 60*60*1000);//1 раз в час
-            singleCleanExecute = true;
+            
+            instance = this;
         }
+
+        return instance;
     }
 
     async loadBook(opts, wState) {
