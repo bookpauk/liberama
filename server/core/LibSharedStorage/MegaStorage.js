@@ -57,7 +57,20 @@ class MegaStorage {
         await fs.writeFile(nameHash.descPath, JSON.stringify(desc, null, 2));
     }
 
-    async readFiles(callback) {
+    async readFiles(callback, dir) {
+        if (!callback)
+            return;
+        if (!dir)
+            dir = this.megaStorageDir;
+
+        const files = await fs.readdir(dir, { withFileTypes: true });
+        for (const file of files) {
+            const found = path.resolve(dir, file.name);
+            if (file.isDirectory())
+                await this.readFiles(callback, found);
+            else
+                callback(found);
+        }
     }
 
     async stopReadFiles() {
