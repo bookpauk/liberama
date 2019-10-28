@@ -1,12 +1,13 @@
 const BaseController = require('./BaseController');
 const ReaderWorker = require('../core/ReaderWorker');
 const readerStorage = require('../core/readerStorage');
-const workerState = require('../core/workerState');
+const WorkerState = require('../core/WorkerState');//singleton
 
 class ReaderController extends BaseController {
     constructor(config) {
         super(config);
         this.readerWorker = new ReaderWorker(config);
+        this.workerState = new WorkerState();
     }
 
     async loadBook(req, res) {
@@ -19,7 +20,7 @@ class ReaderController extends BaseController {
                 url: request.url, 
                 enableSitesFilter: (request.hasOwnProperty('enableSitesFilter') ? request.enableSitesFilter : true)
             });
-            const state = workerState.getState(workerId);
+            const state = this.workerState.getState(workerId);
             return (state ? state : {});
         } catch (e) {
             error = e.message;

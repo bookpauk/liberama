@@ -3,10 +3,18 @@ const utils = require('./utils');
 const cleanInterval = 3600; //sec
 const cleanAfterLastModified = cleanInterval - 60; //sec
 
+let instance = null;
+
+//singleton
 class WorkerState {
     constructor() {
-        this.states = {};
-        setTimeout(this.cleanStates.bind(this), cleanInterval*1000);
+        if (!instance) {
+            this.states = {};
+            this.cleanStates();
+            instance = this;
+        }
+
+        return instance;
     }
 
     generateWorkerId() {
@@ -51,6 +59,4 @@ class WorkerState {
     }
 }
 
-const workerState = new WorkerState();
-
-module.exports = workerState;
+module.exports = WorkerState;

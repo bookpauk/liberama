@@ -1,7 +1,7 @@
 const fs = require('fs-extra');
 const path = require('path');
 
-const workerState = require('./workerState');
+const WorkerState = require('./WorkerState');//singleton
 const FileDownloader = require('./FileDownloader');
 const FileDecompressor = require('./FileDecompressor');
 const BookConverter = require('./BookConverter');
@@ -20,6 +20,7 @@ class ReaderWorker {
         this.config.tempPublicDir = `${config.publicDir}/tmp`;
         fs.ensureDirSync(this.config.tempPublicDir);
 
+        this.workerState = new WorkerState();
         this.down = new FileDownloader();
         this.decomp = new FileDecompressor();
         this.bookConverter = new BookConverter(this.config);
@@ -106,8 +107,8 @@ class ReaderWorker {
     }
 
     loadBookUrl(opts) {
-        const workerId = workerState.generateWorkerId();
-        const wState = workerState.getControl(workerId);
+        const workerId = this.workerState.generateWorkerId();
+        const wState = this.workerState.getControl(workerId);
         wState.set({state: 'start'});
 
         this.loadBook(opts, wState);
