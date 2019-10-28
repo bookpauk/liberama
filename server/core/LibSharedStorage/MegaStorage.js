@@ -30,6 +30,8 @@ class MegaStorage {
     }
 
     async nameHash(filename) {
+        if (!this.inited)
+            throw new Error('MegaStorage::not inited');
         const hash = utils.toBase36(await utils.getFileHash(filename, 'sha1'));
         const hashPath = `${hash.substr(0, 2)}/${hash.substr(2, 2)}/${hash}`;
         const fullHashPath = `${this.megaStorageDir}/${hashPath}`;
@@ -48,6 +50,8 @@ class MegaStorage {
     }
 
     async addFile(nameHash, desc = null, force = false) {
+        if (!this.inited)
+            throw new Error('MegaStorage::not inited');
         if (await this.checkFileExists(nameHash) && !force)
             return false;
 
@@ -90,6 +94,8 @@ class MegaStorage {
     }
 
     async startFindFiles(callback, dir) {
+        if (!this.inited)
+            throw new Error('MegaStorage::not inited');
         this.readingFiles = true;
         try {
             return await this._findFiles(callback, dir);
@@ -103,6 +109,8 @@ class MegaStorage {
     }
 
     async getStats(gather = false) {
+        if (!this.inited)
+            throw new Error('MegaStorage::not inited');
     }
 }
 
