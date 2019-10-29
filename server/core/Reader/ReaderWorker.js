@@ -1,12 +1,13 @@
 const fs = require('fs-extra');
 const path = require('path');
 
-const WorkerState = require('./WorkerState');//singleton
-const FileDownloader = require('./FileDownloader');
-const FileDecompressor = require('./FileDecompressor');
+const WorkerState = require('../WorkerState');//singleton
+const FileDownloader = require('../FileDownloader');
+const FileDecompressor = require('../FileDecompressor');
 const BookConverter = require('./BookConverter');
-const utils = require('./utils');
-const log = new (require('./AppLogger'))().log;//singleton
+
+const utils = require('../utils');
+const log = new (require('../AppLogger'))().log;//singleton
 
 let instance = null;
 

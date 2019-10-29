@@ -1,6 +1,6 @@
 const BaseController = require('./BaseController');
-const ReaderWorker = require('../core/ReaderWorker');//singleton
-const ReaderStorage = require('../core/ReaderStorage');//singleton
+const ReaderWorker = require('../core/Reader/ReaderWorker');//singleton
+const ReaderStorage = require('../core/Reader/ReaderStorage');//singleton
 const WorkerState = require('../core/WorkerState');//singleton
 
 class ReaderController extends BaseController {

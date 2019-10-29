@@ -1,5 +1,5 @@
 const fs = require('fs-extra');
-const FileDetector = require('../FileDetector');
+const FileDetector = require('../../FileDetector');
 
 //порядок важен
 const convertClassFactory = [

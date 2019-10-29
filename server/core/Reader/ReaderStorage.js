@@ -1,7 +1,7 @@
 const SQL = require('sql-template-strings');
 const _ = require('lodash');
 
-const ConnManager = require('../db/ConnManager');//singleton
+const ConnManager = require('../../db/ConnManager');//singleton
 
 let instance = null;
 
