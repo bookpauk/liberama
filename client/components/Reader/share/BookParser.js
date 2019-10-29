@@ -1,5 +1,5 @@
 import he from 'he';
-import sax from '../../../../server/core/BookConverter/sax';
+import sax from '../../../../server/core/sax';
 import {sleep} from '../../../share/utils';
 
 const maxImageLineCount = 100;

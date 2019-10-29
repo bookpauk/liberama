@@ -1,7 +1,7 @@
 const fs = require('fs-extra');
 const path = require('path');
 
-const sax = require('./sax');
+const sax = require('../../sax');
 const utils = require('../../utils');
 const ConvertHtml = require('./ConvertHtml');
 
