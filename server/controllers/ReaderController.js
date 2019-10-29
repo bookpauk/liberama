@@ -1,11 +1,12 @@
 const BaseController = require('./BaseController');
-const ReaderWorker = require('../core/ReaderWorker');
-const readerStorage = require('../core/readerStorage');
+const ReaderWorker = require('../core/ReaderWorker');//singleton
+const ReaderStorage = require('../core/ReaderStorage');//singleton
 const WorkerState = require('../core/WorkerState');//singleton
 
 class ReaderController extends BaseController {
     constructor(config) {
         super(config);
+        this.readerStorage = new ReaderStorage();
         this.readerWorker = new ReaderWorker(config);
         this.workerState = new WorkerState();
     }
@@ -39,7 +40,7 @@ class ReaderController extends BaseController {
             if (!request.items || Array.isArray(request.data)) 
                 throw new Error(`key 'items' is empty`);
 
-            return await readerStorage.doAction(request);
+            return await this.readerStorage.doAction(request);
         } catch (e) {
             error = e.message;
         }

@@ -8,13 +8,23 @@ const migrations = {
     'readerStorage': require('./migrations/readerStorage'),
 };
 
+let instance = null;
+
+//singleton
 class ConnManager {
     constructor() {
-        this._pool = {};
+        if (!instance) {
+            this.inited = false;
+
+            instance = this;
+        }
+
+        return instance;
     }
 
     async init(config) {
         this.config = config;
+        this._pool = {};
 
         const force = null;//(config.branch == 'development' ? 'last' : null);
 
@@ -39,6 +49,7 @@ class ConnManager {
 
             this._pool[poolConfig.poolName] = connPool;
         }
+        this.inited = true;
     }
 
     get pool() {
@@ -46,6 +57,4 @@ class ConnManager {
     }
 }
 
-const connManager = new ConnManager();
-
-module.exports = connManager;
+module.exports = ConnManager;

@@ -1,12 +1,22 @@
 const SQL = require('sql-template-strings');
 const _ = require('lodash');
 
-const connManager = require('../db/connManager');
+const ConnManager = require('../db/ConnManager');//singleton
 
+let instance = null;
+
+//singleton
 class ReaderStorage {
     constructor() {
-        this.storagePool = connManager.pool.readerStorage;
-        this.periodicCleanCache(3*3600*1000);//1 раз в 3 часа
+        if (!instance) {
+            this.connManager = new ConnManager();
+            this.storagePool = this.connManager.pool.readerStorage;
+            this.periodicCleanCache(3*3600*1000);//1 раз в 3 часа
+
+            instance = this;
+        }
+
+        return instance;
     }
 
     async doAction(act) {
@@ -113,6 +123,4 @@ class ReaderStorage {
     }
 }
 
-const readerStorage = new ReaderStorage();
-
-module.exports = readerStorage;
+module.exports = ReaderStorage;

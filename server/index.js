@@ -11,7 +11,7 @@ const path = require('path');
 const express = require('express');
 const compression = require('compression');
 
-const connManager = require('./db/connManager');
+const connManager = new(require('./db/ConnManager'))();//singleton
 
 async function init() {
     await fs.ensureDir(config.dataDir);
