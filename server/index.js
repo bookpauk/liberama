@@ -1,19 +1,26 @@
-const config = require('./config');
-const appLogger = new (require('./core/AppLogger'))();//singleton
-appLogger.init(config);
-const log = appLogger.log;
-
-const configSaver = require('./config/configSaver');
-const argv = require('minimist')(process.argv.slice(2));
-
 const fs = require('fs-extra');
 const path = require('path');
+const argv = require('minimist')(process.argv.slice(2));
 const express = require('express');
 const compression = require('compression');
 
-const connManager = new(require('./db/ConnManager'))();//singleton
-
 async function init() {
+    //config
+    const configManager = new (require('./config'))();//singleton
+    await configManager.init();
+    configManager.userConfigFile = argv.config;
+    await configManager.load();
+    const config = configManager.config;
+
+    //logger
+    const appLogger = new (require('./core/AppLogger'))();//singleton
+    await appLogger.init();
+    const log = appLogger.log;
+
+    //dirs
+    log(`${config.name} v${config.version}`);
+    log('Initializing');
+
     await fs.ensureDir(config.dataDir);
     await fs.ensureDir(config.uploadDir);
     await fs.ensureDir(config.sharedDir);
@@ -28,16 +35,14 @@ async function init() {
         await fs.move(appNewDir, appDir);
     }
 
-    //загружаем конфиг из файла
-    await configSaver.load(config, argv.config);
+    //connections
+    const connManager = new (require('./db/ConnManager'))();//singleton
+    await connManager.init();
 }
 
-async function main() {
-    log(`${config.name} v${config.version}`);
-    log('Initializing');
-    await init();
-
-    await connManager.init(config);
+async function main() {    
+    const log = new (require('./core/AppLogger'))().log;//singleton
+    const config = new (require('./config'))().config;//singleton
 
     //servers
     for (let server of config.servers) {
@@ -88,6 +93,7 @@ async function main() {
 
 (async() => {
     try {
+        await init();
         await main();
     } catch (e) {
         console.error(e);

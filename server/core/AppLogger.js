@@ -1,5 +1,6 @@
 const fs = require('fs-extra');
 const Logger = require('./Logger');
+const configManager = new (require('../config'))();//singleton
 
 let instance = null;
 
@@ -14,14 +15,15 @@ class AppLogger {
         return instance;
     }
 
-    init(config) {
+    async init() {
         if (this.inited)
             throw new Error('already inited');
 
+        let config = configManager.config;
         let loggerParams = null;
 
         if (config.loggingEnabled) {
-            fs.ensureDirSync(config.logDir);
+            await fs.ensureDir(config.logDir);
             loggerParams = [
                 {log: 'ConsoleLog'},
                 {log: 'FileLog', fileName: `${config.logDir}/${config.name}.log`},
@@ -35,9 +37,9 @@ class AppLogger {
     }
 
     get logger() {
-        if (this.inited)
-            return this._logger;
-        throw new Error('not inited');
+        if (!this.inited)
+            throw new Error('not inited');
+        return this._logger;
     }
 
     get log() {
