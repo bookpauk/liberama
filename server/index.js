@@ -14,7 +14,7 @@ async function init() {
 
     //logger
     const appLogger = new (require('./core/AppLogger'))();//singleton
-    await appLogger.init();
+    await appLogger.init(config);
     const log = appLogger.log;
 
     //dirs
@@ -37,7 +37,7 @@ async function init() {
 
     //connections
     const connManager = new (require('./db/ConnManager'))();//singleton
-    await connManager.init();
+    await connManager.init(config);
 }
 
 async function main() {    

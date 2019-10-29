@@ -1,7 +1,6 @@
 const fs = require('fs-extra');
 
 const SqliteConnectionPool = require('./SqliteConnectionPool');
-const configManager = new (require('../config'))();//singleton
 const log = new (require('../core/AppLogger'))().log;//singleton
 
 const migrations = {
@@ -24,7 +23,7 @@ class ConnManager {
     }
 
     async init(config) {
-        this.config = configManager.config;
+        this.config = config;
         this._pool = {};
 
         const force = null;//(config.branch == 'development' ? 'last' : null);

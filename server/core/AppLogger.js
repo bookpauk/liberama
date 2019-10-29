@@ -1,6 +1,5 @@
 const fs = require('fs-extra');
 const Logger = require('./Logger');
-const configManager = new (require('../config'))();//singleton
 
 let instance = null;
 
@@ -15,11 +14,10 @@ class AppLogger {
         return instance;
     }
 
-    async init() {
+    async init(config) {
         if (this.inited)
             throw new Error('already inited');
 
-        let config = configManager.config;
         let loggerParams = null;
 
         if (config.loggingEnabled) {
