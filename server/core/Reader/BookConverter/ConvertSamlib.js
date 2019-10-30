@@ -1,7 +1,7 @@
 const _ = require('lodash');
 const URL = require('url').URL;
 
-const sax = require('./sax');
+const sax = require('../../sax');
 const ConvertBase = require('./ConvertBase');
 
 class ConvertSamlib extends ConvertBase {

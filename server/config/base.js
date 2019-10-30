@@ -14,6 +14,7 @@ module.exports = {
     logDir: `${dataDir}/log`,
     publicDir: `${execDir}/public`,
     uploadDir: `${execDir}/public/upload`,
+    sharedDir: `${execDir}/public/shared`,
     loggingEnabled: true,
 
     maxUploadFileSize: 50*1024*1024,//50Мб

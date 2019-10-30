@@ -1,4 +1,4 @@
-const log = require('./core/getLogger').getLog();
+const log = new (require('./core/AppLogger'))().log;//singleton
 
 function webpackDevMiddleware(app) {
     const webpack  = require('webpack');

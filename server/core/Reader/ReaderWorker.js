@@ -1,35 +1,40 @@
 const fs = require('fs-extra');
 const path = require('path');
-const crypto = require('crypto');
 
-const workerState = require('./workerState');
-const FileDownloader = require('./FileDownloader');
-const FileDecompressor = require('./FileDecompressor');
+const WorkerState = require('../WorkerState');//singleton
+const FileDownloader = require('../FileDownloader');
+const FileDecompressor = require('../FileDecompressor');
 const BookConverter = require('./BookConverter');
-const utils = require('./utils');
-const log = require('./getLogger').getLog();
 
-let singleCleanExecute = false;
+const utils = require('../utils');
+const log = new (require('../AppLogger'))().log;//singleton
 
+let instance = null;
+
+//singleton
 class ReaderWorker {
     constructor(config) {
-        this.config = Object.assign({}, config);
-        
-        this.config.tempDownloadDir = `${config.tempDir}/download`;
-        fs.ensureDirSync(this.config.tempDownloadDir);
+        if (!instance) {
+            this.config = Object.assign({}, config);
+            
+            this.config.tempDownloadDir = `${config.tempDir}/download`;
+            fs.ensureDirSync(this.config.tempDownloadDir);
 
-        this.config.tempPublicDir = `${config.publicDir}/tmp`;
-        fs.ensureDirSync(this.config.tempPublicDir);
+            this.config.tempPublicDir = `${config.publicDir}/tmp`;
+            fs.ensureDirSync(this.config.tempPublicDir);
 
-        this.down = new FileDownloader();
-        this.decomp = new FileDecompressor();
-        this.bookConverter = new BookConverter(this.config);
+            this.workerState = new WorkerState();
+            this.down = new FileDownloader();
+            this.decomp = new FileDecompressor();
+            this.bookConverter = new BookConverter(this.config);
 
-        if (!singleCleanExecute) {
             this.periodicCleanDir(this.config.tempPublicDir, this.config.maxTempPublicDirSize, 60*60*1000);//1 раз в час
             this.periodicCleanDir(this.config.uploadDir, this.config.maxUploadPublicDirSize, 60*60*1000);//1 раз в час
-            singleCleanExecute = true;
+            
+            instance = this;
         }
+
+        return instance;
     }
 
     async loadBook(opts, wState) {
@@ -107,8 +112,8 @@ class ReaderWorker {
     }
 
     loadBookUrl(opts) {
-        const workerId = workerState.generateWorkerId();
-        const wState = workerState.getControl(workerId);
+        const workerId = this.workerState.generateWorkerId();
+        const wState = this.workerState.getControl(workerId);
         wState.set({state: 'start'});
 
         this.loadBook(opts, wState);
@@ -117,10 +122,7 @@ class ReaderWorker {
     }
 
     async saveFile(file) {
-        const buf = await fs.readFile(file.path);
-
-        const hash = crypto.createHash('sha256').update(buf).digest('hex');
-
+        const hash = await utils.getFileHash(file.path, 'sha256', 'hex');
         const outFilename = `${this.config.uploadDir}/${hash}`;
 
         if (!await fs.pathExists(outFilename)) {

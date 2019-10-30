@@ -4,7 +4,7 @@ const chardet = require('chardet');
 const he = require('he');
 
 const textUtils = require('./textUtils');
-const utils = require('../utils');
+const utils = require('../../utils');
 
 let execConverterCounter = 0;
 

@@ -403,7 +403,7 @@ class ServerStorage extends Vue {
 
                 const md = newRecentMod.data;
                 if (md.key && result[md.key])
-                    result[md.key] = utils.applyObjDiff(result[md.key], md.mod);
+                    result[md.key] = utils.applyObjDiff(result[md.key], md.mod, true);
 
                 if (!bookManager.loaded) {
                     this.warning('Ожидание загрузки списка книг перед синхронизацией');
@@ -463,11 +463,11 @@ class ServerStorage extends Vue {
             if (itemKey && !needSaveRecentMod) {
                 newRecentPatch = _.cloneDeep(this.cachedRecentPatch);
                 newRecentPatch.rev++;
-                newRecentPatch.data[itemKey] = bm.recent[itemKey];
+                newRecentPatch.data[itemKey] = _.cloneDeep(bm.recent[itemKey]);
 
                 let applyMod = this.cachedRecentMod.data;
                 if (applyMod && applyMod.key && newRecentPatch.data[applyMod.key])
-                    newRecentPatch.data[applyMod.key] = utils.applyObjDiff(newRecentPatch.data[applyMod.key], applyMod.mod);
+                    newRecentPatch.data[applyMod.key] = utils.applyObjDiff(newRecentPatch.data[applyMod.key], applyMod.mod, true);
 
                 newRecentMod = {rev: this.cachedRecentMod.rev + 1, data: {}};
                 needSaveRecentPatch = true;
@@ -481,7 +481,7 @@ class ServerStorage extends Vue {
                 while (!bookManager.loaded)
                     await utils.sleep(100);
 
-                newRecent = {rev: this.cachedRecent.rev + 1, data: bm.recent};
+                newRecent = {rev: this.cachedRecent.rev + 1, data: _.cloneDeep(bm.recent)};
                 newRecentPatch = {rev: this.cachedRecentPatch.rev + 1, data: {}};
                 newRecentMod = {rev: this.cachedRecentMod.rev + 1, data: {}};
                 needSaveRecent = true;
@@ -510,9 +510,10 @@ class ServerStorage extends Vue {
 
             if (result.state == 'reject') {
 
-                await this.loadRecent(false, false);
+                const res = await this.loadRecent(false, false);
 
-                this.warning(`Последние изменения отменены. Данные синхронизированы с сервером.`);
+                if (res)
+                    this.warning(`Последние изменения отменены. Данные синхронизированы с сервером.`);
                 if (!recurse && itemKey) {
                     this.savingRecent = false;
                     this.saveRecent(itemKey, true);

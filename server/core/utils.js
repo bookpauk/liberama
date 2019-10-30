@@ -1,6 +1,28 @@
 const { spawn } = require('child_process');
 const fs = require('fs-extra');
 const crypto = require('crypto');
+const baseX = require('base-x');
+
+const BASE36 = '0123456789abcdefghijklmnopqrstuvwxyz';
+const bs36 = baseX(BASE36);
+
+function toBase36(data) {
+    return bs36.encode(Buffer.from(data));
+}
+
+function fromBase36(data) {
+    return bs36.decode(data);
+}
+
+function getFileHash(filename, hashName, enc) {
+    return new Promise((resolve, reject) => {
+        const hash = crypto.createHash(hashName);
+        const rs = fs.createReadStream(filename);
+        rs.on('error', reject);
+        rs.on('data', chunk => hash.update(chunk));
+        rs.on('end', () => resolve(hash.digest(enc)));
+    });
+}
 
 function sleep(ms) {
     return new Promise(resolve => setTimeout(resolve, ms));
@@ -20,7 +42,7 @@ function spawnProcess(cmd, opts) {
     onData = (onData ? onData : () => {});
     args = (args ? args : []);
 
-    return new Promise(async(resolve, reject) => {
+    return new Promise((resolve, reject) => { (async() => {
         let resolved = false;
         const proc = spawn(cmd, args, {detached: true});
 
@@ -50,10 +72,13 @@ function spawnProcess(cmd, opts) {
             process.kill(proc.pid);
             reject({status: 'killed', stdout, stderr});
         }
-    });
+    })().catch(reject); });
 }
 
 module.exports = {
+    toBase36,
+    fromBase36,
+    getFileHash,
     sleep,
     randomHexString,
     touchFile,
