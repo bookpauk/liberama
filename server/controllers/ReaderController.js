@@ -1,12 +1,14 @@
 const BaseController = require('./BaseController');
-const ReaderWorker = require('../core/ReaderWorker');
-const readerStorage = require('../core/readerStorage');
-const workerState = require('../core/workerState');
+const ReaderWorker = require('../core/Reader/ReaderWorker');//singleton
+const ReaderStorage = require('../core/Reader/ReaderStorage');//singleton
+const WorkerState = require('../core/WorkerState');//singleton
 
 class ReaderController extends BaseController {
     constructor(config) {
         super(config);
+        this.readerStorage = new ReaderStorage();
         this.readerWorker = new ReaderWorker(config);
+        this.workerState = new WorkerState();
     }
 
     async loadBook(req, res) {
@@ -19,7 +21,7 @@ class ReaderController extends BaseController {
                 url: request.url, 
                 enableSitesFilter: (request.hasOwnProperty('enableSitesFilter') ? request.enableSitesFilter : true)
             });
-            const state = workerState.getState(workerId);
+            const state = this.workerState.getState(workerId);
             return (state ? state : {});
         } catch (e) {
             error = e.message;
@@ -38,7 +40,7 @@ class ReaderController extends BaseController {
             if (!request.items || Array.isArray(request.data)) 
                 throw new Error(`key 'items' is empty`);
 
-            return await readerStorage.doAction(request);
+            return await this.readerStorage.doAction(request);
         } catch (e) {
             error = e.message;
         }

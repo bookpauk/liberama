@@ -1,5 +1,5 @@
 import he from 'he';
-import sax from '../../../../server/core/BookConverter/sax';
+import sax from '../../../../server/core/sax';
 import {sleep} from '../../../share/utils';
 
 const maxImageLineCount = 100;
@@ -67,7 +67,7 @@ export default class BookParser {
             }
         */
         const getImageDimensions = (binaryId, binaryType, data) => {
-            return new Promise (async(resolve, reject) => {
+            return new Promise ((resolve, reject) => { (async() => {
                 const i = new Image();
                 let resolved = false;
                 i.onload = () => {
@@ -81,19 +81,17 @@ export default class BookParser {
                     resolve();
                 };
 
-                i.onerror = (e) => {
-                    reject(e);
-                };
+                i.onerror = reject;
 
                 i.src = `data:${binaryType};base64,${data}`;
                 await sleep(30*1000);
                 if (!resolved)
                     reject('Не удалось получить размер изображения');
-            });
+            })().catch(reject); });
         };
 
         const getExternalImageDimensions = (src) => {
-            return new Promise (async(resolve, reject) => {
+            return new Promise ((resolve, reject) => { (async() => {
                 const i = new Image();
                 let resolved = false;
                 i.onload = () => {
@@ -105,15 +103,13 @@ export default class BookParser {
                     resolve();
                 };
 
-                i.onerror = (e) => {
-                    reject(e);
-                };
+                i.onerror = reject;
 
                 i.src = src;
                 await sleep(30*1000);
                 if (!resolved)
                     reject('Не удалось получить размер изображения');
-            });
+            })().catch(reject); });
         };
 
         const newParagraph = (text, len, addIndex) => {

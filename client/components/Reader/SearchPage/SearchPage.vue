@@ -201,6 +201,7 @@ class SearchPage extends Vue {
 
 .el-button {
     padding: 9px 17px 9px 17px;
+    width: 55px;
 }
 
 i {

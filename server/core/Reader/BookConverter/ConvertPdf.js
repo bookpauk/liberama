@@ -1,8 +1,8 @@
 const fs = require('fs-extra');
 const path = require('path');
 
-const sax = require('./sax');
-const utils = require('../utils');
+const sax = require('../../sax');
+const utils = require('../../utils');
 const ConvertHtml = require('./ConvertHtml');
 
 class ConvertPdf extends ConvertHtml {

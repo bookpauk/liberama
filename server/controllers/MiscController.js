@@ -1,5 +1,4 @@
 const BaseController = require('./BaseController');
-const log = require('../core/getLogger').getLog();
 const _ = require('lodash');
 
 class MiscController extends BaseController {

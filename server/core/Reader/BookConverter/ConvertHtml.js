@@ -1,5 +1,5 @@
 const ConvertBase = require('./ConvertBase');
-const sax = require('./sax');
+const sax = require('../../sax');
 const textUtils = require('./textUtils');
 
 class ConvertHtml extends ConvertBase {
