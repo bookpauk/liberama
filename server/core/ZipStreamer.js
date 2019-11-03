@@ -57,6 +57,8 @@ class ZipStreamer {
             entryCallback = (entryCallback ? entryCallback : () => {});
             const unzip = new unzipStream({file: zipFile});
 
+            unzip.on('error', reject);
+
             let files = [];
             unzip.on('extract', (en) => {
                 const entry = {path: en.name, size: en.size, compressedSize: en.compressedSize};
