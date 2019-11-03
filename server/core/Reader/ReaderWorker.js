@@ -97,8 +97,7 @@ class ReaderWorker {
             wState.finish({path: `/tmp/${finishFilename}`});
 
         } catch (e) {
-            if (this.config.branch == 'development')
-                console.error(e);
+            log(LM_ERR, e.stack);
             wState.set({state: 'error', error: (errMes ? errMes : e.message)});
         } finally {
             //clean
@@ -137,7 +136,6 @@ class ReaderWorker {
 
     async periodicCleanDir(dir, maxSize, timeout) {
         try {
-            log(`Start clean dir: ${dir}, maxSize=${maxSize}`);
             const list = await fs.readdir(dir);
 
             let size = 0;
@@ -149,21 +147,20 @@ class ReaderWorker {
                     files.push({name, stat});
                 }
             }
-            log(`found ${files.length} files in dir ${dir}`);
+            log(`clean dir ${dir}, maxSize=${maxSize}, found ${files.length} files`);
 
             files.sort((a, b) => a.stat.mtimeMs - b.stat.mtimeMs);
 
             let i = 0;
             while (i < files.length && size > maxSize) {
                 const file = files[i];
-                log(`rm ${dir}/${file.name}`);
                 await fs.remove(`${dir}/${file.name}`);
                 size -= file.stat.size;
                 i++;
             }
             log(`removed ${i} files`);
         } catch(e) {
-            log(LM_ERR, e.message);
+            log(LM_ERR, e.stack);
         } finally {
             setTimeout(() => {
                 this.periodicCleanDir(dir, maxSize, timeout);
