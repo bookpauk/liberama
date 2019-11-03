@@ -74,8 +74,7 @@ class ReaderWorker {
             try {
                 decompFiles = await this.decomp.decompressNested(downloadedFilename, decompDir);
             } catch (e) {
-                if (this.config.branch == 'development')
-                    console.error(e);
+                log(LM_ERR, e.stack);
                 throw new Error('Ошибка распаковки');
             }
             wState.set({progress: 100});

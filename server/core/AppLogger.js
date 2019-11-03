@@ -25,6 +25,7 @@ class AppLogger {
             loggerParams = [
                 {log: 'ConsoleLog'},
                 {log: 'FileLog', fileName: `${config.logDir}/${config.name}.log`},
+                {log: 'FileLog', fileName: `${config.logDir}/${config.name}.err.log`, exclude: [LM_OK, LM_INFO]},
             ];
         }
 
