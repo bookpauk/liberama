@@ -112,7 +112,7 @@ class FileDecompressor {
 
     async unZip(filename, outputDir) {
         const zip = new ZipStreamer();
-        return await await zip.unpack(filename, outputDir);
+        return await zip.unpack(filename, outputDir);
     }
 
     unBz2(filename, outputDir) {
