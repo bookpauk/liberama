@@ -11,7 +11,7 @@
             <el-tab-pane label="Клавиатура">
                 <HotkeysHelpPage></HotkeysHelpPage>
             </el-tab-pane>
-            <el-tab-pane label="Мышь/тачпад">
+            <el-tab-pane label="Мышь/тачскрин">
                 <MouseHelpPage></MouseHelpPage>
             </el-tab-pane>
             <el-tab-pane label="История версий" name="releases">

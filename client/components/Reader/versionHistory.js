@@ -1,5 +1,22 @@
 export const versionHistory = [
 {
+    showUntil: '2019-11-10',
+    header: '0.7.7 (2019-11-06)',
+    content:
+`
+<ul>
+    <li>добавлены следующие жесты для тачскрина (только при включенной опции "управление кликом"):</li>
+    <ul>
+        <li style="list-style-type: square">от центра вверх: на весь экран</li>
+        <li style="list-style-type: square">от центра вниз: плавный скроллинг</li>
+        <li style="list-style-type: square">от центра вправо: увеличить скорость скроллинга</li>
+        <li style="list-style-type: square">от центра влево: уменьшить скорость скроллинга</li>
+    </ul>
+</ul>
+`
+},
+
+{
     showUntil: '2019-10-29',
     header: '0.7.6 (2019-10-30)',
     content:
