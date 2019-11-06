@@ -19,7 +19,7 @@
         </div>
         <div v-show="clickControl" ref="layoutEvents" class="layout events" @mousedown.prevent.stop="onMouseDown" @mouseup.prevent.stop="onMouseUp"
             @wheel.prevent.stop="onMouseWheel"
-            @touchstart.stop="onTouchStart" @touchend.stop="onTouchEnd" @touchcancel.prevent.stop="onTouchCancel"
+            @touchstart.stop="onTouchStart" @touchend.stop="onTouchEnd" @touchmove.stop="onTouchMove" @touchcancel.prevent.stop="onTouchCancel"
             oncontextmenu="return false;">
             <div v-show="showStatusBar" v-html="statusBarClickable" @mousedown.prevent.stop @touchstart.stop
                 @click.prevent.stop="onStatusBarClick"></div>
@@ -877,6 +877,14 @@ class TextPage extends Vue {
         this.$emit('tool-bar-toggle');
     }
 
+    doScrollingToggle() {
+        this.$emit('scrolling-toggle');
+    }
+
+    doFullScreenToggle() {
+        this.$emit('full-screen-toogle');
+    }
+
     async doFontSizeInc() {
         if (!this.settingsChanging) {
             this.settingsChanging = true;
@@ -968,7 +976,7 @@ class TextPage extends Vue {
                 case 'Enter':
                 case 'Backquote'://`
                 case 'KeyF':
-                    this.$emit('full-screen-toogle');
+                    this.doFullScreenToggle();
                     break;
                 case 'Tab':
                 case 'KeyQ':
@@ -1009,22 +1017,64 @@ class TextPage extends Vue {
         if (!this.$isMobileDevice)
             return;
         this.endClickRepeat();
+
         if (event.touches.length == 1) {
             const touch = event.touches[0];
             const rect = event.target.getBoundingClientRect();
             const x = touch.pageX - rect.left;
             const y = touch.pageY - rect.top;
-            if (this.handleClick(x, y)) {
-                this.repDoing = true;
-                this.debouncedStartClickRepeat(x, y);
+            const hc = this.handleClick(x, y, new Set(['Menu']));
+            if (hc) {
+                if (hc != 'Menu') {
+                    this.repDoing = true;
+                    this.debouncedStartClickRepeat(x, y);
+                } else {
+                    this.startTouch = {x, y};
+                }
             }
         }
     }
 
-    onTouchEnd() {
+    onTouchMove(event) {
+        if (this.startTouch) {
+            event.preventDefault();
+        }
+    }
+
+    onTouchEnd(event) {
         if (!this.$isMobileDevice)
             return;
         this.endClickRepeat();
+
+        if (event.changedTouches.length == 1) {
+            const touch = event.changedTouches[0];
+            const rect = event.target.getBoundingClientRect();
+            const x = touch.pageX - rect.left;
+            const y = touch.pageY - rect.top;
+            if (this.startTouch) {
+                const dy = this.startTouch.y - y;
+                const dx = this.startTouch.x - x;
+                const moveDelta = 30;
+                const touchDelta = 15;
+                if (dy > 0 && Math.abs(dy) >= moveDelta && Math.abs(dy) > Math.abs(dx)) {
+                    //движение вверх
+                    this.doFullScreenToggle();
+                } else if (dy < 0 && Math.abs(dy) >= moveDelta && Math.abs(dy) > Math.abs(dx)) {
+                    //движение вниз
+                    this.doScrollingToggle();
+                } else if (dx > 0 && Math.abs(dx) >= moveDelta && Math.abs(dy) < Math.abs(dx)) {
+                    //движение влево
+                    this.doScrollingSpeedDown();
+                } else if (dx < 0 && Math.abs(dx) >= moveDelta && Math.abs(dy) < Math.abs(dx)) {
+                    //движение вправо
+                    this.doScrollingSpeedUp();
+                } else if (Math.abs(dy) < touchDelta && Math.abs(dx) < touchDelta) {
+                    this.doToolBarToggle();
+                }
+
+                this.startTouch = null;
+            }
+        }
     }
 
     onTouchCancel() {
@@ -1038,12 +1088,13 @@ class TextPage extends Vue {
             return;
         this.endClickRepeat();
         if (event.button == 0) {
-            if (this.handleClick(event.offsetX, event.offsetY)) {
+            const hc = this.handleClick(event.offsetX, event.offsetY);
+            if (hc && hc != 'Menu') {
                 this.repDoing = true;
                 this.debouncedStartClickRepeat(event.offsetX, event.offsetY);
             }
         } else if (event.button == 1) {
-            this.$emit('scrolling-toggle');
+            this.doScrollingToggle();
         } else if (event.button == 2) {
             this.doToolBarToggle();
         }
@@ -1074,7 +1125,7 @@ class TextPage extends Vue {
         }
     }
 
-    handleClick(pointX, pointY) {
+    getClickAction(pointX, pointY) {
         const w = pointX/this.realWidth*100;
         const h = pointY/this.realHeight*100;
 
@@ -1090,27 +1141,35 @@ class TextPage extends Vue {
             }
         }
 
-        switch (action) {
-            case 'Down' ://Down
-                this.doDown();
-                break;
-            case 'Up' ://Up
-                this.doUp();
-                break;
-            case 'PgDown' ://PgDown
-                this.doPageDown();
-                break;
-            case 'PgUp' ://PgUp
-                this.doPageUp();
-                break;
-            case 'Menu' :
-                this.doToolBarToggle();
-                break;
-            default :
-                // Nothing
+        return action;
+    }
+
+    handleClick(pointX, pointY, exclude) {
+        const action = this.getClickAction(pointX, pointY);
+
+        if (!exclude || !exclude.has(action)) {
+            switch (action) {
+                case 'Down' ://Down
+                    this.doDown();
+                    break;
+                case 'Up' ://Up
+                    this.doUp();
+                    break;
+                case 'PgDown' ://PgDown
+                    this.doPageDown();
+                    break;
+                case 'PgUp' ://PgUp
+                    this.doPageUp();
+                    break;
+                case 'Menu' :
+                    this.doToolBarToggle();
+                    break;
+                default :
+                    // Nothing
+            }
         }
 
-        return (action && action != 'Menu');
+        return action;
    }
 
 }
