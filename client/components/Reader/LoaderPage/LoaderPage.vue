@@ -1,6 +1,6 @@
 <template>
     <div ref="main" class="main">
-        <div class="part">
+        <div class="part top">
             <span class="greeting bold-font">{{ title }}</span>
             <div class="space"></div>
             <span class="greeting">Добро пожаловать!</span>
@@ -14,6 +14,7 @@
             </el-input>
             <div class="space"></div>
             <input type="file" id="file" ref="file" @change="loadFile" style='display: none;'/>
+
             <el-button size="mini" @click="loadFileClick">
                 Загрузить файл с диска
             </el-button>
@@ -21,13 +22,16 @@
             <el-button size="mini" @click="loadBufferClick">
                 Из буфера обмена
             </el-button>
+
             <div class="space"></div>
             <div class="space"></div>
-            <div v-if="mode == 'omnireader'" ref="yaShare2" class="ya-share2" 
-                data-services="collections,vkontakte,facebook,odnoklassniki,twitter,telegram"
-                data-description="Чтение fb2-книг онлайн. Загрузка любой страницы интернета одним кликом, синхронизация между устройствами, удобное управление, регистрация не требуется."
-                data-title="Omni Reader - браузерная онлайн-читалка"
-                data-url="https://omnireader.ru">
+            <div v-if="mode == 'omnireader'">
+                <div ref="yaShare2" class="ya-share2" 
+                    data-services="collections,vkontakte,facebook,odnoklassniki,twitter,telegram"
+                    data-description="Чтение fb2-книг онлайн. Загрузка любой страницы интернета одним кликом, синхронизация между устройствами, удобное управление, регистрация не требуется."
+                    data-title="Omni Reader - браузерная онлайн-читалка"
+                    data-url="https://omnireader.ru">
+                </div>
             </div>
             <div class="space"></div>
             <span v-if="mode == 'omnireader'" class="bottom-span clickable" @click="openComments">Отзывы о читалке</span>
@@ -184,7 +188,7 @@ class LoaderPage extends Vue {
     flex: 1;
     display: flex;
     flex-direction: column;
-    min-height: 400px;
+    min-height: 480px;
 }
 
 .part {
@@ -210,9 +214,14 @@ class LoaderPage extends Vue {
     cursor: pointer;
 }
 
+.top {
+    min-height: 120px;
+}
+
 .center {
     justify-content: flex-start;
     padding: 0 10px 0 10px;
+    min-height: 250px;
 }
 
 .bottom {
