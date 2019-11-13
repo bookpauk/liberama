@@ -64,6 +64,7 @@ class ConvertHtml extends ConvertBase {
             for (let line of lines) {
                 if (line.trim() == '')
                     continue;
+
                 line = repCrLfTab(line);
 
                 let l = 0;
@@ -171,7 +172,6 @@ class ConvertHtml extends ConvertBase {
         });
 
         titleInfo['book-title'] = title;
-
         //подозрение на чистый текст, надо разбить на параграфы
         if (isText || pars.length < buf.length/2000) {
             let total = 0;
@@ -257,8 +257,9 @@ class ConvertHtml extends ConvertBase {
 
             pars[i]._t = this.repSpaces(pars[i]._t).trim();
 
-            if (pars[i]._t.indexOf('<') >= 0) {
+            if (pars[i]._t.indexOf('<') >= 0 || bold || italic) {
                 const t = pars[i]._t;
+
                 let a = [];
 
                 const onTextNode = (text) => {
