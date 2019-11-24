@@ -77,7 +77,8 @@ class ConvertHtml extends ConvertBase {
             }
         };
 
-        const newPara = new Set(['tr', '/table', 'hr', 'br', 'br/', 'li', 'dt', 'dd', 'p', 'title', '/title', 'h1', 'h2', 'h3', '/h1', '/h2', '/h3']);
+        const newPara = new Set(['tr', '/table', 'hr', 'br', 'br/', 'li', 'dt', 'dd', 'p', 'title', '/title', 'ul', '/ul', 'h1', 'h2', 'h3', 'h4', 'h5', '/h1', '/h2', '/h3', '/h4', '/h5']);
+        const newPara2 = new Set(['h1', 'h2', 'h3', 'h4', 'h5']);
 
         const onTextNode = (text, cutCounter, cutTag) => {// eslint-disable-line no-unused-vars
             text = this.escapeEntities(text);
@@ -107,6 +108,8 @@ class ConvertHtml extends ConvertBase {
         const onStartNode = (tag, tail, singleTag, cutCounter, cutTag) => {// eslint-disable-line no-unused-vars
             if (!cutCounter) {
                 if (newPara.has(tag))
+                    newParagraph();
+                if (newPara2.has(tag))
                     newParagraph();
 
                 switch (tag) {
@@ -140,6 +143,8 @@ class ConvertHtml extends ConvertBase {
         const onEndNode = (tag, tail, singleTag, cutCounter, cutTag) => {// eslint-disable-line no-unused-vars
             if (!cutCounter) {
                 if (newPara.has('/' + tag))
+                    newParagraph();
+                if (newPara2.has('/' + tag))
                     newParagraph();
 
                 switch (tag) {

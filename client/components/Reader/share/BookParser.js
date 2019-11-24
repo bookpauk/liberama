@@ -240,6 +240,7 @@ export default class BookParser {
                     newParagraph(' ', 1);
                     isFirstTitlePara = true;
                     bold = true;
+                    center = true;
                 }
 
                 if (tag == 'epigraph') {
@@ -282,6 +283,7 @@ export default class BookParser {
                     if (tag == 'subtitle') {
                         isFirstTitlePara = false;
                         bold = false;
+                        center = false;
                     }
 
                     if (tag == 'epigraph') {
