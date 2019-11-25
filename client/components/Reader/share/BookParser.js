@@ -369,11 +369,10 @@ export default class BookParser {
             tClose += (bold ? '</strong>' : '');
             tClose += (center ? '</center>' : '');
 
-            if (path.indexOf('/fictionbook/body/title') == 0) {
-                growParagraph(`${tOpen}${text}${tClose}`, text.length);
-            }
-
-            if (path.indexOf('/fictionbook/body/section') == 0) {
+            if (path.indexOf('/fictionbook/body/title') == 0 ||
+                path.indexOf('/fictionbook/body/section') == 0 ||
+                path.indexOf('/fictionbook/body/epigraph') == 0
+                ) {
                 growParagraph(`${tOpen}${text}${tClose}`, text.length);
             }
 
