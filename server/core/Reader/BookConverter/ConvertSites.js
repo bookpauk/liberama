@@ -12,7 +12,10 @@ const sitesFilter = {
         converter: 'cutter',
         begin: `<!-- BEGIN section where work skin applies -->`,
         end: `<!-- END work skin -->`,
-    }
+    },
+    'flibusta.is': {
+        converter: 'flibusta'
+    },
 };
 
 class ConvertSites extends ConvertHtml {
@@ -54,17 +57,53 @@ class ConvertSites extends ConvertHtml {
         if (m)
             title = m[1];
 
-        return `<title>${title.trim()}</title>`;
+        return title.trim();
     }
 
     cutter(text, opts) {
-        const title = this.getTitle(text);
+        const title = `<title>${this.getTitle(text)}</title>`;
         const l = text.indexOf(opts.begin) + opts.begin.length;
         const r = text.indexOf(opts.end);
         if (l < 0 || r < 0 || r <= l)
             return false;
         
         return text.substring(l, r) + title;
+    }
+
+    flibusta(text) {
+        let author = '';
+        let m = text.match(/- <a href=".+">([\s\S]*?)<\/a><br\/?>/);
+        if (m)
+            author = m[1];
+
+        let book = this.getTitle(text);
+        book = book.replace(' (fb2) | Флибуста', '');
+
+        const title = `<title>${author}${(author ? ' - ' : '')}${book}</title>`;
+
+        let begin = '<h3 class="book">';
+        if (text.indexOf(begin) <= 0)
+            begin = '<h3 class=book>';
+
+        const end = '<div id="footer">';
+
+        const l = text.indexOf(begin);
+        const r = text.indexOf(end);
+        if (l < 0 || r < 0 || r <= l)
+            return false;
+
+        return text.substring(l, r)
+            .replace(/blockquote class="?book"?/g, 'p')
+            .replace(/<br\/?>\s*<\/h3>/g, '</h3>')
+            .replace(/<h3 class="?book"?>/g, '<br><br><subtitle>')
+            .replace(/<h5 class="?book"?>/g, '<br><br><subtitle>')
+            .replace(/<h3>/g, '<br><br><subtitle>')
+            .replace(/<h5>/g, '<br><br><subtitle>')
+            .replace(/<\/h3>/g, '</subtitle><br>')
+            .replace(/<\/h5>/g, '</subtitle><br>')
+            .replace(/<div class="?stanza"?>/g, '<br>')
+            .replace(/<div>/g, '<br>')
+            + title;
     }
 }
 
