@@ -6,6 +6,7 @@ export const versionHistory = [
 `
 <ul>
     <li>улучшение html-фильтров для сайтов</li>
+    <li>исправления багов</li>
 </ul>
 `
 },
