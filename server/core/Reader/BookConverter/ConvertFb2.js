@@ -23,7 +23,7 @@ class ConvertFb2 extends ConvertBase {
             const right = data.indexOf('?>', left);
             if (right >= 0) {
                 const head = data.slice(left, right + 2).toString();
-                const m = head.match(/encoding="(.*)"/);
+                const m = head.match(/encoding="(.*?)"/);
                 if (m) {
                     let encoding = m[1].toLowerCase();
                     if (encoding != 'utf-8') {
