@@ -39,16 +39,19 @@ class ConvertHtml extends ConvertBase {
 
         let title = '';
         let inTitle = false;
+        let inSubTitle = false;
         let inImage = false;
         let image = {};
         let bold = false;
         let italic = false;
+        let begining = true;
 
         let spaceCounter = [];
 
         const repCrLfTab = (text) => text.replace(/[\n\r]/g, '').replace(/\t/g, '    ');
 
         const newParagraph = () => {
+            begining = false;
             pars.push({_n: 'p', _t: ''});
         };
 
@@ -58,6 +61,8 @@ class ConvertHtml extends ConvertBase {
 
             const l = pars.length;
             pars[l - 1]._t += text;
+            if (inSubTitle)
+                pars[l - 1]._n = '';
 
             //посчитаем отступы у текста, чтобы выделить потом параграфы
             const lines = text.split('\n');
@@ -77,16 +82,21 @@ class ConvertHtml extends ConvertBase {
             }
         };
 
-        const newPara = new Set(['tr', '/table', 'hr', 'br', 'br/', 'li', 'dt', 'dd', 'p', 'title', '/title', 'h1', 'h2', 'h3', '/h1', '/h2', '/h3']);
+        const newPara = new Set(['tr', '/table', 'hr', 'br', 'br/', 'li', 'dt', 'dd', 'p', 'title', '/title', 'ul', '/ul', 'h1', 'h2', 'h3', 'h4', 'h5', '/h1', '/h2', '/h3', '/h4', '/h5']);
+        const newPara2 = new Set(['h1', 'h2', 'h3', 'h4', 'h5']);
 
         const onTextNode = (text, cutCounter, cutTag) => {// eslint-disable-line no-unused-vars
             text = this.escapeEntities(text);
 
             if (!cutCounter && !(cutTitle && inTitle)) {
-                let tOpen = (bold ? '<strong>' : '');
+                let tOpen = '';
+                tOpen += (inSubTitle ? '<subtitle>' : '');
+                tOpen += (bold ? '<strong>' : '');
                 tOpen += (italic ? '<emphasis>' : '');
-                let tClose = (italic ? '</emphasis>' : '');
+                let tClose = ''
+                tClose +=  (italic ? '</emphasis>' : '');
                 tClose += (bold ? '</strong>' : '');
+                tClose += (inSubTitle ? '</subtitle>' : '');
 
                 growParagraph(`${tOpen}${text}${tClose}`);
             }
@@ -106,6 +116,8 @@ class ConvertHtml extends ConvertBase {
 
         const onStartNode = (tag, tail, singleTag, cutCounter, cutTag) => {// eslint-disable-line no-unused-vars
             if (!cutCounter) {
+                if (newPara2.has(tag) && !begining)
+                    newParagraph();
                 if (newPara.has(tag))
                     newParagraph();
 
@@ -130,6 +142,10 @@ class ConvertHtml extends ConvertBase {
                     cutTitle = true;
             }
 
+            if (tag == 'subtitle') {
+                inSubTitle = true;
+            }
+
             if (tag == 'fb2-image') {
                 inImage = true;
                 const attrs = sax.getAttrsSync(tail);
@@ -140,6 +156,8 @@ class ConvertHtml extends ConvertBase {
         const onEndNode = (tag, tail, singleTag, cutCounter, cutTag) => {// eslint-disable-line no-unused-vars
             if (!cutCounter) {
                 if (newPara.has('/' + tag))
+                    newParagraph();
+                if (newPara2.has('/' + tag))
                     newParagraph();
 
                 switch (tag) {
@@ -159,6 +177,9 @@ class ConvertHtml extends ConvertBase {
 
             if (tag == 'title' || tag == 'cut-title')
                 inTitle = false;
+
+            if (tag == 'subtitle')
+                inSubTitle = false;
 
             if (tag == 'fb2-image')
                 inImage = false;
@@ -197,7 +218,8 @@ class ConvertHtml extends ConvertBase {
                 while (i > 0 && (!spaceCounter[i] || spaceCounter[i] < total)) i--;
             }
 
-            const parIndent = (i > 0 ? i : 0);
+            let parIndent = (i > 0 ? i : 0);
+            if (parIndent > 2) parIndent--;
 
             let newPars = [];
             const newPar = () => {
@@ -233,7 +255,7 @@ class ConvertHtml extends ConvertBase {
                         l++;
                     }
 
-                    if (l >= parIndent) {
+                    if (l >= parIndent || line == '') {
                         if (j > 0)
                             newPar();
                         j++;
@@ -250,6 +272,7 @@ class ConvertHtml extends ConvertBase {
         //убираем лишнее, делаем валидный fb2, т.к. в рез-те разбиения на параграфы бьются теги
         bold = false;
         italic = false;
+        inSubTitle = false;
         pars = body.section._a[0];
         for (let i = 0; i < pars.length; i++) {
             if (pars[i]._n != 'p')
@@ -259,16 +282,24 @@ class ConvertHtml extends ConvertBase {
 
             if (pars[i]._t.indexOf('<') >= 0 || bold || italic) {
                 const t = pars[i]._t;
+                let first = true;
 
                 let a = [];
 
                 const onTextNode = (text) => {
-                    let tOpen = (bold ? '<strong>' : '');
+                    let tOpen = '';
+                    tOpen += (inSubTitle ? '<subtitle>' : '');
+                    tOpen += (bold ? '<strong>' : '');
                     tOpen += (italic ? '<emphasis>' : '');
-                    let tClose = (italic ? '</emphasis>' : '');
+                    let tClose = ''
+                    tClose +=  (italic ? '</emphasis>' : '');
                     tClose += (bold ? '</strong>' : '');
+                    tClose += (inSubTitle ? '</subtitle>' : '');
 
+                    if (first)
+                        text = text.replace(/^\s+/, ''); //trimLeft
                     a.push(`${tOpen}${text}${tClose}`);
+                    first = false;
                 }
 
                 const onStartNode = (tag) => {
@@ -276,6 +307,8 @@ class ConvertHtml extends ConvertBase {
                         bold = true;
                     if (tag == 'emphasis')
                         italic = true;
+                    if (tag == 'subtitle')
+                        inSubTitle = true;
                 }
 
                 const onEndNode = (tag) => {
@@ -283,6 +316,8 @@ class ConvertHtml extends ConvertBase {
                         bold = false;
                     if (tag == 'emphasis')
                         italic = false;
+                    if (tag == 'subtitle')
+                        inSubTitle = false;
                 }
 
                 sax.parseSync(t, { onStartNode, onEndNode, onTextNode });

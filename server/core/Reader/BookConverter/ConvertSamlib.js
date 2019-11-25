@@ -102,6 +102,8 @@ class ConvertSamlib extends ConvertBase {
                     case 'h1':
                     case 'h2':
                     case 'h3':
+                    case 'h4':
+                    case 'h5':
                         if (inPara)
                             closeTag('p');
                         openTag('p');
@@ -173,6 +175,8 @@ class ConvertSamlib extends ConvertBase {
                     case 'h1':
                     case 'h2':
                     case 'h3':
+                    case 'h4':
+                    case 'h5':
                         closeTag('p');
                         bold = false;
                         break;
