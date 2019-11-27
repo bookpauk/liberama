@@ -56,7 +56,11 @@ class Reader {
         }
     }
 
-    async loadCachedBook(url, callback){
+    async checkUrl(url) {
+        return await axios.head(url, {headers: {'Cache-Control': 'no-cache'}});
+    }
+
+    async loadCachedBook(url, callback) {
         const response = await axios.head(url);
 
         let estSize = 1000000;
