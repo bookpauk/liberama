@@ -5,6 +5,7 @@
             <span v-show="loading"><i class="el-icon-loading" style="font-size: 25px"></i> <span style="position: relative; top: -4px">Список загружается</span></span>
         </template>
 
+        <a ref="download" style='display: none;'></a>
         <el-table
             :data="tableData"
             style="width: 570px"
@@ -72,7 +73,7 @@
                     >
                     <template slot-scope="scope">
                         <a v-show="isUrl(scope.row.url)" :href="scope.row.url" target="_blank">Оригинал</a><br>
-                        <a :href="scope.row.path" :download="getFileNameFromPath(scope.row.path)">Скачать FB2</a>
+                        <a :href="scope.row.path" @click.prevent="downloadBook(scope.row.path)">Скачать FB2</a>
                     </template>
                 </el-table-column>
 
@@ -104,6 +105,7 @@ import _ from 'lodash';
 import * as utils from '../../../share/utils';
 import Window from '../../share/Window.vue';
 import bookManager from '../share/bookManager';
+import readerApi from '../../../api/reader';
 
 export default @Component({
     components: {
@@ -209,7 +211,7 @@ class RecentBooksPage extends Vue {
                     a.middleName
                 ]).join(' '));
                 author = authorNames.join(', ');
-            } else {
+            } else {//TODO: убрать в будущем
                 author = _.compact([
                     fb2.lastName,
                     fb2.firstName,
@@ -268,8 +270,20 @@ class RecentBooksPage extends Vue {
         return result;
     }
 
-    getFileNameFromPath(fb2Path) {
-        return path.basename(fb2Path).substr(0, 10) + '.fb2';
+    async downloadBook(fb2path) {
+        try {
+            await readerApi.checkUrl(fb2path);
+
+            const d = this.$refs.download;
+            d.href = fb2path;
+            d.download = path.basename(fb2path).substr(0, 10) + '.fb2';
+            d.click();
+        } catch (e) {
+            let errMes = e.message;
+            if (errMes.indexOf('404') >= 0)
+                errMes = 'Файл не найден на сервере (возможно был удален как устаревший)';
+            this.$alert(errMes, 'Ошибка', {type: 'error'});
+        }
     }
 
     openOriginal(url) {
