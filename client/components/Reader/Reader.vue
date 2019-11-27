@@ -1,5 +1,8 @@
 <template>
     <el-container>
+        <div v-show="isShowMigrationWarning" style="height: 30px; overflow: hidden; white-space:nowrap;">
+            <span style="margin-left: 10px; font-size: 20px; position: relative; top: 2px" class="clickable" @click="showMigrationHttp">HTTP-версия читалки скоро станет недоступна. Подробнее...</span>
+        </div>
         <el-header v-show="toolBarActive" height='50px'>
             <div ref="header" class="header">
                 <el-tooltip content="Загрузить книгу" :open-delay="1000" effect="light">
@@ -433,6 +436,14 @@ class Reader extends Vue {
                 this.migrationVisible2 = true;
             }
         }
+    }
+
+    get isShowMigrationWarning() {
+        return window.location.protocol == 'http:';
+    }
+
+    showMigrationHttp() {
+        this.migrationVisible1 = true;
     }
 
     migrationDialogDisable() {
