@@ -32,9 +32,6 @@ export default class BookParser {
 
         //defaults
         let fb2 = {
-            firstName: '',
-            middleName: '',
-            lastName: '',
             bookTitle: '',
         };
 

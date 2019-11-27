@@ -319,7 +319,6 @@ class BookManager {
 
     metaOnly(book) {
         let result = Object.assign({}, book);
-        delete result.data;//можно будет убрать эту строку со временем
         delete result.parsed;
         return result;
     }

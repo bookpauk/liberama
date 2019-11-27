@@ -211,7 +211,7 @@ class RecentBooksPage extends Vue {
                     a.middleName
                 ]).join(' '));
                 author = authorNames.join(', ');
-            } else {
+            } else {//TODO: убрать в будущем
                 author = _.compact([
                     fb2.lastName,
                     fb2.firstName,
