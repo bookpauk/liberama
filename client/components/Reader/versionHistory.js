@@ -1,5 +1,17 @@
 export const versionHistory = [
 {
+    showUntil: '2019-11-26',
+    header: '0.7.9 (2019-11-27)',
+    content:
+`
+<ul>
+    <li>добавлен неубираемый баннер для http-версии о переходе на httpS</li>
+    <li>исправления багов</li>
+</ul>
+`
+},
+
+{
     showUntil: '2019-11-24',
     header: '0.7.8 (2019-11-25)',
     content:
