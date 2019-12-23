@@ -18,7 +18,7 @@ async function init() {
     const log = appLogger.log;
 
     //dirs
-    log(`${config.name} v${config.version}`);
+    log(`${config.name} v${config.version}, Node.js ${process.version}`);
     log('Initializing');
 
     await fs.ensureDir(config.dataDir);
@@ -40,7 +40,7 @@ async function init() {
     await connManager.init(config);
 }
 
-async function main() {    
+async function main() {
     const log = new (require('./core/AppLogger'))().log;//singleton
     const config = new (require('./config'))().config;//singleton
 

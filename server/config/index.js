@@ -41,9 +41,9 @@ class ConfigManager {
         process.env.NODE_ENV = this.branch;
 
         this.branchConfigFile = __dirname + `/${this.branch}.js`;
-        await fs.access(this.branchConfigFile);
         this._config = require(this.branchConfigFile);
 
+        await fs.ensureDir(this._config.dataDir);
         this._userConfigFile = `${this._config.dataDir}/config.json`;
 
         this.inited = true;
@@ -83,6 +83,7 @@ class ConfigManager {
     async save() {
         if (!this.inited)
             throw new Error('not inited');
+
         const dataToSave = _.pick(this._config, propsToSave);
         await fs.writeFile(this.userConfigFile, JSON.stringify(dataToSave, null, 4));
     }
