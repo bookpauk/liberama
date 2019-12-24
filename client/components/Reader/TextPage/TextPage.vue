@@ -334,13 +334,15 @@ class TextPage extends Vue {
 
         this.draw();
 
-        // шрифты хрен знает когда подгружаются в div, поэтому
-        const parsed = this.parsed;
-        await sleep(5000);
-        if (this.parsed === parsed) {
-            parsed.force = true;
-            this.draw();
-            parsed.force = false;
+        // ширина шрифта некоторое время выдается неверно, поэтому
+        if (!omitLoadFonts) {
+            const parsed = this.parsed;
+            await sleep(100);
+            if (this.parsed === parsed) {
+                parsed.force = true;
+                this.draw();
+                parsed.force = false;
+            }
         }
     }
 
