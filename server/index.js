@@ -1,3 +1,4 @@
+require('tls').DEFAULT_MIN_VERSION = 'TLSv1';
 const fs = require('fs-extra');
 const path = require('path');
 const argv = require('minimist')(process.argv.slice(2));
