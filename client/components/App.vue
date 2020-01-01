@@ -215,22 +215,6 @@ class App extends Vue {
             window.history.replaceState({}, '', '/');
             this.$router.replace({ path: '/reader', query: q });
         }
-
-        //yandex-метрика для omnireader
-        if (this.config.branch == 'production' && this.mode == 'omnireader' && !this.yaMetricsDone) {
-            (function(m,e,t,r,i,k,a){m[i]=m[i]||function(){(m[i].a=m[i].a||[]).push(arguments)};
-            m[i].l=1*new Date();k=e.createElement(t),a=e.getElementsByTagName(t)[0],k.async=1,k.src=r,a.parentNode.insertBefore(k,a)})
-            (window, document, "script", "https://mc.yandex.ru/metrika/tag.js", "ym");// eslint-disable-line no-unexpected-multiline
-
-            ym(52347334, "init", {// eslint-disable-line no-undef
-                id:52347334,
-                clickmap:true,
-                trackLinks:true,
-                accurateTrackBounce:true
-            });
-
-            this.yaMetricsDone = true;
-        }
     }
 }
 //-----------------------------------------------------------------------------
