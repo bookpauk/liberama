@@ -1,12 +1,12 @@
 export const versionHistory = [
 {
-    showUntil: '2019-12-31',
+    showUntil: '2020-01-15',
     header: '0.8.0 (2020-01-02)',
     content:
 `
 <ul>
     <li>окончательный переход на https</li>
-    <li>код проекта выложен на GitHub под лицензией cc0</li>
+    <li>код проекта теперь Open Source: <a href="https://github.com/bookpauk/liberama" target="_blank">https://github.com/bookpauk/liberama</a></li>
 </ul>
 `
 },
