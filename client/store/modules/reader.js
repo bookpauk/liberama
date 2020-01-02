@@ -182,7 +182,6 @@ const settingDefaults = {
     imageFitWidth: true,
     showServerStorageMessages: true,
     showWhatsNewDialog: true,
-    showMigrationDialog: true,
     enableSitesFilter: true,
 
     fontShifts: {},
@@ -205,7 +204,6 @@ const state = {
     profilesRev: 0,
     allowProfilesSave: false,//подстраховка для разработки
     whatsNewContentHash: '',
-    migrationRemindDate: '',
     currentProfile: '',
     settings: Object.assign({}, settingDefaults),
     settingsRev: {},
@@ -239,9 +237,6 @@ const mutations = {
     },
     setWhatsNewContentHash(state, value) {
         state.whatsNewContentHash = value;
-    },
-    setMigrationRemindDate(state, value) {
-        state.migrationRemindDate = value;
     },
     setCurrentProfile(state, value) {
         state.currentProfile = value;

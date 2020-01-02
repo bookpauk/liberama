@@ -1,6 +1,9 @@
 {
   "name": "Liberama",
-  "version": "0.7.9",
+  "version": "0.8.0",
+  "author": "Book Pauk <bookpauk@gmail.com>",
+  "license": "CC0-1.0",
+  "repository": "bookpauk/liberama",
   "engines": {
     "node": ">=10.0.0"
   },
@@ -27,7 +30,7 @@
     "babel-plugin-transform-decorators-legacy": "^1.3.5",
     "babel-preset-env": "^1.3.2",
     "clean-webpack-plugin": "^1.0.1",
-    "copy-webpack-plugin": "^4.6.0",
+    "copy-webpack-plugin": "^5.1.1",
     "css-loader": "^1.0.0",
     "disable-output-webpack-plugin": "^1.0.1",
     "element-theme-chalk": "^2.12.0",

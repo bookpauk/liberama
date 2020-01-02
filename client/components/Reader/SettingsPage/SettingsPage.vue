@@ -471,18 +471,10 @@
                             <el-checkbox v-model="showWhatsNewDialog">Показывать уведомление "Что нового"</el-checkbox>
                         </el-tooltip>
                     </el-form-item>
-                    <el-form-item label="Уведомление">
-                        <el-tooltip :open-delay="500" effect="light">
-                            <template slot="content">
-                                Показывать диалог о переходе на httpS-версию
-                            </template>
-                            <el-checkbox v-model="showMigrationDialog">Уведомлять о переходе на httpS-версию</el-checkbox>
-                        </el-tooltip>
-                    </el-form-item>
                 </el-form>
 
                 <el-form :model="form" size="mini" label-width="120px" @submit.native.prevent>
-                    <div class="partHeader">Прочее</div>
+                    <div class="partHeader">Другое</div>
 
                     <el-form-item label="Парам. в URL">
                         <el-tooltip :open-delay="500" effect="light">

@@ -36,26 +36,7 @@ server {
   listen 80;
   server_name omnireader.ru;
 
-  client_max_body_size 50m;
-
-  gzip on;
-  gzip_min_length 1024;
-  gzip_proxied expired no-cache no-store private auth;
-  gzip_types *;
-
-  location /api {
-    proxy_pass http://127.0.0.1:44081;
-  }
-
-  location /tmp {
-    root /home/liberama/public;
-    add_header Content-Type text/xml;
-    add_header Content-Encoding gzip;
-  }
-
-  location / {
-    root /home/liberama/public;
-  }
+  return 301 https://$host$request_uri;
 }
 
 server {

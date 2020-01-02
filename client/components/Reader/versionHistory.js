@@ -1,5 +1,17 @@
 export const versionHistory = [
 {
+    showUntil: '2019-12-31',
+    header: '0.8.0 (2020-01-02)',
+    content:
+`
+<ul>
+    <li>окончательный переход на https</li>
+    <li>код проекта выложен на GitHub под лицензией cc0</li>
+</ul>
+`
+},
+
+{
     showUntil: '2019-11-26',
     header: '0.7.9 (2019-11-27)',
     content:
