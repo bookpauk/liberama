@@ -2,7 +2,7 @@
 
 Браузерная онлайн-читалка книг и децентрализованная библиотека.
 
-Читалка ![](https://omnireader.ru/favicon.ico)[OmniReader](https://omnireader.ru) является частью данного проекта, развернутой на VPS:
+Читалка ![](https://omnireader.ru/favicon.ico)[OmniReader](https://omnireader.ru) является частью данного проекта, размещенной на VPS:
 
 ![](docs/assets/face.jpg)
 ![](docs/assets/reader.jpg)
