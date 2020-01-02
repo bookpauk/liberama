@@ -3,6 +3,7 @@
   "version": "0.8.0",
   "author": "Book Pauk <bookpauk@gmail.com>",
   "license": "CC0-1.0",
+  "repository": "bookpauk/liberama",
   "engines": {
     "node": ">=10.0.0"
   },
