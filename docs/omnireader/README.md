@@ -64,3 +64,17 @@ cd docs/omnireader
 sh deploy.sh
 sh run_server.sh
 ```
+
+После первого запуска будет создан конфигурационный файл `/home/liberama/data/config.json`.
+Необходимо переключить приложение в режим omnireader, отредактировав опцию `servers`:
+```
+    "servers": [
+        {
+            "serverName": "1",
+            "mode": "omnireader",
+            "ip": "0.0.0.0",
+            "port": "44081"
+        }
+    ]
+```
+и перезапустить `run_server.sh`
