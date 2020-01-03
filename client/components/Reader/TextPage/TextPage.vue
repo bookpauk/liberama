@@ -225,30 +225,23 @@ class TextPage extends Vue {
 
         //scrolling page
         const pageSpace = this.scrollHeight - this.pageLineCount*this.lineHeight;
-        let y = pageSpace/2;
+        let top = pageSpace/2;
         if (this.showStatusBar)
-            y += this.statusBarHeight*(this.statusBarTop ? 1 : 0);
-        let page1 = this.$refs.scrollBox1;
-        let page2 = this.$refs.scrollBox2;
+            top += this.statusBarHeight*(this.statusBarTop ? 1 : 0);
+        let page1 = this.$refs.scrollBox1.style;
+        let page2 = this.$refs.scrollBox2.style;
         
-        page1.style.perspective = '3072px';
-        page2.style.perspective = '3072px';
+        page1.perspective = page2.perspective = '3072px';
 
-        page1.style.width = this.w + this.indentLR + 'px';
-        page2.style.width = this.w + this.indentLR + 'px';
-        page1.style.height = this.scrollHeight - (pageSpace > 0 ? pageSpace : 0) + 'px';
-        page2.style.height = this.scrollHeight - (pageSpace > 0 ? pageSpace : 0) + 'px';
-        page1.style.top = y + 'px';
-        page2.style.top = y + 'px';
-        page1.style.left = this.indentLR + 'px';
-        page2.style.left = this.indentLR + 'px';
+        page1.width = page2.width = this.w + this.indentLR + 'px';
+        page1.height = page2.height = this.scrollHeight - (pageSpace > 0 ? pageSpace : 0) + 'px';
+        page1.top = page2.top = top + 'px';
+        page1.left = page2.left = this.indentLR + 'px';
 
-        page1 = this.$refs.scrollingPage1;
-        page2 = this.$refs.scrollingPage2;
-        page1.style.width = this.w + this.indentLR + 'px';
-        page2.style.width = this.w + this.indentLR + 'px';
-        page1.style.height = this.scrollHeight + this.lineHeight + 'px';
-        page2.style.height = this.scrollHeight + this.lineHeight + 'px';
+        page1 = this.$refs.scrollingPage1.style;
+        page2 = this.$refs.scrollingPage2.style;
+        page1.width = page2.width = this.w + this.indentLR + 'px';
+        page1.height = page2.height = this.scrollHeight + this.lineHeight + 'px';
     }
 
     async checkLoadedFonts() {
