@@ -39,6 +39,8 @@ sudo apt install poppler-utils
 ```
 
 ### nginx, server config
+Для своего домена необходимо будет подправить docs/omnireader/omnireader.
+Можно также настроить сервер для HTTP, без SSL.
 ```
 sudo apt install nginx
 sudo cp docs/omnireader/omnireader /etc/nginx/sites-available/omnireader
@@ -48,6 +50,8 @@ sudo service nginx reload
 sudo chown -R www-data.www-data /var/www
 ```
 
+### certbot
+Следовать инструкции установки certbot https://certbot.eff.org/lets-encrypt/ubuntubionic-nginx
 ### old.omnireader 
 ```
 sudo apt install php7.2 php7.2-curl php7.2-mbstring php7.2-fpm
