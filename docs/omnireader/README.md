@@ -65,8 +65,8 @@ sudo -u www-data cp -r docs/omnireader/old/* /home/oldreader
 ## Деплой и запуск
 ```
 cd docs/omnireader
-sh deploy.sh
-sh run_server.sh
+./deploy.sh
+./run_server.sh
 ```
 
 После первого запуска будет создан конфигурационный файл `/home/liberama/data/config.json`.
