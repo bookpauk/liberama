@@ -1,6 +1,18 @@
 export const versionHistory = [
 {
-    showUntil: '2020-01-15',
+    showUntil: '2020-01-06',
+    header: '0.8.1 (2020-01-07)',
+    content:
+`
+<ul>
+    <li>добавлена частичная поддержка формата FB3</li>
+    <li>исправлен баг "Request path contains unescaped characters"</li>
+</ul>
+`
+},
+
+{
+    showUntil: '2020-01-05',
     header: '0.8.0 (2020-01-02)',
     content:
 `
