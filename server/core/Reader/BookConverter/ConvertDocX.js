@@ -4,14 +4,15 @@ const path = require('path');
 const ConvertBase = require('./ConvertBase');
 
 class ConvertDocX extends ConvertBase {
-    check(data, opts) {
+    async check(data, opts) {
         const {inputFiles} = opts;
         if (this.config.useExternalBookConverter && 
             inputFiles.sourceFileType && inputFiles.sourceFileType.ext == 'zip') {
             //ищем файл '[Content_Types].xml'
             for (const file of inputFiles.files) {
                 if (file.path == '[Content_Types].xml') {
-                    return true;
+                    const contentTypes = await fs.readFile(`${inputFiles.filesDir}/${file.path}`, 'utf8');
+                    return contentTypes.indexOf('/word/document.xml') >= 0;
                 }
             }
         }
@@ -30,7 +31,7 @@ class ConvertDocX extends ConvertBase {
     }
 
     async run(data, opts) {
-        if (!this.check(data, opts))
+        if (!(await this.check(data, opts)))
             return false;
         await this.checkExternalConverterPresent();
 

@@ -9,7 +9,7 @@ git clone https://github.com/bookpauk/liberama
 ### node.js
 ```
 sudo apt install -y curl
-curl -sL https://deb.nodesource.com/setup_10.x | sudo bash -
+curl -sL https://deb.nodesource.com/setup_12.x | sudo -E bash -
 sudo apt install -y nodejs
 ```
 
@@ -39,6 +39,8 @@ sudo apt install poppler-utils
 ```
 
 ### nginx, server config
+Для своего домена необходимо будет подправить docs/omnireader/omnireader.
+Можно также настроить сервер для HTTP, без SSL.
 ```
 sudo apt install nginx
 sudo cp docs/omnireader/omnireader /etc/nginx/sites-available/omnireader
@@ -48,6 +50,8 @@ sudo service nginx reload
 sudo chown -R www-data.www-data /var/www
 ```
 
+### certbot
+Следовать инструкции установки certbot https://certbot.eff.org/lets-encrypt/ubuntubionic-nginx
 ### old.omnireader 
 ```
 sudo apt install php7.2 php7.2-curl php7.2-mbstring php7.2-fpm
@@ -61,8 +65,8 @@ sudo -u www-data cp -r docs/omnireader/old/* /home/oldreader
 ## Деплой и запуск
 ```
 cd docs/omnireader
-sh deploy.sh
-sh run_server.sh
+./deploy.sh
+./run_server.sh
 ```
 
 После первого запуска будет создан конфигурационный файл `/home/liberama/data/config.json`.

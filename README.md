@@ -11,6 +11,7 @@
 Для разворачивания читалки на чистом VPS с нуля смотрите [docs/omnireader](docs/omnireader/README.md)
 
 ## Сборка проекта
+Необходима версия node.js не ниже 10.
 
 ```
 $ git clone https://github.com/bookpauk/liberama
