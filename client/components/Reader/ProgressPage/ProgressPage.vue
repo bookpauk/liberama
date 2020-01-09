@@ -1,7 +1,21 @@
 <template>
     <div v-show="visible" class="main">
         <div class="center">
-            <el-progress type="circle" :width="100" :stroke-width="6" color="#0F9900" :percentage="percentage"></el-progress>
+            <!--el-progress type="circle" :width="100" :stroke-width="6" color="#0F9900" :percentage="percentage"></el-progress-->
+            <q-circular-progress
+                show-value
+                instant-feedback
+                font-size="14px"
+                :value="percentage"
+                size="100px"
+                :thickness="0.12"
+                color="green-7"
+                track-color="grey-4"
+                class="q-ma-md"
+            >
+              {{ percentage }}%
+            </q-circular-progress>
+
             <p class="text">{{ text }}</p>
         </div>
     </div>
@@ -84,7 +98,7 @@ class ProgressPage extends Vue {
     align-items: center;
 
     color: white;
-    height: 300px;
+    height: 250px;
 }
 
 .text {
