@@ -1,5 +1,6 @@
 <template>
     <div ref="main" class="main">
+        <GithubCorner url="https://github.com/bookpauk/liberama" cornerColor="#1B695F"></GithubCorner>
         <div class="part top">
             <span class="greeting bold-font">{{ title }}</span>
             <div class="space"></div>
@@ -54,11 +55,14 @@
 //-----------------------------------------------------------------------------
 import Vue from 'vue';
 import Component from 'vue-class-component';
+import GithubCorner from './GithubCorner/GithubCorner.vue';
+
 import PasteTextPage from './PasteTextPage/PasteTextPage.vue';
 import {versionHistory} from '../versionHistory';
 
 export default @Component({
     components: {
+        GithubCorner,
         PasteTextPage,
     },
 })
