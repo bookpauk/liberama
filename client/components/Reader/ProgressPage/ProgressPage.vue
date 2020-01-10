@@ -1,11 +1,10 @@
 <template>
     <div v-show="visible" class="main">
         <div class="center">
-            <!--el-progress type="circle" :width="100" :stroke-width="6" color="#0F9900" :percentage="percentage"></el-progress-->
             <q-circular-progress
                 show-value
                 instant-feedback
-                font-size="14px"
+                font-size="13px"
                 :value="percentage"
                 size="100px"
                 :thickness="0.1"
@@ -13,7 +12,7 @@
                 track-color="grey-4"
                 class="q-ma-md"
             >
-              {{ percentage }}%
+                <span class="text-yellow">{{ percentage }}%</span>
             </q-circular-progress>
 
             <p class="text">{{ text }}</p>
@@ -71,9 +70,6 @@ class ProgressPage extends Vue {
     }
 
     get percentage() {
-        let circle = document.querySelector('path[class="el-progress-circle__path"]');
-        if (circle)
-            circle.style.transition = '';
         return Math.round(((this.step - 1)/this.totalSteps + this.progress/(100*this.totalSteps))*100);
     }
 }
