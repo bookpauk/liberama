@@ -31,7 +31,6 @@ class ConvertDocX extends ConvertHtml {
     async run(data, opts) {
         if (!(await this.check(data, opts)))
             return false;
-        await this.checkExternalConverterPresent();
 
         const {inputFiles} = opts;
 
