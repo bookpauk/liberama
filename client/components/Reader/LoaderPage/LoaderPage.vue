@@ -1,6 +1,6 @@
 <template>
     <div ref="main" class="main">
-        <GithubCorner url="https://github.com/bookpauk/liberama" cornerColor="#1B695F"></GithubCorner>
+        <GithubCorner url="https://github.com/bookpauk/liberama" cornerColor="#1B695F" gitColor="EBE2C9"></GithubCorner>
         <div class="part top">
             <span class="greeting bold-font">{{ title }}</span>
             <div class="space"></div>
