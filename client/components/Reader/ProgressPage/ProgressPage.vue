@@ -7,7 +7,7 @@
                 font-size="13px"
                 :value="percentage"
                 size="100px"
-                :thickness="0.1"
+                :thickness="0.11"
                 color="green-7"
                 track-color="grey-4"
                 class="q-ma-md"
