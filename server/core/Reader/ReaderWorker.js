@@ -87,7 +87,7 @@ class ReaderWorker {
             });
 
             //сжимаем файл в tmp, если там уже нет с тем же именем-sha256
-            const compFilename = await this.decomp.gzipFileIfNotExists(convertFilename, `${this.config.tempPublicDir}`);
+            const compFilename = await this.decomp.gzipFileIfNotExists(convertFilename, this.config.tempPublicDir);
 
             wState.set({progress: 100});
 
