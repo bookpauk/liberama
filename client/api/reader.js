@@ -37,7 +37,11 @@ class Reader {
                 //быстрее будет last.split
                 const res = last.split(splitter).pop();
                 if (res) {
-                    callback(JSON.parse(res));
+                    try {
+                        callback(JSON.parse(res));
+                    } catch (e) {
+                        //
+                    }
                 }
             }
         });
@@ -46,8 +50,14 @@ class Reader {
         response = response.data.split(splitter).pop();
 
         if (response) {
-            response = JSON.parse(response);
+            try {
+                response = JSON.parse(response);
+            } catch (e) {
+                response = false;
+            }
+        }
 
+        if (response) {
             if (response.state == 'finish') {//воркер закончил работу, можно скачивать кешированный на сервере файл
                 callback({step: 4});
                 const book = await this.loadCachedBook(response.path, callback);
