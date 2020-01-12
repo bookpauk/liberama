@@ -1,7 +1,5 @@
 import axios from 'axios';
 
-import * as utils from '../share/utils';
-
 const api = axios.create({
     baseURL: '/api/reader'
 });
@@ -12,7 +10,6 @@ const workerApi = axios.create({
 
 class Reader {
     async loadBook(opts, callback) {
-        const refreshPause = 300;
         if (!callback) callback = () => {};
 
         let response = await api.post('/load-book', opts);
@@ -22,37 +19,52 @@ class Reader {
             throw new Error('Неверный ответ api');
 
         callback({totalSteps: 4});
+        callback(response.data);
 
-        let i = 0;
-        while (1) {// eslint-disable-line no-constant-condition
-            callback(response.data);
+        //присылается текст, состоящий из json-объектов state каждые 300ms, с разделителем splitter между ними
+        const splitter = '-- aod2t5hDXU32bUFyqlFE next status --';
+        let lastIndex = 0;
+        response = await workerApi.post('/get-state-finish', {workerId}, {
+            onDownloadProgress: progress => {
+                //небольая оптимизация, вместо простого responseText.split
+                const xhr = progress.target;
+                let currIndex = xhr.responseText.length;
+                if (lastIndex == currIndex)
+                    return; 
+                const last = xhr.responseText.substring(lastIndex, currIndex);
+                lastIndex = currIndex;
 
-            if (response.data.state == 'finish') {//воркер закончил работу, можно скачивать кешированный на сервере файл
-                callback({step: 4});
-                const book = await this.loadCachedBook(response.data.path, callback);
-                return Object.assign({}, response.data, {data: book.data});
+                //быстрее будет last.split
+                const res = last.split(splitter).pop();
+                if (res) {
+                    callback(JSON.parse(res));
+                }
             }
-            if (response.data.state == 'error') {
-                let errMes = response.data.error;
+        });
+
+        //берем последний state
+        response = response.data.split(splitter).pop();
+
+        if (response) {
+            response = JSON.parse(response);
+
+            if (response.state == 'finish') {//воркер закончил работу, можно скачивать кешированный на сервере файл
+                callback({step: 4});
+                const book = await this.loadCachedBook(response.path, callback);
+                return Object.assign({}, response, {data: book.data});
+            }
+
+            if (response.state == 'error') {
+                let errMes = response.error;
                 if (errMes.indexOf('getaddrinfo') >= 0 || 
                     errMes.indexOf('ECONNRESET') >= 0 ||
                     errMes.indexOf('EINVAL') >= 0 ||
                     errMes.indexOf('404') >= 0)
-                    errMes = `Ресурс не найден по адресу: ${response.data.url}`;
+                    errMes = `Ресурс не найден по адресу: ${response.url}`;
                 throw new Error(errMes);
             }
-            if (i > 0)
-                await utils.sleep(refreshPause);
-
-            i++;
-            if (i > 120*1000/refreshPause) {//2 мин ждем телодвижений воркера
-                throw new Error('Слишком долгое время ожидания');
-            }
-            //проверка воркера
-            const prevProgress = response.data.progress;
-            const prevState = response.data.state;
-            response = await workerApi.post('/get-state', {workerId});
-            i = (prevProgress != response.data.progress || prevState != response.data.state ? 1 : i);
+        } else {
+            throw new Error('Пустой ответ сервера');
         }
     }
 

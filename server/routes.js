@@ -29,6 +29,7 @@ function initRoutes(app, config) {
         ['POST', '/api/reader/storage', reader.storage.bind(reader), [aAll], {}],
         ['POST', '/api/reader/upload-file', [upload.single('file'), reader.uploadFile.bind(reader)], [aAll], {}],
         ['POST', '/api/worker/get-state', worker.getState.bind(worker), [aAll], {}],
+        ['POST', '/api/worker/get-state-finish', worker.getStateFinish.bind(worker), [aAll], {}],
     ];
 
     //to app
