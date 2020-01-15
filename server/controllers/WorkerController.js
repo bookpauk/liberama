@@ -50,7 +50,7 @@ class WorkerController extends BaseController {
                 res.write(splitter + JSON.stringify(state));
                 res.flush();
 
-                if (state.state != 'finish')
+                if (state.state != 'finish' && state.state != 'error')
                     await utils.sleep(refreshPause);
                 else
                     break;
