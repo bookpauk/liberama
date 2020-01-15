@@ -9,22 +9,14 @@ const workerApi = axios.create({
 });
 
 class Reader {
-    async loadBook(opts, callback) {
+
+    async getStateFinish(workerId, callback) {
         if (!callback) callback = () => {};
-
-        let response = await api.post('/load-book', opts);
-
-        const workerId = response.data.workerId;
-        if (!workerId)
-            throw new Error('Неверный ответ api');
-
-        callback({totalSteps: 4});
-        callback(response.data);
 
         //присылается текст, состоящий из json-объектов state каждые 300ms, с разделителем splitter между ними
         const splitter = '-- aod2t5hDXU32bUFyqlFE next status --';
         let lastIndex = 0;
-        response = await workerApi.post('/get-state-finish', {workerId}, {
+        let response = await workerApi.post('/get-state-finish', {workerId}, {
             onDownloadProgress: progress => {
                 //небольая оптимизация, вместо простого responseText.split
                 const xhr = progress.target;
@@ -57,6 +49,23 @@ class Reader {
             }
         }
 
+        return response;
+    }
+
+    async loadBook(opts, callback) {
+        if (!callback) callback = () => {};
+
+        let response = await api.post('/load-book', opts);
+
+        const workerId = response.data.workerId;
+        if (!workerId)
+            throw new Error('Неверный ответ api');
+
+        callback({totalSteps: 4});
+        callback(response.data);
+
+        response = await this.getStateFinish(workerId, callback);
+
         if (response) {
             if (response.state == 'finish') {//воркер закончил работу, можно скачивать кешированный на сервере файл
                 callback({step: 4});
@@ -83,7 +92,7 @@ class Reader {
     }
 
     async loadCachedBook(url, callback) {
-        const response = await axios.head(url);
+        const response = await axios.head(url, {headers: {'Cache-Control': 'no-cache'}});
 
         let estSize = 1000000;
         if (response.headers['content-length']) {
