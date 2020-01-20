@@ -5,6 +5,7 @@ const WorkerState = require('../WorkerState');//singleton
 const FileDownloader = require('../FileDownloader');
 const FileDecompressor = require('../FileDecompressor');
 const BookConverter = require('./BookConverter');
+const RemoteWebDavStorage = require('../RemoteWebDavStorage');
 
 const utils = require('../utils');
 const log = new (require('../AppLogger'))().log;//singleton
@@ -28,6 +29,11 @@ class ReaderWorker {
             this.decomp = new FileDecompressor();
             this.bookConverter = new BookConverter(this.config);
 
+            this.remoteWebDavStorage = false;
+            if (config.remoteWebDavStorage) {
+                this.remoteWebDavStorage = new RemoteWebDavStorage(config.remoteWebDavStorage);
+            }
+
             this.periodicCleanDir(this.config.tempPublicDir, this.config.maxTempPublicDirSize, 60*60*1000);//1 раз в час
             this.periodicCleanDir(this.config.uploadDir, this.config.maxUploadPublicDirSize, 60*60*1000);//1 раз в час
             
@@ -39,7 +45,6 @@ class ReaderWorker {
 
     async loadBook(opts, wState) {
         const url = opts.url;
-        let errMes = '';
         let decompDir = '';
         let downloadedFilename = '';
         let isUploaded = false;
@@ -88,16 +93,17 @@ class ReaderWorker {
 
             //сжимаем файл в tmp, если там уже нет с тем же именем-sha256
             const compFilename = await this.decomp.gzipFileIfNotExists(convertFilename, this.config.tempPublicDir);
+            const stat = await fs.stat(compFilename);
 
             wState.set({progress: 100});
 
             //finish
             const finishFilename = path.basename(compFilename);
-            wState.finish({path: `/tmp/${finishFilename}`});
+            wState.finish({path: `/tmp/${finishFilename}`, size: stat.size});
 
         } catch (e) {
             log(LM_ERR, e.stack);
-            wState.set({state: 'error', error: (errMes ? errMes : e.message)});
+            wState.set({state: 'error', error: e.message});
         } finally {
             //clean
             if (decompDir)
@@ -133,6 +139,41 @@ class ReaderWorker {
         return `file://${hash}`;
     }
 
+    restoreCachedFile(filename) {
+        const workerId = this.workerState.generateWorkerId();
+        const wState = this.workerState.getControl(workerId);
+        wState.set({state: 'start'});
+
+        (async() => {
+            try {
+                wState.set({state: 'download', step: 1, totalSteps: 1, path: filename, progress: 0});
+
+                const basename = path.basename(filename);
+                const targetName = `${this.config.tempPublicDir}/${basename}`;
+
+                if (!await fs.pathExists(targetName)) {
+                    let found = false;
+                    if (this.remoteWebDavStorage) {
+                        found = await this.remoteWebDavStorage.getFileSuccess(targetName);
+                    } 
+
+                    if (!found) {
+                        throw new Error('404 Файл не найден');
+                    }
+                }
+
+                const stat = await fs.stat(targetName);
+                wState.finish({path: `/tmp/${basename}`, size: stat.size, progress: 100});
+            } catch (e) {
+                if (e.message.indexOf('404') < 0)
+                    log(LM_ERR, e.stack);
+                wState.set({state: 'error', error: e.message});
+            }
+        })();
+
+        return workerId;
+    }
+
     async periodicCleanDir(dir, maxSize, timeout) {
         try {
             const list = await fs.readdir(dir);
@@ -153,7 +194,16 @@ class ReaderWorker {
             let i = 0;
             while (i < files.length && size > maxSize) {
                 const file = files[i];
-                await fs.remove(`${dir}/${file.name}`);
+                const oldFile = `${dir}/${file.name}`;
+                if (this.remoteWebDavStorage) {
+                    try {
+                        //log(`remoteWebDavStorage.putFile ${path.basename(oldFile)}`);
+                        await this.remoteWebDavStorage.putFile(oldFile);
+                    } catch (e) {
+                        log(LM_ERR, e.stack);
+                    }
+                }
+                await fs.remove(oldFile);
                 size -= file.stat.size;
                 i++;
             }

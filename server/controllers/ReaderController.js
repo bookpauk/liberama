@@ -62,6 +62,24 @@ class ReaderController extends BaseController {
         res.status(400).send({error});
         return false;
     }
+
+    async restoreCachedFile(req, res) {
+        const request = req.body;
+        let error = '';
+        try {
+            if (!request.path) 
+                throw new Error(`key 'path' is empty`);
+
+            const workerId = this.readerWorker.restoreCachedFile(request.path);
+            const state = this.workerState.getState(workerId);
+            return (state ? state : {});
+        } catch (e) {
+            error = e.message;
+        }
+        //bad request
+        res.status(400).send({error});
+        return false;
+    }
 }
 
 module.exports = ReaderController;
