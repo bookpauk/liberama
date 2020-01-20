@@ -1,5 +1,16 @@
 export const versionHistory = [
 {
+    showUntil: '2020-01-19',
+    header: '0.8.2 (2020-01-20)',
+    content:
+`
+<ul>
+    <li>внутренние оптимизации</li>
+</ul>
+`
+},
+
+{
     showUntil: '2020-01-06',
     header: '0.8.1 (2020-01-07)',
     content:
