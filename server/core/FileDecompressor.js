@@ -5,7 +5,7 @@ const unbzip2Stream = require('unbzip2-stream');
 const tar = require('tar-fs');
 const ZipStreamer = require('./ZipStreamer');
 
-const log = new (require('./AppLogger'))().log;//singleton
+const appLogger = new (require('./AppLogger'))();//singleton
 const utils = require('./utils');
 const FileDetector = require('./FileDetector');
 
@@ -223,7 +223,7 @@ class FileDecompressor {
                 await fs.move(filenameGZ, outFilename, {overwrite: true});
 
                 await fs.remove(filenameCopy);
-            })().catch((e) => { log(LM_ERR, e.message) });
+            })().catch((e) => { if (appLogger.inited) appLogger.log(LM_ERR, `FileDecompressor.gzipFileIfNotExists: ${e.message}`) });
         } else {
             await utils.touchFile(outFilename);
         }
