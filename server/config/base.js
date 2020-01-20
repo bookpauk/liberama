@@ -21,7 +21,7 @@ module.exports = {
     maxTempPublicDirSize: 512*1024*1024,//512Мб
     maxUploadPublicDirSize: 200*1024*1024,//100Мб
 
-    useExternalBookConverter: false,
+    useExternalBookConverter: false,    
 
     db: [
         {
@@ -44,6 +44,15 @@ module.exports = {
             port: '33080',
         },
     ],
+
+    remoteWebDavStorage: false,
+    /*
+    remoteWebDavStorage: {
+        url: '127.0.0.1:1900',
+        username: '',
+        password: '',
+    },
+    */
 
 };
 
