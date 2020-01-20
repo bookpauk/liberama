@@ -1,7 +1,5 @@
 import axios from 'axios';
 
-import * as utils from '../share/utils';
-
 const api = axios.create({
     baseURL: '/api/reader'
 });
@@ -11,8 +9,50 @@ const workerApi = axios.create({
 });
 
 class Reader {
+
+    async getStateFinish(workerId, callback) {
+        if (!callback) callback = () => {};
+
+        //присылается текст, состоящий из json-объектов state каждые 300ms, с разделителем splitter между ними
+        const splitter = '-- aod2t5hDXU32bUFyqlFE next status --';
+        let lastIndex = 0;
+        let response = await workerApi.post('/get-state-finish', {workerId}, {
+            onDownloadProgress: progress => {
+                //небольая оптимизация, вместо простого responseText.split
+                const xhr = progress.target;
+                let currIndex = xhr.responseText.length;
+                if (lastIndex == currIndex)
+                    return; 
+                const last = xhr.responseText.substring(lastIndex, currIndex);
+                lastIndex = currIndex;
+
+                //быстрее будет last.split
+                const res = last.split(splitter).pop();
+                if (res) {
+                    try {
+                        callback(JSON.parse(res));
+                    } catch (e) {
+                        //
+                    }
+                }
+            }
+        });
+
+        //берем последний state
+        response = response.data.split(splitter).pop();
+
+        if (response) {
+            try {
+                response = JSON.parse(response);
+            } catch (e) {
+                response = false;
+            }
+        }
+
+        return response;
+    }
+
     async loadBook(opts, callback) {
-        const refreshPause = 300;
         if (!callback) callback = () => {};
 
         let response = await api.post('/load-book', opts);
@@ -22,53 +62,98 @@ class Reader {
             throw new Error('Неверный ответ api');
 
         callback({totalSteps: 4});
+        callback(response.data);
 
-        let i = 0;
-        while (1) {// eslint-disable-line no-constant-condition
-            callback(response.data);
+        response = await this.getStateFinish(workerId, callback);
 
-            if (response.data.state == 'finish') {//воркер закончил работу, можно скачивать кешированный на сервере файл
+        if (response) {
+            if (response.state == 'finish') {//воркер закончил работу, можно скачивать кешированный на сервере файл
                 callback({step: 4});
-                const book = await this.loadCachedBook(response.data.path, callback);
-                return Object.assign({}, response.data, {data: book.data});
+                const book = await this.loadCachedBook(response.path, callback, false, (response.size ? response.size : -1));
+                return Object.assign({}, response, {data: book.data});
             }
-            if (response.data.state == 'error') {
-                let errMes = response.data.error;
+
+            if (response.state == 'error') {
+                let errMes = response.error;
                 if (errMes.indexOf('getaddrinfo') >= 0 || 
                     errMes.indexOf('ECONNRESET') >= 0 ||
                     errMes.indexOf('EINVAL') >= 0 ||
                     errMes.indexOf('404') >= 0)
-                    errMes = `Ресурс не найден по адресу: ${response.data.url}`;
+                    errMes = `Ресурс не найден по адресу: ${response.url}`;
                 throw new Error(errMes);
             }
-            if (i > 0)
-                await utils.sleep(refreshPause);
-
-            i++;
-            if (i > 120*1000/refreshPause) {//2 мин ждем телодвижений воркера
-                throw new Error('Слишком долгое время ожидания');
-            }
-            //проверка воркера
-            const prevProgress = response.data.progress;
-            const prevState = response.data.state;
-            response = await workerApi.post('/get-state', {workerId});
-            i = (prevProgress != response.data.progress || prevState != response.data.state ? 1 : i);
+        } else {
+            throw new Error('Пустой ответ сервера');
         }
     }
 
     async checkUrl(url) {
-        return await axios.head(url, {headers: {'Cache-Control': 'no-cache'}});
-    }
-
-    async loadCachedBook(url, callback) {
-        const response = await axios.head(url);
-
-        let estSize = 1000000;
-        if (response.headers['content-length']) {
-            estSize = response.headers['content-length'];
+        let fileExists = false;
+        try {
+            await axios.head(url, {headers: {'Cache-Control': 'no-cache'}});
+            fileExists = true;
+        } catch (e) {
+            //
         }
 
+        //восстановим при необходимости файл на сервере из удаленного облака
+        if (!fileExists) {
+            let response = await api.post('/restore-cached-file', {path: url});
+
+            const workerId = response.data.workerId;
+            if (!workerId)
+                throw new Error('Неверный ответ api');
+
+            response = await this.getStateFinish(workerId);
+            if (response.state == 'error') {
+                throw new Error(response.error);
+            }
+        }
+
+        return true;
+    }
+
+    async loadCachedBook(url, callback, restore = true, estSize = -1) {
+        if (!callback) callback = () => {};
+        let response = null;
+
         callback({state: 'loading', progress: 0});
+
+        //получение размера файла
+        let fileExists = false;
+        if (estSize < 0) {
+            try {
+                response = await axios.head(url, {headers: {'Cache-Control': 'no-cache'}});
+
+                if (response.headers['content-length']) {
+                    estSize = response.headers['content-length'];
+                }
+                fileExists = true;
+            } catch (e) {
+                //
+            }
+        }
+
+        //восстановим при необходимости файл на сервере из удаленного облака
+        if (restore && !fileExists) {
+            response = await api.post('/restore-cached-file', {path: url});
+
+            const workerId = response.data.workerId;
+            if (!workerId)
+                throw new Error('Неверный ответ api');
+
+            response = await this.getStateFinish(workerId);
+            if (response.state == 'error') {
+                throw new Error(response.error);
+            }
+
+            if (response.size && estSize < 0) {
+                estSize = response.size;
+            }
+        }
+
+        //получение файла
+        estSize = (estSize > 0 ? estSize : 1000000);
         const options = {
             onDownloadProgress: progress => {
                 while (progress.loaded > estSize) estSize *= 1.5;
@@ -77,7 +162,7 @@ class Reader {
                     callback({progress: Math.round((progress.loaded*100)/estSize)});
             }
         }
-        //загрузка
+
         return await axios.get(url, options);
     }
 

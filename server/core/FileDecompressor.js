@@ -5,6 +5,7 @@ const unbzip2Stream = require('unbzip2-stream');
 const tar = require('tar-fs');
 const ZipStreamer = require('./ZipStreamer');
 
+const appLogger = new (require('./AppLogger'))();//singleton
 const utils = require('./utils');
 const FileDetector = require('./FileDetector');
 
@@ -189,9 +190,9 @@ class FileDecompressor {
         });
     }
 
-    async gzipFile(inputFile, outputFile) {
+    async gzipFile(inputFile, outputFile, level = 1) {
         return new Promise((resolve, reject) => {
-            const gzip = zlib.createGzip({level: 1});
+            const gzip = zlib.createGzip({level});
             const input = fs.createReadStream(inputFile);
             const output = fs.createWriteStream(outputFile);
 
@@ -208,7 +209,21 @@ class FileDecompressor {
         const outFilename = `${outDir}/${hash}`;
 
         if (!await fs.pathExists(outFilename)) {
-            await this.gzipFile(filename, outFilename);
+            await this.gzipFile(filename, outFilename, 1);
+
+            // переупакуем через некоторое время на максималках
+            const filenameCopy = `${filename}.copy`;
+            await fs.copy(filename, filenameCopy);
+
+            (async() => {
+                await utils.sleep(5000);
+                const filenameGZ = `${filename}.gz`;
+                await this.gzipFile(filenameCopy, filenameGZ, 9);
+
+                await fs.move(filenameGZ, outFilename, {overwrite: true});
+
+                await fs.remove(filenameCopy);
+            })().catch((e) => { if (appLogger.inited) appLogger.log(LM_ERR, `FileDecompressor.gzipFileIfNotExists: ${e.message}`) });
         } else {
             await utils.touchFile(outFilename);
         }

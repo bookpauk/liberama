@@ -112,7 +112,7 @@ class LoaderPage extends Vue {
 
     submitUrl() {
         if (this.bookUrl) {
-            this.$emit('load-book', {url: this.bookUrl});
+            this.$emit('load-book', {url: this.bookUrl, force: true});
             this.bookUrl = '';
         }
     }
