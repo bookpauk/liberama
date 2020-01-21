@@ -31,7 +31,9 @@ class ReaderWorker {
 
             this.remoteWebDavStorage = false;
             if (config.remoteWebDavStorage) {
-                this.remoteWebDavStorage = new RemoteWebDavStorage(config.remoteWebDavStorage);
+                this.remoteWebDavStorage = new RemoteWebDavStorage(
+                    Object.assign({maxContentLength: config.maxUploadFileSize}, config.remoteWebDavStorage)
+                );
             }
 
             this.periodicCleanDir(this.config.tempPublicDir, this.config.maxTempPublicDirSize, 60*60*1000);//1 раз в час

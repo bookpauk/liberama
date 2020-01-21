@@ -1,62 +1,48 @@
 const fs = require('fs-extra');
 const path = require('path');
 
-const WebDavFS = require('webdav-fs');
+const { createClient } = require('webdav');
 
 class RemoteWebDavStorage {
     constructor(config) {
-        const opts = Object.assign({}, config);
-        this.wfs = WebDavFS(config.url, opts);
+        this.config = Object.assign({}, config);
+        this.config.maxContentLength = this.config.maxContentLength || 10*1024*1024;
+        this.wdc = createClient(config.url, this.config);
     }
 
-    stat(filename) {
-        return new Promise((resolve, reject) => {
-            this.wfs.stat(filename, function(err, fileStat) {
-                if (err)
-                    reject(err);
-                resolve(fileStat);
-            });
-        });
+    _convertStat(data) {
+        return {
+            isDirectory: function() {
+                return data.type === "directory";
+            },
+            isFile: function() {
+                return data.type === "file";
+            },
+            mtime: (new Date(data.lastmod)).getTime(),
+            name: data.basename,
+            size: data.size || 0
+        };
     }
 
-    writeFile(filename, data) {
-        return new Promise((resolve, reject) => {
-            this.wfs.writeFile(filename, data, 'binary', function(err) {
-                if (err)
-                    reject(err);
-                resolve();
-            });
-        });
+    async stat(filename) {
+        const stat = await this.wdc.stat(filename);
+        return this._convertStat(stat);
     }
 
-    unlink(filename) {
-        return new Promise((resolve, reject) => {
-            this.wfs.unlink(filename, function(err) {
-                if (err)
-                    reject(err);
-                resolve();
-            });        
-        });
+    async writeFile(filename, data) {
+        return await this.wdc.putFileContents(filename, data, { maxContentLength: this.config.maxContentLength })
     }
 
-    readFile(filename) {
-        return new Promise((resolve, reject) => {
-            this.wfs.readFile(filename, 'binary', function(err, data) {
-                if (err)
-                    reject(err);
-                resolve(data);
-            });        
-        });
+    async unlink(filename) {
+        return await this.wdc.deleteFile(filename);
     }
 
-    mkdir(dirname) {
-        return new Promise((resolve, reject) => {
-            this.wfs.mkdir(dirname, function(err) {
-                if (err)
-                    reject(err);
-                resolve();
-            });
-        });
+    async readFile(filename) {
+        return await this.wdc.getFileContents(filename, { maxContentLength: this.config.maxContentLength })
+    }
+
+    async mkdir(dirname) {
+        return await this.wdc.createDirectory(dirname);
     }
 
     async putFile(filename) {
