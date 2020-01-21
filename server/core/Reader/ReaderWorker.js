@@ -10,6 +10,8 @@ const RemoteWebDavStorage = require('../RemoteWebDavStorage');
 const utils = require('../utils');
 const log = new (require('../AppLogger'))().log;//singleton
 
+const cleanDirPeriod = 60*60*1000;//1 раз в час
+
 let instance = null;
 
 //singleton
@@ -31,11 +33,13 @@ class ReaderWorker {
 
             this.remoteWebDavStorage = false;
             if (config.remoteWebDavStorage) {
-                this.remoteWebDavStorage = new RemoteWebDavStorage(config.remoteWebDavStorage);
+                this.remoteWebDavStorage = new RemoteWebDavStorage(
+                    Object.assign({maxContentLength: config.maxUploadFileSize}, config.remoteWebDavStorage)
+                );
             }
 
-            this.periodicCleanDir(this.config.tempPublicDir, this.config.maxTempPublicDirSize, 60*60*1000);//1 раз в час
-            this.periodicCleanDir(this.config.uploadDir, this.config.maxUploadPublicDirSize, 60*60*1000);//1 раз в час
+            this.periodicCleanDir(this.config.tempPublicDir, this.config.maxTempPublicDirSize, cleanDirPeriod);
+            this.periodicCleanDir(this.config.uploadDir, this.config.maxUploadPublicDirSize, cleanDirPeriod);
             
             instance = this;
         }
@@ -100,6 +104,19 @@ class ReaderWorker {
             //finish
             const finishFilename = path.basename(compFilename);
             wState.finish({path: `/tmp/${finishFilename}`, size: stat.size});
+
+            //лениво сохраним compFilename в удаленном хранилище
+            if (this.remoteWebDavStorage) {
+                (async() => {
+                    await utils.sleep(20*1000);
+                    try {
+                        //log(`remoteWebDavStorage.putFile ${path.basename(compFilename)}`);
+                        await this.remoteWebDavStorage.putFile(compFilename);
+                    } catch (e) {
+                        log(LM_ERR, e.stack);
+                    }
+                })();
+            }
 
         } catch (e) {
             log(LM_ERR, e.stack);
