@@ -105,6 +105,19 @@ class ReaderWorker {
             const finishFilename = path.basename(compFilename);
             wState.finish({path: `/tmp/${finishFilename}`, size: stat.size});
 
+            //лениво сохраним compFilename в удаленном хранилище
+            if (this.remoteWebDavStorage) {
+                (async() => {
+                    await utils.sleep(20*1000);
+                    try {
+                        //log(`remoteWebDavStorage.putFile ${path.basename(compFilename)}`);
+                        await this.remoteWebDavStorage.putFile(compFilename);
+                    } catch (e) {
+                        log(LM_ERR, e.stack);
+                    }
+                })();
+            }
+
         } catch (e) {
             log(LM_ERR, e.stack);
             wState.set({state: 'error', error: e.message});
