@@ -47,10 +47,6 @@ class WorkerController extends BaseController {
                 state = this.workerState.getState(request.workerId);
                 if (!state) break;
 
-                if (i == 0) {
-                    state = Object.assign({dummy: '0'.repeat(1024)}, state);
-                }
-
                 res.write(splitter + JSON.stringify(state));
                 res.flush();
 
