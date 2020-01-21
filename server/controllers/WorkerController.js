@@ -38,7 +38,7 @@ class WorkerController extends BaseController {
             });
 
             const splitter = '-- aod2t5hDXU32bUFyqlFE next status --';            
-            const refreshPause = 300;
+            const refreshPause = 200;
             let i = 0;
             let prevProgress = -1;
             let prevState = '';
@@ -46,6 +46,10 @@ class WorkerController extends BaseController {
             while (1) {// eslint-disable-line no-constant-condition
                 state = this.workerState.getState(request.workerId);
                 if (!state) break;
+
+                if (i == 0) {
+                    state = Object.assign({dummy: '0'.repeat(1024)}, state);
+                }
 
                 res.write(splitter + JSON.stringify(state));
                 res.flush();
