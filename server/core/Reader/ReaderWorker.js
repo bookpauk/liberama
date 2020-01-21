@@ -212,6 +212,9 @@ class ReaderWorker {
             while (i < files.length && size > maxSize) {
                 const file = files[i];
                 const oldFile = `${dir}/${file.name}`;
+
+                //отправляем только this.config.tempPublicDir
+                //TODO: убрать в будущем, т.к. уже делается ленивое сохранение compFilename в удаленном хранилище
                 if (this.remoteWebDavStorage && dir === this.config.tempPublicDir) {
                     try {
                         //log(`remoteWebDavStorage.putFile ${path.basename(oldFile)}`);
