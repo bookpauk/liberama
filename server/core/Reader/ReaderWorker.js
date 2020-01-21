@@ -212,7 +212,7 @@ class ReaderWorker {
             while (i < files.length && size > maxSize) {
                 const file = files[i];
                 const oldFile = `${dir}/${file.name}`;
-                if (this.remoteWebDavStorage) {
+                if (this.remoteWebDavStorage && dir === this.config.tempPublicDir) {
                     try {
                         //log(`remoteWebDavStorage.putFile ${path.basename(oldFile)}`);
                         await this.remoteWebDavStorage.putFile(oldFile);
