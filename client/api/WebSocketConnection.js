@@ -57,7 +57,12 @@ class WebSocketConnection {
             if (this.ws && this.ws.readyState == WebSocket.OPEN) {
                 resolve(this.ws);
             } else {
-                url = url || `ws://${window.location.host}/ws`;
+                let protocol = 'ws:';
+                if (window.location.protocol == 'https:') {
+                    protocol = 'wss:'
+                }
+
+                url = url || `${protocol}//${window.location.host}/ws`;
                 
                 this.ws = new WebSocket(url);
 
