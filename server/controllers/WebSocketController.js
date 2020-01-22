@@ -65,7 +65,7 @@ class WebSocketController {
         }
     }
 
-    //Actions
+    //Actions ------------------------------------------------------------------
     async test(req, ws) {
         this.send({message: 'Liberama project is awesome'}, req, ws);
     }
