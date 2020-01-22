@@ -1,4 +1,6 @@
 import axios from 'axios';
+import * as utils from '../share/utils';
+import WebSocketConnection from './WebSocketConnection';
 
 const api = axios.create({
     baseURL: '/api/reader'
@@ -9,44 +11,57 @@ const workerApi = axios.create({
 });
 
 class Reader {
+    constructor() {
+        this.wsc = new WebSocketConnection();
+    }
 
     async getStateFinish(workerId, callback) {
         if (!callback) callback = () => {};
 
-        //присылается текст, состоящий из json-объектов state каждые 300ms, с разделителем splitter между ними
-        const splitter = '-- aod2t5hDXU32bUFyqlFE next status --';
-        let lastIndex = 0;
-        let response = await workerApi.post('/get-state-finish', {workerId}, {
-            onDownloadProgress: progress => {
-                //небольая оптимизация, вместо простого responseText.split
-                const xhr = progress.target;
-                let currIndex = xhr.responseText.length;
-                if (lastIndex == currIndex)
-                    return; 
-                const last = xhr.responseText.substring(lastIndex, currIndex);
-                lastIndex = currIndex;
+        let response = {};
 
-                //быстрее будет last.split
-                const res = last.split(splitter).pop();
-                if (res) {
-                    try {
-                        callback(JSON.parse(res));
-                    } catch (e) {
-                        //
-                    }
+        try {
+            const wsc = this.wsc;
+            await wsc.open();
+            const requestId = wsc.send({action: 'worker-get-state-finish', workerId});
+
+            while (1) {// eslint-disable-line no-constant-condition
+                response = await wsc.message(requestId);
+                callback(response);
+
+                if (response.state == 'finish' || response.state == 'error') {
+                    break;
                 }
             }
-        });
+            return response;
+        } catch (e) {
+            //
+        }
 
-        //берем последний state
-        response = response.data.split(splitter).pop();
+        //с WebSocket проблема, проверяем по http
+        const refreshPause = 500;
+        let i = 0;
+        response = {};
+        while (1) {// eslint-disable-line no-constant-condition
+            const prevProgress = response.progress || 0;
+            const prevState = response.state || 0;
+            response = await workerApi.post('/get-state', {workerId});
+            response = response.data;
+            callback(response);
 
-        if (response) {
-            try {
-                response = JSON.parse(response);
-            } catch (e) {
-                response = false;
+            if (response.state == 'finish' || response.state == 'error') {
+                break;
             }
+
+            if (i > 0)
+                await utils.sleep(refreshPause);
+
+            i++;
+            if (i > 120*1000/refreshPause) {//2 мин ждем телодвижений воркера
+                throw new Error('Слишком долгое время ожидания');
+            }
+            //проверка воркера
+            i = (prevProgress != response.progress || prevState != response.state ? 1 : i);
         }
 
         return response;
