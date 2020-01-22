@@ -52,12 +52,13 @@ class WebSocketConnection {
         return this.listeners.length != len;
     }
 
-    open() {
+    open(url) {
         return new Promise((resolve, reject) => {
             if (this.ws && this.ws.readyState == WebSocket.OPEN) {
                 resolve(this.ws);
             } else {
-                this.ws = new WebSocket(`ws://${window.location.host}`);
+                url = url || `ws://${window.location.host}/ws`;
+                this.ws = new WebSocket(url);
 
                 if (this.timer) {
                     clearTimeout(this.timer);

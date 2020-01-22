@@ -36,6 +36,7 @@ class Reader {
             return response;
         } catch (e) {
             //
+            console.error(e);
         }
 
         //с WebSocket проблема, проверяем по http
