@@ -26,6 +26,7 @@ class WorkerController extends BaseController {
         return false;
     }
 
+    //TODO: удалить бесполезную getStateFinish
     async getStateFinish(req, res) {
         const request = req.body;
         let error = '';

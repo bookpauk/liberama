@@ -2,10 +2,11 @@ const c = require('./controllers');
 const utils = require('./core/utils');
 const multer = require('multer');
 
-function initRoutes(app, config) {
+function initRoutes(app, wss, config) {
     const misc = new c.MiscController(config);
     const reader = new c.ReaderController(config);
     const worker = new c.WorkerController(config);
+    new c.WebSocketController(wss, config);
 
     //access
     const [aAll, aNormal, aSite, aReader, aOmnireader] = // eslint-disable-line no-unused-vars

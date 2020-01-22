@@ -464,7 +464,7 @@ class BookManager {
 
     addEventListener(listener) {
         if (this.eventListeners.indexOf(listener) < 0)
-            this.eventListeners.push(listener);        
+            this.eventListeners.push(listener);
     }
 
     removeEventListener(listener) {
