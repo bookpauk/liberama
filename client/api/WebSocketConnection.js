@@ -58,6 +58,7 @@ class WebSocketConnection {
                 resolve(this.ws);
             } else {
                 url = url || `ws://${window.location.host}/ws`;
+                
                 this.ws = new WebSocket(url);
 
                 if (this.timer) {
