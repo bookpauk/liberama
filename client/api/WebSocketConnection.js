@@ -98,22 +98,7 @@ class WebSocketConnection {
     }
 
     //timeout в минутах (cleanPeriod)
-    message(timeout = 2) {
-        return new Promise((resolve, reject) => {
-            this.addListener({
-                timeout,
-                onMessage: (mes) => {
-                    resolve(mes);
-                },
-                onError: (e) => {
-                    reject(e);
-                }
-            });
-        });
-    }
-
-    //timeout в минутах (cleanPeriod)
-    messageId(requestId, timeout = 2) {
+    message(requestId, timeout = 2) {
         return new Promise((resolve, reject) => {
             this.addListener({
                 requestId,
@@ -130,16 +115,8 @@ class WebSocketConnection {
 
     send(req) {
         if (this.ws && this.ws.readyState == WebSocket.OPEN) {
-            this.ws.send(JSON.stringify(req));
-        } else {
-            throw new Error('WebSocket connection is not ready');
-        }
-    }
-
-    sendId(req) {
-        if (this.ws && this.ws.readyState == WebSocket.OPEN) {
             const requestId = ++this.requestId;
-            this.ws.send(Object.assign({requestId}, JSON.stringify(req)));
+            this.ws.send(JSON.stringify(Object.assign({requestId}, req)));
             return requestId;
         } else {
             throw new Error('WebSocket connection is not ready');
@@ -162,6 +139,9 @@ class WebSocketConnection {
             for (const listener of this.listeners) {
                 if (now - listener.regTime < listener.timeout*cleanPeriod - 50) {
                     newListeners.push(listener);
+                } else {
+                    if (listener.onError)
+                        listener.onError('Время ожидания ответа истекло');
                 }
             }
             this.listeners = newListeners;
