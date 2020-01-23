@@ -36,7 +36,7 @@ class Reader {
             console.error(e);
         }
 
-        //если WebSocket проблема, работаем по http
+        //если с WebSocket проблема, работаем по http
         const refreshPause = 500;
         let i = 0;
         response = {};

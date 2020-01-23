@@ -19,7 +19,7 @@ class Misc {
             console.error(e);
         }
 
-        //если WebSocket проблема, работаем по http
+        //если с WebSocket проблема, работаем по http
         const response = await api.post('/config', query);
         return response.data;
     }
