@@ -14,7 +14,7 @@ class Reader {
     constructor() {
     }
 
-    async getStateFinish(workerId, callback) {
+    async getWorkerStateFinish(workerId, callback) {
         if (!callback) callback = () => {};
 
         let response = {};
@@ -77,12 +77,12 @@ class Reader {
         callback({totalSteps: 4});
         callback(response.data);
 
-        response = await this.getStateFinish(workerId, callback);
+        response = await this.getWorkerStateFinish(workerId, callback);
 
         if (response) {
             if (response.state == 'finish') {//воркер закончил работу, можно скачивать кешированный на сервере файл
                 callback({step: 4});
-                const book = await this.loadCachedBook(response.path, callback, false, (response.size ? response.size : -1));
+                const book = await this.loadCachedBook(response.path, callback, response.size);
                 return Object.assign({}, response, {data: book.data});
             }
 
@@ -100,69 +100,52 @@ class Reader {
         }
     }
 
-    async checkUrl(url) {
-        let fileExists = false;
+    async checkCachedBook(url) {
+        let estSize = -1;
         try {
-            await axios.head(url, {headers: {'Cache-Control': 'no-cache'}});
-            fileExists = true;
+            const response = await axios.head(url, {headers: {'Cache-Control': 'no-cache'}});
+
+            if (response.headers['content-length']) {
+                estSize = response.headers['content-length'];
+            }
         } catch (e) {
-            //
-        }
+            //восстановим при необходимости файл на сервере из удаленного облака
+            let response = null
+            
+            try {
+                await wsc.open();
+                response = await wsc.message(wsc.send({action: 'reader-restore-cached-file', path: url}));
+            } catch (e) {
+                console.error(e);
+                //если с WebSocket проблема, работаем по http
+                response = await api.post('/restore-cached-file', {path: url});
+                response = response.data;
+            }
 
-        //восстановим при необходимости файл на сервере из удаленного облака
-        if (!fileExists) {
-            let response = await api.post('/restore-cached-file', {path: url});
-
-            const workerId = response.data.workerId;
+            const workerId = response.workerId;
             if (!workerId)
                 throw new Error('Неверный ответ api');
 
-            response = await this.getStateFinish(workerId);
+            response = await this.getWorkerStateFinish(workerId);
             if (response.state == 'error') {
                 throw new Error(response.error);
             }
+            if (response.size && estSize < 0) {
+                estSize = response.size;
+            }
         }
 
-        return true;
+        return estSize;
     }
 
-    async loadCachedBook(url, callback, restore = true, estSize = -1) {
+    async loadCachedBook(url, callback, estSize = -1) {
         if (!callback) callback = () => {};
-        let response = null;
 
         callback({state: 'loading', progress: 0});
 
         //получение размера файла
-        let fileExists = false;
-        if (estSize < 0) {
-            try {
-                response = await axios.head(url, {headers: {'Cache-Control': 'no-cache'}});
-
-                if (response.headers['content-length']) {
-                    estSize = response.headers['content-length'];
-                }
-                fileExists = true;
-            } catch (e) {
-                //
-            }
-        }
-
-        //восстановим при необходимости файл на сервере из удаленного облака
-        if (restore && !fileExists) {
-            response = await api.post('/restore-cached-file', {path: url});
-
-            const workerId = response.data.workerId;
-            if (!workerId)
-                throw new Error('Неверный ответ api');
-
-            response = await this.getStateFinish(workerId);
-            if (response.state == 'error') {
-                throw new Error(response.error);
-            }
-
-            if (response.size && estSize < 0) {
-                estSize = response.size;
-            }
+        if (estSize && estSize < 0) {
+            estSize = await this.checkCachedBook(url);
         }
 
         //получение файла

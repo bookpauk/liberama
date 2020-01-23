@@ -1,6 +1,8 @@
 const WebSocket = require ('ws');
 const _ = require('lodash');
 
+const ReaderWorker = require('../core/Reader/ReaderWorker');//singleton
+const ReaderStorage = require('../core/Reader/ReaderStorage');//singleton
 const WorkerState = require('../core/WorkerState');//singleton
 const utils = require('../core/utils');
 
@@ -10,6 +12,8 @@ const closeSocketOnIdle = 5*60*1000;//5 минут
 class WebSocketController {
     constructor(wss, config) {
         this.config = config;
+        this.readerStorage = new ReaderStorage();
+        this.readerWorker = new ReaderWorker(config);
         this.workerState = new WorkerState();
 
         this.wss = wss;
@@ -50,6 +54,8 @@ class WebSocketController {
                     this.workerGetState(req, ws); break;
                 case 'worker-get-state-finish':
                     this.workerGetStateFinish(req, ws); break;
+                case 'reader-restore-cached-file':
+                    this.readerRestoreCachedFile(req, ws); break;
 
                 default:
                     throw new Error(`Action not found: ${req.action}`);
@@ -118,6 +124,14 @@ class WebSocketController {
         }        
     }
 
+    async readerRestoreCachedFile(req, ws) {
+        if (!req.path)
+            throw new Error(`key 'path' is empty`);
+
+        const workerId = this.readerWorker.restoreCachedFile(req.path);
+        const state = this.workerState.getState(workerId);
+        this.send((state ? state : {}), req, ws);
+    }
 }
 
 module.exports = WebSocketController;
