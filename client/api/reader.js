@@ -195,13 +195,22 @@ class Reader {
     }
 
     async storage(request) {
-        let response = await api.post('/storage', request);
+        let response = null;
+        try {
+            await wsc.open();
+            response = await wsc.message(wsc.send({action: 'reader-storage', body: request}));
+        } catch (e) {
+            console.error(e);
+            //если с WebSocket проблема, работаем по http
+            response = await api.post('/storage', request);
+            response = response.data;
+        }
 
-        const state = response.data.state;
+        const state = response.state;
         if (!state)
             throw new Error('Неверный ответ api');
 
-        return response.data;
+        return response;
     }
 }
 
