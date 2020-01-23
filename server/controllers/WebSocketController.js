@@ -150,11 +150,11 @@ class WebSocketController {
     }
 
     async readerStorageDo(req, ws) {
-        if (!req.body) 
+        if (!req.body)
             throw new Error(`key 'body' is empty`);
-        if (!req.body.action) 
+        if (!req.body.action)
             throw new Error(`key 'action' is empty`);
-        if (!req.body.items || Array.isArray(req.body.data)) 
+        if (!req.body.items || Array.isArray(req.body.data))
             throw new Error(`key 'items' is empty`);
 
         this.send(await this.readerStorage.doAction(req.body), req, ws);
