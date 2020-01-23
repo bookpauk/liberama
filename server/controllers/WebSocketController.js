@@ -1,4 +1,6 @@
 const WebSocket = require ('ws');
+const _ = require('lodash');
+
 const WorkerState = require('../core/WorkerState');//singleton
 const utils = require('../core/utils');
 
@@ -42,6 +44,8 @@ class WebSocketController {
             switch (req.action) {
                 case 'test':
                     this.test(req, ws); break;
+                case 'get-config':
+                    this.getConfig(req, ws); break;
                 case 'worker-get-state':
                     this.workerGetState(req, ws); break;
                 case 'worker-get-state-finish':
@@ -68,6 +72,14 @@ class WebSocketController {
     //Actions ------------------------------------------------------------------
     async test(req, ws) {
         this.send({message: 'Liberama project is awesome'}, req, ws);
+    }
+
+    async getConfig(req, ws) {
+        if (Array.isArray(req.params)) {
+            this.send(_.pick(this.config, req.params), req, ws);
+        } else {
+            throw new Error('params is not an array');
+        }
     }
 
     async workerGetState(req, ws) {

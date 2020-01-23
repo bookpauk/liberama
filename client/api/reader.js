@@ -1,6 +1,6 @@
 import axios from 'axios';
 import * as utils from '../share/utils';
-import WebSocketConnection from './WebSocketConnection';
+import wsc from './webSocketConnection';
 
 const api = axios.create({
     baseURL: '/api/reader'
@@ -12,7 +12,6 @@ const workerApi = axios.create({
 
 class Reader {
     constructor() {
-        this.wsc = new WebSocketConnection();
     }
 
     async getStateFinish(workerId, callback) {
@@ -21,7 +20,6 @@ class Reader {
         let response = {};
 
         try {
-            const wsc = this.wsc;
             await wsc.open();
             const requestId = wsc.send({action: 'worker-get-state-finish', workerId});
 
@@ -35,11 +33,10 @@ class Reader {
             }
             return response;
         } catch (e) {
-            //
             console.error(e);
         }
 
-        //с WebSocket проблема, проверяем по http
+        //если WebSocket проблема, работаем по http
         const refreshPause = 500;
         let i = 0;
         response = {};
