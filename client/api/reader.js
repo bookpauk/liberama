@@ -171,7 +171,7 @@ class Reader {
         //получение файла
         estSize = (estSize > 0 ? estSize : 1000000);
         const options = {
-            onDownloadProgress: progress => {
+            onDownloadProgress: (progress) => {
                 while (progress.loaded > estSize) estSize *= 1.5;
 
                 if (callback)
