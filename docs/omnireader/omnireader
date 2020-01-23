@@ -8,6 +8,7 @@ server {
   server_name omnireader.ru;
 
   client_max_body_size 50m;
+  proxy_read_timeout 1h;
 
   gzip on;
   gzip_min_length 1024;

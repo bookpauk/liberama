@@ -1,5 +1,10 @@
 const WebSocket = require ('ws');
+const _ = require('lodash');
+
+const ReaderWorker = require('../core/Reader/ReaderWorker');//singleton
+const ReaderStorage = require('../core/Reader/ReaderStorage');//singleton
 const WorkerState = require('../core/WorkerState');//singleton
+const log = new (require('../core/AppLogger'))().log;//singleton
 const utils = require('../core/utils');
 
 const cleanPeriod = 1*60*1000;//1 минута
@@ -8,6 +13,10 @@ const closeSocketOnIdle = 5*60*1000;//5 минут
 class WebSocketController {
     constructor(wss, config) {
         this.config = config;
+        this.isDevelopment = (config.branch == 'development');
+
+        this.readerStorage = new ReaderStorage();
+        this.readerWorker = new ReaderWorker(config);
         this.workerState = new WorkerState();
 
         this.wss = wss;
@@ -37,15 +46,25 @@ class WebSocketController {
     async onMessage(ws, message) {
         let req = {};
         try {
+            if (this.isDevelopment) {
+                log(`WebSocket-IN:  ${message.substr(0, 4000)}`);
+            }
+
             ws.lastActivity = Date.now();
             req = JSON.parse(message);
             switch (req.action) {
                 case 'test':
-                    this.test(req, ws); break;
+                    await this.test(req, ws); break;
+                case 'get-config':
+                    await this.getConfig(req, ws); break;
                 case 'worker-get-state':
-                    this.workerGetState(req, ws); break;
+                    await this.workerGetState(req, ws); break;
                 case 'worker-get-state-finish':
-                    this.workerGetStateFinish(req, ws); break;
+                    await this.workerGetStateFinish(req, ws); break;
+                case 'reader-restore-cached-file':
+                    await this.readerRestoreCachedFile(req, ws); break;
+                case 'reader-storage':
+                    await this.readerStorageDo(req, ws); break;
 
                 default:
                     throw new Error(`Action not found: ${req.action}`);
@@ -58,16 +77,31 @@ class WebSocketController {
     send(res, req, ws) {
         if (ws.readyState == WebSocket.OPEN) {
             ws.lastActivity = Date.now();
-            let r = Object.assign({}, res);
+            let r = res;
             if (req.requestId)
-                r.requestId = req.requestId;
-            ws.send(JSON.stringify(r));
+                r = Object.assign({requestId: req.requestId}, r);
+
+            const message = JSON.stringify(r);
+            ws.send(message);
+
+            if (this.isDevelopment) {
+                log(`WebSocket-OUT: ${message.substr(0, 4000)}`);
+            }
+
         }
     }
 
     //Actions ------------------------------------------------------------------
     async test(req, ws) {
         this.send({message: 'Liberama project is awesome'}, req, ws);
+    }
+
+    async getConfig(req, ws) {
+        if (Array.isArray(req.params)) {
+            this.send(_.pick(this.config, req.params), req, ws);
+        } else {
+            throw new Error('params is not an array');
+        }
     }
 
     async workerGetState(req, ws) {
@@ -106,6 +140,25 @@ class WebSocketController {
         }        
     }
 
+    async readerRestoreCachedFile(req, ws) {
+        if (!req.path)
+            throw new Error(`key 'path' is empty`);
+
+        const workerId = this.readerWorker.restoreCachedFile(req.path);
+        const state = this.workerState.getState(workerId);
+        this.send((state ? state : {}), req, ws);
+    }
+
+    async readerStorageDo(req, ws) {
+        if (!req.body)
+            throw new Error(`key 'body' is empty`);
+        if (!req.body.action)
+            throw new Error(`key 'action' is empty`);
+        if (!req.body.items || Array.isArray(req.body.data))
+            throw new Error(`key 'items' is empty`);
+
+        this.send(await this.readerStorage.doAction(req.body), req, ws);
+    }
 }
 
 module.exports = WebSocketController;

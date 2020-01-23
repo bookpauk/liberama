@@ -719,15 +719,16 @@ class Reader extends Vue {
             case 'scrolling':
             case 'search':
             case 'copyText':
-            case 'recentBooks':
+            case 'refresh':
             case 'offlineMode':
+            case 'recentBooks':
             case 'settings':
-                if (this[`${button}Active`])
+                if (this.progressActive) {
+                    classResult = classDisabled;
+                } else if (this[`${button}Active`]) {
                     classResult = classActive;
+                }
                 break;
-        }
-
-        switch (button) {
             case 'undoAction':
                 if (this.actionCur <= 0)
                     classResult = classDisabled;

@@ -1,4 +1,5 @@
 import axios from 'axios';
+import wsc from './webSocketConnection';
 
 const api = axios.create({
   baseURL: '/api'
@@ -6,9 +7,20 @@ const api = axios.create({
 
 class Misc {
     async loadConfig() {
-        const response = await api.post('/config', {params: [
+
+        const query = {params: [
             'name', 'version', 'mode', 'maxUploadFileSize', 'useExternalBookConverter', 'branch',
-        ]});
+        ]};
+
+        try {
+            await wsc.open();
+            return await wsc.message(wsc.send(Object.assign({action: 'get-config'}, query)));
+        } catch (e) {
+            console.error(e);
+        }
+
+        //если с WebSocket проблема, работаем по http
+        const response = await api.post('/config', query);
         return response.data;
     }
 }

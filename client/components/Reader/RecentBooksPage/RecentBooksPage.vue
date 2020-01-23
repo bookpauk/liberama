@@ -272,7 +272,7 @@ class RecentBooksPage extends Vue {
 
     async downloadBook(fb2path) {
         try {
-            await readerApi.checkUrl(fb2path);
+            await readerApi.checkCachedBook(fb2path);
 
             const d = this.$refs.download;
             d.href = fb2path;

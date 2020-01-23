@@ -35,9 +35,9 @@ class ReaderController extends BaseController {
         const request = req.body;
         let error = '';
         try {
-            if (!request.action) 
+            if (!request.action)
                 throw new Error(`key 'action' is empty`);
-            if (!request.items || Array.isArray(request.data)) 
+            if (!request.items || Array.isArray(request.data))
                 throw new Error(`key 'items' is empty`);
 
             return await this.readerStorage.doAction(request);
