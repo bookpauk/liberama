@@ -1,9 +1,8 @@
 const got = require('got');
 
-const maxDownloadSize = 50*1024*1024;
-
 class FileDownloader {
-    constructor() {
+    constructor(limitDownloadSize = 0) {
+        this.limitDownloadSize = limitDownloadSize;
     }
 
     async load(url, callback) {
@@ -24,9 +23,11 @@ class FileDownloader {
 
         let prevProg = 0;
         const request = got(url, options).on('downloadProgress', progress => {
-            if (progress.transferred > maxDownloadSize) {
-                errMes = 'file too big';
-                request.cancel();
+            if (this.limitDownloadSize) {
+                if (progress.transferred > this.limitDownloadSize) {
+                    errMes = 'Файл слишком большой';
+                    request.cancel();
+                }
             }
 
             let prog = 0;
