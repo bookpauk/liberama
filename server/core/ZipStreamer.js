@@ -52,7 +52,7 @@ class ZipStreamer {
         })().catch(reject); });
     }
 
-    unpack(zipFile, outputDir, entryCallback) {
+    unpack(zipFile, outputDir, entryCallback, limitFileSize = 0) {
         return new Promise((resolve, reject) => {
             entryCallback = (entryCallback ? entryCallback : () => {});
             const unzip = new unzipStream({file: zipFile});
@@ -67,6 +67,15 @@ class ZipStreamer {
             });
 
             unzip.on('ready', () => {
+                if (limitFileSize) {
+                    for (const entry of Object.values(unzip.entries())) {
+                        if (!entry.isDirectory && entry.size > limitFileSize) {
+                            reject('Файл слишком большой');
+                            return;
+                        }
+                    }
+                }
+
                 unzip.extract(null, outputDir, (err) => {
                     if (err) reject(err);
                     unzip.close();

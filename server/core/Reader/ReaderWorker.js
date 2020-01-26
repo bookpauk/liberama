@@ -27,8 +27,8 @@ class ReaderWorker {
             fs.ensureDirSync(this.config.tempPublicDir);
 
             this.workerState = new WorkerState();
-            this.down = new FileDownloader();
-            this.decomp = new FileDecompressor();
+            this.down = new FileDownloader(config.maxUploadFileSize);
+            this.decomp = new FileDecompressor(2*config.maxUploadFileSize);
             this.bookConverter = new BookConverter(this.config);
 
             this.remoteWebDavStorage = false;
