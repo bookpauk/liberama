@@ -27,6 +27,9 @@ class Reader {
                 response = await wsc.message(requestId);
                 callback(response);
 
+                if (!response.state)
+                    throw new Error('Неверный ответ api');
+
                 if (response.state == 'finish' || response.state == 'error') {
                     break;
                 }
@@ -46,6 +49,9 @@ class Reader {
             response = await workerApi.post('/get-state', {workerId});
             response = response.data;
             callback(response);
+
+            if (!response.state)
+                throw new Error('Неверный ответ api');
 
             if (response.state == 'finish' || response.state == 'error') {
                 break;
