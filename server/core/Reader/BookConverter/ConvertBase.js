@@ -3,10 +3,9 @@ const iconv = require('iconv-lite');
 const chardet = require('chardet');
 const he = require('he');
 
+const LimitedQueue = require('../../LimitedQueue');
 const textUtils = require('./textUtils');
 const utils = require('../../utils');
-
-let execConverterCounter = 0;
 
 class ConvertBase {
     constructor(config) {
@@ -15,6 +14,7 @@ class ConvertBase {
         this.calibrePath = `${config.dataDir}/calibre/ebook-convert`;
         this.sofficePath = '/usr/bin/soffice';
         this.pdfToHtmlPath = '/usr/bin/pdftohtml';
+        this.queue = new LimitedQueue(2, 20, 3);
     }
 
     async run(data, opts) {// eslint-disable-line no-unused-vars
@@ -33,11 +33,14 @@ class ConvertBase {
     }
 
     async execConverter(path, args, onData) {
-        execConverterCounter++;
+        let q = null;
         try {
-            if (execConverterCounter > 10)
-                throw new Error('Слишком большая очередь конвертирования. Пожалуйста, попробуйте позже.');
+            q = await this.queue.get(() => {onData();});
+        } catch (e) {
+            throw new Error('Слишком большая очередь конвертирования. Пожалуйста, попробуйте позже.');
+        }
 
+        try {
             const result = await utils.spawnProcess(path, {args, onData});
             if (result.code != 0) {
                 let error = result.code;
@@ -54,7 +57,7 @@ class ConvertBase {
                 throw new Error(e);
             }
         } finally {
-            execConverterCounter--;
+            q.ret();
         }
     }
 

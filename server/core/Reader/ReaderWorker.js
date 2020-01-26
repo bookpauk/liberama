@@ -1,6 +1,7 @@
 const fs = require('fs-extra');
 const path = require('path');
 
+const LimitedQueue = require('../LimitedQueue');
 const WorkerState = require('../WorkerState');//singleton
 const FileDownloader = require('../FileDownloader');
 const FileDecompressor = require('../FileDecompressor');
@@ -26,6 +27,7 @@ class ReaderWorker {
             this.config.tempPublicDir = `${config.publicDir}/tmp`;
             fs.ensureDirSync(this.config.tempPublicDir);
 
+            this.queue = new LimitedQueue(5, 100, 3);
             this.workerState = new WorkerState();
             this.down = new FileDownloader(config.maxUploadFileSize);
             this.decomp = new FileDecompressor(2*config.maxUploadFileSize);
@@ -53,7 +55,21 @@ class ReaderWorker {
         let downloadedFilename = '';
         let isUploaded = false;
         let convertFilename = '';
+
+        let q = null;
         try {
+            wState.set({state: 'queue', step: 1, totalSteps: 1});
+            try {
+                let qSize = 0;
+                q = await this.queue.get((place) => {
+                    wState.set({place, progress: (qSize ? Math.round((qSize - place)/qSize*100) : 0)});
+                    if (!qSize)
+                        qSize = place;
+                });
+            } catch (e) {
+                throw new Error('Слишком большая очередь загрузки. Пожалуйста, попробуйте позже.');
+            }
+
             wState.set({state: 'download', step: 1, totalSteps: 3, url});
 
             const tempFilename = utils.randomHexString(30);
@@ -123,6 +139,8 @@ class ReaderWorker {
             wState.set({state: 'error', error: e.message});
         } finally {
             //clean
+            if (q)
+                q.ret();
             if (decompDir)
                 await fs.remove(decompDir);
             if (downloadedFilename && !isUploaded)
