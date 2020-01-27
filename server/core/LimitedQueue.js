@@ -22,8 +22,6 @@ class LimitedQueue {
             for (let i = 0; i < this.listeners.length; i++) {
                 this.listeners[i].onPlaceChange(i + 1);
             }
-
-            this.resetTimeout();
         }
     }
 
@@ -46,6 +44,7 @@ class LimitedQueue {
                             this.freed++;
                             this._emitFree();
                             aCount = -1;
+                            this.resetTimeout();
                         }
                     },
                     abort: () => {
