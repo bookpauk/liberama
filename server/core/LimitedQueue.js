@@ -110,6 +110,7 @@ class LimitedQueue {
             listener.onError('destroy');
         }
         this.listeners = [];
+        this.abortCount++;
 
         this.destroyed = true;
     }
