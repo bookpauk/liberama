@@ -14,7 +14,7 @@ class ConvertBase {
         this.calibrePath = `${config.dataDir}/calibre/ebook-convert`;
         this.sofficePath = '/usr/bin/soffice';
         this.pdfToHtmlPath = '/usr/bin/pdftohtml';
-        this.queue = new LimitedQueue(2, 20, 3*60*1000);
+        this.queue = new LimitedQueue(2, 20, 3*60*1000);//3 минуты ожидание подвижек
     }
 
     async run(data, opts) {// eslint-disable-line no-unused-vars
@@ -32,7 +32,7 @@ class ConvertBase {
             throw new Error('Внешний конвертер pdftohtml не найден');
     }
 
-    async execConverter(path, args, onData) {
+    async execConverter(path, args, onData, abort) {
         let q = null;
         try {
             q = await this.queue.get(() => {onData();});
@@ -41,7 +41,7 @@ class ConvertBase {
         }
 
         try {
-            const result = await utils.spawnProcess(path, {args, onData});
+            const result = await utils.spawnProcess(path, {args, onData, abort});
             if (result.code != 0) {
                 let error = result.code;
                 if (this.config.branch == 'development')
@@ -51,6 +51,8 @@ class ConvertBase {
         } catch(e) {
             if (e.status == 'killed') {
                 throw new Error('Слишком долгое ожидание конвертера');
+            } else if (e.status == 'abort') {
+                throw new Error('abort');
             } else if (e.status == 'error') {
                 throw new Error(e.error);
             } else {

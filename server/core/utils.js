@@ -37,8 +37,8 @@ async function touchFile(filename) {
 }
 
 function spawnProcess(cmd, opts) {
-    let {args, killAfter, onData} = opts;
-    killAfter = (killAfter ? killAfter : 120*1000);
+    let {args, killAfter, onData, abort} = opts;
+    killAfter = (killAfter ? killAfter : 120);//seconds
     onData = (onData ? onData : () => {});
     args = (args ? args : []);
 
@@ -67,10 +67,18 @@ function spawnProcess(cmd, opts) {
             reject({status: 'error', error, stdout, stderr});
         });
 
-        await sleep(killAfter);
-        if (!resolved) {
-            process.kill(proc.pid);
-            reject({status: 'killed', stdout, stderr});
+        while (!resolved) {
+            await sleep(1000);
+            killAfter -= 1;
+            if (killAfter <= 0 || (abort && abort())) {
+                process.kill(proc.pid);
+                if (killAfter <= 0) {
+                    reject({status: 'killed', stdout, stderr});
+                } else {
+                    reject({status: 'abort', stdout, stderr});
+                }
+                break;
+            }
         }
     })().catch(reject); });
 }

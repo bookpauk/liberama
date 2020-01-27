@@ -27,7 +27,7 @@ class ReaderWorker {
             this.config.tempPublicDir = `${config.publicDir}/tmp`;
             fs.ensureDirSync(this.config.tempPublicDir);
 
-            this.queue = new LimitedQueue(5, 100, 3*60*1000);
+            this.queue = new LimitedQueue(5, 100, 5*60*1000);//5 минут ожидание подвижек
             this.workerState = new WorkerState();
             this.down = new FileDownloader(config.maxUploadFileSize);
             this.decomp = new FileDecompressor(2*config.maxUploadFileSize);

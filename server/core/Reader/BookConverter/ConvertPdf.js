@@ -18,7 +18,7 @@ class ConvertPdf extends ConvertHtml {
             return false;
         await this.checkExternalConverterPresent();
 
-        const {inputFiles, callback} = opts;
+        const {inputFiles, callback, abort} = opts;
 
         const outFile = `${inputFiles.filesDir}/${utils.randomHexString(10)}.xml`;
 
@@ -27,7 +27,7 @@ class ConvertPdf extends ConvertHtml {
         await this.execConverter(this.pdfToHtmlPath, ['-c', '-s', '-xml', inputFiles.sourceFile, outFile], () => {
             perc = (perc < 80 ? perc + 10 : 40);
             callback(perc);
-        });
+        }, abort);
         callback(80);
 
         const data = await fs.readFile(outFile);
