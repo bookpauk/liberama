@@ -14,7 +14,7 @@ class ConvertBase {
         this.calibrePath = `${config.dataDir}/calibre/ebook-convert`;
         this.sofficePath = '/usr/bin/soffice';
         this.pdfToHtmlPath = '/usr/bin/pdftohtml';
-        this.queue = new LimitedQueue(2, 20, 3);
+        this.queue = new LimitedQueue(2, 20, 3*60*1000);
     }
 
     async run(data, opts) {// eslint-disable-line no-unused-vars

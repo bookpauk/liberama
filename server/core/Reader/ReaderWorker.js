@@ -27,7 +27,7 @@ class ReaderWorker {
             this.config.tempPublicDir = `${config.publicDir}/tmp`;
             fs.ensureDirSync(this.config.tempPublicDir);
 
-            this.queue = new LimitedQueue(5, 100, 3);
+            this.queue = new LimitedQueue(5, 100, 3*60*1000);
             this.workerState = new WorkerState();
             this.down = new FileDownloader(config.maxUploadFileSize);
             this.decomp = new FileDecompressor(2*config.maxUploadFileSize);
@@ -56,6 +56,9 @@ class ReaderWorker {
         let isUploaded = false;
         let convertFilename = '';
 
+        const overLoadMes = 'Слишком большая очередь загрузки. Пожалуйста, попробуйте позже.';
+        const overLoadErr = new Error(overLoadMes);
+
         let q = null;
         try {
             wState.set({state: 'queue', step: 1, totalSteps: 1});
@@ -67,7 +70,7 @@ class ReaderWorker {
                         qSize = place;
                 });
             } catch (e) {
-                throw new Error('Слишком большая очередь загрузки. Пожалуйста, попробуйте позже.');
+                throw overLoadErr;
             }
 
             wState.set({state: 'download', step: 1, totalSteps: 3, url});
@@ -76,10 +79,11 @@ class ReaderWorker {
             const tempFilename2 = utils.randomHexString(30);
             const decompDirname = utils.randomHexString(30);
 
+            //download or use uploaded
             if (url.indexOf('file://') != 0) {//download
                 const downdata = await this.down.load(url, (progress) => {
                     wState.set({progress});
-                });
+                }, q.abort);
 
                 downloadedFilename = `${this.config.tempDownloadDir}/${tempFilename}`;
                 await fs.writeFile(downloadedFilename, downdata);
@@ -91,6 +95,10 @@ class ReaderWorker {
                 isUploaded = true;
             }
             wState.set({progress: 100});
+
+            if (q.abort())
+                throw overLoadErr;
+            q.resetTimeout();
 
             //decompress
             wState.set({state: 'decompress', step: 2, progress: 0});
@@ -104,12 +112,16 @@ class ReaderWorker {
             }
             wState.set({progress: 100});
             
+            if (q.abort())
+                throw overLoadErr;
+            q.resetTimeout();
+
             //конвертирование в fb2
             wState.set({state: 'convert', step: 3, progress: 0});
             convertFilename = `${this.config.tempDownloadDir}/${tempFilename2}`;
             await this.bookConverter.convertToFb2(decompFiles, convertFilename, opts, progress => {
                 wState.set({progress});
-            });
+            }, q.abort);
 
             //сжимаем файл в tmp, если там уже нет с тем же именем-sha256
             const compFilename = await this.decomp.gzipFileIfNotExists(convertFilename, this.config.tempPublicDir);
@@ -136,6 +148,8 @@ class ReaderWorker {
 
         } catch (e) {
             log(LM_ERR, e.stack);
+            if (e.message == 'abort')
+                e.message = overLoadMes;
             wState.set({state: 'error', error: e.message});
         } finally {
             //clean

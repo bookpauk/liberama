@@ -1,19 +1,16 @@
-const cleanPeriod = 60*1000;//1 минута
-const cleanTimeout = 60;//timeout в минутах (cleanPeriod)
-
 class LimitedQueue {
-    constructor(enqueueAfter = 10, size = 100, timeout = cleanTimeout) {//timeout в минутах (cleanPeriod)
+    constructor(enqueueAfter = 10, size = 100, timeout = 60*60*1000) {//timeout в ms
         this.size = size;
         this.timeout = timeout;
 
+        this.abortCount = 0;
+        this.enqueueAfter = enqueueAfter;
         this.freed = enqueueAfter;
         this.listeners = [];
-
-        this.timer = setTimeout(() => { this.periodicClean(); }, cleanPeriod);
     }
 
     _addListener(listener) {
-        this.listeners.push(Object.assign({regTime: Date.now()}, listener));
+        this.listeners.push(listener);
     }
 
     //отсылаем сообщение первому ожидающему и удаляем его из списка
@@ -22,13 +19,11 @@ class LimitedQueue {
             let listener = this.listeners.shift();
             listener.onFree();
 
-            const now = Date.now();
             for (let i = 0; i < this.listeners.length; i++) {
-                listener = this.listeners[i];
-                listener.regTime = now;
-                listener.onPlaceChange(i + 1);
+                this.listeners[i].onPlaceChange(i + 1);
             }
 
+            this.resetTimeout();
         }
     }
 
@@ -42,16 +37,21 @@ class LimitedQueue {
                     throw new Error('Ошибка получения ресурсов в очереди ожидания');
 
                 this.freed--;
+                this.resetTimeout();
 
-                let returned = false;
+                let aCount = this.abortCount;
                 return {
                     ret: () => {
-                        if (!returned) {
+                        if (aCount == this.abortCount) {
                             this.freed++;
                             this._emitFree();
-                            returned = true;
+                            aCount = -1;
                         }
-                    }
+                    },
+                    abort: () => {
+                        return (aCount != this.abortCount);
+                    },
+                    resetTimeout: this.resetTimeout.bind(this)
                 };
             };
 
@@ -80,6 +80,27 @@ class LimitedQueue {
         });
     }
 
+    resetTimeout() {
+        if (this.timer)
+            clearTimeout(this.timer);
+        this.timer = setTimeout(() => { this.clean(); }, this.timeout);
+    }
+
+    clean() {
+        this.timer = null;
+
+        if (this.freed < this.enqueueAfter) {
+            this.abortCount++;
+            //чистка listeners
+            for (const listener of this.listeners) {
+                listener.onError('Время ожидания в очереди истекло');
+            }
+            this.listeners = [];
+
+            this.freed = this.enqueueAfter;
+        }
+    }
+
     destroy() {
         if (this.timer) {
             clearTimeout(this.timer);
@@ -92,28 +113,6 @@ class LimitedQueue {
         this.listeners = [];
 
         this.destroyed = true;
-    }
-
-    periodicClean() {
-        try {
-            this.timer = null;
-
-            const now = Date.now();
-            //чистка listeners, убираем зависшие в очереди на одном месте
-            let newListeners = [];
-            for (const listener of this.listeners) {
-                if (now - listener.regTime < this.timeout*cleanPeriod - 50) {
-                    newListeners.push(listener);
-                } else {
-                    listener.onError('Время ожидания в очереди истекло');
-                }
-            }
-            this.listeners = newListeners;
-        } finally {
-            if (!this.destroyed) {
-                this.timer = setTimeout(() => { this.periodicClean(); }, cleanPeriod);
-            }
-        }
     }
 }
 

@@ -5,7 +5,7 @@ class FileDownloader {
         this.limitDownloadSize = limitDownloadSize;
     }
 
-    async load(url, callback) {
+    async load(url, callback, abort) {
         let errMes = '';
         const options = {
             encoding: null,
@@ -22,7 +22,9 @@ class FileDownloader {
         }
 
         let prevProg = 0;
-        const request = got(url, options).on('downloadProgress', progress => {
+        const request = got(url, options);
+
+        request.on('downloadProgress', progress => {
             if (this.limitDownloadSize) {
                 if (progress.transferred > this.limitDownloadSize) {
                     errMes = 'Файл слишком большой';
@@ -39,8 +41,12 @@ class FileDownloader {
             if (prog != prevProg && callback)
                 callback(prog);
             prevProg = prog;
-        });
 
+            if (abort && abort()) {
+                errMes = 'abort';
+                request.cancel();
+            }
+        });
 
         try {
             return (await request).body;
