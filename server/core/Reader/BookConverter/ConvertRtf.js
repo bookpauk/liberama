@@ -16,7 +16,7 @@ class ConvertRtf extends ConvertDocX {
             return false;
         await this.checkExternalConverterPresent();
 
-        const {inputFiles, callback} = opts;
+        const {inputFiles, callback, abort} = opts;
 
         const outFile = `${inputFiles.filesDir}/${path.basename(inputFiles.sourceFile)}`;
         const rtfFile = `${outFile}.rtf`;
@@ -24,9 +24,9 @@ class ConvertRtf extends ConvertDocX {
         const fb2File = `${outFile}.fb2`;
 
         await fs.copy(inputFiles.sourceFile, rtfFile);
-        await this.execConverter(this.sofficePath, ['--headless', '--convert-to', 'docx', '--outdir', inputFiles.filesDir, rtfFile]);
+        await this.execConverter(this.sofficePath, ['--headless', '--convert-to', 'docx', '--outdir', inputFiles.filesDir, rtfFile], null, abort);
 
-        return await super.convert(docxFile, fb2File, callback);
+        return await super.convert(docxFile, fb2File, callback, abort);
     }
 }
 

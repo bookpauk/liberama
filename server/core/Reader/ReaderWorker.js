@@ -1,6 +1,7 @@
 const fs = require('fs-extra');
 const path = require('path');
 
+const LimitedQueue = require('../LimitedQueue');
 const WorkerState = require('../WorkerState');//singleton
 const FileDownloader = require('../FileDownloader');
 const FileDecompressor = require('../FileDecompressor');
@@ -11,6 +12,7 @@ const utils = require('../utils');
 const log = new (require('../AppLogger'))().log;//singleton
 
 const cleanDirPeriod = 60*60*1000;//1 раз в час
+const queue = new LimitedQueue(5, 100, 5*60*1000);//5 минут ожидание подвижек
 
 let instance = null;
 
@@ -27,8 +29,8 @@ class ReaderWorker {
             fs.ensureDirSync(this.config.tempPublicDir);
 
             this.workerState = new WorkerState();
-            this.down = new FileDownloader();
-            this.decomp = new FileDecompressor();
+            this.down = new FileDownloader(config.maxUploadFileSize);
+            this.decomp = new FileDecompressor(2*config.maxUploadFileSize);
             this.bookConverter = new BookConverter(this.config);
 
             this.remoteWebDavStorage = false;
@@ -53,17 +55,35 @@ class ReaderWorker {
         let downloadedFilename = '';
         let isUploaded = false;
         let convertFilename = '';
+
+        const overLoadMes = 'Слишком большая очередь загрузки. Пожалуйста, попробуйте позже.';
+        const overLoadErr = new Error(overLoadMes);
+
+        let q = null;
         try {
+            wState.set({state: 'queue', step: 1, totalSteps: 1});
+            try {
+                let qSize = 0;
+                q = await queue.get((place) => {
+                    wState.set({place, progress: (qSize ? Math.round((qSize - place)/qSize*100) : 0)});
+                    if (!qSize)
+                        qSize = place;
+                });
+            } catch (e) {
+                throw overLoadErr;
+            }
+
             wState.set({state: 'download', step: 1, totalSteps: 3, url});
 
             const tempFilename = utils.randomHexString(30);
             const tempFilename2 = utils.randomHexString(30);
             const decompDirname = utils.randomHexString(30);
 
+            //download or use uploaded
             if (url.indexOf('file://') != 0) {//download
                 const downdata = await this.down.load(url, (progress) => {
                     wState.set({progress});
-                });
+                }, q.abort);
 
                 downloadedFilename = `${this.config.tempDownloadDir}/${tempFilename}`;
                 await fs.writeFile(downloadedFilename, downdata);
@@ -75,6 +95,10 @@ class ReaderWorker {
                 isUploaded = true;
             }
             wState.set({progress: 100});
+
+            if (q.abort())
+                throw overLoadErr;
+            q.resetTimeout();
 
             //decompress
             wState.set({state: 'decompress', step: 2, progress: 0});
@@ -88,12 +112,16 @@ class ReaderWorker {
             }
             wState.set({progress: 100});
             
+            if (q.abort())
+                throw overLoadErr;
+            q.resetTimeout();
+
             //конвертирование в fb2
             wState.set({state: 'convert', step: 3, progress: 0});
             convertFilename = `${this.config.tempDownloadDir}/${tempFilename2}`;
             await this.bookConverter.convertToFb2(decompFiles, convertFilename, opts, progress => {
                 wState.set({progress});
-            });
+            }, q.abort);
 
             //сжимаем файл в tmp, если там уже нет с тем же именем-sha256
             const compFilename = await this.decomp.gzipFileIfNotExists(convertFilename, this.config.tempPublicDir);
@@ -120,9 +148,13 @@ class ReaderWorker {
 
         } catch (e) {
             log(LM_ERR, e.stack);
+            if (e.message == 'abort')
+                e.message = overLoadMes;
             wState.set({state: 'error', error: e.message});
         } finally {
             //clean
+            if (q)
+                q.ret();
             if (decompDir)
                 await fs.remove(decompDir);
             if (downloadedFilename && !isUploaded)

@@ -1,30 +1,54 @@
 <template>
     <div class="page">
         <div class="box">
-            <p class="p">Проект существует исключительно на личном энтузиазме.</p>
-            <p class="p">Чтобы энтузиазма было побольше, вы можете пожертвовать на развитие проекта любую сумму:</p>
+            <p class="p">Вы можете пожертвовать на развитие проекта любую сумму:</p>
             <div class="address">
                 <img class="logo" src="./assets/yandex.png">
                 <el-button class="button" @click="donateYandexMoney">Пожертвовать</el-button><br>
-                <div class="para">{{ yandexAddress }}</div>
+                <div class="para">{{ yandexAddress }}
+                    <el-tooltip :open-delay="500" effect="light">
+                        <template slot="content">
+                            Скопировать
+                        </template>
+                        <i class="el-icon-copy-document copy-icon" @click="copyAddress(yandexAddress, 'Яндекс кошелек')"></i>
+                    </el-tooltip>
+                </div>
             </div>
 
             <div class="address">                
                 <img class="logo" src="./assets/bitcoin.png">
-                <el-button class="button" @click="copyAddress(bitcoinAddress, 'Bitcoin')">Скопировать</el-button><br>
-                <div class="para">{{ bitcoinAddress }}</div>
+                <div class="para">{{ bitcoinAddress }}
+                    <el-tooltip :open-delay="500" effect="light">
+                        <template slot="content">
+                            Скопировать
+                        </template>
+                        <i class="el-icon-copy-document copy-icon" @click="copyAddress(bitcoinAddress, 'Bitcoin-адрес')"></i>
+                    </el-tooltip>
+                </div>
             </div>
 
             <div class="address">                
                 <img class="logo" src="./assets/litecoin.png">
-                <el-button class="button" @click="copyAddress(litecoinAddress, 'Litecoin')">Скопировать</el-button><br>
-                <div class="para">{{ litecoinAddress }}</div>
+                <div class="para">{{ litecoinAddress }}
+                    <el-tooltip :open-delay="500" effect="light">
+                        <template slot="content">
+                            Скопировать
+                        </template>
+                        <i class="el-icon-copy-document copy-icon" @click="copyAddress(litecoinAddress, 'Litecoin-адрес')"></i>
+                    </el-tooltip>
+                </div>
             </div>
 
             <div class="address">                
                 <img class="logo" src="./assets/monero.png">
-                <el-button class="button" @click="copyAddress(moneroAddress, 'Monero')">Скопировать</el-button><br>
-                <div class="para">{{ moneroAddress }}</div>
+                <div class="para">{{ moneroAddress }}
+                    <el-tooltip :open-delay="500" effect="light">
+                        <template slot="content">
+                            Скопировать
+                        </template>
+                        <i class="el-icon-copy-document copy-icon" @click="copyAddress(moneroAddress, 'Monero-адрес')"></i>
+                    </el-tooltip>
+                </div>
             </div>
         </div>
     </div>
@@ -54,7 +78,7 @@ class DonateHelpPage extends Vue {
     async copyAddress(address, prefix) {
         const result = await copyTextToClipboard(address);
         if (result)
-            this.$notify.success({message: `${prefix}-адрес ${address} успешно скопирован в буфер обмена`});
+            this.$notify.success({message: `${prefix} ${address} успешно скопирован в буфер обмена`});
         else
             this.$notify.error({message: 'Копирование не удалось'});
     }
@@ -105,5 +129,11 @@ h5 {
     width: 130px;
     position: relative;
     top: 10px;
+}
+
+.copy-icon {
+    margin-left: 10px;
+    cursor: pointer;
+    font-size: 120%;
 }
 </style>

@@ -10,8 +10,9 @@ const utils = require('./utils');
 const FileDetector = require('./FileDetector');
 
 class FileDecompressor {
-    constructor() {
+    constructor(limitFileSize = 0) {
         this.detector = new FileDetector();
+        this.limitFileSize = limitFileSize;
     }
 
     async decompressNested(filename, outputDir) {
@@ -113,7 +114,7 @@ class FileDecompressor {
 
     async unZip(filename, outputDir) {
         const zip = new ZipStreamer();
-        return await zip.unpack(filename, outputDir);
+        return await zip.unpack(filename, outputDir, null, this.limitFileSize);
     }
 
     unBz2(filename, outputDir) {
@@ -125,8 +126,15 @@ class FileDecompressor {
     }
 
     unTar(filename, outputDir) {
-        return new Promise((resolve, reject) => {
+        return new Promise((resolve, reject) => { (async() => {
             const files = [];
+
+            if (this.limitFileSize) {
+                if ((await fs.stat(filename)).size > this.limitFileSize) {
+                    reject('Файл слишком большой');
+                    return;
+                }
+            }
 
             const tarExtract = tar.extract(outputDir, {
                 map: (header) => {
@@ -149,7 +157,7 @@ class FileDecompressor {
             });
 
             inputStream.pipe(tarExtract);
-        });
+        })().catch(reject); });
     }
 
     decompressByStream(stream, filename, outputDir) {
@@ -174,6 +182,16 @@ class FileDecompressor {
             });
 
             stream.on('error', reject);
+
+            if (this.limitFileSize) {
+                let readSize = 0;
+                stream.on('data', (buffer) => {
+                    readSize += buffer.length;
+                    if (readSize > this.limitFileSize)
+                        stream.destroy(new Error('Файл слишком большой'));
+                });
+            }
+
             inputStream.on('error', reject);
             outputStream.on('error', reject);
         

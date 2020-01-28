@@ -16,6 +16,7 @@ const ruMessage = {
     'start': ' ',
     'finish': ' ',
     'error': ' ',
+    'queue': 'очередь',
     'download': 'скачивание',
     'decompress': 'распаковка',
     'convert': 'конвертирование',
@@ -49,8 +50,13 @@ class ProgressPage extends Vue {
     }
 
     setState(state) {
-        if (state.state)
-            this.text = (ruMessage[state.state] ? ruMessage[state.state] : state.state);
+        if (state.state) {
+            if (state.state == 'queue') {
+                this.text = 'Номер в очереди: ' + (state.place ? state.place : '');
+            } else {
+                this.text = (ruMessage[state.state] ? ruMessage[state.state] : state.state);
+            }
+        }
         this.step = (state.step ? state.step : this.step);
         this.totalSteps = (state.totalSteps > this.totalSteps ? state.totalSteps : this.totalSteps);
         this.progress = state.progress || 0;
