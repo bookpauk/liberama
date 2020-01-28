@@ -90,6 +90,51 @@
                 </span>
             </el-dialog>
 
+            <el-dialog
+                title="Здравствуйте, уважаемые читатели!"
+                :visible.sync="donationVisible"
+                width="90%">
+                <div style="word-break: normal">
+                    Стартовала ежегодная акция "Оплатим хостинг вместе".<br><br>
+
+                    Для оплаты годового хостинга читалки, необходимо собрать сумму около 2000 рублей.
+                    У автора эти деньги есть. Однако будет справедливо, если каждый
+                    сможет проголосовать рублем за то, чтобы читалка так и оставалась:
+
+                    <ul>
+                        <li>непрерывно улучшаемой</li>
+                        <li>без рекламы</li>
+                        <li>без регистрации</li>
+                        <li>Open Source</li>
+                    </ul>
+
+                    Автор также обращается с просьбой о помощи в распространении 
+                    <a href="https://omnireader.ru" target="_blank">ссылки</a>
+                    <el-tooltip :open-delay="500" effect="light">
+                        <template slot="content">
+                            Скопировать
+                        </template>
+                        <i class="el-icon-copy-document" style="cursor: pointer; font-size: 100%" @click="copyLink('https://omnireader.ru')"></i>
+                    </el-tooltip>
+                    на читалку через тематические форумы, соцсети, мессенджеры и пр.
+                    Чем нас больше, тем легче оставаться на плаву и тем больше мотивации у автора, чтобы продолжать работать над проектом.
+
+                    <br><br>
+                    Если соберется бóльшая сумма, то разработка децентрализованной библиотеки для свободного обмена книгами будет по воможности ускорена.
+                    <br><br>
+                    P.S. При необходимости можно воспользоваться подходящим обменником на <a href="https://www.bestchange.ru" target="_blank">bestchange.ru</a>
+
+                    <br><br>
+                    <el-button type="success" round @click="openDonate">Помочь проекту</el-button>
+                </div>
+
+                <span slot="footer" class="dialog-footer">
+                    <span class="clickable" style="font-size: 60%; color: grey" @click="donationDialogDisable">Больше не показывать</span>                        
+                    <br><br>
+                    <el-button @click="donationDialogRemind">Напомнить позже</el-button>
+                </span>
+            </el-dialog>
+
         </el-main>
     </el-container>
 </template>
@@ -200,6 +245,7 @@ class Reader extends Vue {
 
     whatsNewVisible = false;
     whatsNewContent = '';
+    donationVisible = false;
 
     created() {
         this.loading = true;
@@ -258,9 +304,10 @@ class Reader extends Vue {
             this.checkActivateDonateHelpPage();
             this.loading = false;
 
-            await this.showWhatsNew();
-
             this.updateRoute();
+
+            await this.showWhatsNew();
+            await this.showDonation();
         })();
     }
 
@@ -272,6 +319,7 @@ class Reader extends Vue {
         this.clickControl = settings.clickControl;
         this.blinkCachedLoad = settings.blinkCachedLoad;
         this.showWhatsNewDialog = settings.showWhatsNewDialog;
+        this.showDonationDialog2020 = settings.showDonationDialog2020;
         this.showToolButton = settings.showToolButton;
         this.enableSitesFilter = settings.enableSitesFilter;
 
@@ -335,6 +383,41 @@ class Reader extends Vue {
             this.whatsNewContent = 'Версия ' + whatsNew.header + whatsNew.content;
             this.whatsNewVisible = true;
         }
+    }
+
+    async showDonation() {
+        await utils.sleep(3000);
+        const today = utils.formatDate(new Date(), 'coDate');
+
+        if (this.mode == 'omnireader' && today < '2020-03-01' && this.showDonationDialog2020 && this.donationRemindDate != today) {
+            this.donationVisible = true;
+        }
+    }
+
+    donationDialogDisable() {
+        this.donationVisible = false;
+        if (this.showDonationDialog2020) {
+            const newSettings = Object.assign({}, this.settings, { showDonationDialog2020: false });
+            this.commit('reader/setSettings', newSettings);
+        }
+    }
+
+    donationDialogRemind() {
+        this.donationVisible = false;
+        this.commit('reader/setDonationRemindDate', utils.formatDate(new Date(), 'coDate'));
+    }
+
+    openDonate() {
+        this.donationVisible = false;
+        this.donateToggle();
+    }
+
+    async copyLink(link) {
+        const result = await utils.copyTextToClipboard(link);
+        if (result)
+            this.$notify.success({message: `Ссылка ${link} успешно скопирована в буфер обмена`});
+        else
+            this.$notify.error({message: 'Копирование не удалось'});
     }
 
     openVersionHistory() {
@@ -453,6 +536,10 @@ class Reader extends Vue {
 
     get whatsNewContentHash() {
         return this.$store.state.reader.whatsNewContentHash;
+    }
+
+    get donationRemindDate() {
+        return this.$store.state.reader.donationRemindDate;
     }
 
     addAction(pos) {
