@@ -34,6 +34,8 @@ class ConvertBase {
     }
 
     async execConverter(path, args, onData, abort) {
+        onData = (onData ? onData : () => {});
+        
         let q = null;
         try {
             q = await queue.get(() => {onData();});
