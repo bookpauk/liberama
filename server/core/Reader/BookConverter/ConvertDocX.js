@@ -22,8 +22,8 @@ class ConvertDocX extends ConvertBase {
 
     async convert(docxFile, fb2File, callback, abort) {
         let perc = 0;
-        await this.execConverter(this.calibrePath, [docxFile, fb2File], () => {
-            perc = (perc < 100 ? perc + 5 : 50);
+        await this.execConverter(this.calibrePath, [docxFile, fb2File, '-vv'], () => {
+            perc = (perc < 100 ? perc + 1 : 50);
             callback(perc);
         }, abort);
 

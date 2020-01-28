@@ -37,8 +37,8 @@ class ConvertEpub extends ConvertBase {
         await fs.copy(inputFiles.sourceFile, epubFile);
 
         let perc = 0;
-        await this.execConverter(this.calibrePath, [epubFile, fb2File], () => {
-            perc = (perc < 100 ? perc + 5 : 50);
+        await this.execConverter(this.calibrePath, [epubFile, fb2File, '-vv'], () => {
+            perc = (perc < 100 ? perc + 1 : 50);
             callback(perc);
         }, abort);
 

@@ -42,7 +42,15 @@ class ConvertBase {
         }
 
         try {
-            const result = await utils.spawnProcess(path, {args, onData, abort});
+            const result = await utils.spawnProcess(path, {
+                killAfter: 600,
+                args, 
+                onData: (data) => {
+                    q.resetTimeout();
+                    onData(data);
+                },
+                abort
+            });
             if (result.code != 0) {
                 let error = result.code;
                 if (this.config.branch == 'development')
