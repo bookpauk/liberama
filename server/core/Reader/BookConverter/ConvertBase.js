@@ -7,6 +7,8 @@ const LimitedQueue = require('../../LimitedQueue');
 const textUtils = require('./textUtils');
 const utils = require('../../utils');
 
+const queue = new LimitedQueue(2, 20, 3*60*1000);//3 минуты ожидание подвижек
+
 class ConvertBase {
     constructor(config) {
         this.config = config;
@@ -14,7 +16,6 @@ class ConvertBase {
         this.calibrePath = `${config.dataDir}/calibre/ebook-convert`;
         this.sofficePath = '/usr/bin/soffice';
         this.pdfToHtmlPath = '/usr/bin/pdftohtml';
-        this.queue = new LimitedQueue(2, 20, 3*60*1000);//3 минуты ожидание подвижек
     }
 
     async run(data, opts) {// eslint-disable-line no-unused-vars
@@ -35,7 +36,7 @@ class ConvertBase {
     async execConverter(path, args, onData, abort) {
         let q = null;
         try {
-            q = await this.queue.get(() => {onData();});
+            q = await queue.get(() => {onData();});
         } catch (e) {
             throw new Error('Слишком большая очередь конвертирования. Пожалуйста, попробуйте позже.');
         }

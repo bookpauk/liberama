@@ -12,6 +12,7 @@ const utils = require('../utils');
 const log = new (require('../AppLogger'))().log;//singleton
 
 const cleanDirPeriod = 60*60*1000;//1 раз в час
+const queue = new LimitedQueue(5, 100, 5*60*1000);//5 минут ожидание подвижек
 
 let instance = null;
 
@@ -27,7 +28,6 @@ class ReaderWorker {
             this.config.tempPublicDir = `${config.publicDir}/tmp`;
             fs.ensureDirSync(this.config.tempPublicDir);
 
-            this.queue = new LimitedQueue(5, 100, 5*60*1000);//5 минут ожидание подвижек
             this.workerState = new WorkerState();
             this.down = new FileDownloader(config.maxUploadFileSize);
             this.decomp = new FileDecompressor(2*config.maxUploadFileSize);
@@ -64,7 +64,7 @@ class ReaderWorker {
             wState.set({state: 'queue', step: 1, totalSteps: 1});
             try {
                 let qSize = 0;
-                q = await this.queue.get((place) => {
+                q = await queue.get((place) => {
                     wState.set({place, progress: (qSize ? Math.round((qSize - place)/qSize*100) : 0)});
                     if (!qSize)
                         qSize = place;
