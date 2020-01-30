@@ -1,5 +1,5 @@
 <template>
-    <div v-show="visible" class="flex column justify-center items-center z-max" style="background-color: rgba(0, 0, 0, 0.8)">
+    <div v-show="visible" class="fit flex column justify-center items-center z-max" style="background-color: rgba(0, 0, 0, 0.8)">
         <div class="flex column justify-start items-center" style="height: 250px">
             <q-circular-progress
                 show-value
@@ -48,8 +48,6 @@ class ProgressPage extends Vue {
     visible = false;
 
     show() {
-        this.$el.style.width = this.$parent.$el.offsetWidth + 'px';
-        this.$el.style.height = this.$parent.$el.offsetHeight + 'px';
         this.text = '';
         this.totalSteps = 1;
         this.step = 1;
