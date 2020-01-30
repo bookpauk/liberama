@@ -1,12 +1,11 @@
 const got = require('got');
 
-const maxDownloadSize = 50*1024*1024;
-
 class FileDownloader {
-    constructor() {
+    constructor(limitDownloadSize = 0) {
+        this.limitDownloadSize = limitDownloadSize;
     }
 
-    async load(url, callback) {
+    async load(url, callback, abort) {
         let errMes = '';
         const options = {
             encoding: null,
@@ -23,10 +22,14 @@ class FileDownloader {
         }
 
         let prevProg = 0;
-        const request = got(url, options).on('downloadProgress', progress => {
-            if (progress.transferred > maxDownloadSize) {
-                errMes = 'file too big';
-                request.cancel();
+        const request = got(url, options);
+
+        request.on('downloadProgress', progress => {
+            if (this.limitDownloadSize) {
+                if (progress.transferred > this.limitDownloadSize) {
+                    errMes = 'Файл слишком большой';
+                    request.cancel();
+                }
             }
 
             let prog = 0;
@@ -38,8 +41,12 @@ class FileDownloader {
             if (prog != prevProg && callback)
                 callback(prog);
             prevProg = prog;
-        });
 
+            if (abort && abort()) {
+                errMes = 'abort';
+                request.cancel();
+            }
+        });
 
         try {
             return (await request).body;

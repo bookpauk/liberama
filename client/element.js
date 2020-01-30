@@ -19,6 +19,7 @@ import ElCheckbox from 'element-ui/lib/checkbox';
 import ElTabs from 'element-ui/lib/tabs';
 import ElTabPane from 'element-ui/lib/tab-pane';
 import ElTooltip from 'element-ui/lib/tooltip';
+import ElRow from 'element-ui/lib/row';
 import ElCol from 'element-ui/lib/col';
 import ElContainer from 'element-ui/lib/container';
 import ElAside from 'element-ui/lib/aside';
@@ -43,7 +44,7 @@ import MessageBox from 'element-ui/lib/message-box';
 
 const components = {
     ElMenu, ElMenuItem, ElButton, ElButtonGroup, ElCheckbox, ElTabs, ElTabPane, ElTooltip,
-    ElCol, ElContainer, ElAside, ElMain, ElHeader,
+    ElRow, ElCol, ElContainer, ElAside, ElMain, ElHeader,
     ElInput, ElInputNumber, ElSelect, ElOption, ElTable, ElTableColumn,
     ElProgress, ElSlider, ElForm, ElFormItem,
     ElColorPicker, ElDialog,

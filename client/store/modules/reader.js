@@ -182,6 +182,7 @@ const settingDefaults = {
     imageFitWidth: true,
     showServerStorageMessages: true,
     showWhatsNewDialog: true,
+    showDonationDialog2020: true,
     enableSitesFilter: true,
 
     fontShifts: {},
@@ -204,6 +205,7 @@ const state = {
     profilesRev: 0,
     allowProfilesSave: false,//подстраховка для разработки
     whatsNewContentHash: '',
+    donationRemindDate: '',
     currentProfile: '',
     settings: Object.assign({}, settingDefaults),
     settingsRev: {},
@@ -237,6 +239,9 @@ const mutations = {
     },
     setWhatsNewContentHash(state, value) {
         state.whatsNewContentHash = value;
+    },
+    setDonationRemindDate(state, value) {
+        state.donationRemindDate = value;
     },
     setCurrentProfile(state, value) {
         state.currentProfile = value;

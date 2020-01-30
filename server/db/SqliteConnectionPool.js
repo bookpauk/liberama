@@ -14,7 +14,6 @@ class SqliteConnectionPool {
         if (!Number.isInteger(connCount) || connCount <= 0)
             return;
         this.connections = [];
-        this.taken = new Set();
         this.freed = new Set();
 
         for (let i = 0; i < connCount; i++) {
@@ -22,7 +21,6 @@ class SqliteConnectionPool {
             client.configure('busyTimeout', 10000); //ms
 
             client.ret = () => {
-                this.taken.delete(i);
                 this.freed.add(i);
             };
 
@@ -52,7 +50,6 @@ class SqliteConnectionPool {
         }
 
         this.freed.delete(freeConnIndex);
-        this.taken.add(freeConnIndex);
 
         return this.connections[freeConnIndex];
     }

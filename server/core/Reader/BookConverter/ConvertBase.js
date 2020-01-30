@@ -3,10 +3,11 @@ const iconv = require('iconv-lite');
 const chardet = require('chardet');
 const he = require('he');
 
+const LimitedQueue = require('../../LimitedQueue');
 const textUtils = require('./textUtils');
 const utils = require('../../utils');
 
-let execConverterCounter = 0;
+const queue = new LimitedQueue(2, 20, 3*60*1000);//3 минуты ожидание подвижек
 
 class ConvertBase {
     constructor(config) {
@@ -32,13 +33,26 @@ class ConvertBase {
             throw new Error('Внешний конвертер pdftohtml не найден');
     }
 
-    async execConverter(path, args, onData) {
-        execConverterCounter++;
+    async execConverter(path, args, onData, abort) {
+        onData = (onData ? onData : () => {});
+        
+        let q = null;
         try {
-            if (execConverterCounter > 10)
-                throw new Error('Слишком большая очередь конвертирования. Пожалуйста, попробуйте позже.');
+            q = await queue.get(() => {onData();});
+        } catch (e) {
+            throw new Error('Слишком большая очередь конвертирования. Пожалуйста, попробуйте позже.');
+        }
 
-            const result = await utils.spawnProcess(path, {args, onData});
+        try {
+            const result = await utils.spawnProcess(path, {
+                killAfter: 600,
+                args, 
+                onData: (data) => {
+                    q.resetTimeout();
+                    onData(data);
+                },
+                abort
+            });
             if (result.code != 0) {
                 let error = result.code;
                 if (this.config.branch == 'development')
@@ -48,13 +62,15 @@ class ConvertBase {
         } catch(e) {
             if (e.status == 'killed') {
                 throw new Error('Слишком долгое ожидание конвертера');
+            } else if (e.status == 'abort') {
+                throw new Error('abort');
             } else if (e.status == 'error') {
                 throw new Error(e.error);
             } else {
                 throw new Error(e);
             }
         } finally {
-            execConverterCounter--;
+            q.ret();
         }
     }
 

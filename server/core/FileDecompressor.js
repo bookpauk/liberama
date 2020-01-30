@@ -5,12 +5,14 @@ const unbzip2Stream = require('unbzip2-stream');
 const tar = require('tar-fs');
 const ZipStreamer = require('./ZipStreamer');
 
+const appLogger = new (require('./AppLogger'))();//singleton
 const utils = require('./utils');
 const FileDetector = require('./FileDetector');
 
 class FileDecompressor {
-    constructor() {
+    constructor(limitFileSize = 0) {
         this.detector = new FileDetector();
+        this.limitFileSize = limitFileSize;
     }
 
     async decompressNested(filename, outputDir) {
@@ -112,7 +114,7 @@ class FileDecompressor {
 
     async unZip(filename, outputDir) {
         const zip = new ZipStreamer();
-        return await zip.unpack(filename, outputDir);
+        return await zip.unpack(filename, outputDir, null, this.limitFileSize);
     }
 
     unBz2(filename, outputDir) {
@@ -124,8 +126,15 @@ class FileDecompressor {
     }
 
     unTar(filename, outputDir) {
-        return new Promise((resolve, reject) => {
+        return new Promise((resolve, reject) => { (async() => {
             const files = [];
+
+            if (this.limitFileSize) {
+                if ((await fs.stat(filename)).size > this.limitFileSize) {
+                    reject('Файл слишком большой');
+                    return;
+                }
+            }
 
             const tarExtract = tar.extract(outputDir, {
                 map: (header) => {
@@ -148,7 +157,7 @@ class FileDecompressor {
             });
 
             inputStream.pipe(tarExtract);
-        });
+        })().catch(reject); });
     }
 
     decompressByStream(stream, filename, outputDir) {
@@ -173,6 +182,16 @@ class FileDecompressor {
             });
 
             stream.on('error', reject);
+
+            if (this.limitFileSize) {
+                let readSize = 0;
+                stream.on('data', (buffer) => {
+                    readSize += buffer.length;
+                    if (readSize > this.limitFileSize)
+                        stream.destroy(new Error('Файл слишком большой'));
+                });
+            }
+
             inputStream.on('error', reject);
             outputStream.on('error', reject);
         
@@ -189,9 +208,9 @@ class FileDecompressor {
         });
     }
 
-    async gzipFile(inputFile, outputFile) {
+    async gzipFile(inputFile, outputFile, level = 1) {
         return new Promise((resolve, reject) => {
-            const gzip = zlib.createGzip({level: 1});
+            const gzip = zlib.createGzip({level});
             const input = fs.createReadStream(inputFile);
             const output = fs.createWriteStream(outputFile);
 
@@ -208,7 +227,21 @@ class FileDecompressor {
         const outFilename = `${outDir}/${hash}`;
 
         if (!await fs.pathExists(outFilename)) {
-            await this.gzipFile(filename, outFilename);
+            await this.gzipFile(filename, outFilename, 1);
+
+            // переупакуем через некоторое время на максималках
+            const filenameCopy = `${filename}.copy`;
+            await fs.copy(filename, filenameCopy);
+
+            (async() => {
+                await utils.sleep(5000);
+                const filenameGZ = `${filename}.gz`;
+                await this.gzipFile(filenameCopy, filenameGZ, 9);
+
+                await fs.move(filenameGZ, outFilename, {overwrite: true});
+
+                await fs.remove(filenameCopy);
+            })().catch((e) => { if (appLogger.inited) appLogger.log(LM_ERR, `FileDecompressor.gzipFileIfNotExists: ${e.message}`) });
         } else {
             await utils.touchFile(outFilename);
         }

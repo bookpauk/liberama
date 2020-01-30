@@ -35,9 +35,9 @@ class ReaderController extends BaseController {
         const request = req.body;
         let error = '';
         try {
-            if (!request.action) 
+            if (!request.action)
                 throw new Error(`key 'action' is empty`);
-            if (!request.items || Array.isArray(request.data)) 
+            if (!request.items || Array.isArray(request.data))
                 throw new Error(`key 'items' is empty`);
 
             return await this.readerStorage.doAction(request);
@@ -55,6 +55,24 @@ class ReaderController extends BaseController {
         try {
             const url = await this.readerWorker.saveFile(file);
             return {url};
+        } catch (e) {
+            error = e.message;
+        }
+        //bad request
+        res.status(400).send({error});
+        return false;
+    }
+
+    async restoreCachedFile(req, res) {
+        const request = req.body;
+        let error = '';
+        try {
+            if (!request.path) 
+                throw new Error(`key 'path' is empty`);
+
+            const workerId = this.readerWorker.restoreCachedFile(request.path);
+            const state = this.workerState.getState(workerId);
+            return (state ? state : {});
         } catch (e) {
             error = e.message;
         }

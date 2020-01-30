@@ -1,6 +1,6 @@
 import axios from 'axios';
-
 import * as utils from '../share/utils';
+import wsc from './webSocketConnection';
 
 const api = axios.create({
     baseURL: '/api/reader'
@@ -11,8 +11,67 @@ const workerApi = axios.create({
 });
 
 class Reader {
+    constructor() {
+    }
+
+    async getWorkerStateFinish(workerId, callback) {
+        if (!callback) callback = () => {};
+
+        let response = {};
+
+        try {
+            await wsc.open();
+            const requestId = wsc.send({action: 'worker-get-state-finish', workerId});
+
+            while (1) {// eslint-disable-line no-constant-condition
+                response = await wsc.message(requestId);
+                callback(response);
+
+                if (!response.state)
+                    throw new Error('Неверный ответ api');
+
+                if (response.state == 'finish' || response.state == 'error') {
+                    break;
+                }
+            }
+            return response;
+        } catch (e) {
+            console.error(e);
+        }
+
+        //если с WebSocket проблема, работаем по http
+        const refreshPause = 500;
+        let i = 0;
+        response = {};
+        while (1) {// eslint-disable-line no-constant-condition
+            const prevProgress = response.progress || 0;
+            const prevState = response.state || 0;
+            response = await workerApi.post('/get-state', {workerId});
+            response = response.data;
+            callback(response);
+
+            if (!response.state)
+                throw new Error('Неверный ответ api');
+
+            if (response.state == 'finish' || response.state == 'error') {
+                break;
+            }
+
+            if (i > 0)
+                await utils.sleep(refreshPause);
+
+            i++;
+            if (i > 120*1000/refreshPause) {//2 мин ждем телодвижений воркера
+                throw new Error('Слишком долгое время ожидания');
+            }
+            //проверка воркера
+            i = (prevProgress != response.progress || prevState != response.state ? 1 : i);
+        }
+
+        return response;
+    }
+
     async loadBook(opts, callback) {
-        const refreshPause = 300;
         if (!callback) callback = () => {};
 
         let response = await api.post('/load-book', opts);
@@ -22,62 +81,90 @@ class Reader {
             throw new Error('Неверный ответ api');
 
         callback({totalSteps: 4});
+        callback(response.data);
 
-        let i = 0;
-        while (1) {// eslint-disable-line no-constant-condition
-            callback(response.data);
+        response = await this.getWorkerStateFinish(workerId, callback);
 
-            if (response.data.state == 'finish') {//воркер закончил работу, можно скачивать кешированный на сервере файл
+        if (response) {
+            if (response.state == 'finish') {//воркер закончил работу, можно скачивать кешированный на сервере файл
                 callback({step: 4});
-                const book = await this.loadCachedBook(response.data.path, callback);
-                return Object.assign({}, response.data, {data: book.data});
+                const book = await this.loadCachedBook(response.path, callback, response.size);
+                return Object.assign({}, response, {data: book.data});
             }
-            if (response.data.state == 'error') {
-                let errMes = response.data.error;
+
+            if (response.state == 'error') {
+                let errMes = response.error;
                 if (errMes.indexOf('getaddrinfo') >= 0 || 
                     errMes.indexOf('ECONNRESET') >= 0 ||
                     errMes.indexOf('EINVAL') >= 0 ||
                     errMes.indexOf('404') >= 0)
-                    errMes = `Ресурс не найден по адресу: ${response.data.url}`;
+                    errMes = `Ресурс не найден по адресу: ${response.url}`;
                 throw new Error(errMes);
             }
-            if (i > 0)
-                await utils.sleep(refreshPause);
+        } else {
+            throw new Error('Пустой ответ сервера');
+        }
+    }
 
-            i++;
-            if (i > 120*1000/refreshPause) {//2 мин ждем телодвижений воркера
-                throw new Error('Слишком долгое время ожидания');
+    async checkCachedBook(url) {
+        let estSize = -1;
+        try {
+            const response = await axios.head(url, {headers: {'Cache-Control': 'no-cache'}});
+
+            if (response.headers['content-length']) {
+                estSize = response.headers['content-length'];
             }
-            //проверка воркера
-            const prevProgress = response.data.progress;
-            const prevState = response.data.state;
-            response = await workerApi.post('/get-state', {workerId});
-            i = (prevProgress != response.data.progress || prevState != response.data.state ? 1 : i);
+        } catch (e) {
+            //восстановим при необходимости файл на сервере из удаленного облака
+            let response = null
+            
+            try {
+                await wsc.open();
+                response = await wsc.message(wsc.send({action: 'reader-restore-cached-file', path: url}));
+            } catch (e) {
+                console.error(e);
+                //если с WebSocket проблема, работаем по http
+                response = await api.post('/restore-cached-file', {path: url});
+                response = response.data;
+            }
+
+            const workerId = response.workerId;
+            if (!workerId)
+                throw new Error('Неверный ответ api');
+
+            response = await this.getWorkerStateFinish(workerId);
+            if (response.state == 'error') {
+                throw new Error(response.error);
+            }
+            if (response.size && estSize < 0) {
+                estSize = response.size;
+            }
         }
+
+        return estSize;
     }
 
-    async checkUrl(url) {
-        return await axios.head(url, {headers: {'Cache-Control': 'no-cache'}});
-    }
-
-    async loadCachedBook(url, callback) {
-        const response = await axios.head(url);
-
-        let estSize = 1000000;
-        if (response.headers['content-length']) {
-            estSize = response.headers['content-length'];
-        }
+    async loadCachedBook(url, callback, estSize = -1) {
+        if (!callback) callback = () => {};
 
         callback({state: 'loading', progress: 0});
+
+        //получение размера файла
+        if (estSize && estSize < 0) {
+            estSize = await this.checkCachedBook(url);
+        }
+
+        //получение файла
+        estSize = (estSize > 0 ? estSize : 1000000);
         const options = {
-            onDownloadProgress: progress => {
+            onDownloadProgress: (progress) => {
                 while (progress.loaded > estSize) estSize *= 1.5;
 
                 if (callback)
                     callback({progress: Math.round((progress.loaded*100)/estSize)});
             }
         }
-        //загрузка
+
         return await axios.get(url, options);
     }
 
@@ -114,13 +201,22 @@ class Reader {
     }
 
     async storage(request) {
-        let response = await api.post('/storage', request);
+        let response = null;
+        try {
+            await wsc.open();
+            response = await wsc.message(wsc.send({action: 'reader-storage', body: request}));
+        } catch (e) {
+            console.error(e);
+            //если с WebSocket проблема, работаем по http
+            response = await api.post('/storage', request);
+            response = response.data;
+        }
 
-        const state = response.data.state;
+        const state = response.state;
         if (!state)
             throw new Error('Неверный ответ api');
 
-        return response.data;
+        return response;
     }
 }
 

@@ -20,12 +20,12 @@ class ConvertDocX extends ConvertBase {
         return false;
     }
 
-    async convert(docxFile, fb2File, callback) {
+    async convert(docxFile, fb2File, callback, abort) {
         let perc = 0;
-        await this.execConverter(this.calibrePath, [docxFile, fb2File], () => {
-            perc = (perc < 100 ? perc + 5 : 50);
+        await this.execConverter(this.calibrePath, [docxFile, fb2File, '-vv'], () => {
+            perc = (perc < 100 ? perc + 1 : 50);
             callback(perc);
-        });
+        }, abort);
 
         return await fs.readFile(fb2File);
     }
@@ -35,7 +35,7 @@ class ConvertDocX extends ConvertBase {
             return false;
         await this.checkExternalConverterPresent();
 
-        const {inputFiles, callback} = opts;
+        const {inputFiles, callback, abort} = opts;
 
         const outFile = `${inputFiles.filesDir}/${path.basename(inputFiles.sourceFile)}`;
         const docxFile = `${outFile}.docx`;
@@ -43,7 +43,7 @@ class ConvertDocX extends ConvertBase {
 
         await fs.copy(inputFiles.sourceFile, docxFile);
 
-        return await this.convert(docxFile, fb2File, callback);
+        return await this.convert(docxFile, fb2File, callback, abort);
     }
 }
 

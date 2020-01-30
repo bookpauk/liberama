@@ -2,10 +2,11 @@ const c = require('./controllers');
 const utils = require('./core/utils');
 const multer = require('multer');
 
-function initRoutes(app, config) {
+function initRoutes(app, wss, config) {
     const misc = new c.MiscController(config);
     const reader = new c.ReaderController(config);
     const worker = new c.WorkerController(config);
+    new c.WebSocketController(wss, config);
 
     //access
     const [aAll, aNormal, aSite, aReader, aOmnireader] = // eslint-disable-line no-unused-vars
@@ -28,7 +29,9 @@ function initRoutes(app, config) {
         ['POST', '/api/reader/load-book', reader.loadBook.bind(reader), [aAll], {}],
         ['POST', '/api/reader/storage', reader.storage.bind(reader), [aAll], {}],
         ['POST', '/api/reader/upload-file', [upload.single('file'), reader.uploadFile.bind(reader)], [aAll], {}],
+        ['POST', '/api/reader/restore-cached-file', reader.restoreCachedFile.bind(reader), [aAll], {}],        
         ['POST', '/api/worker/get-state', worker.getState.bind(worker), [aAll], {}],
+        ['POST', '/api/worker/get-state-finish', worker.getStateFinish.bind(worker), [aAll], {}],
     ];
 
     //to app

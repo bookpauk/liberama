@@ -4,6 +4,8 @@ const path = require('path');
 const argv = require('minimist')(process.argv.slice(2));
 const express = require('express');
 const compression = require('compression');
+const http = require('http');
+const WebSocket = require ('ws');
 
 async function init() {
     //config
@@ -46,10 +48,13 @@ async function main() {
     const config = new (require('./config'))().config;//singleton
 
     //servers
-    for (let server of config.servers) {
-        if (server.mode !== 'none') {
+    for (let serverCfg of config.servers) {
+        if (serverCfg.mode !== 'none') {
             const app = express();
-            const serverConfig = Object.assign({}, config, server);
+            const server = http.createServer(app);
+            const wss = new WebSocket.Server({ server, maxPayload: 10*1024*1024 });
+
+            const serverConfig = Object.assign({}, config, serverCfg);
 
             let devModule = undefined;
             if (serverConfig.branch == 'development') {
@@ -73,7 +78,7 @@ async function main() {
                 }               
             }));
 
-            require('./routes').initRoutes(app, serverConfig);
+            require('./routes').initRoutes(app, wss, serverConfig);
 
             if (devModule) {
                 devModule.logErrors(app);
@@ -84,7 +89,7 @@ async function main() {
                 });
             }
 
-            app.listen(serverConfig.port, serverConfig.ip, function() {
+            server.listen(serverConfig.port, serverConfig.ip, function() {
                 log(`Server-${serverConfig.serverName} is ready on ${serverConfig.ip}:${serverConfig.port}, mode: ${serverConfig.mode}`);
             });
         }

@@ -26,11 +26,14 @@ class BookConverter {
         }
     }
 
-    async convertToFb2(inputFiles, outputFile, opts, callback) {
+    async convertToFb2(inputFiles, outputFile, opts, callback, abort) {
+        if (abort && abort())
+            throw new Error('abort');
+
         const selectedFileType = await this.detector.detectFile(inputFiles.selectedFile);
         const data = await fs.readFile(inputFiles.selectedFile);
 
-        const convertOpts = Object.assign({}, opts, {inputFiles, callback, dataType: selectedFileType});
+        const convertOpts = Object.assign({}, opts, {inputFiles, callback, abort, dataType: selectedFileType});
         let result = false;
         for (const convert of this.convertFactory) {
             result = await convert.run(data, convertOpts);
@@ -41,7 +44,7 @@ class BookConverter {
         }
 
         if (!result && inputFiles.nesting) {
-            result = await this.convertToFb2(inputFiles.nesting, outputFile, opts, callback);
+            result = await this.convertToFb2(inputFiles.nesting, outputFile, opts, callback, abort);
         }
 
         if (!result) {
