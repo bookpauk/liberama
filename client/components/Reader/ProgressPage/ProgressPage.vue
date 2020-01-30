@@ -1,6 +1,6 @@
 <template>
-    <div v-show="visible" class="main">
-        <div class="center">
+    <div v-show="visible" class="flex column justify-center items-center z-max" style="background-color: rgba(0, 0, 0, 0.8)">
+        <div class="flex column justify-start items-center" style="height: 250px">
             <q-circular-progress
                 show-value
                 instant-feedback
@@ -15,7 +15,7 @@
                 <span class="text-yellow">{{ percentage }}%</span>
             </q-circular-progress>
 
-            <p class="text">{{ text }}</p>
+            <p class="text-yellow">{{ text }}</p>
         </div>
     </div>
 </template>
@@ -82,35 +82,3 @@ class ProgressPage extends Vue {
 }
 //-----------------------------------------------------------------------------
 </script>
-<style scoped>
-.main {
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-
-    z-index: 100;
-    background-color: rgba(0, 0, 0, 0.8);
-
-    position: absolute;
-}
-.center {
-    display: flex;
-    flex-direction: column;
-    justify-content: flex-start;
-    align-items: center;
-
-    color: white;
-    height: 250px;
-}
-
-.text {
-    color: yellow;
-}
-
-</style>
-<style>
-.el-progress__text {
-    color: lightgreen !important;
-}
-</style>
