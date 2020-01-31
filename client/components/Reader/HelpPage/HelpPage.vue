@@ -4,23 +4,40 @@
             Справка
         </template>
 
-        <el-tabs type="border-card" v-model="selectedTab">
-            <el-tab-pane class="tab" label="Общее">
+        <q-btn-toggle
+            v-model="selectedTab"
+            toggle-color="primary"
+            no-caps
+            :options="[
+                {label: 'Общее', value: 'common'},
+                {label: 'Клавиатура', value: 'hotkeys'},
+                {label: 'Мышь/тачскрин', value: 'mouse'},
+                {label: 'История версий', value: 'releases'},
+                {label: 'Помочь проекту', value: 'donate'}
+            ]"
+        />
+        <q-separator />
+        <q-tab-panels class="fit" v-model="selectedTab">
+            <q-tab-panel name="common">
                 <CommonHelpPage></CommonHelpPage>
-            </el-tab-pane>
-            <el-tab-pane label="Клавиатура">
+            </q-tab-panel>
+
+            <q-tab-panel name="hotkeys">
                 <HotkeysHelpPage></HotkeysHelpPage>
-            </el-tab-pane>
-            <el-tab-pane label="Мышь/тачскрин">
+            </q-tab-panel>
+
+            <q-tab-panel name="mouse">
                 <MouseHelpPage></MouseHelpPage>
-            </el-tab-pane>
-            <el-tab-pane label="История версий" name="releases">
+            </q-tab-panel>
+
+            <q-tab-panel name="releases">
                 <VersionHistoryPage></VersionHistoryPage>
-            </el-tab-pane>
-            <el-tab-pane label="Помочь проекту" name="donate">
+            </q-tab-panel>
+
+            <q-tab-panel name="donate">
                 <DonateHelpPage></DonateHelpPage>
-            </el-tab-pane>
-        </el-tabs>
+            </q-tab-panel>
+        </q-tab-panels>        
     </Window>
 </template>
 
@@ -47,7 +64,7 @@ export default @Component({
     },
 })
 class HelpPage extends Vue {
-    selectedTab = null;
+    selectedTab = 'common';
 
     close() {
         this.$emit('help-toggle');
@@ -72,16 +89,4 @@ class HelpPage extends Vue {
 </script>
 
 <style scoped>
-.el-tabs {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    overflow: hidden;
-}
-
-.el-tab-pane {
-    flex: 1;
-    display: flex;
-    overflow: hidden;
-}
 </style>
