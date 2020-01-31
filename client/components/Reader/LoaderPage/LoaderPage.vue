@@ -1,34 +1,32 @@
 <template>
-    <div ref="main" class="fit column no-wrap" style="min-height: 500px">
+    <div ref="main" class="fit column no-wrap" style="min-height: 520px">
         <GithubCorner url="https://github.com/bookpauk/liberama" cornerColor="#1B695F" gitColor="EBE2C9"></GithubCorner>
-        <div class="col column justify-center items-center no-wrap" style="min-height: 150px">
+        <div class="col column justify-center items-center no-wrap" style="min-height: 170px">
             <span class="greeting"><b>{{ title }}</b></span>
-            <div class="q-my-md"></div>
+            <div class="q-my-sm"></div>
             <span class="greeting">Добро пожаловать!</span>
             <span class="greeting">Поддерживаются форматы: <b>fb2, html, txt</b> и сжатие: <b>zip, bz2, gz</b></span>
             <span v-if="isExternalConverter" class="greeting">...а также форматы: <b>rtf, doc, docx, pdf, epub, mobi</b></span>
         </div>
 
-        <div class="col column justify-start items-center no-wrap" style="min-height: 300px">
-            <!--el-input ref="input1" placeholder="URL книги" v-model="bookUrl">
-                <el-button slot="append" icon="el-icon-check" @click="submitUrl"></el-button>
-            </el-input-->
-            <q-input ref="input" class="fit" style="max-width: 700px" outlined dense bg-color="white" v-model="bookUrl" placeholder="URL книги">
+        <div class="col column justify-start items-center no-wrap">
+            <q-input ref="input" class="fit q-px-xs" style="max-width: 700px" outlined dense bg-color="white" v-model="bookUrl" placeholder="URL книги">
                 <template v-slot:append>
                     <q-btn round dense flat icon="done" @click="submitUrl"/>
                 </template>
             </q-input>
 
-            <div class="q-my-md"></div>
             <input type="file" id="file" ref="file" @change="loadFile" style='display: none;'/>
 
-            <el-button size="mini" @click="loadFileClick">
+            <div class="q-my-sm"></div>
+            <q-btn no-caps dense class="q-px-sm" color="primary" @click="loadFileClick">
                 Загрузить файл с диска
-            </el-button>
+            </q-btn>
+            
             <div class="q-my-md"></div>
-            <el-button size="mini" @click="loadBufferClick">
+            <q-btn no-caps dense class="q-px-sm" color="primary" @click="loadBufferClick">
                 Из буфера обмена
-            </el-button>
+            </q-btn>
 
             <div class="q-my-md"></div>
             <div v-if="mode == 'omnireader'">
