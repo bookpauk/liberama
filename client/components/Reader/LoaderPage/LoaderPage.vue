@@ -10,9 +10,15 @@
         </div>
 
         <div class="col column justify-start items-center no-wrap" style="min-height: 300px">
-            <el-input ref="input" placeholder="URL книги" v-model="bookUrl">
+            <!--el-input ref="input1" placeholder="URL книги" v-model="bookUrl">
                 <el-button slot="append" icon="el-icon-check" @click="submitUrl"></el-button>
-            </el-input>
+            </el-input-->
+            <q-input ref="input" class="fit" style="max-width: 700px" outlined dense bg-color="white" v-model="bookUrl" placeholder="URL книги">
+                <template v-slot:append>
+                    <q-btn round dense flat icon="done" @click="submitUrl"/>
+                </template>
+            </q-input>
+
             <div class="q-my-md"></div>
             <input type="file" id="file" ref="file" @change="loadFile" style='display: none;'/>
 
@@ -201,9 +207,5 @@ class LoaderPage extends Vue {
 .bottom-span {
     font-size: 70%;
     margin-bottom: 10px;
-}
-
-.el-input {
-    max-width: 700px;
 }
 </style>
