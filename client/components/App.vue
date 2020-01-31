@@ -284,14 +284,6 @@ body, html, #app {
     font: normal 12pt ReaderDefault;
 }
 
-.el-tabs__content {
-    flex: 1;
-    padding: 0 !important;
-    display: flex;
-    flex-direction: column;
-    overflow: hidden;
-}
-
 @font-face {
   font-family: 'ReaderDefault';
   src: url('fonts/reader-default.woff') format('woff'),
