@@ -1,7 +1,7 @@
 <template>
     <div ref="main" class="fit column no-wrap" style="min-height: 520px">
         <GithubCorner url="https://github.com/bookpauk/liberama" cornerColor="#1B695F" gitColor="EBE2C9"></GithubCorner>
-        <div class="col column justify-center items-center no-wrap" style="min-height: 170px">
+        <div class="col column justify-center items-center no-wrap overflow-hidden" style="min-height: 170px">
             <span class="greeting"><b>{{ title }}</b></span>
             <div class="q-my-sm"></div>
             <span class="greeting">Добро пожаловать!</span>
@@ -9,8 +9,8 @@
             <span v-if="isExternalConverter" class="greeting">...а также форматы: <b>rtf, doc, docx, pdf, epub, mobi</b></span>
         </div>
 
-        <div class="col column justify-start items-center no-wrap">
-            <q-input ref="input" class="fit q-px-xs" style="max-width: 700px" outlined dense bg-color="white" v-model="bookUrl" placeholder="URL книги">
+        <div class="col-auto column justify-start items-center no-wrap overflow-hidden">
+            <q-input ref="input" class="full-width q-px-xs" style="max-width: 700px" outlined dense bg-color="white" v-model="bookUrl" placeholder="URL книги">
                 <template v-slot:append>
                     <q-btn round dense flat icon="done" @click="submitUrl"/>
                 </template>
@@ -42,7 +42,7 @@
             <span v-if="mode == 'omnireader'" class="bottom-span clickable" @click="openOldVersion">Старая версия</span>
         </div>
 
-        <div class="col column justify-end items-center no-wrap">
+        <div class="col column justify-end items-center no-wrap overflow-hidden">
             <span class="bottom-span clickable" @click="openHelp">Справка</span>
             <span class="bottom-span clickable" @click="openDonate">Помочь проекту</span>
 
