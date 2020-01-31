@@ -460,10 +460,13 @@ class TextPage extends Vue {
         /*this.page1 = null;
         this.page2 = null;
         this.statusBar = null;*/
-
-        this.calcDrawProps();
-        this.setBackground();
-        this.draw();
+        try {
+            this.calcDrawProps();
+            this.setBackground();
+            this.draw();
+        } catch (e) {
+            //
+        }
     }
 
     get settings() {
