@@ -8,9 +8,7 @@
             </span>
         </template>
 
-        <div>
-            <el-input placeholder="Введите название текста" class="input" v-model="bookTitle"></el-input>
-        </div>
+        <q-input class="q-px-sm" dense borderless v-model="bookTitle" placeholder="Введите название текста"/>
         <hr/>
         <textarea ref="textArea" class="text" @paste="calcTitle"></textarea>
     </Window>
