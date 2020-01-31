@@ -27,7 +27,8 @@
         <div v-show="!clickControl && showStatusBar" class="layout" v-html="statusBarClickable" @mousedown.prevent.stop @touchstart.stop
             @click.prevent.stop="onStatusBarClick"></div>
         <!-- невидимым делать нельзя, вовремя не подгружаютя шрифты -->
-        <canvas ref="offscreenCanvas" class="layout" style="width: 0px; height: 0px"></canvas>
+        <canvas ref="offscreenCanvas" class="layout" style="visibility: hidden"></canvas>
+        <div ref="measureWidth" style="position: absolute; visibility: hidden"></div>
     </div>
 </template>
 
@@ -143,6 +144,8 @@ class TextPage extends Vue {
     }
 
     calcDrawProps() {
+        const wideLetter = 'Щ';
+
         //preloaded fonts
         this.fontList = [`12px ${this.fontName}`];
 
@@ -199,6 +202,22 @@ class TextPage extends Vue {
         this.drawHelper.lineHeight = this.lineHeight;
         this.drawHelper.context = this.context;
 
+        //альтернатива context.measureText
+        if (!this.context.measureText(wideLetter).width) {
+            const ctx = this.$refs.measureWidth;
+            this.drawHelper.measureText = function(text, style) {
+                ctx.innerText = text;
+                ctx.style.font = this.fontByStyle(style);
+                return ctx.clientWidth;
+            };
+
+            this.drawHelper.measureTextFont = function(text, font) {
+                ctx.innerText = text;
+                ctx.style.font = font;
+                return ctx.clientWidth;
+            }
+        }
+
         //statusBar
         this.statusBarClickable = this.drawHelper.statusBarClickable(this.statusBarTop, this.statusBarHeight);
 
@@ -211,10 +230,10 @@ class TextPage extends Vue {
             this.parsed.wordWrap = this.wordWrap;
             this.parsed.cutEmptyParagraphs = this.cutEmptyParagraphs;
             this.parsed.addEmptyParagraphs = this.addEmptyParagraphs;
-            let t = 'Щ';
-            if (this.drawHelper.measureText(t, {}) == 0)
+            let t = wideLetter;
+            if (!this.drawHelper.measureText(t, {}))
                 throw new Error('Ошибка measureText');
-            while (this.drawHelper.measureText(t, {}) < this.w) t += 'Щ';
+            while (this.drawHelper.measureText(t, {}) < this.w) t += wideLetter;
             this.parsed.maxWordLength = t.length - 1;
             this.parsed.measureText = this.drawHelper.measureText.bind(this.drawHelper);
             this.parsed.lineHeight = this.lineHeight;
