@@ -211,7 +211,9 @@ class TextPage extends Vue {
             this.parsed.wordWrap = this.wordWrap;
             this.parsed.cutEmptyParagraphs = this.cutEmptyParagraphs;
             this.parsed.addEmptyParagraphs = this.addEmptyParagraphs;
-            let t = '';
+            let t = 'Щ';
+            if (this.drawHelper.measureText(t, {}) == 0)
+                throw new Error('Ошибка measureText');
             while (this.drawHelper.measureText(t, {}) < this.w) t += 'Щ';
             this.parsed.maxWordLength = t.length - 1;
             this.parsed.measureText = this.drawHelper.measureText.bind(this.drawHelper);
@@ -368,47 +370,51 @@ class TextPage extends Vue {
 
         if (this.lastBook) {
             (async() => {
-                //подождем ленивый парсинг
-                this.stopLazyParse = true;
-                while (this.doingLazyParse) await sleep(10);
+                try {
+                    //подождем ленивый парсинг
+                    this.stopLazyParse = true;
+                    while (this.doingLazyParse) await sleep(10);
 
-                const isParsed = await bookManager.hasBookParsed(this.lastBook);
-                if (!isParsed) {
-                    return;
+                    const isParsed = await bookManager.hasBookParsed(this.lastBook);
+                    if (!isParsed) {
+                        return;
+                    }
+
+                    this.book = await bookManager.getBook(this.lastBook);
+                    this.meta = bookManager.metaOnly(this.book);
+                    this.fb2 = this.meta.fb2;
+
+                    let authorNames = [];
+                    if (this.fb2.author) {
+                        authorNames = this.fb2.author.map(a => _.compact([
+                            a.lastName,
+                            a.firstName,
+                            a.middleName
+                        ]).join(' '));
+                    }
+
+                    this.title = _.compact([
+                        authorNames.join(', '),
+                        this.fb2.bookTitle
+                    ]).join(' - ');
+
+                    this.$root.$emit('set-app-title', this.title);
+
+                    this.parsed = this.book.parsed;
+
+                    this.page1 = null;
+                    this.page2 = null;
+                    this.statusBar = null;
+                    await this.stopTextScrolling();
+
+                    await this.calcPropsAndLoadFonts();
+
+                    this.refreshTime();
+                    if (this.lazyParseEnabled)
+                        this.lazyParsePara();
+                } catch (e) {
+                    this.$alert(e.message, 'Ошибка', {type: 'error'});
                 }
-
-                this.book = await bookManager.getBook(this.lastBook);
-                this.meta = bookManager.metaOnly(this.book);
-                this.fb2 = this.meta.fb2;
-
-                let authorNames = [];
-                if (this.fb2.author) {
-                    authorNames = this.fb2.author.map(a => _.compact([
-                        a.lastName,
-                        a.firstName,
-                        a.middleName
-                    ]).join(' '));
-                }
-
-                this.title = _.compact([
-                    authorNames.join(', '),
-                    this.fb2.bookTitle
-                ]).join(' - ');
-
-                this.$root.$emit('set-app-title', this.title);
-
-                this.parsed = this.book.parsed;
-
-                this.page1 = null;
-                this.page2 = null;
-                this.statusBar = null;
-                await this.stopTextScrolling();
-
-                this.calcPropsAndLoadFonts();
-
-                this.refreshTime();
-                if (this.lazyParseEnabled)
-                    this.lazyParsePara();
             })();
         }
     }
