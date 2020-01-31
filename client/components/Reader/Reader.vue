@@ -562,22 +562,9 @@ class Reader extends Vue {
     fullScreenToggle() {
         this.fullScreenActive = !this.fullScreenActive;
         if (this.fullScreenActive) {
-            const element = document.documentElement;
-            if (element.requestFullscreen) {
-                element.requestFullscreen();
-            } else if (element.webkitrequestFullscreen) {
-                element.webkitRequestFullscreen();
-            } else if (element.mozRequestFullscreen) {
-                element.mozRequestFullScreen();
-            }
+            this.$q.fullscreen.request();
         } else {
-            if (document.cancelFullScreen) {
-                document.cancelFullScreen();
-            } else if (document.mozCancelFullScreen) {
-                document.mozCancelFullScreen();
-            } else if (document.webkitCancelFullScreen) {
-                document.webkitCancelFullScreen();
-            }
+            this.$q.fullscreen.exit();
         }
     }
 

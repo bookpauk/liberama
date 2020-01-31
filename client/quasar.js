@@ -8,22 +8,29 @@ import {QCircularProgress} from 'quasar/src/components/circular-progress';
 import {QInput} from 'quasar/src/components/input';
 import {QBtn} from 'quasar/src/components/btn';
 import {QIcon} from 'quasar/src/components/icon';
+import {QSlider} from 'quasar/src/components/slider';
+
+//plugins
+import AppFullscreen from 'quasar/src/plugins/AppFullscreen';
 
 //config
 const config = {};
 
 const components = {
+    QCircularProgress,
     QInput,
     QBtn,
     QIcon,
-    QCircularProgress,
+    QSlider,
 };
 
 //directives
 const directives = {};
 
 //plugins
-const plugins = {};
+const plugins = {
+    AppFullscreen,
+};
 
 //use
 Vue.use(Quasar, { config, components, directives, plugins });

@@ -4,8 +4,14 @@
             Установить позицию
         </template>
 
-        <div class="slider">
-            <el-slider v-model="sliderValue" :max="sliderMax" :format-tooltip="formatTooltip"></el-slider>
+        <div class="slider q-px-md">
+            <q-slider
+                v-model="sliderValue"
+                :max="sliderMax"
+                label
+                :label-value="(sliderMax ? (sliderValue/this.sliderMax*100).toFixed(2) + '%' : 0)"
+                color="primary"
+            />
         </div>
     </Window>
 </template>
@@ -46,13 +52,6 @@ class SetPositionPage extends Vue {
         this.initialized = true;
     }
 
-    formatTooltip(val) {
-        if (this.sliderMax)
-            return (val/this.sliderMax*100).toFixed(2) + '%';
-        else
-            return 0;
-    }
-
     close() {
         this.$emit('set-position-toggle');
     }
@@ -72,10 +71,5 @@ class SetPositionPage extends Vue {
     margin: 20px;
     background-color: #efefef;
     border-radius: 15px;
-}
-
-.el-slider {
-    margin-right: 20px;
-    margin-left: 20px;
 }
 </style>
