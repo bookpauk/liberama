@@ -1,5 +1,5 @@
 <template>
-    <div ref="main" class="fit column no-wrap" style="min-height: 480px">
+    <div ref="main" class="fit column no-wrap" style="min-height: 500px">
         <GithubCorner url="https://github.com/bookpauk/liberama" cornerColor="#1B695F" gitColor="EBE2C9"></GithubCorner>
         <div class="col column justify-center items-center no-wrap" style="min-height: 150px">
             <span class="greeting"><b>{{ title }}</b></span>
@@ -9,17 +9,17 @@
             <span v-if="isExternalConverter" class="greeting">...а также форматы: <b>rtf, doc, docx, pdf, epub, mobi</b></span>
         </div>
 
-        <div class="col column justify-start items-center" style="min-height: 250px">
+        <div class="col column justify-start items-center no-wrap" style="min-height: 300px">
             <el-input ref="input" placeholder="URL книги" v-model="bookUrl">
                 <el-button slot="append" icon="el-icon-check" @click="submitUrl"></el-button>
             </el-input>
-            <div class="q-my-sm"></div>
+            <div class="q-my-md"></div>
             <input type="file" id="file" ref="file" @change="loadFile" style='display: none;'/>
 
             <el-button size="mini" @click="loadFileClick">
                 Загрузить файл с диска
             </el-button>
-            <div class="q-my-sm"></div>
+            <div class="q-my-md"></div>
             <el-button size="mini" @click="loadBufferClick">
                 Из буфера обмена
             </el-button>
@@ -38,7 +38,7 @@
             <span v-if="mode == 'omnireader'" class="bottom-span clickable" @click="openOldVersion">Старая версия</span>
         </div>
 
-        <div class="col column justify-end items-center">
+        <div class="col column justify-end items-center no-wrap">
             <span class="bottom-span clickable" @click="openHelp">Справка</span>
             <span class="bottom-span clickable" @click="openDonate">Помочь проекту</span>
 
