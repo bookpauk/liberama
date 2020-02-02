@@ -42,7 +42,6 @@ class HotkeysHelpPage extends Vue {
 
 <style scoped>
 .page {
-    flex: 1;
     padding: 15px;
     overflow-y: auto;
     font-size: 120%;

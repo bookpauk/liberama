@@ -59,7 +59,7 @@
             </div>
         </div>
 
-        <div class="col row main">
+        <div class="main col row relative-position">
             <keep-alive>
                 <component ref="page" :is="activePage"
                     @load-book="loadBook"

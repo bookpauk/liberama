@@ -4,7 +4,7 @@
             Справка
         </template>
 
-        <div class="fit" style="min-width: 600px">
+        <div class="col" style="min-width: 600px; display: grid">
             <q-btn-toggle
                 v-model="selectedTab"
                 toggle-color="primary"
@@ -18,7 +18,8 @@
                 ]"
             />
             <q-separator />
-            <q-tab-panels class="fit" v-model="selectedTab">
+
+            <q-tab-panels v-model="selectedTab">
                 <q-tab-panel name="common">
                     <CommonHelpPage></CommonHelpPage>
                 </q-tab-panel>

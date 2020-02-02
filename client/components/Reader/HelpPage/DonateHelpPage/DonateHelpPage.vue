@@ -88,12 +88,10 @@ class DonateHelpPage extends Vue {
 
 <style scoped>
 .page {
-    flex: 1;
     padding: 15px;
     overflow-y: auto;
     font-size: 120%;
     line-height: 130%;
-    display: flex;
 }
 
 .p {
@@ -103,7 +101,6 @@ class DonateHelpPage extends Vue {
 }
 
 .box {
-    flex: 1;
     max-width: 550px;
     overflow-wrap: break-word;
 }
