@@ -1,6 +1,6 @@
 <template>
     <q-page class="column no-wrap">
-        <div class="header" v-show="toolBarActive">
+        <div  ref="header" class="header" v-show="toolBarActive">
             <div ref="buttons" class="row justify-between no-wrap">
                 <button ref="loader" class="tool-button" :class="buttonActiveClass('loader')" @click="buttonClick('loader')" v-ripple>
                     <q-icon name="o_arrow_back" size="30px"/>
@@ -342,6 +342,11 @@ class Reader extends Vue {
         const showButtonCount = Object.values(this.showToolButton).reduce((a, b) => a + (b ? 1 : 0), 0);
         if (this.$refs.buttons)
             this.$refs.buttons.style.minWidth = 65*showButtonCount + 'px';
+        (async () => {
+            await utils.sleep(1000);
+            if (this.$refs.header)
+                this.$refs.header.style.overflowX = 'auto';
+        })();
     }
 
     checkSetStorageAccessKey() {
@@ -1158,8 +1163,7 @@ class Reader extends Vue {
     padding-right: 5px;
     background-color: #1B695F;
     color: #000;
-    overflow-x: auto;
-    overflow-y: hidden;
+    overflow: hidden;
     height: 50px;
 }
 
