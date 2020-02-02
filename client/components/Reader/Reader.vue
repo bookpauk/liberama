@@ -2,57 +2,57 @@
     <q-page class="column no-wrap">
         <div class="header" v-show="toolBarActive">
             <div ref="buttons" class="row justify-between no-wrap">
-                <button ref="loader" class="tool-button" :class="buttonActiveClass('loader')" @click="buttonClick('loader')">
+                <button ref="loader" class="tool-button" :class="buttonActiveClass('loader')" @click="buttonClick('loader')" v-ripple>
                     <q-icon name="o_arrow_back" size="30px"/>
                     <q-tooltip :delay="1000" anchor="bottom right" content-style="font-size: 80%">Загрузить книгу</q-tooltip>
                 </button>
 
                 <div>
-                    <button ref="undoAction" v-show="showToolButton['undoAction']" class="tool-button" :class="buttonActiveClass('undoAction')" @click="buttonClick('undoAction')">
+                    <button ref="undoAction" v-show="showToolButton['undoAction']" class="tool-button" :class="buttonActiveClass('undoAction')" @click="buttonClick('undoAction')" v-ripple>
                         <q-icon name="o_arrow_back_ios" size="25px"/>
                         <q-tooltip :delay="1000" anchor="bottom middle" content-style="font-size: 80%">Действие назад</q-tooltip>
                     </button>
-                    <button ref="redoAction" v-show="showToolButton['redoAction']" class="tool-button" :class="buttonActiveClass('redoAction')" @click="buttonClick('redoAction')">
+                    <button ref="redoAction" v-show="showToolButton['redoAction']" class="tool-button" :class="buttonActiveClass('redoAction')" @click="buttonClick('redoAction')" v-ripple>
                         <q-icon name="o_arrow_forward_ios" size="25px"/>
                         <q-tooltip :delay="1000" anchor="bottom middle" content-style="font-size: 80%">Действие вперед</q-tooltip>
                     </button>
                     <div class="space"></div>
-                    <button ref="fullScreen" v-show="showToolButton['fullScreen']" class="tool-button" :class="buttonActiveClass('fullScreen')" @click="buttonClick('fullScreen')">
+                    <button ref="fullScreen" v-show="showToolButton['fullScreen']" class="tool-button" :class="buttonActiveClass('fullScreen')" @click="buttonClick('fullScreen')" v-ripple>
                         <q-icon :name="(fullScreenActive ? 'o_fullscreen_exit': 'o_fullscreen')" size="38px"/>
                         <q-tooltip :delay="1000" anchor="bottom middle" content-style="font-size: 80%">На весь экран</q-tooltip>
                     </button>
-                    <button ref="scrolling" v-show="showToolButton['scrolling']" class="tool-button" :class="buttonActiveClass('scrolling')" @click="buttonClick('scrolling')">
+                    <button ref="scrolling" v-show="showToolButton['scrolling']" class="tool-button" :class="buttonActiveClass('scrolling')" @click="buttonClick('scrolling')" v-ripple>
                         <q-icon name="o_swap_vert" size="34px"/>
                         <q-tooltip :delay="1000" anchor="bottom middle" content-style="font-size: 80%">Плавный скроллинг</q-tooltip>
                     </button>
-                    <button ref="setPosition" v-show="showToolButton['setPosition']" class="tool-button" :class="buttonActiveClass('setPosition')" @click="buttonClick('setPosition')">
+                    <button ref="setPosition" v-show="showToolButton['setPosition']" class="tool-button" :class="buttonActiveClass('setPosition')" @click="buttonClick('setPosition')" v-ripple>
                         <q-icon name="o_fast_forward" size="34px"/>
                         <q-tooltip :delay="1000" anchor="bottom middle" content-style="font-size: 80%">На страницу</q-tooltip>
                     </button>
-                    <button ref="search" v-show="showToolButton['search']" class="tool-button" :class="buttonActiveClass('search')" @click="buttonClick('search')">
+                    <button ref="search" v-show="showToolButton['search']" class="tool-button" :class="buttonActiveClass('search')" @click="buttonClick('search')" v-ripple>
                         <q-icon name="o_search" size="34px"/>
                         <q-tooltip :delay="1000" anchor="bottom middle" content-style="font-size: 80%">Найти в тексте</q-tooltip>
                     </button>
-                    <button ref="copyText" v-show="showToolButton['copyText']" class="tool-button" :class="buttonActiveClass('copyText')" @click="buttonClick('copyText')">
+                    <button ref="copyText" v-show="showToolButton['copyText']" class="tool-button" :class="buttonActiveClass('copyText')" @click="buttonClick('copyText')" v-ripple>
                         <q-icon name="o_open_in_new" size="34px"/>
                         <q-tooltip :delay="1000" anchor="bottom middle" content-style="font-size: 80%">Скопировать текст со страницы</q-tooltip>
                     </button>
-                    <button ref="refresh" v-show="showToolButton['refresh']" class="tool-button" :class="buttonActiveClass('refresh')" @click="buttonClick('refresh')">
+                    <button ref="refresh" v-show="showToolButton['refresh']" class="tool-button" :class="buttonActiveClass('refresh')" @click="buttonClick('refresh')" v-ripple>
                         <q-icon name="o_sync" size="34px"/>
                         <q-tooltip :delay="1000" anchor="bottom middle" content-style="font-size: 80%">Принудительно обновить книгу в обход кэша</q-tooltip>
                     </button>
                     <div class="space"></div>
-                    <button ref="offlineMode" v-show="showToolButton['offlineMode']" class="tool-button" :class="buttonActiveClass('offlineMode')" @click="buttonClick('offlineMode')">
+                    <button ref="offlineMode" v-show="showToolButton['offlineMode']" class="tool-button" :class="buttonActiveClass('offlineMode')" @click="buttonClick('offlineMode')" v-ripple>
                         <q-icon name="o_link_off" size="32px"/>
                         <q-tooltip :delay="1000" anchor="bottom middle" content-style="font-size: 80%">Автономный режим (без интернета)</q-tooltip>
                     </button>
-                    <button ref="recentBooks" v-show="showToolButton['recentBooks']" class="tool-button" :class="buttonActiveClass('recentBooks')" @click="buttonClick('recentBooks')">
+                    <button ref="recentBooks" v-show="showToolButton['recentBooks']" class="tool-button" :class="buttonActiveClass('recentBooks')" @click="buttonClick('recentBooks')" v-ripple>
                         <q-icon name="o_library_books" size="32px"/>
                         <q-tooltip :delay="1000" anchor="bottom middle" content-style="font-size: 80%">Открыть недавние</q-tooltip>
                     </button>
                 </div>
 
-                <button ref="settings" class="tool-button" :class="buttonActiveClass('settings')" @click="buttonClick('settings')">
+                <button ref="settings" class="tool-button" :class="buttonActiveClass('settings')" @click="buttonClick('settings')" v-ripple>
                     <q-icon name="o_settings" size="30px"/>
                     <q-tooltip :delay="1000" anchor="bottom left" content-style="font-size: 80%">Настроить</q-tooltip>
                 </button>

@@ -152,7 +152,7 @@ class Window extends Vue {
     flex: 1;
     margin-left: 10px;
     margin-right: 10px;
-    color: #F0F0F0;
+    color: #E8E8E8;
     text-shadow: 2px 1px 5px black, 2px 2px 5px black;
 }
 
