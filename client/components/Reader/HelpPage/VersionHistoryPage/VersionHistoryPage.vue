@@ -62,6 +62,7 @@ class VersionHistoryPage extends Vue {
     overflow-y: auto;
     font-size: 120%;
     line-height: 130%;
+    position: relative;
 }
 
 h4 {

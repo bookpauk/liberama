@@ -243,15 +243,6 @@ body, html, #app {
     font: normal 12pt ReaderDefault;
 }
 
-.xyfit {
-    height: 100%;
-    width: 100%;
-}
-
-.flexfit {
-    flex: 1;
-}
-
 .dborder {
     border: 2px solid yellow;
 }

@@ -19,7 +19,7 @@ import {QIcon} from 'quasar/src/components/icon';
 import {QSlider} from 'quasar/src/components/slider';
 //import {QTabs} from 'quasar/src/components/tabs';
 //import {QTab} from 'quasar/src/components/tab';
-import {QTabPanels, QTabPanel} from 'quasar/src/components/tab-panels';
+//import {QTabPanels, QTabPanel} from 'quasar/src/components/tab-panels';
 import {QSeparator} from 'quasar/src/components/separator';
 import {QList, QItem, QItemSection, QItemLabel} from 'quasar/src/components/item';
 import {QTooltip} from 'quasar/src/components/tooltip';
@@ -34,8 +34,7 @@ const components = {
     QSlider,
     //QTabs,
     //QTab
-    QTabPanels,
-    QTabPanel,
+    //QTabPanels, QTabPanel,
     QSeparator,
     QList, QItem, QItemSection, QItemLabel,
     QTooltip,

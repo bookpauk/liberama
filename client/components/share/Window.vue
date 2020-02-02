@@ -120,6 +120,15 @@ class Window extends Vue {
     z-index: 50;
 }
 
+.xyfit {
+    height: 100%;
+    width: 100%;
+}
+
+.flexfit {
+    flex: 1;
+}
+
 .window {
     margin: 10px;
     background-color: #ffffff;

@@ -4,7 +4,7 @@
             Справка
         </template>
 
-        <div class="col" style="min-width: 600px; display: grid">
+        <div class="col column" style="min-width: 600px">
             <q-btn-toggle
                 v-model="selectedTab"
                 toggle-color="primary"
@@ -17,29 +17,13 @@
                     {label: 'Помочь проекту', value: 'donate'}
                 ]"
             />
-            <q-separator />
+            <div class="separator"></div>
 
-            <q-tab-panels v-model="selectedTab">
-                <q-tab-panel name="common">
-                    <CommonHelpPage></CommonHelpPage>
-                </q-tab-panel>
-
-                <q-tab-panel name="hotkeys">
-                    <HotkeysHelpPage></HotkeysHelpPage>
-                </q-tab-panel>
-
-                <q-tab-panel name="mouse">
-                    <MouseHelpPage></MouseHelpPage>
-                </q-tab-panel>
-
-                <q-tab-panel name="releases">
-                    <VersionHistoryPage></VersionHistoryPage>
-                </q-tab-panel>
-
-                <q-tab-panel name="donate">
-                    <DonateHelpPage></DonateHelpPage>
-                </q-tab-panel>
-            </q-tab-panels>
+            <CommonHelpPage v-if="selectedTab == 'common'" class="col"></CommonHelpPage>
+            <HotkeysHelpPage v-if="selectedTab == 'hotkeys'" class="col"></HotkeysHelpPage>
+            <MouseHelpPage v-if="selectedTab == 'mouse'" class="col"></MouseHelpPage>
+            <VersionHistoryPage v-if="selectedTab == 'releases'" class="col"></VersionHistoryPage>
+            <DonateHelpPage v-if="selectedTab == 'donate'" class="col"></DonateHelpPage>
         </div>
     </Window>
 </template>
@@ -92,4 +76,8 @@ class HelpPage extends Vue {
 </script>
 
 <style scoped>
+.separator {
+    height: 1px;
+    background-color: #E0E0E0;
+}
 </style>
