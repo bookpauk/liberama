@@ -3,6 +3,9 @@ import Vue from 'vue';
 import 'quasar/dist/quasar.css';
 import Quasar from 'quasar/src/vue-plugin.js'
 
+//config
+const config = {};
+
 //components
 import {QLayout} from 'quasar/src/components/layout';
 import {QPageContainer, QPage} from 'quasar/src/components/page';
@@ -19,12 +22,8 @@ import {QSlider} from 'quasar/src/components/slider';
 import {QTabPanels, QTabPanel} from 'quasar/src/components/tab-panels';
 import {QSeparator} from 'quasar/src/components/separator';
 
-//plugins
-import AppFullscreen from 'quasar/src/plugins/AppFullscreen';
-
-//config
-const config = {};
-
+import {QList, QItem, QItemSection, QItemLabel} from 'quasar/src/components/item';
+      
 const components = {
     QLayout, QPageContainer, QPage, QDrawer,
     QCircularProgress,
@@ -38,12 +37,17 @@ const components = {
     QTabPanels,
     QTabPanel,
     QSeparator,
+    QList, QItem, QItemSection, QItemLabel,
 };
 
-//directives
-const directives = {};
+//directives 
+import Ripple from 'quasar/src/directives/Ripple';
+
+const directives = {Ripple};
 
 //plugins
+import AppFullscreen from 'quasar/src/plugins/AppFullscreen';
+
 const plugins = {
     AppFullscreen,
 };

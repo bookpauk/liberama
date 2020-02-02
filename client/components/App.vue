@@ -4,7 +4,16 @@
             <div class="app-name"><span v-html="appName"></span></div>
             <q-btn class="el-button-collapse" @click="toggleCollapse"></q-btn>
 
-            <el-menu class="el-menu-vertical" :default-active="rootRoute" :collapse="isCollapse" router>
+            <q-list>
+                <q-item clickable v-ripple>
+                    <q-item-section avatar>
+                        <q-icon name="inbox" />
+                    </q-item-section>
+
+                    <q-item-section>Inbox</q-item-section>
+                </q-item>
+            </q-list>
+            <!--el-menu class="el-menu-vertical" :default-active="rootRoute" :collapse="isCollapse" router>
               <el-menu-item index="/cardindex">
                 <i class="el-icon-search"></i>
                 <span :class="itemTitleClass('/cardindex')" slot="title">{{ this.itemRuText['/cardindex'] }}</span>
@@ -33,7 +42,7 @@
                 <i class="el-icon-question"></i>
                 <span :class="itemTitleClass('/help')" slot="title">{{ this.itemRuText['/help'] }}</span>
               </el-menu-item>
-            </el-menu>
+            </el-menu-->
         </q-drawer>
 
         <q-page-container>
