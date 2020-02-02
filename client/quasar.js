@@ -4,6 +4,10 @@ import 'quasar/dist/quasar.css';
 import Quasar from 'quasar/src/vue-plugin.js'
 
 //components
+import {QLayout} from 'quasar/src/components/layout';
+import {QPageContainer, QPage} from 'quasar/src/components/page';
+import {QDrawer} from 'quasar/src/components/drawer';
+
 import {QCircularProgress} from 'quasar/src/components/circular-progress';
 import {QInput} from 'quasar/src/components/input';
 import {QBtn} from 'quasar/src/components/btn';
@@ -22,6 +26,7 @@ import AppFullscreen from 'quasar/src/plugins/AppFullscreen';
 const config = {};
 
 const components = {
+    QLayout, QPageContainer, QPage, QDrawer,
     QCircularProgress,
     QInput,
     QBtn,

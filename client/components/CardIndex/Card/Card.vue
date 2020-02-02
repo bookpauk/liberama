@@ -1,7 +1,7 @@
 <template>
-    <el-container>
+    <div>
         Раздел Card в разработке
-    </el-container>
+    </div>
 </template>
 
 <script>

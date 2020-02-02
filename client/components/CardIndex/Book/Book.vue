@@ -1,7 +1,7 @@
 <template>
-    <el-container>
+    <div>
         Раздел Book в разработке
-    </el-container>
+    </div>
 </template>
 
 <script>

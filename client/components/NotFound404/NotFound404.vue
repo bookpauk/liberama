@@ -1,7 +1,7 @@
 <template>
-    <el-container>
+    <q-page>
         Страница не найдена
-    </el-container>
+    </q-page>
 </template>
 
 <script>

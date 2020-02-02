@@ -1,15 +1,9 @@
 <template>
-    <el-container direction="vertical">
-        <el-tabs type="border-card" style="height: 100%;" v-model="selectedTab">
-            <el-tab-pane label="Поиск"></el-tab-pane>
-            <el-tab-pane label="Автор"></el-tab-pane>
-            <el-tab-pane label="Книга"></el-tab-pane>
-            <el-tab-pane label="История"></el-tab-pane>
-            <keep-alive>
-                <router-view></router-view>
-            </keep-alive>
-        </el-tabs>
-    </el-container>
+    <q-page>
+        <keep-alive>
+            <router-view></router-view>
+        </keep-alive>
+    </q-page>
 </template>
 
 <script>

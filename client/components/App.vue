@@ -1,8 +1,9 @@
 <template>
-    <el-container>
-        <el-aside v-if="showAsideBar" :width="asideWidth">
+    <q-layout view="lhr lpr lfr">
+        <q-drawer v-model="showAsideBar" :width="asideWidth">
             <div class="app-name"><span v-html="appName"></span></div>
-            <el-button class="el-button-collapse" @click="toggleCollapse" :icon="buttonCollapseIcon"></el-button>
+            <q-btn class="el-button-collapse" @click="toggleCollapse"></q-btn>
+
             <el-menu class="el-menu-vertical" :default-active="rootRoute" :collapse="isCollapse" router>
               <el-menu-item index="/cardindex">
                 <i class="el-icon-search"></i>
@@ -33,14 +34,14 @@
                 <span :class="itemTitleClass('/help')" slot="title">{{ this.itemRuText['/help'] }}</span>
               </el-menu-item>
             </el-menu>
-        </el-aside>
+        </q-drawer>
 
-        <el-main v-if="showMain" :style="{padding: (isReaderActive ? 0 : '5px')}">
+        <q-page-container>
             <keep-alive>
                 <router-view></router-view>
             </keep-alive>
-        </el-main>
-    </el-container>
+        </q-page-container>
+    </q-layout>
 </template>
 
 <script>
@@ -137,9 +138,9 @@ class App extends Vue {
 
     get asideWidth() {
         if (this.uistate.asideBarCollapse) {
-            return '64px';
+            return 64;
         } else {
-            return '170px';
+            return 170;
         }
     }
 
@@ -197,10 +198,6 @@ class App extends Vue {
         return this.rootRoute == '/reader';
     }
 
-    get showMain() {
-        return (this.showAsideBar || this.isReaderActive);
-    }
-
     redirectIfNeeded() {
         if ((this.mode == 'reader' || this.mode == 'omnireader') && (!this.isReaderActive)) {
             //старый url
@@ -227,52 +224,6 @@ class App extends Vue {
     text-align: center;
     line-height: 140%;
     font-weight: bold;
-}
-
-.bold-font {
-    font-weight: bold;
-}
-
-.el-container {
-    height: 100%;
-}
-
-.el-aside {
-    line-height: 1;
-    background-color: #ccc;
-    color: #000;
-}
-
-.el-main {
-    padding: 0;
-    background-color: #E6EDF4;
-    color: #000;
-}
-
-.el-menu-vertical:not(.el-menu--collapse) {
-    background-color: inherit;
-    color: inherit;
-    text-align: left;
-    width: 100%;
-    border: 0;
-}
-
-.el-menu--collapse {
-    background-color: inherit;
-    color: inherit;
-    border: 0;
-}
-
-.el-button-collapse, .el-button-collapse:focus, .el-button-collapse:active, .el-button-collapse:hover {
-    background-color: inherit;
-    color: inherit;
-    margin-top: 5px;
-    width: 100%;
-    height: 64px;
-    border: 0;
-}
-.el-menu-item {
-    font-size: 85%;
 }
 </style>
 

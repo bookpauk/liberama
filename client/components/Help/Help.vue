@@ -1,7 +1,7 @@
 <template>
-    <el-container>
+    <q-page>
         Раздел Help в разработке
-    </el-container>
+    </q-page>
 </template>
 
 <script>

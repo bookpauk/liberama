@@ -1,5 +1,5 @@
 <template>
-    <el-container>
+    <q-page>
         <el-header v-show="toolBarActive" height='50px'>
             <div ref="header" class="header">
                 <el-tooltip content="Загрузить книгу" :open-delay="1000" effect="light">
@@ -138,7 +138,7 @@
             </el-dialog>
 
         </el-main>
-    </el-container>
+    </q-page>
 </template>
 
 <script>

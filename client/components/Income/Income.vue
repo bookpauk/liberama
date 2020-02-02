@@ -1,7 +1,7 @@
 <template>
-    <el-container>
+    <q-page>
         Раздел Income в разработке
-    </el-container>
+    </q-page>
 </template>
 
 <script>
