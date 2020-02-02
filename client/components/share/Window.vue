@@ -117,6 +117,7 @@ class Window extends Vue {
 
 <style scoped>
 .main {
+    background-color: transparent !important;
     z-index: 50;
 }
 
