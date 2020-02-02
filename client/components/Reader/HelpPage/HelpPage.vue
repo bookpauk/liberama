@@ -4,40 +4,42 @@
             Справка
         </template>
 
-        <q-btn-toggle
-            v-model="selectedTab"
-            toggle-color="primary"
-            no-caps
-            :options="[
-                {label: 'Общее', value: 'common'},
-                {label: 'Клавиатура', value: 'hotkeys'},
-                {label: 'Мышь/тачскрин', value: 'mouse'},
-                {label: 'История версий', value: 'releases'},
-                {label: 'Помочь проекту', value: 'donate'}
-            ]"
-        />
-        <q-separator />
-        <q-tab-panels class="fit" v-model="selectedTab">
-            <q-tab-panel name="common">
-                <CommonHelpPage></CommonHelpPage>
-            </q-tab-panel>
+        <div class="fit" style="min-width: 600px">
+            <q-btn-toggle
+                v-model="selectedTab"
+                toggle-color="primary"
+                no-caps unelevated
+                :options="[
+                    {label: 'Общее', value: 'common'},
+                    {label: 'Клавиатура', value: 'hotkeys'},
+                    {label: 'Мышь/тачскрин', value: 'mouse'},
+                    {label: 'История версий', value: 'releases'},
+                    {label: 'Помочь проекту', value: 'donate'}
+                ]"
+            />
+            <q-separator />
+            <q-tab-panels class="fit" v-model="selectedTab">
+                <q-tab-panel name="common">
+                    <CommonHelpPage></CommonHelpPage>
+                </q-tab-panel>
 
-            <q-tab-panel name="hotkeys">
-                <HotkeysHelpPage></HotkeysHelpPage>
-            </q-tab-panel>
+                <q-tab-panel name="hotkeys">
+                    <HotkeysHelpPage></HotkeysHelpPage>
+                </q-tab-panel>
 
-            <q-tab-panel name="mouse">
-                <MouseHelpPage></MouseHelpPage>
-            </q-tab-panel>
+                <q-tab-panel name="mouse">
+                    <MouseHelpPage></MouseHelpPage>
+                </q-tab-panel>
 
-            <q-tab-panel name="releases">
-                <VersionHistoryPage></VersionHistoryPage>
-            </q-tab-panel>
+                <q-tab-panel name="releases">
+                    <VersionHistoryPage></VersionHistoryPage>
+                </q-tab-panel>
 
-            <q-tab-panel name="donate">
-                <DonateHelpPage></DonateHelpPage>
-            </q-tab-panel>
-        </q-tab-panels>        
+                <q-tab-panel name="donate">
+                    <DonateHelpPage></DonateHelpPage>
+                </q-tab-panel>
+            </q-tab-panels>
+        </div>
     </Window>
 </template>
 
