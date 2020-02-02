@@ -1,5 +1,5 @@
 <template>
-    <q-page class="fit">
+    <q-page class="column no-wrap">
         <div class="header" v-show="toolBarActive">
             <div ref="buttons" class="row justify-between">
                 <el-tooltip content="Загрузить книгу" :open-delay="1000" effect="light">
@@ -49,7 +49,7 @@
             </div>
         </div>
 
-        <div class="fit">
+        <div class="col row main">
             <keep-alive>
                 <component ref="page" :is="activePage"
                     @load-book="loadBook"
@@ -1154,10 +1154,6 @@ class Reader extends Vue {
 }
 
 .main {
-    position: relative;
-    display: flex;
-    padding: 0;
-    margin: 0;
     background-color: #EBE2C9;
     color: #000;
 }

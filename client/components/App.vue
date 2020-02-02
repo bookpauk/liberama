@@ -234,8 +234,8 @@ body, html, #app {
     font: normal 12pt ReaderDefault;
 }
 
-.border {
-    border: 1px solid black;
+.dborder {
+    border: 2px solid yellow;
 }
 
 @font-face {
