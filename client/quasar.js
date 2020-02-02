@@ -21,8 +21,8 @@ import {QSlider} from 'quasar/src/components/slider';
 //import {QTab} from 'quasar/src/components/tab';
 import {QTabPanels, QTabPanel} from 'quasar/src/components/tab-panels';
 import {QSeparator} from 'quasar/src/components/separator';
-
 import {QList, QItem, QItemSection, QItemLabel} from 'quasar/src/components/item';
+import {QTooltip} from 'quasar/src/components/tooltip';
       
 const components = {
     QLayout, QPageContainer, QPage, QDrawer,
@@ -38,6 +38,8 @@ const components = {
     QTabPanel,
     QSeparator,
     QList, QItem, QItemSection, QItemLabel,
+    QTooltip,
+
 };
 
 //directives 
@@ -56,7 +58,8 @@ const plugins = {
 Vue.use(Quasar, { config, components, directives, plugins });
 
 //icons
-import '@quasar/extras/material-icons/material-icons.css';
+//import '@quasar/extras/material-icons/material-icons.css';
+import '@quasar/extras/material-icons-outlined/material-icons-outlined.css';
 //import '@quasar/extras/fontawesome-v5/fontawesome-v5.css';
 //import fontawesomeV5 from 'quasar/icon-set/fontawesome-v5.js'
 //Quasar.iconSet.set(fontawesomeV5);

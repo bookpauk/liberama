@@ -2,12 +2,13 @@
     <q-page class="column no-wrap">
         <div class="header" v-show="toolBarActive">
             <div ref="buttons" class="row justify-between">
-                <el-tooltip content="Загрузить книгу" :open-delay="1000" effect="light">
-                    <el-button ref="loader" class="tool-button" :class="buttonActiveClass('loader')" @click="buttonClick('loader')"><i class="el-icon-back"></i></el-button>
-                </el-tooltip>
+                <q-btn class="tool-button" :class="buttonActiveClass('loader')" @click="buttonClick('loader')">
+                    <q-icon name="o_arrow_back" size="30px"/>
+                    <q-tooltip :delay="1000" anchor="bottom right" content-style="font-size: 80%">Загрузить книгу</q-tooltip>
+                </q-btn>
 
                 <div>
-                    <el-tooltip v-show="showToolButton['undoAction']" content="Действие назад" :open-delay="1000" effect="light">
+                    <!--el-tooltip v-show="showToolButton['undoAction']" content="Действие назад" :open-delay="1000" effect="light">
                         <el-button ref="undoAction" class="tool-button" :class="buttonActiveClass('undoAction')" @click="buttonClick('undoAction')" ><i class="el-icon-arrow-left"></i></el-button>
                     </el-tooltip>
                     <el-tooltip v-show="showToolButton['redoAction']" content="Действие вперед" :open-delay="1000" effect="light">
@@ -40,12 +41,17 @@
                     </el-tooltip>
                     <el-tooltip v-show="showToolButton['recentBooks']" content="Открыть недавние" :open-delay="1000" effect="light">
                         <el-button ref="recentBooks" class="tool-button" :class="buttonActiveClass('recentBooks')" @click="buttonClick('recentBooks')"><i class="el-icon-document"></i></el-button>
-                    </el-tooltip>
+                    </el-tooltip-->
                 </div>
 
-                <el-tooltip content="Настроить" :open-delay="1000" effect="light">
+                <q-btn class="tool-button" :class="buttonActiveClass('settings')" @click="buttonClick('settings')">
+                    <q-icon name="o_settings" size="30px"/>
+                    <q-tooltip :delay="1000" anchor="bottom left" content-style="font-size: 80%">Настроить</q-tooltip>
+                </q-btn>
+
+                <!--el-tooltip content="Настроить" :open-delay="1000" effect="light">
                     <el-button ref="settings" class="tool-button" :class="buttonActiveClass('settings')" @click="buttonClick('settings')"><i class="el-icon-setting"></i></el-button>            
-                </el-tooltip>
+                </el-tooltip-->
             </div>
         </div>
 
@@ -732,7 +738,7 @@ class Reader extends Vue {
     buttonClick(button) {
         const activeClass = this.buttonActiveClass(button);
 
-        this.$refs[button].$el.blur();
+        //this.$refs[button].$el.blur();
 
         if (activeClass['tool-button-disabled'])
             return;
@@ -1159,7 +1165,7 @@ class Reader extends Vue {
 }
 
 .tool-button {
-    margin: 0 2px 0 2px;
+    margin: 0px 2px 0 2px;
     padding: 0;
     color: #3E843E;
     background-color: #E6EDF4;
@@ -1200,10 +1206,6 @@ class Reader extends Vue {
 .tool-button-disabled:hover {
     color: lightgray;
     background-color: gray;
-}
-
-i {
-    font-size: 200%;
 }
 
 .space {
