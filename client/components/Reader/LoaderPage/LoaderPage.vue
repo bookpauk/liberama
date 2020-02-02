@@ -1,6 +1,8 @@
 <template>
-    <div ref="main" class="fit column no-wrap" style="min-height: 520px">
-        <GithubCorner url="https://github.com/bookpauk/liberama" cornerColor="#1B695F" gitColor="EBE2C9"></GithubCorner>
+    <div ref="main" class="col column no-wrap" style="min-height: 520px">
+        <div class="relative-position">
+            <GithubCorner url="https://github.com/bookpauk/liberama" cornerColor="#1B695F" gitColor="EBE2C9"></GithubCorner>
+        </div>
         <div class="col column justify-center items-center no-wrap overflow-hidden" style="min-height: 170px">
             <span class="greeting"><b>{{ title }}</b></span>
             <div class="q-my-sm"></div>
