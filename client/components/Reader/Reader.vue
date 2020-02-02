@@ -61,7 +61,7 @@
 
         <div class="main col row relative-position">
             <keep-alive>
-                <component ref="page" :is="activePage"
+                <component ref="page" class="col" :is="activePage"
                     @load-book="loadBook"
                     @load-file="loadFile"
                     @book-pos-changed="bookPosChanged"

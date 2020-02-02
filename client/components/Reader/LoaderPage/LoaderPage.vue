@@ -1,5 +1,5 @@
 <template>
-    <div ref="main" class="col column no-wrap" style="min-height: 520px">
+    <div ref="main" class="column no-wrap" style="min-height: 520px">
         <div class="relative-position">
             <GithubCorner url="https://github.com/bookpauk/liberama" cornerColor="#1B695F" gitColor="EBE2C9"></GithubCorner>
         </div>

@@ -1,5 +1,5 @@
 <template>
-    <div v-show="visible" class="fit column justify-center items-center z-max" style="background-color: rgba(0, 0, 0, 0.8)">
+    <div v-show="visible" class="column justify-center items-center z-max" style="background-color: rgba(0, 0, 0, 0.8)">
         <div class="column justify-start items-center" style="height: 250px">
             <q-circular-progress
                 show-value
