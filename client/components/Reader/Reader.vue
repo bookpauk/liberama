@@ -1,57 +1,61 @@
 <template>
     <q-page class="column no-wrap">
         <div class="header" v-show="toolBarActive">
-            <div ref="buttons" class="row justify-between">
-                <q-btn class="tool-button" :class="buttonActiveClass('loader')" @click="buttonClick('loader')">
+            <div ref="buttons" class="row justify-between no-wrap">
+                <button ref="loader" class="tool-button" :class="buttonActiveClass('loader')" @click="buttonClick('loader')">
                     <q-icon name="o_arrow_back" size="30px"/>
                     <q-tooltip :delay="1000" anchor="bottom right" content-style="font-size: 80%">Загрузить книгу</q-tooltip>
-                </q-btn>
+                </button>
 
                 <div>
-                    <!--el-tooltip v-show="showToolButton['undoAction']" content="Действие назад" :open-delay="1000" effect="light">
-                        <el-button ref="undoAction" class="tool-button" :class="buttonActiveClass('undoAction')" @click="buttonClick('undoAction')" ><i class="el-icon-arrow-left"></i></el-button>
-                    </el-tooltip>
-                    <el-tooltip v-show="showToolButton['redoAction']" content="Действие вперед" :open-delay="1000" effect="light">
-                        <el-button ref="redoAction" class="tool-button" :class="buttonActiveClass('redoAction')" @click="buttonClick('redoAction')" ><i class="el-icon-arrow-right"></i></el-button>
-                    </el-tooltip>
+                    <button ref="undoAction" v-show="showToolButton['undoAction']" class="tool-button" :class="buttonActiveClass('undoAction')" @click="buttonClick('undoAction')">
+                        <q-icon name="o_arrow_back_ios" size="25px"/>
+                        <q-tooltip :delay="1000" anchor="bottom middle" content-style="font-size: 80%">Действие назад</q-tooltip>
+                    </button>
+                    <button ref="redoAction" v-show="showToolButton['redoAction']" class="tool-button" :class="buttonActiveClass('redoAction')" @click="buttonClick('redoAction')">
+                        <q-icon name="o_arrow_forward_ios" size="25px"/>
+                        <q-tooltip :delay="1000" anchor="bottom middle" content-style="font-size: 80%">Действие вперед</q-tooltip>
+                    </button>
                     <div class="space"></div>
-                    <el-tooltip v-show="showToolButton['fullScreen']" content="На весь экран" :open-delay="1000" effect="light">
-                        <el-button ref="fullScreen" class="tool-button" :class="buttonActiveClass('fullScreen')" @click="buttonClick('fullScreen')"><i class="el-icon-rank"></i></el-button>
-                    </el-tooltip>
-                    <el-tooltip v-show="showToolButton['scrolling']" content="Плавный скроллинг" :open-delay="1000" effect="light">
-                        <el-button ref="scrolling" class="tool-button" :class="buttonActiveClass('scrolling')" @click="buttonClick('scrolling')"><i class="el-icon-sort"></i></el-button>
-                    </el-tooltip>
-                    <el-tooltip v-show="showToolButton['setPosition']" content="На страницу" :open-delay="1000" effect="light">
-                        <el-button ref="setPosition" class="tool-button" :class="buttonActiveClass('setPosition')" @click="buttonClick('setPosition')"><i class="el-icon-d-arrow-right"></i></el-button>
-                    </el-tooltip>
-                    <el-tooltip v-show="showToolButton['search']" content="Найти в тексте" :open-delay="1000" effect="light">
-                        <el-button ref="search" class="tool-button" :class="buttonActiveClass('search')" @click="buttonClick('search')"><i class="el-icon-search"></i></el-button>
-                    </el-tooltip>
-                    <el-tooltip v-show="showToolButton['copyText']" content="Скопировать текст со страницы" :open-delay="1000" effect="light">
-                        <el-button ref="copyText" class="tool-button" :class="buttonActiveClass('copyText')" @click="buttonClick('copyText')"><i class="el-icon-edit-outline"></i></el-button>
-                    </el-tooltip>
-                    <el-tooltip v-show="showToolButton['refresh']" content="Принудительно обновить книгу в обход кэша" :open-delay="1000" effect="light">
-                        <el-button ref="refresh" class="tool-button" :class="buttonActiveClass('refresh')" @click="buttonClick('refresh')">
-                            <i class="el-icon-refresh" :class="{clear: !showRefreshIcon}"></i>
-                        </el-button>
-                    </el-tooltip>
+                    <button ref="fullScreen" v-show="showToolButton['fullScreen']" class="tool-button" :class="buttonActiveClass('fullScreen')" @click="buttonClick('fullScreen')">
+                        <q-icon :name="(fullScreenActive ? 'o_fullscreen_exit': 'o_fullscreen')" size="38px"/>
+                        <q-tooltip :delay="1000" anchor="bottom middle" content-style="font-size: 80%">На весь экран</q-tooltip>
+                    </button>
+                    <button ref="scrolling" v-show="showToolButton['scrolling']" class="tool-button" :class="buttonActiveClass('scrolling')" @click="buttonClick('scrolling')">
+                        <q-icon name="o_swap_vert" size="34px"/>
+                        <q-tooltip :delay="1000" anchor="bottom middle" content-style="font-size: 80%">Плавный скроллинг</q-tooltip>
+                    </button>
+                    <button ref="setPosition" v-show="showToolButton['setPosition']" class="tool-button" :class="buttonActiveClass('setPosition')" @click="buttonClick('setPosition')">
+                        <q-icon name="o_fast_forward" size="34px"/>
+                        <q-tooltip :delay="1000" anchor="bottom middle" content-style="font-size: 80%">На страницу</q-tooltip>
+                    </button>
+                    <button ref="search" v-show="showToolButton['search']" class="tool-button" :class="buttonActiveClass('search')" @click="buttonClick('search')">
+                        <q-icon name="o_search" size="34px"/>
+                        <q-tooltip :delay="1000" anchor="bottom middle" content-style="font-size: 80%">Найти в тексте</q-tooltip>
+                    </button>
+                    <button ref="copyText" v-show="showToolButton['copyText']" class="tool-button" :class="buttonActiveClass('copyText')" @click="buttonClick('copyText')">
+                        <q-icon name="o_open_in_new" size="34px"/>
+                        <q-tooltip :delay="1000" anchor="bottom middle" content-style="font-size: 80%">Скопировать текст со страницы</q-tooltip>
+                    </button>
+                    <button ref="refresh" v-show="showToolButton['refresh']" class="tool-button" :class="buttonActiveClass('refresh')" @click="buttonClick('refresh')">
+                        <q-icon name="o_sync" size="34px"/>
+                        <q-tooltip :delay="1000" anchor="bottom middle" content-style="font-size: 80%">Принудительно обновить книгу в обход кэша</q-tooltip>
+                    </button>
                     <div class="space"></div>
-                    <el-tooltip v-show="showToolButton['offlineMode']" content="Автономный режим (без интернета)" :open-delay="1000" effect="light">
-                        <el-button ref="offlineMode" class="tool-button" :class="buttonActiveClass('offlineMode')" @click="buttonClick('offlineMode')"><i class="el-icon-connection"></i></el-button>
-                    </el-tooltip>
-                    <el-tooltip v-show="showToolButton['recentBooks']" content="Открыть недавние" :open-delay="1000" effect="light">
-                        <el-button ref="recentBooks" class="tool-button" :class="buttonActiveClass('recentBooks')" @click="buttonClick('recentBooks')"><i class="el-icon-document"></i></el-button>
-                    </el-tooltip-->
+                    <button ref="offlineMode" v-show="showToolButton['offlineMode']" class="tool-button" :class="buttonActiveClass('offlineMode')" @click="buttonClick('offlineMode')">
+                        <q-icon name="o_link_off" size="32px"/>
+                        <q-tooltip :delay="1000" anchor="bottom middle" content-style="font-size: 80%">Автономный режим (без интернета)</q-tooltip>
+                    </button>
+                    <button ref="recentBooks" v-show="showToolButton['recentBooks']" class="tool-button" :class="buttonActiveClass('recentBooks')" @click="buttonClick('recentBooks')">
+                        <q-icon name="o_library_books" size="32px"/>
+                        <q-tooltip :delay="1000" anchor="bottom middle" content-style="font-size: 80%">Открыть недавние</q-tooltip>
+                    </button>
                 </div>
 
-                <q-btn class="tool-button" :class="buttonActiveClass('settings')" @click="buttonClick('settings')">
+                <button ref="settings" class="tool-button" :class="buttonActiveClass('settings')" @click="buttonClick('settings')">
                     <q-icon name="o_settings" size="30px"/>
                     <q-tooltip :delay="1000" anchor="bottom left" content-style="font-size: 80%">Настроить</q-tooltip>
-                </q-btn>
-
-                <!--el-tooltip content="Настроить" :open-delay="1000" effect="light">
-                    <el-button ref="settings" class="tool-button" :class="buttonActiveClass('settings')" @click="buttonClick('settings')"><i class="el-icon-setting"></i></el-button>            
-                </el-tooltip-->
+                </button>
             </div>
         </div>
 
@@ -738,7 +742,7 @@ class Reader extends Vue {
     buttonClick(button) {
         const activeClass = this.buttonActiveClass(button);
 
-        //this.$refs[button].$el.blur();
+        this.$refs[button].blur();
 
         if (activeClass['tool-button-disabled'])
             return;
@@ -1173,11 +1177,9 @@ class Reader extends Vue {
     height: 38px;
     width: 38px;
     border: 0;
+    border-radius: 2px;
     box-shadow: 3px 3px 5px black;
-}
-
-.tool-button + .tool-button {
-    margin: 0 2px 0 2px;
+    outline: 0;
 }
 
 .tool-button:hover {
