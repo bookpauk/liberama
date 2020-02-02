@@ -131,7 +131,11 @@ class TextPage extends Vue {
             await this.doPageAnimation();
         }, 10);
 
-        this.$root.$on('resize', () => {this.$nextTick(this.onResize)});
+        this.$root.$on('resize', async() => {
+            this.$nextTick(this.onResize);
+            await sleep(300);
+            this.$nextTick(this.onResize);
+        });
     }
 
     mounted() {
@@ -446,9 +450,6 @@ class TextPage extends Vue {
     }
 
     async onResize() {
-        /*this.page1 = null;
-        this.page2 = null;
-        this.statusBar = null;*/
         try {
             this.calcDrawProps();
             this.setBackground();

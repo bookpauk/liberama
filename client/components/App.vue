@@ -203,6 +203,9 @@ class App extends Vue {
         return (this.mode !== null && this.mode != 'reader' && this.mode != 'omnireader');
     }
 
+    set showAsideBar(value) {
+    }
+
     get isReaderActive() {
         return this.rootRoute == '/reader';
     }
