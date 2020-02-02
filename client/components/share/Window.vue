@@ -143,7 +143,7 @@ class Window extends Vue {
 .header {
     display: flex;
     justify-content: flex-end;
-    background-color: #59B04F;
+    background: linear-gradient(to bottom right, green, #59B04F);
     align-items: center;
     height: 30px;
 }
@@ -152,6 +152,8 @@ class Window extends Vue {
     flex: 1;
     margin-left: 10px;
     margin-right: 10px;
+    color: yellow;
+    text-shadow: 2px 1px 5px black, 2px 2px 5px black;
 }
 
 .close-button {
