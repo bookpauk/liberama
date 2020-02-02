@@ -7,9 +7,9 @@ import Quasar from 'quasar/src/vue-plugin.js'
 const config = {};
 
 //components
-import {QLayout} from 'quasar/src/components/layout';
-import {QPageContainer, QPage} from 'quasar/src/components/page';
-import {QDrawer} from 'quasar/src/components/drawer';
+//import {QLayout} from 'quasar/src/components/layout';
+//import {QPageContainer, QPage} from 'quasar/src/components/page';
+//import {QDrawer} from 'quasar/src/components/drawer';
 
 import {QCircularProgress} from 'quasar/src/components/circular-progress';
 import {QInput} from 'quasar/src/components/input';
@@ -25,7 +25,10 @@ import {QList, QItem, QItemSection, QItemLabel} from 'quasar/src/components/item
 import {QTooltip} from 'quasar/src/components/tooltip';
       
 const components = {
-    QLayout, QPageContainer, QPage, QDrawer,
+    //QLayout,
+    //QPageContainer, QPage,
+    //QDrawer,
+    
     QCircularProgress,
     QInput,
     QBtn,
