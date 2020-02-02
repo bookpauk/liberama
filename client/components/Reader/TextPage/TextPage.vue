@@ -133,7 +133,7 @@ class TextPage extends Vue {
 
         this.$root.$on('resize', async() => {
             this.$nextTick(this.onResize);
-            await sleep(300);
+            await sleep(500);
             this.$nextTick(this.onResize);
         });
     }

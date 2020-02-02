@@ -1,6 +1,6 @@
 <template>
-    <q-page class="column no-wrap">
-        <div  ref="header" class="header" v-show="toolBarActive">
+    <div class="column no-wrap">
+        <div ref="header" class="header" v-show="toolBarActive">
             <div ref="buttons" class="row justify-between no-wrap">
                 <button ref="loader" class="tool-button" :class="buttonActiveClass('loader')" @click="buttonClick('loader')" v-ripple>
                     <q-icon name="o_arrow_back" size="30px"/>
@@ -148,7 +148,7 @@
             </el-dialog>
 
         </div>
-    </q-page>
+    </div>
 </template>
 
 <script>

@@ -1,5 +1,5 @@
 <template>
-    <q-layout view="lhr lpr lfr">
+    <!--q-layout view="lhr lpr lfr">
         <q-drawer v-model="showAsideBar" :width="asideWidth">
             <div class="app-name"><span v-html="appName"></span></div>
             <q-btn class="el-button-collapse" @click="toggleCollapse"></q-btn>
@@ -12,7 +12,7 @@
 
                     <q-item-section>Inbox</q-item-section>
                 </q-item>
-            </q-list>
+            </q-list-->
             <!--el-menu class="el-menu-vertical" :default-active="rootRoute" :collapse="isCollapse" router>
               <el-menu-item index="/cardindex">
                 <i class="el-icon-search"></i>
@@ -43,14 +43,19 @@
                 <span :class="itemTitleClass('/help')" slot="title">{{ this.itemRuText['/help'] }}</span>
               </el-menu-item>
             </el-menu-->
-        </q-drawer>
+        <!--/q-drawer>
 
         <q-page-container>
             <keep-alive>
                 <router-view></router-view>
             </keep-alive>
         </q-page-container>
-    </q-layout>
+    </q-layout-->
+    <div class="fit row">
+        <keep-alive>
+            <router-view class="col"></router-view>
+        </keep-alive>
+    </div>
 </template>
 
 <script>
@@ -240,9 +245,12 @@ class App extends Vue {
 </style>
 
 <style>
-body, html, #app {
+body, html, #app {    
     margin: 0;
     padding: 0;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
     font: normal 12pt ReaderDefault;
 }
 
