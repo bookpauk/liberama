@@ -231,8 +231,11 @@ class App extends Vue {
 body, html, #app {
     margin: 0;
     padding: 0;
-    height: 100%;
     font: normal 12pt ReaderDefault;
+}
+
+.border {
+    border: 1px solid black;
 }
 
 @font-face {

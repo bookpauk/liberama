@@ -1,7 +1,7 @@
 <template>
-    <q-page>
-        <el-header v-show="toolBarActive" height='50px'>
-            <div ref="header" class="header">
+    <q-page class="fit">
+        <div class="header" v-show="toolBarActive">
+            <div ref="buttons" class="row justify-between">
                 <el-tooltip content="Загрузить книгу" :open-delay="1000" effect="light">
                     <el-button ref="loader" class="tool-button" :class="buttonActiveClass('loader')" @click="buttonClick('loader')"><i class="el-icon-back"></i></el-button>
                 </el-tooltip>
@@ -47,9 +47,9 @@
                     <el-button ref="settings" class="tool-button" :class="buttonActiveClass('settings')" @click="buttonClick('settings')"><i class="el-icon-setting"></i></el-button>            
                 </el-tooltip>
             </div>
-        </el-header>
+        </div>
 
-        <el-main>
+        <div class="fit">
             <keep-alive>
                 <component ref="page" :is="activePage"
                     @load-book="loadBook"
@@ -137,7 +137,7 @@
                 </span>
             </el-dialog>
 
-        </el-main>
+        </div>
     </q-page>
 </template>
 
@@ -330,8 +330,8 @@ class Reader extends Vue {
 
     updateHeaderMinWidth() {
         const showButtonCount = Object.values(this.showToolButton).reduce((a, b) => a + (b ? 1 : 0), 0);
-        if (this.$refs.header)
-            this.$refs.header.style.minWidth = 65*showButtonCount + 'px';
+        if (this.$refs.buttons)
+            this.$refs.buttons.style.minWidth = 65*showButtonCount + 'px';
     }
 
     checkSetStorageAccessKey() {
@@ -1143,27 +1143,17 @@ class Reader extends Vue {
 </script>
 
 <style scoped>
-.el-container {
-    padding: 0;
-    margin: 0;
-    height: 100%;
-}
-
-.el-header {
+.header {
     padding-left: 5px;
     padding-right: 5px;
     background-color: #1B695F;
     color: #000;
     overflow-x: auto;
     overflow-y: hidden;
+    height: 50px;
 }
 
-.header {
-    display: flex;
-    justify-content: space-between;
-}
-
-.el-main {
+.main {
     position: relative;
     display: flex;
     padding: 0;
