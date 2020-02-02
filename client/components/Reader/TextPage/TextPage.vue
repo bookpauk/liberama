@@ -298,20 +298,9 @@ class TextPage extends Vue {
             this.fontsLoaded[this.fontCssUrl] = 1;
         }
 
-        const waitingTime = 10*1000;
-        const delay = 100;
-        let i = 0;
-        //ждем шрифты
-        while (i < waitingTime/delay) {
-            i++;
-            try {
-                await this.checkLoadedFonts();
-                i = waitingTime;
-            } catch (e) {
-                await sleep(delay);
-            }
-        }
-        if (i !== waitingTime) {
+        try {
+            await this.checkLoadedFonts();
+        } catch (e) {
             this.$notify.error({
                 title: 'Ошибка загрузки',
                 message: 'Некоторые шрифты не удалось загрузить'
