@@ -28,7 +28,7 @@ const components = {
     //QLayout,
     //QPageContainer, QPage,
     //QDrawer,
-    
+
     QCircularProgress,
     QInput,
     QBtn,
@@ -51,9 +51,11 @@ const directives = {Ripple};
 
 //plugins
 import AppFullscreen from 'quasar/src/plugins/AppFullscreen';
+import Notify from 'quasar/src/plugins/Notify';
 
 const plugins = {
     AppFullscreen,
+    Notify,
 };
 
 //use
