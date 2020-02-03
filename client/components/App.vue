@@ -250,7 +250,6 @@ body, html, #app {
     padding: 0;
     width: 100%;
     height: 100%;
-    overflow: hidden;
     font: normal 12pt ReaderDefault;
 }
 
