@@ -3,7 +3,7 @@
         <template slot="header">
             <span style="position: relative; top: -3px">
                 Вставьте текст и нажмите
-                <span class="clickable" style="font-size: 150%; position: relative; top: 1px" @click="loadBuffer">загрузить</span>
+                <span class="clickable text-primary" style="font-size: 150%; position: relative; top: 1px" @click="loadBuffer">загрузить</span>
                 или F2
             </span>
         </template>
