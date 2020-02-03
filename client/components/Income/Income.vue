@@ -1,7 +1,7 @@
 <template>
-    <q-page>
+    <div>
         Раздел Income в разработке
-    </q-page>
+    </div>
 </template>
 
 <script>

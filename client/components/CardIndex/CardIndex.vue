@@ -1,9 +1,9 @@
 <template>
-    <q-page>
+    <div>
         <keep-alive>
             <router-view></router-view>
         </keep-alive>
-    </q-page>
+    </div>
 </template>
 
 <script>

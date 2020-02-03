@@ -1,7 +1,7 @@
 <template>
-    <q-page>
+    <div>
         Раздел Settings в разработке
-    </q-page>
+    </div>
 </template>
 
 <script>

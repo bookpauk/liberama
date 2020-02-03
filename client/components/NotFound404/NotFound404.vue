@@ -1,7 +1,7 @@
 <template>
-    <q-page>
+    <div>
         Страница не найдена
-    </q-page>
+    </div>
 </template>
 
 <script>
