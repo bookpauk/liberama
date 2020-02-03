@@ -22,7 +22,7 @@
                         <q-tooltip :delay="1000" anchor="bottom middle" content-style="font-size: 80%">На весь экран</q-tooltip>
                     </button>
                     <button ref="scrolling" v-show="showToolButton['scrolling']" class="tool-button" :class="buttonActiveClass('scrolling')" @click="buttonClick('scrolling')" v-ripple>
-                        <q-icon name="o_swap_vert" size="34px"/>
+                        <q-icon name="o_line_weight" size="32px"/>
                         <q-tooltip :delay="1000" anchor="bottom middle" content-style="font-size: 80%">Плавный скроллинг</q-tooltip>
                     </button>
                     <button ref="setPosition" v-show="showToolButton['setPosition']" class="tool-button" :class="buttonActiveClass('setPosition')" @click="buttonClick('setPosition')" v-ripple>
