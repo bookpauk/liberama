@@ -4,50 +4,38 @@
             <p class="p">Вы можете пожертвовать на развитие проекта любую сумму:</p>
             <div class="address">
                 <img class="logo" src="./assets/yandex.png">
-                <el-button class="button" @click="donateYandexMoney">Пожертвовать</el-button><br>
+                <q-btn class="button q-px-sm" dense no-caps @click="donateYandexMoney">Пожертвовать</q-btn><br>
                 <div class="para">{{ yandexAddress }}
-                    <el-tooltip :open-delay="500" effect="light">
-                        <template slot="content">
-                            Скопировать
-                        </template>
-                        <i class="el-icon-copy-document copy-icon" @click="copyAddress(yandexAddress, 'Яндекс кошелек')"></i>
-                    </el-tooltip>
+                    <q-icon class="copy-icon" name="o_file_copy" @click="copyAddress(yandexAddress, 'Яндекс кошелек')">
+                        <q-tooltip :delay="1000" anchor="top middle" self="center middle" content-style="font-size: 80%">Скопировать</q-tooltip>                    
+                    </q-icon>
                 </div>
             </div>
 
             <div class="address">                
                 <img class="logo" src="./assets/bitcoin.png">
                 <div class="para">{{ bitcoinAddress }}
-                    <el-tooltip :open-delay="500" effect="light">
-                        <template slot="content">
-                            Скопировать
-                        </template>
-                        <i class="el-icon-copy-document copy-icon" @click="copyAddress(bitcoinAddress, 'Bitcoin-адрес')"></i>
-                    </el-tooltip>
+                    <q-icon class="copy-icon" name="o_file_copy" @click="copyAddress(bitcoinAddress, 'Bitcoin-адрес')">
+                        <q-tooltip :delay="1000" anchor="top middle" self="center middle" content-style="font-size: 80%">Скопировать</q-tooltip>                    
+                    </q-icon>
                 </div>
             </div>
 
             <div class="address">                
                 <img class="logo" src="./assets/litecoin.png">
                 <div class="para">{{ litecoinAddress }}
-                    <el-tooltip :open-delay="500" effect="light">
-                        <template slot="content">
-                            Скопировать
-                        </template>
-                        <i class="el-icon-copy-document copy-icon" @click="copyAddress(litecoinAddress, 'Litecoin-адрес')"></i>
-                    </el-tooltip>
+                    <q-icon class="copy-icon" name="o_file_copy" @click="copyAddress(litecoinAddress, 'Litecoin-адрес')">
+                        <q-tooltip :delay="1000" anchor="top middle" self="center middle" content-style="font-size: 80%">Скопировать</q-tooltip>                    
+                    </q-icon>
                 </div>
             </div>
 
             <div class="address">                
                 <img class="logo" src="./assets/monero.png">
                 <div class="para">{{ moneroAddress }}
-                    <el-tooltip :open-delay="500" effect="light">
-                        <template slot="content">
-                            Скопировать
-                        </template>
-                        <i class="el-icon-copy-document copy-icon" @click="copyAddress(moneroAddress, 'Monero-адрес')"></i>
-                    </el-tooltip>
+                    <q-icon class="copy-icon" name="o_file_copy" @click="copyAddress(moneroAddress, 'Monero-адрес')">
+                        <q-tooltip :delay="1000" anchor="top middle" self="center middle" content-style="font-size: 80%">Скопировать</q-tooltip>                    
+                    </q-icon>
                 </div>
             </div>
         </div>
@@ -59,6 +47,7 @@
 import Vue from 'vue';
 import Component from 'vue-class-component';
 import {copyTextToClipboard} from '../../../../share/utils';
+import * as notify from '../../../share/notify';
 
 export default @Component({
 })
@@ -78,9 +67,9 @@ class DonateHelpPage extends Vue {
     async copyAddress(address, prefix) {
         const result = await copyTextToClipboard(address);
         if (result)
-            this.$notify.success({message: `${prefix} ${address} успешно скопирован в буфер обмена`});
+            notify.success(this, `${prefix} ${address} успешно скопирован в буфер обмена`);
         else
-            this.$notify.error({message: 'Копирование не удалось'});
+            notify.error(this, 'Копирование не удалось');
     }
 }
 //-----------------------------------------------------------------------------

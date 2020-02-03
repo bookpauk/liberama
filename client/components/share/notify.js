@@ -11,7 +11,7 @@ export function success(vue, message, caption) {
         message: 
             `<div style="max-width: 350px;">
                 ${caption}
-                <div style="color: black">${message}</div>
+                <div style="color: black; overflow-wrap: break-word; word-wrap: break-word;">${message}</div>
             </div>`
     });
 }
@@ -29,7 +29,7 @@ export function error(vue, message, caption) {
         message: 
             `<div style="max-width: 350px;">
                 ${caption}
-                <div style="color: yellow">${message}</div>
+                <div style="color: yellow; overflow-wrap: break-word; word-wrap: break-word;">${message}</div>
             </div>`
     });
 }
