@@ -1181,7 +1181,7 @@ class Reader extends Vue {
     height: 38px;
     width: 38px;
     border: 0;
-    border-radius: 2px;
+    border-radius: 6px;
     box-shadow: 3px 3px 5px black;
     outline: 0;
 }
