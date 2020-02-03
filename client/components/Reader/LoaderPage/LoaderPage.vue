@@ -1,5 +1,5 @@
 <template>
-    <div ref="main" class="column no-wrap" style="min-height: 520px">
+    <div ref="main" class="column no-wrap" style="min-height: 500px">
         <div class="relative-position">
             <GithubCorner url="https://github.com/bookpauk/liberama" cornerColor="#1B695F" gitColor="EBE2C9"></GithubCorner>
         </div>
@@ -21,12 +21,12 @@
             <input type="file" id="file" ref="file" @change="loadFile" style='display: none;'/>
 
             <div class="q-my-sm"></div>
-            <q-btn no-caps dense class="q-px-sm" color="primary" @click="loadFileClick">
+            <q-btn no-caps dense class="q-px-sm" color="primary" size="13px" @click="loadFileClick">
                 Загрузить файл с диска
             </q-btn>
             
-            <div class="q-my-md"></div>
-            <q-btn no-caps dense class="q-px-sm" color="primary" @click="loadBufferClick">
+            <div class="q-my-sm"></div>
+            <q-btn no-caps dense class="q-px-sm" color="primary" size="13px" @click="loadBufferClick">
                 Из буфера обмена
             </q-btn>
 
