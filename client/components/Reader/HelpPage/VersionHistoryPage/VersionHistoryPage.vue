@@ -7,7 +7,7 @@
         </span>
 
         <br>
-        <h4>История версий:</h4>
+        <span class="text-h5">История версий:</span>
         <br>
 
         <div v-for="item in versionContent" :id="item.key" :key="item.key">
@@ -63,10 +63,6 @@ class VersionHistoryPage extends Vue {
     font-size: 120%;
     line-height: 130%;
     position: relative;
-}
-
-h4 {
-    margin: 0;
 }
 
 p {

@@ -1,6 +1,6 @@
 <template>
     <div class="page">
-        <h4>Управление с помощью мыши/тачскрина:</h4>
+        <span class="text-h5">Управление с помощью мыши/тачскрина:</span>
         <ul>
             <li><b>ЛКМ/ТАЧ</b> по экрану в одну из областей - активация действия:</li>
                 <div class="click-map-page">
@@ -53,10 +53,6 @@ class MouseHelpPage extends Vue {
     overflow-y: auto;
     font-size: 120%;
     line-height: 130%;
-}
-
-h4 {
-    margin: 0;
 }
 
 .click-map-page {

@@ -4,7 +4,7 @@
             <p class="p">Вы можете пожертвовать на развитие проекта любую сумму:</p>
             <div class="address">
                 <img class="logo" src="./assets/yandex.png">
-                <q-btn class="button q-px-sm" dense no-caps @click="donateYandexMoney">Пожертвовать</q-btn><br>
+                <q-btn class="q-ml-sm q-px-sm" dense no-caps @click="donateYandexMoney">Пожертвовать</q-btn><br>
                 <div class="para">{{ yandexAddress }}
                     <q-icon class="copy-icon" name="o_file_copy" @click="copyAddress(yandexAddress, 'Яндекс кошелек')">
                         <q-tooltip :delay="1000" anchor="top middle" self="center middle" content-style="font-size: 80%">Скопировать</q-tooltip>                    
@@ -94,10 +94,6 @@ class DonateHelpPage extends Vue {
     overflow-wrap: break-word;
 }
 
-h5 {
-    margin: 0;
-}
-
 .address {
     padding-top: 10px;
     margin-top: 20px;
@@ -105,10 +101,6 @@ h5 {
 
 .para {
     margin: 10px 10px 10px 40px;
-}
-
-.button {
-    margin-left: 10px;
 }
 
 .logo {

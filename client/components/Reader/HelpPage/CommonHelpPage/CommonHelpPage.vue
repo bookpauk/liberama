@@ -1,6 +1,6 @@
 <template>
     <div class="page">
-        <h4>Возможности читалки:</h4>
+        <span class="text-h5">Возможности читалки:</span>
         <ul>
             <li>загрузка любой страницы интернета</li>
             <li>работа в автономном режиме (без связи)</li>
@@ -75,10 +75,6 @@ class CommonHelpPage extends Vue {
     overflow-y: auto;
     font-size: 120%;
     line-height: 130%;
-}
-
-h4 {
-    margin: 0;
 }
 
 .clickable {
