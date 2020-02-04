@@ -14,6 +14,7 @@ const config = {};
 import {QCircularProgress} from 'quasar/src/components/circular-progress';
 import {QInput} from 'quasar/src/components/input';
 import {QBtn} from 'quasar/src/components/btn';
+import {QBtnGroup} from 'quasar/src/components/btn-group';
 import {QBtnToggle} from 'quasar/src/components/btn-toggle';
 import {QIcon} from 'quasar/src/components/icon';
 import {QSlider} from 'quasar/src/components/slider';
@@ -32,6 +33,7 @@ const components = {
     QCircularProgress,
     QInput,
     QBtn,
+    QBtnGroup,
     QBtnToggle,
     QIcon,
     QSlider,

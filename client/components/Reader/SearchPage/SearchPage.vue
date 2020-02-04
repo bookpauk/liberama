@@ -8,15 +8,19 @@
             <span v-show="initStep">{{ initPercentage }}%</span>
 
             <div v-show="!initStep" class="input">
-                <input ref="input" class="el-input__inner"
+                <!--input ref="input"
                     placeholder="что ищем"
-                    :value="needle" @input="needle = $event.target.value"/>
+                    :value="needle" @input="needle = $event.target.value"/-->
+                <q-input ref="input" class="col" outlined dense
+                    placeholder="что ищем"
+                    v-model="needle"
+                />
                 <div style="position: absolute; right: 10px; margin-top: 10px; font-size: 16px;">{{ foundText }}</div>
             </div>
-            <el-button-group v-show="!initStep" class="button-group">
-                <el-button @click="showNext"><i class="el-icon-arrow-down"></i></el-button>
-                <el-button @click="showPrev"><i class="el-icon-arrow-up"></i></el-button>
-            </el-button-group>
+            <q-btn-group v-show="!initStep" class="button-group row no-wrap">
+                <q-btn class="button" dense stretch @click="showNext"><q-icon class="icon" name="o_expand_more" dense size="30px"/></q-btn>
+                <q-btn class="button" dense stretch @click="showPrev"><q-icon class="icon" name="o_expand_less" dense size="30px"/></q-btn>
+            </q-btn-group>
         </div>
     </Window>
 </template>
@@ -39,7 +43,9 @@ export default @Component({
 
         },
         foundText: function(newValue) {
-            this.$refs.input.style.paddingRight = (10 + newValue.length*12) + 'px';
+            const el = this.$refs.input.$el.querySelector('label div div div input');
+            if (el)
+                el.style.paddingRight = newValue.length*12 + 'px';
         },
     },
 })
@@ -194,17 +200,18 @@ class SearchPage extends Vue {
 }
 
 .button-group {
-    width: 150px;
+    width: 120px;
     margin: 0;
     padding: 0;
+    height: 37px;
 }
 
-.el-button {
+.button {
     padding: 9px 17px 9px 17px;
-    width: 55px;
+    width: 60px;
 }
 
-i {
-    font-size: 20px;
+.icon {
+    top: -8px;
 }
 </style>
