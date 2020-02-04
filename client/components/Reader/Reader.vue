@@ -302,8 +302,8 @@ class Reader extends Vue {
         (async() => {
             await bookManager.init(this.settings);
             bookManager.addEventListener(this.bookManagerEvent);
-            
-            if (this.$root.rootRoute == '/reader') {
+
+            if (this.$root.rootRoute() == '/reader') {
                 if (this.routeParamUrl) {
                     await this.loadBook({url: this.routeParamUrl, bookPos: this.routeParamPos, force: this.routeParamRefresh});
                 } else {
@@ -1086,7 +1086,7 @@ class Reader extends Vue {
     }
 
     keyHook(event) {
-        if (this.$root.rootRoute == '/reader') {
+        if (this.$root.rootRoute() == '/reader') {
             let handled = false;
             if (!handled && this.helpActive)
                 handled = this.$refs.helpPage.keyHook(event);

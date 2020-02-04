@@ -90,6 +90,18 @@ class App extends Vue {
         this.uistate = this.$store.state.uistate;
         this.config = this.$store.state.config;
 
+        //root route
+        let cachedRoute = '';
+        let cachedPath = '';
+        this.$root.rootRoute = () => {
+            if (this.$route.path != cachedPath) {
+                cachedPath = this.$route.path;
+                const m = cachedPath.match(/^(\/[^/]*).*$/i);
+                cachedRoute = (m ? m[1] : this.$route.path);
+            }
+            return cachedRoute;
+        }
+
         // set-app-title
         this.$root.$on('set-app-title', this.setAppTitle);
 
@@ -178,10 +190,7 @@ class App extends Vue {
     }
 
     get rootRoute() {
-        const m = this.$route.path.match(/^(\/[^/]*).*$/i);
-        this.$root.rootRoute = (m ? m[1] : this.$route.path);
-
-        return this.$root.rootRoute;
+        return this.$root.rootRoute();
     }
 
     setAppTitle(title) {
