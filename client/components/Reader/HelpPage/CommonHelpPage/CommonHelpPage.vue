@@ -3,10 +3,10 @@
         <span class="text-h5">Возможности читалки:</span>
         <ul>
             <li>загрузка любой страницы интернета</li>
+            <li>синхронизация данных (настроек и читаемых книг) между различными устройствами</li>
             <li>работа в автономном режиме (без связи)</li>
             <li>изменение цвета фона, текста, размер и тип шрифта и прочее</li>
             <li>установка и запоминание текущей позиции и настроек в браузере и на сервере</li>
-            <li>синхронизация данных (настроек и читаемых книг) между различными устройствами</li>
             <li>кэширование файлов книг на клиенте и на сервере</li>
             <li>открытие книг с локального диска</li>
             <li>плавный скроллинг текста</li>
@@ -25,10 +25,10 @@
         <div v-show="mode == 'omnireader'">
             <p>Вы можете добавить в свой браузер закладку, указав в ее свойствах вместо адреса следующий код:
                 <br><strong>javascript:location.href='https://omnireader.ru/?url='+location.href;</strong>
-                &nbsp;
-                <span class="clickable" @click="copyText('javascript:location.href=\'https://omnireader.ru/?url=\'+location.href;', 'Код для адреса закладки успешно скопирован в буфер обмена')">
-                    (скопировать)
-                </span>
+                <q-icon class="copy-icon" name="o_file_copy" @click="copyText('javascript:location.href=\'https://omnireader.ru/?url=\'+location.href;', 'Код для адреса закладки успешно скопирован в буфер обмена')">
+                    <q-tooltip :delay="1000" anchor="top middle" self="center middle" content-style="font-size: 80%">Скопировать</q-tooltip>                    
+                </q-icon>
+
                 <br>или перетащив на панель закладок следующую ссылку:
                 <br><a style="margin-left: 50px" href="javascript:location.href='https://omnireader.ru/?url='+location.href;">Omni Reader</a>
                 <br>Тогда, активировав получившуюся закладку на любой странице интернета, вы автоматически загрузите эту страницу в Omni Reader.
@@ -77,9 +77,10 @@ class CommonHelpPage extends Vue {
     line-height: 130%;
 }
 
-.clickable {
-    color: blue;
-    text-decoration: underline;
+.copy-icon {
+    margin-left: 10px;
     cursor: pointer;
+    font-size: 120%;
+    color: blue;
 }
 </style>

@@ -113,5 +113,6 @@ class DonateHelpPage extends Vue {
     margin-left: 10px;
     cursor: pointer;
     font-size: 120%;
+    color: blue;
 }
 </style>
