@@ -13,7 +13,7 @@
                     :value="needle" @input="needle = $event.target.value"/-->
                 <q-input ref="input" class="col" outlined dense
                     placeholder="что ищем"
-                    v-model="needle"
+                    v-model="needle" @keydown="inputKeyDown"
                 />
                 <div style="position: absolute; right: 10px; margin-top: 10px; font-size: 16px;">{{ foundText }}</div>
             </div>
@@ -43,6 +43,7 @@ export default @Component({
 
         },
         foundText: function(newValue) {
+            //недостатки сторонних ui
             const el = this.$refs.input.$el.querySelector('label div div div input');
             if (el)
                 el.style.paddingRight = newValue.length*12 + 'px';
@@ -166,12 +167,13 @@ class SearchPage extends Vue {
         this.$emit('search-toggle');
     }
 
-    keyHook(event) {
-        //недостатки сторонних ui
-        if (document.activeElement === this.$refs.input && event.type == 'keydown' && event.key == 'Enter') {
+    inputKeyDown(event) {
+        if (event.key == 'Enter') {
             this.showNext();
         }
+    }
 
+    keyHook(event) {
         if (event.type == 'keydown' && (event.code == 'Escape')) {
             this.close();
         }
@@ -200,7 +202,7 @@ class SearchPage extends Vue {
 }
 
 .button-group {
-    width: 120px;
+    width: 100px;
     margin: 0;
     padding: 0;
     height: 37px;
@@ -208,10 +210,10 @@ class SearchPage extends Vue {
 
 .button {
     padding: 9px 17px 9px 17px;
-    width: 60px;
+    width: 50px;
 }
 
 .icon {
-    top: -8px;
+    top: -9px;
 }
 </style>
