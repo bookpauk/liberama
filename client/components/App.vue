@@ -257,6 +257,11 @@ body, html, #app {
     border: 2px solid yellow;
 }
 
+.icon-rotate {
+    vertical-align: middle;
+    animation: rotating 2s linear infinite;
+}
+
 @font-face {
   font-family: 'ReaderDefault';
   src: url('fonts/reader-default.woff') format('woff'),

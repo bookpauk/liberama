@@ -38,8 +38,9 @@ import Vue from 'vue';
 import Component from 'vue-class-component';
 import {loadCSS} from 'fg-loadcss';
 import _ from 'lodash';
-import {sleep} from '../../../share/utils';
 
+import * as notify from '../../share/notify';
+import {sleep} from '../../../share/utils';
 import bookManager from '../share/bookManager';
 import DrawHelper from './DrawHelper';
 import rstore from '../../../store/modules/reader';
@@ -281,16 +282,11 @@ class TextPage extends Vue {
     async loadFonts() {
         this.fontsLoading = true;
 
-        let inst = null;
+        let close = null;
         (async() => {
             await sleep(500);
             if (this.fontsLoading)
-                inst = this.$notify({
-                  title: '',
-                  dangerouslyUseHTMLString: true,
-                  message: 'Загрузка шрифта &nbsp;<i class="el-icon-loading"></i>',
-                  duration: 0
-                });
+                close = notify.info(this, 'Загрузка шрифта &nbsp;<i class="material-icons-outlined icon-rotate" style="font-size: 150%">grade</i>');
         })();
 
         if (!this.fontsLoaded)
@@ -305,15 +301,12 @@ class TextPage extends Vue {
         try {
             await this.checkLoadedFonts();
         } catch (e) {
-            this.$notify.error({
-                title: 'Ошибка загрузки',
-                message: 'Некоторые шрифты не удалось загрузить'
-            });
+            notify.error(this, 'Некоторые шрифты не удалось загрузить', 'Ошибка загрузки');
         }
 
         this.fontsLoading = false;
-        if (inst)
-            inst.close();
+        if (close)
+            close();
     }
 
     getSettings() {
