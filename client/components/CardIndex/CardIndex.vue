@@ -12,7 +12,7 @@ import Vue from 'vue';
 import Component from 'vue-class-component';
 import _ from 'lodash';
 
-const rootRoute = '/cardindex';
+const selfRoute = '/cardindex';
 const tab2Route = [
     '/cardindex/search',
     '/cardindex/card',
@@ -45,7 +45,7 @@ class CardIndex extends Vue {
             if (t !== this.selectedTab)
                 this.selectedTab = t.toString();
         } else {
-            if (route == rootRoute && lastActiveTab !== null)
+            if (route == selfRoute && lastActiveTab !== null)
                 this.setRouteByTab(lastActiveTab);
         }
     }
