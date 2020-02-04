@@ -273,9 +273,7 @@ class TextPage extends Vue {
     async checkLoadedFonts() {
         let loaded = await Promise.all(this.fontList.map(font => document.fonts.check(font)));
         if (loaded.some(r => !r)) {
-            loaded = await Promise.all(this.fontList.map(font => document.fonts.load(font)));
-            if (loaded.some(r => !r.length))
-                throw new Error('some font not loaded');
+            await Promise.all(this.fontList.map(font => document.fonts.load(font)));
         }
     }
 
