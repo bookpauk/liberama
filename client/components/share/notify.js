@@ -1,53 +1,39 @@
-export function success(vue, message, caption) {
-    caption = (caption ? `<div style="font-size: 120%; color: black"><b>${caption}</b></div><br>` : '');
+export function notify(vue, opts) {
+    let {
+        caption = null,
+        captionColor = 'black',
+        color = 'positive',
+        icon = '',
+        iconColor = 'white',
+        message = '',
+        messageColor = 'black',
+    } = opts;
+
+    caption = (caption ? `<div style="font-size: 120%; color: ${captionColor}"><b>${caption}</b></div><br>` : '');
     return vue.$q.notify({
         position: 'top-right',
-        color: 'positive',
-        textColor: 'white',
-        icon: 'o_check_circle',
+        color,
+        textColor: iconColor,
+        icon,
         actions: [{icon: 'o_close', color: 'black'}],
         html: true,
 
         message: 
             `<div style="max-width: 350px;">
                 ${caption}
-                <div style="color: black; overflow-wrap: break-word; word-wrap: break-word;">${message}</div>
+                <div style="color: ${messageColor}; overflow-wrap: break-word; word-wrap: break-word;">${message}</div>
             </div>`
     });
+}
+
+export function success(vue, message, caption) {
+    notify(vue, {color: 'positive', icon: 'o_check_circle', message, caption});
 }
 
 export function error(vue, message, caption) {
-    caption = (caption ? `<div style="font-size: 120%; color: yellow"><b>${caption}</b></div><br>` : '');
-    return vue.$q.notify({
-        position: 'top-right',
-        color: 'negative',
-        textColor: 'white',
-        icon: 'o_error_outline',
-        actions: [{icon: 'o_close', color: 'black'}],
-        html: true,
-
-        message: 
-            `<div style="max-width: 350px;">
-                ${caption}
-                <div style="color: yellow; overflow-wrap: break-word; word-wrap: break-word;">${message}</div>
-            </div>`
-    });
+    notify(vue, {color: 'negative', icon: 'o_error_outline', messageColor: 'yellow', message, caption});
 }
 
 export function info(vue, message, caption) {
-    caption = (caption ? `<div style="font-size: 120%; color: black"><b>${caption}</b></div><br>` : '');
-    return vue.$q.notify({
-        position: 'top-right',
-        color: 'info',
-        textColor: 'white',
-        icon: 'o_notifications',
-        actions: [{icon: 'o_close', color: 'black'}],
-        html: true,
-
-        message: 
-            `<div style="max-width: 350px;">
-                ${caption}
-                <div style="color: black; overflow-wrap: break-word; word-wrap: break-word;">${message}</div>
-            </div>`
-    });
+    notify(vue, {color: 'info', icon: 'o_notifications', message, caption});
 }
