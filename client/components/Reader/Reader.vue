@@ -602,7 +602,8 @@ class Reader extends Vue {
 
     setPositionToggle() {
         this.setPositionActive = !this.setPositionActive;
-        if (this.setPositionActive && this.activePage == 'TextPage' && this.mostRecentBook()) {
+        const page = this.$refs.page;
+        if (this.setPositionActive && this.activePage == 'TextPage' && page.parsed) {
             this.closeAllTextPages();
             this.setPositionActive = true;
 
