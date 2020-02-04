@@ -82,7 +82,7 @@
                 @stop-text-search="stopTextSearch">
             </SearchPage>
             <CopyTextPage v-if="copyTextActive" ref="copyTextPage" @copy-text-toggle="copyTextToggle"></CopyTextPage>
-            <RecentBooksPage v-show="recentBooksActive" ref="recentBooksPage" @load-book="loadBook" @recent-books-toggle="recentBooksToggle"></RecentBooksPage>
+            <RecentBooksPage v-show="recentBooksActive" ref="recentBooksPage" @load-book="loadBook" @recent-books-close="recentBooksClose"></RecentBooksPage>
             <SettingsPage v-if="settingsActive" ref="settingsPage" @settings-toggle="settingsToggle"></SettingsPage>
             <HelpPage v-if="helpActive" ref="helpPage" @help-toggle="helpToggle"></HelpPage>
             <ClickMapPage v-show="clickMapActive" ref="clickMapPage"></ClickMapPage>
@@ -342,7 +342,7 @@ class Reader extends Vue {
         const showButtonCount = Object.values(this.showToolButton).reduce((a, b) => a + (b ? 1 : 0), 0);
         if (this.$refs.buttons)
             this.$refs.buttons.style.minWidth = 65*showButtonCount + 'px';
-        (async () => {
+        (async() => {
             await utils.sleep(1000);
             if (this.$refs.header)
                 this.$refs.header.style.overflowX = 'auto';
@@ -682,6 +682,10 @@ class Reader extends Vue {
         }
     }
 
+    recentBooksClose() {
+        this.recentBooksActive = false;
+    }
+
     recentBooksToggle() {
         this.recentBooksActive = !this.recentBooksActive;
         if (this.recentBooksActive) {
@@ -915,6 +919,8 @@ class Reader extends Vue {
             this.mostRecentBook();
             return;
         }
+
+        this.closeAllTextPages();
 
         let url = encodeURI(decodeURI(opts.url));
 

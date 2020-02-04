@@ -315,7 +315,7 @@ class RecentBooksPage extends Vue {
     }
 
     close() {
-        this.$emit('recent-books-toggle');
+        this.$emit('recent-books-close');
     }
 
     keyHook(event) {
