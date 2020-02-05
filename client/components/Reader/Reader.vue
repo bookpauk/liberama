@@ -34,7 +34,7 @@
                         <q-tooltip :delay="1500" anchor="bottom middle" content-style="font-size: 80%">Найти в тексте</q-tooltip>
                     </button>
                     <button ref="copyText" v-show="showToolButton['copyText']" class="tool-button" :class="buttonActiveClass('copyText')" @click="buttonClick('copyText')" v-ripple>
-                        <q-icon name="la la-external-link-square-alt" size="34px"/>
+                        <q-icon name="la la-copy" size="32px"/>
                         <q-tooltip :delay="1500" anchor="bottom middle" content-style="font-size: 80%">Скопировать текст со страницы</q-tooltip>
                     </button>
                     <button ref="refresh" v-show="showToolButton['refresh']" class="tool-button" :class="buttonActiveClass('refresh')" @click="buttonClick('refresh')" v-ripple>
