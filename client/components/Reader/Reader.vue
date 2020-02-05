@@ -1195,6 +1195,7 @@ class Reader extends Vue {
 
 .tool-button:hover {
     background-color: white;
+    cursor: pointer;
 }
 
 .tool-button-active {
@@ -1209,6 +1210,7 @@ class Reader extends Vue {
 .tool-button-active:hover {
     color: white;
     background-color: #81C581;
+    cursor: pointer;
 }
 
 .tool-button-disabled {
