@@ -1216,11 +1216,13 @@ class Reader extends Vue {
 .tool-button-disabled {
     color: lightgray;
     background-color: gray;
+    cursor: default;
 }
 
 .tool-button-disabled:hover {
     color: lightgray;
     background-color: gray;
+    cursor: default;
 }
 
 .space {
