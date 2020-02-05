@@ -15,7 +15,7 @@ export function notify(vue, opts) {
         color,
         textColor: iconColor,
         icon,
-        actions: [{icon: 'la la-times', color: 'black'}],
+        actions: [{icon: 'la la-times notify-button-icon', color: 'black'}],
         html: true,
 
         message: 

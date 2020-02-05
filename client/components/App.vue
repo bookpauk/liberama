@@ -271,6 +271,10 @@ body, html, #app {
     animation: rotating 2s linear infinite;
 }
 
+.notify-button-icon {
+    font-size: 16px !important;
+}
+
 @font-face {
   font-family: 'ReaderDefault';
   src: url('fonts/reader-default.woff') format('woff'),
