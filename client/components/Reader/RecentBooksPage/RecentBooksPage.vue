@@ -2,7 +2,7 @@
     <Window width="600px" ref="window" @close="close">
         <template slot="header">
             <span v-show="!loading">Последние {{tableData ? tableData.length : 0}} открытых книг</span>
-            <span v-show="loading"><i class="el-icon-loading" style="font-size: 25px"></i> <span style="position: relative; top: -4px">Список загружается</span></span>
+            <span v-if="loading"><i class="el-icon-loading" style="font-size: 25px"></i> <span style="position: relative; top: -4px">Список загружается</span></span>
         </template>
 
         <a ref="download" style='display: none;'></a>
