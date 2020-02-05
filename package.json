@@ -75,7 +75,7 @@
     "node-stream-zip": "^1.8.2",
     "pako": "^1.0.10",
     "path-browserify": "^1.0.0",
-    "quasar": "^1.6.1",
+    "quasar": "^1.8.5",
     "safe-buffer": "^5.2.0",
     "sjcl": "^1.0.8",
     "sql-template-strings": "^2.2.2",
