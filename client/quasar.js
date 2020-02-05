@@ -24,6 +24,8 @@ import {QSlider} from 'quasar/src/components/slider';
 import {QSeparator} from 'quasar/src/components/separator';
 import {QList, QItem, QItemSection, QItemLabel} from 'quasar/src/components/item';
 import {QTooltip} from 'quasar/src/components/tooltip';
+import {QSpinner} from 'quasar/src/components/spinner';
+import {QTable, QTh, QTr, QTd} from 'quasar/src/components/table';
       
 const components = {
     //QLayout,
@@ -43,7 +45,8 @@ const components = {
     QSeparator,
     QList, QItem, QItemSection, QItemLabel,
     QTooltip,
-
+    QSpinner,
+    QTable, QTh, QTr, QTd,
 };
 
 //directives 
@@ -72,4 +75,5 @@ Vue.use(Quasar, { config, components, directives, plugins });
 import '@quasar/extras/line-awesome/line-awesome.css';
 
 //import fontawesomeV5 from 'quasar/icon-set/fontawesome-v5.js'
-//Quasar.iconSet.set(fontawesomeV5);
+import lineAwesome from 'quasar/icon-set/line-awesome.js'
+Quasar.iconSet.set(lineAwesome);

@@ -2,10 +2,87 @@
     <Window width="600px" ref="window" @close="close">
         <template slot="header">
             <span v-show="!loading">Последние {{tableData ? tableData.length : 0}} открытых книг</span>
-            <span v-if="loading"><i class="el-icon-loading" style="font-size: 25px"></i> <span style="position: relative; top: -4px">Список загружается</span></span>
+            <span v-if="loading"><q-spinner class="q-mr-sm" color="lime-12" size="20px" :thickness="7"/>Список загружается</span>
         </template>
 
         <a ref="download" style='display: none;'></a>
+
+    <!--q-table
+      title="Treats"
+      :data="data1"
+      :columns="columns1"
+      row-key="name"
+    /-->
+            <q-table
+            class="recent-books-table col"
+            :data="tableData"
+            :columns="columns"
+            row-key="key"
+            :pagination.sync="pagination"
+            separator="cell"
+            hide-bottom
+            virtual-scroll
+            dense
+        > 
+            <template v-slot:header="props">
+                <q-tr :props="props">
+                    <q-th
+                        v-for="col in props.cols"
+                        :key="col.name"
+                        :props="props"
+                    >
+                    <span v-html="col.label"></span>
+                    </q-th>
+                </q-tr>
+            </template>
+
+            <template v-slot:body-cell-num="props">
+                <q-td :props="props" class="no-mp">
+                    <div class="break-word dborder" style="width: 25px">
+                        {{ props.value }}
+                    </div>
+                </q-td>
+            </template>
+
+            <template v-slot:body-cell-date="props">
+                <q-td :props="props">
+                    <div class="break-word clickable dborder" style="width: 75px" @click="loadBook(props.row.url)">
+                        {{ props.row.touchDate }}<br>
+                        {{ props.row.touchTime }}
+                    </div>
+                </q-td>
+            </template>
+
+            <template v-slot:body-cell-desc="props">
+                <q-td :props="props">
+                    <div class="dborder break-word clickable" style="width: 280px" @click="loadBook(props.row.url)">
+                        <div style="color: green">{{ props.row.desc.author }}</div>
+                        <div>{{ props.row.desc.title }}</div>
+                    </div>
+                </q-td>
+            </template>
+
+            <template v-slot:body-cell-links="props">
+                <q-td :props="props">
+                    <div class="dborder" style="width: 90px">
+                        <a v-show="isUrl(props.row.url)" :href="props.row.url" target="_blank">Оригинал</a><br>
+                        <a :href="props.row.path" @click.prevent="downloadBook(props.row.path)">Скачать FB2</a>
+                    </div>
+                </q-td>
+            </template>
+
+            <template v-slot:body-cell-close="props">
+                <q-td :props="props">
+                    <div class="dborder" style="width: 30px">123</div>
+                </q-td>
+            </template>
+        </q-table>
+
+    </Window>
+</template>
+
+<script>
+/*
         <el-table
             :data="tableData"
             style="width: 570px"
@@ -92,10 +169,7 @@
             </el-table-column>
 
         </el-table>
-    </Window>
-</template>
-
-<script>
+*/    
 //-----------------------------------------------------------------------------
 import Vue from 'vue';
 import Component from 'vue-class-component';
@@ -121,8 +195,94 @@ class RecentBooksPage extends Vue {
     loading = false;
     search = null;
     tableData = [];
+    columns = [];
+    pagination = {};
 
     created() {
+/*        this.columns1 = [
+        {
+          name: 'name',
+          required: true,
+          label: 'Dessert (100g serving)',
+          align: 'left',
+          field: row => row.name,
+          format: val => `${val}`,
+          sortable: true
+        },
+        { name: 'calories', align: 'center', label: 'Calories', field: 'calories', sortable: true },
+        { name: 'fat', label: 'Fat (g)', field: 'fat', sortable: true },
+        { name: 'carbs', label: 'Carbs (g)', field: 'carbs' },
+        { name: 'protein', label: 'Protein (g)', field: 'protein' },
+        { name: 'sodium', label: 'Sodium (mg)', field: 'sodium' },
+        { name: 'calcium', label: 'Calcium (%)', field: 'calcium', sortable: true, sort: (a, b) => parseInt(a, 10) - parseInt(b, 10) },
+        { name: 'iron', label: 'Iron (%)', field: 'iron', sortable: true, sort: (a, b) => parseInt(a, 10) - parseInt(b, 10) }
+      ];
+      this.data1 = [
+        {
+          name: 'Frozen Yogurt',
+          calories: 159,
+          fat: 6.0,
+          carbs: 24,
+          protein: 4.0,
+          sodium: 87,
+          calcium: '14%',
+          iron: '1%'
+        },
+        {
+          name: 'Ice cream sandwich',
+          calories: 237,
+          fat: 9.0,
+          carbs: 37,
+          protein: 4.3,
+          sodium: 129,
+          calcium: '8%',
+          iron: '1%'
+        },
+        {
+          name: 'Eclair',
+          calories: 262,
+          fat: 16.0,
+          carbs: 23,
+          protein: 6.0,
+          sodium: 337,
+          calcium: '6%',
+          iron: '7%'
+        }
+        ];
+*/
+        this.pagination = {rowsPerPage: 0};
+
+        this.columns = [
+            {
+                name: 'num',
+                label: '#',
+                align: 'center',
+                field: 'num',
+            },
+            {
+                name: 'date',
+                label: 'Время<br>просм.',
+                align: 'left',
+                sortable: true,
+                sort: (a, b, rowA, rowB) => rowA.touchDateTime - rowB.touchDateTime,
+            },
+            {
+                name: 'desc',
+                label: 'Название',
+                align: 'left',
+                sortable: true,
+            },
+            {
+                name: 'links',
+                label: '',
+                align: 'left',
+            },
+            {
+                name: 'close',
+                label: '',
+                align: 'left',
+            },
+        ];
     }
 
     init() {
@@ -136,15 +296,7 @@ class RecentBooksPage extends Vue {
                 return;
             this.initing = true;
 
-            await this.updateTableData(3);
-            await utils.sleep(200);
-
-            if (bookManager.loaded) {
-                const t = Date.now();
-                await this.updateTableData(10);
-                if (bookManager.getSortedRecent().length > 10)
-                    await utils.sleep(10*(Date.now() - t));
-            } else {
+            if (!bookManager.loaded) {
                 let i = 0;
                 let j = 5;
                 while (i < 500 && !bookManager.loaded) {
@@ -163,10 +315,6 @@ class RecentBooksPage extends Vue {
         })();
     }
 
-    rowKey(row) {
-        return row.key;
-    }
-
     async updateTableData(limit) {
         while (this.updating) await utils.sleep(100);
         this.updating = true;
@@ -175,11 +323,13 @@ class RecentBooksPage extends Vue {
         this.loading = !!limit;
         const sorted = bookManager.getSortedRecent();
 
+        let num = 0;
         for (let i = 0; i < sorted.length; i++) {
             const book = sorted[i];
             if (book.deleted)
                 continue;
 
+            num++;
             if (limit && result.length >= limit)
                 break;
 
@@ -221,6 +371,7 @@ class RecentBooksPage extends Vue {
             author = (author ? author : (fb2.bookTitle ? fb2.bookTitle : book.url));
 
             result.push({
+                num,
                 touchDateTime: book.touchTime,
                 touchDate: t[0],
                 touchTime: t[1],
@@ -232,8 +383,8 @@ class RecentBooksPage extends Vue {
                 path: book.path,
                 key: book.key,
             });
-            if (result.length >= 100)
-                break;
+            /*if (result.length >= 100)
+                break;*/
         }
 
         const search = this.search;
@@ -256,18 +407,6 @@ class RecentBooksPage extends Vue {
 
         this.tableData = result;
         this.updating = false;
-    }
-
-    headerCellStyle(cell) {
-        let result = {margin: 0, padding: 0};
-        if (cell.columnIndex > 0) {
-            result['border-bottom'] = 0;
-        }
-        if (cell.rowIndex > 0) {
-            result.height = '0px';
-            result['border-right'] = 0;
-        }
-        return result;
     }
 
     async downloadBook(fb2path) {
@@ -329,7 +468,37 @@ class RecentBooksPage extends Vue {
 </script>
 
 <style scoped>
-.desc {
+.recent-books-table {
+    width: 600px;
+    overflow-y: auto;
+}
+
+.clickable {
     cursor: pointer;
+}
+
+.no-mp {
+    margin: 0;
+    padding: 0;
+}
+
+.break-word {
+    overflow-wrap: break-word;
+    word-wrap: break-word;
+    white-space: normal;
+}
+
+</style>
+
+<style>
+.recent-books-table .q-table__middle {
+    height: 100%;
+}
+
+.recent-books-table thead tr:first-child th {
+    position: sticky;
+    z-index: 1;
+    top: 0;
+    background-color: white;
 }
 </style>
