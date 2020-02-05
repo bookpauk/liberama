@@ -6,7 +6,7 @@
                 <img class="logo" src="./assets/yandex.png">
                 <q-btn class="q-ml-sm q-px-sm" dense no-caps @click="donateYandexMoney">Пожертвовать</q-btn><br>
                 <div class="para">{{ yandexAddress }}
-                    <q-icon class="copy-icon" name="o_file_copy" @click="copyAddress(yandexAddress, 'Яндекс кошелек')">
+                    <q-icon class="copy-icon" name="la la-copy" @click="copyAddress(yandexAddress, 'Яндекс кошелек')">
                         <q-tooltip :delay="1000" anchor="top middle" self="center middle" content-style="font-size: 80%">Скопировать</q-tooltip>                    
                     </q-icon>
                 </div>
@@ -15,7 +15,7 @@
             <div class="address">                
                 <img class="logo" src="./assets/bitcoin.png">
                 <div class="para">{{ bitcoinAddress }}
-                    <q-icon class="copy-icon" name="o_file_copy" @click="copyAddress(bitcoinAddress, 'Bitcoin-адрес')">
+                    <q-icon class="copy-icon" name="la la-copy" @click="copyAddress(bitcoinAddress, 'Bitcoin-адрес')">
                         <q-tooltip :delay="1000" anchor="top middle" self="center middle" content-style="font-size: 80%">Скопировать</q-tooltip>                    
                     </q-icon>
                 </div>
@@ -24,7 +24,7 @@
             <div class="address">                
                 <img class="logo" src="./assets/litecoin.png">
                 <div class="para">{{ litecoinAddress }}
-                    <q-icon class="copy-icon" name="o_file_copy" @click="copyAddress(litecoinAddress, 'Litecoin-адрес')">
+                    <q-icon class="copy-icon" name="la la-copy" @click="copyAddress(litecoinAddress, 'Litecoin-адрес')">
                         <q-tooltip :delay="1000" anchor="top middle" self="center middle" content-style="font-size: 80%">Скопировать</q-tooltip>                    
                     </q-icon>
                 </div>
@@ -33,7 +33,7 @@
             <div class="address">                
                 <img class="logo" src="./assets/monero.png">
                 <div class="para">{{ moneroAddress }}
-                    <q-icon class="copy-icon" name="o_file_copy" @click="copyAddress(moneroAddress, 'Monero-адрес')">
+                    <q-icon class="copy-icon" name="la la-copy" @click="copyAddress(moneroAddress, 'Monero-адрес')">
                         <q-tooltip :delay="1000" anchor="top middle" self="center middle" content-style="font-size: 80%">Скопировать</q-tooltip>                    
                     </q-icon>
                 </div>

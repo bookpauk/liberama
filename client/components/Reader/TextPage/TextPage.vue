@@ -284,7 +284,7 @@ class TextPage extends Vue {
         (async() => {
             await sleep(500);
             if (this.fontsLoading)
-                close = notify.info(this, 'Загрузка шрифта &nbsp;<i class="material-icons-outlined icon-rotate" style="font-size: 150%">grade</i>');
+                close = notify.info(this, 'Загрузка шрифта &nbsp;<i class="la la-snowflake icon-rotate" style="font-size: 150%"></i>');
         })();
 
         if (!this.fontsLoaded)

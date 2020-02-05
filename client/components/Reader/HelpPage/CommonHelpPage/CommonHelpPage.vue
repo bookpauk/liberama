@@ -25,7 +25,7 @@
         <div v-show="mode == 'omnireader'">
             <p>Вы можете добавить в свой браузер закладку, указав в ее свойствах вместо адреса следующий код:
                 <br><strong>javascript:location.href='https://omnireader.ru/?url='+location.href;</strong>
-                <q-icon class="copy-icon" name="o_file_copy" @click="copyText('javascript:location.href=\'https://omnireader.ru/?url=\'+location.href;', 'Код для адреса закладки успешно скопирован в буфер обмена')">
+                <q-icon class="copy-icon" name="la la-copy" @click="copyText('javascript:location.href=\'https://omnireader.ru/?url=\'+location.href;', 'Код для адреса закладки успешно скопирован в буфер обмена')">
                     <q-tooltip :delay="1000" anchor="top middle" self="center middle" content-style="font-size: 80%">Скопировать</q-tooltip>                    
                 </q-icon>
 

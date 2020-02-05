@@ -18,8 +18,8 @@
                 <div style="position: absolute; right: 10px; margin-top: 10px; font-size: 16px;">{{ foundText }}</div>
             </div>
             <q-btn-group v-show="!initStep" class="button-group row no-wrap">
-                <q-btn class="button" dense stretch @click="showNext"><q-icon class="icon" name="o_expand_more" dense size="30px"/></q-btn>
-                <q-btn class="button" dense stretch @click="showPrev"><q-icon class="icon" name="o_expand_less" dense size="30px"/></q-btn>
+                <q-btn class="button" dense stretch @click="showNext"><q-icon style="top: -6px" name="la la-angle-down" dense size="22px"/></q-btn>
+                <q-btn class="button" dense stretch @click="showPrev"><q-icon style="top: -4px" class="icon" name="la la-angle-up" dense size="22px"/></q-btn>
             </q-btn-group>
         </div>
     </Window>
@@ -211,9 +211,5 @@ class SearchPage extends Vue {
 .button {
     padding: 9px 17px 9px 17px;
     width: 50px;
-}
-
-.icon {
-    top: -9px;
 }
 </style>

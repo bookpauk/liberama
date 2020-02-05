@@ -15,7 +15,7 @@ export function notify(vue, opts) {
         color,
         textColor: iconColor,
         icon,
-        actions: [{icon: 'o_close', color: 'black'}],
+        actions: [{icon: 'la la-times', color: 'black'}],
         html: true,
 
         message: 
@@ -27,13 +27,13 @@ export function notify(vue, opts) {
 }
 
 export function success(vue, message, caption) {
-    notify(vue, {color: 'positive', icon: 'o_check_circle', message, caption});
+    notify(vue, {color: 'positive', icon: 'la la-check-circle', message, caption});
 }
 
 export function error(vue, message, caption) {
-    notify(vue, {color: 'negative', icon: 'o_error_outline', messageColor: 'yellow', message, caption});
+    notify(vue, {color: 'negative', icon: 'la la-exclamation-circle', messageColor: 'yellow', message, caption});
 }
 
 export function info(vue, message, caption) {
-    notify(vue, {color: 'info', icon: 'o_notifications', message, caption});
+    notify(vue, {color: 'info', icon: 'la la-bell', message, caption});
 }

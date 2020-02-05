@@ -5,7 +5,7 @@
                 <div ref="header" class="header row justify-end" @mousedown.prevent.stop="onMouseDown"
                     @touchstart.stop="onTouchStart" @touchend.stop="onTouchEnd" @touchmove.stop="onTouchMove">
                     <span class="header-text col"><slot name="header"></slot></span>
-                    <span class="close-button row justify-center items-center" @mousedown.stop @click="close"><q-icon name="o_close" size="18px"/></span>
+                    <span class="close-button row justify-center items-center" @mousedown.stop @click="close"><q-icon name="la la-times" size="16px"/></span>
                 </div>
 
                 <slot></slot>
