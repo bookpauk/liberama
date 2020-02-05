@@ -4,8 +4,9 @@
             Установить позицию
         </template>
 
-        <div class="slider q-px-md">
+        <div id="set-position-slider" class="slider q-px-md">
             <q-slider
+                thumb-path="M 2, 10 a 8.5,8.5 0 1,0 17,0 a 8.5,8.5 0 1,0 -17,0"
                 v-model="sliderValue"
                 :max="sliderMax"
                 label
@@ -72,4 +73,13 @@ class SetPositionPage extends Vue {
     background-color: #efefef;
     border-radius: 15px;
 }
+</style>
+
+<style>
+#set-position-slider .q-slider__thumb path {
+    fill: white !important;
+    stroke: blue !important;
+    stroke-width: 2 !important;
+}
+
 </style>
