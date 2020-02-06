@@ -1,6 +1,5 @@
 const fs = require('fs-extra');
 const iconv = require('iconv-lite');
-const chardet = require('chardet');
 const he = require('he');
 
 const LimitedQueue = require('../../LimitedQueue');
@@ -76,16 +75,6 @@ class ConvertBase {
 
     decode(data) {
         let selected = textUtils.getEncoding(data);
-
-        if (selected == 'ISO-8859-5') {
-            const charsetAll = chardet.detectAll(data.slice(0, 20000));
-            for (const charset of charsetAll) {
-                if (charset.name.indexOf('ISO-8859') < 0) {
-                    selected = charset.name;
-                    break;
-                }
-            }
-        }
 
         if (selected.toLowerCase() != 'utf-8')
             return iconv.decode(data, selected);
