@@ -226,12 +226,12 @@ class Logger {
 
         // catch ctrl+c event and exit normally
         process.on('SIGINT', () => {
-            this.log(LM_WARN, 'Ctrl-C pressed, exiting...');
+            this.log(LM_FATAL, 'Ctrl-C pressed, exiting...');
             process.exit(2);
         });
 
         process.on('SIGTERM', () => {
-            this.log(LM_WARN, 'Kill signal, exiting...');
+            this.log(LM_FATAL, 'Kill signal, exiting...');
             process.exit(2);
         });
 

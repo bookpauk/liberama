@@ -3,7 +3,7 @@ const fs = require('fs-extra');
 const path = require('path');
 
 const log = new (require('../AppLogger'))().log;//singleton
-const ZipStreamer = require('../ZipStreamer');
+const ZipStreamer = require('../Zip/ZipStreamer');
 
 const utils = require('../utils');
 

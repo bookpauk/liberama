@@ -25,7 +25,8 @@ class AppLogger {
             loggerParams = [
                 {log: 'ConsoleLog'},
                 {log: 'FileLog', fileName: `${config.logDir}/${config.name}.log`},
-                {log: 'FileLog', fileName: `${config.logDir}/${config.name}.err.log`, exclude: [LM_OK, LM_INFO]},
+                {log: 'FileLog', fileName: `${config.logDir}/${config.name}.err.log`, exclude: [LM_OK, LM_INFO, LM_TOTAL]},
+                {log: 'FileLog', fileName: `${config.logDir}/${config.name}.fatal.log`, exclude: [LM_OK, LM_INFO, LM_WARN, LM_ERR, LM_TOTAL]},//LM_FATAL only
             ];
         }
 
