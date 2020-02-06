@@ -1,4 +1,23 @@
-function getEncoding(buf, returnAll) {
+const chardet = require('chardet');
+
+function getEncoding(buf) {
+    let selected = getEncodingLite(buf);
+
+    if (selected == 'ISO-8859-5') {
+        const charsetAll = chardet.detectAll(buf.slice(0, 20000));
+        for (const charset of charsetAll) {
+            if (charset.name.indexOf('ISO-8859') < 0) {
+                selected = charset.name;
+                break;
+            }
+        }
+    }
+
+    return selected;
+}
+
+
+function getEncodingLite(buf, returnAll) {
     const lowerCase = 3;
     const upperCase = 1;
 
@@ -106,5 +125,6 @@ function checkIfText(buf) {
 
 module.exports = {
     getEncoding,
+    getEncodingLite,
     checkIfText,
 }

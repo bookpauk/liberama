@@ -27,7 +27,8 @@
         <div v-show="!clickControl && showStatusBar" class="layout" v-html="statusBarClickable" @mousedown.prevent.stop @touchstart.stop
             @click.prevent.stop="onStatusBarClick"></div>
         <!-- невидимым делать нельзя, вовремя не подгружаютя шрифты -->
-        <canvas ref="offscreenCanvas" class="layout" style="width: 0px; height: 0px"></canvas>
+        <canvas ref="offscreenCanvas" class="layout" style="visibility: hidden"></canvas>
+        <div ref="measureWidth" style="position: absolute; visibility: hidden"></div>
     </div>
 </template>
 
@@ -143,6 +144,8 @@ class TextPage extends Vue {
     }
 
     calcDrawProps() {
+        const wideLetter = 'Щ';
+
         //preloaded fonts
         this.fontList = [`12px ${this.fontName}`];
 
@@ -199,6 +202,22 @@ class TextPage extends Vue {
         this.drawHelper.lineHeight = this.lineHeight;
         this.drawHelper.context = this.context;
 
+        //альтернатива context.measureText
+        if (!this.context.measureText(wideLetter).width) {
+            const ctx = this.$refs.measureWidth;
+            this.drawHelper.measureText = function(text, style) {
+                ctx.innerText = text;
+                ctx.style.font = this.fontByStyle(style);
+                return ctx.clientWidth;
+            };
+
+            this.drawHelper.measureTextFont = function(text, font) {
+                ctx.innerText = text;
+                ctx.style.font = font;
+                return ctx.clientWidth;
+            }
+        }
+
         //statusBar
         this.statusBarClickable = this.drawHelper.statusBarClickable(this.statusBarTop, this.statusBarHeight);
 
@@ -211,8 +230,10 @@ class TextPage extends Vue {
             this.parsed.wordWrap = this.wordWrap;
             this.parsed.cutEmptyParagraphs = this.cutEmptyParagraphs;
             this.parsed.addEmptyParagraphs = this.addEmptyParagraphs;
-            let t = '';
-            while (this.drawHelper.measureText(t, {}) < this.w) t += 'Щ';
+            let t = wideLetter;
+            if (!this.drawHelper.measureText(t, {}))
+                throw new Error('Ошибка measureText');
+            while (this.drawHelper.measureText(t, {}) < this.w) t += wideLetter;
             this.parsed.maxWordLength = t.length - 1;
             this.parsed.measureText = this.drawHelper.measureText.bind(this.drawHelper);
             this.parsed.lineHeight = this.lineHeight;
@@ -368,47 +389,51 @@ class TextPage extends Vue {
 
         if (this.lastBook) {
             (async() => {
-                //подождем ленивый парсинг
-                this.stopLazyParse = true;
-                while (this.doingLazyParse) await sleep(10);
+                try {
+                    //подождем ленивый парсинг
+                    this.stopLazyParse = true;
+                    while (this.doingLazyParse) await sleep(10);
 
-                const isParsed = await bookManager.hasBookParsed(this.lastBook);
-                if (!isParsed) {
-                    return;
+                    const isParsed = await bookManager.hasBookParsed(this.lastBook);
+                    if (!isParsed) {
+                        return;
+                    }
+
+                    this.book = await bookManager.getBook(this.lastBook);
+                    this.meta = bookManager.metaOnly(this.book);
+                    this.fb2 = this.meta.fb2;
+
+                    let authorNames = [];
+                    if (this.fb2.author) {
+                        authorNames = this.fb2.author.map(a => _.compact([
+                            a.lastName,
+                            a.firstName,
+                            a.middleName
+                        ]).join(' '));
+                    }
+
+                    this.title = _.compact([
+                        authorNames.join(', '),
+                        this.fb2.bookTitle
+                    ]).join(' - ');
+
+                    this.$root.$emit('set-app-title', this.title);
+
+                    this.parsed = this.book.parsed;
+
+                    this.page1 = null;
+                    this.page2 = null;
+                    this.statusBar = null;
+                    await this.stopTextScrolling();
+
+                    await this.calcPropsAndLoadFonts();
+
+                    this.refreshTime();
+                    if (this.lazyParseEnabled)
+                        this.lazyParsePara();
+                } catch (e) {
+                    this.$alert(e.message, 'Ошибка', {type: 'error'});
                 }
-
-                this.book = await bookManager.getBook(this.lastBook);
-                this.meta = bookManager.metaOnly(this.book);
-                this.fb2 = this.meta.fb2;
-
-                let authorNames = [];
-                if (this.fb2.author) {
-                    authorNames = this.fb2.author.map(a => _.compact([
-                        a.lastName,
-                        a.firstName,
-                        a.middleName
-                    ]).join(' '));
-                }
-
-                this.title = _.compact([
-                    authorNames.join(', '),
-                    this.fb2.bookTitle
-                ]).join(' - ');
-
-                this.$root.$emit('set-app-title', this.title);
-
-                this.parsed = this.book.parsed;
-
-                this.page1 = null;
-                this.page2 = null;
-                this.statusBar = null;
-                await this.stopTextScrolling();
-
-                this.calcPropsAndLoadFonts();
-
-                this.refreshTime();
-                if (this.lazyParseEnabled)
-                    this.lazyParsePara();
             })();
         }
     }

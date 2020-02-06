@@ -47,12 +47,13 @@ class ProgressPage extends Vue {
 
     hide() {
         this.visible = false;
+        this.text = '';
     }
 
     setState(state) {
         if (state.state) {
             if (state.state == 'queue') {
-                this.text = 'Номер в очереди: ' + (state.place ? state.place : '');
+                this.text = (state.place ? 'Номер в очереди: ' + state.place : '');
             } else {
                 this.text = (ruMessage[state.state] ? ruMessage[state.state] : state.state);
             }
