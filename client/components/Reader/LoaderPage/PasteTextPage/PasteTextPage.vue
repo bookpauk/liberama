@@ -70,7 +70,7 @@ class PasteTextPage extends Vue {
     }
 
     loadBuffer() {
-        this.$emit('load-buffer', {buffer: `<cut-title>${this.bookTitle}</cut-title>${this.$refs.textArea.value}`});
+        this.$emit('load-buffer', {buffer: `<buffer><cut-title>${utils.escapeXml(this.bookTitle)}</cut-title>${this.$refs.textArea.value}</buffer>`});
         this.close();
     }
 

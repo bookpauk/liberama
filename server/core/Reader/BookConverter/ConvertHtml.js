@@ -6,12 +6,18 @@ class ConvertHtml extends ConvertBase {
     check(data, opts) {
         const {dataType} = opts;
 
+        //html?
         if (dataType && (dataType.ext == 'html' || dataType.ext == 'xml')) 
             return {isText: false};
 
         //может это чистый текст?
         if (textUtils.checkIfText(data)) {
             return {isText: true};
+        }
+
+        //из буфера обмена?
+        if (data.toString().indexOf('<buffer>') == 0) {
+            return {isText: false};
         }
 
         return false;
