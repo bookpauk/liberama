@@ -1,5 +1,17 @@
 export const versionHistory = [
 {
+    showUntil: '2020-02-05',
+    header: '0.8.4 (2020-02-06)',
+    content:
+`
+<ul>
+    <li>добавлен paypal-адрес для пожертвований</li>
+    <li>исправления багов</li>
+</ul>
+`
+},
+
+{
     showUntil: '2020-01-27',
     header: '0.8.3 (2020-01-28)',
     content:
