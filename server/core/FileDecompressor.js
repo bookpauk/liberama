@@ -3,11 +3,13 @@ const zlib = require('zlib');
 const path = require('path');
 const unbzip2Stream = require('unbzip2-stream');
 const tar = require('tar-fs');
-const ZipStreamer = require('./ZipStreamer');
+const iconv = require('iconv-lite');
 
+const ZipStreamer = require('./Zip/ZipStreamer');
 const appLogger = new (require('./AppLogger'))();//singleton
-const utils = require('./utils');
 const FileDetector = require('./FileDetector');
+const textUtils = require('./Reader/BookConverter/textUtils');
+const utils = require('./utils');
 
 class FileDecompressor {
     constructor(limitFileSize = 0) {
@@ -114,7 +116,25 @@ class FileDecompressor {
 
     async unZip(filename, outputDir) {
         const zip = new ZipStreamer();
-        return await zip.unpack(filename, outputDir, null, this.limitFileSize);
+        try {
+            return await zip.unpack(filename, outputDir, {
+                limitFileSize: this.limitFileSize, 
+                limitFileCount: 1000
+            });
+        } catch (e) {
+            fs.emptyDir(outputDir);
+            return await zip.unpack(filename, outputDir, {
+                limitFileSize: this.limitFileSize, 
+                limitFileCount: 1000,
+                decodeEntryNameCallback: (nameRaw) => {
+                    const enc = textUtils.getEncodingLite(nameRaw);
+                    if (enc.indexOf('ISO-8859') < 0) {
+                        return iconv.decode(nameRaw, enc);
+                    }
+                    return nameRaw;
+                }
+            });
+        }
     }
 
     unBz2(filename, outputDir) {

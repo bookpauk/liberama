@@ -2,7 +2,7 @@ const fs = require('fs-extra');
 const path = require('path');
 
 const zipStream = require('zip-stream');
-const unzipStream = require('node-stream-zip');
+const unzipStream = require('./node_stream_zip');
 
 class ZipStreamer {
     constructor() {
@@ -52,9 +52,15 @@ class ZipStreamer {
         })().catch(reject); });
     }
 
-    unpack(zipFile, outputDir, entryCallback, limitFileSize = 0) {
+    unpack(zipFile, outputDir, options, entryCallback) {
         return new Promise((resolve, reject) => {
             entryCallback = (entryCallback ? entryCallback : () => {});
+            const {
+                limitFileSize = 0,
+                limitFileCount = 0,
+                decodeEntryNameCallback = false,
+            } = options;
+
             const unzip = new unzipStream({file: zipFile});
 
             unzip.on('error', reject);
@@ -67,23 +73,41 @@ class ZipStreamer {
             });
 
             unzip.on('ready', () => {
-                if (limitFileSize) {
-                    for (const entry of Object.values(unzip.entries())) {
-                        if (!entry.isDirectory && entry.size > limitFileSize) {
+                if (limitFileCount || limitFileSize || decodeEntryNameCallback) {
+                    const entries = Object.values(unzip.entries());
+                    if (limitFileCount && entries.length > limitFileCount) {
+                        reject('Слишком много файлов');
+                        return;
+                    }
+
+                    for (const entry of entries) {
+                        if (limitFileSize && !entry.isDirectory && entry.size > limitFileSize) {
                             reject('Файл слишком большой');
                             return;
+                        }
+
+                        if (decodeEntryNameCallback) {
+                            entry.name = (decodeEntryNameCallback(entry.nameRaw)).toString();
                         }
                     }
                 }
 
                 unzip.extract(null, outputDir, (err) => {
-                    if (err) reject(err);
-                    unzip.close();
-                    resolve(files);
+                    if (err) {
+                        reject(err);
+                        return;
+                    }
+                    try {
+                        unzip.close();
+                        resolve(files);
+                    } catch (e) {
+                        reject(e);
+                    }
                 });
             });            
         });
     }
+
 }
 
 module.exports = ZipStreamer;
