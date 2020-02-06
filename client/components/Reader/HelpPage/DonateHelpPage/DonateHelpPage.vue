@@ -15,6 +15,18 @@
                 </div>
             </div>
 
+            <div class="address">
+                <img class="logo" src="./assets/paypal.png">
+                <div class="para">{{ paypalAddress }}
+                    <el-tooltip :open-delay="500" effect="light">
+                        <template slot="content">
+                            Скопировать
+                        </template>
+                        <i class="el-icon-copy-document copy-icon" @click="copyAddress(paypalAddress, 'Paypal-адрес')"></i>
+                    </el-tooltip>
+                </div>
+            </div>            
+
             <div class="address">                
                 <img class="logo" src="./assets/bitcoin.png">
                 <div class="para">{{ bitcoinAddress }}
@@ -64,6 +76,7 @@ export default @Component({
 })
 class DonateHelpPage extends Vue {
     yandexAddress = '410018702323056';
+    paypalAddress = 'bookpauk@gmail.com';
     bitcoinAddress = '3EbgZ7MK1UVaN38Gty5DCBtS4PknM4Ut85';
     litecoinAddress = 'MP39Riec4oSNB3XMjiquKoLWxbufRYNXxZ';
     moneroAddress = '8BQPnvHcPSHM5gMQsmuypDgx9NNsYqwXKfDDuswEyF2Q2ewQSfd2pkK6ydH2wmMyq2JViZvy9DQ35hLMx7g72mFWNJTPtnz';
