@@ -26,17 +26,16 @@
         > 
             <template v-slot:header="props">
                 <q-tr :props="props">
-                    <q-th
-                        v-for="col in props.cols"
-                        :key="col.name"
-                        :props="props"
-                    >
-                        <span v-html="col.label"></span>
+                    <q-th class="td-mp" key="num" :props="props"><span v-html="props.cols[0].label"></span></q-th>
+                    <q-th class="td-mp" key="date" :props="props"><span v-html="props.cols[1].label"></span></q-th>
+                    <q-th class="td-mp" key="desc" :props="props" colspan="3">
+                        <span v-html="props.cols[2].label"></span>
+
                     </q-th>
                 </q-tr>
             </template>
 
-           <template v-slot:body="props">
+            <template v-slot:body="props">
                 <q-tr :props="props">
                     <q-td key="num" :props="props" class="td-mp" auto-width>
                         <div class="break-word" style="width: 25px">
@@ -260,12 +259,14 @@ class RecentBooksPage extends Vue {
                 name: 'num',
                 label: '#',
                 align: 'center',
+                sortable: true,
                 field: 'num',
             },
             {
                 name: 'date',
                 label: 'Время<br>просм.',
                 align: 'left',
+                field: 'touchDateTime',
                 sortable: true,
                 sort: (a, b, rowA, rowB) => rowA.touchDateTime - rowB.touchDateTime,
             },
@@ -273,6 +274,7 @@ class RecentBooksPage extends Vue {
                 name: 'desc',
                 label: 'Название',
                 align: 'left',
+                field: 'descString',
                 sortable: true,
             },
             {
@@ -391,9 +393,10 @@ class RecentBooksPage extends Vue {
                 touchDate: t[0],
                 touchTime: t[1],
                 desc: {
-                    title: `${title}${perc}${textLen}`,
                     author,
+                    title: `${title}${perc}${textLen}`,
                 },
+                descString: `${author}${title}${perc}${textLen}`,
                 url: book.url,
                 path: book.path,
                 key: book.key,
