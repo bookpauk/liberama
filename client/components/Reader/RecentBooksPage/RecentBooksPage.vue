@@ -356,11 +356,13 @@ class RecentBooksPage extends Vue {
 .td-mp {
     margin: 0 !important;
     padding: 4px 4px 4px 4px !important;
+    border-bottom: 1px solid #ddd;
 }
 
 .no-mp {
     margin: 0 !important;
     padding: 0 !important;
+    border-bottom: 1px solid #ddd;
 }
 
 .break-word {
