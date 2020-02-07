@@ -7,13 +7,7 @@
 
         <a ref="download" style='display: none;'></a>
 
-    <!--q-table
-      title="Treats"
-      :data="data1"
-      :columns="columns1"
-      row-key="name"
-    /-->
-            <q-table
+        <q-table
             class="recent-books-table col"
             :data="tableData"
             :columns="columns"
@@ -88,94 +82,6 @@
 </template>
 
 <script>
-/*
-        <el-table
-            :data="tableData"
-            style="width: 570px"
-            size="mini"
-            height="1px"
-            stripe
-            border
-            :default-sort = "{prop: 'touchDateTime', order: 'descending'}"
-            :header-cell-style = "headerCellStyle"
-            :row-key = "rowKey"
-            >
-
-            <el-table-column
-                type="index"
-                width="35px"
-                >
-            </el-table-column>
-            <el-table-column
-                prop="touchDateTime"
-                min-width="85px"
-                sortable
-                >
-                <template slot="header" slot-scope="scope"><!-- eslint-disable-line vue/no-unused-vars -->
-                    <span style="font-size: 90%">Время<br>просм.</span>
-                </template>
-                <template slot-scope="scope"><!-- eslint-disable-line vue/no-unused-vars -->
-                    <div class="desc" @click="loadBook(scope.row.url)">
-                        {{ scope.row.touchDate }}<br>
-                        {{ scope.row.touchTime }}
-                    </div>
-                </template>
-            </el-table-column>
-
-            <el-table-column
-                >
-                <template slot="header" slot-scope="scope"><!-- eslint-disable-line vue/no-unused-vars -->
-                    <!--el-input ref="input"
-                        :value="search" @input="search = $event"
-                        size="mini"
-                        style="margin: 0; padding: 0; vertical-align: bottom; margin-top: 10px"
-                        placeholder="Найти"/-->
-                        <div class="el-input el-input--mini">
-                            <input class="el-input__inner"
-                                ref="input"
-                                placeholder="Найти"
-                                style="margin: 0; vertical-align: bottom; margin-top: 20px; padding: 0 10px 0 10px"
-                                :value="search" @input="search = $event.target.value"
-                            />
-                        </div>
-                </template>
-
-                <el-table-column
-                    min-width="280px"
-                    >
-                    <template slot-scope="scope">
-                        <div class="desc" @click="loadBook(scope.row.url)">
-                            <span style="color: green">{{ scope.row.desc.author }}</span><br>
-                            <span>{{ scope.row.desc.title }}</span>
-                        </div>
-                    </template>
-                </el-table-column>
-
-                <el-table-column
-                    min-width="90px"
-                    >
-                    <template slot-scope="scope">
-                        <a v-show="isUrl(scope.row.url)" :href="scope.row.url" target="_blank">Оригинал</a><br>
-                        <a :href="scope.row.path" @click.prevent="downloadBook(scope.row.path)">Скачать FB2</a>
-                    </template>
-                </el-table-column>
-
-                <el-table-column
-                    width="60px"
-                    >
-                    <template slot-scope="scope">
-                        <el-button
-                            size="mini"
-                            style="width: 30px; padding: 7px 0 7px 0; margin-left: 4px"
-                            @click="handleDel(scope.row.key)"><i class="el-icon-close"></i>
-                        </el-button>
-                    </template>
-                </el-table-column>
-
-            </el-table-column>
-
-        </el-table>
-*/    
 //-----------------------------------------------------------------------------
 import Vue from 'vue';
 import Component from 'vue-class-component';
@@ -205,57 +111,6 @@ class RecentBooksPage extends Vue {
     pagination = {};
 
     created() {
-/*        this.columns1 = [
-        {
-          name: 'name',
-          required: true,
-          label: 'Dessert (100g serving)',
-          align: 'left',
-          field: row => row.name,
-          format: val => `${val}`,
-          sortable: true
-        },
-        { name: 'calories', align: 'center', label: 'Calories', field: 'calories', sortable: true },
-        { name: 'fat', label: 'Fat (g)', field: 'fat', sortable: true },
-        { name: 'carbs', label: 'Carbs (g)', field: 'carbs' },
-        { name: 'protein', label: 'Protein (g)', field: 'protein' },
-        { name: 'sodium', label: 'Sodium (mg)', field: 'sodium' },
-        { name: 'calcium', label: 'Calcium (%)', field: 'calcium', sortable: true, sort: (a, b) => parseInt(a, 10) - parseInt(b, 10) },
-        { name: 'iron', label: 'Iron (%)', field: 'iron', sortable: true, sort: (a, b) => parseInt(a, 10) - parseInt(b, 10) }
-      ];
-      this.data1 = [
-        {
-          name: 'Frozen Yogurt',
-          calories: 159,
-          fat: 6.0,
-          carbs: 24,
-          protein: 4.0,
-          sodium: 87,
-          calcium: '14%',
-          iron: '1%'
-        },
-        {
-          name: 'Ice cream sandwich',
-          calories: 237,
-          fat: 9.0,
-          carbs: 37,
-          protein: 4.3,
-          sodium: 129,
-          calcium: '8%',
-          iron: '1%'
-        },
-        {
-          name: 'Eclair',
-          calories: 262,
-          fat: 16.0,
-          carbs: 23,
-          protein: 6.0,
-          sodium: 337,
-          calcium: '6%',
-          iron: '7%'
-        }
-        ];
-*/
         this.pagination = {rowsPerPage: 0};
 
         this.columns = [
