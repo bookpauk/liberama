@@ -12,17 +12,14 @@
                 </div>
             </div>
 
-            <div class="address">
+            <div class="address">                
                 <img class="logo" src="./assets/paypal.png">
                 <div class="para">{{ paypalAddress }}
-                    <el-tooltip :open-delay="500" effect="light">
-                        <template slot="content">
-                            Скопировать
-                        </template>
-                        <i class="el-icon-copy-document copy-icon" @click="copyAddress(paypalAddress, 'Paypal-адрес')"></i>
-                    </el-tooltip>
+                    <q-icon class="copy-icon" name="la la-copy" @click="copyAddress(paypalAddress, 'Paypal-адрес')">
+                        <q-tooltip :delay="1000" anchor="top middle" self="center middle" content-style="font-size: 80%">Скопировать</q-tooltip>                    
+                    </q-icon>
                 </div>
-            </div>            
+            </div>
 
             <div class="address">                
                 <img class="logo" src="./assets/bitcoin.png">
