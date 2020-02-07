@@ -263,7 +263,7 @@ body, html, #app {
 }
 
 .dborder {
-    border: 2px solid yellow;
+    border: 2px solid yellow !important;
 }
 
 .icon-rotate {

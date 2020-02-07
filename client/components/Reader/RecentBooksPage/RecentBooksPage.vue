@@ -31,50 +31,53 @@
                         :key="col.name"
                         :props="props"
                     >
-                    <span v-html="col.label"></span>
+                        <span v-html="col.label"></span>
                     </q-th>
                 </q-tr>
             </template>
 
-            <template v-slot:body-cell-num="props">
-                <q-td :props="props" class="no-mp">
-                    <div class="break-word dborder" style="width: 25px">
-                        {{ props.value }}
-                    </div>
-                </q-td>
-            </template>
+           <template v-slot:body="props">
+                <q-tr :props="props">
+                    <q-td key="num" :props="props" class="td-mp" auto-width>
+                        <div class="break-word" style="width: 25px">
+                            {{ props.row.num }}
+                        </div>
+                    </q-td>
 
-            <template v-slot:body-cell-date="props">
-                <q-td :props="props">
-                    <div class="break-word clickable dborder" style="width: 75px" @click="loadBook(props.row.url)">
-                        {{ props.row.touchDate }}<br>
-                        {{ props.row.touchTime }}
-                    </div>
-                </q-td>
-            </template>
+                    <q-td key="date" :props="props" class="td-mp clickable" @click="loadBook(props.row.url)" auto-width>
+                        <div class="break-word" style="width: 68px">
+                            {{ props.row.touchDate }}<br>
+                            {{ props.row.touchTime }}
+                        </div>
+                    </q-td>
 
-            <template v-slot:body-cell-desc="props">
-                <q-td :props="props">
-                    <div class="dborder break-word clickable" style="width: 280px" @click="loadBook(props.row.url)">
-                        <div style="color: green">{{ props.row.desc.author }}</div>
-                        <div>{{ props.row.desc.title }}</div>
-                    </div>
-                </q-td>
-            </template>
+                    <q-td key="desc" :props="props" class="td-mp clickable" @click="loadBook(props.row.url)" auto-width>
+                        <div class="break-word" style="width: 332px; font-size: 90%">
+                            <div style="color: green">{{ props.row.desc.author }}</div>
+                            <div>{{ props.row.desc.title }}</div>
+                        </div>
+                    </q-td>
 
-            <template v-slot:body-cell-links="props">
-                <q-td :props="props">
-                    <div class="dborder" style="width: 90px">
-                        <a v-show="isUrl(props.row.url)" :href="props.row.url" target="_blank">Оригинал</a><br>
-                        <a :href="props.row.path" @click.prevent="downloadBook(props.row.path)">Скачать FB2</a>
-                    </div>
-                </q-td>
-            </template>
+                    <q-td key="links" :props="props" class="td-mp" auto-width>
+                        <div class="break-word" style="width: 75px; font-size: 90%">
+                            <a v-show="isUrl(props.row.url)" :href="props.row.url" target="_blank">Оригинал</a><br>
+                            <a :href="props.row.path" @click.prevent="downloadBook(props.row.path)">Скачать FB2</a>
+                        </div>
+                    </q-td>
 
-            <template v-slot:body-cell-close="props">
-                <q-td :props="props">
-                    <div class="dborder" style="width: 30px">123</div>
-                </q-td>
+                    <q-td key="close" :props="props" class="td-mp" auto-width>
+                        <div style="width: 38px">
+                            <q-btn
+                                dense
+                                style="width: 30px; height: 30px; padding: 7px 0 7px 0; margin-left: 4px"
+                                @click="handleDel(props.row.key)">
+                                <q-icon class="la la-times" size="16px" style="top: -5px"/>
+                            </q-btn>
+                        </div>
+                    </q-td>
+                    <q-td key="last" :props="props" class="no-mp">
+                    </q-td>
+                </q-tr>
             </template>
         </q-table>
 
@@ -282,6 +285,11 @@ class RecentBooksPage extends Vue {
                 label: '',
                 align: 'left',
             },
+            {
+                name: 'last',
+                label: '',
+                align: 'left',
+            },
         ];
     }
 
@@ -291,24 +299,31 @@ class RecentBooksPage extends Vue {
         this.$nextTick(() => {
             //this.$refs.input.focus();
         });
-        (async() => {//отбражение подгрузки списка, иначе тормозит
+        (async() => {//подгрузка списка
             if (this.initing)
                 return;
             this.initing = true;
 
+
             if (!bookManager.loaded) {
+                await this.updateTableData(10);
+                //для отзывчивости
+                await utils.sleep(100);
                 let i = 0;
                 let j = 5;
                 while (i < 500 && !bookManager.loaded) {
                     if (i % j == 0) {
                         bookManager.sortedRecentCached = null;
-                        await this.updateTableData(100);
+                        await this.updateTableData(20);
                         j *= 2;
                     }
 
                     await utils.sleep(100);
                     i++;
                 }
+            } else {
+                //для отзывчивости
+                await utils.sleep(100);
             }
             await this.updateTableData();
             this.initing = false;
@@ -383,8 +398,6 @@ class RecentBooksPage extends Vue {
                 path: book.path,
                 key: book.key,
             });
-            /*if (result.length >= 100)
-                break;*/
         }
 
         const search = this.search;
@@ -471,18 +484,25 @@ class RecentBooksPage extends Vue {
 .recent-books-table {
     width: 600px;
     overflow-y: auto;
+    overflow-x: hidden;
 }
 
 .clickable {
     cursor: pointer;
 }
 
+.td-mp {
+    margin: 0 !important;
+    padding: 4px 4px 4px 4px !important;
+}
+
 .no-mp {
-    margin: 0;
-    padding: 0;
+    margin: 0 !important;
+    padding: 0 !important;
 }
 
 .break-word {
+    line-height: 180%;
     overflow-wrap: break-word;
     word-wrap: break-word;
     white-space: normal;
@@ -493,12 +513,13 @@ class RecentBooksPage extends Vue {
 <style>
 .recent-books-table .q-table__middle {
     height: 100%;
+    overflow-x: hidden;
 }
 
 .recent-books-table thead tr:first-child th {
     position: sticky;
     z-index: 1;
     top: 0;
-    background-color: white;
+    background-color: #c1f4cd;
 }
 </style>
