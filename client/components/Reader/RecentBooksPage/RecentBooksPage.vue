@@ -68,7 +68,7 @@
                                 dense
                                 style="width: 30px; height: 30px; padding: 7px 0 7px 0; margin-left: 4px"
                                 @click="handleDel(props.row.key)">
-                                <q-icon class="la la-times" size="16px" style="top: -5px"/>
+                                <q-icon class="la la-times" size="14px" style="top: -6px"/>
                             </q-btn>
                         </div>
                     </q-td>
