@@ -158,7 +158,7 @@ class RecentBooksPage extends Vue {
         this.$refs.window.init();
 
         this.$nextTick(() => {
-            this.$refs.input.focus();
+            //this.$refs.input.focus();//плохо на планшетах
         });
         (async() => {//подгрузка списка
             if (this.initing)
@@ -271,15 +271,6 @@ class RecentBooksPage extends Vue {
                 item.desc.author.toLowerCase().includes(search.toLowerCase())
         });
 
-        /*for (let i = 0; i < result.length; i++) {
-            if (!_.isEqual(this.tableData[i], result[i])) {
-                this.$set(this.tableData, i, result[i]);
-                await utils.sleep(10);
-            }
-        }
-        if (this.tableData.length > result.length)
-            this.tableData.splice(result.length);*/
-
         this.tableData = result;
         this.updating = false;
     }
@@ -310,7 +301,7 @@ class RecentBooksPage extends Vue {
 
     async handleDel(key) {
         await bookManager.delRecentBook({key});
-        this.updateTableData();
+        //this.updateTableData();//обновление уже происходит Reader.bookManagerEvent
 
         if (!bookManager.mostRecentBook())
             this.close();
