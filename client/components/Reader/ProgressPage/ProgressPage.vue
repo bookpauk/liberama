@@ -15,7 +15,10 @@
                 <span class="text-yellow">{{ percentage }}%</span>
             </q-circular-progress>
 
-            <p class="text-yellow">{{ text }}</p>
+            <div>
+                <span class="text-yellow">{{ text }}</span>
+                <q-icon :style="iconStyle" color="yellow" name="la la-slash" size="20px"/>
+            </div>
         </div>
     </div>
 </template>
@@ -24,6 +27,7 @@
 //-----------------------------------------------------------------------------
 import Vue from 'vue';
 import Component from 'vue-class-component';
+import * as utils from '../../../share/utils';
 
 const ruMessage = {
     'start': ' ',
@@ -46,12 +50,15 @@ class ProgressPage extends Vue {
     step = 1;
     progress = 0;
     visible = false;
+    iconStyle = '';
 
     show() {
         this.text = '';
         this.totalSteps = 1;
         this.step = 1;
         this.progress = 0;
+        this.iconAngle = 0;
+        this.ani = false;
 
         this.visible = true;
     }
@@ -59,6 +66,7 @@ class ProgressPage extends Vue {
     hide() {
         this.visible = false;
         this.text = '';
+        this.iconAngle = 0;
     }
 
     setState(state) {
@@ -72,6 +80,16 @@ class ProgressPage extends Vue {
         this.step = (state.step ? state.step : this.step);
         this.totalSteps = (state.totalSteps > this.totalSteps ? state.totalSteps : this.totalSteps);
         this.progress = state.progress || 0;
+
+        if (!this.ani) {
+            (async() => {
+                this.ani = true;
+                this.iconAngle += 30;
+                this.iconStyle = `transform: rotate(${this.iconAngle}deg); transition: 150ms linear`;
+                await utils.sleep(150);
+                this.ani = false;
+            })();
+        }
     }
 
     get percentage() {
