@@ -23,9 +23,10 @@
                     <q-th class="td-mp" style="width: 25px" key="num" :props="props"><span v-html="props.cols[0].label"></span></q-th>
                     <q-th class="td-mp break-word" style="width: 77px" key="date" :props="props"><span v-html="props.cols[1].label"></span></q-th>
                     <q-th class="td-mp" style="width: 332px" key="desc" :props="props" colspan="4">
-                        <q-input ref="input" outlined dense style="position: absolute; top: 6px; left: 100px; width: 370px" size="10px" bg-color="white"
+                        <q-input ref="input" outlined dense rounded style="position: absolute; top: 6px; left: 90px; width: 380px" bg-color="white"
                             placeholder="Найти"
                             v-model="search"
+                            @click.stop
                         />
 
                         <span v-html="props.cols[2].label"></span>
@@ -353,7 +354,8 @@ class RecentBooksPage extends Vue {
 .no-mp {
     margin: 0 !important;
     padding: 0 !important;
-    border-bottom: 1px solid #ddd;
+    border: 0;
+    border-left: 1px solid #ddd !important;
 }
 
 .break-word {
