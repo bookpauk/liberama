@@ -4,43 +4,70 @@
             Настройки
         </template>
 
-        <!--q-tabs
-          v-model="tab"
-          vertical
-          class="text-teal"
-        >
-          <q-tab name="mails" icon="mail" label="Mails" />
-          <q-tab name="alarms" icon="alarm" label="Alarms" />
-          <q-tab name="movies" icon="movie" label="Movies" />
-        </q-tabs-->
+        <div class="col row">
+            <div class="full-height">
+                <q-tabs
+                    class="bg-grey-3 text-black"
+                    v-model="selectedTab"
+                    left-icon="la la-caret-up"
+                    right-icon="la la-caret-down"
+                    active-color="white"
+                    active-bg-color="primary"
+                    indicator-color="black"
+                    vertical
+                    no-caps
+                    stretch
+                    inline-label
+                >
+                    <div class="q-pt-lg"/>
+                    <q-tab class="tab" name="profiles" icon="la la-users" label="Профили" />
+                    <q-tab class="tab" name="view" icon="la la-eye" label="Вид" />
+                    <q-tab class="tab" name="buttons" icon="la la-grip-horizontal" label="Кнопки" />
+                    <q-tab class="tab" name="keys" icon="la la-gamepad" label="Управление" />
+                    <q-tab class="tab" name="pagemove" icon="la la-school" label="Листание" />
+                    <q-tab class="tab" name="others" icon="la la-list-ul" label="Прочее" />
+                    <q-tab class="tab" name="reset" icon="la la-broom" label="Сброс" />
+                    <div class="q-pt-lg"/>
+                </q-tabs>
+            </div>
 
-        <el-tabs type="border-card" tab-position="left" v-model="selectedTab">
-            <!-- Профили --------------------------------------------------------------------->
-            @@include('./includeOld/ProfilesTabOld.inc');
+            <div class="col fit">
+                <!-- Профили --------------------------------------------------------------------->
+                <div v-if="selectedTab == 'profiles'" class="fit tab-panel">
+                    @@include('./include/ProfilesTab.inc');
+                </div>
+            </div>
 
-            <!-- Вид ------------------------------------------------------------------------->                    
-            @@include('./includeOld/ViewTabOld.inc');
-
-            <!-- Кнопки ---------------------------------------------------------------------->
-            @@include('./includeOld/ButtonsTabOld.inc');
-
-            <!-- Управление ------------------------------------------------------------------>
-            @@include('./includeOld/KeysTabOld.inc');
-
-            <!-- Листание -------------------------------------------------------------------->
-            @@include('./includeOld/PageMoveTabOld.inc');
-            
-            <!-- Прочее ---------------------------------------------------------------------->
-            @@include('./includeOld/OthersTabOld.inc');
-
-            <!-- Сброс ----------------------------------------------------------------------->
-            @@include('./includeOld/ResetTabOld.inc');
-                        
-        </el-tabs>
+        </div>
     </Window>
 </template>
 
 <script>
+/*
+            <el-tabs type="border-card" tab-position="left" v-model="selectedTabOld">
+                <!-- Профили --------------------------------------------------------------------->
+                @@include('./includeOld/ProfilesTabOld.inc');
+
+                <!-- Вид ------------------------------------------------------------------------->                    
+                @@include('./includeOld/ViewTabOld.inc');
+
+                <!-- Кнопки ---------------------------------------------------------------------->
+                @@include('./includeOld/ButtonsTabOld.inc');
+
+                <!-- Управление ------------------------------------------------------------------>
+                @@include('./includeOld/KeysTabOld.inc');
+
+                <!-- Листание -------------------------------------------------------------------->
+                @@include('./includeOld/PageMoveTabOld.inc');
+                
+                <!-- Прочее ---------------------------------------------------------------------->
+                @@include('./includeOld/OthersTabOld.inc');
+
+                <!-- Сброс ----------------------------------------------------------------------->
+                @@include('./includeOld/ResetTabOld.inc');
+
+            </el-tabs>
+*/
 //-----------------------------------------------------------------------------
 import Vue from 'vue';
 import Component from 'vue-class-component';
@@ -91,7 +118,8 @@ export default @Component({
     },
 })
 class SettingsPage extends Vue {
-    selectedTab = null;
+    selectedTab = 'profiles';
+selectedTabOld = null;//todo: remove
     form = {};
     fontBold = false;
     fontItalic = false;
@@ -401,6 +429,46 @@ class SettingsPage extends Vue {
 </script>
 
 <style scoped>
+.tab {
+    justify-content: initial;
+}
+
+.tab-panel {
+    overflow-x: hidden;
+    overflow-y: auto;
+    font-size: 90%;
+    padding: 15px 10px 15px 10px;
+}
+
+.part-header {
+    border-top: 2px solid #bbbbbb;
+    font-weight: bold;
+    font-size: 110%;
+    margin-bottom: 5px;
+}
+
+.item {
+    width: 100%;
+    margin-top: 5px;
+    margin-bottom: 5px;
+}
+
+.label {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    text-align: right;
+    margin-right: 10px;
+}
+
+.text {
+    font-size: 90%;
+    line-height: 130%;
+}
+</style>
+
+<style scoped>
+/* TODO: REMOVE */
 .text {
     font-size: 90%;
     line-height: 130%;
@@ -421,11 +489,6 @@ class SettingsPage extends Vue {
     margin-left: 10px;
     position: relative;
     top: -11px;
-}
-
-.partHeader {
-    font-weight: bold;
-    margin-bottom: 5px;
 }
 
 .el-tabs {

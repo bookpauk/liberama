@@ -18,14 +18,14 @@ import {QBtnGroup} from 'quasar/src/components/btn-group';
 import {QBtnToggle} from 'quasar/src/components/btn-toggle';
 import {QIcon} from 'quasar/src/components/icon';
 import {QSlider} from 'quasar/src/components/slider';
-//import {QTabs} from 'quasar/src/components/tabs';
-//import {QTab} from 'quasar/src/components/tab';
+import {QTabs, QTab} from 'quasar/src/components/tabs';
 //import {QTabPanels, QTabPanel} from 'quasar/src/components/tab-panels';
 import {QSeparator} from 'quasar/src/components/separator';
 import {QList, QItem, QItemSection, QItemLabel} from 'quasar/src/components/item';
 import {QTooltip} from 'quasar/src/components/tooltip';
 import {QSpinner} from 'quasar/src/components/spinner';
 import {QTable, QTh, QTr, QTd} from 'quasar/src/components/table';
+import {QCheckbox} from 'quasar/src/components/checkbox';
       
 const components = {
     //QLayout,
@@ -39,14 +39,14 @@ const components = {
     QBtnToggle,
     QIcon,
     QSlider,
-    //QTabs,
-    //QTab
+    QTabs, QTab,
     //QTabPanels, QTabPanel,
     QSeparator,
     QList, QItem, QItemSection, QItemLabel,
     QTooltip,
     QSpinner,
     QTable, QTh, QTr, QTd,
+    QCheckbox,
 };
 
 //directives 
