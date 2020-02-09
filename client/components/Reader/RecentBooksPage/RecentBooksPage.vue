@@ -1,7 +1,7 @@
 <template>
     <Window width="600px" ref="window" @close="close">
         <template slot="header">
-            <span v-show="!loading">Последние {{tableData ? tableData.length : 0}} открытых книг</span>
+            <span v-show="!loading">{{ header }}</span>
             <span v-if="loading"><q-spinner class="q-mr-sm" color="lime-12" size="20px" :thickness="7"/>Список загружается</span>
         </template>
 
@@ -276,6 +276,20 @@ class RecentBooksPage extends Vue {
         this.updating = false;
     }
 
+    wordEnding(num) {
+        const endings = ['', 'а', 'и', 'и', 'и', '', '', '', '', ''];
+        return endings[num % 10];
+    }
+
+    get header() {
+        const len = (this.tableData ? this.tableData.length : 0);
+        if (this.search) {
+            return `Найдено ${len} книг${this.wordEnding(len)}`;
+        } else {
+            return `Всего ${len} книг${this.wordEnding(len)}`;
+        }
+    }
+
     async downloadBook(fb2path) {
         try {
             await readerApi.checkCachedBook(fb2path);
@@ -378,5 +392,8 @@ class RecentBooksPage extends Vue {
     z-index: 1;
     top: 0;
     background-color: #c1f4cd;
+}
+.recent-books-table tr:nth-child(even) {
+    background-color: #f8f8f8;
 }
 </style>
