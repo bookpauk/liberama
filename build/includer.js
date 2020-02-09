@@ -1,6 +1,9 @@
 const path = require('path');
 const fs = require('fs');
 
+//пример в коде:
+//  @@include('./test/testFile.inc');
+
 exports.default = function includer(source) {
     const lines = source.split('\n');
 
@@ -12,6 +15,7 @@ exports.default = function includer(source) {
             const includedFile = path.resolve(path.dirname(this.resourcePath), m[1]);
             const fileContent = fs.readFileSync(includedFile, 'utf8');
             result.push(fileContent);
+            this.addDependency(includedFile);
         } else {
             result.push(line);
         }
