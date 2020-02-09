@@ -26,7 +26,7 @@ import {QTooltip} from 'quasar/src/components/tooltip';
 import {QSpinner} from 'quasar/src/components/spinner';
 import {QTable, QTh, QTr, QTd} from 'quasar/src/components/table';
 import {QCheckbox} from 'quasar/src/components/checkbox';
-      
+import {QSelect} from 'quasar/src/components/select';
 const components = {
     //QLayout,
     //QPageContainer, QPage,
@@ -47,6 +47,7 @@ const components = {
     QSpinner,
     QTable, QTh, QTr, QTd,
     QCheckbox,
+    QSelect,
 };
 
 //directives 

@@ -185,9 +185,15 @@ selectedTabOld = null;//todo: remove
         return this.$store.state.reader.profiles;
     }
 
-    get profilesArray() {
-        const result = Object.keys(this.profiles)
-        result.sort();
+
+    get currentProfileOptions() {
+        const profNames = Object.keys(this.profiles)
+        profNames.sort();
+
+        let result = [{label: 'Нет', value: ''}];
+        profNames.forEach(name => {
+            result.push({label: name, value: name});
+        });
         return result;
     }
 
@@ -437,13 +443,14 @@ selectedTabOld = null;//todo: remove
     overflow-x: hidden;
     overflow-y: auto;
     font-size: 90%;
-    padding: 15px 10px 15px 10px;
+    padding: 0 10px 15px 10px;
 }
 
 .part-header {
     border-top: 2px solid #bbbbbb;
     font-weight: bold;
     font-size: 110%;
+    margin-top: 15px;
     margin-bottom: 5px;
 }
 
@@ -465,15 +472,15 @@ selectedTabOld = null;//todo: remove
     font-size: 90%;
     line-height: 130%;
 }
+
+.button {
+    margin-right: 15px;
+    padding: 0 5px 0 5px;
+}
 </style>
 
 <style scoped>
 /* TODO: REMOVE */
-.text {
-    font-size: 90%;
-    line-height: 130%;
-}
-
 .el-form {
     border-top: 2px solid #bbbbbb;
     margin-bottom: 5px;
