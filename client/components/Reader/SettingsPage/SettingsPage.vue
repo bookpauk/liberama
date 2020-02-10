@@ -7,6 +7,7 @@
         <div class="col row">
             <div class="full-height">
                 <q-tabs
+                    ref="tabs"
                     class="bg-grey-3 text-black"
                     v-model="selectedTab"
                     left-icon="la la-caret-up"
@@ -19,7 +20,7 @@
                     stretch
                     inline-label
                 >
-                    <div class="q-pt-lg"/>
+                    <div v-show="tabsScrollable" class="q-pt-lg"/>
                     <q-tab class="tab" name="profiles" icon="la la-users" label="Профили" />
                     <q-tab class="tab" name="view" icon="la la-eye" label="Вид" />
                     <q-tab class="tab" name="buttons" icon="la la-grip-horizontal" label="Кнопки" />
@@ -27,7 +28,7 @@
                     <q-tab class="tab" name="pagemove" icon="la la-school" label="Листание" />
                     <q-tab class="tab" name="others" icon="la la-list-ul" label="Прочее" />
                     <q-tab class="tab" name="reset" icon="la la-broom" label="Сброс" />
-                    <div class="q-pt-lg"/>
+                    <div v-show="tabsScrollable" class="q-pt-lg"/>
                 </q-tabs>
             </div>
 
@@ -124,6 +125,7 @@ selectedTabOld = null;//todo: remove
     fontBold = false;
     fontItalic = false;
     vertShift = 0;
+    tabsScrollable = false;
 
     webFonts = [];
     fonts = [];
@@ -138,6 +140,15 @@ selectedTabOld = null;//todo: remove
         this.form = {};
         this.toolButtons = rstore.toolButtons;
         this.settingsChanged();
+    }
+
+    mounted() {
+        this.$watch(
+            '$refs.tabs.scrollable',
+            (newValue) => {
+                this.tabsScrollable = newValue;
+            }
+        );
     }
 
     init() {
@@ -184,7 +195,6 @@ selectedTabOld = null;//todo: remove
     get profiles() {
         return this.$store.state.reader.profiles;
     }
-
 
     get currentProfileOptions() {
         const profNames = Object.keys(this.profiles)
