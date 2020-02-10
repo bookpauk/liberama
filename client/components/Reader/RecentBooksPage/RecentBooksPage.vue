@@ -278,16 +278,17 @@ class RecentBooksPage extends Vue {
 
     wordEnding(num) {
         const endings = ['', 'а', 'и', 'и', 'и', '', '', '', '', ''];
-        return endings[num % 10];
+        const deci = num % 100;
+        if (deci > 10 && deci < 20) {
+            return '';
+        } else {
+            return endings[num % 10];
+        }
     }
 
     get header() {
         const len = (this.tableData ? this.tableData.length : 0);
-        if (this.search) {
-            return `Найдено ${len} книг${this.wordEnding(len)}`;
-        } else {
-            return `Всего ${len} книг${this.wordEnding(len)}`;
-        }
+        return `${(this.search ? 'Найдено' : 'Всего')} ${len} книг${this.wordEnding(len)}`;
     }
 
     async downloadBook(fb2path) {
