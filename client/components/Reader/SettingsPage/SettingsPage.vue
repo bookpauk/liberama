@@ -460,12 +460,17 @@ selectedTabOld = null;//todo: remove
     margin-bottom: 5px;
 }
 
-.label {
+.label-1 {
+    width: 75px;
+}
+
+.label-1, .label-2 {
     display: flex;
     flex-direction: column;
     justify-content: center;
     text-align: right;
     margin-right: 10px;
+    overflow: hidden;
 }
 
 .text {

@@ -1,7 +1,7 @@
 <div class="part-header">Управление синхронизацией данных</div>
 
 <div class="item row">
-    <div class="label col-2"></div>
+    <div class="label-1"></div>
     <q-checkbox class="col" v-model="serverSyncEnabled" size="xs" label="Включить синхронизацию с сервером" />
 </div>
 
@@ -10,24 +10,24 @@
     <div class="part-header">Профили устройств</div>
 
     <div class="item row">
-        <div class="label col-2"></div>
+        <div class="label-1"></div>
         <div class="text col">
             Выберите или добавьте профиль устройства, чтобы начать синхронизацию настроек с сервером.
             <br>При выборе "Нет" синхронизация настроек (но не книг) отключается.
         </div>
     </div>
      <div class="item row">
-        <div class="label col-2">Устройство</div>
+        <div class="label-1">Устройство</div>
         <div class="col">
             <q-select v-model="currentProfile" :options="currentProfileOptions"
                 style="width: 275px"
                 dropdown-icon="la la-angle-down la-sm"
-                outlined dense emit-value map-options
+                outlined dense emit-value
             />
         </div>
     </div>
     <div class="item row">
-        <div class="label col-2"></div>
+        <div class="label-1"></div>
         <q-btn class="button" dense no-caps @click="addProfile">Добавить</q-btn>
         <q-btn class="button" dense no-caps @click="delProfile">Удалить</q-btn>
         <q-btn class="button" dense no-caps @click="delAllProfiles">Удалить все</q-btn>
@@ -36,14 +36,14 @@
     <!---------------------------------------------->
     <div class="part-header">Ключ доступа</div>
     <div class="item row">
-        <div class="label col-2"></div>
+        <div class="label-1"></div>
         <div class="text col">
             Ключ доступа позволяет восстановить профили с настройками и список читаемых книг.
             Для этого необходимо передать ключ на новое устройство через почту, мессенджер или другим способом.
         </div>
     </div>
     <div class="item row">
-        <div class="label col-2"></div>
+        <div class="label-1"></div>
         <q-btn class="button" style="width: 250px" dense no-caps @click="showServerStorageKey">
                 <span v-show="serverStorageKeyVisible">Скрыть</span>
                 <span v-show="!serverStorageKeyVisible">Показать</span>
@@ -51,7 +51,7 @@
          </q-btn>
     </div>
     <div class="item row">
-        <div class="label col-2"></div>
+        <div class="label-1"></div>
         <div v-if="!serverStorageKeyVisible">
             <hr/>
             <b>{{ partialStorageKey }}</b> (часть вашего ключа)
