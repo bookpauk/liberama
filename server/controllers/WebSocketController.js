@@ -98,7 +98,9 @@ class WebSocketController {
 
     async getConfig(req, ws) {
         if (Array.isArray(req.params)) {
-            this.send(_.pick(this.config, req.params), req, ws);
+            const paramsSet = new Set(req.params);
+
+            this.send(_.pick(this.config, this.config.webConfigParams.filter(x => paramsSet.has(x))), req, ws);
         } else {
             throw new Error('params is not an array');
         }

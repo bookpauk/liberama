@@ -14,7 +14,8 @@ class Misc {
 
         try {
             await wsc.open();
-            return await wsc.message(wsc.send(Object.assign({action: 'get-config'}, query)));
+            const config = await wsc.message(wsc.send(Object.assign({action: 'get-config'}, query)));
+            return config;
         } catch (e) {
             console.error(e);
         }
