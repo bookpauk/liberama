@@ -111,11 +111,7 @@ class WebSocketConnection {
                 requestId,
                 timeout,
                 onMessage: (mes) => {
-                    if (mes.error) {
-                        reject(mes.error);
-                    } else {
-                        resolve(mes);
-                    }
+                    resolve(mes);
                 },
                 onError: (e) => {
                     reject(e);

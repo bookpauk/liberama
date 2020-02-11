@@ -122,9 +122,10 @@ class WebSocketController {
         while (1) {// eslint-disable-line no-constant-condition
             const prevProgress = state.progress || -1;
             const prevState = state.state || '';
+            const lastModified = state.lastModified || 0;
             state = this.workerState.getState(req.workerId);
 
-            this.send((state ? state : {}), req, ws);
+            this.send((state && lastModified != state.lastModified ? state : {}), req, ws);
             if (!state) break;
 
             if (state.state != 'finish' && state.state != 'error')
