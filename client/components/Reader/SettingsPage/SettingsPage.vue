@@ -492,6 +492,13 @@ selectedTabOld = null;//todo: remove
     margin-right: 15px;
     padding: 0 5px 0 5px;
 }
+
+.copy-icon {
+    margin-left: 5px;
+    cursor: pointer;
+    font-size: 120%;
+    color: blue;
+}
 </style>
 
 <style scoped>
@@ -525,10 +532,6 @@ selectedTabOld = null;//todo: remove
     width: 420px;
     overflow-y: auto;
     padding: 15px;
-}
-
-.center {
-    text-align: center;
 }
 </style>
 

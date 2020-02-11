@@ -52,24 +52,26 @@
     </div>
     <div class="item row">
         <div class="label-1"></div>
-        <div v-if="!serverStorageKeyVisible">
+        <div v-if="!serverStorageKeyVisible" class="col">
             <hr/>
             <b>{{ partialStorageKey }}</b> (часть вашего ключа)
             <hr/>
         </div>
-        <div v-else style="line-height: 100%">
+        <div v-else class="col" style="line-height: 100%">
             <hr/>
-            <div style="width: 300px; padding-top: 5px; overflow-wrap: break-word;"><b>{{ serverStorageKey }}</b></div>
-            <br><div class="center">
-                <q-btn class="button" style="width: 250px" dense no-caps @click="copyToClip(serverStorageKey, 'Ключ')">Скопировать ключ</q-btn>
+            <div style="width: 300px; padding-top: 5px; overflow-wrap: break-word;">
+                <b>{{ serverStorageKey }}</b>
+                <q-icon class="copy-icon" name="la la-copy" @click="copyToClip(serverStorageKey, 'Ключ')">
+                    <q-tooltip :delay="1000" anchor="top middle" self="center middle" content-style="font-size: 80%">Скопировать</q-tooltip>                    
+                </q-icon>            
             </div>
             <div v-if="mode == 'omnireader'">
                 <br>Переход по ссылке позволит автоматически ввести ключ доступа:
-                <br><div class="center" style="margin-top: 5px">
+                <br><div class="text-center" style="margin-top: 5px">
                     <a :href="setStorageKeyLink" target="_blank">Ссылка для ввода ключа</a>
-                </div>
-                <br><div class="center">
-                    <el-button size="mini" class="copy-button" @click="copyToClip(setStorageKeyLink, 'Ссылка')">Скопировать ссылку</el-button>
+                    <q-icon class="copy-icon" name="la la-copy" @click="copyToClip(setStorageKeyLink, 'Ссылка')">
+                        <q-tooltip :delay="1000" anchor="top middle" self="center middle" content-style="font-size: 80%">Скопировать</q-tooltip>                    
+                    </q-icon>            
                 </div>
             </div>
             <hr/>
