@@ -1,6 +1,6 @@
 <template>
     <div class="page">
-        <span class="text-h5">Управление с помощью мыши/тачскрина:</span>
+        <span class="text-h6 text-bold">Управление с помощью мыши/тачскрина:</span>
         <ul>
             <li><b>ЛКМ/ТАЧ</b> по экрану в одну из областей - активация действия:</li>
                 <div class="click-map-page">

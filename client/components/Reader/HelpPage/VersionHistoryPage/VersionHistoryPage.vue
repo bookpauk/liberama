@@ -1,13 +1,14 @@
 <template>
     <div id="versionHistoryPage" class="page">
+        <span class="text-h6 text-bold">История версий:</span>
+        <br><br>
+
         <span class="clickable" v-for="(item, index) in versionHeader" :key="index" @click="showRelease(item)">
             <p>
             {{ item }}
             </p>
         </span>
 
-        <br>
-        <span class="text-h5">История версий:</span>
         <br>
 
         <div v-for="item in versionContent" :id="item.key" :key="item.key">

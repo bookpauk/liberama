@@ -1,6 +1,6 @@
 <template>
     <div class="page">
-        <span class="text-h5">Управление с помощью горячих клавиш:</span>
+        <span class="text-h6 text-bold">Управление с помощью горячих клавиш:</span>
         <ul>
             <li><b>F1, H</b> - открыть справку</li>
             <li><b>Escape</b> - показать/скрыть страницу загрузки</li>
