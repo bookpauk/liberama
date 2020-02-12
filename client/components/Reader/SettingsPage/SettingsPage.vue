@@ -489,7 +489,7 @@ selectedTabOld = null;//todo: remove
 }
 
 .button {
-    margin-right: 15px;
+    margin: 3px 15px 3px 0;
     padding: 0 5px 0 5px;
 }
 

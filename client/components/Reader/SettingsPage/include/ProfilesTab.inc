@@ -42,6 +42,7 @@
             Для этого необходимо передать ключ на новое устройство через почту, мессенджер или другим способом.
         </div>
     </div>
+
     <div class="item row">
         <div class="label-1"></div>
         <q-btn class="button" style="width: 250px" dense no-caps @click="showServerStorageKey">
@@ -50,6 +51,7 @@
                 &nbsp;ключ доступа
          </q-btn>
     </div>
+
     <div class="item row">
         <div class="label-1"></div>
         <div v-if="!serverStorageKeyVisible" class="col">
@@ -77,14 +79,29 @@
             <hr/>
         </div>
     </div>
+
+    <div class="item row">
+        <div class="label-1"></div>
+        <q-btn class="button" style="width: 250px" dense no-caps @click="enterServerStorageKey">Ввести ключ доступа</q-btn>
+    </div>
+    <div class="item row">
+        <div class="label-1"></div>
+        <q-btn class="button" style="width: 250px" dense no-caps @click="generateServerStorageKey">Сгенерировать новый ключ</q-btn>
+    </div>
+    <div class="item row">
+        <div class="label-1"></div>
+        <div class="text col">
+            Рекомендуется сохранить ключ в надежном месте, чтобы всегда иметь возможность восстановить настройки,
+            например, после переустановки ОС или чистки/смены браузера.<br>
+            <b>ПРЕДУПРЕЖДЕНИЕ!</b> При утере ключа, НИКТО не сможет восстановить ваши данные, т.к. они сжимаются
+            и шифруются ключом доступа перед отправкой на сервер.
+        </div>
+    </div>
 </div>
 
 
 <!--
 
-
-                    <el-form-item label="">
-                    </el-form-item>
 
                     <el-form-item label="">
                             <el-button style="width: 250px" @click="enterServerStorageKey">Ввести ключ доступа</el-button>
@@ -94,12 +111,6 @@
                     </el-form-item>
 
                     <el-form-item label="">
-                        <div class="text">
-                            Рекомендуется сохранить ключ в надежном месте, чтобы всегда иметь возможность восстановить настройки,
-                            например, после переустановки ОС или чистки/смены браузера.<br>
-                            <b>ПРЕДУПРЕЖДЕНИЕ!</b> При утере ключа, НИКТО не сможет восстановить ваши данные, т.к. они сжимаются
-                            и шифруются ключом доступа перед отправкой на сервер.
-                        </div>
                     </el-form-item>
                 </el-form>
                 </div>
