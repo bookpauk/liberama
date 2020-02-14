@@ -37,6 +37,11 @@
                 <div v-if="selectedTab == 'profiles'" class="fit tab-panel">
                     @@include('./include/ProfilesTab.inc');
                 </div>
+
+                <!-- Вид ------------------------------------------------------------------------->                    
+                <div v-if="selectedTab == 'view'" class="fit tab-panel">
+                    @@include('./include/ViewTab.inc');
+                </div>
             </div>
 
         </div>
@@ -46,8 +51,6 @@
 <script>
 /*
             <el-tabs type="border-card" tab-position="left" v-model="selectedTabOld">
-                <!-- Профили --------------------------------------------------------------------->
-                @@include('./includeOld/ProfilesTabOld.inc');
 
                 <!-- Вид ------------------------------------------------------------------------->                    
                 @@include('./includeOld/ViewTabOld.inc');
@@ -471,6 +474,10 @@ selectedTabOld = null;//todo: remove
 }
 
 .label-1 {
+    width: 75px;
+}
+
+.label-2 {
     width: 75px;
 }
 

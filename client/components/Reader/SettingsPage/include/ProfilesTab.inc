@@ -35,6 +35,7 @@
 
     <!---------------------------------------------->
     <div class="part-header">Ключ доступа</div>
+    
     <div class="item row">
         <div class="label-1"></div>
         <div class="text col">

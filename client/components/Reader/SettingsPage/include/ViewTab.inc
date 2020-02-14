@@ -1,4 +1,13 @@
-            <el-tab-pane label="Вид">
+<div class="part-header">Цвет</div>
+
+<div class="item row">
+    <div class="label-2">Текст</div>
+    <div class="col">
+        <span style="position: relative; top: 20px;">Обои:</span>
+    </div>
+</div>
+
+            <!--el-tab-pane label="Вид">
 
                 <el-form :model="form" size="small" label-width="120px" @submit.native.prevent>
                     <div class="partHeader">Цвет</div>
@@ -9,7 +18,6 @@
                             <span class="color-picked"><b>{{ textColor }}</b></span>
                         </el-col>
                         <el-col :span="5">
-                            <span style="position: relative; top: 20px;">Обои:</span>
                         </el-col>
                     </el-form-item>
 
@@ -260,4 +268,4 @@
                         <el-input-number v-model="statusBarColorAlpha" :min="0" :max="1" :precision="2" :step="0.1" :disabled="!showStatusBar"></el-input-number>
                     </el-form-item>
                 </el-form>
-            </el-tab-pane>
+            </el-tab-pane-->
