@@ -14,7 +14,7 @@
         <div class="col-auto column justify-start items-center no-wrap overflow-hidden">
             <q-input ref="input" class="full-width q-px-xs" style="max-width: 700px" outlined dense bg-color="white" v-model="bookUrl" placeholder="URL книги">
                 <template v-slot:append>
-                    <q-btn round dense flat icon="la la-check" @click="submitUrl"/>
+                    <q-btn rounded flat style="width: 40px" icon="la la-check" @click="submitUrl"/>
                 </template>
             </q-input>
 
