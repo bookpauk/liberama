@@ -22,7 +22,7 @@
             <q-select v-model="currentProfile" :options="currentProfileOptions"
                 style="width: 275px"
                 dropdown-icon="la la-angle-down la-sm"
-                outlined dense emit-value
+                outlined dense emit-value map-options
             />
         </div>
     </div>

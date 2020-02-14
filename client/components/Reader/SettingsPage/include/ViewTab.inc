@@ -6,7 +6,7 @@
         <div class="col-left-2">
             <q-input
                 outlined dense
-                v-model="textColor"
+                v-model="textColorFiltered"
                 :rules="['hexColor']"
                 class="no-mp"
                 style="max-width: 150px"
@@ -15,8 +15,11 @@
                 <template v-slot:prepend>
                     <q-icon name="la la-angle-down la-xs" class="cursor-pointer text-white" :style="colorPanStyle('text')">
                         <q-popup-proxy anchor="bottom middle" self="top middle">
-                            <div><q-color v-model="textColor" no-header default-view="palette" :palette="predefineTextColors"
-                            /></div>
+                            <div>
+                                <q-color v-model="textColor"
+                                    no-header default-view="palette" :palette="predefineTextColors"
+                                />
+                            </div>
                         </q-popup-proxy>
                     </q-icon>
                 </template>
@@ -34,7 +37,7 @@
         <div class="col-left-2">
             <q-input
                 outlined dense
-                v-model="backgroundColor"
+                v-model="bgColorFiltered"
                 :rules="['hexColor']"
                 class="no-mp"
                 style="max-width: 150px"
@@ -43,8 +46,9 @@
                 <template v-slot:prepend>
                     <q-icon name="la la-angle-down la-xs" class="cursor-pointer text-white" :style="colorPanStyle('bg')">
                         <q-popup-proxy anchor="bottom middle" self="top middle">
-                            <div><q-color v-model="backgroundColor" no-header default-view="palette" :palette="predefineBackgroundColors"
-                            /></div>
+                            <div>
+                                <q-color v-model="backgroundColor" no-header default-view="palette" :palette="predefineBackgroundColors"/>
+                            </div>
                         </q-popup-proxy>
                     </q-icon>
                 </template>
@@ -54,7 +58,7 @@
         <q-select class="col" v-model="wallpaper" :options="wallpaperOptions"
             style="max-width: 120px; margin-left: 30px"
             dropdown-icon="la la-angle-down la-sm"
-            outlined dense emit-value
+            outlined dense emit-value map-options
         />
     </div>
 </div>
