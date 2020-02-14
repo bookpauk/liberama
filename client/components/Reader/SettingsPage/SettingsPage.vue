@@ -198,6 +198,8 @@ selectedTabOld = null;//todo: remove
         this.webFonts = rstore.webFonts;
         const font = (this.webFontName ? this.webFontName : this.fontName);
         this.vertShift = this.fontShifts[font] || 0;
+        this.textColorFiltered = this.textColor;
+        this.bgColorFiltered = this.backgroundColor;
     }
 
     get mode() {

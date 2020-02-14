@@ -10,7 +10,6 @@
                 :rules="['hexColor']"
                 class="no-mp"
                 style="max-width: 150px"
-                :disabled="wallpaper != ''"
             >
                 <template v-slot:prepend>
                     <q-icon name="la la-angle-down la-xs" class="cursor-pointer text-white" :style="colorPanStyle('text')">
@@ -41,7 +40,7 @@
                 :rules="['hexColor']"
                 class="no-mp"
                 style="max-width: 150px"
-                :disabled="wallpaper != ''"
+                :disable="wallpaper != ''"
             >
                 <template v-slot:prepend>
                     <q-icon name="la la-angle-down la-xs" class="cursor-pointer text-white" :style="colorPanStyle('bg')">
