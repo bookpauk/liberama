@@ -2,49 +2,67 @@
 
 <div class="item row">
     <div class="label-2">Текст</div>
-    <div class="col">
-        <span style="position: relative; top: 20px;">Обои:</span>
+    <div class="col row">
+        <div class="col-left-2">
+            <q-input
+                outlined dense
+                v-model="textColor"
+                :rules="['hexColor']"
+                class="no-mp"
+                style="max-width: 150px"
+                :disabled="wallpaper != ''"
+            >
+                <template v-slot:prepend>
+                    <q-icon name="la la-angle-down la-xs" class="cursor-pointer text-white" :style="colorPanStyle('text')">
+                        <q-popup-proxy anchor="bottom middle" self="top middle">
+                            <div><q-color v-model="textColor" no-header default-view="palette" :palette="predefineTextColors"
+                            /></div>
+                        </q-popup-proxy>
+                    </q-icon>
+                </template>
+            </q-input>
+        </div>
+
+        <span class="col" style="position: relative; top: 35px; left: 30px;">Обои:</span>
     </div>
 </div>
 
-            <!--el-tab-pane label="Вид">
+<div class="q-mt-md"/>
+<div class="item row">
+    <div class="label-2">Фон</div>
+    <div class="col row">
+        <div class="col-left-2">
+            <q-input
+                outlined dense
+                v-model="backgroundColor"
+                :rules="['hexColor']"
+                class="no-mp"
+                style="max-width: 150px"
+                :disabled="wallpaper != ''"
+            >
+                <template v-slot:prepend>
+                    <q-icon name="la la-angle-down la-xs" class="cursor-pointer text-white" :style="colorPanStyle('bg')">
+                        <q-popup-proxy anchor="bottom middle" self="top middle">
+                            <div><q-color v-model="backgroundColor" no-header default-view="palette" :palette="predefineBackgroundColors"
+                            /></div>
+                        </q-popup-proxy>
+                    </q-icon>
+                </template>
+            </q-input>
+        </div>
 
-                <el-form :model="form" size="small" label-width="120px" @submit.native.prevent>
-                    <div class="partHeader">Цвет</div>
+        <q-select class="col" v-model="wallpaper" :options="wallpaperOptions"
+            style="max-width: 120px; margin-left: 30px"
+            dropdown-icon="la la-angle-down la-sm"
+            outlined dense emit-value
+        />
+    </div>
+</div>
 
-                    <el-form-item label="Текст">
-                        <el-col :span="12">
-                            <el-color-picker v-model="textColor" color-format="hex" :predefine="predefineTextColors"></el-color-picker>
-                            <span class="color-picked"><b>{{ textColor }}</b></span>
-                        </el-col>
-                        <el-col :span="5">
-                        </el-col>
-                    </el-form-item>
 
-                    <el-form-item label="Фон">
-                        <el-col :span="12">
-                            <el-color-picker v-model="backgroundColor" color-format="hex" :predefine="predefineBackgroundColors" :disabled="wallpaper != ''"></el-color-picker>
-                            <span v-show="wallpaper == ''" class="color-picked"><b>{{ backgroundColor }}</b></span>
-                        </el-col>
 
-                        <el-col :span="11">
-                            <el-select v-model="wallpaper">
-                                <el-option label="Нет" value=""></el-option>
-                                <el-option label="1" value="paper1"></el-option>
-                                <el-option label="2" value="paper2"></el-option>
-                                <el-option label="3" value="paper3"></el-option>
-                                <el-option label="4" value="paper4"></el-option>
-                                <el-option label="5" value="paper5"></el-option>
-                                <el-option label="6" value="paper6"></el-option>
-                                <el-option label="7" value="paper7"></el-option>
-                                <el-option label="8" value="paper8"></el-option>
-                                <el-option label="9" value="paper9"></el-option>
-                            </el-select>
-                        </el-col>
-                    </el-form-item>
-                </el-form>
 
-                <el-form :model="form" size="mini" label-width="120px" @submit.native.prevent>
+                <!--el-form :model="form" size="mini" label-width="120px" @submit.native.prevent>
                     <div class="partHeader">Шрифт</div>
 
                     <el-form-item label="Локальный/веб">

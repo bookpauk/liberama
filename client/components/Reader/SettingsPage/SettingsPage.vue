@@ -4,6 +4,8 @@
             Настройки
         </template>
 
+        <q-color v-show="false" ref="defPalette"/>
+
         <div class="col row">
             <div class="full-height">
                 <q-tabs
@@ -80,6 +82,19 @@ import _ from 'lodash';
 import * as utils from '../../../share/utils';
 import Window from '../../share/Window.vue';
 import rstore from '../../../store/modules/reader';
+
+const defPalette = [
+  'rgb(255,204,204)', 'rgb(255,230,204)', 'rgb(255,255,204)', 'rgb(204,255,204)', 'rgb(204,255,230)', 'rgb(204,255,255)', 'rgb(204,230,255)', 'rgb(204,204,255)', 'rgb(230,204,255)', 'rgb(255,204,255)',
+  'rgb(255,153,153)', 'rgb(255,204,153)', 'rgb(255,255,153)', 'rgb(153,255,153)', 'rgb(153,255,204)', 'rgb(153,255,255)', 'rgb(153,204,255)', 'rgb(153,153,255)', 'rgb(204,153,255)', 'rgb(255,153,255)',
+  'rgb(255,102,102)', 'rgb(255,179,102)', 'rgb(255,255,102)', 'rgb(102,255,102)', 'rgb(102,255,179)', 'rgb(102,255,255)', 'rgb(102,179,255)', 'rgb(102,102,255)', 'rgb(179,102,255)', 'rgb(255,102,255)',
+  'rgb(255,51,51)', 'rgb(255,153,51)', 'rgb(255,255,51)', 'rgb(51,255,51)', 'rgb(51,255,153)', 'rgb(51,255,255)', 'rgb(51,153,255)', 'rgb(51,51,255)', 'rgb(153,51,255)', 'rgb(255,51,255)',
+  'rgb(255,0,0)', 'rgb(255,128,0)', 'rgb(255,255,0)', 'rgb(0,255,0)', 'rgb(0,255,128)', 'rgb(0,255,255)', 'rgb(0,128,255)', 'rgb(0,0,255)', 'rgb(128,0,255)', 'rgb(255,0,255)',
+  'rgb(245,0,0)', 'rgb(245,123,0)', 'rgb(245,245,0)', 'rgb(0,245,0)', 'rgb(0,245,123)', 'rgb(0,245,245)', 'rgb(0,123,245)', 'rgb(0,0,245)', 'rgb(123,0,245)', 'rgb(245,0,245)',
+  'rgb(214,0,0)', 'rgb(214,108,0)', 'rgb(214,214,0)', 'rgb(0,214,0)', 'rgb(0,214,108)', 'rgb(0,214,214)', 'rgb(0,108,214)', 'rgb(0,0,214)', 'rgb(108,0,214)', 'rgb(214,0,214)',
+  'rgb(163,0,0)', 'rgb(163,82,0)', 'rgb(163,163,0)', 'rgb(0,163,0)', 'rgb(0,163,82)', 'rgb(0,163,163)', 'rgb(0,82,163)', 'rgb(0,0,163)', 'rgb(82,0,163)', 'rgb(163,0,163)',
+  'rgb(92,0,0)', 'rgb(92,46,0)', 'rgb(92,92,0)', 'rgb(0,92,0)', 'rgb(0,92,46)', 'rgb(0,92,92)', 'rgb(0,46,92)', 'rgb(0,0,92)', 'rgb(46,0,92)', 'rgb(92,0,92)',
+  'rgb(255,255,255)', 'rgb(205,205,205)', 'rgb(178,178,178)', 'rgb(153,153,153)', 'rgb(127,127,127)', 'rgb(102,102,102)', 'rgb(76,76,76)', 'rgb(51,51,51)', 'rgb(25,25,25)', 'rgb(0,0,0)'
+];
 
 export default @Component({
     components: {
@@ -210,6 +225,14 @@ selectedTabOld = null;//todo: remove
         return result;
     }
 
+    get wallpaperOptions() {
+        let result = [{label: 'Нет', value: ''}];        
+        for (let i = 0; i < 10; i++) {
+            result.push({label: i, value: `paper${i}`});
+        }
+        return result;
+    }
+
     get currentProfile() {
         return this.$store.state.reader.currentProfile;
     }
@@ -231,18 +254,18 @@ selectedTabOld = null;//todo: remove
     }
 
     get predefineTextColors() {
-        return [
+        return defPalette.concat([
           '#ffffff',
           '#000000',
           '#202020',
           '#323232',
           '#aaaaaa',
           '#00c0c0',
-        ];
+        ]);
     }
 
     get predefineBackgroundColors() {
-        return [
+        return defPalette.concat([
           '#ffffff',
           '#000000',
           '#202020',
@@ -253,7 +276,20 @@ selectedTabOld = null;//todo: remove
           '#909080',
           '#808080',
           '#c8c8c8',
-        ];
+        ]);
+    }
+
+    colorPanStyle(type) {
+        let result = 'width: 30px; height: 30px; border: 1px solid black; border-radius: 4px;';
+        switch (type) {
+            case 'text':
+                result += `background-color: ${this.textColor};`
+                break;
+            case 'bg':
+                result += `background-color: ${this.backgroundColor};`
+                break;
+        }
+        return result;
     }
 
     needReload() {
@@ -478,7 +514,7 @@ selectedTabOld = null;//todo: remove
 }
 
 .label-2 {
-    width: 75px;
+    width: 100px;
 }
 
 .label-1, .label-2 {
@@ -505,6 +541,19 @@ selectedTabOld = null;//todo: remove
     cursor: pointer;
     font-size: 120%;
     color: blue;
+}
+
+.input {
+    max-width: 150px;
+}
+
+.no-mp {
+    margin: 0;
+    padding: 0;
+}
+
+.col-left-2 {
+    width: 150px;
 }
 </style>
 

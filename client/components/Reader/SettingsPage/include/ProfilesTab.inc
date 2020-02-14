@@ -99,20 +99,3 @@
         </div>
     </div>
 </div>
-
-
-<!--
-
-
-                    <el-form-item label="">
-                            <el-button style="width: 250px" @click="enterServerStorageKey">Ввести ключ доступа</el-button>
-                    </el-form-item>
-                    <el-form-item label="">
-                            <el-button style="width: 250px" @click="generateServerStorageKey">Сгенерировать новый ключ</el-button>
-                    </el-form-item>
-
-                    <el-form-item label="">
-                    </el-form-item>
-                </el-form>
-                </div>
-            </el-tab-pane-->
