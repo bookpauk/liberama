@@ -100,7 +100,7 @@ function getEncodingLite(buf, returnAll) {
 }
 
 function checkIfText(buf) {
-    const enc = getEncoding(buf, true);
+    const enc = getEncodingLite(buf, true);
     if (enc[0].c > enc[0].totalChecked*0.9)
         return true;
 
