@@ -1,7 +1,7 @@
 <template>
     <div ref="main" class="column no-wrap" style="min-height: 500px">
         <div class="relative-position">
-            <GithubCorner url="https://github.com/bookpauk/liberama" cornerColor="#1B695F" gitColor="EBE2C9"></GithubCorner>
+            <GithubCorner url="https://github.com/bookpauk/liberama" cornerColor="#1B695F" gitColor="#EBE2C9"></GithubCorner>
         </div>
         <div class="col column justify-center items-center no-wrap overflow-hidden" style="min-height: 170px">
             <span class="greeting"><b>{{ title }}</b></span>

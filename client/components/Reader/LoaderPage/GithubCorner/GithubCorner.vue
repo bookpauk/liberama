@@ -127,7 +127,8 @@
     top: 0;
     border: 0;
   }
-    #github-corner-svg, #github-corner-svg .octo-arm, #github-corner-svg .octo-body {
-      transition: fill 1s ease;
-    }
+
+  #github-corner-svg, #github-corner-svg .octo-arm, #github-corner-svg .octo-body {
+    transition: fill 1s ease;
+  }
 </style>
