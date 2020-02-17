@@ -234,10 +234,26 @@ selectedTabOld = null;//todo: remove
     }
 
     get wallpaperOptions() {
-        let result = [{label: 'Нет', value: ''}];        
+        let result = [{label: 'Нет', value: ''}];
         for (let i = 1; i < 10; i++) {
             result.push({label: i, value: `paper${i}`});
         }
+        return result;
+    }
+
+    get fontsOptions() {
+        let result = [];
+        this.fonts.forEach(font => {
+            result.push({label: (font.label ? font.label : font.name), value: font.name});
+        });
+        return result;
+    }
+
+    get webFontsOptions() {
+        let result = [{label: 'Нет', value: ''}];
+        this.webFonts.forEach(font => {
+            result.push({label: font.name, value: font.name});
+        });
         return result;
     }
 
@@ -526,7 +542,7 @@ selectedTabOld = null;//todo: remove
 }
 
 .label-2 {
-    width: 100px;
+    width: 110px;
 }
 
 .label-1, .label-2 {

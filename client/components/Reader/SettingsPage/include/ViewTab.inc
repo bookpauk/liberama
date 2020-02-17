@@ -26,7 +26,7 @@
             </q-input>
         </div>
 
-        <span class="col" style="position: relative; top: 35px; left: 30px;">Обои:</span>
+        <span class="col" style="position: relative; top: 35px; left: 15px;">Обои:</span>
     </div>
 </div>
 
@@ -55,8 +55,8 @@
             </q-input>
         </div>
 
+        <div class="q-px-sm"/>
         <q-select class="col" v-model="wallpaper" :options="wallpaperOptions"
-            style="max-width: 120px; margin-left: 30px"
             dropdown-icon="la la-angle-down la-sm"
             outlined dense emit-value map-options
         />
@@ -66,6 +66,23 @@
 <!---------------------------------------------->
 <div class="part-header">Шрифт</div>
 
+<div class="item row">
+    <div class="label-2">Локальный/веб</div>
+    <div class="col row">
+        <div class="col-left-2">
+            <q-select class="col" v-model="fontName" :options="fontsOptions" :disable="webFontName != ''"
+                dropdown-icon="la la-angle-down la-sm"
+                outlined dense emit-value map-options
+            />
+        </div>
+
+        <div class="q-px-sm"/>
+        <q-select class="col" v-model="webFontName" :options="webFontsOptions"
+            dropdown-icon="la la-angle-down la-sm"
+            outlined dense emit-value map-options
+        />
+    </div>
+</div>
 
 
                 <!--el-form :model="form" size="mini" label-width="120px" @submit.native.prevent>
