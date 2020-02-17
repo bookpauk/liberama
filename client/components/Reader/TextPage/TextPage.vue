@@ -247,6 +247,9 @@ class TextPage extends Vue {
             this.parsed.imageHeightLines = this.imageHeightLines;
             this.parsed.imageFitWidth = this.imageFitWidth;
             this.parsed.compactTextPerc = this.compactTextPerc;
+
+            this.parsed.testText = 'Это тестовый текст. Его ширина выдается системой неверно некоторое время.';
+            this.parsed.testWidth = this.drawHelper.measureText(this.parsed.testText, {});
         }
 
         //scrolling page
@@ -335,11 +338,15 @@ class TextPage extends Vue {
         // ширина шрифта некоторое время выдается неверно, поэтому
         if (!omitLoadFonts) {
             const parsed = this.parsed;
-            await sleep(100);
+
+            let i = 0;
+            const t = this.parsed.testText;
+            while (i++ < 50 && this.parsed === parsed && this.drawHelper.measureText(t, {}) === this.parsed.testWidth)
+                await sleep(100);
+
             if (this.parsed === parsed) {
-                parsed.force = true;
+                this.parsed.testWidth = this.drawHelper.measureText(t, {});
                 this.draw();
-                parsed.force = false;
             }
         }
     }
