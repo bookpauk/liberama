@@ -172,7 +172,7 @@ selectedTabOld = null;//todo: remove
         this.$watch(
             '$refs.tabs.scrollable',
             (newValue) => {
-                this.tabsScrollable = newValue;
+                this.tabsScrollable = newValue && !this.$isMobileDevice;
             }
         );
     }
