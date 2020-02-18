@@ -33,7 +33,6 @@
                 @touchend.stop="onTouchEnd"
                 @touchcancel.prevent.stop="onTouchEnd"
             />
-            {{ t }}
         </template>
     </q-input>
 </template>
@@ -72,7 +71,6 @@ export default @Component({
 class NumInput extends NumInputProps {
     filteredValue = 0;
     error = false;
-    t = '';
 
     created() {
         this.mask = '#'.repeat(this.max.toString().length);
