@@ -5,11 +5,21 @@
         class="no-mp"
         :class="(error ? 'error' : '')"
     >
+        <slot></slot>
         <template v-slot:prepend>
-            <q-icon name="la la-minus-circle" class="button" v-ripple @click="minus"/>
+            <q-icon :class="(validate(value - step) ? '' : 'disable')" 
+                name="la la-minus-circle" 
+                class="button" 
+                :v-ripple="validate(value - step)" 
+                @click="minus"
+            />
         </template>
         <template v-slot:append>
-            <q-icon name="la la-plus-circle" class="button" v-ripple @click="plus"/>
+            <q-icon :class="(validate(value + step) ? '' : 'disable')"
+                name="la la-plus-circle"
+                class="button"
+                :v-ripple="validate(value + step)"
+                @click="plus"/>
         </template>
     </q-input>
 </template>
@@ -87,15 +97,22 @@ class NumInput extends NumInputProps {
 .button {
     font-size: 130%;
     border-radius: 20px;
-    color: #616161;
+    color: #bbb;
 }
 
 .button:hover {
+    color: #616161;
     background-color: #efebe9;
 }
 
 .error {
     background-color: #ffabab;
     border-radius: 3px;
+}
+
+.disable, .disable:hover {
+    cursor: not-allowed;
+    color: #bbb;
+    background-color: white;
 }
 </style>
