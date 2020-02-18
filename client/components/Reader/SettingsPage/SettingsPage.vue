@@ -81,6 +81,7 @@ import _ from 'lodash';
 
 import * as utils from '../../../share/utils';
 import Window from '../../share/Window.vue';
+import NumInput from '../../share/NumInput.vue';
 import rstore from '../../../store/modules/reader';
 import defPalette from './defPalette';
 
@@ -89,6 +90,7 @@ const hex = /^#[0-9a-fA-F]{3}([0-9a-fA-F]{3})?$/;
 export default @Component({
     components: {
         Window,
+        NumInput,
     },
     data: function() {
         return Object.assign({}, rstore.settingDefaults);

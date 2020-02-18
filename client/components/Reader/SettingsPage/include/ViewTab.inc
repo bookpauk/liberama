@@ -80,44 +80,30 @@
         <q-select class="col" v-model="webFontName" :options="webFontsOptions"
             dropdown-icon="la la-angle-down la-sm"
             outlined dense emit-value map-options
-        />
+        >
+            <q-tooltip :delay="1000" anchor="top middle" self="bottom middle" content-style="font-size: 80%">
+                Веб шрифты дают большое разнообразие,<br>
+                однако есть шанс, что шрифт будет загружаться<br>
+                очень медленно или вовсе не загрузится
+            </q-tooltip>
+        </q-select>
     </div>
 </div>
 
+<div class="item row">
+    <div class="label-2">Размер</div>
+    <div class="col row">
+        <div class="col-left-2">
+            <NumInput v-model="fontSize" :min="5" :max="200"/>
+        </div>
 
-                <!--el-form :model="form" size="mini" label-width="120px" @submit.native.prevent>
-                    <div class="partHeader">Шрифт</div>
+        <div class="col q-pt-xs" style="text-align: right">
+            <a href="https://fonts.google.com/?subset=cyrillic" target="_blank">Примеры</a>
+        </div>
+    </div>
+</div>
 
-                    <el-form-item label="Локальный/веб">
-                        <el-col :span="11">
-                            <el-select v-model="fontName" placeholder="Шрифт" :disabled="webFontName != ''">
-                                <el-option v-for="item in fonts"
-                                    :key="item.name"
-                                    :label="item.label"
-                                    :value="item.name">
-                                </el-option>
-                            </el-select>
-                        </el-col>
-                        <el-col :span="1">
-                            &nbsp;
-                        </el-col>
-                        <el-col :span="11">
-                            <el-tooltip :open-delay="500" effect="light" placement="top">
-                                <template slot="content">
-                                    Веб шрифты дают большое разнообразие,<br>
-                                    однако есть шанс, что шрифт будет загружаться<br>
-                                    очень медленно или вовсе не загрузится
-                                </template>
-                                <el-select v-model="webFontName">
-                                    <el-option label="Нет" value=""></el-option>
-                                    <el-option v-for="item in webFonts"
-                                        :key="item.name"
-                                        :value="item.name">
-                                    </el-option>
-                                </el-select>
-                            </el-tooltip>
-                        </el-col>
-                    </el-form-item>
+<!--
                     <el-form-item label="Размер">
                         <el-col :span="17">
                             <el-input-number v-model="fontSize" :min="5" :max="200"></el-input-number>
