@@ -103,35 +103,71 @@
     </div>
 </div>
 
-<!--
-                    <el-form-item label="Размер">
-                        <el-col :span="17">
-                            <el-input-number v-model="fontSize" :min="5" :max="200"></el-input-number>
-                        </el-col>
-                        <el-col :span="1">
-                            <a href="https://fonts.google.com/?subset=cyrillic" target="_blank">Примеры</a>
-                        </el-col>
-                    </el-form-item>
-                    <el-form-item label="Сдвиг">
-                        <el-tooltip :open-delay="500" effect="light">
-                            <template slot="content">
-                                Сдвиг шрифта по вертикали в процентах от размера.<br>
-                                Отрицательное значение сдвигает вверх, положительное -<br>
-                                вниз. Значение зависит от метрики шрифта.
-                            </template>
-                            <el-input-number v-model="vertShift" :min="-100" :max="100"></el-input-number>
-                        </el-tooltip>
-                    </el-form-item>
+<div class="item row">
+    <div class="label-2">Сдвиг</div>
+    <div class="col row">
+        <div class="col-left-2">
+            <NumInput v-model="vertShift" :min="-100" :max="100">
+                <q-tooltip :delay="1000" anchor="top middle" self="bottom middle" content-style="font-size: 80%">
+                    Сдвиг шрифта по вертикали в процентах от размера.<br>
+                    Отрицательное значение сдвигает вверх, положительное -<br>
+                    вниз. Значение зависит от метрики шрифта.
+                </q-tooltip>
+            </NumInput>
+        </div>
+    </div>
+</div>
 
-                    <el-form-item label="Стиль">
-                        <el-col :span="8">
-                            <el-checkbox v-model="fontBold">Жирный</el-checkbox>
-                        </el-col>
-                        <el-col :span="8">
-                            <el-checkbox v-model="fontItalic">Курсив</el-checkbox>
-                        </el-col>
-                    </el-form-item>
-                </el-form>
+<div class="item row">
+    <div class="label-2">Стиль</div>
+    <div class="col row">
+        <q-checkbox v-model="fontBold" size="xs" label="Жирный" />
+        <q-checkbox class="q-ml-sm" v-model="fontItalic" size="xs" label="Курсив" />
+    </div>
+</div>
+
+<!---------------------------------------------->
+<div class="part-header">Текст</div>
+
+<div class="item row">
+    <div class="label-2">Интервал</div>
+    <div class="col row">
+        <div class="col-left-2">
+            <NumInput v-model="lineInterval" :min="0" :max="200"/>
+        </div>
+    </div>
+</div>
+
+<div class="item row">
+    <div class="label-2">Параграф</div>
+    <div class="col row">
+        <div class="col-left-2">
+            <NumInput v-model="p" :min="0" :max="2000"/>
+        </div>
+    </div>
+</div>
+
+<div class="item row">
+    <div class="label-2">Отступ</div>
+    <div class="col row">
+        <div class="col-left-2">
+            <NumInput v-model="indentLR" :min="0" :max="2000">
+                <q-tooltip :delay="1000" anchor="top middle" self="bottom middle" content-style="font-size: 80%">
+                    Слева/справа
+                </q-tooltip>
+            </NumInput>
+        </div>
+        <div class="q-px-sm"/>
+        <div class="col">
+            <NumInput v-model="indentTB" :min="0" :max="2000">
+                <q-tooltip :delay="1000" anchor="top middle" self="bottom middle" content-style="font-size: 80%">
+                    Слева/справа
+                </q-tooltip>
+            </NumInput>
+        </div>
+    </div>
+</div>
+<!--
 
                 <el-form :model="form" size="mini" label-width="120px" @submit.native.prevent>
                     <div class="partHeader">Текст</div>
