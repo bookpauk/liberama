@@ -12,6 +12,9 @@
                 class="button" 
                 :v-ripple="validate(value - step)" 
                 @click="minus"
+                @mousedown.prevent.stop="onMouseDown($event, 'minus')"
+                @mouseup.prevent.stop="onMouseUp($event, 'minus')"
+                @mouseout.prevent.stop="onMouseUp($event, 'minus')"
             />
         </template>
         <template v-slot:append>
@@ -19,7 +22,11 @@
                 name="la la-plus-circle"
                 class="button"
                 :v-ripple="validate(value + step)"
-                @click="plus"/>
+                @click="plus"
+                @mousedown.prevent.stop="onMouseDown($event, 'plus')"
+                @mouseup.prevent.stop="onMouseUp($event, 'plus')"
+                @mouseout.prevent.stop="onMouseUp($event, 'plus')"
+            />
         </template>
     </q-input>
 </template>
@@ -28,6 +35,8 @@
 //-----------------------------------------------------------------------------
 import Vue from 'vue';
 import Component from 'vue-class-component';
+
+import * as utils from '../../share/utils';
 
 const NumInputProps = Vue.extend({
     props: {
@@ -83,6 +92,33 @@ class NumInput extends NumInputProps {
         const newValue = this.value - this.step;
         if (this.validate(newValue))
             this.filteredValue = newValue;
+    }
+
+    onMouseDown(event, way) {
+        this.startClickRepeat = true;
+        this.clickRepeat = false;
+
+        if (event.button == 0) {
+            (async() => {
+                await utils.sleep(300);
+                if (this.startClickRepeat) {
+                    this.clickRepeat = true;
+                    while (this.clickRepeat) {
+                        if (way == 'plus') {
+                            this.plus();
+                        } else {
+                            this.minus();
+                        }
+                        await utils.sleep(50);
+                    }
+                }
+            })();
+        }
+    }
+
+    onMouseUp() {
+        this.startClickRepeat = false;
+        this.clickRepeat = false;
     }
 }
 //-----------------------------------------------------------------------------
