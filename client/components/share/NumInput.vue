@@ -10,23 +10,30 @@
             <q-icon :class="(validate(value - step) ? '' : 'disable')" 
                 name="la la-minus-circle" 
                 class="button" 
-                :v-ripple="validate(value - step)" 
+                v-ripple="validate(value - step)" 
                 @click="minus"
                 @mousedown.prevent.stop="onMouseDown($event, 'minus')"
-                @mouseup.prevent.stop="onMouseUp($event, 'minus')"
-                @mouseout.prevent.stop="onMouseUp($event, 'minus')"
+                @mouseup.prevent.stop="onMouseUp"
+                @mouseout.prevent.stop="onMouseUp"
+                @touchstart.stop="onTouchStart($event, 'minus')"
+                @touchend.stop="onTouchEnd"
+                @touchcancel.prevent.stop="onTouchEnd"
             />
         </template>
         <template v-slot:append>
             <q-icon :class="(validate(value + step) ? '' : 'disable')"
                 name="la la-plus-circle"
                 class="button"
-                :v-ripple="validate(value + step)"
+                v-ripple="validate(value + step)"
                 @click="plus"
                 @mousedown.prevent.stop="onMouseDown($event, 'plus')"
-                @mouseup.prevent.stop="onMouseUp($event, 'plus')"
-                @mouseout.prevent.stop="onMouseUp($event, 'plus')"
+                @mouseup.prevent.stop="onMouseUp"
+                @mouseout.prevent.stop="onMouseUp"
+                @touchstart.stop="onTouchStart($event, 'plus')"
+                @touchend.stop="onTouchEnd"
+                @touchcancel.prevent.stop="onTouchEnd"
             />
+            {{ t }}
         </template>
     </q-input>
 </template>
@@ -65,6 +72,7 @@ export default @Component({
 class NumInput extends NumInputProps {
     filteredValue = 0;
     error = false;
+    t = '';
 
     created() {
         this.mask = '#'.repeat(this.max.toString().length);
@@ -117,8 +125,26 @@ class NumInput extends NumInputProps {
     }
 
     onMouseUp() {
+        if (this.inTouch)
+            return;
         this.startClickRepeat = false;
         this.clickRepeat = false;
+    }
+
+    onTouchStart(event, way) {
+        if (!this.$isMobileDevice)
+            return;
+        if (event.touches.length == 1) {
+            this.inTouch = true;
+            this.onMouseDown({button: 0}, way);
+        }
+    }
+
+    onTouchEnd() {
+        if (!this.$isMobileDevice)
+            return;
+        this.inTouch = false;
+        this.onMouseUp();
     }
 }
 //-----------------------------------------------------------------------------
