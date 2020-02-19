@@ -4,27 +4,24 @@
 <div class="item row">
     <div class="label-2">Текст</div>
     <div class="col row">
-        <div class="col-left-2">
-            <q-input
-                outlined dense
-                v-model="textColorFiltered"
-                :rules="['hexColor']"
-                class="no-mp"
-                style="max-width: 150px"
-            >
-                <template v-slot:prepend>
-                    <q-icon name="la la-angle-down la-xs" class="cursor-pointer text-white" :style="colorPanStyle('text')">
-                        <q-popup-proxy anchor="bottom middle" self="top middle">
-                            <div>
-                                <q-color v-model="textColor"
-                                    no-header default-view="palette" :palette="predefineTextColors"
-                                />
-                            </div>
-                        </q-popup-proxy>
-                    </q-icon>
-                </template>
-            </q-input>
-        </div>
+        <q-input class="col-left-2 no-mp"
+            outlined dense
+            v-model="textColorFiltered"
+            :rules="['hexColor']"
+            style="max-width: 150px"
+        >
+            <template v-slot:prepend>
+                <q-icon name="la la-angle-down la-xs" class="cursor-pointer text-white" :style="colorPanStyle('text')">
+                    <q-popup-proxy anchor="bottom middle" self="top middle">
+                        <div>
+                            <q-color v-model="textColor"
+                                no-header default-view="palette" :palette="predefineTextColors"
+                            />
+                        </div>
+                    </q-popup-proxy>
+                </q-icon>
+            </template>
+        </q-input>
 
         <span class="col" style="position: relative; top: 35px; left: 15px;">Обои:</span>
     </div>
@@ -34,26 +31,23 @@
 <div class="item row">
     <div class="label-2">Фон</div>
     <div class="col row">
-        <div class="col-left-2">
-            <q-input
-                outlined dense
-                v-model="bgColorFiltered"
-                :rules="['hexColor']"
-                class="no-mp"
-                style="max-width: 150px"
-                :disable="wallpaper != ''"
-            >
-                <template v-slot:prepend>
-                    <q-icon name="la la-angle-down la-xs" class="cursor-pointer text-white" :style="colorPanStyle('bg')">
-                        <q-popup-proxy anchor="bottom middle" self="top middle">
-                            <div>
-                                <q-color v-model="backgroundColor" no-header default-view="palette" :palette="predefineBackgroundColors"/>
-                            </div>
-                        </q-popup-proxy>
-                    </q-icon>
-                </template>
-            </q-input>
-        </div>
+        <q-input class="col-left-2 no-mp"
+            outlined dense
+            v-model="bgColorFiltered"
+            :rules="['hexColor']"
+            style="max-width: 150px"
+            :disable="wallpaper != ''"
+        >
+            <template v-slot:prepend>
+                <q-icon name="la la-angle-down la-xs" class="cursor-pointer text-white" :style="colorPanStyle('bg')">
+                    <q-popup-proxy anchor="bottom middle" self="top middle">
+                        <div>
+                            <q-color v-model="backgroundColor" no-header default-view="palette" :palette="predefineBackgroundColors"/>
+                        </div>
+                    </q-popup-proxy>
+                </q-icon>
+            </template>
+        </q-input>
 
         <div class="q-px-sm"/>
         <q-select class="col" v-model="wallpaper" :options="wallpaperOptions"
@@ -69,12 +63,10 @@
 <div class="item row">
     <div class="label-2">Локальный/веб</div>
     <div class="col row">
-        <div class="col-left-2">
-            <q-select class="col" v-model="fontName" :options="fontsOptions" :disable="webFontName != ''"
-                dropdown-icon="la la-angle-down la-sm"
-                outlined dense emit-value map-options
-            />
-        </div>
+        <q-select class="col-left-2" v-model="fontName" :options="fontsOptions" :disable="webFontName != ''"
+            dropdown-icon="la la-angle-down la-sm"
+            outlined dense emit-value map-options
+        />
 
         <div class="q-px-sm"/>
         <q-select class="col" v-model="webFontName" :options="webFontsOptions"
@@ -93,11 +85,9 @@
 <div class="item row">
     <div class="label-2">Размер</div>
     <div class="col row">
-        <div class="col-left-2">
-            <NumInput v-model="fontSize" :min="5" :max="200"/>
-        </div>
+        <NumInput class="col-left-2" v-model="fontSize" :min="5" :max="200"/>
 
-        <div class="col q-pt-xs" style="text-align: right">
+        <div class="col q-pt-xs text-right">
             <a href="https://fonts.google.com/?subset=cyrillic" target="_blank">Примеры</a>
         </div>
     </div>
@@ -106,15 +96,13 @@
 <div class="item row">
     <div class="label-2">Сдвиг</div>
     <div class="col row">
-        <div class="col-left-2">
-            <NumInput v-model="vertShift" :min="-100" :max="100">
-                <q-tooltip :delay="1000" anchor="top middle" self="bottom middle" content-style="font-size: 80%">
-                    Сдвиг шрифта по вертикали в процентах от размера.<br>
-                    Отрицательное значение сдвигает вверх, положительное -<br>
-                    вниз. Значение зависит от метрики шрифта.
-                </q-tooltip>
-            </NumInput>
-        </div>
+        <NumInput class="col-left-2" v-model="vertShift" :min="-100" :max="100">
+            <q-tooltip :delay="1000" anchor="top middle" self="bottom middle" content-style="font-size: 80%">
+                Сдвиг шрифта по вертикали в процентах от размера.<br>
+                Отрицательное значение сдвигает вверх, положительное -<br>
+                вниз. Значение зависит от метрики шрифта.
+            </q-tooltip>
+        </NumInput>
     </div>
 </div>
 
@@ -132,119 +120,98 @@
 <div class="item row">
     <div class="label-2">Интервал</div>
     <div class="col row">
-        <div class="col-left-2">
-            <NumInput v-model="lineInterval" :min="0" :max="200"/>
-        </div>
+        <NumInput class="col-left-2" v-model="lineInterval" :min="0" :max="200"/>
     </div>
 </div>
 
 <div class="item row">
     <div class="label-2">Параграф</div>
     <div class="col row">
-        <div class="col-left-2">
-            <NumInput v-model="p" :min="0" :max="2000"/>
-        </div>
+        <NumInput class="col-left-2" v-model="p" :min="0" :max="2000"/>
     </div>
 </div>
 
 <div class="item row">
     <div class="label-2">Отступ</div>
     <div class="col row">
-        <div class="col-left-2">
-            <NumInput v-model="indentLR" :min="0" :max="2000">
-                <q-tooltip :delay="1000" anchor="top middle" self="bottom middle" content-style="font-size: 80%">
-                    Слева/справа
-                </q-tooltip>
-            </NumInput>
-        </div>
+        <NumInput class="col-left-2" v-model="indentLR" :min="0" :max="2000">
+            <q-tooltip :delay="1000" anchor="top middle" self="bottom middle" content-style="font-size: 80%">
+                Слева/справа
+            </q-tooltip>
+        </NumInput>
         <div class="q-px-sm"/>
-        <div class="col">
-            <NumInput v-model="indentTB" :min="0" :max="2000">
-                <q-tooltip :delay="1000" anchor="top middle" self="bottom middle" content-style="font-size: 80%">
-                    Слева/справа
-                </q-tooltip>
-            </NumInput>
-        </div>
+        <NumInput class="col" v-model="indentTB" :min="0" :max="2000">
+            <q-tooltip :delay="1000" anchor="top middle" self="bottom middle" content-style="font-size: 80%">
+                Сверху/снизу
+            </q-tooltip>
+        </NumInput>
     </div>
 </div>
+
+<div class="item row">
+    <div class="label-2">Сдвиг</div>
+    <div class="col row">
+        <NumInput class="col-left-2" v-model="textVertShift" :min="-100" :max="100">
+            <q-tooltip :delay="1000" anchor="top middle" self="bottom middle" content-style="font-size: 80%">
+                Сдвиг текста по вертикали в процентах от размера шрифта.<br>
+                Отрицательное значение сдвигает вверх, положительное -<br>
+                вниз.
+            </q-tooltip>
+        </NumInput>
+    </div>
+</div>
+
+<div class="item row">
+    <div class="label-2">Скроллинг</div>
+    <div class="col row">
+        <NumInput class="col-left-2" v-model="scrollingDelay" :min="1" :max="10000">
+            <q-tooltip :delay="1000" anchor="top middle" self="bottom middle" content-style="font-size: 80%">
+                Замедление скроллинга в миллисекундах.<br>
+                Определяет время, за которое текст<br>
+                прокручивается на одну строку.
+            </q-tooltip>
+        </NumInput>
+
+        <div class="q-px-sm"/>
+        <q-select class="col" v-model="scrollingType" :options="['linear', 'ease', 'ease-in', 'ease-out', 'ease-in-out']"
+            dropdown-icon="la la-angle-down la-sm"
+            outlined dense emit-value map-options
+        >
+            <q-tooltip :delay="1000" anchor="top middle" self="bottom middle" content-style="font-size: 80%">
+                Вид скроллинга: линейный,<br>
+                ускорение-замедление и пр.
+            </q-tooltip>
+        </q-select>
+    </div>
+</div>
+
+<div class="item row">
+    <div class="label-2">Выравнивание</div>
+    <div class="col row">
+        <q-checkbox v-model="textAlignJustify" size="xs" label="По ширине" />
+        <q-checkbox class="q-ml-sm" v-model="wordWrap" size="xs" label="Перенос по слогам" />
+    </div>
+</div>
+
+<div class="item row">
+    <div class="label-2"></div>
+    <div class="col-left-2 column justify-center text-right">
+        Компактность
+    </div>
+    <div class="q-px-sm"/>
+    <NumInput class="col" v-model="compactTextPerc" :min="0" :max="100">
+        <q-tooltip :delay="1000" anchor="top middle" self="bottom middle" content-style="font-size: 80%">
+            Степень компактности текста в процентах.<br>
+            Чем больше компактность, тем хуже выравнивание<br>
+            по правому краю.
+        </q-tooltip>
+    </NumInput>
+</div>
+
+
 <!--
 
-                <el-form :model="form" size="mini" label-width="120px" @submit.native.prevent>
-                    <div class="partHeader">Текст</div>
 
-                    <el-form-item label="Интервал">
-                        <el-input-number v-model="lineInterval" :min="0" :max="200"></el-input-number>
-                    </el-form-item>
-                    <el-form-item label="Параграф">
-                        <el-input-number v-model="p" :min="0" :max="2000"></el-input-number>
-                    </el-form-item>
-                    <el-form-item label="Отступ">
-                        <el-col :span="11">
-                            <el-tooltip :open-delay="500" effect="light">
-                                <template slot="content">
-                                    Слева/справа
-                                </template>
-                                <el-input-number v-model="indentLR" :min="0" :max="2000"></el-input-number>
-                            </el-tooltip>
-                        </el-col>
-                        <el-col :span="1">
-                            &nbsp;
-                        </el-col>
-                        <el-col :span="11">
-                            <el-tooltip :open-delay="500" effect="light">
-                                <template slot="content">
-                                    Сверху/снизу
-                                </template>
-                                <el-input-number v-model="indentTB" :min="0" :max="2000"></el-input-number>
-                            </el-tooltip>
-                        </el-col>
-                    </el-form-item>
-                    <el-form-item label="Сдвиг">
-                        <el-tooltip :open-delay="500" effect="light">
-                            <template slot="content">
-                                Сдвиг текста по вертикали в процентах от размера шрифта.<br>
-                                Отрицательное значение сдвигает вверх, положительное -<br>
-                                вниз.
-                            </template>
-                            <el-input-number v-model="textVertShift" :min="-100" :max="100"></el-input-number>
-                        </el-tooltip>
-                    </el-form-item>
-                    <el-form-item label="Скроллинг">
-                        <el-col :span="11">
-                            <el-tooltip :open-delay="500" effect="light">
-                                <template slot="content">
-                                    Замедление скроллинга в миллисекундах.<br>
-                                    Определяет время, за которое текст<br>
-                                    прокручивается на одну строку.
-                                </template>
-                                <el-input-number v-model="scrollingDelay" :min="1" :max="10000"></el-input-number>
-                            </el-tooltip>
-                        </el-col>
-                        <el-col :span="1">
-                            &nbsp;
-                        </el-col>
-                        <el-col :span="11">
-                            <el-tooltip :open-delay="500" effect="light" placement="top">
-                                <template slot="content">
-                                    Вид скроллинга: линейный,<br>
-                                    ускорение-замедление и пр.
-                                </template>
-
-                                <el-select v-model="scrollingType">
-                                    <el-option value="linear"></el-option>
-                                    <el-option value="ease"></el-option>
-                                    <el-option value="ease-in"></el-option>
-                                    <el-option value="ease-out"></el-option>
-                                    <el-option value="ease-in-out"></el-option>
-                                </el-select>
-                            </el-tooltip>
-                        </el-col>
-
-                    </el-form-item>
-                    <el-form-item label="Выравнивание">
-                        <el-checkbox v-model="textAlignJustify">По ширине</el-checkbox>
-                        <el-checkbox v-model="wordWrap">Перенос по слогам</el-checkbox>
-                    </el-form-item>
                     <el-form-item label="">
                         <el-col :span="12">
                             Компактность
