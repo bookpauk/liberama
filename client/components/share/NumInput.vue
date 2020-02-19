@@ -50,6 +50,7 @@ const NumInputProps = Vue.extend({
         min: { type: Number, default: -Number.MAX_VALUE },
         max: { type: Number, default: Number.MAX_VALUE },
         step: { type: Number, default: 1 },
+        digits: { type: Number, default: 0 },
     }
 })
 
@@ -58,7 +59,7 @@ export default @Component({
         filteredValue: function(newValue) {
             if (this.validate(newValue)) {
                 this.error = false;
-                this.$emit('input', Number.parseFloat(newValue));
+                this.$emit('input', this.string2number(newValue));
             } else {
                 this.error = true;
             }
@@ -73,12 +74,15 @@ class NumInput extends NumInputProps {
     error = false;
 
     created() {
-        this.mask = '#'.repeat(this.max.toString().length);
         this.filteredValue = this.value;
     }
 
+    string2number(value) {
+        return parseFloat(Number.parseFloat(value).toFixed(this.digits));
+    }
+
     validate(value) {
-        let n = Number.parseFloat(value);
+        let n = this.string2number(value);
         if (isNaN(n))
             return false;
         if (n < this.min)
