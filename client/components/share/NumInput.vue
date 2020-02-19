@@ -78,7 +78,7 @@ class NumInput extends NumInputProps {
     }
 
     string2number(value) {
-        return parseFloat(Number.parseFloat(value).toFixed(this.digits));
+        return Number.parseFloat(Number.parseFloat(value).toFixed(this.digits));
     }
 
     validate(value) {
