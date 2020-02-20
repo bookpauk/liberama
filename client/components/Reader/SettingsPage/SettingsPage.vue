@@ -39,11 +39,15 @@
                 <div v-if="selectedTab == 'profiles'" class="fit tab-panel">
                     @@include('./include/ProfilesTab.inc');
                 </div>
-
                 <!-- Вид ------------------------------------------------------------------------->                    
                 <div v-if="selectedTab == 'view'" class="fit column">
                     @@include('./include/ViewTab.inc');
                 </div>
+                <!-- Кнопки ---------------------------------------------------------------------->
+                <div v-if="selectedTab == 'buttons'" class="fit tab-panel">
+                    @@include('./include/ButtonsTab.inc');
+                </div>
+
             </div>
 
         </div>
@@ -53,13 +57,6 @@
 <script>
 /*
             <el-tabs type="border-card" tab-position="left" v-model="selectedTabOld">
-
-                <!-- Вид ------------------------------------------------------------------------->                    
-                @@include('./includeOld/ViewTabOld.inc');
-
-                <!-- Кнопки ---------------------------------------------------------------------->
-                @@include('./includeOld/ButtonsTabOld.inc');
-
                 <!-- Управление ------------------------------------------------------------------>
                 @@include('./includeOld/KeysTabOld.inc');
 
@@ -526,7 +523,7 @@ class SettingsPage extends Vue {
 }
 
 .part-header {
-    border-bottom: 2px solid #bbbbbb;
+    border-top: 2px solid #bbbbbb;
     font-weight: bold;
     font-size: 110%;
     margin-top: 15px;
@@ -547,7 +544,11 @@ class SettingsPage extends Vue {
     width: 110px;
 }
 
-.label-1, .label-2 {
+.label-3 {
+    width: 110px;
+}
+
+.label-1, .label-2, .label-3 {
     display: flex;
     flex-direction: column;
     justify-content: center;
@@ -584,46 +585,5 @@ class SettingsPage extends Vue {
 
 .col-left-2 {
     width: 150px;
-}
-</style>
-
-<style scoped>
-/* TODO: REMOVE */
-.el-form {
-    border-top: 2px solid #bbbbbb;
-    margin-bottom: 5px;
-}
-
-.el-form-item {
-    padding: 0 !important;
-    margin: 0 !important;
-    margin-bottom: 5px !important;
-}
-
-.color-picked {
-    margin-left: 10px;
-    position: relative;
-    top: -11px;
-}
-
-.el-tabs {
-    flex: 1;
-    display: flex;
-}
-
-.el-tab-pane {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    width: 420px;
-    overflow-y: auto;
-    padding: 15px;
-}
-</style>
-
-<style>
-.prompt-dialog {
-    width: 100% !important;
-    max-width: 450px;
 }
 </style>
