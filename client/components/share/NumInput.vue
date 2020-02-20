@@ -164,6 +164,7 @@ class NumInput extends NumInputProps {
     font-size: 130%;
     border-radius: 20px;
     color: #bbb;
+    cursor: pointer;
 }
 
 .button:hover {
