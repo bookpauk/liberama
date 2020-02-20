@@ -41,7 +41,7 @@
                 </div>
 
                 <!-- Вид ------------------------------------------------------------------------->                    
-                <div v-if="selectedTab == 'view'" class="fit tab-panel">
+                <div v-if="selectedTab == 'view'" class="fit column">
                     @@include('./include/ViewTab.inc');
                 </div>
             </div>
@@ -144,7 +144,7 @@ export default @Component({
 })
 class SettingsPage extends Vue {
     selectedTab = 'profiles';
-selectedTabOld = null;//todo: remove
+    selectedViewTab = 'color';
     form = {};
     fontBold = false;
     fontItalic = false;
@@ -526,7 +526,7 @@ selectedTabOld = null;//todo: remove
 }
 
 .part-header {
-    border-top: 2px solid #bbbbbb;
+    border-bottom: 2px solid #bbbbbb;
     font-weight: bold;
     font-size: 110%;
     margin-top: 15px;
