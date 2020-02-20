@@ -208,94 +208,94 @@
     </NumInput>
 </div>
 
+<div class="item row">
+    <div class="label-2">Обработка</div>
+    <div class="col row">
+        <q-checkbox v-model="cutEmptyParagraphs" size="xs" label="Убирать пустые строки" />
+    </div>
+</div>
 
-<!--
+<div class="item row">
+    <div class="label-2"></div>
+    <div class="col-left-2 column justify-center text-right">
+        Добавлять пустые
+    </div>
+    <div class="q-px-sm"/>
+    <NumInput class="col" v-model="addEmptyParagraphs" :min="0" :max="2"/>
+</div>
 
+<div class="item row">
+    <div class="label-2"></div>
+    <div class="col row">
+        <q-checkbox v-model="enableSitesFilter" @input="needTextReload" size="xs" label="Включить html-фильтр для сайтов">
+            <q-tooltip :delay="1000" anchor="top middle" self="bottom middle" content-style="font-size: 80%">
+                Html-фильтр вырезает лишние элементы со<br>
+                страницы для определенных сайтов, таких как:<br>
+                samlib.ru<br>
+                www.fanfiction.net<br>
+                archiveofourown.org<br>
+                и других
+            </q-tooltip>
+        </q-checkbox>
+    </div>
+</div>
 
-                    <el-form-item label="">
-                        <el-col :span="12">
-                            Компактность
-                        </el-col>
-                        <el-tooltip :open-delay="500" effect="light" placement="top">
-                            <template slot="content">
-                                Степень компактности текста в процентах.<br>
-                                Чем больше компактность, тем хуже выравнивание<br>
-                                по правому краю.
-                            </template>
-                            <el-input-number v-model="compactTextPerc" :min="0" :max="100"></el-input-number>
-                        </el-tooltip>
-                    </el-form-item>
-                    <el-form-item label="Обработка">
-                        <el-checkbox v-model="cutEmptyParagraphs">Убирать пустые строки</el-checkbox>
-                    </el-form-item>
-                    <el-form-item label="">
-                        <el-col :span="12">
-                            Добавлять пустые
-                        </el-col>
-                        <el-input-number v-model="addEmptyParagraphs" :min="0" :max="2"></el-input-number>
-                    </el-form-item>
-                    <el-form-item label="">
-                        <el-tooltip :open-delay="500" effect="light" placement="top">
-                            <template slot="content">
-                                Html-фильтр вырезает лишние элементы со<br>
-                                страницы для определенных сайтов, таких как:<br>
-                                samlib.ru<br>
-                                www.fanfiction.net<br>
-                                archiveofourown.org<br>
-                                и других
-                            </template>
-                            <el-checkbox v-model="enableSitesFilter" @change="needTextReload">Включить html-фильтр для сайтов</el-checkbox>
-                        </el-tooltip>
-                    </el-form-item>
-                    
-                    <el-form-item label="Изображения">
-                        <el-col :span="11">
-                            <el-checkbox v-model="showImages">Показывать</el-checkbox>
-                        </el-col>
+<div class="item row">
+    <div class="label-2">Изображения</div>
+    <div class="col row">
+        <q-checkbox v-model="showImages" size="xs" label="Показывать" />
+        <q-checkbox class="q-ml-sm" v-model="showInlineImagesInCenter" @input="needReload" :disable="!showImages" size="xs" label="Инлайн в центр">
+            <q-tooltip :delay="1000" anchor="top middle" self="bottom middle" content-style="font-size: 80%">
+                Выносить все изображения в центр экрана
+            </q-tooltip>
+        </q-checkbox>
+    </div>
+</div>
 
-                        <el-col :span="1">
-                            &nbsp;
-                        </el-col>
-                        <el-col :span="11">
-                            <el-tooltip :open-delay="500" effect="light" placement="top">
-                                <template slot="content">
-                                    Выносить все изображения в центр экрана
-                                </template>
-                                <el-checkbox v-model="showInlineImagesInCenter" @change="needReload" :disabled="!showImages">Инлайн в центр</el-checkbox>
-                            </el-tooltip>
-                        </el-col>
-                    </el-form-item>
-                    <el-form-item label="">
-                        <el-checkbox v-model="imageFitWidth" :disabled="!showImages">Ширина не более размера экрана</el-checkbox>
-                    </el-form-item>
-                    <el-form-item label="">
-                            <el-col :span="12">
-                                Высота не более
-                            </el-col>
-                            <el-tooltip :open-delay="500" effect="light" placement="top">
-                                <template slot="content">
-                                    Определяет высоту изображения количеством строк.<br>
-                                    В случае превышения высоты, изображение будет<br>
-                                    уменьшено с сохранением пропорций так, чтобы<br>
-                                    помещаться в указанное количество строк.
-                                </template>
-                                <el-input-number v-model="imageHeightLines" :min="1" :max="100" :disabled="!showImages"></el-input-number>
-                            </el-tooltip>
-                    </el-form-item>
-                </el-form>
+<div class="item row">
+    <div class="label-2"></div>
+    <div class="col row">
+        <q-checkbox v-model="imageFitWidth" :disable="!showImages" size="xs" label="Ширина не более размера экрана" />
+    </div>
+</div>
 
-                <el-form :model="form" size="mini" label-width="120px" @submit.native.prevent>
-                    <div class="partHeader">Строка статуса</div>
+<div class="item row">
+    <div class="label-2"></div>
+    <div class="col-left-2 column justify-center text-right">
+        Высота не более
+    </div>
+    <div class="q-px-sm"/>
+    <NumInput class="col" v-model="imageHeightLines" :min="1" :max="100" :disable="!showImages">
+        <q-tooltip :delay="1000" anchor="top middle" self="bottom middle" content-style="font-size: 80%">
+            Определяет высоту изображения количеством строк.<br>
+            В случае превышения высоты, изображение будет<br>
+            уменьшено с сохранением пропорций так, чтобы<br>
+            помещаться в указанное количество строк.
+        </q-tooltip>
+    </NumInput>
+</div>
 
-                    <el-form-item label="Статус">
-                        <el-checkbox v-model="showStatusBar">Показывать</el-checkbox>
-                        <el-checkbox v-model="statusBarTop" :disabled="!showStatusBar">Вверху/внизу</el-checkbox>
-                    </el-form-item>
-                    <el-form-item label="Высота">
-                        <el-input-number v-model="statusBarHeight" :min="5" :max="100" :disabled="!showStatusBar"></el-input-number>
-                    </el-form-item>
-                    <el-form-item label="Прозрачность">
-                        <el-input-number v-model="statusBarColorAlpha" :min="0" :max="1" :precision="2" :step="0.1" :disabled="!showStatusBar"></el-input-number>
-                    </el-form-item>
-                </el-form>
-            </el-tab-pane-->
+<!---------------------------------------------->
+<div class="part-header">Строка статуса</div>
+
+<div class="item row">
+    <div class="label-2">Статус</div>
+    <div class="col row">
+        <q-checkbox v-model="showStatusBar" size="xs" label="Показывать" />
+        <q-checkbox class="q-ml-sm" v-model="statusBarTop" size="xs" :disable="!showStatusBar" label="Вверху/внизу" />
+    </div>
+</div>
+
+<div class="item row">
+    <div class="label-2">Высота</div>
+    <div class="col row">
+        <NumInput class="col-left-2" v-model="statusBarHeight" :min="5" :max="100" :disable="!showStatusBar"/>
+    </div>
+</div>
+
+<div class="item row">
+    <div class="label-2">Прозрачность</div>
+    <div class="col row">
+        <NumInput class="col-left-2" v-model="statusBarColorAlpha" :min="0" :max="1" :digits="2" :step="0.1" :disable="!showStatusBar"/>
+    </div>
+</div>
