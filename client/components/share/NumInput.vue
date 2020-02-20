@@ -4,6 +4,7 @@
         input-style="text-align: center"
         class="no-mp"
         :class="(error ? 'error' : '')"
+        :disable="disable"
     >
         <slot></slot>
         <template v-slot:prepend>
@@ -51,6 +52,7 @@ const NumInputProps = Vue.extend({
         max: { type: Number, default: Number.MAX_VALUE },
         step: { type: Number, default: 1 },
         digits: { type: Number, default: 0 },
+        disable: Boolean
     }
 })
 
