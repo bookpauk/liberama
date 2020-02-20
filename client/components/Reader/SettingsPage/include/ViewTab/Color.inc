@@ -4,7 +4,7 @@
 <div class="item row">
     <div class="label-2">Текст</div>
     <div class="col row">
-        <q-input class="col-left-2 no-mp"
+        <q-input class="col-left no-mp"
             outlined dense
             v-model="textColorFiltered"
             :rules="['hexColor']"
@@ -31,7 +31,7 @@
 <div class="item row">
     <div class="label-2">Фон</div>
     <div class="col row">
-        <q-input class="col-left-2 no-mp"
+        <q-input class="col-left no-mp"
             outlined dense
             v-model="bgColorFiltered"
             :rules="['hexColor']"

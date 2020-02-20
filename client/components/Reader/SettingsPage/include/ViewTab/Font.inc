@@ -4,7 +4,7 @@
 <div class="item row">
     <div class="label-2">Локальный/веб</div>
     <div class="col row">
-        <q-select class="col-left-2" v-model="fontName" :options="fontsOptions" :disable="webFontName != ''"
+        <q-select class="col-left" v-model="fontName" :options="fontsOptions" :disable="webFontName != ''"
             dropdown-icon="la la-angle-down la-sm"
             outlined dense emit-value map-options
         />
@@ -26,7 +26,7 @@
 <div class="item row">
     <div class="label-2">Размер</div>
     <div class="col row">
-        <NumInput class="col-left-2" v-model="fontSize" :min="5" :max="200"/>
+        <NumInput class="col-left" v-model="fontSize" :min="5" :max="200"/>
 
         <div class="col q-pt-xs text-right">
             <a href="https://fonts.google.com/?subset=cyrillic" target="_blank">Примеры</a>
@@ -37,7 +37,7 @@
 <div class="item row">
     <div class="label-2">Сдвиг</div>
     <div class="col row">
-        <NumInput class="col-left-2" v-model="vertShift" :min="-100" :max="100">
+        <NumInput class="col-left" v-model="vertShift" :min="-100" :max="100">
             <q-tooltip :delay="1000" anchor="top middle" self="bottom middle" content-style="font-size: 80%">
                 Сдвиг шрифта по вертикали в процентах от размера.<br>
                 Отрицательное значение сдвигает вверх, положительное -<br>

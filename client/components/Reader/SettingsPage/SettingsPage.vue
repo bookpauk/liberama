@@ -51,6 +51,10 @@
                 <div v-if="selectedTab == 'keys'" class="fit tab-panel">
                     @@include('./include/KeysTab.inc');
                 </div>
+                <!-- Листание -------------------------------------------------------------------->
+                <div v-if="selectedTab == 'pagemove'" class="fit tab-panel">
+                    @@include('./include/PageMoveTab.inc');
+                </div>
 
             </div>
 
@@ -61,11 +65,7 @@
 <script>
 /*
             <el-tabs type="border-card" tab-position="left" v-model="selectedTabOld">
-                <!-- Управление ------------------------------------------------------------------>
-                @@include('./includeOld/KeysTabOld.inc');
 
-                <!-- Листание -------------------------------------------------------------------->
-                @@include('./includeOld/PageMoveTabOld.inc');
                 
                 <!-- Прочее ---------------------------------------------------------------------->
                 @@include('./includeOld/OthersTabOld.inc');
@@ -257,6 +257,20 @@ class SettingsPage extends Vue {
         this.webFonts.forEach(font => {
             result.push({label: font.name, value: font.name});
         });
+        return result;
+    }
+
+    get pageChangeAnimationOptions() {
+        let result = [
+            {label: 'Нет', value: ''},
+            {label: 'Вверх-вниз', value: 'downShift'},
+            {label: 'Вправо-влево', value: 'rightShift'},
+            {label: 'Протаивание', value: 'thaw'},
+            {label: 'Мерцание', value: 'blink'},
+            {label: 'Вращение', value: 'rotate'},
+        ];
+        if (this.wallpaper == '')
+            result.push({label: 'Листание', value: 'flip'});
         return result;
     }
 
@@ -556,7 +570,11 @@ class SettingsPage extends Vue {
     width: 110px;
 }
 
-.label-1, .label-2, .label-3, .label-4 {
+.label-5 {
+    width: 110px;
+}
+
+.label-1, .label-2, .label-3, .label-4, .label-5 {
     display: flex;
     flex-direction: column;
     justify-content: center;
@@ -591,7 +609,7 @@ class SettingsPage extends Vue {
     padding: 0;
 }
 
-.col-left-2 {
+.col-left {
     width: 150px;
 }
 </style>

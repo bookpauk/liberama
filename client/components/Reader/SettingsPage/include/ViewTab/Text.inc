@@ -4,21 +4,21 @@
 <div class="item row">
     <div class="label-2">Интервал</div>
     <div class="col row">
-        <NumInput class="col-left-2" v-model="lineInterval" :min="0" :max="200"/>
+        <NumInput class="col-left" v-model="lineInterval" :min="0" :max="200"/>
     </div>
 </div>
 
 <div class="item row">
     <div class="label-2">Параграф</div>
     <div class="col row">
-        <NumInput class="col-left-2" v-model="p" :min="0" :max="2000"/>
+        <NumInput class="col-left" v-model="p" :min="0" :max="2000"/>
     </div>
 </div>
 
 <div class="item row">
     <div class="label-2">Отступ</div>
     <div class="col row">
-        <NumInput class="col-left-2" v-model="indentLR" :min="0" :max="2000">
+        <NumInput class="col-left" v-model="indentLR" :min="0" :max="2000">
             <q-tooltip :delay="1000" anchor="top middle" self="bottom middle" content-style="font-size: 80%">
                 Слева/справа
             </q-tooltip>
@@ -35,7 +35,7 @@
 <div class="item row">
     <div class="label-2">Сдвиг</div>
     <div class="col row">
-        <NumInput class="col-left-2" v-model="textVertShift" :min="-100" :max="100">
+        <NumInput class="col-left" v-model="textVertShift" :min="-100" :max="100">
             <q-tooltip :delay="1000" anchor="top middle" self="bottom middle" content-style="font-size: 80%">
                 Сдвиг текста по вертикали в процентах от размера шрифта.<br>
                 Отрицательное значение сдвигает вверх, положительное -<br>
@@ -48,7 +48,7 @@
 <div class="item row">
     <div class="label-2">Скроллинг</div>
     <div class="col row">
-        <NumInput class="col-left-2" v-model="scrollingDelay" :min="1" :max="10000">
+        <NumInput class="col-left" v-model="scrollingDelay" :min="1" :max="10000">
             <q-tooltip :delay="1000" anchor="top middle" self="bottom middle" content-style="font-size: 80%">
                 Замедление скроллинга в миллисекундах.<br>
                 Определяет время, за которое текст<br>
@@ -79,7 +79,7 @@
 
 <div class="item row">
     <div class="label-2"></div>
-    <div class="col-left-2 column justify-center text-right">
+    <div class="col-left column justify-center text-right">
         Компактность
     </div>
     <div class="q-px-sm"/>
@@ -101,7 +101,7 @@
 
 <div class="item row">
     <div class="label-2"></div>
-    <div class="col-left-2 column justify-center text-right">
+    <div class="col-left column justify-center text-right">
         Добавлять пустые
     </div>
     <div class="q-px-sm"/>
@@ -145,7 +145,7 @@
 
 <div class="item row">
     <div class="label-2"></div>
-    <div class="col-left-2 column justify-center text-right">
+    <div class="col-left column justify-center text-right">
         Высота не более
     </div>
     <div class="q-px-sm"/>

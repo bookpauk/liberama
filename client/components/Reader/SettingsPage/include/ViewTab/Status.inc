@@ -12,13 +12,13 @@
 <div class="item row">
     <div class="label-2">Высота</div>
     <div class="col row">
-        <NumInput class="col-left-2" v-model="statusBarHeight" :min="5" :max="100" :disable="!showStatusBar"/>
+        <NumInput class="col-left" v-model="statusBarHeight" :min="5" :max="100" :disable="!showStatusBar"/>
     </div>
 </div>
 
 <div class="item row">
     <div class="label-2">Прозрачность</div>
     <div class="col row">
-        <NumInput class="col-left-2" v-model="statusBarColorAlpha" :min="0" :max="1" :digits="2" :step="0.1" :disable="!showStatusBar"/>
+        <NumInput class="col-left" v-model="statusBarColorAlpha" :min="0" :max="1" :digits="2" :step="0.1" :disable="!showStatusBar"/>
     </div>
 </div>
