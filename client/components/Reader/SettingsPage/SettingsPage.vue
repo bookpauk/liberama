@@ -47,6 +47,10 @@
                 <div v-if="selectedTab == 'buttons'" class="fit tab-panel">
                     @@include('./include/ButtonsTab.inc');
                 </div>
+                <!-- Управление ------------------------------------------------------------------>
+                <div v-if="selectedTab == 'keys'" class="fit tab-panel">
+                    @@include('./include/KeysTab.inc');
+                </div>
 
             </div>
 
@@ -548,7 +552,11 @@ class SettingsPage extends Vue {
     width: 110px;
 }
 
-.label-1, .label-2, .label-3 {
+.label-4 {
+    width: 110px;
+}
+
+.label-1, .label-2, .label-3, .label-4 {
     display: flex;
     flex-direction: column;
     justify-content: center;
