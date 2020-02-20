@@ -1,6 +1,7 @@
 <q-tabs
     v-model="selectedViewTab"
-    active-bg-color="grey-5"
+    active-color="white"
+    active-bg-color="grey-6"
     indicator-color="white"
     dense
     no-caps
