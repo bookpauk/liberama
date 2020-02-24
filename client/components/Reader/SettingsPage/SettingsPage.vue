@@ -59,8 +59,10 @@
                 <div v-if="selectedTab == 'others'" class="fit tab-panel">
                     @@include('./include/OthersTab.inc');
                 </div>
-
-
+                <!-- Сброс ----------------------------------------------------------------------->
+                <div v-if="selectedTab == 'reset'" class="fit tab-panel">
+                    @@include('./include/ResetTab.inc');
+                </div>
             </div>
 
         </div>
@@ -68,15 +70,6 @@
 </template>
 
 <script>
-/*
-            <el-tabs type="border-card" tab-position="left" v-model="selectedTabOld">
-
-                
-                <!-- Сброс ----------------------------------------------------------------------->
-                @@include('./includeOld/ResetTabOld.inc');
-
-            </el-tabs>
-*/
 //-----------------------------------------------------------------------------
 import Vue from 'vue';
 import Component from 'vue-class-component';
