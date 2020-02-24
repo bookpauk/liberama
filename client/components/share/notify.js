@@ -30,6 +30,10 @@ export function success(vue, message, caption) {
     notify(vue, {color: 'positive', icon: 'la la-check-circle', message, caption});
 }
 
+export function warning(vue, message, caption) {
+    notify(vue, {color: 'warning', icon: 'la la-exclamation-circle', message, caption});
+}
+
 export function error(vue, message, caption) {
     notify(vue, {color: 'negative', icon: 'la la-exclamation-circle', messageColor: 'yellow', message, caption});
 }

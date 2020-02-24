@@ -80,6 +80,7 @@ import Window from '../../share/Window.vue';
 import NumInput from '../../share/NumInput.vue';
 import rstore from '../../../store/modules/reader';
 import defPalette from './defPalette';
+import * as notify from '../../share/notify';
 
 const hex = /^#[0-9a-fA-F]{3}([0-9a-fA-F]{3})?$/;
 
@@ -333,11 +334,11 @@ class SettingsPage extends Vue {
     }
 
     needReload() {
-        this.$notify.warning({message: 'Необходимо обновить страницу (F5), чтобы изменения возымели эффект'});
+        notify.warning(this, 'Необходимо обновить страницу (F5), чтобы изменения возымели эффект');
     }
 
     needTextReload() {
-        this.$notify.warning({message: 'Необходимо обновить книгу в обход кэша, чтобы изменения возымели эффект'});
+        notify.warning(this, 'Необходимо обновить книгу в обход кэша, чтобы изменения возымели эффект');
     }
 
     close() {
@@ -462,9 +463,9 @@ class SettingsPage extends Vue {
         const suf = (prefix.substr(-1) == 'а' ? 'а' : '');
         const msg = (result ? `${prefix} успешно скопирован${suf} в буфер обмена` : 'Копирование не удалось');
         if (result)
-            this.$notify.success({message: msg});
+            notify.success(this, msg);
         else
-            this.$notify.error({message: msg});
+            notify.error(this, msg);
     }
 
     async showServerStorageKey() {
