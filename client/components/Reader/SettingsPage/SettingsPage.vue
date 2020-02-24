@@ -55,6 +55,11 @@
                 <div v-if="selectedTab == 'pagemove'" class="fit tab-panel">
                     @@include('./include/PageMoveTab.inc');
                 </div>
+                <!-- Прочее ---------------------------------------------------------------------->
+                <div v-if="selectedTab == 'others'" class="fit tab-panel">
+                    @@include('./include/OthersTab.inc');
+                </div>
+
 
             </div>
 
@@ -67,9 +72,6 @@
             <el-tabs type="border-card" tab-position="left" v-model="selectedTabOld">
 
                 
-                <!-- Прочее ---------------------------------------------------------------------->
-                @@include('./includeOld/OthersTabOld.inc');
-
                 <!-- Сброс ----------------------------------------------------------------------->
                 @@include('./includeOld/ResetTabOld.inc');
 
@@ -558,23 +560,11 @@ class SettingsPage extends Vue {
     width: 75px;
 }
 
-.label-2 {
+.label-2, .label-3, .label-4, .label-5, .label-6 {
     width: 110px;
 }
 
-.label-3 {
-    width: 110px;
-}
-
-.label-4 {
-    width: 110px;
-}
-
-.label-5 {
-    width: 110px;
-}
-
-.label-1, .label-2, .label-3, .label-4, .label-5 {
+.label-1, .label-2, .label-3, .label-4, .label-5, .label-6 {
     display: flex;
     flex-direction: column;
     justify-content: center;
