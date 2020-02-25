@@ -2,7 +2,7 @@
     <q-dialog ref="dialog" v-model="active" @hide="onHide">
         <slot></slot>
 
-        <div v-show="alertType" class="column bg-white">
+        <div v-show="type == 'alert'" class="column bg-white">
             <div class="header row">
                 <div class="caption col row items-center q-ml-md">
                     <q-icon v-show="caption" class="text-warning q-mr-sm" name="las la-exclamation-circle" size="28px"></q-icon>
@@ -24,7 +24,7 @@
             </div>
         </div>
 
-        <div v-show="confirmType" class="column bg-white">
+        <div v-show="type == 'confirm'" class="column bg-white">
             <div class="header row">
                 <div class="caption col row items-center q-ml-md">
                     <q-icon v-show="caption" class="text-warning q-mr-sm" name="las la-exclamation-circle" size="28px"></q-icon>
@@ -62,8 +62,7 @@ class StdDialog extends Vue {
     caption = '';
     message = '';
     active = false;
-    alertType = false;
-    confirmType = false;
+    type = '';
 
     created() {
         if (this.$root.addKeyHook) {
@@ -76,8 +75,7 @@ class StdDialog extends Vue {
         this.message = message;
 
         this.ok = false;        
-        this.alertType = false;
-        this.confirmType = false;
+        this.type = '';
     }
 
     onHide() {
@@ -103,7 +101,7 @@ class StdDialog extends Vue {
                 }
             };
 
-            this.alertType = true;
+            this.type = 'alert';
             this.active = true;
         });
     }
@@ -120,7 +118,7 @@ class StdDialog extends Vue {
                 }
             };
 
-            this.confirmType = true;
+            this.type = 'confirm';
             this.active = true;
         });
     }
