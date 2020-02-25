@@ -1,7 +1,7 @@
 <!---------------------------------------------->
 <div class="part-header">Подсказки, уведомления</div>
 
-<div class="item row">
+<div class="item row no-wrap">
     <div class="label-6">Подсказка</div>
     <q-checkbox size="xs" v-model="showClickMapPage" label="Показывать области управления кликом" :disable="!clickControl" >
         <q-tooltip :delay="1000" anchor="top middle" self="bottom middle" content-style="font-size: 80%">
@@ -20,7 +20,7 @@
     </q-checkbox>
 </div>
 
-<div class="item row">
+<div class="item row no-wrap">
     <div class="label-6">Уведомление</div>
     <q-checkbox size="xs" v-model="showServerStorageMessages" label="Показывать сообщения синхронизации">
         <q-tooltip :delay="1000" anchor="top middle" self="bottom middle" content-style="font-size: 80%">

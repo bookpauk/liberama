@@ -474,7 +474,16 @@ class SettingsPage extends Vue {
         try {
             const result = await this.stdDialog.prompt(`<b>Предупреждение!</b> Изменение ключа доступа приведет к замене всех профилей и читаемых книг в читалке.` +
                     `<br><br>Введите новый ключ доступа:`, ' ', {
-                inputValidator: (str) => { if (str && utils.fromBase58(str).length == 32) return true; else return 'Неверный формат ключа'; },
+                inputValidator: (str) => {
+                    try {
+                        if (str && utils.fromBase58(str).length == 32) {
+                            return true;
+                        }
+                    } catch (e) {
+                        //
+                    }
+                    return 'Неверный формат ключа'; 
+                },
                 inputValue: (key && _.isString(key) ? key : null),
             });
 /*
@@ -547,8 +556,12 @@ class SettingsPage extends Vue {
     width: 75px;
 }
 
-.label-2, .label-3, .label-4, .label-5, .label-6 {
+.label-2, .label-3, .label-4, .label-5 {
     width: 110px;
+}
+
+.label-6 {
+    width: 100px;
 }
 
 .label-1, .label-2, .label-3, .label-4, .label-5, .label-6 {

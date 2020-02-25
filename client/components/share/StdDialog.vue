@@ -21,7 +21,7 @@
             </div>
 
             <div class="buttons row justify-end q-pa-md">
-                <q-btn class="q-px-md" dense no-caps @click="okClick" v-close-popup>OK</q-btn>
+                <q-btn class="q-px-md" dense no-caps @click="okClick">OK</q-btn>
             </div>
         </div>
 
@@ -45,7 +45,7 @@
 
             <div class="buttons row justify-end q-pa-md">
                 <q-btn class="q-px-md q-ml-sm" dense no-caps v-close-popup>Отмена</q-btn>
-                <q-btn class="q-px-md q-ml-sm" color="primary" dense no-caps @click="okClick" v-close-popup>OK</q-btn>
+                <q-btn class="q-px-md q-ml-sm" color="primary" dense no-caps @click="okClick">OK</q-btn>
             </div>
         </div>
 
@@ -65,12 +65,13 @@
 
             <div class="col q-mx-md">
                 <div v-html="message"></div>
-                <q-input ref="input" outlined dense v-model="inputValue"/>                
+                <q-input ref="input" class="q-mt-xs" outlined dense v-model="inputValue"/>
+                <div class="error"><span v-show="error != ''">{{ error }}</span></div>
             </div>
 
             <div class="buttons row justify-end q-pa-md">
                 <q-btn class="q-px-md q-ml-sm" dense no-caps v-close-popup>Отмена</q-btn>
-                <q-btn class="q-px-md q-ml-sm" color="primary" dense no-caps @click="okClick" v-close-popup>OK</q-btn>
+                <q-btn class="q-px-md q-ml-sm" color="primary" dense no-caps @click="okClick">OK</q-btn>
             </div>
         </div>
     </q-dialog>
@@ -84,6 +85,11 @@ import Component from 'vue-class-component';
 //import * as utils from '../../share/utils';
 
 export default @Component({
+    watch: {
+        inputValue: function(newValue) {
+            this.validate(newValue);
+        },
+    }
 })
 class StdDialog extends Vue {
     caption = '';
@@ -91,6 +97,7 @@ class StdDialog extends Vue {
     active = false;
     type = '';
     inputValue = '';
+    error = '';
 
     created() {
         if (this.$root.addKeyHook) {
@@ -104,6 +111,9 @@ class StdDialog extends Vue {
 
         this.ok = false;        
         this.type = '';
+        this.inputValidator = null;
+        this.inputValue = '';
+        this.error = '';
     }
 
     onHide() {
@@ -115,12 +125,35 @@ class StdDialog extends Vue {
 
     onShow() {
         if (this.type == 'prompt') {
+            this.enableValidator = true;
+            if (this.inputValue)
+                this.validate(this.inputValue);
             this.$refs.input.focus();
         }
     }
 
+    validate(value) {
+        if (!this.enableValidator)
+            return false;
+
+        if (this.inputValidator) {
+            const result = this.inputValidator(value);
+            if (result !== true) {
+                this.error = result;
+                return false;
+            }
+        }
+        this.error = '';
+        return true;
+    }
+
     okClick() {
+        if (this.type == 'prompt' && !this.validate(this.inputValue)) {
+            this.$refs.dialog.shake();
+            return;
+        }
         this.ok = true;
+        this.$refs.dialog.hide();
     }
 
     alert(message, caption) {
@@ -159,6 +192,7 @@ class StdDialog extends Vue {
 
     prompt(message, caption, opts) {
         return new Promise((resolve) => {
+            this.enableValidator = false;
             this.init(message, caption);
 
             this.hideTrigger = () => {
@@ -170,8 +204,10 @@ class StdDialog extends Vue {
             };
 
             this.type = 'prompt';
-            this.inputValue = opts.inputValue || '';
-            this.inputValidator = opts.inputValidator || null;
+            if (opts) {
+                this.inputValidator = opts.inputValidator || null;
+                this.inputValue = opts.inputValue || '';
+            }
             this.active = true;
         });
     }
@@ -179,7 +215,6 @@ class StdDialog extends Vue {
     keyHook(event) {
         if (this.active && event.code == 'Enter') {
             this.okClick();
-            this.$refs.dialog.hide();
             event.stopPropagation();
             event.preventDefault();
         }
@@ -206,4 +241,9 @@ class StdDialog extends Vue {
     height: 60px;
 }
 
+.error {
+    height: 20px;
+    font-size: 80%;
+    color: red;
+}
 </style>
