@@ -497,17 +497,12 @@ class SettingsPage extends Vue {
 
     async generateServerStorageKey() {
         try {
-            const result = await this.$prompt(`<b>Предупреждение!</b> Генерация нового ключа доступа приведет к удалению всех профилей и читаемых книг в читалке.` +
-                    `<br><br>Введите 'да' для подтверждения генерации нового ключа:`, '', {
-                dangerouslyUseHTMLString: true,
-                confirmButtonText: 'OK',
-                cancelButtonText: 'Отмена',
+            const result = await this.stdDialog.prompt(`<b>Предупреждение!</b> Генерация нового ключа доступа приведет к удалению всех профилей и читаемых книг в читалке.` +
+                    `<br><br>Введите 'да' для подтверждения генерации нового ключа:`, ' ', {
                 inputValidator: (str) => { if (str && str.toLowerCase() === 'да') return true; else return 'Генерация не подтверждена'; },
-                customClass: 'prompt-dialog',
-                type: 'warning',
             });
 
-            if (result.value && result.value.toLowerCase() == 'да') {
+            if (result && result.value && result.value.toLowerCase() == 'да') {
                 this.$root.$emit('generateNewServerStorageKey');
             }
         } catch (e) {
