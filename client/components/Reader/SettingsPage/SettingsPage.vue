@@ -486,10 +486,10 @@ class SettingsPage extends Vue {
                 },
                 inputValue: (key && _.isString(key) ? key : null),
             });
-/*
-            if (result.value && utils.fromBase58(result.value).length == 32) {
+
+            if (result && result.value && utils.fromBase58(result.value).length == 32) {
                 this.commit('reader/setServerStorageKey', result.value);
-            }*/
+            }
         } catch (e) {
             //
         }

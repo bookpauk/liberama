@@ -197,7 +197,7 @@ class StdDialog extends Vue {
 
             this.hideTrigger = () => {
                 if (this.ok) {
-                    resolve(true);
+                    resolve({value: this.inputValue});
                 } else {
                     resolve(false);
                 }
