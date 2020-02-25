@@ -376,7 +376,7 @@ class SettingsPage extends Vue {
             });
             if (result && result.value) {
                 if (this.profiles[result.value]) {
-                    this.$alert('Такой профиль уже существует', 'Ошибка');
+                    this.stdDialog.alert('Такой профиль уже существует', 'Ошибка');
                 } else {
                     const newProfiles = Object.assign({}, this.profiles, {[result.value]: 1});
                     this.commit('reader/setAllowProfilesSave', true);
