@@ -4,7 +4,7 @@
             Настройки
         </template>
 
-        <q-color v-show="false" ref="defPalette"/>
+        <StdDialog ref="stdDialog"/>
 
         <div class="col row">
             <div class="full-height">
@@ -78,6 +78,7 @@ import _ from 'lodash';
 import * as utils from '../../../share/utils';
 import Window from '../../share/Window.vue';
 import NumInput from '../../share/NumInput.vue';
+import StdDialog from '../../share/StdDialog.vue';
 import rstore from '../../../store/modules/reader';
 import defPalette from './defPalette';
 import * as notify from '../../share/notify';
@@ -88,6 +89,7 @@ export default @Component({
     components: {
         Window,
         NumInput,
+        StdDialog,
     },
     data: function() {
         return Object.assign({}, rstore.settingDefaults);
@@ -166,6 +168,7 @@ class SettingsPage extends Vue {
     }
 
     mounted() {
+        this.stdDialog = this.$refs.stdDialog;
         this.$watch(
             '$refs.tabs.scrollable',
             (newValue) => {

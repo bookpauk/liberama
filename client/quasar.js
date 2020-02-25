@@ -29,6 +29,7 @@ import {QCheckbox} from 'quasar/src/components/checkbox';
 import {QSelect} from 'quasar/src/components/select';
 import {QColor} from 'quasar/src/components/color';
 import {QPopupProxy} from 'quasar/src/components/popup-proxy';
+import {QDialog} from 'quasar/src/components/dialog';
 
 const components = {
     //QLayout,
@@ -53,12 +54,14 @@ const components = {
     QSelect,
     QColor,
     QPopupProxy,
+    QDialog,
 };
 
 //directives 
 import Ripple from 'quasar/src/directives/Ripple';
+import ClosePopup from 'quasar/src/directives/ClosePopup';
 
-const directives = {Ripple};
+const directives = {Ripple, ClosePopup};
 
 //plugins
 import AppFullscreen from 'quasar/src/plugins/AppFullscreen';
