@@ -350,12 +350,7 @@ class SettingsPage extends Vue {
 
     async setDefaults() {
         try {
-            if (await this.$confirm('Подтвердите установку настроек по умолчанию:', '', {
-                confirmButtonText: 'OK',
-                cancelButtonText: 'Отмена',
-                customClass: 'prompt-dialog',
-                type: 'warning'
-            })) {
+            if (await this.stdDialog.confirm('Подтвердите установку настроек по умолчанию:', ' ')) {
                 this.form = Object.assign({}, rstore.settingDefaults);
                 for (let prop in rstore.settingDefaults) {
                     this[prop] = this.form[prop];
@@ -518,7 +513,7 @@ class SettingsPage extends Vue {
     }
 
     keyHook(event) {
-        if (event.type == 'keydown' && event.code == 'Escape') {
+        if (!this.stdDialog.active && event.type == 'keydown' && event.code == 'Escape') {
             this.close();
         }
         return true;

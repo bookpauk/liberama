@@ -1,5 +1,5 @@
 <template>
-    <q-dialog v-model="dialog" @hide="onHide">
+    <q-dialog ref="dialog" v-model="active" @hide="onHide">
         <slot></slot>
 
         <div v-show="alertType" class="column bg-white">
@@ -23,6 +23,29 @@
                 <q-btn class="q-px-md" dense no-caps @click="okClick" v-close-popup>OK</q-btn>
             </div>
         </div>
+
+        <div v-show="confirmType" class="column bg-white">
+            <div class="header row">
+                <div class="caption col row items-center q-ml-md">
+                    <q-icon v-show="caption" class="text-warning q-mr-sm" name="las la-exclamation-circle" size="28px"></q-icon>
+                    <div v-html="caption"></div>
+                </div>
+                <div class="close-icon column justify-center items-center">
+                    <q-btn flat round dense v-close-popup>
+                        <q-icon name="la la-times" size="18px"></q-icon>
+                    </q-btn>
+                </div>
+            </div>
+
+            <div class="col q-mx-md">
+                <div v-html="message"></div>
+            </div>
+
+            <div class="buttons row justify-end q-pa-md">
+                <q-btn class="q-px-md q-ml-sm" dense no-caps v-close-popup>Отмена</q-btn>
+                <q-btn class="q-px-md q-ml-sm" color="primary" dense no-caps @click="okClick" v-close-popup>OK</q-btn>
+            </div>
+        </div>
     </q-dialog>
 </template>
 
@@ -38,10 +61,14 @@ export default @Component({
 class StdDialog extends Vue {
     caption = '';
     message = '';
-    dialog = false;
+    active = false;
     alertType = false;
+    confirmType = false;
 
     created() {
+        if (this.$root.addKeyHook) {
+            this.$root.addKeyHook(this.keyHook);
+        }
     }
 
     init(message, caption) {
@@ -50,6 +77,7 @@ class StdDialog extends Vue {
 
         this.ok = false;        
         this.alertType = false;
+        this.confirmType = false;
     }
 
     onHide() {
@@ -76,8 +104,34 @@ class StdDialog extends Vue {
             };
 
             this.alertType = true;
-            this.dialog = true;
+            this.active = true;
         });
+    }
+
+    confirm(message, caption) {
+        return new Promise((resolve) => {
+            this.init(message, caption);
+
+            this.hideTrigger = () => {
+                if (this.ok) {
+                    resolve(true);
+                } else {
+                    resolve(false);
+                }
+            };
+
+            this.confirmType = true;
+            this.active = true;
+        });
+    }
+
+    keyHook(event) {
+        if (this.active && event.code == 'Enter') {
+            this.okClick();
+            this.$refs.dialog.hide();
+            event.stopPropagation();
+            event.preventDefault();
+        }
     }
 }
 //-----------------------------------------------------------------------------
