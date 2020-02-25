@@ -472,20 +472,15 @@ class SettingsPage extends Vue {
 
     async enterServerStorageKey(key) {
         try {
-            const result = await this.$prompt(`<b>Предупреждение!</b> Изменение ключа доступа приведет к замене всех профилей и читаемых книг в читалке.` +
-                    `<br><br>Введите новый ключ доступа:`, '', {
-                dangerouslyUseHTMLString: true,
-                confirmButtonText: 'OK',
-                cancelButtonText: 'Отмена',
+            const result = await this.stdDialog.prompt(`<b>Предупреждение!</b> Изменение ключа доступа приведет к замене всех профилей и читаемых книг в читалке.` +
+                    `<br><br>Введите новый ключ доступа:`, ' ', {
                 inputValidator: (str) => { if (str && utils.fromBase58(str).length == 32) return true; else return 'Неверный формат ключа'; },
                 inputValue: (key && _.isString(key) ? key : null),
-                customClass: 'prompt-dialog',
-                type: 'warning',
             });
-
+/*
             if (result.value && utils.fromBase58(result.value).length == 32) {
                 this.commit('reader/setServerStorageKey', result.value);
-            }
+            }*/
         } catch (e) {
             //
         }

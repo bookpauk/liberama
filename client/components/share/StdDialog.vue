@@ -1,7 +1,8 @@
 <template>
-    <q-dialog ref="dialog" v-model="active" @hide="onHide">
+    <q-dialog ref="dialog" v-model="active" @show="onShow" @hide="onHide">
         <slot></slot>
 
+        <!--------------------------------------------------->
         <div v-show="type == 'alert'" class="column bg-white">
             <div class="header row">
                 <div class="caption col row items-center q-ml-md">
@@ -24,6 +25,7 @@
             </div>
         </div>
 
+        <!--------------------------------------------------->
         <div v-show="type == 'confirm'" class="column bg-white">
             <div class="header row">
                 <div class="caption col row items-center q-ml-md">
@@ -39,6 +41,31 @@
 
             <div class="col q-mx-md">
                 <div v-html="message"></div>
+            </div>
+
+            <div class="buttons row justify-end q-pa-md">
+                <q-btn class="q-px-md q-ml-sm" dense no-caps v-close-popup>Отмена</q-btn>
+                <q-btn class="q-px-md q-ml-sm" color="primary" dense no-caps @click="okClick" v-close-popup>OK</q-btn>
+            </div>
+        </div>
+
+        <!--------------------------------------------------->
+        <div v-show="type == 'prompt'" class="column bg-white">
+            <div class="header row">
+                <div class="caption col row items-center q-ml-md">
+                    <q-icon v-show="caption" class="text-warning q-mr-sm" name="las la-exclamation-circle" size="28px"></q-icon>
+                    <div v-html="caption"></div>
+                </div>
+                <div class="close-icon column justify-center items-center">
+                    <q-btn flat round dense v-close-popup>
+                        <q-icon name="la la-times" size="18px"></q-icon>
+                    </q-btn>
+                </div>
+            </div>
+
+            <div class="col q-mx-md">
+                <div v-html="message"></div>
+                <q-input ref="input" outlined dense v-model="inputValue"/>                
             </div>
 
             <div class="buttons row justify-end q-pa-md">
@@ -63,6 +90,7 @@ class StdDialog extends Vue {
     message = '';
     active = false;
     type = '';
+    inputValue = '';
 
     created() {
         if (this.$root.addKeyHook) {
@@ -82,6 +110,12 @@ class StdDialog extends Vue {
         if (this.hideTrigger) {
             this.hideTrigger();
             this.hideTrigger = null;
+        }
+    }
+
+    onShow() {
+        if (this.type == 'prompt') {
+            this.$refs.input.focus();
         }
     }
 
@@ -119,6 +153,25 @@ class StdDialog extends Vue {
             };
 
             this.type = 'confirm';
+            this.active = true;
+        });
+    }
+
+    prompt(message, caption, opts) {
+        return new Promise((resolve) => {
+            this.init(message, caption);
+
+            this.hideTrigger = () => {
+                if (this.ok) {
+                    resolve(true);
+                } else {
+                    resolve(false);
+                }
+            };
+
+            this.type = 'prompt';
+            this.inputValue = opts.inputValue || '';
+            this.inputValidator = opts.inputValidator || null;
             this.active = true;
         });
     }
