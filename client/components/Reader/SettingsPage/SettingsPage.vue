@@ -368,16 +368,13 @@ class SettingsPage extends Vue {
     async addProfile() {
         try {
             if (Object.keys(this.profiles).length >= 100) {
-                this.$alert('Достигнут предел количества профилей', 'Ошибка');
+                this.stdDialog.alert('Достигнут предел количества профилей', 'Ошибка');
                 return;
             }
-            const result = await this.$prompt('Введите произвольное название для профиля устройства:', '', {
-                confirmButtonText: 'OK',
-                cancelButtonText: 'Отмена',
+            const result = await this.stdDialog.prompt('Введите произвольное название для профиля устройства:', ' ', {
                 inputValidator: (str) => { if (!str) return 'Название не должно быть пустым'; else if (str.length > 50) return 'Слишком длинное название'; else return true; },
-                customClass: 'prompt-dialog',
             });
-            if (result.value) {
+            if (result && result.value) {
                 if (this.profiles[result.value]) {
                     this.$alert('Такой профиль уже существует', 'Ошибка');
                 } else {
@@ -400,18 +397,13 @@ class SettingsPage extends Vue {
             return;
 
         try {
-            const result = await this.$prompt(`<b>Предупреждение!</b> Удаление профиля '${this.currentProfile}' необратимо.` +
-                    `<br>Все настройки профиля будут потеряны,<br>однако список читаемых книг сохранится.` +
-                    `<br><br>Введите 'да' для подтверждения удаления:`, '', {
-                dangerouslyUseHTMLString: true,
-                confirmButtonText: 'OK',
-                cancelButtonText: 'Отмена',
+            const result = await this.stdDialog.prompt(`<b>Предупреждение!</b> Удаление профиля '${this.currentProfile}' необратимо.` +
+                    `<br>Все настройки профиля будут потеряны, однако список читаемых книг сохранится.` +
+                    `<br><br>Введите 'да' для подтверждения удаления:`, ' ', {
                 inputValidator: (str) => { if (str && str.toLowerCase() === 'да') return true; else return 'Удаление не подтверждено'; },
-                customClass: 'prompt-dialog',
-                type: 'warning',
             });
 
-            if (result.value && result.value.toLowerCase() == 'да') {
+            if (result && result.value && result.value.toLowerCase() == 'да') {
                 if (this.profiles[this.currentProfile]) {
                     const newProfiles = Object.assign({}, this.profiles);
                     delete newProfiles[this.currentProfile];
@@ -433,17 +425,12 @@ class SettingsPage extends Vue {
             return;
 
         try {
-            const result = await this.$prompt(`<b>Предупреждение!</b> Удаление ВСЕХ профилей с настройками необратимо.` +
-                    `<br><br>Введите 'да' для подтверждения удаления:`, '', {
-                dangerouslyUseHTMLString: true,
-                confirmButtonText: 'OK',
-                cancelButtonText: 'Отмена',
+            const result = await this.stdDialog.prompt(`<b>Предупреждение!</b> Удаление ВСЕХ профилей с настройками необратимо.` +
+                    `<br><br>Введите 'да' для подтверждения удаления:`, ' ', {
                 inputValidator: (str) => { if (str && str.toLowerCase() === 'да') return true; else return 'Удаление не подтверждено'; },
-                customClass: 'prompt-dialog',
-                type: 'warning',
             });
 
-            if (result.value && result.value.toLowerCase() == 'да') {
+            if (result && result.value && result.value.toLowerCase() == 'да') {
                 this.commit('reader/setAllowProfilesSave', true);
                 await this.$nextTick();//ждем обработчики watch
                 this.commit('reader/setProfiles', {});
