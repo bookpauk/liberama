@@ -54,7 +54,7 @@ const NumInputProps = Vue.extend({
         digits: { type: Number, default: 0 },
         disable: Boolean
     }
-})
+});
 
 export default @Component({
     watch: {

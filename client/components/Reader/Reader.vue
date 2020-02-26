@@ -88,22 +88,24 @@
             <ClickMapPage v-show="clickMapActive" ref="clickMapPage"></ClickMapPage>
             <ServerStorage v-show="hidden" ref="serverStorage"></ServerStorage>
 
-            <el-dialog
-                title="Что нового:"
-                :visible.sync="whatsNewVisible"
-                width="80%">
+            <Dialog ref="dialog1" v-model="whatsNewVisible">
+                <template slot="header">
+                    Что нового:
+                </template>
+
                 <div style="line-height: 20px" v-html="whatsNewContent"></div>
 
                 <span class="clickable" @click="openVersionHistory">Посмотреть историю версий</span>
-                <span slot="footer" class="dialog-footer">
-                    <el-button @click="whatsNewDisable">Больше не показывать</el-button>
+                <span slot="footer">
+                    <q-btn class="q-px-md" dense no-caps @click="whatsNewDisable">Больше не показывать</q-btn>
                 </span>
-            </el-dialog>
+            </Dialog>
 
-            <el-dialog
-                title="Здравствуйте, уважаемые читатели!"
-                :visible.sync="donationVisible"
-                width="90%">
+            <Dialog ref="dialog2" v-model="donationVisible">
+                <template slot="header">
+                    Здравствуйте, уважаемые читатели!
+                </template>
+
                 <div style="word-break: normal">
                     Стартовала ежегодная акция "Оплатим хостинг вместе".<br><br>
 
@@ -120,12 +122,9 @@
 
                     Автор также обращается с просьбой о помощи в распространении 
                     <a href="https://omnireader.ru" target="_blank">ссылки</a>
-                    <el-tooltip :open-delay="500" effect="light">
-                        <template slot="content">
-                            Скопировать
-                        </template>
-                        <i class="el-icon-copy-document" style="cursor: pointer; font-size: 100%" @click="copyLink('https://omnireader.ru')"></i>
-                    </el-tooltip>
+                    <q-icon class="copy-icon" name="la la-copy" @click="copyLink('https://omnireader.ru')">
+                        <q-tooltip :delay="1000" anchor="top middle" self="center middle" content-style="font-size: 80%">Скопировать</q-tooltip>                    
+                    </q-icon>
                     на читалку через тематические форумы, соцсети, мессенджеры и пр.
                     Чем нас больше, тем легче оставаться на плаву и тем больше мотивации у разработчика, чтобы продолжать работать над проектом.
 
@@ -135,17 +134,17 @@
                     P.S. При необходимости можно воспользоваться подходящим обменником на <a href="https://www.bestchange.ru" target="_blank">bestchange.ru</a>
 
                     <br><br>
-                    <el-row type="flex" justify="center">
-                        <el-button type="success" round @click="openDonate">Помочь проекту</el-button>
-                    </el-row>
+                    <div class="row justify-center">
+                        <q-btn class="q-px-sm" color="primary" dense no-caps rounded @click="openDonate">Помочь проекту</q-btn>
+                    </div>
                 </div>
 
-                <span slot="footer" class="dialog-footer">
-                    <span class="clickable" style="font-size: 60%; color: grey" @click="donationDialogDisable">Больше не показывать</span>                        
-                    <br><br>
-                    <el-button @click="donationDialogRemind">Напомнить позже</el-button>
+                <span slot="footer">
+                    <span class="clickable row justify-end" style="font-size: 60%; color: grey" @click="donationDialogDisable">Больше не показывать</span>                        
+                    <br>
+                    <q-btn class="q-px-sm" dense no-caps @click="donationDialogRemind">Напомнить позже</q-btn>
                 </span>
-            </el-dialog>
+            </Dialog>
 
         </div>
     </div>
@@ -175,6 +174,7 @@ import bookManager from './share/bookManager';
 import readerApi from '../../api/reader';
 import * as utils from '../../share/utils';
 import {versionHistory} from './versionHistory';
+import Dialog from '../share/Dialog.vue';
 
 export default @Component({
     components: {
@@ -190,6 +190,7 @@ export default @Component({
         HelpPage,
         ClickMapPage,
         ServerStorage,
+        Dialog,
     },
     watch: {
         bookPos: function(newValue) {
@@ -1087,7 +1088,7 @@ class Reader extends Vue {
 
     keyHook(event) {
         if (this.$root.rootRoute() == '/reader') {
-            if (this.$root.stdDialog.active)
+            if (this.$root.stdDialog.active || this.$refs.dialog1.active || this.$refs.dialog2.active)
                 return;
 
             let handled = false;
@@ -1241,5 +1242,11 @@ class Reader extends Vue {
     color: blue;
     text-decoration: underline;
     cursor: pointer;
+}
+
+.copy-icon {
+    cursor: pointer;
+    font-size: 120%;
+    color: blue;
 }
 </style>
