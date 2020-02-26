@@ -303,7 +303,7 @@ class RecentBooksPage extends Vue {
             let errMes = e.message;
             if (errMes.indexOf('404') >= 0)
                 errMes = 'Файл не найден на сервере (возможно был удален как устаревший)';
-            this.$alert(errMes, 'Ошибка', {type: 'error'});
+            this.$root.stdDialog.alert(errMes, 'Ошибка', {type: 'negative'});
         }
     }
 
@@ -340,7 +340,7 @@ class RecentBooksPage extends Vue {
     }
 
     keyHook(event) {
-        if (event.type == 'keydown' && event.code == 'Escape') {
+        if (!this.$root.stdDialog.active && event.type == 'keydown' && event.code == 'Escape') {
             this.close();
         }
         return true;
