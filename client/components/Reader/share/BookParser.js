@@ -605,6 +605,7 @@ export default class BookParser {
 
         if (!this.force &&
             para.parsed && 
+            para.parsed.testWidth === this.testWidth &&
             para.parsed.w === this.w &&
             para.parsed.p === this.p &&
             para.parsed.wordWrap === this.wordWrap &&
@@ -620,6 +621,7 @@ export default class BookParser {
             return para.parsed;
 
         const parsed = {
+            testWidth: this.testWidth,
             w: this.w,
             p: this.p,
             wordWrap: this.wordWrap,

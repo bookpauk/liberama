@@ -8,15 +8,19 @@
             <span v-show="initStep">{{ initPercentage }}%</span>
 
             <div v-show="!initStep" class="input">
-                <input ref="input" class="el-input__inner"
+                <!--input ref="input"
                     placeholder="что ищем"
-                    :value="needle" @input="needle = $event.target.value"/>
+                    :value="needle" @input="needle = $event.target.value"/-->
+                <q-input ref="input" class="col" outlined dense
+                    placeholder="что ищем"
+                    v-model="needle" @keydown="inputKeyDown"
+                />
                 <div style="position: absolute; right: 10px; margin-top: 10px; font-size: 16px;">{{ foundText }}</div>
             </div>
-            <el-button-group v-show="!initStep" class="button-group">
-                <el-button @click="showNext"><i class="el-icon-arrow-down"></i></el-button>
-                <el-button @click="showPrev"><i class="el-icon-arrow-up"></i></el-button>
-            </el-button-group>
+            <q-btn-group v-show="!initStep" class="button-group row no-wrap">
+                <q-btn class="button" dense stretch @click="showNext"><q-icon style="top: -6px" name="la la-angle-down" dense size="22px"/></q-btn>
+                <q-btn class="button" dense stretch @click="showPrev"><q-icon style="top: -4px" class="icon" name="la la-angle-up" dense size="22px"/></q-btn>
+            </q-btn-group>
         </div>
     </Window>
 </template>
@@ -39,7 +43,10 @@ export default @Component({
 
         },
         foundText: function(newValue) {
-            this.$refs.input.style.paddingRight = (10 + newValue.length*12) + 'px';
+            //недостатки сторонних ui
+            const el = this.$refs.input.$el.querySelector('label div div div input');
+            if (el)
+                el.style.paddingRight = newValue.length*12 + 'px';
         },
     },
 })
@@ -160,12 +167,13 @@ class SearchPage extends Vue {
         this.$emit('search-toggle');
     }
 
-    keyHook(event) {
-        //недостатки сторонних ui
-        if (document.activeElement === this.$refs.input && event.type == 'keydown' && event.key == 'Enter') {
+    inputKeyDown(event) {
+        if (event.key == 'Enter') {
             this.showNext();
         }
+    }
 
+    keyHook(event) {
         if (event.type == 'keydown' && (event.code == 'Escape')) {
             this.close();
         }
@@ -194,17 +202,14 @@ class SearchPage extends Vue {
 }
 
 .button-group {
-    width: 150px;
+    width: 100px;
     margin: 0;
     padding: 0;
+    height: 37px;
 }
 
-.el-button {
+.button {
     padding: 9px 17px 9px 17px;
-    width: 55px;
-}
-
-i {
-    font-size: 20px;
+    width: 50px;
 }
 </style>

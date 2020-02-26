@@ -1,7 +1,7 @@
 <template>
-    <el-container>
+    <div>
         Страница не найдена
-    </el-container>
+    </div>
 </template>
 
 <script>

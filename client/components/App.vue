@@ -1,9 +1,19 @@
 <template>
-    <el-container>
-        <el-aside v-if="showAsideBar" :width="asideWidth">
+    <!--q-layout view="lhr lpr lfr">
+        <q-drawer v-model="showAsideBar" :width="asideWidth">
             <div class="app-name"><span v-html="appName"></span></div>
-            <el-button class="el-button-collapse" @click="toggleCollapse" :icon="buttonCollapseIcon"></el-button>
-            <el-menu class="el-menu-vertical" :default-active="rootRoute" :collapse="isCollapse" router>
+            <q-btn class="el-button-collapse" @click="toggleCollapse"></q-btn>
+
+            <q-list>
+                <q-item clickable v-ripple>
+                    <q-item-section avatar>
+                        <q-icon name="inbox" />
+                    </q-item-section>
+
+                    <q-item-section>Inbox</q-item-section>
+                </q-item>
+            </q-list-->
+            <!--el-menu class="el-menu-vertical" :default-active="rootRoute" :collapse="isCollapse" router>
               <el-menu-item index="/cardindex">
                 <i class="el-icon-search"></i>
                 <span :class="itemTitleClass('/cardindex')" slot="title">{{ this.itemRuText['/cardindex'] }}</span>
@@ -32,24 +42,37 @@
                 <i class="el-icon-question"></i>
                 <span :class="itemTitleClass('/help')" slot="title">{{ this.itemRuText['/help'] }}</span>
               </el-menu-item>
-            </el-menu>
-        </el-aside>
+            </el-menu-->
+        <!--/q-drawer>
 
-        <el-main v-if="showMain" :style="{padding: (isReaderActive ? 0 : '5px')}">
+        <q-page-container>
             <keep-alive>
                 <router-view></router-view>
             </keep-alive>
-        </el-main>
-    </el-container>
+        </q-page-container>
+    </q-layout-->
+    <div class="fit row">
+        <Notify ref="notify"/>
+        <StdDialog ref="stdDialog"/>
+        <keep-alive>
+            <router-view class="col"></router-view>
+        </keep-alive>
+    </div>
 </template>
 
 <script>
 //-----------------------------------------------------------------------------
 import Vue from 'vue';
 import Component from 'vue-class-component';
+import Notify from './share/Notify.vue';
+import StdDialog from './share/StdDialog.vue';
 import * as utils from '../share/utils';
 
 export default @Component({
+    components: {
+        Notify,
+        StdDialog,
+    },
     watch: {
         mode: function() {
             this.setAppTitle();
@@ -74,6 +97,18 @@ class App extends Vue {
         this.state = this.$store.state;
         this.uistate = this.$store.state.uistate;
         this.config = this.$store.state.config;
+
+        //root route
+        let cachedRoute = '';
+        let cachedPath = '';
+        this.$root.rootRoute = () => {
+            if (this.$route.path != cachedPath) {
+                cachedPath = this.$route.path;
+                const m = cachedPath.match(/^(\/[^/]*).*$/i);
+                cachedRoute = (m ? m[1] : this.$route.path);
+            }
+            return cachedRoute;
+        }
 
         // set-app-title
         this.$root.$on('set-app-title', this.setAppTitle);
@@ -108,17 +143,16 @@ class App extends Vue {
     }
 
     mounted() {
+        this.$root.notify = this.$refs.notify;
+        this.$root.stdDialog = this.$refs.stdDialog;
+
         this.dispatch('config/loadConfig');
         this.$watch('apiError', function(newError) {
             if (newError) {
                 let mes = newError.message;
                 if (newError.response && newError.response.config)
                     mes = newError.response.config.url + '<br>' + newError.response.statusText;
-                this.$notify.error({
-                    title: 'Ошибка API',
-                    dangerouslyUseHTMLString: true,
-                    message: mes
-                });
+                this.$root.notify.error(mes, 'Ошибка API');
             }
         });
 
@@ -137,9 +171,9 @@ class App extends Vue {
 
     get asideWidth() {
         if (this.uistate.asideBarCollapse) {
-            return '64px';
+            return 64;
         } else {
-            return '170px';
+            return 170;
         }
     }
 
@@ -163,10 +197,7 @@ class App extends Vue {
     }
 
     get rootRoute() {
-        const m = this.$route.path.match(/^(\/[^/]*).*$/i);
-        this.$root.rootRoute = (m ? m[1] : this.$route.path);
-
-        return this.$root.rootRoute;
+        return this.$root.rootRoute();
     }
 
     setAppTitle(title) {
@@ -193,12 +224,11 @@ class App extends Vue {
         return (this.mode !== null && this.mode != 'reader' && this.mode != 'omnireader');
     }
 
-    get isReaderActive() {
-        return this.rootRoute == '/reader';
+    set showAsideBar(value) {
     }
 
-    get showMain() {
-        return (this.showAsideBar || this.isReaderActive);
+    get isReaderActive() {
+        return this.rootRoute == '/reader';
     }
 
     redirectIfNeeded() {
@@ -228,68 +258,28 @@ class App extends Vue {
     line-height: 140%;
     font-weight: bold;
 }
-
-.bold-font {
-    font-weight: bold;
-}
-
-.el-container {
-    height: 100%;
-}
-
-.el-aside {
-    line-height: 1;
-    background-color: #ccc;
-    color: #000;
-}
-
-.el-main {
-    padding: 0;
-    background-color: #E6EDF4;
-    color: #000;
-}
-
-.el-menu-vertical:not(.el-menu--collapse) {
-    background-color: inherit;
-    color: inherit;
-    text-align: left;
-    width: 100%;
-    border: 0;
-}
-
-.el-menu--collapse {
-    background-color: inherit;
-    color: inherit;
-    border: 0;
-}
-
-.el-button-collapse, .el-button-collapse:focus, .el-button-collapse:active, .el-button-collapse:hover {
-    background-color: inherit;
-    color: inherit;
-    margin-top: 5px;
-    width: 100%;
-    height: 64px;
-    border: 0;
-}
-.el-menu-item {
-    font-size: 85%;
-}
 </style>
 
 <style>
-body, html, #app {
+body, html, #app {    
     margin: 0;
     padding: 0;
+    width: 100%;
     height: 100%;
     font: normal 12pt ReaderDefault;
 }
 
-.el-tabs__content {
-    flex: 1;
-    padding: 0 !important;
-    display: flex;
-    flex-direction: column;
-    overflow: hidden;
+.dborder {
+    border: 2px solid yellow !important;
+}
+
+.icon-rotate {
+    vertical-align: middle;
+    animation: rotating 2s linear infinite;
+}
+
+.notify-button-icon {
+    font-size: 16px !important;
 }
 
 @font-face {

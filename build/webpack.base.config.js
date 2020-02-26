@@ -17,6 +17,11 @@ module.exports = {
                 loader: "vue-loader"
             },
             {
+                test: /\.includer$/,
+                resourceQuery: /^\?vue/,
+                use: path.resolve('build/includer.js')
+            },
+            {
                 test: /\.js$/,
                 loader: 'babel-loader',
                 exclude: /node_modules/,

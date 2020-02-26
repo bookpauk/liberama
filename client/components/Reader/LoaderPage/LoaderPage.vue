@@ -1,31 +1,36 @@
 <template>
-    <div ref="main" class="main">
-        <GithubCorner url="https://github.com/bookpauk/liberama" cornerColor="#1B695F"></GithubCorner>
-        <div class="part top">
-            <span class="greeting bold-font">{{ title }}</span>
-            <div class="space"></div>
+    <div ref="main" class="column no-wrap" style="min-height: 500px">
+        <div class="relative-position">
+            <GithubCorner url="https://github.com/bookpauk/liberama" cornerColor="#1B695F" gitColor="#EBE2C9"></GithubCorner>
+        </div>
+        <div class="col column justify-center items-center no-wrap overflow-hidden" style="min-height: 230px">
+            <span class="greeting"><b>{{ title }}</b></span>
+            <div class="q-my-sm"></div>
             <span class="greeting">Добро пожаловать!</span>
             <span class="greeting">Поддерживаются форматы: <b>fb2, html, txt</b> и сжатие: <b>zip, bz2, gz</b></span>
             <span v-if="isExternalConverter" class="greeting">...а также форматы: <b>rtf, doc, docx, pdf, epub, mobi</b></span>
         </div>
 
-        <div class="part center">
-            <el-input ref="input" placeholder="URL книги" v-model="bookUrl">
-                <el-button slot="append" icon="el-icon-check" @click="submitUrl"></el-button>
-            </el-input>
-            <div class="space"></div>
+        <div class="col-auto column justify-start items-center no-wrap overflow-hidden">
+            <q-input ref="input" class="full-width q-px-sm" style="max-width: 700px" outlined dense bg-color="white" v-model="bookUrl" placeholder="URL книги">
+                <template v-slot:append>
+                    <q-btn rounded flat style="width: 40px" icon="la la-check" @click="submitUrl"/>
+                </template>
+            </q-input>
+
             <input type="file" id="file" ref="file" @change="loadFile" style='display: none;'/>
 
-            <el-button size="mini" @click="loadFileClick">
+            <div class="q-my-sm"></div>
+            <q-btn no-caps dense class="q-px-sm" color="primary" size="13px" @click="loadFileClick">
                 Загрузить файл с диска
-            </el-button>
-            <div class="space"></div>
-            <el-button size="mini" @click="loadBufferClick">
+            </q-btn>
+            
+            <div class="q-my-sm"></div>
+            <q-btn no-caps dense class="q-px-sm" color="primary" size="13px" @click="loadBufferClick">
                 Из буфера обмена
-            </el-button>
+            </q-btn>
 
-            <div class="space"></div>
-            <div class="space"></div>
+            <div class="q-my-md"></div>
             <div v-if="mode == 'omnireader'">
                 <div ref="yaShare2" class="ya-share2" 
                     data-services="collections,vkontakte,facebook,odnoklassniki,twitter,telegram"
@@ -34,12 +39,12 @@
                     data-url="https://omnireader.ru">
                 </div>
             </div>
-            <div class="space"></div>
+            <div class="q-my-sm"></div>
             <span v-if="mode == 'omnireader'" class="bottom-span clickable" @click="openComments">Отзывы о читалке</span>
             <span v-if="mode == 'omnireader'" class="bottom-span clickable" @click="openOldVersion">Старая версия</span>
         </div>
 
-        <div class="part bottom">
+        <div class="col column justify-end items-center no-wrap overflow-hidden">
             <span class="bottom-span clickable" @click="openHelp">Справка</span>
             <span class="bottom-span clickable" @click="openDonate">Помочь проекту</span>
 
@@ -188,28 +193,9 @@ class LoaderPage extends Vue {
 //-----------------------------------------------------------------------------
 </script>
 <style scoped>
-.main {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    min-height: 480px;
-}
-
-.part {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-}
-
 .greeting {
     font-size: 120%;
     line-height: 160%;
-}
-
-.bold-font {
-    font-weight: bold;
 }
 
 .clickable {
@@ -218,30 +204,8 @@ class LoaderPage extends Vue {
     cursor: pointer;
 }
 
-.top {
-    min-height: 120px;
-}
-
-.center {
-    justify-content: flex-start;
-    padding: 0 10px 0 10px;
-    min-height: 250px;
-}
-
-.bottom {
-    justify-content: flex-end;
-}
-
 .bottom-span {
     font-size: 70%;
     margin-bottom: 10px;
-}
-
-.el-input {
-    max-width: 700px;
-}
-
-.space {
-    height: 20px;
 }
 </style>

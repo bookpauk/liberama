@@ -1,7 +1,7 @@
 <template>
-    <el-container>
+    <div>
         Раздел Income в разработке
-    </el-container>
+    </div>
 </template>
 
 <script>

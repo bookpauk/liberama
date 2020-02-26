@@ -1,6 +1,6 @@
 {
   "name": "Liberama",
-  "version": "0.8.4",
+  "version": "0.9.0",
   "author": "Book Pauk <bookpauk@gmail.com>",
   "license": "CC0-1.0",
   "repository": "bookpauk/liberama",
@@ -55,6 +55,7 @@
     "webpack-merge": "^4.2.2"
   },
   "dependencies": {
+    "@quasar/extras": "^1.5.0",
     "appcache-webpack-plugin": "^1.4.0",
     "axios": "^0.18.1",
     "base-x": "^3.0.6",
@@ -73,6 +74,7 @@
     "multer": "^1.4.2",
     "pako": "^1.0.10",
     "path-browserify": "^1.0.0",
+    "quasar": "^1.8.5",
     "safe-buffer": "^5.2.0",
     "sjcl": "^1.0.8",
     "sql-template-strings": "^2.2.2",

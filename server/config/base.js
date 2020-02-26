@@ -21,7 +21,8 @@ module.exports = {
     maxTempPublicDirSize: 512*1024*1024,//512Мб
     maxUploadPublicDirSize: 200*1024*1024,//100Мб
 
-    useExternalBookConverter: false,    
+    useExternalBookConverter: false,
+    webConfigParams: ['name', 'version', 'mode', 'maxUploadFileSize', 'useExternalBookConverter', 'branch'],
 
     db: [
         {
