@@ -5,7 +5,7 @@
     indicator-color="white"
     dense
     no-caps
-    class="no-mp bg-grey-3 text-grey-7"
+    class="no-mp bg-grey-4 text-grey-7"
 >
     <q-tab name="color" label="Цвет" />
     <q-tab name="font" label="Шрифт" />
