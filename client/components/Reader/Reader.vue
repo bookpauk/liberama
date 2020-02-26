@@ -1,5 +1,6 @@
 <template>
     <div class="column no-wrap">
+        <StdDialog ref="stdDialog"/>
         <div ref="header" class="header" v-show="toolBarActive">
             <div ref="buttons" class="row justify-between no-wrap">
                 <button ref="loader" class="tool-button" :class="buttonActiveClass('loader')" @click="buttonClick('loader')" v-ripple>
@@ -158,6 +159,7 @@ import Component from 'vue-class-component';
 import _ from 'lodash';
 import {Buffer} from 'safe-buffer';
 
+import StdDialog from '../share/StdDialog.vue';
 import LoaderPage from './LoaderPage/LoaderPage.vue';
 import TextPage from './TextPage/TextPage.vue';
 import ProgressPage from './ProgressPage/ProgressPage.vue';
@@ -178,6 +180,7 @@ import {versionHistory} from './versionHistory';
 
 export default @Component({
     components: {
+        StdDialog,
         LoaderPage,
         TextPage,
         ProgressPage,
@@ -297,6 +300,7 @@ class Reader extends Vue {
     }
 
     mounted() {
+        this.stdDialog = this.$refs.stdDialog;
         this.updateHeaderMinWidth();
 
         (async() => {
@@ -1029,7 +1033,7 @@ class Reader extends Vue {
         } catch (e) {
             progress.hide(); this.progressActive = false;
             this.loaderActive = true;
-            this.$alert(e.message, 'Ошибка', {type: 'error'});
+            this.stdDialog.alert(e.message, 'Ошибка', {type: 'negative'});
         }
     }
 
@@ -1053,7 +1057,7 @@ class Reader extends Vue {
         } catch (e) {
             progress.hide(); this.progressActive = false;
             this.loaderActive = true;
-            this.$alert(e.message, 'Ошибка', {type: 'error'});
+            this.stdDialog.alert(e.message, 'Ошибка', {type: 'negative'});
         }
     }
 
@@ -1087,6 +1091,9 @@ class Reader extends Vue {
 
     keyHook(event) {
         if (this.$root.rootRoute() == '/reader') {
+            if (this.stdDialog.active)
+                return;
+
             let handled = false;
             if (!handled && this.helpActive)
                 handled = this.$refs.helpPage.keyHook(event);

@@ -6,7 +6,7 @@
         <div v-show="type == 'alert'" class="column bg-white">
             <div class="header row">
                 <div class="caption col row items-center q-ml-md">
-                    <q-icon v-show="caption" class="text-warning q-mr-sm" name="las la-exclamation-circle" size="28px"></q-icon>
+                    <q-icon v-show="caption" class="q-mr-sm" :class="iconColor" name="las la-exclamation-circle" size="28px"></q-icon>
                     <div v-html="caption"></div>
                 </div>
                 <div class="close-icon column justify-center items-center">
@@ -29,7 +29,7 @@
         <div v-show="type == 'confirm'" class="column bg-white">
             <div class="header row">
                 <div class="caption col row items-center q-ml-md">
-                    <q-icon v-show="caption" class="text-warning q-mr-sm" name="las la-exclamation-circle" size="28px"></q-icon>
+                    <q-icon v-show="caption" class="q-mr-sm" :class="iconColor" name="las la-exclamation-circle" size="28px"></q-icon>
                     <div v-html="caption"></div>
                 </div>
                 <div class="close-icon column justify-center items-center">
@@ -53,7 +53,7 @@
         <div v-show="type == 'prompt'" class="column bg-white">
             <div class="header row">
                 <div class="caption col row items-center q-ml-md">
-                    <q-icon v-show="caption" class="text-warning q-mr-sm" name="las la-exclamation-circle" size="28px"></q-icon>
+                    <q-icon v-show="caption" class="q-mr-sm" :class="iconColor" name="las la-exclamation-circle" size="28px"></q-icon>
                     <div v-html="caption"></div>
                 </div>
                 <div class="close-icon column justify-center items-center">
@@ -98,6 +98,7 @@ class StdDialog extends Vue {
     type = '';
     inputValue = '';
     error = '';
+    iconColor = '';
 
     created() {
         if (this.$root.addKeyHook) {
@@ -105,7 +106,7 @@ class StdDialog extends Vue {
         }
     }
 
-    init(message, caption) {
+    init(message, caption, opts) {
         this.caption = caption;
         this.message = message;
 
@@ -114,6 +115,11 @@ class StdDialog extends Vue {
         this.inputValidator = null;
         this.inputValue = '';
         this.error = '';
+
+        this.iconColor = 'text-warning';
+        if (opts && opts.type) {
+            this.iconColor = `text-${opts.type}`;
+        }
     }
 
     onHide() {
@@ -156,9 +162,9 @@ class StdDialog extends Vue {
         this.$refs.dialog.hide();
     }
 
-    alert(message, caption) {
+    alert(message, caption, opts) {
         return new Promise((resolve) => {
-            this.init(message, caption);
+            this.init(message, caption, opts);
 
             this.hideTrigger = () => {
                 if (this.ok) {
@@ -173,9 +179,9 @@ class StdDialog extends Vue {
         });
     }
 
-    confirm(message, caption) {
+    confirm(message, caption, opts) {
         return new Promise((resolve) => {
-            this.init(message, caption);
+            this.init(message, caption, opts);
 
             this.hideTrigger = () => {
                 if (this.ok) {
@@ -193,7 +199,7 @@ class StdDialog extends Vue {
     prompt(message, caption, opts) {
         return new Promise((resolve) => {
             this.enableValidator = false;
-            this.init(message, caption);
+            this.init(message, caption, opts);
 
             this.hideTrigger = () => {
                 if (this.ok) {
