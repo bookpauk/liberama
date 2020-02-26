@@ -1,7 +1,7 @@
 <template>
-    <el-container>
+    <div>
         Раздел History в разработке
-    </el-container>
+    </div>
 </template>
 
 <script>

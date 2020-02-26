@@ -18,17 +18,22 @@ class Reader {
         if (!callback) callback = () => {};
 
         let response = {};
-
         try {
             await wsc.open();
             const requestId = wsc.send({action: 'worker-get-state-finish', workerId});
 
+            let prevResponse = false;
             while (1) {// eslint-disable-line no-constant-condition
                 response = await wsc.message(requestId);
-                callback(response);
 
-                if (!response.state)
-                    throw new Error('Неверный ответ api');
+                if (!response.state && prevResponse !== false) {//экономия траффика
+                    callback(prevResponse);
+                } else {//были изменения worker state
+                    if (!response.state)
+                        throw new Error('Неверный ответ api');
+                    callback(response);
+                    prevResponse = response;
+                }
 
                 if (response.state == 'finish' || response.state == 'error') {
                     break;
@@ -127,6 +132,9 @@ class Reader {
                 response = await api.post('/restore-cached-file', {path: url});
                 response = response.data;
             }
+            if (response.state == 'error') {
+                throw new Error(response.error);
+            }
 
             const workerId = response.workerId;
             if (!workerId)
@@ -215,6 +223,9 @@ class Reader {
         const state = response.state;
         if (!state)
             throw new Error('Неверный ответ api');
+        if (response.state == 'error') {
+            throw new Error(response.error);
+        }
 
         return response;
     }

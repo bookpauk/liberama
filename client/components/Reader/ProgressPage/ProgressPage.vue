@@ -1,8 +1,24 @@
 <template>
-    <div v-show="visible" class="main">
-        <div class="center">
-            <el-progress type="circle" :width="100" :stroke-width="6" color="#0F9900" :percentage="percentage"></el-progress>
-            <p class="text">{{ text }}</p>
+    <div v-show="visible" class="column justify-center items-center z-max" style="background-color: rgba(0, 0, 0, 0.8)">
+        <div class="column justify-start items-center" style="height: 250px">
+            <q-circular-progress
+                show-value
+                instant-feedback
+                font-size="13px"
+                :value="percentage"
+                size="100px"
+                :thickness="0.11"
+                color="green-7"
+                track-color="grey-4"
+                class="q-ma-md"
+            >
+                <span class="text-yellow">{{ percentage }}%</span>
+            </q-circular-progress>
+
+            <div>
+                <span class="text-yellow">{{ text }}</span>
+                <q-icon :style="iconStyle" color="yellow" name="la la-slash" size="20px"/>
+            </div>
         </div>
     </div>
 </template>
@@ -11,6 +27,7 @@
 //-----------------------------------------------------------------------------
 import Vue from 'vue';
 import Component from 'vue-class-component';
+import * as utils from '../../../share/utils';
 
 const ruMessage = {
     'start': ' ',
@@ -33,14 +50,15 @@ class ProgressPage extends Vue {
     step = 1;
     progress = 0;
     visible = false;
+    iconStyle = '';
 
     show() {
-        this.$el.style.width = this.$parent.$el.offsetWidth + 'px';
-        this.$el.style.height = this.$parent.$el.offsetHeight + 'px';
         this.text = '';
         this.totalSteps = 1;
         this.step = 1;
         this.progress = 0;
+        this.iconAngle = 0;
+        this.ani = false;
 
         this.visible = true;
     }
@@ -48,6 +66,7 @@ class ProgressPage extends Vue {
     hide() {
         this.visible = false;
         this.text = '';
+        this.iconAngle = 0;
     }
 
     setState(state) {
@@ -61,46 +80,21 @@ class ProgressPage extends Vue {
         this.step = (state.step ? state.step : this.step);
         this.totalSteps = (state.totalSteps > this.totalSteps ? state.totalSteps : this.totalSteps);
         this.progress = state.progress || 0;
+
+        if (!this.ani) {
+            (async() => {
+                this.ani = true;
+                this.iconAngle += 30;
+                this.iconStyle = `transform: rotate(${this.iconAngle}deg); transition: 150ms linear`;
+                await utils.sleep(150);
+                this.ani = false;
+            })();
+        }
     }
 
     get percentage() {
-        let circle = document.querySelector('path[class="el-progress-circle__path"]');
-        if (circle)
-            circle.style.transition = '';
         return Math.round(((this.step - 1)/this.totalSteps + this.progress/(100*this.totalSteps))*100);
     }
 }
 //-----------------------------------------------------------------------------
 </script>
-<style scoped>
-.main {
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-
-    z-index: 100;
-    background-color: rgba(0, 0, 0, 0.8);
-
-    position: absolute;
-}
-.center {
-    display: flex;
-    flex-direction: column;
-    justify-content: flex-start;
-    align-items: center;
-
-    color: white;
-    height: 300px;
-}
-
-.text {
-    color: yellow;
-}
-
-</style>
-<style>
-.el-progress__text {
-    color: lightgreen !important;
-}
-</style>

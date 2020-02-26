@@ -1,7 +1,7 @@
 <template>
-    <el-container>
+    <div>
         Раздел Sources в разработке
-    </el-container>
+    </div>
 </template>
 
 <script>

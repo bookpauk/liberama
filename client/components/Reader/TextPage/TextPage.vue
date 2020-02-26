@@ -38,8 +38,8 @@ import Vue from 'vue';
 import Component from 'vue-class-component';
 import {loadCSS} from 'fg-loadcss';
 import _ from 'lodash';
-import {sleep} from '../../../share/utils';
 
+import {sleep} from '../../../share/utils';
 import bookManager from '../share/bookManager';
 import DrawHelper from './DrawHelper';
 import rstore from '../../../store/modules/reader';
@@ -131,7 +131,11 @@ class TextPage extends Vue {
             await this.doPageAnimation();
         }, 10);
 
-        this.$root.$on('resize', () => {this.$nextTick(this.onResize)});
+        this.$root.$on('resize', async() => {
+            this.$nextTick(this.onResize);
+            await sleep(500);
+            this.$nextTick(this.onResize);
+        });
     }
 
     mounted() {
@@ -242,6 +246,9 @@ class TextPage extends Vue {
             this.parsed.imageHeightLines = this.imageHeightLines;
             this.parsed.imageFitWidth = this.imageFitWidth;
             this.parsed.compactTextPerc = this.compactTextPerc;
+
+            this.parsed.testText = 'Это тестовый текст. Его ширина выдается системой неверно некоторое время.';
+            this.parsed.testWidth = this.drawHelper.measureText(this.parsed.testText, {});
         }
 
         //scrolling page
@@ -268,25 +275,18 @@ class TextPage extends Vue {
     async checkLoadedFonts() {
         let loaded = await Promise.all(this.fontList.map(font => document.fonts.check(font)));
         if (loaded.some(r => !r)) {
-            loaded = await Promise.all(this.fontList.map(font => document.fonts.load(font)));
-            if (loaded.some(r => !r.length))
-                throw new Error('some font not loaded');
+            await Promise.all(this.fontList.map(font => document.fonts.load(font)));
         }
     }
 
     async loadFonts() {
         this.fontsLoading = true;
 
-        let inst = null;
+        let close = null;
         (async() => {
             await sleep(500);
             if (this.fontsLoading)
-                inst = this.$notify({
-                  title: '',
-                  dangerouslyUseHTMLString: true,
-                  message: 'Загрузка шрифта &nbsp;<i class="el-icon-loading"></i>',
-                  duration: 0
-                });
+                close = this.$root.notify.info('Загрузка шрифта &nbsp;<i class="la la-snowflake icon-rotate" style="font-size: 150%"></i>');
         })();
 
         if (!this.fontsLoaded)
@@ -298,29 +298,15 @@ class TextPage extends Vue {
             this.fontsLoaded[this.fontCssUrl] = 1;
         }
 
-        const waitingTime = 10*1000;
-        const delay = 100;
-        let i = 0;
-        //ждем шрифты
-        while (i < waitingTime/delay) {
-            i++;
-            try {
-                await this.checkLoadedFonts();
-                i = waitingTime;
-            } catch (e) {
-                await sleep(delay);
-            }
-        }
-        if (i !== waitingTime) {
-            this.$notify.error({
-                title: 'Ошибка загрузки',
-                message: 'Некоторые шрифты не удалось загрузить'
-            });
+        try {
+            await this.checkLoadedFonts();
+        } catch (e) {
+            this.$root.notify.error('Некоторые шрифты не удалось загрузить', 'Ошибка загрузки');
         }
 
         this.fontsLoading = false;
-        if (inst)
-            inst.close();
+        if (close)
+            close();
     }
 
     getSettings() {
@@ -351,11 +337,15 @@ class TextPage extends Vue {
         // ширина шрифта некоторое время выдается неверно, поэтому
         if (!omitLoadFonts) {
             const parsed = this.parsed;
-            await sleep(100);
+
+            let i = 0;
+            const t = this.parsed.testText;
+            while (i++ < 50 && this.parsed === parsed && this.drawHelper.measureText(t, {}) === this.parsed.testWidth)
+                await sleep(100);
+
             if (this.parsed === parsed) {
-                parsed.force = true;
+                this.parsed.testWidth = this.drawHelper.measureText(t, {});
                 this.draw();
-                parsed.force = false;
             }
         }
     }
@@ -432,7 +422,7 @@ class TextPage extends Vue {
                     if (this.lazyParseEnabled)
                         this.lazyParsePara();
                 } catch (e) {
-                    this.$alert(e.message, 'Ошибка', {type: 'error'});
+                    this.$root.stdDialog.alert(e.message, 'Ошибка', {type: 'negative'});
                 }
             })();
         }
@@ -457,13 +447,13 @@ class TextPage extends Vue {
     }
 
     async onResize() {
-        /*this.page1 = null;
-        this.page2 = null;
-        this.statusBar = null;*/
-
-        this.calcDrawProps();
-        this.setBackground();
-        this.draw();
+        try {
+            this.calcDrawProps();
+            this.setBackground();
+            this.draw();
+        } catch (e) {
+            //
+        }
     }
 
     get settings() {
@@ -1141,7 +1131,7 @@ class TextPage extends Vue {
         if (url && url.indexOf('file://') != 0) {
             window.open(url, '_blank');
         } else {
-            this.$alert('Оригинал недоступен, т.к. файл книги был загружен с локального диска', '', {type: 'warning'});
+            this.$root.stdDialog.alert('Оригинал недоступен, т.к. файл книги был загружен с локального диска.', ' ', {type: 'info'});
         }
     }
 

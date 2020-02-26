@@ -3,14 +3,12 @@
         <template slot="header">
             <span style="position: relative; top: -3px">
                 Вставьте текст и нажмите
-                <span class="clickable" style="font-size: 150%; position: relative; top: 1px" @click="loadBuffer">загрузить</span>
+                <span class="clickable text-primary" style="font-size: 150%; position: relative; top: 1px" @click="loadBuffer">загрузить</span>
                 или F2
             </span>
         </template>
 
-        <div>
-            <el-input placeholder="Введите название текста" class="input" v-model="bookTitle"></el-input>
-        </div>
+        <q-input class="q-px-sm" dense borderless v-model="bookTitle" placeholder="Введите название текста"/>
         <hr/>
         <textarea ref="textArea" class="text" @paste="calcTitle"></textarea>
     </Window>

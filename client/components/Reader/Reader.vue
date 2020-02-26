@@ -1,57 +1,67 @@
 <template>
-    <el-container>
-        <el-header v-show="toolBarActive" height='50px'>
-            <div ref="header" class="header">
-                <el-tooltip content="Загрузить книгу" :open-delay="1000" effect="light">
-                    <el-button ref="loader" class="tool-button" :class="buttonActiveClass('loader')" @click="buttonClick('loader')"><i class="el-icon-back"></i></el-button>
-                </el-tooltip>
+    <div class="column no-wrap">
+        <div ref="header" class="header" v-show="toolBarActive">
+            <div ref="buttons" class="row justify-between no-wrap">
+                <button ref="loader" class="tool-button" :class="buttonActiveClass('loader')" @click="buttonClick('loader')" v-ripple>
+                    <q-icon name="la la-arrow-left" size="32px"/>
+                    <q-tooltip :delay="1500" anchor="bottom right" content-style="font-size: 80%">Загрузить книгу</q-tooltip>
+                </button>
 
                 <div>
-                    <el-tooltip v-show="showToolButton['undoAction']" content="Действие назад" :open-delay="1000" effect="light">
-                        <el-button ref="undoAction" class="tool-button" :class="buttonActiveClass('undoAction')" @click="buttonClick('undoAction')" ><i class="el-icon-arrow-left"></i></el-button>
-                    </el-tooltip>
-                    <el-tooltip v-show="showToolButton['redoAction']" content="Действие вперед" :open-delay="1000" effect="light">
-                        <el-button ref="redoAction" class="tool-button" :class="buttonActiveClass('redoAction')" @click="buttonClick('redoAction')" ><i class="el-icon-arrow-right"></i></el-button>
-                    </el-tooltip>
+                    <button ref="undoAction" v-show="showToolButton['undoAction']" class="tool-button" :class="buttonActiveClass('undoAction')" @click="buttonClick('undoAction')" v-ripple>
+                        <q-icon name="la la-angle-left" size="32px"/>
+                        <q-tooltip :delay="1500" anchor="bottom middle" content-style="font-size: 80%">Действие назад</q-tooltip>
+                    </button>
+                    <button ref="redoAction" v-show="showToolButton['redoAction']" class="tool-button" :class="buttonActiveClass('redoAction')" @click="buttonClick('redoAction')" v-ripple>
+                        <q-icon name="la la-angle-right" size="32px"/>
+                        <q-tooltip :delay="1500" anchor="bottom middle" content-style="font-size: 80%">Действие вперед</q-tooltip>
+                    </button>
                     <div class="space"></div>
-                    <el-tooltip v-show="showToolButton['fullScreen']" content="На весь экран" :open-delay="1000" effect="light">
-                        <el-button ref="fullScreen" class="tool-button" :class="buttonActiveClass('fullScreen')" @click="buttonClick('fullScreen')"><i class="el-icon-rank"></i></el-button>
-                    </el-tooltip>
-                    <el-tooltip v-show="showToolButton['scrolling']" content="Плавный скроллинг" :open-delay="1000" effect="light">
-                        <el-button ref="scrolling" class="tool-button" :class="buttonActiveClass('scrolling')" @click="buttonClick('scrolling')"><i class="el-icon-sort"></i></el-button>
-                    </el-tooltip>
-                    <el-tooltip v-show="showToolButton['setPosition']" content="На страницу" :open-delay="1000" effect="light">
-                        <el-button ref="setPosition" class="tool-button" :class="buttonActiveClass('setPosition')" @click="buttonClick('setPosition')"><i class="el-icon-d-arrow-right"></i></el-button>
-                    </el-tooltip>
-                    <el-tooltip v-show="showToolButton['search']" content="Найти в тексте" :open-delay="1000" effect="light">
-                        <el-button ref="search" class="tool-button" :class="buttonActiveClass('search')" @click="buttonClick('search')"><i class="el-icon-search"></i></el-button>
-                    </el-tooltip>
-                    <el-tooltip v-show="showToolButton['copyText']" content="Скопировать текст со страницы" :open-delay="1000" effect="light">
-                        <el-button ref="copyText" class="tool-button" :class="buttonActiveClass('copyText')" @click="buttonClick('copyText')"><i class="el-icon-edit-outline"></i></el-button>
-                    </el-tooltip>
-                    <el-tooltip v-show="showToolButton['refresh']" content="Принудительно обновить книгу в обход кэша" :open-delay="1000" effect="light">
-                        <el-button ref="refresh" class="tool-button" :class="buttonActiveClass('refresh')" @click="buttonClick('refresh')">
-                            <i class="el-icon-refresh" :class="{clear: !showRefreshIcon}"></i>
-                        </el-button>
-                    </el-tooltip>
+                    <button ref="fullScreen" v-show="showToolButton['fullScreen']" class="tool-button" :class="buttonActiveClass('fullScreen')" @click="buttonClick('fullScreen')" v-ripple>
+                        <q-icon :name="(fullScreenActive ? 'la la-compress-arrows-alt': 'la la-expand-arrows-alt')" size="32px"/>
+                        <q-tooltip :delay="1500" anchor="bottom middle" content-style="font-size: 80%">На весь экран</q-tooltip>
+                    </button>
+                    <button ref="scrolling" v-show="showToolButton['scrolling']" class="tool-button" :class="buttonActiveClass('scrolling')" @click="buttonClick('scrolling')" v-ripple>
+                        <q-icon name="la la-film" size="32px"/>
+                        <q-tooltip :delay="1500" anchor="bottom middle" content-style="font-size: 80%">Плавный скроллинг</q-tooltip>
+                    </button>
+                    <button ref="setPosition" v-show="showToolButton['setPosition']" class="tool-button" :class="buttonActiveClass('setPosition')" @click="buttonClick('setPosition')" v-ripple>
+                        <q-icon name="la la-angle-double-right" size="32px"/>
+                        <q-tooltip :delay="1500" anchor="bottom middle" content-style="font-size: 80%">На страницу</q-tooltip>
+                    </button>
+                    <button ref="search" v-show="showToolButton['search']" class="tool-button" :class="buttonActiveClass('search')" @click="buttonClick('search')" v-ripple>
+                        <q-icon name="la la-search" size="32px"/>
+                        <q-tooltip :delay="1500" anchor="bottom middle" content-style="font-size: 80%">Найти в тексте</q-tooltip>
+                    </button>
+                    <button ref="copyText" v-show="showToolButton['copyText']" class="tool-button" :class="buttonActiveClass('copyText')" @click="buttonClick('copyText')" v-ripple>
+                        <q-icon name="la la-copy" size="32px"/>
+                        <q-tooltip :delay="1500" anchor="bottom middle" content-style="font-size: 80%">Скопировать текст со страницы</q-tooltip>
+                    </button>
+                    <button ref="refresh" v-show="showToolButton['refresh']" class="tool-button" :class="buttonActiveClass('refresh')" @click="buttonClick('refresh')" v-ripple>
+                        <q-icon name="la la-sync" size="32px"/>
+                        <q-tooltip :delay="1500" anchor="bottom middle" content-style="font-size: 80%">Принудительно обновить книгу в обход кэша</q-tooltip>
+                    </button>
                     <div class="space"></div>
-                    <el-tooltip v-show="showToolButton['offlineMode']" content="Автономный режим (без интернета)" :open-delay="1000" effect="light">
-                        <el-button ref="offlineMode" class="tool-button" :class="buttonActiveClass('offlineMode')" @click="buttonClick('offlineMode')"><i class="el-icon-connection"></i></el-button>
-                    </el-tooltip>
-                    <el-tooltip v-show="showToolButton['recentBooks']" content="Открыть недавние" :open-delay="1000" effect="light">
-                        <el-button ref="recentBooks" class="tool-button" :class="buttonActiveClass('recentBooks')" @click="buttonClick('recentBooks')"><i class="el-icon-document"></i></el-button>
-                    </el-tooltip>
+                    <button ref="offlineMode" v-show="showToolButton['offlineMode']" class="tool-button" :class="buttonActiveClass('offlineMode')" @click="buttonClick('offlineMode')" v-ripple>
+                        <q-icon name="la la-unlink" size="32px"/>
+                        <q-tooltip :delay="1500" anchor="bottom middle" content-style="font-size: 80%">Автономный режим (без интернета)</q-tooltip>
+                    </button>
+                    <button ref="recentBooks" v-show="showToolButton['recentBooks']" class="tool-button" :class="buttonActiveClass('recentBooks')" @click="buttonClick('recentBooks')" v-ripple>
+                        <q-icon name="la la-book-open" size="32px"/>
+                        <q-tooltip :delay="1500" anchor="bottom middle" content-style="font-size: 80%">Открыть недавние</q-tooltip>
+                    </button>
                 </div>
 
-                <el-tooltip content="Настроить" :open-delay="1000" effect="light">
-                    <el-button ref="settings" class="tool-button" :class="buttonActiveClass('settings')" @click="buttonClick('settings')"><i class="el-icon-setting"></i></el-button>            
-                </el-tooltip>
+                <button ref="settings" class="tool-button" :class="buttonActiveClass('settings')" @click="buttonClick('settings')" v-ripple>
+                    <q-icon name="la la-cog" size="32px"/>
+                    <q-tooltip :delay="1500" anchor="bottom left" content-style="font-size: 80%">Настроить</q-tooltip>
+                </button>
             </div>
-        </el-header>
+        </div>
 
-        <el-main>
+        <div class="main col row relative-position">
             <keep-alive>
-                <component ref="page" :is="activePage"
+                <component ref="page" class="col" :is="activePage"
                     @load-book="loadBook"
                     @load-file="loadFile"
                     @book-pos-changed="bookPosChanged"
@@ -72,28 +82,30 @@
                 @stop-text-search="stopTextSearch">
             </SearchPage>
             <CopyTextPage v-if="copyTextActive" ref="copyTextPage" @copy-text-toggle="copyTextToggle"></CopyTextPage>
-            <RecentBooksPage v-show="recentBooksActive" ref="recentBooksPage" @load-book="loadBook" @recent-books-toggle="recentBooksToggle"></RecentBooksPage>
-            <SettingsPage v-if="settingsActive" ref="settingsPage" @settings-toggle="settingsToggle"></SettingsPage>
+            <RecentBooksPage v-show="recentBooksActive" ref="recentBooksPage" @load-book="loadBook" @recent-books-close="recentBooksClose"></RecentBooksPage>
+            <SettingsPage v-show="settingsActive" ref="settingsPage" @settings-toggle="settingsToggle"></SettingsPage>
             <HelpPage v-if="helpActive" ref="helpPage" @help-toggle="helpToggle"></HelpPage>
             <ClickMapPage v-show="clickMapActive" ref="clickMapPage"></ClickMapPage>
             <ServerStorage v-show="hidden" ref="serverStorage"></ServerStorage>
 
-            <el-dialog
-                title="Что нового:"
-                :visible.sync="whatsNewVisible"
-                width="80%">
+            <Dialog ref="dialog1" v-model="whatsNewVisible">
+                <template slot="header">
+                    Что нового:
+                </template>
+
                 <div style="line-height: 20px" v-html="whatsNewContent"></div>
 
                 <span class="clickable" @click="openVersionHistory">Посмотреть историю версий</span>
-                <span slot="footer" class="dialog-footer">
-                    <el-button @click="whatsNewDisable">Больше не показывать</el-button>
+                <span slot="footer">
+                    <q-btn class="q-px-md" dense no-caps @click="whatsNewDisable">Больше не показывать</q-btn>
                 </span>
-            </el-dialog>
+            </Dialog>
 
-            <el-dialog
-                title="Здравствуйте, уважаемые читатели!"
-                :visible.sync="donationVisible"
-                width="90%">
+            <Dialog ref="dialog2" v-model="donationVisible">
+                <template slot="header">
+                    Здравствуйте, уважаемые читатели!
+                </template>
+
                 <div style="word-break: normal">
                     Стартовала ежегодная акция "Оплатим хостинг вместе".<br><br>
 
@@ -110,12 +122,9 @@
 
                     Автор также обращается с просьбой о помощи в распространении 
                     <a href="https://omnireader.ru" target="_blank">ссылки</a>
-                    <el-tooltip :open-delay="500" effect="light">
-                        <template slot="content">
-                            Скопировать
-                        </template>
-                        <i class="el-icon-copy-document" style="cursor: pointer; font-size: 100%" @click="copyLink('https://omnireader.ru')"></i>
-                    </el-tooltip>
+                    <q-icon class="copy-icon" name="la la-copy" @click="copyLink('https://omnireader.ru')">
+                        <q-tooltip :delay="1000" anchor="top middle" self="center middle" content-style="font-size: 80%">Скопировать</q-tooltip>                    
+                    </q-icon>
                     на читалку через тематические форумы, соцсети, мессенджеры и пр.
                     Чем нас больше, тем легче оставаться на плаву и тем больше мотивации у разработчика, чтобы продолжать работать над проектом.
 
@@ -125,20 +134,20 @@
                     P.S. При необходимости можно воспользоваться подходящим обменником на <a href="https://www.bestchange.ru" target="_blank">bestchange.ru</a>
 
                     <br><br>
-                    <el-row type="flex" justify="center">
-                        <el-button type="success" round @click="openDonate">Помочь проекту</el-button>
-                    </el-row>
+                    <div class="row justify-center">
+                        <q-btn class="q-px-sm" color="primary" dense no-caps rounded @click="openDonate">Помочь проекту</q-btn>
+                    </div>
                 </div>
 
-                <span slot="footer" class="dialog-footer">
-                    <span class="clickable" style="font-size: 60%; color: grey" @click="donationDialogDisable">Больше не показывать</span>                        
-                    <br><br>
-                    <el-button @click="donationDialogRemind">Напомнить позже</el-button>
+                <span slot="footer">
+                    <span class="clickable row justify-end" style="font-size: 60%; color: grey" @click="donationDialogDisable">Больше не показывать</span>                        
+                    <br>
+                    <q-btn class="q-px-sm" dense no-caps @click="donationDialogRemind">Напомнить позже</q-btn>
                 </span>
-            </el-dialog>
+            </Dialog>
 
-        </el-main>
-    </el-container>
+        </div>
+    </div>
 </template>
 
 <script>
@@ -165,6 +174,7 @@ import bookManager from './share/bookManager';
 import readerApi from '../../api/reader';
 import * as utils from '../../share/utils';
 import {versionHistory} from './versionHistory';
+import Dialog from '../share/Dialog.vue';
 
 export default @Component({
     components: {
@@ -180,6 +190,7 @@ export default @Component({
         HelpPage,
         ClickMapPage,
         ServerStorage,
+        Dialog,
     },
     watch: {
         bookPos: function(newValue) {
@@ -292,8 +303,8 @@ class Reader extends Vue {
         (async() => {
             await bookManager.init(this.settings);
             bookManager.addEventListener(this.bookManagerEvent);
-            
-            if (this.$root.rootRoute == '/reader') {
+
+            if (this.$root.rootRoute() == '/reader') {
                 if (this.routeParamUrl) {
                     await this.loadBook({url: this.routeParamUrl, bookPos: this.routeParamPos, force: this.routeParamRefresh});
                 } else {
@@ -330,8 +341,13 @@ class Reader extends Vue {
 
     updateHeaderMinWidth() {
         const showButtonCount = Object.values(this.showToolButton).reduce((a, b) => a + (b ? 1 : 0), 0);
-        if (this.$refs.header)
-            this.$refs.header.style.minWidth = 65*showButtonCount + 'px';
+        if (this.$refs.buttons)
+            this.$refs.buttons.style.minWidth = 65*showButtonCount + 'px';
+        (async() => {
+            await utils.sleep(1000);
+            if (this.$refs.header)
+                this.$refs.header.style.overflowX = 'auto';
+        })();
     }
 
     checkSetStorageAccessKey() {
@@ -417,9 +433,9 @@ class Reader extends Vue {
     async copyLink(link) {
         const result = await utils.copyTextToClipboard(link);
         if (result)
-            this.$notify.success({message: `Ссылка ${link} успешно скопирована в буфер обмена`});
+            this.$root.notify.success(`Ссылка ${link} успешно скопирована в буфер обмена`);
         else
-            this.$notify.error({message: 'Копирование не удалось'});
+            this.$root.notify.error('Копирование не удалось');
     }
 
     openVersionHistory() {
@@ -562,22 +578,9 @@ class Reader extends Vue {
     fullScreenToggle() {
         this.fullScreenActive = !this.fullScreenActive;
         if (this.fullScreenActive) {
-            const element = document.documentElement;
-            if (element.requestFullscreen) {
-                element.requestFullscreen();
-            } else if (element.webkitrequestFullscreen) {
-                element.webkitRequestFullscreen();
-            } else if (element.mozRequestFullscreen) {
-                element.mozRequestFullScreen();
-            }
+            this.$q.fullscreen.request();
         } else {
-            if (document.cancelFullScreen) {
-                document.cancelFullScreen();
-            } else if (document.mozCancelFullScreen) {
-                document.mozCancelFullScreen();
-            } else if (document.webkitCancelFullScreen) {
-                document.webkitCancelFullScreen();
-            }
+            this.$q.fullscreen.exit();
         }
     }
 
@@ -600,7 +603,8 @@ class Reader extends Vue {
 
     setPositionToggle() {
         this.setPositionActive = !this.setPositionActive;
-        if (this.setPositionActive && this.activePage == 'TextPage' && this.mostRecentBook()) {
+        const page = this.$refs.page;
+        if (this.setPositionActive && this.activePage == 'TextPage' && page.parsed) {
             this.closeAllTextPages();
             this.setPositionActive = true;
 
@@ -680,6 +684,10 @@ class Reader extends Vue {
         }
     }
 
+    recentBooksClose() {
+        this.recentBooksActive = false;
+    }
+
     recentBooksToggle() {
         this.recentBooksActive = !this.recentBooksActive;
         if (this.recentBooksActive) {
@@ -745,7 +753,7 @@ class Reader extends Vue {
     buttonClick(button) {
         const activeClass = this.buttonActiveClass(button);
 
-        this.$refs[button].$el.blur();
+        this.$refs[button].blur();
 
         if (activeClass['tool-button-disabled'])
             return;
@@ -914,6 +922,8 @@ class Reader extends Vue {
             return;
         }
 
+        this.closeAllTextPages();
+
         let url = encodeURI(decodeURI(opts.url));
 
         if ((url.indexOf('http://') != 0) && (url.indexOf('https://') != 0) &&
@@ -1020,7 +1030,7 @@ class Reader extends Vue {
         } catch (e) {
             progress.hide(); this.progressActive = false;
             this.loaderActive = true;
-            this.$alert(e.message, 'Ошибка', {type: 'error'});
+            this.$root.stdDialog.alert(e.message, 'Ошибка', {type: 'negative'});
         }
     }
 
@@ -1044,7 +1054,7 @@ class Reader extends Vue {
         } catch (e) {
             progress.hide(); this.progressActive = false;
             this.loaderActive = true;
-            this.$alert(e.message, 'Ошибка', {type: 'error'});
+            this.$root.stdDialog.alert(e.message, 'Ошибка', {type: 'negative'});
         }
     }
 
@@ -1077,7 +1087,10 @@ class Reader extends Vue {
     }
 
     keyHook(event) {
-        if (this.$root.rootRoute == '/reader') {
+        if (this.$root.rootRoute() == '/reader') {
+            if (this.$root.stdDialog.active || this.$refs.dialog1.active || this.$refs.dialog2.active)
+                return;
+
             let handled = false;
             if (!handled && this.helpActive)
                 handled = this.$refs.helpPage.keyHook(event);
@@ -1156,37 +1169,22 @@ class Reader extends Vue {
 </script>
 
 <style scoped>
-.el-container {
-    padding: 0;
-    margin: 0;
-    height: 100%;
-}
-
-.el-header {
+.header {
     padding-left: 5px;
     padding-right: 5px;
     background-color: #1B695F;
     color: #000;
-    overflow-x: auto;
-    overflow-y: hidden;
+    overflow: hidden;
+    height: 50px;
 }
 
-.header {
-    display: flex;
-    justify-content: space-between;
-}
-
-.el-main {
-    position: relative;
-    display: flex;
-    padding: 0;
-    margin: 0;
+.main {
     background-color: #EBE2C9;
     color: #000;
 }
 
 .tool-button {
-    margin: 0 2px 0 2px;
+    margin: 0px 2px 0 2px;
     padding: 0;
     color: #3E843E;
     background-color: #E6EDF4;
@@ -1194,15 +1192,14 @@ class Reader extends Vue {
     height: 38px;
     width: 38px;
     border: 0;
+    border-radius: 6px;
     box-shadow: 3px 3px 5px black;
-}
-
-.tool-button + .tool-button {
-    margin: 0 2px 0 2px;
+    outline: 0;
 }
 
 .tool-button:hover {
     background-color: white;
+    cursor: pointer;
 }
 
 .tool-button-active {
@@ -1217,20 +1214,19 @@ class Reader extends Vue {
 .tool-button-active:hover {
     color: white;
     background-color: #81C581;
+    cursor: pointer;
 }
 
 .tool-button-disabled {
     color: lightgray;
     background-color: gray;
+    cursor: default;
 }
 
 .tool-button-disabled:hover {
     color: lightgray;
     background-color: gray;
-}
-
-i {
-    font-size: 200%;
+    cursor: default;
 }
 
 .space {
@@ -1246,5 +1242,11 @@ i {
     color: blue;
     text-decoration: underline;
     cursor: pointer;
+}
+
+.copy-icon {
+    cursor: pointer;
+    font-size: 120%;
+    color: blue;
 }
 </style>

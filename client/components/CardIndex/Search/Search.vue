@@ -1,7 +1,7 @@
 <template>
-    <el-container>
+    <div>
         Раздел Search в разработке
-    </el-container>
+    </div>
 </template>
 
 <script>

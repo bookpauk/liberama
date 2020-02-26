@@ -4,23 +4,20 @@
             Справка
         </template>
 
-        <el-tabs type="border-card" v-model="selectedTab">
-            <el-tab-pane class="tab" label="Общее">
-                <CommonHelpPage></CommonHelpPage>
-            </el-tab-pane>
-            <el-tab-pane label="Клавиатура">
-                <HotkeysHelpPage></HotkeysHelpPage>
-            </el-tab-pane>
-            <el-tab-pane label="Мышь/тачскрин">
-                <MouseHelpPage></MouseHelpPage>
-            </el-tab-pane>
-            <el-tab-pane label="История версий" name="releases">
-                <VersionHistoryPage></VersionHistoryPage>
-            </el-tab-pane>
-            <el-tab-pane label="Помочь проекту" name="donate">
-                <DonateHelpPage></DonateHelpPage>
-            </el-tab-pane>
-        </el-tabs>
+        <div class="col column" style="min-width: 600px">
+            <q-btn-toggle
+                v-model="selectedTab"
+                toggle-color="primary"
+                no-caps unelevated
+                :options="buttons"
+            />
+            <div class="separator"></div>
+
+            <keep-alive>
+                <component ref="page" class="col" :is="activePage"
+                ></component>
+            </keep-alive>
+        </div>
     </Window>
 </template>
 
@@ -33,32 +30,54 @@ import Window from '../../share/Window.vue';
 import CommonHelpPage from './CommonHelpPage/CommonHelpPage.vue';
 import HotkeysHelpPage from './HotkeysHelpPage/HotkeysHelpPage.vue';
 import MouseHelpPage from './MouseHelpPage/MouseHelpPage.vue';
-import DonateHelpPage from './DonateHelpPage/DonateHelpPage.vue';
 import VersionHistoryPage from './VersionHistoryPage/VersionHistoryPage.vue';
+import DonateHelpPage from './DonateHelpPage/DonateHelpPage.vue';
+
+const pages = {
+    'CommonHelpPage': CommonHelpPage,
+    'HotkeysHelpPage': HotkeysHelpPage,
+    'MouseHelpPage': MouseHelpPage,
+    'VersionHistoryPage': VersionHistoryPage,
+    'DonateHelpPage': DonateHelpPage,
+};
+
+const tabs = [
+    ['CommonHelpPage', 'Общее'],
+    ['HotkeysHelpPage', 'Клавиатура'],
+    ['MouseHelpPage', 'Мышь/тачскрин'],
+    ['VersionHistoryPage', 'История версий'],
+    ['DonateHelpPage', 'Помочь проекту'],
+];
 
 export default @Component({
-    components: {
-        Window,
-        CommonHelpPage,
-        HotkeysHelpPage,
-        MouseHelpPage,
-        DonateHelpPage,
-        VersionHistoryPage,
-    },
+    components: Object.assign({ Window }, pages),
 })
 class HelpPage extends Vue {
-    selectedTab = null;
+    selectedTab = 'CommonHelpPage';
 
     close() {
         this.$emit('help-toggle');
     }
 
+    get activePage() {
+        if (pages[this.selectedTab])
+            return pages[this.selectedTab];
+        return null;
+    }
+
+    get buttons() {
+        let result = [];
+        for (const tab of tabs)
+            result.push({label: tab[1], value: tab[0]});
+        return result;
+    }
+
     activateDonateHelpPage() {
-        this.selectedTab = 'donate';
+        this.selectedTab = 'DonateHelpPage';
     }
 
     activateVersionHistoryHelpPage() {
-        this.selectedTab = 'releases';
+        this.selectedTab = 'VersionHistoryPage';
     }
 
     keyHook(event) {
@@ -72,16 +91,8 @@ class HelpPage extends Vue {
 </script>
 
 <style scoped>
-.el-tabs {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    overflow: hidden;
-}
-
-.el-tab-pane {
-    flex: 1;
-    display: flex;
-    overflow: hidden;
+.separator {
+    height: 1px;
+    background-color: #E0E0E0;
 }
 </style>

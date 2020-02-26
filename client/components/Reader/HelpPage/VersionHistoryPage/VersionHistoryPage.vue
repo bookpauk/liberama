@@ -1,13 +1,14 @@
 <template>
     <div id="versionHistoryPage" class="page">
+        <span class="text-h6 text-bold">История версий:</span>
+        <br><br>
+
         <span class="clickable" v-for="(item, index) in versionHeader" :key="index" @click="showRelease(item)">
             <p>
             {{ item }}
             </p>
         </span>
 
-        <br>
-        <h4>История версий:</h4>
         <br>
 
         <div v-for="item in versionContent" :id="item.key" :key="item.key">
@@ -58,15 +59,11 @@ class VersionHistoryPage extends Vue {
 
 <style scoped>
 .page {
-    flex: 1;
     padding: 15px;
     overflow-y: auto;
     font-size: 120%;
     line-height: 130%;
-}
-
-h4 {
-    margin: 0;
+    position: relative;
 }
 
 p {

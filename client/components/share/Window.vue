@@ -1,12 +1,13 @@
 <template>
-    <div ref="main" class="main" @click="close" @mouseup="onMouseUp" @mousemove="onMouseMove">
-        <div ref="windowBox" class="windowBox" @click.stop>
-            <div class="window">
-                <div ref="header" class="header" @mousedown.prevent.stop="onMouseDown"
+    <div ref="main" class="main xyfit absolute" @click="close" @mouseup="onMouseUp" @mousemove="onMouseMove">
+        <div ref="windowBox" class="xyfit absolute flex no-wrap" @click.stop>
+            <div class="window flexfit column no-wrap">
+                <div ref="header" class="header row justify-end" @mousedown.prevent.stop="onMouseDown"
                     @touchstart.stop="onTouchStart" @touchend.stop="onTouchEnd" @touchmove.stop="onTouchMove">
-                    <span class="header-text"><slot name="header"></slot></span>
-                    <span class="close-button" @mousedown.stop @click="close"><i class="el-icon-close"></i></span>
+                    <span class="header-text col"><slot name="header"></slot></span>
+                    <span class="close-button row justify-center items-center" @mousedown.stop @click="close"><q-icon name="la la-times" size="16px"/></span>
                 </div>
+
                 <slot></slot>
             </div>
         </div>
@@ -116,23 +117,20 @@ class Window extends Vue {
 
 <style scoped>
 .main {
-    position: absolute;
-    width: 100%;
-    height: 100%;
+    background-color: transparent !important;
     z-index: 50;
 }
 
-.windowBox {
-    position: absolute;
-    display: flex;
+.xyfit {
     height: 100%;
     width: 100%;
 }
 
-.window {
+.flexfit {
     flex: 1;
-    display: flex;
-    flex-direction: column;
+}
+
+.window {
     margin: 10px;
     background-color: #ffffff;
     border: 3px double black;
@@ -141,23 +139,21 @@ class Window extends Vue {
 }
 
 .header {
-    display: flex;
-    justify-content: flex-end;
-    background-color: #59B04F;
+    background: linear-gradient(to bottom right, green, #59B04F);
     align-items: center;
     height: 30px;
 }
 
 .header-text {
-    flex: 1;
     margin-left: 10px;
     margin-right: 10px;
+    color: yellow;
+    text-shadow: 2px 1px 5px black, 2px 2px 5px black;
+    overflow: hidden;
+    white-space: nowrap;
 }
 
 .close-button {
-    display: flex;
-    justify-content: center;
-    align-items: center;
     width: 30px;
     height: 30px;
     cursor: pointer;
@@ -166,4 +162,5 @@ class Window extends Vue {
 .close-button:hover {
     background-color: #69C05F;
 }
+
 </style>

@@ -1,15 +1,9 @@
 <template>
-    <el-container direction="vertical">
-        <el-tabs type="border-card" style="height: 100%;" v-model="selectedTab">
-            <el-tab-pane label="Поиск"></el-tab-pane>
-            <el-tab-pane label="Автор"></el-tab-pane>
-            <el-tab-pane label="Книга"></el-tab-pane>
-            <el-tab-pane label="История"></el-tab-pane>
-            <keep-alive>
-                <router-view></router-view>
-            </keep-alive>
-        </el-tabs>
-    </el-container>
+    <div>
+        <keep-alive>
+            <router-view></router-view>
+        </keep-alive>
+    </div>
 </template>
 
 <script>
@@ -18,7 +12,7 @@ import Vue from 'vue';
 import Component from 'vue-class-component';
 import _ from 'lodash';
 
-const rootRoute = '/cardindex';
+const selfRoute = '/cardindex';
 const tab2Route = [
     '/cardindex/search',
     '/cardindex/card',
@@ -51,7 +45,7 @@ class CardIndex extends Vue {
             if (t !== this.selectedTab)
                 this.selectedTab = t.toString();
         } else {
-            if (route == rootRoute && lastActiveTab !== null)
+            if (route == selfRoute && lastActiveTab !== null)
                 this.setRouteByTab(lastActiveTab);
         }
     }

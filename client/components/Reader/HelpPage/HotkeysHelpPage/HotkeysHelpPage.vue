@@ -1,6 +1,6 @@
 <template>
     <div class="page">
-        <h4>Управление с помощью горячих клавиш:</h4>
+        <span class="text-h6 text-bold">Управление с помощью горячих клавиш:</span>
         <ul>
             <li><b>F1, H</b> - открыть справку</li>
             <li><b>Escape</b> - показать/скрыть страницу загрузки</li>
@@ -42,14 +42,9 @@ class HotkeysHelpPage extends Vue {
 
 <style scoped>
 .page {
-    flex: 1;
     padding: 15px;
     overflow-y: auto;
     font-size: 120%;
     line-height: 130%;
-}
-
-h4 {
-    margin: 0;
 }
 </style>
