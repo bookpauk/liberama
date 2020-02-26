@@ -149,6 +149,8 @@ class Window extends Vue {
     margin-right: 10px;
     color: yellow;
     text-shadow: 2px 1px 5px black, 2px 2px 5px black;
+    overflow: hidden;
+    white-space: nowrap;
 }
 
 .close-button {
