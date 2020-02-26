@@ -47,7 +47,7 @@ class Notify extends Vue {
     }
 
     error(message, caption) {
-        this.notify({color: 'negative', icon: 'la la-exclamation-circle', messageColor: 'yellow', message, caption});
+        this.notify({color: 'negative', icon: 'la la-exclamation-circle', messageColor: 'yellow', captionColor: 'white', message, caption});
     }
 
     info(message, caption) {

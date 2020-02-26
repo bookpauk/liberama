@@ -152,11 +152,7 @@ class App extends Vue {
                 let mes = newError.message;
                 if (newError.response && newError.response.config)
                     mes = newError.response.config.url + '<br>' + newError.response.statusText;
-                this.$notify.error({
-                    title: 'Ошибка API',
-                    dangerouslyUseHTMLString: true,
-                    message: mes
-                });
+                this.$root.notify.error(mes, 'Ошибка API');
             }
         });
 
