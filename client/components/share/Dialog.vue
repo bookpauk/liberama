@@ -1,6 +1,6 @@
 <template>
     <q-dialog v-model="active">
-        <div class="column bg-white">
+        <div class="column bg-white no-wrap">
             <div class="header row">
                 <div class="caption col row items-center q-ml-md">
                     <slot name="header"></slot>
