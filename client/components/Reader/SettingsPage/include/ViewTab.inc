@@ -1,11 +1,11 @@
 <q-tabs
     v-model="selectedViewTab"
-    active-color="white"
-    active-bg-color="grey-6"
+    active-color="black"
+    active-bg-color="white"
     indicator-color="white"
     dense
     no-caps
-    class="no-mp"
+    class="no-mp bg-grey-3 text-grey-7"
 >
     <q-tab name="color" label="Цвет" />
     <q-tab name="font" label="Шрифт" />
@@ -13,7 +13,7 @@
     <q-tab name="status" label="Строка статуса" />
 </q-tabs>
 
-<div class="bg-grey-8 q-mb-sm" style="height: 2px; position: relative; top: -2px;"/>
+<div class="q-mb-sm"/>
 
 <div class="col tab-panel">
     <div v-if="selectedViewTab == 'color'">
