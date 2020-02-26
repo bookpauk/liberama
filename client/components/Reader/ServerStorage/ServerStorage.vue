@@ -177,17 +177,17 @@ class ServerStorage extends Vue {
 
     success(message) {
         if (this.showServerStorageMessages)
-            this.$notify.success({message});
+            this.$root.notify.success(message);
     }
 
     warning(message) {
         if (this.showServerStorageMessages && !this.offlineModeActive)
-            this.$notify.warning({message});
+            this.$root.notify.warning(message);
     }
 
     error(message) {
         if (this.showServerStorageMessages && !this.offlineModeActive)
-            this.$notify.error({message});
+            this.$root.notify.error(message);
     }
 
     async loadSettings(force = false, doNotifySuccess = true) {
