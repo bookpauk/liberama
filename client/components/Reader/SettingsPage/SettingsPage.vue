@@ -4,8 +4,6 @@
             Настройки
         </template>
 
-        <StdDialog ref="stdDialog"/>
-
         <div class="col row">
             <div class="full-height">
                 <q-tabs
@@ -78,7 +76,6 @@ import _ from 'lodash';
 import * as utils from '../../../share/utils';
 import Window from '../../share/Window.vue';
 import NumInput from '../../share/NumInput.vue';
-import StdDialog from '../../share/StdDialog.vue';
 import rstore from '../../../store/modules/reader';
 import defPalette from './defPalette';
 import * as notify from '../../share/notify';
@@ -89,7 +86,6 @@ export default @Component({
     components: {
         Window,
         NumInput,
-        StdDialog,
     },
     data: function() {
         return Object.assign({}, rstore.settingDefaults);
@@ -168,7 +164,6 @@ class SettingsPage extends Vue {
     }
 
     mounted() {
-        this.stdDialog = this.$refs.stdDialog;
         this.$watch(
             '$refs.tabs.scrollable',
             (newValue) => {
@@ -350,7 +345,7 @@ class SettingsPage extends Vue {
 
     async setDefaults() {
         try {
-            if (await this.stdDialog.confirm('Подтвердите установку настроек по умолчанию:', ' ')) {
+            if (await this.$root.stdDialog.confirm('Подтвердите установку настроек по умолчанию:', ' ')) {
                 this.form = Object.assign({}, rstore.settingDefaults);
                 for (let prop in rstore.settingDefaults) {
                     this[prop] = this.form[prop];
@@ -368,15 +363,15 @@ class SettingsPage extends Vue {
     async addProfile() {
         try {
             if (Object.keys(this.profiles).length >= 100) {
-                this.stdDialog.alert('Достигнут предел количества профилей', 'Ошибка');
+                this.$root.stdDialog.alert('Достигнут предел количества профилей', 'Ошибка');
                 return;
             }
-            const result = await this.stdDialog.prompt('Введите произвольное название для профиля устройства:', ' ', {
+            const result = await this.$root.stdDialog.prompt('Введите произвольное название для профиля устройства:', ' ', {
                 inputValidator: (str) => { if (!str) return 'Название не должно быть пустым'; else if (str.length > 50) return 'Слишком длинное название'; else return true; },
             });
             if (result && result.value) {
                 if (this.profiles[result.value]) {
-                    this.stdDialog.alert('Такой профиль уже существует', 'Ошибка');
+                    this.$root.stdDialog.alert('Такой профиль уже существует', 'Ошибка');
                 } else {
                     const newProfiles = Object.assign({}, this.profiles, {[result.value]: 1});
                     this.commit('reader/setAllowProfilesSave', true);
@@ -397,7 +392,7 @@ class SettingsPage extends Vue {
             return;
 
         try {
-            const result = await this.stdDialog.prompt(`<b>Предупреждение!</b> Удаление профиля '${this.currentProfile}' необратимо.` +
+            const result = await this.$root.stdDialog.prompt(`<b>Предупреждение!</b> Удаление профиля '${this.currentProfile}' необратимо.` +
                     `<br>Все настройки профиля будут потеряны, однако список читаемых книг сохранится.` +
                     `<br><br>Введите 'да' для подтверждения удаления:`, ' ', {
                 inputValidator: (str) => { if (str && str.toLowerCase() === 'да') return true; else return 'Удаление не подтверждено'; },
@@ -425,7 +420,7 @@ class SettingsPage extends Vue {
             return;
 
         try {
-            const result = await this.stdDialog.prompt(`<b>Предупреждение!</b> Удаление ВСЕХ профилей с настройками необратимо.` +
+            const result = await this.$root.stdDialog.prompt(`<b>Предупреждение!</b> Удаление ВСЕХ профилей с настройками необратимо.` +
                     `<br><br>Введите 'да' для подтверждения удаления:`, ' ', {
                 inputValidator: (str) => { if (str && str.toLowerCase() === 'да') return true; else return 'Удаление не подтверждено'; },
             });
@@ -459,7 +454,7 @@ class SettingsPage extends Vue {
 
     async enterServerStorageKey(key) {
         try {
-            const result = await this.stdDialog.prompt(`<b>Предупреждение!</b> Изменение ключа доступа приведет к замене всех профилей и читаемых книг в читалке.` +
+            const result = await this.$root.stdDialog.prompt(`<b>Предупреждение!</b> Изменение ключа доступа приведет к замене всех профилей и читаемых книг в читалке.` +
                     `<br><br>Введите новый ключ доступа:`, ' ', {
                 inputValidator: (str) => {
                     try {
@@ -484,7 +479,7 @@ class SettingsPage extends Vue {
 
     async generateServerStorageKey() {
         try {
-            const result = await this.stdDialog.prompt(`<b>Предупреждение!</b> Генерация нового ключа доступа приведет к удалению всех профилей и читаемых книг в читалке.` +
+            const result = await this.$root.stdDialog.prompt(`<b>Предупреждение!</b> Генерация нового ключа доступа приведет к удалению всех профилей и читаемых книг в читалке.` +
                     `<br><br>Введите 'да' для подтверждения генерации нового ключа:`, ' ', {
                 inputValidator: (str) => { if (str && str.toLowerCase() === 'да') return true; else return 'Генерация не подтверждена'; },
             });
@@ -499,7 +494,7 @@ class SettingsPage extends Vue {
     }
 
     keyHook(event) {
-        if (!this.stdDialog.active && event.type == 'keydown' && event.code == 'Escape') {
+        if (!this.$root.stdDialog.active && event.type == 'keydown' && event.code == 'Escape') {
             this.close();
         }
         return true;
