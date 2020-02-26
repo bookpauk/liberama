@@ -3,7 +3,7 @@
         <div class="relative-position">
             <GithubCorner url="https://github.com/bookpauk/liberama" cornerColor="#1B695F" gitColor="#EBE2C9"></GithubCorner>
         </div>
-        <div class="col column justify-center items-center no-wrap overflow-hidden" style="min-height: 170px">
+        <div class="col column justify-center items-center no-wrap overflow-hidden" style="min-height: 230px">
             <span class="greeting"><b>{{ title }}</b></span>
             <div class="q-my-sm"></div>
             <span class="greeting">Добро пожаловать!</span>
@@ -12,7 +12,7 @@
         </div>
 
         <div class="col-auto column justify-start items-center no-wrap overflow-hidden">
-            <q-input ref="input" class="full-width q-px-xs" style="max-width: 700px" outlined dense bg-color="white" v-model="bookUrl" placeholder="URL книги">
+            <q-input ref="input" class="full-width q-px-sm" style="max-width: 700px" outlined dense bg-color="white" v-model="bookUrl" placeholder="URL книги">
                 <template v-slot:append>
                     <q-btn rounded flat style="width: 40px" icon="la la-check" @click="submitUrl"/>
                 </template>
