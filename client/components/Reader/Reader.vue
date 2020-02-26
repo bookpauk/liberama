@@ -38,7 +38,7 @@
                         <q-tooltip :delay="1500" anchor="bottom middle" content-style="font-size: 80%">Скопировать текст со страницы</q-tooltip>
                     </button>
                     <button ref="refresh" v-show="showToolButton['refresh']" class="tool-button" :class="buttonActiveClass('refresh')" @click="buttonClick('refresh')" v-ripple>
-                        <q-icon name="la la-sync" size="32px"/>
+                        <q-icon name="la la-sync" size="32px" :class="{clear: !showRefreshIcon}"/>
                         <q-tooltip :delay="1500" anchor="bottom middle" content-style="font-size: 80%">Принудительно обновить книгу в обход кэша</q-tooltip>
                     </button>
                     <div class="space"></div>
