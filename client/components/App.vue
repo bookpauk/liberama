@@ -52,6 +52,7 @@
         </q-page-container>
     </q-layout-->
     <div class="fit row">
+        <Notify ref="notify"/>
         <StdDialog ref="stdDialog"/>
         <keep-alive>
             <router-view class="col"></router-view>
@@ -63,11 +64,13 @@
 //-----------------------------------------------------------------------------
 import Vue from 'vue';
 import Component from 'vue-class-component';
+import Notify from './share/Notify.vue';
 import StdDialog from './share/StdDialog.vue';
 import * as utils from '../share/utils';
 
 export default @Component({
     components: {
+        Notify,
         StdDialog,
     },
     watch: {
@@ -140,7 +143,9 @@ class App extends Vue {
     }
 
     mounted() {
+        this.$root.notify = this.$refs.notify;
         this.$root.stdDialog = this.$refs.stdDialog;
+
         this.dispatch('config/loadConfig');
         this.$watch('apiError', function(newError) {
             if (newError) {

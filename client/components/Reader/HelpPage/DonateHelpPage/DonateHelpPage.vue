@@ -56,7 +56,6 @@
 import Vue from 'vue';
 import Component from 'vue-class-component';
 import {copyTextToClipboard} from '../../../../share/utils';
-import * as notify from '../../../share/notify';
 
 export default @Component({
 })
@@ -77,9 +76,9 @@ class DonateHelpPage extends Vue {
     async copyAddress(address, prefix) {
         const result = await copyTextToClipboard(address);
         if (result)
-            notify.success(this, `${prefix} ${address} успешно скопирован в буфер обмена`);
+            this.$root.notify.success(`${prefix} ${address} успешно скопирован в буфер обмена`);
         else
-            notify.error(this, 'Копирование не удалось');
+            this.$root.notify.error('Копирование не удалось');
     }
 }
 //-----------------------------------------------------------------------------

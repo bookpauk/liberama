@@ -45,7 +45,6 @@ import Vue from 'vue';
 import Component from 'vue-class-component';
 
 import {copyTextToClipboard} from '../../../../share/utils';
-import * as notify from '../../../share/notify';
 
 export default @Component({
 })
@@ -61,9 +60,9 @@ class CommonHelpPage extends Vue {
         const result = await copyTextToClipboard(text);
         const msg = (result ? mes : 'Копирование не удалось');
         if (result)
-            notify.success(this, msg);
+            this.$root.notify.success(msg);
         else
-            notify.error(this, msg);
+            this.$root.notify.error(msg);
     }
 }
 //-----------------------------------------------------------------------------

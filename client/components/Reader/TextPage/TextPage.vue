@@ -39,7 +39,6 @@ import Component from 'vue-class-component';
 import {loadCSS} from 'fg-loadcss';
 import _ from 'lodash';
 
-import * as notify from '../../share/notify';
 import {sleep} from '../../../share/utils';
 import bookManager from '../share/bookManager';
 import DrawHelper from './DrawHelper';
@@ -287,7 +286,7 @@ class TextPage extends Vue {
         (async() => {
             await sleep(500);
             if (this.fontsLoading)
-                close = notify.info(this, 'Загрузка шрифта &nbsp;<i class="la la-snowflake icon-rotate" style="font-size: 150%"></i>');
+                close = this.$root.notify.info('Загрузка шрифта &nbsp;<i class="la la-snowflake icon-rotate" style="font-size: 150%"></i>');
         })();
 
         if (!this.fontsLoaded)
@@ -302,7 +301,7 @@ class TextPage extends Vue {
         try {
             await this.checkLoadedFonts();
         } catch (e) {
-            notify.error(this, 'Некоторые шрифты не удалось загрузить', 'Ошибка загрузки');
+            this.$root.notify.error('Некоторые шрифты не удалось загрузить', 'Ошибка загрузки');
         }
 
         this.fontsLoading = false;

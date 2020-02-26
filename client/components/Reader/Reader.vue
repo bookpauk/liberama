@@ -432,9 +432,9 @@ class Reader extends Vue {
     async copyLink(link) {
         const result = await utils.copyTextToClipboard(link);
         if (result)
-            this.$notify.success({message: `Ссылка ${link} успешно скопирована в буфер обмена`});
+            this.$root.notify.success(`Ссылка ${link} успешно скопирована в буфер обмена`);
         else
-            this.$notify.error({message: 'Копирование не удалось'});
+            this.$root.notify.error('Копирование не удалось');
     }
 
     openVersionHistory() {
