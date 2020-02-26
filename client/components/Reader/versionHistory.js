@@ -1,5 +1,17 @@
 export const versionHistory = [
 {
+    showUntil: '2020-02-25',
+    header: '0.9.0 (2020-02-26)',
+    content:
+`
+<ul>
+    <li>переход на UI-фреймфорк Quasar</li>
+    <li>незначительные изменения интерфейса</li>
+</ul>
+`
+},
+
+{
     showUntil: '2020-02-05',
     header: '0.8.4 (2020-02-06)',
     content:
