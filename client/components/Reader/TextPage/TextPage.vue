@@ -21,11 +21,12 @@
             @wheel.prevent.stop="onMouseWheel"
             @touchstart.stop="onTouchStart" @touchend.stop="onTouchEnd" @touchmove.stop="onTouchMove" @touchcancel.prevent.stop="onTouchCancel"
             oncontextmenu="return false;">
-            <div v-show="showStatusBar" v-html="statusBarClickable" @mousedown.prevent.stop @touchstart.stop
+            <div v-show="showStatusBar && statusBarClickOpen" v-html="statusBarClickable" @mousedown.prevent.stop @touchstart.stop
                 @click.prevent.stop="onStatusBarClick"></div>
         </div>
-        <div v-show="!clickControl && showStatusBar" class="layout" v-html="statusBarClickable" @mousedown.prevent.stop @touchstart.stop
-            @click.prevent.stop="onStatusBarClick"></div>
+        <div v-show="!clickControl && showStatusBar && statusBarClickOpen" class="layout" v-html="statusBarClickable" @mousedown.prevent.stop @touchstart.stop
+            @click.prevent.stop="onStatusBarClick">
+        </div>
         <!-- невидимым делать нельзя, вовремя не подгружаютя шрифты -->
         <canvas ref="offscreenCanvas" class="layout" style="visibility: hidden"></canvas>
         <div ref="measureWidth" style="position: absolute; visibility: hidden"></div>

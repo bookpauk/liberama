@@ -109,22 +109,6 @@
 </div>
 
 <div class="item row">
-    <div class="label-2"></div>
-    <div class="col row">
-        <q-checkbox v-model="enableSitesFilter" @input="needTextReload" size="xs" label="Включить html-фильтр для сайтов">
-            <q-tooltip :delay="1000" anchor="top middle" self="bottom middle" content-style="font-size: 80%">
-                Html-фильтр вырезает лишние элементы со<br>
-                страницы для определенных сайтов, таких как:<br>
-                samlib.ru<br>
-                www.fanfiction.net<br>
-                archiveofourown.org<br>
-                и других
-            </q-tooltip>
-        </q-checkbox>
-    </div>
-</div>
-
-<div class="item row">
     <div class="label-2">Изображения</div>
     <div class="col row">
         <q-checkbox v-model="showImages" size="xs" label="Показывать" />

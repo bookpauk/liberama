@@ -54,6 +54,7 @@ class ReaderWorker {
         let decompDir = '';
         let downloadedFilename = '';
         let isUploaded = false;
+        let isRestored = false;
         let convertFilename = '';
 
         const overLoadMes = 'Слишком большая очередь загрузки. Пожалуйста, попробуйте позже.';
@@ -88,9 +89,17 @@ class ReaderWorker {
                 downloadedFilename = `${this.config.tempDownloadDir}/${tempFilename}`;
                 await fs.writeFile(downloadedFilename, downdata);
             } else {//uploaded file
-                downloadedFilename = `${this.config.uploadDir}/${url.substr(7)}`;
-                if (!await fs.pathExists(downloadedFilename)) 
-                    throw new Error('Файл не найден на сервере (возможно был удален как устаревший). Пожалуйста, загрузите файл с диска на сервер заново.');
+                const fileHash = url.substr(7);
+                downloadedFilename = `${this.config.uploadDir}/${fileHash}`;
+                if (!await fs.pathExists(downloadedFilename)) {
+                    //если удалено из upload, попробуем восстановить из удаленного хранилища
+                    try {
+                        downloadedFilename = await this.restoreRemoteFile(fileHash);
+                        isRestored = true;
+                    } catch(e) {
+                        throw new Error('Файл не найден на сервере (возможно был удален как устаревший). Пожалуйста, загрузите файл с диска на сервер заново.');
+                    }
+                }
                 await utils.touchFile(downloadedFilename);
                 isUploaded = true;
             }
@@ -146,6 +155,20 @@ class ReaderWorker {
                 })();
             }
 
+            //лениво сохраним downloadedFilename в tmp и в удаленном хранилище в случае isUploaded
+            if (this.remoteWebDavStorage && isUploaded && !isRestored) {
+                (async() => {
+                    await utils.sleep(30*1000);
+                    try {
+                        //сжимаем файл в tmp, если там уже нет с тем же именем-sha256
+                        const compDownloadedFilename = await this.decomp.gzipFileIfNotExists(downloadedFilename, this.config.tempPublicDir, true);
+                        await this.remoteWebDavStorage.putFile(compDownloadedFilename);
+                    } catch (e) {
+                        log(LM_ERR, e.stack);
+                    }
+                })();
+            }
+
         } catch (e) {
             log(LM_ERR, e.stack);
             if (e.message == 'abort')
@@ -188,6 +211,24 @@ class ReaderWorker {
         return `file://${hash}`;
     }
 
+    async restoreRemoteFile(filename) {
+        const basename = path.basename(filename);
+        const targetName = `${this.config.tempPublicDir}/${basename}`;
+
+        if (!await fs.pathExists(targetName)) {
+            let found = false;
+            if (this.remoteWebDavStorage) {
+                found = await this.remoteWebDavStorage.getFileSuccess(targetName);
+            }
+
+            if (!found) {
+                throw new Error('404 Файл не найден');
+            }
+        }
+
+        return targetName;
+    }
+
     restoreCachedFile(filename) {
         const workerId = this.workerState.generateWorkerId();
         const wState = this.workerState.getControl(workerId);
@@ -197,21 +238,10 @@ class ReaderWorker {
             try {
                 wState.set({state: 'download', step: 1, totalSteps: 1, path: filename, progress: 0});
 
-                const basename = path.basename(filename);
-                const targetName = `${this.config.tempPublicDir}/${basename}`;
-
-                if (!await fs.pathExists(targetName)) {
-                    let found = false;
-                    if (this.remoteWebDavStorage) {
-                        found = await this.remoteWebDavStorage.getFileSuccess(targetName);
-                    } 
-
-                    if (!found) {
-                        throw new Error('404 Файл не найден');
-                    }
-                }
-
+                const targetName = await this.restoreRemoteFile(filename);
                 const stat = await fs.stat(targetName);
+
+                const basename = path.basename(filename);
                 wState.finish({path: `/tmp/${basename}`, size: stat.size, progress: 100});
             } catch (e) {
                 if (e.message.indexOf('404') < 0)

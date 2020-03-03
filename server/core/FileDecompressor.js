@@ -241,27 +241,29 @@ class FileDecompressor {
         });
     }
 
-    async gzipFileIfNotExists(filename, outDir) {
+    async gzipFileIfNotExists(filename, outDir, isMaxCompression) {
         const hash = await utils.getFileHash(filename, 'sha256', 'hex');
 
         const outFilename = `${outDir}/${hash}`;
 
         if (!await fs.pathExists(outFilename)) {
-            await this.gzipFile(filename, outFilename, 1);
+            await this.gzipFile(filename, outFilename, (isMaxCompression ? 9 : 1));
 
-            // переупакуем через некоторое время на максималках
-            const filenameCopy = `${filename}.copy`;
-            await fs.copy(filename, filenameCopy);
+            // переупакуем через некоторое время на максималках, если упаковали плохо
+            if (!isMaxCompression) {
+                const filenameCopy = `${filename}.copy`;
+                await fs.copy(filename, filenameCopy);
 
-            (async() => {
-                await utils.sleep(5000);
-                const filenameGZ = `${filename}.gz`;
-                await this.gzipFile(filenameCopy, filenameGZ, 9);
+                (async() => {
+                    await utils.sleep(5000);
+                    const filenameGZ = `${filename}.gz`;
+                    await this.gzipFile(filenameCopy, filenameGZ, 9);
 
-                await fs.move(filenameGZ, outFilename, {overwrite: true});
+                    await fs.move(filenameGZ, outFilename, {overwrite: true});
 
-                await fs.remove(filenameCopy);
-            })().catch((e) => { if (appLogger.inited) appLogger.log(LM_ERR, `FileDecompressor.gzipFileIfNotExists: ${e.message}`) });
+                    await fs.remove(filenameCopy);
+                })().catch((e) => { if (appLogger.inited) appLogger.log(LM_ERR, `FileDecompressor.gzipFileIfNotExists: ${e.message}`) });
+            }
         } else {
             await utils.touchFile(outFilename);
         }
