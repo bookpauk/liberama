@@ -80,7 +80,6 @@ Vue.use(Quasar, { config, components, directives, plugins });
 //import '@quasar/extras/material-icons-outlined/material-icons-outlined.css';
 //import '@quasar/extras/fontawesome-v5/fontawesome-v5.css';
 
-//import '@quasar/extras/material-icons-outlined/material-icons-outlined.css';
 import '@quasar/extras/line-awesome/line-awesome.css';
 
 //import fontawesomeV5 from 'quasar/icon-set/fontawesome-v5.js'
