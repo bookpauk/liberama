@@ -160,6 +160,7 @@ const settingDefaults = {
     statusBarTop: false,// top, bottom
     statusBarHeight: 19,// px
     statusBarColorAlpha: 0.4,
+    statusBarClickOpen: true,
 
     scrollingDelay: 3000,// замедление, ms
     scrollingType: 'ease-in-out', //linear, ease, ease-in, ease-out, ease-in-out
