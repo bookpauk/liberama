@@ -71,6 +71,18 @@
 </div>
 
 <div class="item row">
+    <div class="label-6">Обработка</div>
+    <q-checkbox size="xs" v-model="lazyParseEnabled" label="Предварительная подготовка текста">
+        <q-tooltip :delay="1000" anchor="top middle" self="bottom middle" content-style="font-size: 80%">
+            Включение этой опции позволяет делать предварительную<br>
+            подготовку всего текста в ленивом режиме сразу после<br>
+            загрузки книги. Это может повысить отзывчивость читалки,<br>
+            но нагружает процессор каждый раз при открытии книги.
+        </q-tooltip>
+    </q-checkbox>
+</div>
+
+<div class="item row">
     <div class="label-6">Парам. в URL</div>
     <q-checkbox size="xs" v-model="allowUrlParamBookPos">
         Добавлять параметр "__p"
@@ -80,18 +92,6 @@
             без потери текущей позиции. Однако в этом случае<br>
             при листании забивается история браузера, т.к. на<br>
             каждое изменение позиции происходит смена URL.
-        </q-tooltip>
-    </q-checkbox>
-</div>
-
-<div class="item row">
-    <div class="label-6">Парсинг</div>
-    <q-checkbox size="xs" v-model="lazyParseEnabled" label="Предварительная обработка текста">
-        <q-tooltip :delay="1000" anchor="top middle" self="bottom middle" content-style="font-size: 80%">
-            Включение этой опции позволяет делать предварительную<br>
-            обработку текста в ленивом режиме сразу после загрузки<br>
-            книги. Это может повысить отзывчивость читалки, но<br>
-            нагружает процессор каждый раз при открытии книги.
         </q-tooltip>
     </q-checkbox>
 </div>
