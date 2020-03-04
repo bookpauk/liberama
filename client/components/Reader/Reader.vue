@@ -1030,7 +1030,7 @@ class Reader extends Vue {
         } catch (e) {
             progress.hide(); this.progressActive = false;
             this.loaderActive = true;
-            this.$root.stdDialog.alert(e.message, 'Ошибка', {type: 'negative'});
+            this.$root.stdDialog.alert(e.message, 'Ошибка', {color: 'negative'});
         }
     }
 
@@ -1054,7 +1054,7 @@ class Reader extends Vue {
         } catch (e) {
             progress.hide(); this.progressActive = false;
             this.loaderActive = true;
-            this.$root.stdDialog.alert(e.message, 'Ошибка', {type: 'negative'});
+            this.$root.stdDialog.alert(e.message, 'Ошибка', {color: 'negative'});
         }
     }
 

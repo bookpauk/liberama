@@ -3,7 +3,7 @@
         <slot></slot>
 
         <!--------------------------------------------------->
-        <div v-show="type == 'alert'" class="dialog column bg-white no-wrap" style="min-height: 150px">
+        <div v-show="type == 'alert'" class="dialog column bg-white no-wrap" :style="dialogStyle">
             <div class="header row">
                 <div class="caption col row items-center q-ml-md">
                     <q-icon v-show="caption" class="q-mr-sm" :class="iconColor" name="las la-exclamation-circle" size="28px"></q-icon>
@@ -26,7 +26,7 @@
         </div>
 
         <!--------------------------------------------------->
-        <div v-show="type == 'confirm'" class="dialog column bg-white no-wrap" style="min-height: 150px">
+        <div v-show="type == 'confirm'" class="dialog column bg-white no-wrap" :style="dialogStyle">
             <div class="header row">
                 <div class="caption col row items-center q-ml-md">
                     <q-icon v-show="caption" class="q-mr-sm" :class="iconColor" name="las la-exclamation-circle" size="28px"></q-icon>
@@ -50,7 +50,7 @@
         </div>
 
         <!--------------------------------------------------->
-        <div v-show="type == 'prompt'" class="dialog column bg-white no-wrap" style="min-height: 250px">
+        <div v-show="type == 'prompt'" class="dialog column bg-white no-wrap" :style="dialogStyle">
             <div class="header row">
                 <div class="caption col row items-center q-ml-md">
                     <q-icon v-show="caption" class="q-mr-sm" :class="iconColor" name="las la-exclamation-circle" size="28px"></q-icon>
@@ -99,6 +99,7 @@ class StdDialog extends Vue {
     inputValue = '';
     error = '';
     iconColor = '';
+    style = '';
 
     created() {
         if (this.$root.addKeyHook) {
@@ -117,9 +118,13 @@ class StdDialog extends Vue {
         this.error = '';
 
         this.iconColor = 'text-warning';
-        if (opts && opts.type) {
-            this.iconColor = `text-${opts.type}`;
+        if (opts && opts.color) {
+            this.iconColor = `text-${opts.color}`;
         }
+    }
+
+    get dialogStyle() {
+        return 'min-height: 150px';
     }
 
     onHide() {

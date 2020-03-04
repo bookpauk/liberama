@@ -423,7 +423,7 @@ class TextPage extends Vue {
                     if (this.lazyParseEnabled)
                         this.lazyParsePara();
                 } catch (e) {
-                    this.$root.stdDialog.alert(e.message, 'Ошибка', {type: 'negative'});
+                    this.$root.stdDialog.alert(e.message, 'Ошибка', {color: 'negative'});
                 }
             })();
         }
@@ -1132,7 +1132,7 @@ class TextPage extends Vue {
         if (url && url.indexOf('file://') != 0) {
             window.open(url, '_blank');
         } else {
-            this.$root.stdDialog.alert('Оригинал недоступен, т.к. файл книги был загружен с локального диска.', ' ', {type: 'info'});
+            this.$root.stdDialog.alert('Оригинал недоступен, т.к. файл книги был загружен с локального диска.', ' ', {color: 'info'});
         }
     }
 

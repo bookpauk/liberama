@@ -303,7 +303,7 @@ class RecentBooksPage extends Vue {
             let errMes = e.message;
             if (errMes.indexOf('404') >= 0)
                 errMes = 'Файл не найден на сервере (возможно был удален как устаревший)';
-            this.$root.stdDialog.alert(errMes, 'Ошибка', {type: 'negative'});
+            this.$root.stdDialog.alert(errMes, 'Ошибка', {color: 'negative'});
         }
     }
 
