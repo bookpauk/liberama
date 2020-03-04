@@ -3,7 +3,7 @@
         <slot></slot>
 
         <!--------------------------------------------------->
-        <div v-show="type == 'alert'" class="dialog column bg-white no-wrap" :style="dialogStyle">
+        <div v-show="type == 'alert'" class="bg-white no-wrap">
             <div class="header row">
                 <div class="caption col row items-center q-ml-md">
                     <q-icon v-show="caption" class="q-mr-sm" :class="iconColor" name="las la-exclamation-circle" size="28px"></q-icon>
@@ -16,7 +16,7 @@
                 </div>
             </div>
 
-            <div class="col q-mx-md">
+            <div class="q-mx-md">
                 <div v-html="message"></div>
             </div>
 
@@ -26,7 +26,7 @@
         </div>
 
         <!--------------------------------------------------->
-        <div v-show="type == 'confirm'" class="dialog column bg-white no-wrap" :style="dialogStyle">
+        <div v-show="type == 'confirm'" class="bg-white no-wrap">
             <div class="header row">
                 <div class="caption col row items-center q-ml-md">
                     <q-icon v-show="caption" class="q-mr-sm" :class="iconColor" name="las la-exclamation-circle" size="28px"></q-icon>
@@ -39,7 +39,7 @@
                 </div>
             </div>
 
-            <div class="col q-mx-md">
+            <div class="q-mx-md">
                 <div v-html="message"></div>
             </div>
 
@@ -50,7 +50,7 @@
         </div>
 
         <!--------------------------------------------------->
-        <div v-show="type == 'prompt'" class="dialog column bg-white no-wrap" :style="dialogStyle">
+        <div v-show="type == 'prompt'" class="bg-white no-wrap">
             <div class="header row">
                 <div class="caption col row items-center q-ml-md">
                     <q-icon v-show="caption" class="q-mr-sm" :class="iconColor" name="las la-exclamation-circle" size="28px"></q-icon>
@@ -63,7 +63,7 @@
                 </div>
             </div>
 
-            <div class="col q-mx-md">
+            <div class="q-mx-md">
                 <div v-html="message"></div>
                 <q-input ref="input" class="q-mt-xs" outlined dense v-model="inputValue"/>
                 <div class="error"><span v-show="error != ''">{{ error }}</span></div>
@@ -99,7 +99,6 @@ class StdDialog extends Vue {
     inputValue = '';
     error = '';
     iconColor = '';
-    style = '';
 
     created() {
         if (this.$root.addKeyHook) {
@@ -121,10 +120,6 @@ class StdDialog extends Vue {
         if (opts && opts.color) {
             this.iconColor = `text-${opts.color}`;
         }
-    }
-
-    get dialogStyle() {
-        return 'min-height: 150px';
     }
 
     onHide() {
