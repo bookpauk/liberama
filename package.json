@@ -41,6 +41,7 @@
     "mini-css-extract-plugin": "^0.5.0",
     "optimize-css-assets-webpack-plugin": "^5.0.3",
     "pkg": "^4.4.4",
+    "sw-precache-webpack-plugin": "^1.0.0",
     "terser-webpack-plugin": "^1.4.1",
     "url-loader": "^1.1.2",
     "vue-class-component": "^6.3.2",
