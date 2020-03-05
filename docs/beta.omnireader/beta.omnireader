@@ -39,3 +39,10 @@ server {
     }
   }
 }
+
+server {
+  listen 80;
+  server_name beta.omnireader.ru;
+
+  return 301 https://$host$request_uri;
+}
