@@ -9,7 +9,7 @@ const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const CleanWebpackPlugin = require('clean-webpack-plugin');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const CopyWebpackPlugin = require('copy-webpack-plugin');
-const AppCachePlugin = require('appcache-webpack-plugin');
+const SWPrecacheWebpackPlugin = require('sw-precache-webpack-plugin');
 
 const publicDir = path.resolve(__dirname, '../dist/tmp/public');
 const clientDir = path.resolve(__dirname, '../client');
@@ -55,6 +55,14 @@ module.exports = merge(baseWpConfig, {
             filename: `${publicDir}/index.html`
         }),
         new CopyWebpackPlugin([{from: `${clientDir}/assets/*`, to: `${publicDir}/`, flatten: true}]),
-        new AppCachePlugin({exclude: ['../index.html']})
+        new SWPrecacheWebpackPlugin({
+            cacheId: 'liberama',
+            dontCacheBustUrlsMatching: /\.\w{8}\./,
+            filename: 'service-worker.js',
+            minify: true,
+            navigateFallback: '/index.html',
+            staticFileGlobsIgnorePatterns: [/\.map$/, /asset-manifest\.json$/],
+            stripPrefix: publicDir,
+        }),        
     ]
 });

@@ -56,7 +56,6 @@
   },
   "dependencies": {
     "@quasar/extras": "^1.5.2",
-    "appcache-webpack-plugin": "^1.4.0",
     "axios": "^0.18.1",
     "base-x": "^3.0.8",
     "chardet": "^0.7.0",
