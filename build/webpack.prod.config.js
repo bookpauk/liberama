@@ -58,7 +58,7 @@ module.exports = merge(baseWpConfig, {
         new SWPrecacheWebpackPlugin({
             cacheId: 'liberama',
             dontCacheBustUrlsMatching: /\.\w{8}\./,
-            filename: 'service-worker.js',
+            filepath: `${publicDir}/service-worker.js`,
             minify: true,
             navigateFallback: '/index.html',
             staticFileGlobsIgnorePatterns: [/\.map$/, /asset-manifest\.json$/],
