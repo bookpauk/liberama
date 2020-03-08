@@ -57,11 +57,9 @@ module.exports = merge(baseWpConfig, {
         new CopyWebpackPlugin([{from: `${clientDir}/assets/*`, to: `${publicDir}/`, flatten: true}]),
         new SWPrecacheWebpackPlugin({
             cacheId: 'liberama',
-            dontCacheBustUrlsMatching: /\.\w{8}\./,
             filepath: `${publicDir}/service-worker.js`,
             minify: true,
             navigateFallback: '/index.html',
-            staticFileGlobsIgnorePatterns: [/\.map$/, /asset-manifest\.json$/],
             stripPrefix: publicDir,
         }),        
     ]
