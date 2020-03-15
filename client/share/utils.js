@@ -219,3 +219,13 @@ export function keyEventToCode(event) {
 
     return result.join('+');
 }
+
+export function userHotKeysObjectSwap(userHotKeys) {
+    let result = {};
+    for (const [name, codes] of Object.entries(userHotKeys)) {
+        for (const code of codes) {
+            result[code] = name;
+        }
+    }
+    return result;
+}

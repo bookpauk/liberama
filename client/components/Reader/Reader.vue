@@ -339,6 +339,11 @@ class Reader extends Vue {
         this.showToolButton = settings.showToolButton;
         this.enableSitesFilter = settings.enableSitesFilter;
 
+        this.readerActionByKeyCode = utils.userHotKeysObjectSwap(settings.userHotKeys);
+        this.$root.readerActionByKeyEvent = (event) => {
+            return this.readerActionByKeyCode[utils.keyEventToCode(event)];
+        }
+
         this.updateHeaderMinWidth();
     }
 
@@ -1090,9 +1095,10 @@ class Reader extends Vue {
     }
 
     keyHook(event) {
+        let result = false;
         if (this.$root.rootRoute() == '/reader') {
             if (this.$root.stdDialog.active || this.$refs.dialog1.active || this.$refs.dialog2.active)
-                return;
+                return result;
 
             let handled = false;
             if (!handled && this.helpActive)
@@ -1117,17 +1123,26 @@ class Reader extends Vue {
                 handled = this.$refs.page.keyHook(event);
 
             if (!handled && event.type == 'keydown') {
-                if (event.code == 'Escape')
+                const action = this.$root.readerActionByKeyEvent(event);
+                if (action == 'loader') {
                     this.loaderToggle();
+                    result = true;
+                }
 
                 if (this.activePage == 'TextPage') {
-                    switch (event.code) {
-                        case 'KeyH':
-                        case 'F1':
+                    result = true;
+                    switch (action) {
+                        case 'help':
                             this.helpToggle();
                             event.preventDefault();
                             event.stopPropagation();
                             break;
+                        default:
+                            result = false;
+                            break;
+                    }
+
+                    switch (event.code) {
                         case 'KeyZ':
                             this.scrollingToggle();
                             break;
@@ -1166,6 +1181,7 @@ class Reader extends Vue {
                 }
             }
         }
+        return result;
     }
 }
 //-----------------------------------------------------------------------------

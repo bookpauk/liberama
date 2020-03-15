@@ -14,6 +14,7 @@ const readerActions = {
     'recentBooks': 'Открыть недавние',
 };
 
+//readerActions[name]
 const toolButtons = [
     {name: 'undoAction',  show: true},
     {name: 'redoAction',  show: true},
@@ -27,8 +28,10 @@ const toolButtons = [
     {name: 'recentBooks', show: true},
 ];
 
+//readerActions[name]
 const hotKeys = [
-    {name: 'help', text: readerActions['help'], code: ['F1', 'KeyH']},
+    {name: 'help', codes: ['F1', 'KeyH']},
+    {name: 'loader', codes: ['Escape']},
 ];
 
 const fonts = [
@@ -208,6 +211,7 @@ const settingDefaults = {
 
     fontShifts: {},
     showToolButton: {},
+    userHotKeys: {},
 };
 
 for (const font of fonts)
@@ -216,6 +220,8 @@ for (const font of webFonts)
     settingDefaults.fontShifts[font.name] = font.fontVertShift;
 for (const button of toolButtons)
     settingDefaults.showToolButton[button.name] = button.show;
+for (const hotKey of hotKeys)
+    settingDefaults.userHotKeys[hotKey.name] = hotKey.codes;
 
 // initial state
 const state = {
