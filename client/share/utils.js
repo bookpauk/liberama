@@ -203,3 +203,19 @@ export function escapeXml(str) {
         .replace(/'/g, '&apos;')
     ;
 }
+
+export function keyEventToCode(event) {
+    let result = [];
+    if (event.metaKey)
+        result.push('Meta');
+    if (event.ctrlKey)
+        result.push('Ctrl');
+    if (event.shiftKey)
+        result.push('Shift');
+    if (event.altKey)
+        result.push('Alt');
+    
+    result.push(event.code);
+
+    return result.join('+');
+}
