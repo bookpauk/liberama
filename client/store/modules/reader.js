@@ -1,15 +1,34 @@
-//занчение toolButtons.name не должно совпадать с settingDefaults-propertyName
+const readerActions = {
+    'help': 'Справка',
+    'loader': 'Загрузить книгу',
+    'settings': 'Настроить',
+    'undoAction': 'Действие назад',
+    'redoAction': 'Действие вперед',
+    'fullScreen': 'На весь экран',
+    'scrolling': 'Плавный скроллинг',
+    'setPosition': 'На страницу',
+    'search': 'Найти в тексте',
+    'copyText': 'Скопировать текст со страницы',
+    'refresh': 'Принудительно обновить книгу',
+    'offlineMode': 'Автономный режим (без интернета)',
+    'recentBooks': 'Открыть недавние',
+};
+
 const toolButtons = [
-    {name: 'undoAction',  show: true, text: 'Действие назад'},
-    {name: 'redoAction',  show: true, text: 'Действие вперед'},
-    {name: 'fullScreen',  show: true, text: 'На весь экран'},
-    {name: 'scrolling',   show: false, text: 'Плавный скроллинг'},
-    {name: 'setPosition', show: true, text: 'На страницу'},
-    {name: 'search',      show: true, text: 'Найти в тексте'},
-    {name: 'copyText',    show: false, text: 'Скопировать текст со страницы'},
-    {name: 'refresh',     show: true, text: 'Принудительно обновить книгу'},
-    {name: 'offlineMode', show: false, text: 'Автономный режим (без интернета)'},
-    {name: 'recentBooks', show: true, text: 'Открыть недавние'},
+    {name: 'undoAction',  show: true},
+    {name: 'redoAction',  show: true},
+    {name: 'fullScreen',  show: true},
+    {name: 'scrolling',   show: false},
+    {name: 'setPosition', show: true},
+    {name: 'search',      show: true},
+    {name: 'copyText',    show: false},
+    {name: 'refresh',     show: true},
+    {name: 'offlineMode', show: false},
+    {name: 'recentBooks', show: true},
+];
+
+const hotKeys = [
+    {name: 'help', text: readerActions['help'], code: ['F1', 'KeyH']},
 ];
 
 const fonts = [
@@ -136,6 +155,7 @@ const webFonts = [
 
 ];
 
+//----------------------------------------------------------------------------------------------------------
 const settingDefaults = {
     textColor: '#000000',
     backgroundColor: '#EBE2C9',
@@ -256,7 +276,9 @@ const mutations = {
 };
 
 export default {
+    readerActions,
     toolButtons,
+    hotKeys,
     fonts,
     webFonts,
     settingDefaults,

@@ -4,57 +4,57 @@
             <div ref="buttons" class="row justify-between no-wrap">
                 <button ref="loader" class="tool-button" :class="buttonActiveClass('loader')" @click="buttonClick('loader')" v-ripple>
                     <q-icon name="la la-arrow-left" size="32px"/>
-                    <q-tooltip :delay="1500" anchor="bottom right" content-style="font-size: 80%">Загрузить книгу</q-tooltip>
+                    <q-tooltip :delay="1500" anchor="bottom right" content-style="font-size: 80%">{{ rstore.readerActions['loader'] }}</q-tooltip>
                 </button>
 
                 <div>
                     <button ref="undoAction" v-show="showToolButton['undoAction']" class="tool-button" :class="buttonActiveClass('undoAction')" @click="buttonClick('undoAction')" v-ripple>
                         <q-icon name="la la-angle-left" size="32px"/>
-                        <q-tooltip :delay="1500" anchor="bottom middle" content-style="font-size: 80%">Действие назад</q-tooltip>
+                        <q-tooltip :delay="1500" anchor="bottom middle" content-style="font-size: 80%">{{ rstore.readerActions['undoAction'] }}</q-tooltip>
                     </button>
                     <button ref="redoAction" v-show="showToolButton['redoAction']" class="tool-button" :class="buttonActiveClass('redoAction')" @click="buttonClick('redoAction')" v-ripple>
                         <q-icon name="la la-angle-right" size="32px"/>
-                        <q-tooltip :delay="1500" anchor="bottom middle" content-style="font-size: 80%">Действие вперед</q-tooltip>
+                        <q-tooltip :delay="1500" anchor="bottom middle" content-style="font-size: 80%">{{ rstore.readerActions['redoAction'] }}</q-tooltip>
                     </button>
                     <div class="space"></div>
                     <button ref="fullScreen" v-show="showToolButton['fullScreen']" class="tool-button" :class="buttonActiveClass('fullScreen')" @click="buttonClick('fullScreen')" v-ripple>
                         <q-icon :name="(fullScreenActive ? 'la la-compress-arrows-alt': 'la la-expand-arrows-alt')" size="32px"/>
-                        <q-tooltip :delay="1500" anchor="bottom middle" content-style="font-size: 80%">На весь экран</q-tooltip>
+                        <q-tooltip :delay="1500" anchor="bottom middle" content-style="font-size: 80%">{{ rstore.readerActions['fullScreen'] }}</q-tooltip>
                     </button>
                     <button ref="scrolling" v-show="showToolButton['scrolling']" class="tool-button" :class="buttonActiveClass('scrolling')" @click="buttonClick('scrolling')" v-ripple>
                         <q-icon name="la la-film" size="32px"/>
-                        <q-tooltip :delay="1500" anchor="bottom middle" content-style="font-size: 80%">Плавный скроллинг</q-tooltip>
+                        <q-tooltip :delay="1500" anchor="bottom middle" content-style="font-size: 80%">{{ rstore.readerActions['scrolling'] }}</q-tooltip>
                     </button>
                     <button ref="setPosition" v-show="showToolButton['setPosition']" class="tool-button" :class="buttonActiveClass('setPosition')" @click="buttonClick('setPosition')" v-ripple>
                         <q-icon name="la la-angle-double-right" size="32px"/>
-                        <q-tooltip :delay="1500" anchor="bottom middle" content-style="font-size: 80%">На страницу</q-tooltip>
+                        <q-tooltip :delay="1500" anchor="bottom middle" content-style="font-size: 80%">{{ rstore.readerActions['setPosition'] }}</q-tooltip>
                     </button>
                     <button ref="search" v-show="showToolButton['search']" class="tool-button" :class="buttonActiveClass('search')" @click="buttonClick('search')" v-ripple>
                         <q-icon name="la la-search" size="32px"/>
-                        <q-tooltip :delay="1500" anchor="bottom middle" content-style="font-size: 80%">Найти в тексте</q-tooltip>
+                        <q-tooltip :delay="1500" anchor="bottom middle" content-style="font-size: 80%">{{ rstore.readerActions['search'] }}</q-tooltip>
                     </button>
                     <button ref="copyText" v-show="showToolButton['copyText']" class="tool-button" :class="buttonActiveClass('copyText')" @click="buttonClick('copyText')" v-ripple>
                         <q-icon name="la la-copy" size="32px"/>
-                        <q-tooltip :delay="1500" anchor="bottom middle" content-style="font-size: 80%">Скопировать текст со страницы</q-tooltip>
+                        <q-tooltip :delay="1500" anchor="bottom middle" content-style="font-size: 80%">{{ rstore.readerActions['copyText'] }}</q-tooltip>
                     </button>
                     <button ref="refresh" v-show="showToolButton['refresh']" class="tool-button" :class="buttonActiveClass('refresh')" @click="buttonClick('refresh')" v-ripple>
                         <q-icon name="la la-sync" size="32px" :class="{clear: !showRefreshIcon}"/>
-                        <q-tooltip :delay="1500" anchor="bottom middle" content-style="font-size: 80%">Принудительно обновить книгу в обход кэша</q-tooltip>
+                        <q-tooltip :delay="1500" anchor="bottom middle" content-style="font-size: 80%">{{ rstore.readerActions['refresh'] }}</q-tooltip>
                     </button>
                     <div class="space"></div>
                     <button ref="offlineMode" v-show="showToolButton['offlineMode']" class="tool-button" :class="buttonActiveClass('offlineMode')" @click="buttonClick('offlineMode')" v-ripple>
                         <q-icon name="la la-unlink" size="32px"/>
-                        <q-tooltip :delay="1500" anchor="bottom middle" content-style="font-size: 80%">Автономный режим (без интернета)</q-tooltip>
+                        <q-tooltip :delay="1500" anchor="bottom middle" content-style="font-size: 80%">{{ rstore.readerActions['offlineMode'] }}</q-tooltip>
                     </button>
                     <button ref="recentBooks" v-show="showToolButton['recentBooks']" class="tool-button" :class="buttonActiveClass('recentBooks')" @click="buttonClick('recentBooks')" v-ripple>
                         <q-icon name="la la-book-open" size="32px"/>
-                        <q-tooltip :delay="1500" anchor="bottom middle" content-style="font-size: 80%">Открыть недавние</q-tooltip>
+                        <q-tooltip :delay="1500" anchor="bottom middle" content-style="font-size: 80%">{{ rstore.readerActions['recentBooks'] }}</q-tooltip>
                     </button>
                 </div>
 
                 <button ref="settings" class="tool-button" :class="buttonActiveClass('settings')" @click="buttonClick('settings')" v-ripple>
                     <q-icon name="la la-cog" size="32px"/>
-                    <q-tooltip :delay="1500" anchor="bottom left" content-style="font-size: 80%">Настроить</q-tooltip>
+                    <q-tooltip :delay="1500" anchor="bottom left" content-style="font-size: 80%">{{ rstore.readerActions['settings'] }}</q-tooltip>
                 </button>
             </div>
         </div>
@@ -169,12 +169,13 @@ import SettingsPage from './SettingsPage/SettingsPage.vue';
 import HelpPage from './HelpPage/HelpPage.vue';
 import ClickMapPage from './ClickMapPage/ClickMapPage.vue';
 import ServerStorage from './ServerStorage/ServerStorage.vue';
+import Dialog from '../share/Dialog.vue';
 
 import bookManager from './share/bookManager';
+import rstore from '../../store/modules/reader';
 import readerApi from '../../api/reader';
 import * as utils from '../../share/utils';
 import {versionHistory} from './versionHistory';
-import Dialog from '../share/Dialog.vue';
 
 export default @Component({
     components: {
@@ -232,6 +233,7 @@ export default @Component({
     },
 })
 class Reader extends Vue {
+    rstore = {};
     loaderActive = false;
     progressActive = false;
     fullScreenActive = false;
@@ -261,6 +263,7 @@ class Reader extends Vue {
     donationVisible = false;
 
     created() {
+        this.rstore = rstore;
         this.loading = true;
         this.commit = this.$store.commit;
         this.dispatch = this.$store.dispatch;

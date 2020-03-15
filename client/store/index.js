@@ -12,11 +12,11 @@ Vue.use(Vuex);
 const debug = process.env.NODE_ENV !== 'production';
 
 export default new Vuex.Store(Object.assign({}, root, {
-  modules: {
-    uistate,
-    config,
-    reader,
-  },
-  strict: debug,
-  plugins: [createPersistedState()]
+    modules: {
+        uistate,
+        config,
+        reader,
+    },
+    strict: debug,
+    plugins: [createPersistedState()]
 }));
