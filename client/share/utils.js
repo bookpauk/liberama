@@ -207,7 +207,7 @@ export function escapeXml(str) {
 export function keyEventToCode(event) {
     let result = [];
     const modCode = event.code.substring(0, 3);
-    if (event.metaKey)
+    if (event.metaKey && modCode != 'Met')
         result.push('Meta');
     if (event.ctrlKey && modCode != 'Con')
         result.push('Ctrl');
