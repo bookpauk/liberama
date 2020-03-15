@@ -206,16 +206,23 @@ export function escapeXml(str) {
 
 export function keyEventToCode(event) {
     let result = [];
+    const modCode = event.code.substring(0, 3);
     if (event.metaKey)
         result.push('Meta');
-    if (event.ctrlKey)
+    if (event.ctrlKey && modCode != 'Con')
         result.push('Ctrl');
-    if (event.shiftKey)
+    if (event.shiftKey && modCode != 'Shi')
         result.push('Shift');
-    if (event.altKey)
+    if (event.altKey && modCode != 'Alt')
         result.push('Alt');
     
-    result.push(event.code);
+    let code = event.code;
+    if (modCode == 'Dig') {
+        code = code.substring(5, 6);
+    } else if (modCode == 'Key') {
+        code = code.substring(3, 4);
+    }
+    result.push(code);
 
     return result.join('+');
 }

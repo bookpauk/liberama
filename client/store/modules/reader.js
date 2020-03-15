@@ -30,7 +30,7 @@ const toolButtons = [
 
 //readerActions[name]
 const hotKeys = [
-    {name: 'help', codes: ['F1', 'KeyH']},
+    {name: 'help', codes: ['F1', 'H']},
     {name: 'loader', codes: ['Escape']},
 ];
 
