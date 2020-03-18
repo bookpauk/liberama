@@ -65,7 +65,7 @@ const hotKeys = [
     {name: 'incFontSize', codes: ['A']},
     {name: 'decFontSize', codes: ['Shift+A']},
     {name: 'scrollingSpeedUp', codes: ['Shift+ArrowDown']},
-    {name: 'scrollingSpeedDown', codes: ['Shift+ArrowUp']},    
+    {name: 'scrollingSpeedDown', codes: ['Shift+ArrowUp']},
 ];
 
 const fonts = [
