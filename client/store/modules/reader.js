@@ -1,6 +1,6 @@
 const readerActions = {
     'help': 'Справка',
-    'loader': 'Загрузить книгу',
+    'loader': 'Страница загрузки',
     'settings': 'Настроить',
     'undoAction': 'Действие назад',
     'redoAction': 'Действие вперед',

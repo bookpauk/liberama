@@ -76,6 +76,8 @@ import _ from 'lodash';
 import * as utils from '../../../share/utils';
 import Window from '../../share/Window.vue';
 import NumInput from '../../share/NumInput.vue';
+import UserHotKeys from './UserHotKeys/UserHotKeys.vue';
+
 import rstore from '../../../store/modules/reader';
 import defPalette from './defPalette';
 
@@ -85,6 +87,7 @@ export default @Component({
     components: {
         Window,
         NumInput,
+        UserHotKeys,
     },
     data: function() {
         return Object.assign({}, rstore.settingDefaults);
