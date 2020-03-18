@@ -8,10 +8,5 @@
 </div>
 
 <div class="item row">
-    <div class="label-4"></div>
-    <q-btn class="button" dense no-caps @click="addHotKeyCode">{{ testCode }}</q-btn>
-</div>
-
-<div class="item row">
     <UserHotKeys v-model="userHotKeys" />
 </div>

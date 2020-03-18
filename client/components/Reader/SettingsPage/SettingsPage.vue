@@ -156,7 +156,6 @@ class SettingsPage extends Vue {
     serverStorageKeyVisible = false;
     toolButtons = [];
     rstore = {};
-testCode = 'Добавить сочетание';    
 
     created() {
         this.commit = this.$store.commit;
@@ -363,17 +362,6 @@ testCode = 'Добавить сочетание';
 
     changeShowToolButton(buttonName) {
         this.showToolButton = Object.assign({}, this.showToolButton, {[buttonName]: !this.showToolButton[buttonName]});
-    }
-
-    async addHotKeyCode() {
-        try {
-            const result = await this.$root.stdDialog.getHotKey('Нажмите сочетание клавиш:', '');
-            if (result) {
-                this.testCode = result;
-            }
-        } catch (e) {
-            //
-        }
     }
 
     async addProfile() {

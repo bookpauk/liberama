@@ -24,7 +24,12 @@
         <div class="table-row row" v-for="(action, index) in tableData" :key="index">
             <div class="desc q-pa-sm">{{ rstore.readerActions[action] }}</div>
             <div class="hotKeys col q-pa-sm">
-                <q-chip removable color="grey-7" text-color="white" v-for="(code, index) in value[action]" :key="index" @remove="removeCode(action, code)">
+                <q-chip
+                    :color="collisions[code] ? 'red' : 'grey-7'"
+                    removable :clickable="collisions[code] ? true : false"
+                    text-color="white" v-for="(code, index) in value[action]" :key="index" @remove="removeCode(action, code)"
+                    @click="collisionWarning(code)"
+                    >
                     {{ code }}
                 </q-chip>
             </div>
@@ -75,6 +80,7 @@ export default @Component({
             this.updateTableData();
         },
         value: function() {
+            this.checkCollisions();
             this.updateTableData();
         }
     },
@@ -83,12 +89,14 @@ class UserHotKeys extends UserHotKeysProps {
     search = '';
     rstore = {};
     tableData = [];
+    collisions = {};
 
     created() {
         this.rstore = rstore;
     }
 
     mounted() {
+        this.checkCollisions();
         this.updateTableData();
     }
 
@@ -113,16 +121,83 @@ class UserHotKeys extends UserHotKeysProps {
         this.tableData = result;
     }
 
+    checkCollisions() {
+        const cols = {};
+        for (const [action, codes] of Object.entries(this.value)) {
+            codes.forEach(code => {
+                if (!cols[code])
+                    cols[code] = [];
+                if (cols[code].indexOf(action) < 0)
+                    cols[code].push(action);
+            });
+        }
+
+        const result = {};
+        for (const [code, actions] of Object.entries(cols)) {
+            if (actions.length > 1)
+                result[code] = actions;
+        }
+
+        this.collisions = result;
+    }
+
+    collisionWarning(code) {
+        if (this.collisions[code]) {
+            const descs = this.collisions[code].map(action => `<b>${rstore.readerActions[action]}</b>`);
+            this.$root.stdDialog.alert(`Сочетание '${code}' одновременно назначено<br>следующим действиям:<br>${descs.join('<br>')}`, 'Предупреждение');
+        }
+    }
+
     removeCode(action, code) {
+        let codes = Array.from(this.value[action]);
+        const index = codes.indexOf(code);
+        if (index >= 0) {
+            codes.splice(index, 1);
+            const newValue = Object.assign({}, this.value, {[action]: codes});
+            this.$emit('input', newValue);
+        }
     }
 
-    addHotKey(action) {
+    async addHotKey(action) {
+        try {
+            const result = await this.$root.stdDialog.getHotKey(`Добавить сочетание для:<br><b>${rstore.readerActions[action]}</b>`, '');
+            if (result) {
+                let codes = Array.from(this.value[action]);
+                if (codes.indexOf(result) < 0) {
+                    codes.push(result);
+                    const newValue = Object.assign({}, this.value, {[action]: codes});
+                    this.$emit('input', newValue);
+                    this.$nextTick(() => {
+                        this.collisionWarning(result);
+                    });
+                }
+            }
+        } catch (e) {
+            //
+        }
     }
 
-    defaultHotKey(action) {
+    async defaultHotKey(action) {
+        try {
+            if (await this.$root.stdDialog.confirm(`Подтвердите установку клавиш по умолчанию для:<br><b>${rstore.readerActions[action]}</b>`, ' ')) {
+                const codes = Array.from(rstore.settingDefaults.userHotKeys[action]);
+                const newValue = Object.assign({}, this.value, {[action]: codes});
+                this.$emit('input', newValue);
+            }
+        } catch (e) {
+            //
+        }
     }
 
-    defaultHotKeyAll() {
+    async defaultHotKeyAll() {
+        try {
+            if (await this.$root.stdDialog.confirm('Подтвердите установку ВСЕХ <br>сочетаний клавиш по умолчанию:', ' ')) {
+                const newValue = Object.assign({}, rstore.settingDefaults.userHotKeys);
+                this.$emit('input', newValue);
+            }
+        } catch (e) {
+            //
+        }
     }
 }
 //-----------------------------------------------------------------------------
