@@ -12,6 +12,17 @@ const readerActions = {
     'refresh': 'Принудительно обновить книгу',
     'offlineMode': 'Автономный режим (без интернета)',
     'recentBooks': 'Открыть недавние',
+    'switchToolbar': 'Показать/скрыть панель управления',
+    'bookBegin': 'В начало книги',
+    'bookEnd': 'В конец книги',
+    'pageBack': 'Страницу назад',
+    'pageForward': 'Страницу вперед',
+    'lineBack': 'Строчку назад',
+    'lineForward': 'Строчку вперед',
+    'incFontSize': 'Увеличить размер шрифта',
+    'decFontSize': 'Уменьшить размер шрифта',
+    'scrollingSpeedUp': 'Увеличить скорость скроллинга',
+    'scrollingSpeedDown': 'Уменьшить скорость скроллинга',
 };
 
 //readerActions[name]
@@ -37,7 +48,24 @@ const hotKeys = [
     {name: 'redoAction', codes: ['Ctrl+X']},
     {name: 'fullScreen', codes: ['Enter', 'Backquote', 'F']},
     {name: 'scrolling', codes: ['Z']},
+    {name: 'setPosition', codes: ['P']},
+    {name: 'search', codes: ['Ctrl+F']},
+    {name: 'copyText', codes: ['Ctrl+C']},
+    {name: 'refresh', codes: ['R']},
+    {name: 'offlineMode', codes: ['O']},
+    {name: 'recentBooks', codes: ['X']},
 
+    {name: 'switchToolbar', codes: ['Tab', 'Q']},
+    {name: 'bookBegin', codes: ['Home']},
+    {name: 'bookEnd', codes: ['End']},
+    {name: 'pageBack', codes: ['PageUp', 'ArrowLeft', 'Backspace', 'Shift+Space']},
+    {name: 'pageForward', codes: ['PageDown', 'ArrowRight', 'Space']},
+    {name: 'lineBack', codes: ['ArrowUp']},
+    {name: 'lineForward', codes: ['ArrowDown']},
+    {name: 'incFontSize', codes: ['A']},
+    {name: 'decFontSize', codes: ['Shift+A']},
+    {name: 'scrollingSpeedUp', codes: ['Shift+ArrowDown']},
+    {name: 'scrollingSpeedDown', codes: ['Shift+ArrowUp']},    
 ];
 
 const fonts = [

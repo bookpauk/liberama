@@ -146,7 +146,8 @@ class UserHotKeys extends UserHotKeysProps {
     collisionWarning(code) {
         if (this.collisions[code]) {
             const descs = this.collisions[code].map(action => `<b>${rstore.readerActions[action]}</b>`);
-            this.$root.stdDialog.alert(`Сочетание '${code}' одновременно назначено<br>следующим действиям:<br>${descs.join('<br>')}`, 'Предупреждение');
+            this.$root.stdDialog.alert(`Сочетание '${code}' одновременно назначено<br>следующим действиям:<br>${descs.join('<br>')}<br><br>
+Возможно неожиданное поведение.`, 'Предупреждение');
         }
     }
 
@@ -183,7 +184,7 @@ class UserHotKeys extends UserHotKeysProps {
 
     async defaultHotKey(action) {
         try {
-            if (await this.$root.stdDialog.confirm(`Подтвердите установку клавиш по умолчанию для:<br><b>${rstore.readerActions[action]}</b>`, ' ')) {
+            if (await this.$root.stdDialog.confirm(`Подтвердите сброс сочетаний клавиш<br>в значения по умолчанию для действия:<br><b>${rstore.readerActions[action]}</b>`, ' ')) {
                 const codes = Array.from(rstore.settingDefaults.userHotKeys[action]);
                 const newValue = Object.assign({}, this.value, {[action]: codes});
                 this.$emit('input', newValue);
@@ -195,7 +196,7 @@ class UserHotKeys extends UserHotKeysProps {
 
     async defaultHotKeyAll() {
         try {
-            if (await this.$root.stdDialog.confirm('Подтвердите установку ВСЕХ <br>сочетаний клавиш по умолчанию:', ' ')) {
+            if (await this.$root.stdDialog.confirm('Подтвердите сброс ВСЕХ сочетаний<br>клавиш в значения по умолчанию:', ' ')) {
                 const newValue = Object.assign({}, rstore.settingDefaults.userHotKeys);
                 this.$emit('input', newValue);
             }
@@ -218,8 +219,19 @@ class UserHotKeys extends UserHotKeysProps {
     border-bottom: 1px solid grey;
 }
 
+.table-row:nth-child(even) {
+    background-color: #f7f7f7;
+}
+
+.table-row:hover {
+    background-color: #f0f0f0;
+}
+
 .desc {
-    width: 100px;
+    width: 130px;
+    overflow-wrap: break-word;
+    word-wrap: break-word;
+    white-space: normal;
 }
 
 .hotKeys {

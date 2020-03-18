@@ -899,7 +899,7 @@ class TextPage extends Vue {
     async doFontSizeInc() {
         if (!this.settingsChanging) {
             this.settingsChanging = true;
-            const newSize = (this.settings.fontSize + 1 < 100 ? this.settings.fontSize + 1 : 100);
+            const newSize = (this.settings.fontSize + 1 < 200 ? this.settings.fontSize + 1 : 100);
             const newSettings = Object.assign({}, this.settings, {fontSize: newSize});
             this.commit('reader/setSettings', newSettings);
             await sleep(50);
@@ -947,56 +947,40 @@ class TextPage extends Vue {
             const action = this.$root.readerActionByKeyEvent(event);
 
             switch (action) {
-                default:
-                    result = false;
-                    break;
-            }
-
-            switch (event.code) {
-                case 'ArrowDown':
-                    if (event.shiftKey)
-                        this.doScrollingSpeedUp();
-                    else
-                        this.doDown();
-                    break;
-                case 'ArrowUp':
-                    if (event.shiftKey)
-                        this.doScrollingSpeedDown();
-                    else
-                        this.doUp();
-                    break;
-                case 'PageDown':
-                case 'ArrowRight':
-                    this.doPageDown();
-                    break;
-                case 'Space':
-                    if (event.shiftKey)
-                        this.doPageUp();
-                    else
-                        this.doPageDown();
-                    break;
-                case 'PageUp':
-                case 'ArrowLeft':
-                case 'Backspace':
-                    this.doPageUp();
-                    break;
-                case 'Home':
-                    this.doHome();
-                    break;
-                case 'End':
-                    this.doEnd();
-                    break;
-                case 'KeyA':
-                    if (event.shiftKey)
-                        this.doFontSizeDec();
-                    else
-                        this.doFontSizeInc();
-                    break;
-                case 'Tab':
-                case 'KeyQ':
+                case 'switchToolbar':
                     this.doToolBarToggle();
                     event.preventDefault();
                     event.stopPropagation();
+                    break;
+                case 'bookBegin':
+                    this.doHome();
+                    break;
+                case 'bookEnd':
+                    this.doEnd();
+                    break;
+                case 'pageBack':
+                    this.doPageUp();
+                    break;
+                case 'pageForward':
+                    this.doPageDown();
+                    break;
+                case 'lineBack':
+                    this.doUp();
+                    break;
+                case 'lineForward':
+                    this.doDown();
+                    break;
+                case 'incFontSize':
+                    this.doFontSizeInc();
+                    break;
+                case 'decFontSize':
+                    this.doFontSizeDec();
+                    break;
+                case 'scrollingSpeedUp':
+                    this.doScrollingSpeedUp();
+                    break;
+                case 'scrollingSpeedDown':
+                    this.doScrollingSpeedDown();
                     break;
                 default:
                     result = false;

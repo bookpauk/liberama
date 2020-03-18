@@ -1160,39 +1160,32 @@ class Reader extends Vue {
                         case 'scrolling':
                             this.scrollingToggle();
                             break;
-                        default:
-                            result = false;
-                            break;
-                    }
-
-                    switch (event.code) {
-                        case 'KeyP':
+                        case 'setPosition':
                             this.setPositionToggle();
                             break;
-                        case 'KeyF':
-                            if (event.ctrlKey) {
-                                this.searchToggle();
-                                event.preventDefault();
-                                event.stopPropagation();
-                            }
+                        case 'search':
+                            this.searchToggle();
+                            event.preventDefault();
+                            event.stopPropagation();
                             break;
-                        case 'KeyC':
-                            if (event.ctrlKey) {
-                                this.copyTextToggle();
-                                event.preventDefault();
-                                event.stopPropagation();
-                            }
+                        case 'copyText':
+                            this.copyTextToggle();
+                            event.preventDefault();
+                            event.stopPropagation();
                             break;
-                        case 'KeyR':
+                        case 'refresh':
                             this.refreshBook();
                             break;
-                        case 'KeyX':
+                        case 'offlineMode':
+                            this.offlineModeToggle();
+                            break;
+                        case 'recentBooks':
                             this.recentBooksToggle();
                             event.preventDefault();
                             event.stopPropagation();
                             break;
-                        case 'KeyO':
-                            this.offlineModeToggle();
+                        default:
+                            result = false;
                             break;
                     }
                 }
