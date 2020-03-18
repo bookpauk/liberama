@@ -39,6 +39,7 @@
                     class="button bg-green-8 text-white"
                     @click="addHotKey(action)"
                     v-ripple
+                    :disabled="value[action].length >= maxCodesLength"
                 >
                     <q-tooltip :delay="1000" anchor="top middle" self="bottom middle" content-style="font-size: 80%">
                         Добавить сочетание клавиш
@@ -90,6 +91,7 @@ class UserHotKeys extends UserHotKeysProps {
     rstore = {};
     tableData = [];
     collisions = {};
+    maxCodesLength = 10;
 
     created() {
         this.rstore = rstore;
@@ -159,6 +161,8 @@ class UserHotKeys extends UserHotKeysProps {
     }
 
     async addHotKey(action) {
+        if (this.value[action].length >= this.maxCodesLength)
+            return;
         try {
             const result = await this.$root.stdDialog.getHotKey(`Добавить сочетание для:<br><b>${rstore.readerActions[action]}</b>`, '');
             if (result) {

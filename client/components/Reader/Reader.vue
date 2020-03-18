@@ -758,6 +758,20 @@ class Reader extends Vue {
         }
     }
 
+    undoAction() {
+        if (this.actionCur > 0) {
+            this.actionCur--;
+            this.bookPosChanged({bookPos: this.actionList[this.actionCur]});
+        }
+    }
+
+    redoAction() {
+        if (this.actionCur < this.actionList.length - 1) {
+            this.actionCur++;
+            this.bookPosChanged({bookPos: this.actionList[this.actionCur]});
+        }
+    }
+
     buttonClick(button) {
         const activeClass = this.buttonActiveClass(button);
 
@@ -771,16 +785,10 @@ class Reader extends Vue {
                 this.loaderToggle();
                 break;
             case 'undoAction':
-                if (this.actionCur > 0) {
-                    this.actionCur--;
-                    this.bookPosChanged({bookPos: this.actionList[this.actionCur]});
-                }
+                this.undoAction();
                 break;
             case 'redoAction':
-                if (this.actionCur < this.actionList.length - 1) {
-                    this.actionCur++;
-                    this.bookPosChanged({bookPos: this.actionList[this.actionCur]});
-                }
+                this.redoAction();
                 break;
             case 'fullScreen':
                 this.fullScreenToggle();
@@ -1137,15 +1145,27 @@ class Reader extends Vue {
                             event.preventDefault();
                             event.stopPropagation();
                             break;
+                        case 'settings':
+                            this.settingsToggle();
+                            break;
+                        case 'undoAction':
+                            this.undoAction();
+                            break;
+                        case 'redoAction':
+                            this.redoAction();
+                            break;
+                        case 'fullScreen':
+                            this.fullScreenToggle();
+                            break;
+                        case 'scrolling':
+                            this.scrollingToggle();
+                            break;
                         default:
                             result = false;
                             break;
                     }
 
                     switch (event.code) {
-                        case 'KeyZ':
-                            this.scrollingToggle();
-                            break;
                         case 'KeyP':
                             this.setPositionToggle();
                             break;
@@ -1173,9 +1193,6 @@ class Reader extends Vue {
                             break;
                         case 'KeyO':
                             this.offlineModeToggle();
-                            break;
-                        case 'KeyS':
-                            this.settingsToggle();
                             break;
                     }
                 }

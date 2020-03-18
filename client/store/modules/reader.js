@@ -1,12 +1,12 @@
 const readerActions = {
-    'help': 'Справка',
-    'loader': 'Страница загрузки',
+    'help': 'Вызвать cправку',
+    'loader': 'На страницу загрузки',
     'settings': 'Настроить',
     'undoAction': 'Действие назад',
     'redoAction': 'Действие вперед',
     'fullScreen': 'На весь экран',
     'scrolling': 'Плавный скроллинг',
-    'setPosition': 'На страницу',
+    'setPosition': 'Установить позицию',
     'search': 'Найти в тексте',
     'copyText': 'Скопировать текст со страницы',
     'refresh': 'Принудительно обновить книгу',
@@ -32,6 +32,12 @@ const toolButtons = [
 const hotKeys = [
     {name: 'help', codes: ['F1', 'H']},
     {name: 'loader', codes: ['Escape']},
+    {name: 'settings', codes: ['S']},
+    {name: 'undoAction', codes: ['Ctrl+Z']},
+    {name: 'redoAction', codes: ['Ctrl+X']},
+    {name: 'fullScreen', codes: ['Enter', 'Backquote', 'F']},
+    {name: 'scrolling', codes: ['Z']},
+
 ];
 
 const fonts = [

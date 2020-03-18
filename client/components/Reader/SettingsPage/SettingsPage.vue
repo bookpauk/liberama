@@ -46,7 +46,7 @@
                     @@include('./include/ButtonsTab.inc');
                 </div>
                 <!-- Управление ------------------------------------------------------------------>
-                <div v-if="selectedTab == 'keys'" class="fit tab-panel">
+                <div v-if="selectedTab == 'keys'" class="fit column">
                     @@include('./include/KeysTab.inc');
                 </div>
                 <!-- Листание -------------------------------------------------------------------->
@@ -142,6 +142,7 @@ export default @Component({
 class SettingsPage extends Vue {
     selectedTab = 'profiles';
     selectedViewTab = 'color';
+    selectedKeysTab = 'mouse';
     form = {};
     fontBold = false;
     fontItalic = false;

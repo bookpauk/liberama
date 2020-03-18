@@ -944,6 +944,14 @@ class TextPage extends Vue {
         let result = false;
         if (event.type == 'keydown' && !event.ctrlKey && !event.altKey) {
             result = true;
+            const action = this.$root.readerActionByKeyEvent(event);
+
+            switch (action) {
+                default:
+                    result = false;
+                    break;
+            }
+
             switch (event.code) {
                 case 'ArrowDown':
                     if (event.shiftKey)
@@ -983,11 +991,6 @@ class TextPage extends Vue {
                         this.doFontSizeDec();
                     else
                         this.doFontSizeInc();
-                    break;
-                case 'Enter':
-                case 'Backquote'://`
-                case 'KeyF':
-                    this.doFullScreenToggle();
                     break;
                 case 'Tab':
                 case 'KeyQ':
