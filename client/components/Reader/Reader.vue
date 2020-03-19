@@ -1102,6 +1102,67 @@ class Reader extends Vue {
         }
     }
 
+    doAction(opts) {
+        let result = false;
+        let {action = '', event = false} = opts;
+
+        if (action == 'loader') {
+            this.loaderToggle();
+            result = true;
+        }
+
+        if (this.activePage == 'TextPage') {
+            result = true;
+            switch (action) {
+                case 'help':
+                    this.helpToggle();
+                    break;
+                case 'settings':
+                    this.settingsToggle();
+                    break;
+                case 'undoAction':
+                    this.undoAction();
+                    break;
+                case 'redoAction':
+                    this.redoAction();
+                    break;
+                case 'fullScreen':
+                    this.fullScreenToggle();
+                    break;
+                case 'scrolling':
+                    this.scrollingToggle();
+                    break;
+                case 'setPosition':
+                    this.setPositionToggle();
+                    break;
+                case 'search':
+                    this.searchToggle();
+                    break;
+                case 'copyText':
+                    this.copyTextToggle();
+                    break;
+                case 'refresh':
+                    this.refreshBook();
+                    break;
+                case 'offlineMode':
+                    this.offlineModeToggle();
+                    break;
+                case 'recentBooks':
+                    this.recentBooksToggle();
+                    break;
+                default:
+                    result = false;
+                    break;
+            }
+        }
+
+        if (result && event) {
+            event.preventDefault();
+            event.stopPropagation();
+        }
+        return result;
+    }
+
     keyHook(event) {
         let result = false;
         if (this.$root.rootRoute() == '/reader') {
@@ -1132,63 +1193,7 @@ class Reader extends Vue {
 
             if (!handled && event.type == 'keydown') {
                 const action = this.$root.readerActionByKeyEvent(event);
-                if (action == 'loader') {
-                    this.loaderToggle();
-                    result = true;
-                }
-
-                if (this.activePage == 'TextPage') {
-                    result = true;
-                    switch (action) {
-                        case 'help':
-                            this.helpToggle();
-                            event.preventDefault();
-                            event.stopPropagation();
-                            break;
-                        case 'settings':
-                            this.settingsToggle();
-                            break;
-                        case 'undoAction':
-                            this.undoAction();
-                            break;
-                        case 'redoAction':
-                            this.redoAction();
-                            break;
-                        case 'fullScreen':
-                            this.fullScreenToggle();
-                            break;
-                        case 'scrolling':
-                            this.scrollingToggle();
-                            break;
-                        case 'setPosition':
-                            this.setPositionToggle();
-                            break;
-                        case 'search':
-                            this.searchToggle();
-                            event.preventDefault();
-                            event.stopPropagation();
-                            break;
-                        case 'copyText':
-                            this.copyTextToggle();
-                            event.preventDefault();
-                            event.stopPropagation();
-                            break;
-                        case 'refresh':
-                            this.refreshBook();
-                            break;
-                        case 'offlineMode':
-                            this.offlineModeToggle();
-                            break;
-                        case 'recentBooks':
-                            this.recentBooksToggle();
-                            event.preventDefault();
-                            event.stopPropagation();
-                            break;
-                        default:
-                            result = false;
-                            break;
-                    }
-                }
+                result = this.doAction({action, event});
             }
         }
         return result;
