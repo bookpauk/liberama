@@ -504,7 +504,7 @@ class TextPage extends Vue {
     async startTextScrolling() {
         if (this.doingScrolling || !this.book || !this.parsed.textLength || !this.linesDown || this.pageLineCount < 1 ||
             this.linesDown.length <= this.pageLineCount) {
-            this.$emit('stop-scrolling');
+            this.doStopScrolling();
             return;
         }
 
@@ -545,7 +545,7 @@ class TextPage extends Vue {
         }
         this.resolveTransition1Finish = null;
         this.doingScrolling = false;
-        this.$emit('stop-scrolling');
+        this.doStopScrolling();
         this.draw();
     }
 
@@ -889,11 +889,15 @@ class TextPage extends Vue {
     }
 
     doScrollingToggle() {
-        this.$emit('scrolling-toggle');
+        this.$emit('do-action', {action: 'scrolling', event});
     }
 
     doFullScreenToggle() {
-        this.$emit('full-screen-toogle');
+        this.$emit('do-action', {action: 'fullScreen', event});
+    }
+
+    doStopScrolling() {
+        this.$emit('do-action', {action: 'stopScrolling', event});
     }
 
     async doFontSizeInc() {

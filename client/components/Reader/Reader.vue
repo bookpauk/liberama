@@ -67,9 +67,6 @@
                     @book-pos-changed="bookPosChanged"
                     @do-action="doAction"
 
-                    @tool-bar-toggle="toolBarToggle"
-                    @full-screen-toogle="fullScreenToggle"
-                    @stop-scrolling="stopScrolling"
                     @scrolling-toggle="scrollingToggle"
                     @help-toggle="helpToggle"
                     @donate-toggle="donateToggle"
