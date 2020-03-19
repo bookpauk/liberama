@@ -345,7 +345,7 @@ class SettingsPage extends Vue {
     }
 
     close() {
-        this.$emit('settings-toggle');
+        this.$emit('do-action', {action: 'settings'});
     }
 
     async setDefaults() {

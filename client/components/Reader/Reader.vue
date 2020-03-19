@@ -66,25 +66,20 @@
                     @load-file="loadFile"
                     @book-pos-changed="bookPosChanged"
                     @do-action="doAction"
-
-                    @scrolling-toggle="scrollingToggle"
-                    @help-toggle="helpToggle"
-                    @donate-toggle="donateToggle"
                 ></component>
             </keep-alive>
 
             <SetPositionPage v-if="setPositionActive" ref="setPositionPage" @set-position-toggle="setPositionToggle" @book-pos-changed="bookPosChanged"></SetPositionPage>
             <SearchPage v-show="searchActive" ref="searchPage" 
                 @do-action="doAction"
-                @search-toggle="searchToggle" 
                 @book-pos-changed="bookPosChanged"
                 @start-text-search="startTextSearch"
                 @stop-text-search="stopTextSearch">
             </SearchPage>
-            <CopyTextPage v-if="copyTextActive" ref="copyTextPage" @copy-text-toggle="copyTextToggle"></CopyTextPage>
+            <CopyTextPage v-if="copyTextActive" ref="copyTextPage" @do-action="doAction"></CopyTextPage>
             <RecentBooksPage v-show="recentBooksActive" ref="recentBooksPage" @load-book="loadBook" @recent-books-close="recentBooksClose"></RecentBooksPage>
-            <SettingsPage v-show="settingsActive" ref="settingsPage" @settings-toggle="settingsToggle"></SettingsPage>
-            <HelpPage v-if="helpActive" ref="helpPage" @help-toggle="helpToggle"></HelpPage>
+            <SettingsPage v-show="settingsActive" ref="settingsPage" @do-action="doAction"></SettingsPage>
+            <HelpPage v-if="helpActive" ref="helpPage" @do-action="doAction"></HelpPage>
             <ClickMapPage v-show="clickMapActive" ref="clickMapPage"></ClickMapPage>
             <ServerStorage v-show="hidden" ref="serverStorage"></ServerStorage>
 

@@ -56,7 +56,7 @@ class HelpPage extends Vue {
     selectedTab = 'CommonHelpPage';
 
     close() {
-        this.$emit('help-toggle');
+        this.$emit('do-action', {action: 'help'});
     }
 
     get activePage() {

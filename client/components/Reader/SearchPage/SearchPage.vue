@@ -164,7 +164,7 @@ class SearchPage extends Vue {
 
     close() {
         this.stopInit = true;
-        this.$emit('search-toggle');
+        this.$emit('do-action', {action: 'search'});
     }
 
     inputKeyDown(event) {

@@ -148,12 +148,12 @@ class LoaderPage extends Vue {
         this.pasteTextActive = !this.pasteTextActive;
     }
 
-    openHelp() {
-        this.$emit('help-toggle');
+    openHelp(event) {
+        this.$emit('do-action', {action: 'help', event});
     }
 
     openDonate() {
-        this.$emit('donate-toggle');
+        this.$emit('do-action', {action: 'donate'});
     }
     
     openComments() {
@@ -180,9 +180,7 @@ class LoaderPage extends Vue {
             const action = this.$root.readerActionByKeyEvent(event);
             switch (action) {
                 case 'help':
-                    this.$emit('help-toggle');
-                    event.preventDefault();
-                    event.stopPropagation();
+                    this.openHelp(event);
                     return true;
             }
         }
