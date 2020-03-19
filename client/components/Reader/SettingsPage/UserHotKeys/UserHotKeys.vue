@@ -2,8 +2,8 @@
     <div class="table col column no-wrap">
         <!-- header -->
         <div class="table-row row">
-            <div class="desc q-pa-sm bg-green-4">Команда</div>
-            <div class="hotKeys col q-pa-sm bg-green-4 row no-wrap">
+            <div class="desc q-pa-sm bg-blue-2">Команда</div>
+            <div class="hotKeys col q-pa-sm bg-blue-2 row no-wrap">
                 <div style="width: 80px">Сочетание клавиш</div>
                 <q-input ref="input" class="q-ml-sm col"
                     outlined dense rounded
