@@ -2,9 +2,9 @@
     <div class="table col column no-wrap">
         <!-- header -->
         <div class="table-row row">
-            <div class="desc q-pa-sm bg-green-4">Действие</div>
+            <div class="desc q-pa-sm bg-green-4">Команда</div>
             <div class="hotKeys col q-pa-sm bg-green-4 row no-wrap">
-                <span>Сочетания клавиш</span>
+                <span>Сочетание клавиш</span>
                 <q-input ref="input" outlined dense rounded bg-color="grey-4"
                     placeholder="Найти"
                     v-model="search"
@@ -146,7 +146,7 @@ class UserHotKeys extends UserHotKeysProps {
     collisionWarning(code) {
         if (this.collisions[code]) {
             const descs = this.collisions[code].map(action => `<b>${rstore.readerActions[action]}</b>`);
-            this.$root.stdDialog.alert(`Сочетание '${code}' одновременно назначено<br>следующим действиям:<br>${descs.join('<br>')}<br><br>
+            this.$root.stdDialog.alert(`Сочетание '${code}' одновременно назначено<br>следующим командам:<br>${descs.join('<br>')}<br><br>
 Возможно неожиданное поведение.`, 'Предупреждение');
         }
     }
@@ -184,7 +184,7 @@ class UserHotKeys extends UserHotKeysProps {
 
     async defaultHotKey(action) {
         try {
-            if (await this.$root.stdDialog.confirm(`Подтвердите сброс сочетаний клавиш<br>в значения по умолчанию для действия:<br><b>${rstore.readerActions[action]}</b>`, ' ')) {
+            if (await this.$root.stdDialog.confirm(`Подтвердите сброс сочетаний клавиш<br>в значения по умолчанию для команды:<br><b>${rstore.readerActions[action]}</b>`, ' ')) {
                 const codes = Array.from(rstore.settingDefaults.userHotKeys[action]);
                 const newValue = Object.assign({}, this.value, {[action]: codes});
                 this.$emit('input', newValue);
@@ -196,7 +196,7 @@ class UserHotKeys extends UserHotKeysProps {
 
     async defaultHotKeyAll() {
         try {
-            if (await this.$root.stdDialog.confirm('Подтвердите сброс ВСЕХ сочетаний<br>клавиш в значения по умолчанию:', ' ')) {
+            if (await this.$root.stdDialog.confirm('Подтвердите сброс сочетаний клавиш<br>для ВСЕХ команд в значения по умолчанию:', ' ')) {
                 const newValue = Object.assign({}, rstore.settingDefaults.userHotKeys);
                 this.$emit('input', newValue);
             }
