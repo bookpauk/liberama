@@ -940,51 +940,6 @@ class TextPage extends Vue {
         }
     }
 
-    keyHook(event) {
-        let result = false;
-        if (event.type == 'keydown' && !event.ctrlKey && !event.altKey) {
-            result = true;
-            const action = this.$root.readerActionByKeyEvent(event);
-
-            switch (action) {
-                case 'bookBegin':
-                    this.doHome();
-                    break;
-                case 'bookEnd':
-                    this.doEnd();
-                    break;
-                case 'pageBack':
-                    this.doPageUp();
-                    break;
-                case 'pageForward':
-                    this.doPageDown();
-                    break;
-                case 'lineBack':
-                    this.doUp();
-                    break;
-                case 'lineForward':
-                    this.doDown();
-                    break;
-                case 'incFontSize':
-                    this.doFontSizeInc();
-                    break;
-                case 'decFontSize':
-                    this.doFontSizeDec();
-                    break;
-                case 'scrollingSpeedUp':
-                    this.doScrollingSpeedUp();
-                    break;
-                case 'scrollingSpeedDown':
-                    this.doScrollingSpeedDown();
-                    break;
-                default:
-                    result = false;
-                    break;
-            }
-        }
-        return result;
-    }
-
     async startClickRepeat(pointX, pointY) {
         this.repX = pointX;
         this.repY = pointY;

@@ -1126,6 +1126,47 @@ class Reader extends Vue {
                 break;
         }
 
+        if (!result && this.activePage == 'TextPage' && this.$refs.page) {
+            result = true;
+            const textPage = this.$refs.page;
+
+            switch (action) {
+                case 'bookBegin':
+                    textPage.doHome();
+                    break;
+                case 'bookEnd':
+                    textPage.doEnd();
+                    break;
+                case 'pageBack':
+                    textPage.doPageUp();
+                    break;
+                case 'pageForward':
+                    textPage.doPageDown();
+                    break;
+                case 'lineBack':
+                    textPage.doUp();
+                    break;
+                case 'lineForward':
+                    textPage.doDown();
+                    break;
+                case 'incFontSize':
+                    textPage.doFontSizeInc();
+                    break;
+                case 'decFontSize':
+                    textPage.doFontSizeDec();
+                    break;
+                case 'scrollingSpeedUp':
+                    textPage.doScrollingSpeedUp();
+                    break;
+                case 'scrollingSpeedDown':
+                    textPage.doScrollingSpeedDown();
+                    break;
+                default:
+                    result = false;
+                    break;
+            }
+        }
+
         if (result && event) {
             event.preventDefault();
             event.stopPropagation();
