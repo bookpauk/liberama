@@ -884,8 +884,8 @@ class TextPage extends Vue {
         }
     }
 
-    doToolBarToggle() {
-        this.$emit('tool-bar-toggle');
+    doToolBarToggle(event) {
+        this.$emit('do-action', {action: 'switchToolbar', event});
     }
 
     doScrollingToggle() {
@@ -947,11 +947,6 @@ class TextPage extends Vue {
             const action = this.$root.readerActionByKeyEvent(event);
 
             switch (action) {
-                case 'switchToolbar':
-                    this.doToolBarToggle();
-                    event.preventDefault();
-                    event.stopPropagation();
-                    break;
                 case 'bookBegin':
                     this.doHome();
                     break;
@@ -1067,7 +1062,7 @@ class TextPage extends Vue {
                     //движение вправо
                     this.doScrollingSpeedUp();
                 } else if (Math.abs(dy) < touchDelta && Math.abs(dx) < touchDelta) {
-                    this.doToolBarToggle();
+                    this.doToolBarToggle(event);
                 }
 
                 this.startTouch = null;
@@ -1094,7 +1089,7 @@ class TextPage extends Vue {
         } else if (event.button == 1) {
             this.doScrollingToggle();
         } else if (event.button == 2) {
-            this.doToolBarToggle();
+            this.doToolBarToggle(event);
         }
     }
 

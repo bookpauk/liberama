@@ -65,6 +65,8 @@
                     @load-book="loadBook"
                     @load-file="loadFile"
                     @book-pos-changed="bookPosChanged"
+                    @do-action="doAction"
+
                     @tool-bar-toggle="toolBarToggle"
                     @full-screen-toogle="fullScreenToggle"
                     @stop-scrolling="stopScrolling"
@@ -76,6 +78,7 @@
 
             <SetPositionPage v-if="setPositionActive" ref="setPositionPage" @set-position-toggle="setPositionToggle" @book-pos-changed="bookPosChanged"></SetPositionPage>
             <SearchPage v-show="searchActive" ref="searchPage" 
+                @do-action="doAction"
                 @search-toggle="searchToggle" 
                 @book-pos-changed="bookPosChanged"
                 @start-text-search="startTextSearch"
@@ -772,60 +775,23 @@ class Reader extends Vue {
         }
     }
 
-    buttonClick(button) {
-        const activeClass = this.buttonActiveClass(button);
+    buttonClick(action) {
+        const activeClass = this.buttonActiveClass(action);
 
-        this.$refs[button].blur();
+        this.$refs[action].blur();
 
         if (activeClass['tool-button-disabled'])
             return;
         
-        switch (button) {
-            case 'loader':
-                this.loaderToggle();
-                break;
-            case 'undoAction':
-                this.undoAction();
-                break;
-            case 'redoAction':
-                this.redoAction();
-                break;
-            case 'fullScreen':
-                this.fullScreenToggle();
-                break;
-            case 'setPosition':
-                this.setPositionToggle();
-                break;
-            case 'scrolling':
-                this.scrollingToggle();
-                break;
-            case 'search':
-                this.searchToggle();
-                break;
-            case 'copyText':
-                this.copyTextToggle();
-                break;
-            case 'refresh':
-                this.refreshBook();
-                break;
-            case 'recentBooks':
-                this.recentBooksToggle();
-                break;
-            case 'offlineMode':
-                this.offlineModeToggle();
-                break;
-            case 'settings':
-                this.settingsToggle();
-                break;
-        }
+        this.doAction({action});
     }
 
-    buttonActiveClass(button) {
+    buttonActiveClass(action) {
         const classActive = { 'tool-button-active': true, 'tool-button-active:hover': true };
         const classDisabled = { 'tool-button-disabled': true, 'tool-button-disabled:hover': true };
         let classResult = {};
 
-        switch (button) {
+        switch (action) {
             case 'loader':
             case 'fullScreen':
             case 'setPosition':
@@ -838,7 +804,7 @@ class Reader extends Vue {
             case 'settings':
                 if (this.progressActive) {
                     classResult = classDisabled;
-                } else if (this[`${button}Active`]) {
+                } else if (this[`${action}Active`]) {
                     classResult = classActive;
                 }
                 break;
@@ -853,7 +819,7 @@ class Reader extends Vue {
         }
 
         if (this.activePage == 'LoaderPage' || !this.mostRecentBookReactive) {
-            switch (button) {
+            switch (action) {
                 case 'undoAction':
                 case 'redoAction':
                 case 'setPosition':
@@ -1103,63 +1069,68 @@ class Reader extends Vue {
     }
 
     doAction(opts) {
-        let result = false;
+        let result = true;
         let {action = '', event = false} = opts;
 
-        if (action == 'loader') {
-            this.loaderToggle();
-            result = true;
-        }
-
-        if (this.activePage == 'TextPage') {
-            result = true;
-            switch (action) {
-                case 'help':
-                    this.helpToggle();
-                    break;
-                case 'settings':
-                    this.settingsToggle();
-                    break;
-                case 'undoAction':
-                    this.undoAction();
-                    break;
-                case 'redoAction':
-                    this.redoAction();
-                    break;
-                case 'fullScreen':
-                    this.fullScreenToggle();
-                    break;
-                case 'scrolling':
-                    this.scrollingToggle();
-                    break;
-                case 'setPosition':
-                    this.setPositionToggle();
-                    break;
-                case 'search':
-                    this.searchToggle();
-                    break;
-                case 'copyText':
-                    this.copyTextToggle();
-                    break;
-                case 'refresh':
-                    this.refreshBook();
-                    break;
-                case 'offlineMode':
-                    this.offlineModeToggle();
-                    break;
-                case 'recentBooks':
-                    this.recentBooksToggle();
-                    break;
-                default:
-                    result = false;
-                    break;
-            }
+        switch (action) {
+            case 'loader':
+                this.loaderToggle();
+                break;
+            case 'help':
+                this.helpToggle();
+                break;
+            case 'settings':
+                this.settingsToggle();
+                break;
+            case 'undoAction':
+                this.undoAction();
+                break;
+            case 'redoAction':
+                this.redoAction();
+                break;
+            case 'fullScreen':
+                this.fullScreenToggle();
+                break;
+            case 'scrolling':
+                this.scrollingToggle();
+                break;
+            case 'stopScrolling':
+                this.stopScrolling();
+                break;
+            case 'setPosition':
+                this.setPositionToggle();
+                break;
+            case 'search':
+                this.searchToggle();
+                break;
+            case 'copyText':
+                this.copyTextToggle();
+                break;
+            case 'refresh':
+                this.refreshBook();
+                break;
+            case 'offlineMode':
+                this.offlineModeToggle();
+                break;
+            case 'recentBooks':
+                this.recentBooksToggle();
+                break;
+            case 'switchToolbar':
+                this.toolBarToggle();
+                break;
+            case 'donate':
+                this.donateToggle();
+                break;
+            default:
+                result = false;
+                break;
         }
 
         if (result && event) {
             event.preventDefault();
             event.stopPropagation();
         }
+
         return result;
     }
 
@@ -1193,7 +1164,14 @@ class Reader extends Vue {
 
             if (!handled && event.type == 'keydown') {
                 const action = this.$root.readerActionByKeyEvent(event);
-                result = this.doAction({action, event});
+
+                if (action == 'loader') {
+                    result = this.doAction({action, event});
+                }
+
+                if (!result && this.activePage == 'TextPage') {
+                    result = this.doAction({action, event});
+                }
             }
         }
         return result;
