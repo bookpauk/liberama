@@ -43,8 +43,8 @@ const pages = {
 
 const tabs = [
     ['CommonHelpPage', 'Общее'],
-    ['HotkeysHelpPage', 'Клавиатура'],
     ['MouseHelpPage', 'Мышь/тачскрин'],
+    ['HotkeysHelpPage', 'Клавиатура'],
     ['VersionHistoryPage', 'История версий'],
     ['DonateHelpPage', 'Помочь проекту'],
 ];

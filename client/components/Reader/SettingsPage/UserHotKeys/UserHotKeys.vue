@@ -4,13 +4,15 @@
         <div class="table-row row">
             <div class="desc q-pa-sm bg-green-4">Команда</div>
             <div class="hotKeys col q-pa-sm bg-green-4 row no-wrap">
-                <span>Сочетание клавиш</span>
-                <q-input ref="input" outlined dense rounded bg-color="grey-4"
+                <div style="width: 80px">Сочетание клавиш</div>
+                <q-input ref="input" class="q-ml-sm col"
+                    outlined dense rounded
+                    bg-color="grey-4"
                     placeholder="Найти"
                     v-model="search"
                     @click.stop
                 />
-                <div class="q-ml-sm column justify-center">
+                <div v-show="!readonly" class="q-ml-sm column justify-center">
                     <q-btn class="bg-grey-4 text-grey-6" style="height: 35px; width: 35px" rounded flat icon="la la-broom" @click="defaultHotKeyAll">
                         <q-tooltip :delay="1000" anchor="top middle" self="bottom middle" content-style="font-size: 80%">
                             Установить все сочетания по умолчанию
@@ -26,14 +28,14 @@
             <div class="hotKeys col q-pa-sm">
                 <q-chip
                     :color="collisions[code] ? 'red' : 'grey-7'"
-                    removable :clickable="collisions[code] ? true : false"
+                    :removable="!readonly" :clickable="collisions[code] ? true : false"
                     text-color="white" v-for="(code, index) in value[action]" :key="index" @remove="removeCode(action, code)"
                     @click="collisionWarning(code)"
                     >
                     {{ code }}
                 </q-chip>
             </div>
-            <div class="column q-pa-xs">
+            <div v-show="!readonly" class="column q-pa-xs">
                 <q-icon
                     name="la la-plus-circle"
                     class="button bg-green-8 text-white"
@@ -71,7 +73,7 @@ import rstore from '../../../../store/modules/reader';
 const UserHotKeysProps = Vue.extend({
     props: {
         value: Object,
-        //prop: { type: Number, default: 0 },
+        readonly: Boolean,
     }
 });
 
