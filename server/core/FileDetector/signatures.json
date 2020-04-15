@@ -663,31 +663,6 @@
   },
 
   {
-    "type": "html",
-    "ext": "html",
-    "mime": "text/html",
-    "rules": [
-      { "type": "or", "rules":
-      [
-        { "type": "contains", "bytes": "3c68746d6c" },
-        { "type": "contains", "bytes": "3c00680074006d006c00" },
-        { "type": "equal", "end": 5, "bytes": "3c68746d6c" },
-        { "type": "equal", "end": 10, "bytes": "3c00680074006d006c00" },
-        { "type": "equal", "end": 9, "bytes": "3c21646f6374797065" },
-        { "type": "equal", "end": 5, "bytes": "3c626f6479" },
-        { "type": "equal", "end": 5, "bytes": "3c68656164" },
-        { "type": "equal", "end": 7, "bytes": "3c696672616d65" },
-        { "type": "equal", "end": 4, "bytes": "3c696d67" },
-        { "type": "equal", "end": 7, "bytes": "3c6f626a656374" },
-        { "type": "equal", "end": 7, "bytes": "3c736372697074" },
-        { "type": "equal", "end": 6, "bytes": "3c7461626c65" },
-        { "type": "equal", "end": 6, "bytes": "3c7469746c65" }
-      ]
-      }
-    ]
-  },
-
-  {
     "type": "docx",
     "ext": "docx",
     "mime": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
@@ -720,6 +695,35 @@
     "mime": "application/x-mobipocket-ebook",
     "rules": [
       { "type": "equal", "start": 64, "end": 68, "bytes": "4d4f4249" }
+    ]
+  },
+
+  {
+    "type": "html",
+    "ext": "html",
+    "mime": "text/html",
+    "rules": [
+      { "type": "or", "rules":
+      [
+        { "type": "contains", "bytes": "3c68746d6c" },
+        { "type": "contains", "bytes": "3c00680074006d006c00" },
+        { "type": "contains", "bytes": "3c48544d4c" },
+        { "type": "contains", "bytes": "3c00480054004d004c00" },
+
+        { "type": "equal", "end": 5, "bytes": "3c68746d6c" },
+        { "type": "equal", "end": 10, "bytes": "3c00680074006d006c00" },
+        { "type": "equal", "end": 9, "bytes": "3c21646f6374797065" },
+        { "type": "equal", "end": 9, "bytes": "3c21444f4354595045" },
+        { "type": "equal", "end": 5, "bytes": "3c626f6479" },
+        { "type": "equal", "end": 5, "bytes": "3c68656164" },
+        { "type": "equal", "end": 7, "bytes": "3c696672616d65" },
+        { "type": "equal", "end": 4, "bytes": "3c696d67" },
+        { "type": "equal", "end": 7, "bytes": "3c6f626a656374" },
+        { "type": "equal", "end": 7, "bytes": "3c736372697074" },
+        { "type": "equal", "end": 6, "bytes": "3c7461626c65" },
+        { "type": "equal", "end": 6, "bytes": "3c7469746c65" }
+      ]
+      }
     ]
   }
 
