@@ -43,8 +43,8 @@ const pages = {
 
 const tabs = [
     ['CommonHelpPage', 'Общее'],
-    ['HotkeysHelpPage', 'Клавиатура'],
     ['MouseHelpPage', 'Мышь/тачскрин'],
+    ['HotkeysHelpPage', 'Клавиатура'],
     ['VersionHistoryPage', 'История версий'],
     ['DonateHelpPage', 'Помочь проекту'],
 ];
@@ -56,7 +56,7 @@ class HelpPage extends Vue {
     selectedTab = 'CommonHelpPage';
 
     close() {
-        this.$emit('help-toggle');
+        this.$emit('do-action', {action: 'help'});
     }
 
     get activePage() {

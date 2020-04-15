@@ -1,28 +1,13 @@
 <template>
     <div class="page">
-        <span class="text-h6 text-bold">Управление с помощью горячих клавиш:</span>
-        <ul>
-            <li><b>F1, H</b> - открыть справку</li>
-            <li><b>Escape</b> - показать/скрыть страницу загрузки</li>
-            <li><b>Tab, Q</b> - показать/скрыть панель управления</li>
-            <li><b>PageUp, Left, Shift+Space, Backspace</b> - страницу назад</li>
-            <li><b>PageDown, Right, Space</b> - страницу вперед</li>
-            <li><b>Home</b> - в начало книги</li>
-            <li><b>End</b> - в конец книги</li>
-            <li><b>Up</b> - строчку назад</li>
-            <li><b>Down</b> - строчку вперёд</li>
-            <li><b>A, Shift+A</b> - изменить размер шрифта</li>
-            <li><b>Enter, F, F11, ` (апостроф)</b> - вкл./выкл. полный экран</li>
-            <li><b>Z</b> - вкл./выкл. плавный скроллинг текста</li>
-            <li><b>Shift+Down/Shift+Up</b> - увеличить/уменьшить скорость скроллинга
-            <li><b>P</b> - установить страницу</li>
-            <li><b>Ctrl+F</b> - найти в тексте</li>            
-            <li><b>Ctrl+C</b> - скопировать текст со страницы</li>            
-            <li><b>R</b> - принудительно обновить книгу в обход кэша</li>
-            <li><b>X</b> - открыть недавние</li>
-            <li><b>O</b> - автономный режим</li>
-            <li><b>S</b> - открыть окно настроек</li>
-        </ul>
+        <div style="font-size: 120%">
+            <div class="text-h6 text-bold">Доступны следующие клавиатурные команды:</div>
+            <br>
+        </div>
+        <div class="q-mb-md" style="width: 550px">
+            <div class="text-right text-italic" style="font-size: 80%">* Изменить сочетания клавиш можно в настройках</div>
+            <UserHotKeys v-model="userHotKeys" readonly/>
+        </div>
     </div>
 </template>
 
@@ -31,11 +16,25 @@
 import Vue from 'vue';
 import Component from 'vue-class-component';
 
+import UserHotKeys from '../../SettingsPage/UserHotKeys/UserHotKeys.vue';
+
 export default @Component({
+    components: {
+        UserHotKeys,
+    },
 })
 class HotkeysHelpPage extends Vue {
     created() {
     }
+
+    get userHotKeys() {
+        return this.$store.state.reader.settings.userHotKeys;
+    }
+
+    set userHotKeys(value) {
+        //no setter
+    }
+
 }
 //-----------------------------------------------------------------------------
 </script>
@@ -44,7 +43,5 @@ class HotkeysHelpPage extends Vue {
 .page {
     padding: 15px;
     overflow-y: auto;
-    font-size: 120%;
-    line-height: 130%;
 }
 </style>

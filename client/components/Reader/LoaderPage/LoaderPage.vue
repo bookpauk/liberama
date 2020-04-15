@@ -148,12 +148,12 @@ class LoaderPage extends Vue {
         this.pasteTextActive = !this.pasteTextActive;
     }
 
-    openHelp() {
-        this.$emit('help-toggle');
+    openHelp(event) {
+        this.$emit('do-action', {action: 'help', event});
     }
 
     openDonate() {
-        this.$emit('donate-toggle');
+        this.$emit('do-action', {action: 'donate'});
     }
     
     openComments() {
@@ -173,21 +173,19 @@ class LoaderPage extends Vue {
         const input = this.$refs.input.$refs.input;
         if (document.activeElement === input && event.type == 'keydown' && event.code == 'Enter') {
             this.submitUrl();
-        }
-
-        if (event.type == 'keydown' && (event.code == 'F1' || (document.activeElement !== input && event.code == 'KeyH'))) {
-            this.$emit('help-toggle');
-            event.preventDefault();
-            event.stopPropagation();
             return true;
         }
 
-        if (event.type == 'keydown' && (document.activeElement !== input && event.code == 'KeyQ')) {
-            this.$emit('tool-bar-toggle');
-            event.preventDefault();
-            event.stopPropagation();
-            return true;
+        if (event.type == 'keydown' && document.activeElement !== input) {
+            const action = this.$root.readerActionByKeyEvent(event);
+            switch (action) {
+                case 'help':
+                    this.openHelp(event);
+                    return true;
+            }
         }
+
+        return false;
     }
 }
 //-----------------------------------------------------------------------------

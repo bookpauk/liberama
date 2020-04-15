@@ -423,7 +423,7 @@ class TextPage extends Vue {
                     if (this.lazyParseEnabled)
                         this.lazyParsePara();
                 } catch (e) {
-                    this.$root.stdDialog.alert(e.message, 'Ошибка', {type: 'negative'});
+                    this.$root.stdDialog.alert(e.message, 'Ошибка', {color: 'negative'});
                 }
             })();
         }
@@ -504,7 +504,7 @@ class TextPage extends Vue {
     async startTextScrolling() {
         if (this.doingScrolling || !this.book || !this.parsed.textLength || !this.linesDown || this.pageLineCount < 1 ||
             this.linesDown.length <= this.pageLineCount) {
-            this.$emit('stop-scrolling');
+            this.doStopScrolling();
             return;
         }
 
@@ -545,7 +545,7 @@ class TextPage extends Vue {
         }
         this.resolveTransition1Finish = null;
         this.doingScrolling = false;
-        this.$emit('stop-scrolling');
+        this.doStopScrolling();
         this.draw();
     }
 
@@ -884,22 +884,26 @@ class TextPage extends Vue {
         }
     }
 
-    doToolBarToggle() {
-        this.$emit('tool-bar-toggle');
+    doToolBarToggle(event) {
+        this.$emit('do-action', {action: 'switchToolbar', event});
     }
 
     doScrollingToggle() {
-        this.$emit('scrolling-toggle');
+        this.$emit('do-action', {action: 'scrolling', event});
     }
 
     doFullScreenToggle() {
-        this.$emit('full-screen-toogle');
+        this.$emit('do-action', {action: 'fullScreen', event});
+    }
+
+    doStopScrolling() {
+        this.$emit('do-action', {action: 'stopScrolling', event});
     }
 
     async doFontSizeInc() {
         if (!this.settingsChanging) {
             this.settingsChanging = true;
-            const newSize = (this.settings.fontSize + 1 < 100 ? this.settings.fontSize + 1 : 100);
+            const newSize = (this.settings.fontSize + 1 < 200 ? this.settings.fontSize + 1 : 100);
             const newSettings = Object.assign({}, this.settings, {fontSize: newSize});
             this.commit('reader/setSettings', newSettings);
             await sleep(50);
@@ -938,69 +942,6 @@ class TextPage extends Vue {
             await sleep(50);
             this.settingsChanging = false;
         }
-    }
-
-    keyHook(event) {
-        let result = false;
-        if (event.type == 'keydown' && !event.ctrlKey && !event.altKey) {
-            result = true;
-            switch (event.code) {
-                case 'ArrowDown':
-                    if (event.shiftKey)
-                        this.doScrollingSpeedUp();
-                    else
-                        this.doDown();
-                    break;
-                case 'ArrowUp':
-                    if (event.shiftKey)
-                        this.doScrollingSpeedDown();
-                    else
-                        this.doUp();
-                    break;
-                case 'PageDown':
-                case 'ArrowRight':
-                    this.doPageDown();
-                    break;
-                case 'Space':
-                    if (event.shiftKey)
-                        this.doPageUp();
-                    else
-                        this.doPageDown();
-                    break;
-                case 'PageUp':
-                case 'ArrowLeft':
-                case 'Backspace':
-                    this.doPageUp();
-                    break;
-                case 'Home':
-                    this.doHome();
-                    break;
-                case 'End':
-                    this.doEnd();
-                    break;
-                case 'KeyA':
-                    if (event.shiftKey)
-                        this.doFontSizeDec();
-                    else
-                        this.doFontSizeInc();
-                    break;
-                case 'Enter':
-                case 'Backquote'://`
-                case 'KeyF':
-                    this.doFullScreenToggle();
-                    break;
-                case 'Tab':
-                case 'KeyQ':
-                    this.doToolBarToggle();
-                    event.preventDefault();
-                    event.stopPropagation();
-                    break;
-                default:
-                    result = false;
-                    break;
-            }
-        }
-        return result;
     }
 
     async startClickRepeat(pointX, pointY) {
@@ -1080,7 +1021,7 @@ class TextPage extends Vue {
                     //движение вправо
                     this.doScrollingSpeedUp();
                 } else if (Math.abs(dy) < touchDelta && Math.abs(dx) < touchDelta) {
-                    this.doToolBarToggle();
+                    this.doToolBarToggle(event);
                 }
 
                 this.startTouch = null;
@@ -1107,7 +1048,7 @@ class TextPage extends Vue {
         } else if (event.button == 1) {
             this.doScrollingToggle();
         } else if (event.button == 2) {
-            this.doToolBarToggle();
+            this.doToolBarToggle(event);
         }
     }
 
@@ -1132,7 +1073,7 @@ class TextPage extends Vue {
         if (url && url.indexOf('file://') != 0) {
             window.open(url, '_blank');
         } else {
-            this.$root.stdDialog.alert('Оригинал недоступен, т.к. файл книги был загружен с локального диска.', ' ', {type: 'info'});
+            this.$root.stdDialog.alert('Оригинал недоступен, т.к. файл книги был загружен с локального диска.', ' ', {color: 'info'});
         }
     }
 

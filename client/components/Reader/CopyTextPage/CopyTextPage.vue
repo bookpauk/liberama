@@ -91,7 +91,7 @@ class CopyTextPage extends Vue {
 
     close() {
         this.stopInit = true;
-        this.$emit('copy-text-toggle');
+        this.$emit('do-action', {action: 'copyText'});
     }
 
     keyHook(event) {

@@ -1,15 +1,73 @@
-//занчение toolButtons.name не должно совпадать с settingDefaults-propertyName
+const readerActions = {
+    'help': 'Вызвать cправку',
+    'loader': 'На страницу загрузки',
+    'settings': 'Настроить',
+    'undoAction': 'Действие назад',
+    'redoAction': 'Действие вперед',
+    'fullScreen': 'На весь экран',
+    'scrolling': 'Плавный скроллинг',
+    'stopScrolling': '',
+    'setPosition': 'Установить позицию',
+    'search': 'Найти в тексте',
+    'copyText': 'Скопировать текст со страницы',
+    'refresh': 'Принудительно обновить книгу',
+    'offlineMode': 'Автономный режим (без интернета)',
+    'recentBooks': 'Открыть недавние',
+    'switchToolbar': 'Показать/скрыть панель управления',
+    'donate': '',
+    'bookBegin': 'В начало книги',
+    'bookEnd': 'В конец книги',
+    'pageBack': 'Страницу назад',
+    'pageForward': 'Страницу вперед',
+    'lineBack': 'Строчку назад',
+    'lineForward': 'Строчку вперед',
+    'incFontSize': 'Увеличить размер шрифта',
+    'decFontSize': 'Уменьшить размер шрифта',
+    'scrollingSpeedUp': 'Увеличить скорость скроллинга',
+    'scrollingSpeedDown': 'Уменьшить скорость скроллинга',
+};
+
+//readerActions[name]
 const toolButtons = [
-    {name: 'undoAction',  show: true, text: 'Действие назад'},
-    {name: 'redoAction',  show: true, text: 'Действие вперед'},
-    {name: 'fullScreen',  show: true, text: 'На весь экран'},
-    {name: 'scrolling',   show: false, text: 'Плавный скроллинг'},
-    {name: 'setPosition', show: true, text: 'На страницу'},
-    {name: 'search',      show: true, text: 'Найти в тексте'},
-    {name: 'copyText',    show: false, text: 'Скопировать текст со страницы'},
-    {name: 'refresh',     show: true, text: 'Принудительно обновить книгу'},
-    {name: 'offlineMode', show: false, text: 'Автономный режим (без интернета)'},
-    {name: 'recentBooks', show: true, text: 'Открыть недавние'},
+    {name: 'undoAction',  show: true},
+    {name: 'redoAction',  show: true},
+    {name: 'fullScreen',  show: true},
+    {name: 'scrolling',   show: false},
+    {name: 'setPosition', show: true},
+    {name: 'search',      show: true},
+    {name: 'copyText',    show: false},
+    {name: 'refresh',     show: true},
+    {name: 'offlineMode', show: false},
+    {name: 'recentBooks', show: true},
+];
+
+//readerActions[name]
+const hotKeys = [
+    {name: 'help', codes: ['F1', 'H']},
+    {name: 'loader', codes: ['Escape']},
+    {name: 'settings', codes: ['S']},
+    {name: 'undoAction', codes: ['Ctrl+BracketLeft']},
+    {name: 'redoAction', codes: ['Ctrl+BracketRight']},
+    {name: 'fullScreen', codes: ['Enter', 'Backquote', 'F']},
+    {name: 'scrolling', codes: ['Z']},
+    {name: 'setPosition', codes: ['P']},
+    {name: 'search', codes: ['Ctrl+F']},
+    {name: 'copyText', codes: ['Ctrl+C']},
+    {name: 'refresh', codes: ['R']},
+    {name: 'offlineMode', codes: ['O']},
+    {name: 'recentBooks', codes: ['X']},
+
+    {name: 'switchToolbar', codes: ['Tab', 'Q']},
+    {name: 'bookBegin', codes: ['Home']},
+    {name: 'bookEnd', codes: ['End']},
+    {name: 'pageBack', codes: ['PageUp', 'ArrowLeft', 'Backspace', 'Shift+Space']},
+    {name: 'pageForward', codes: ['PageDown', 'ArrowRight', 'Space']},
+    {name: 'lineBack', codes: ['ArrowUp']},
+    {name: 'lineForward', codes: ['ArrowDown']},
+    {name: 'incFontSize', codes: ['A']},
+    {name: 'decFontSize', codes: ['Shift+A']},
+    {name: 'scrollingSpeedUp', codes: ['Shift+ArrowDown']},
+    {name: 'scrollingSpeedDown', codes: ['Shift+ArrowUp']},
 ];
 
 const fonts = [
@@ -136,6 +194,7 @@ const webFonts = [
 
 ];
 
+//----------------------------------------------------------------------------------------------------------
 const settingDefaults = {
     textColor: '#000000',
     backgroundColor: '#EBE2C9',
@@ -188,6 +247,7 @@ const settingDefaults = {
 
     fontShifts: {},
     showToolButton: {},
+    userHotKeys: {},
 };
 
 for (const font of fonts)
@@ -196,6 +256,8 @@ for (const font of webFonts)
     settingDefaults.fontShifts[font.name] = font.fontVertShift;
 for (const button of toolButtons)
     settingDefaults.showToolButton[button.name] = button.show;
+for (const hotKey of hotKeys)
+    settingDefaults.userHotKeys[hotKey.name] = hotKey.codes;
 
 // initial state
 const state = {
@@ -256,7 +318,9 @@ const mutations = {
 };
 
 export default {
+    readerActions,
     toolButtons,
+    hotKeys,
     fonts,
     webFonts,
     settingDefaults,

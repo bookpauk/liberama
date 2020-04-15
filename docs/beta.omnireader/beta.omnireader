@@ -1,0 +1,48 @@
+server {
+  listen 443 ssl; # managed by Certbot
+  ssl_certificate /etc/letsencrypt/live/beta.omnireader.ru/fullchain.pem; # managed by Certbot
+  ssl_certificate_key /etc/letsencrypt/live/beta.omnireader.ru/privkey.pem; # managed by Certbot
+  include /etc/letsencrypt/options-ssl-nginx.conf; # managed by Certbot
+  ssl_dhparam /etc/letsencrypt/ssl-dhparams.pem; # managed by Certbot
+
+  server_name beta.omnireader.ru;
+
+  client_max_body_size 50m;
+  proxy_read_timeout 1h;
+
+  gzip on;
+  gzip_min_length 1024;
+  gzip_proxied expired no-cache no-store private auth;
+  gzip_types *;
+
+  location /api {
+    proxy_pass http://127.0.0.1:34081;
+  }
+
+  location /ws {
+    proxy_pass http://127.0.0.1:34081;
+    proxy_http_version 1.1;
+    proxy_set_header Upgrade $http_upgrade;
+    proxy_set_header Connection "upgrade";
+  }
+
+  location / {
+    root /home/beta.liberama/public;
+
+    location /tmp {
+      add_header Content-Type text/xml;
+      add_header Content-Encoding gzip;
+    }
+
+    location ~* \.(?:manifest|appcache|html)$ {
+      expires -1;
+    }
+  }
+}
+
+server {
+  listen 80;
+  server_name beta.omnireader.ru;
+
+  return 301 https://$host$request_uri;
+}

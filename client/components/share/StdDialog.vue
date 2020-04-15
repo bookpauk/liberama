@@ -3,7 +3,7 @@
         <slot></slot>
 
         <!--------------------------------------------------->
-        <div v-show="type == 'alert'" class="dialog column bg-white no-wrap" style="min-height: 150px">
+        <div v-show="type == 'alert'" class="bg-white no-wrap">
             <div class="header row">
                 <div class="caption col row items-center q-ml-md">
                     <q-icon v-show="caption" class="q-mr-sm" :class="iconColor" name="las la-exclamation-circle" size="28px"></q-icon>
@@ -16,7 +16,7 @@
                 </div>
             </div>
 
-            <div class="col q-mx-md">
+            <div class="q-mx-md">
                 <div v-html="message"></div>
             </div>
 
@@ -26,7 +26,7 @@
         </div>
 
         <!--------------------------------------------------->
-        <div v-show="type == 'confirm'" class="dialog column bg-white no-wrap" style="min-height: 150px">
+        <div v-show="type == 'confirm'" class="bg-white no-wrap">
             <div class="header row">
                 <div class="caption col row items-center q-ml-md">
                     <q-icon v-show="caption" class="q-mr-sm" :class="iconColor" name="las la-exclamation-circle" size="28px"></q-icon>
@@ -39,7 +39,7 @@
                 </div>
             </div>
 
-            <div class="col q-mx-md">
+            <div class="q-mx-md">
                 <div v-html="message"></div>
             </div>
 
@@ -50,7 +50,7 @@
         </div>
 
         <!--------------------------------------------------->
-        <div v-show="type == 'prompt'" class="dialog column bg-white no-wrap" style="min-height: 250px">
+        <div v-show="type == 'prompt'" class="bg-white no-wrap">
             <div class="header row">
                 <div class="caption col row items-center q-ml-md">
                     <q-icon v-show="caption" class="q-mr-sm" :class="iconColor" name="las la-exclamation-circle" size="28px"></q-icon>
@@ -63,7 +63,7 @@
                 </div>
             </div>
 
-            <div class="col q-mx-md">
+            <div class="q-mx-md">
                 <div v-html="message"></div>
                 <q-input ref="input" class="q-mt-xs" outlined dense v-model="inputValue"/>
                 <div class="error"><span v-show="error != ''">{{ error }}</span></div>
@@ -74,6 +74,34 @@
                 <q-btn class="q-px-md q-ml-sm" color="primary" dense no-caps @click="okClick">OK</q-btn>
             </div>
         </div>
+
+        <!--------------------------------------------------->
+        <div v-show="type == 'hotKey'" class="bg-white no-wrap">
+            <div class="header row">
+                <div class="caption col row items-center q-ml-md">
+                    <q-icon v-show="caption" class="q-mr-sm" :class="iconColor" name="las la-exclamation-circle" size="28px"></q-icon>
+                    <div v-html="caption"></div>
+                </div>
+                <div class="close-icon column justify-center items-center">
+                    <q-btn flat round dense v-close-popup>
+                        <q-icon name="la la-times" size="18px"></q-icon>
+                    </q-btn>
+                </div>
+            </div>
+
+            <div class="q-mx-md">
+                <div v-html="message"></div>
+                <div class="q-my-md text-center">
+                    <div v-show="hotKeyCode == ''" class="text-grey-5">Нет</div>
+                    <div>{{ hotKeyCode }}</div>
+                </div>
+            </div>
+
+            <div class="buttons row justify-end q-pa-md">
+                <q-btn class="q-px-md q-ml-sm" dense no-caps v-close-popup>Отмена</q-btn>
+                <q-btn class="q-px-md q-ml-sm" color="primary" dense no-caps @click="okClick" :disabled="hotKeyCode == ''">OK</q-btn>
+            </div>
+        </div>
     </q-dialog>
 </template>
 
@@ -82,7 +110,7 @@
 import Vue from 'vue';
 import Component from 'vue-class-component';
 
-//import * as utils from '../../share/utils';
+import * as utils from '../../share/utils';
 
 export default @Component({
     watch: {
@@ -99,6 +127,7 @@ class StdDialog extends Vue {
     inputValue = '';
     error = '';
     iconColor = '';
+    hotKeyCode = '';
 
     created() {
         if (this.$root.addKeyHook) {
@@ -117,8 +146,13 @@ class StdDialog extends Vue {
         this.error = '';
 
         this.iconColor = 'text-warning';
-        if (opts && opts.type) {
-            this.iconColor = `text-${opts.type}`;
+        if (opts && opts.color) {
+            this.iconColor = `text-${opts.color}`;
+        }
+
+        this.hotKeyCode = '';
+        if (opts && opts.hotKeyCode) {
+            this.hotKeyCode = opts.hotKeyCode;
         }
     }
 
@@ -158,6 +192,12 @@ class StdDialog extends Vue {
             this.$refs.dialog.shake();
             return;
         }
+
+        if (this.type == 'hotKey' && this.hotKeyCode == '') {
+            this.$refs.dialog.shake();
+            return;
+        }
+
         this.ok = true;
         this.$refs.dialog.hide();
     }
@@ -218,9 +258,38 @@ class StdDialog extends Vue {
         });
     }
 
+    getHotKey(message, caption, opts) {
+        return new Promise((resolve) => {
+            this.init(message, caption, opts);
+
+            this.hideTrigger = () => {
+                if (this.ok) {
+                    resolve(this.hotKeyCode);
+                } else {
+                    resolve(false);
+                }
+            };
+
+            this.type = 'hotKey';
+            this.active = true;
+        });
+    }
+
     keyHook(event) {
-        if (this.active && event.code == 'Enter') {
-            this.okClick();
+        if (this.active) {
+            if (this.type == 'hotKey') {
+                if (event.type == 'keydown') {
+                    this.hotKeyCode = utils.keyEventToCode(event);
+                }
+            } else {
+                if (event.code == 'Enter')
+                    this.okClick();
+                if (event.code == 'Escape') {
+                    this.$nextTick(() => {
+                        this.$refs.dialog.hide();
+                    });
+                }
+            }
             event.stopPropagation();
             event.preventDefault();
         }

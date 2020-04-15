@@ -46,7 +46,7 @@
                     @@include('./include/ButtonsTab.inc');
                 </div>
                 <!-- Управление ------------------------------------------------------------------>
-                <div v-if="selectedTab == 'keys'" class="fit tab-panel">
+                <div v-if="selectedTab == 'keys'" class="fit column">
                     @@include('./include/KeysTab.inc');
                 </div>
                 <!-- Листание -------------------------------------------------------------------->
@@ -76,6 +76,8 @@ import _ from 'lodash';
 import * as utils from '../../../share/utils';
 import Window from '../../share/Window.vue';
 import NumInput from '../../share/NumInput.vue';
+import UserHotKeys from './UserHotKeys/UserHotKeys.vue';
+
 import rstore from '../../../store/modules/reader';
 import defPalette from './defPalette';
 
@@ -85,6 +87,7 @@ export default @Component({
     components: {
         Window,
         NumInput,
+        UserHotKeys,
     },
     data: function() {
         return Object.assign({}, rstore.settingDefaults);
@@ -139,6 +142,7 @@ export default @Component({
 class SettingsPage extends Vue {
     selectedTab = 'profiles';
     selectedViewTab = 'color';
+    selectedKeysTab = 'mouse';
     form = {};
     fontBold = false;
     fontItalic = false;
@@ -152,12 +156,14 @@ class SettingsPage extends Vue {
 
     serverStorageKeyVisible = false;
     toolButtons = [];
+    rstore = {};
 
     created() {
         this.commit = this.$store.commit;
         this.reader = this.$store.state.reader;
 
         this.form = {};
+        this.rstore = rstore;
         this.toolButtons = rstore.toolButtons;
         this.settingsChanged();
     }
@@ -339,7 +345,7 @@ class SettingsPage extends Vue {
     }
 
     close() {
-        this.$emit('settings-toggle');
+        this.$emit('do-action', {action: 'settings'});
     }
 
     async setDefaults() {

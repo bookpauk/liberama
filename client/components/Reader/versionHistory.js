@@ -1,5 +1,17 @@
 export const versionHistory = [
 {
+    showUntil: '2020-04-25',
+    header: '0.9.2 (2020-03-15)',
+    content:
+`
+<ul>
+    <li>в настройки добавлена возможность назначать сочетания клавиш на команды в читалке</li>
+    <li>переход на Service Worker вместо AppCache для автономного режима работы</li>
+</ul>
+`
+},
+
+{
     showUntil: '2020-03-02',
     header: '0.9.1 (2020-03-03)',
     content:

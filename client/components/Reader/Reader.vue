@@ -4,57 +4,57 @@
             <div ref="buttons" class="row justify-between no-wrap">
                 <button ref="loader" class="tool-button" :class="buttonActiveClass('loader')" @click="buttonClick('loader')" v-ripple>
                     <q-icon name="la la-arrow-left" size="32px"/>
-                    <q-tooltip :delay="1500" anchor="bottom right" content-style="font-size: 80%">Загрузить книгу</q-tooltip>
+                    <q-tooltip :delay="1500" anchor="bottom right" content-style="font-size: 80%">{{ rstore.readerActions['loader'] }}</q-tooltip>
                 </button>
 
                 <div>
                     <button ref="undoAction" v-show="showToolButton['undoAction']" class="tool-button" :class="buttonActiveClass('undoAction')" @click="buttonClick('undoAction')" v-ripple>
                         <q-icon name="la la-angle-left" size="32px"/>
-                        <q-tooltip :delay="1500" anchor="bottom middle" content-style="font-size: 80%">Действие назад</q-tooltip>
+                        <q-tooltip :delay="1500" anchor="bottom middle" content-style="font-size: 80%">{{ rstore.readerActions['undoAction'] }}</q-tooltip>
                     </button>
                     <button ref="redoAction" v-show="showToolButton['redoAction']" class="tool-button" :class="buttonActiveClass('redoAction')" @click="buttonClick('redoAction')" v-ripple>
                         <q-icon name="la la-angle-right" size="32px"/>
-                        <q-tooltip :delay="1500" anchor="bottom middle" content-style="font-size: 80%">Действие вперед</q-tooltip>
+                        <q-tooltip :delay="1500" anchor="bottom middle" content-style="font-size: 80%">{{ rstore.readerActions['redoAction'] }}</q-tooltip>
                     </button>
                     <div class="space"></div>
                     <button ref="fullScreen" v-show="showToolButton['fullScreen']" class="tool-button" :class="buttonActiveClass('fullScreen')" @click="buttonClick('fullScreen')" v-ripple>
                         <q-icon :name="(fullScreenActive ? 'la la-compress-arrows-alt': 'la la-expand-arrows-alt')" size="32px"/>
-                        <q-tooltip :delay="1500" anchor="bottom middle" content-style="font-size: 80%">На весь экран</q-tooltip>
+                        <q-tooltip :delay="1500" anchor="bottom middle" content-style="font-size: 80%">{{ rstore.readerActions['fullScreen'] }}</q-tooltip>
                     </button>
                     <button ref="scrolling" v-show="showToolButton['scrolling']" class="tool-button" :class="buttonActiveClass('scrolling')" @click="buttonClick('scrolling')" v-ripple>
                         <q-icon name="la la-film" size="32px"/>
-                        <q-tooltip :delay="1500" anchor="bottom middle" content-style="font-size: 80%">Плавный скроллинг</q-tooltip>
+                        <q-tooltip :delay="1500" anchor="bottom middle" content-style="font-size: 80%">{{ rstore.readerActions['scrolling'] }}</q-tooltip>
                     </button>
                     <button ref="setPosition" v-show="showToolButton['setPosition']" class="tool-button" :class="buttonActiveClass('setPosition')" @click="buttonClick('setPosition')" v-ripple>
                         <q-icon name="la la-angle-double-right" size="32px"/>
-                        <q-tooltip :delay="1500" anchor="bottom middle" content-style="font-size: 80%">На страницу</q-tooltip>
+                        <q-tooltip :delay="1500" anchor="bottom middle" content-style="font-size: 80%">{{ rstore.readerActions['setPosition'] }}</q-tooltip>
                     </button>
                     <button ref="search" v-show="showToolButton['search']" class="tool-button" :class="buttonActiveClass('search')" @click="buttonClick('search')" v-ripple>
                         <q-icon name="la la-search" size="32px"/>
-                        <q-tooltip :delay="1500" anchor="bottom middle" content-style="font-size: 80%">Найти в тексте</q-tooltip>
+                        <q-tooltip :delay="1500" anchor="bottom middle" content-style="font-size: 80%">{{ rstore.readerActions['search'] }}</q-tooltip>
                     </button>
                     <button ref="copyText" v-show="showToolButton['copyText']" class="tool-button" :class="buttonActiveClass('copyText')" @click="buttonClick('copyText')" v-ripple>
                         <q-icon name="la la-copy" size="32px"/>
-                        <q-tooltip :delay="1500" anchor="bottom middle" content-style="font-size: 80%">Скопировать текст со страницы</q-tooltip>
+                        <q-tooltip :delay="1500" anchor="bottom middle" content-style="font-size: 80%">{{ rstore.readerActions['copyText'] }}</q-tooltip>
                     </button>
                     <button ref="refresh" v-show="showToolButton['refresh']" class="tool-button" :class="buttonActiveClass('refresh')" @click="buttonClick('refresh')" v-ripple>
                         <q-icon name="la la-sync" size="32px" :class="{clear: !showRefreshIcon}"/>
-                        <q-tooltip :delay="1500" anchor="bottom middle" content-style="font-size: 80%">Принудительно обновить книгу в обход кэша</q-tooltip>
+                        <q-tooltip :delay="1500" anchor="bottom middle" content-style="font-size: 80%">{{ rstore.readerActions['refresh'] }}</q-tooltip>
                     </button>
                     <div class="space"></div>
                     <button ref="offlineMode" v-show="showToolButton['offlineMode']" class="tool-button" :class="buttonActiveClass('offlineMode')" @click="buttonClick('offlineMode')" v-ripple>
                         <q-icon name="la la-unlink" size="32px"/>
-                        <q-tooltip :delay="1500" anchor="bottom middle" content-style="font-size: 80%">Автономный режим (без интернета)</q-tooltip>
+                        <q-tooltip :delay="1500" anchor="bottom middle" content-style="font-size: 80%">{{ rstore.readerActions['offlineMode'] }}</q-tooltip>
                     </button>
                     <button ref="recentBooks" v-show="showToolButton['recentBooks']" class="tool-button" :class="buttonActiveClass('recentBooks')" @click="buttonClick('recentBooks')" v-ripple>
                         <q-icon name="la la-book-open" size="32px"/>
-                        <q-tooltip :delay="1500" anchor="bottom middle" content-style="font-size: 80%">Открыть недавние</q-tooltip>
+                        <q-tooltip :delay="1500" anchor="bottom middle" content-style="font-size: 80%">{{ rstore.readerActions['recentBooks'] }}</q-tooltip>
                     </button>
                 </div>
 
                 <button ref="settings" class="tool-button" :class="buttonActiveClass('settings')" @click="buttonClick('settings')" v-ripple>
                     <q-icon name="la la-cog" size="32px"/>
-                    <q-tooltip :delay="1500" anchor="bottom left" content-style="font-size: 80%">Настроить</q-tooltip>
+                    <q-tooltip :delay="1500" anchor="bottom left" content-style="font-size: 80%">{{ rstore.readerActions['settings'] }}</q-tooltip>
                 </button>
             </div>
         </div>
@@ -65,26 +65,21 @@
                     @load-book="loadBook"
                     @load-file="loadFile"
                     @book-pos-changed="bookPosChanged"
-                    @tool-bar-toggle="toolBarToggle"
-                    @full-screen-toogle="fullScreenToggle"
-                    @stop-scrolling="stopScrolling"
-                    @scrolling-toggle="scrollingToggle"
-                    @help-toggle="helpToggle"
-                    @donate-toggle="donateToggle"
+                    @do-action="doAction"
                 ></component>
             </keep-alive>
 
             <SetPositionPage v-if="setPositionActive" ref="setPositionPage" @set-position-toggle="setPositionToggle" @book-pos-changed="bookPosChanged"></SetPositionPage>
             <SearchPage v-show="searchActive" ref="searchPage" 
-                @search-toggle="searchToggle" 
+                @do-action="doAction"
                 @book-pos-changed="bookPosChanged"
                 @start-text-search="startTextSearch"
                 @stop-text-search="stopTextSearch">
             </SearchPage>
-            <CopyTextPage v-if="copyTextActive" ref="copyTextPage" @copy-text-toggle="copyTextToggle"></CopyTextPage>
+            <CopyTextPage v-if="copyTextActive" ref="copyTextPage" @do-action="doAction"></CopyTextPage>
             <RecentBooksPage v-show="recentBooksActive" ref="recentBooksPage" @load-book="loadBook" @recent-books-close="recentBooksClose"></RecentBooksPage>
-            <SettingsPage v-show="settingsActive" ref="settingsPage" @settings-toggle="settingsToggle"></SettingsPage>
-            <HelpPage v-if="helpActive" ref="helpPage" @help-toggle="helpToggle"></HelpPage>
+            <SettingsPage v-show="settingsActive" ref="settingsPage" @do-action="doAction"></SettingsPage>
+            <HelpPage v-if="helpActive" ref="helpPage" @do-action="doAction"></HelpPage>
             <ClickMapPage v-show="clickMapActive" ref="clickMapPage"></ClickMapPage>
             <ServerStorage v-show="hidden" ref="serverStorage"></ServerStorage>
 
@@ -169,12 +164,13 @@ import SettingsPage from './SettingsPage/SettingsPage.vue';
 import HelpPage from './HelpPage/HelpPage.vue';
 import ClickMapPage from './ClickMapPage/ClickMapPage.vue';
 import ServerStorage from './ServerStorage/ServerStorage.vue';
+import Dialog from '../share/Dialog.vue';
 
 import bookManager from './share/bookManager';
+import rstore from '../../store/modules/reader';
 import readerApi from '../../api/reader';
 import * as utils from '../../share/utils';
 import {versionHistory} from './versionHistory';
-import Dialog from '../share/Dialog.vue';
 
 export default @Component({
     components: {
@@ -232,6 +228,7 @@ export default @Component({
     },
 })
 class Reader extends Vue {
+    rstore = {};
     loaderActive = false;
     progressActive = false;
     fullScreenActive = false;
@@ -261,6 +258,7 @@ class Reader extends Vue {
     donationVisible = false;
 
     created() {
+        this.rstore = rstore;
         this.loading = true;
         this.commit = this.$store.commit;
         this.dispatch = this.$store.dispatch;
@@ -335,6 +333,11 @@ class Reader extends Vue {
         this.showDonationDialog2020 = settings.showDonationDialog2020;
         this.showToolButton = settings.showToolButton;
         this.enableSitesFilter = settings.enableSitesFilter;
+
+        this.readerActionByKeyCode = utils.userHotKeysObjectSwap(settings.userHotKeys);
+        this.$root.readerActionByKeyEvent = (event) => {
+            return this.readerActionByKeyCode[utils.keyEventToCode(event)];
+        }
 
         this.updateHeaderMinWidth();
     }
@@ -750,66 +753,37 @@ class Reader extends Vue {
         }
     }
 
-    buttonClick(button) {
-        const activeClass = this.buttonActiveClass(button);
+    undoAction() {
+        if (this.actionCur > 0) {
+            this.actionCur--;
+            this.bookPosChanged({bookPos: this.actionList[this.actionCur]});
+        }
+    }
 
-        this.$refs[button].blur();
+    redoAction() {
+        if (this.actionCur < this.actionList.length - 1) {
+            this.actionCur++;
+            this.bookPosChanged({bookPos: this.actionList[this.actionCur]});
+        }
+    }
+
+    buttonClick(action) {
+        const activeClass = this.buttonActiveClass(action);
+
+        this.$refs[action].blur();
 
         if (activeClass['tool-button-disabled'])
             return;
         
-        switch (button) {
-            case 'loader':
-                this.loaderToggle();
-                break;
-            case 'undoAction':
-                if (this.actionCur > 0) {
-                    this.actionCur--;
-                    this.bookPosChanged({bookPos: this.actionList[this.actionCur]});
-                }
-                break;
-            case 'redoAction':
-                if (this.actionCur < this.actionList.length - 1) {
-                    this.actionCur++;
-                    this.bookPosChanged({bookPos: this.actionList[this.actionCur]});
-                }
-                break;
-            case 'fullScreen':
-                this.fullScreenToggle();
-                break;
-            case 'setPosition':
-                this.setPositionToggle();
-                break;
-            case 'scrolling':
-                this.scrollingToggle();
-                break;
-            case 'search':
-                this.searchToggle();
-                break;
-            case 'copyText':
-                this.copyTextToggle();
-                break;
-            case 'refresh':
-                this.refreshBook();
-                break;
-            case 'recentBooks':
-                this.recentBooksToggle();
-                break;
-            case 'offlineMode':
-                this.offlineModeToggle();
-                break;
-            case 'settings':
-                this.settingsToggle();
-                break;
-        }
+        this.doAction({action});
     }
 
-    buttonActiveClass(button) {
+    buttonActiveClass(action) {
         const classActive = { 'tool-button-active': true, 'tool-button-active:hover': true };
         const classDisabled = { 'tool-button-disabled': true, 'tool-button-disabled:hover': true };
         let classResult = {};
 
-        switch (button) {
+        switch (action) {
             case 'loader':
             case 'fullScreen':
             case 'setPosition':
@@ -822,7 +796,7 @@ class Reader extends Vue {
             case 'settings':
                 if (this.progressActive) {
                     classResult = classDisabled;
-                } else if (this[`${button}Active`]) {
+                } else if (this[`${action}Active`]) {
                     classResult = classActive;
                 }
                 break;
@@ -837,7 +811,7 @@ class Reader extends Vue {
         }
 
         if (this.activePage == 'LoaderPage' || !this.mostRecentBookReactive) {
-            switch (button) {
+            switch (action) {
                 case 'undoAction':
                 case 'redoAction':
                 case 'setPosition':
@@ -1030,7 +1004,7 @@ class Reader extends Vue {
         } catch (e) {
             progress.hide(); this.progressActive = false;
             this.loaderActive = true;
-            this.$root.stdDialog.alert(e.message, 'Ошибка', {type: 'negative'});
+            this.$root.stdDialog.alert(e.message, 'Ошибка', {color: 'negative'});
         }
     }
 
@@ -1054,7 +1028,7 @@ class Reader extends Vue {
         } catch (e) {
             progress.hide(); this.progressActive = false;
             this.loaderActive = true;
-            this.$root.stdDialog.alert(e.message, 'Ошибка', {type: 'negative'});
+            this.$root.stdDialog.alert(e.message, 'Ошибка', {color: 'negative'});
         }
     }
 
@@ -1086,10 +1060,118 @@ class Reader extends Vue {
         }
     }
 
+    doAction(opts) {
+        let result = true;
+        let {action = '', event = false} = opts;
+
+        switch (action) {
+            case 'loader':
+                this.loaderToggle();
+                break;
+            case 'help':
+                this.helpToggle();
+                break;
+            case 'settings':
+                this.settingsToggle();
+                break;
+            case 'undoAction':
+                this.undoAction();
+                break;
+            case 'redoAction':
+                this.redoAction();
+                break;
+            case 'fullScreen':
+                this.fullScreenToggle();
+                break;
+            case 'scrolling':
+                this.scrollingToggle();
+                break;
+            case 'stopScrolling':
+                this.stopScrolling();
+                break;
+            case 'setPosition':
+                this.setPositionToggle();
+                break;
+            case 'search':
+                this.searchToggle();
+                break;
+            case 'copyText':
+                this.copyTextToggle();
+                break;
+            case 'refresh':
+                this.refreshBook();
+                break;
+            case 'offlineMode':
+                this.offlineModeToggle();
+                break;
+            case 'recentBooks':
+                this.recentBooksToggle();
+                break;
+            case 'switchToolbar':
+                this.toolBarToggle();
+                break;
+            case 'donate':
+                this.donateToggle();
+                break;
+            default:
+                result = false;
+                break;
+        }
+
+        if (!result && this.activePage == 'TextPage' && this.$refs.page) {
+            result = true;
+            const textPage = this.$refs.page;
+
+            switch (action) {
+                case 'bookBegin':
+                    textPage.doHome();
+                    break;
+                case 'bookEnd':
+                    textPage.doEnd();
+                    break;
+                case 'pageBack':
+                    textPage.doPageUp();
+                    break;
+                case 'pageForward':
+                    textPage.doPageDown();
+                    break;
+                case 'lineBack':
+                    textPage.doUp();
+                    break;
+                case 'lineForward':
+                    textPage.doDown();
+                    break;
+                case 'incFontSize':
+                    textPage.doFontSizeInc();
+                    break;
+                case 'decFontSize':
+                    textPage.doFontSizeDec();
+                    break;
+                case 'scrollingSpeedUp':
+                    textPage.doScrollingSpeedUp();
+                    break;
+                case 'scrollingSpeedDown':
+                    textPage.doScrollingSpeedDown();
+                    break;
+                default:
+                    result = false;
+                    break;
+            }
+        }
+
+        if (result && event) {
+            event.preventDefault();
+            event.stopPropagation();
+        }
+
+        return result;
+    }
+
     keyHook(event) {
+        let result = false;
         if (this.$root.rootRoute() == '/reader') {
             if (this.$root.stdDialog.active || this.$refs.dialog1.active || this.$refs.dialog2.active)
-                return;
+                return result;
 
             let handled = false;
             if (!handled && this.helpActive)
@@ -1114,55 +1196,18 @@ class Reader extends Vue {
                 handled = this.$refs.page.keyHook(event);
 
             if (!handled && event.type == 'keydown') {
-                if (event.code == 'Escape')
-                    this.loaderToggle();
+                const action = this.$root.readerActionByKeyEvent(event);
 
-                if (this.activePage == 'TextPage') {
-                    switch (event.code) {
-                        case 'KeyH':
-                        case 'F1':
-                            this.helpToggle();
-                            event.preventDefault();
-                            event.stopPropagation();
-                            break;
-                        case 'KeyZ':
-                            this.scrollingToggle();
-                            break;
-                        case 'KeyP':
-                            this.setPositionToggle();
-                            break;
-                        case 'KeyF':
-                            if (event.ctrlKey) {
-                                this.searchToggle();
-                                event.preventDefault();
-                                event.stopPropagation();
-                            }
-                            break;
-                        case 'KeyC':
-                            if (event.ctrlKey) {
-                                this.copyTextToggle();
-                                event.preventDefault();
-                                event.stopPropagation();
-                            }
-                            break;
-                        case 'KeyR':
-                            this.refreshBook();
-                            break;
-                        case 'KeyX':
-                            this.recentBooksToggle();
-                            event.preventDefault();
-                            event.stopPropagation();
-                            break;
-                        case 'KeyO':
-                            this.offlineModeToggle();
-                            break;
-                        case 'KeyS':
-                            this.settingsToggle();
-                            break;
-                    }
+                if (action == 'loader') {
+                    result = this.doAction({action, event});
+                }
+
+                if (!result && this.activePage == 'TextPage') {
+                    result = this.doAction({action, event});
                 }
             }
         }
+        return result;
     }
 }
 //-----------------------------------------------------------------------------
