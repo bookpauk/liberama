@@ -1,4 +1,4 @@
-<div class="bg-grey-4 row">
+<div class="bg-grey-3 row">
     <q-tabs
         v-model="selectedKeysTab"
         active-color="black"
