@@ -4,7 +4,7 @@ const signatures = require('./signatures.json');
 class FileDetector {
     detectFile(filename) {
         return new Promise((resolve, reject) => {
-            this.fromFile(filename, 2000, (err, result) => {
+            this.fromFile(filename, 10000, (err, result) => {
                 if (err) reject(err);
                 resolve(result);
             });
