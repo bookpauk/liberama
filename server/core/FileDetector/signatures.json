@@ -654,15 +654,6 @@
   },
 
   {
-    "type": "svg",
-    "ext": "svg",
-    "mime": "image/svg+xml",
-    "rules": [
-      { "type": "contains", "bytes": "3c737667" }
-    ]
-  },
-
-  {
     "type": "docx",
     "ext": "docx",
     "mime": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
@@ -725,6 +716,14 @@
       ]
       }
     ]
-  }
+  },
 
+  {
+    "type": "svg",
+    "ext": "svg",
+    "mime": "image/svg+xml",
+    "rules": [
+      { "type": "contains", "bytes": "3c737667" }
+    ]
+  }
 ]
