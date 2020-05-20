@@ -299,7 +299,7 @@ class RecentBooksPage extends Vue {
             d.href = fb2path;
             d.download = path.basename(fb2path).substr(0, 10) + '.fb2';
 
-            d.click();
+            //d.click();
         } catch (e) {
             let errMes = e.message;
             if (errMes.indexOf('404') >= 0)
