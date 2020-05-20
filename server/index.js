@@ -72,7 +72,7 @@ async function main() {
                 maxAge: '30d',
                 setHeaders: (res, filePath) => {
                     if (path.basename(path.dirname(filePath)) == 'tmp') {
-                        res.set('Content-Type', 'text/xml');
+                        res.set('Content-Type', 'application/xml');
                         res.set('Content-Encoding', 'gzip');
                     }
                 }               

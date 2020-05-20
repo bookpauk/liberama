@@ -277,21 +277,30 @@ class StdDialog extends Vue {
 
     keyHook(event) {
         if (this.active) {
+            let handled = false;
             if (this.type == 'hotKey') {
                 if (event.type == 'keydown') {
                     this.hotKeyCode = utils.keyEventToCode(event);
+                    handled = true;
                 }
             } else {
-                if (event.code == 'Enter')
+                if (event.code == 'Enter') {
                     this.okClick();
+                    handled = true;
+                }
+
                 if (event.code == 'Escape') {
                     this.$nextTick(() => {
                         this.$refs.dialog.hide();
                     });
+                    handled = true;
                 }
             }
-            event.stopPropagation();
-            event.preventDefault();
+
+            if (handled) {
+                event.stopPropagation();
+                event.preventDefault();
+            }
         }
     }
 }

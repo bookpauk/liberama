@@ -5,7 +5,7 @@
             <span v-if="loading"><q-spinner class="q-mr-sm" color="lime-12" size="20px" :thickness="7"/>Список загружается</span>
         </template>
 
-        <a ref="download" style='display: none;'></a>
+        <a ref="download" style='display: none;' target="_blank"></a>
 
         <q-table
             class="recent-books-table col"
@@ -298,6 +298,7 @@ class RecentBooksPage extends Vue {
             const d = this.$refs.download;
             d.href = fb2path;
             d.download = path.basename(fb2path).substr(0, 10) + '.fb2';
+
             d.click();
         } catch (e) {
             let errMes = e.message;
