@@ -59,8 +59,7 @@
                     <q-td key="links" :props="props" class="td-mp" auto-width>
                         <div class="break-word" style="width: 75px; font-size: 90%">
                             <a v-show="isUrl(props.row.url)" :href="props.row.url" target="_blank">Оригинал</a><br>
-                            <!--a :href="props.row.path" @click.prevent="downloadBook(props.row.path)">Скачать FB2</a-->
-                            <span @click="downloadBook(props.row.path)">Скачать FB2</span>
+                            <a :href="props.row.path" @click.prevent="downloadBook(props.row.path)">Скачать FB2</a>
                         </div>
                     </q-td>
 
