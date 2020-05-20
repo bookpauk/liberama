@@ -5,7 +5,7 @@
             <span v-if="loading"><q-spinner class="q-mr-sm" color="lime-12" size="20px" :thickness="7"/>Список загружается</span>
         </template>
 
-        <a ref="download" style='display: none;'></a>
+        <a ref="download">123</a>
 
         <q-table
             class="recent-books-table col"
