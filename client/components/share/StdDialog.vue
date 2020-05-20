@@ -131,7 +131,7 @@ class StdDialog extends Vue {
 
     created() {
         if (this.$root.addKeyHook) {
-            //this.$root.addKeyHook(this.keyHook);
+            this.$root.addKeyHook(this.keyHook);
         }
     }
 
