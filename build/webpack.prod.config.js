@@ -60,6 +60,7 @@ module.exports = merge(baseWpConfig, {
             swDest: `${publicDir}/service-worker.js`,
             navigateFallback: '/index.html',
             navigateFallbackDenylist: [new RegExp('^/api'), new RegExp('^/ws'), new RegExp('^/tmp'),],
+            skipWaiting: true,
         }),        
     ]
 });
