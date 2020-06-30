@@ -59,7 +59,6 @@ export default class BookParser {
                 offset: Number, //сумма всех length до этого параграфа
                 length: Number, //длина text без тегов
                 text: String, //текст параграфа с вложенными тегами
-                cut: Boolean, //параграф - кандидат на сокрытие (cutEmptyParagraphs)
                 addIndex: Number, //индекс добавляемого пустого параграфа (addEmptyParagraphs)
             }
         */
@@ -116,7 +115,6 @@ export default class BookParser {
                 offset: paraOffset,
                 length: len,
                 text: text,
-                cut: (!addIndex && (len == 1 && text[0] == ' ')),
                 addIndex: (addIndex ? addIndex : 0),
             };
 
@@ -132,10 +130,10 @@ export default class BookParser {
             }
 
             let p = para[paraIndex];
-            //добавление пустых (addEmptyParagraphs) параграфов
+            paraOffset -= p.length;
+            //добавление пустых (addEmptyParagraphs) параграфов перед текущим
             if (p.length == 1 && p.text[0] == ' ' && len > 0) {
                 paraIndex--;
-                paraOffset -= p.length;
                 for (let i = 0; i < 2; i++) {
                     newParagraph(' ', 1, i + 1);
                 }
@@ -144,15 +142,10 @@ export default class BookParser {
                 p.index = paraIndex;
                 p.offset = paraOffset;
                 para[paraIndex] = p;
-                paraOffset += p.length;
-            }
 
-            paraOffset -= p.length;
-            //параграф оказался непустой
-            if (p.length == 1 && p.text[0] == ' ' && len > 0) {
+                //уберем начальный пробел
                 p.length = 0;
                 p.text = p.text.substr(1);
-                p.cut = (len == 1 && text[0] == ' ');
             }
 
             p.length += len;
@@ -633,10 +626,7 @@ export default class BookParser {
             imageHeightLines: this.imageHeightLines,
             imageFitWidth: this.imageFitWidth,
             compactTextPerc: this.compactTextPerc,
-            visible: !(
-                (this.cutEmptyParagraphs && para.cut) ||
-                (para.addIndex > this.addEmptyParagraphs)
-            )
+            visible: true, //вычисляется позже
         };
 
 
@@ -652,9 +642,12 @@ export default class BookParser {
                 text: String,
             }
         }*/
+
         let parts = this.splitToStyle(para.text);
 
+        //инициализация парсера
         let line = {begin: para.offset, parts: []};
+        let paragraphText = '';//текст параграфа
         let partText = '';//накапливаемый кусок со стилем
 
         let str = '';//измеряемая строка
@@ -667,6 +660,7 @@ export default class BookParser {
         // тут начинается самый замес, перенос по слогам и стилизация, а также изображения
         for (const part of parts) {
             style = part.style;
+            paragraphText += part.text;
 
             //изображения
             if (part.image.id && !part.image.inline) {
@@ -836,6 +830,12 @@ export default class BookParser {
                 line.end = end;
             }
         }
+
+        //parsed.visible
+        parsed.visible = !(
+            (para.addIndex > this.addEmptyParagraphs) ||
+            (para.addIndex == 0 && this.cutEmptyParagraphs && paragraphText.trim() == '')
+        );
 
         parsed.lines = lines;
         para.parsed = parsed;
