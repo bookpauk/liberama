@@ -31,7 +31,7 @@
             </q-btn>
 
             <div class="q-my-md"></div>
-            <div v-if="mode == 'omnireader'">
+            <!--div v-if="mode == 'omnireader'">
                 <div ref="yaShare2" class="ya-share2" 
                     data-services="collections,vkontakte,facebook,odnoklassniki,twitter,telegram"
                     data-description="Чтение fb2-книг онлайн. Загрузка любой страницы интернета одним кликом, синхронизация между устройствами, удобное управление, регистрация не требуется."
@@ -39,7 +39,7 @@
                     data-url="https://omnireader.ru">
                 </div>
             </div>
-            <div class="q-my-sm"></div>
+            <div class="q-my-sm"></div-->
             <span v-if="mode == 'omnireader'" class="bottom-span clickable" @click="openComments">Отзывы о читалке</span>
             <span v-if="mode == 'omnireader'" class="bottom-span clickable" @click="openOldVersion">Старая версия</span>
         </div>
@@ -82,8 +82,8 @@ class LoaderPage extends Vue {
 
     mounted() {
         this.progress = this.$refs.progress;
-        if (this.mode == 'omnireader')
-            Ya.share2(this.$refs.yaShare2);// eslint-disable-line no-undef
+        /*if (this.mode == 'omnireader')
+            Ya.share2(this.$refs.yaShare2);// eslint-disable-line no-undef*/
     }
 
     activated() {
