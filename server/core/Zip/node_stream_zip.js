@@ -766,7 +766,7 @@ ZipEntry.prototype.readDataHeader = function(data) {
 };
 
 ZipEntry.prototype.read = function(data, offset) {
-    this.nameRaw = data.slice(offset, offset += this.fnameLen);
+    this.nameRaw = Buffer.from(data.slice(offset, offset += this.fnameLen));
     this.name = this.nameRaw.toString();
     var lastChar = data[offset - 1];
     this.isDirectory = (lastChar == 47) || (lastChar == 92);
