@@ -125,9 +125,9 @@ function parseSync(xstr, options) {
 
     if (i < len) {
         if (inCdata) {
-            _onCdata(xstr.substr(leftData, len - leftData), cutCounter, cutTag);
+            _onCdata(xstr.substr(leftData + 1, len - leftData - 1), cutCounter, cutTag);
         } else if (inComment) {
-            _onComment(xstr.substr(leftData, len - leftData), cutCounter, cutTag);
+            _onComment(xstr.substr(leftData + 1, len - leftData - 1), cutCounter, cutTag);
         } else {
             _onTextNode(xstr.substr(i, len - i), cutCounter, cutTag);
         }
@@ -265,9 +265,9 @@ async function parse(xstr, options) {
 
     if (i < len) {
         if (inCdata) {
-            await _onCdata(xstr.substr(leftData, len - leftData), cutCounter, cutTag);
+            await _onCdata(xstr.substr(leftData + 1, len - leftData - 1), cutCounter, cutTag);
         } else if (inComment) {
-            await _onComment(xstr.substr(leftData, len - leftData), cutCounter, cutTag);
+            await _onComment(xstr.substr(leftData + 1, len - leftData - 1), cutCounter, cutTag);
         } else {
             await _onTextNode(xstr.substr(i, len - i), cutCounter, cutTag);
         }
