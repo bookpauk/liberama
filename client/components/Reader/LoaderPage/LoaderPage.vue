@@ -40,8 +40,8 @@
                 </div>
             </div>
             <div class="q-my-sm"></div-->
-            <span v-if="mode == 'omnireader'" class="bottom-span clickable" @click="openComments">Отзывы о читалке</span>
-            <span v-if="mode == 'omnireader'" class="bottom-span clickable" @click="openOldVersion">Старая версия</span>
+            <span v-if="mode == 'omnireader' || mode == 'liberama.top'" class="bottom-span clickable" @click="openComments">Отзывы о читалке</span>
+            <span v-if="mode == 'omnireader' || mode == 'liberama.top'" class="bottom-span clickable" @click="openOldVersion">Старая версия</span>
         </div>
 
         <div class="col column justify-end items-center no-wrap overflow-hidden">
@@ -93,6 +93,8 @@ class LoaderPage extends Vue {
     get title() {
         if (this.mode == 'omnireader')
             return 'Omni Reader - браузерная онлайн-читалка.';
+        if (this.mode == 'liberama.top')
+            return 'Liberama Reader - браузерная онлайн-читалка.';
         return 'Универсальная читалка книг и ресурсов интернета.';
 
     }

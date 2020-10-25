@@ -202,7 +202,9 @@ class App extends Vue {
 
     setAppTitle(title) {
         if (!title) {
-            if (this.mode == 'omnireader') {
+            if (this.mode == 'liberama.top') {
+                document.title = `Liberama Reader - всегда с вами`;
+            } else if (this.mode == 'omnireader') {
                 document.title = `Omni Reader - всегда с вами`;
             } else if (this.config && this.mode !== null) {
                 document.title = `${this.config.name} - ${this.itemRuText[this.$root.rootRoute]}`;
@@ -221,7 +223,7 @@ class App extends Vue {
     }
 
     get showAsideBar() {
-        return (this.mode !== null && this.mode != 'reader' && this.mode != 'omnireader');
+        return (this.mode !== null && this.mode != 'reader' && this.mode != 'omnireader' && this.mode != 'liberama.top');
     }
 
     set showAsideBar(value) {
@@ -232,7 +234,7 @@ class App extends Vue {
     }
 
     redirectIfNeeded() {
-        if ((this.mode == 'reader' || this.mode == 'omnireader') && (!this.isReaderActive)) {
+        if ((this.mode == 'reader' || this.mode == 'omnireader' || this.mode == 'liberama.top') && (!this.isReaderActive)) {
             //старый url
             const search = window.location.search.substr(1);
             const s = search.split('url=');

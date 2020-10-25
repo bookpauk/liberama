@@ -410,7 +410,7 @@ class Reader extends Vue {
         await utils.sleep(3000);
         const today = utils.formatDate(new Date(), 'coDate');
 
-        if (this.mode == 'omnireader' && today < '2020-03-01' && this.showDonationDialog2020 && this.donationRemindDate != today) {
+        if ((this.mode == 'omnireader' || this.mode == 'liberama.top') && today < '2020-03-01' && this.showDonationDialog2020 && this.donationRemindDate != today) {
             this.donationVisible = true;
         }
     }
