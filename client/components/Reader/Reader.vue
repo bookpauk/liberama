@@ -2,10 +2,12 @@
     <div class="column no-wrap">
         <div ref="header" class="header" v-show="toolBarActive">
             <div ref="buttons" class="row justify-between no-wrap">
-                <button ref="loader" class="tool-button" :class="buttonActiveClass('loader')" @click="buttonClick('loader')" v-ripple>
-                    <q-icon name="la la-arrow-left" size="32px"/>
-                    <q-tooltip :delay="1500" anchor="bottom right" content-style="font-size: 80%">{{ rstore.readerActions['loader'] }}</q-tooltip>
-                </button>
+                <div>
+                    <button ref="loader" class="tool-button" :class="buttonActiveClass('loader')" @click="buttonClick('loader')" v-ripple>
+                        <q-icon name="la la-arrow-left" size="32px"/>
+                        <q-tooltip :delay="1500" anchor="bottom right" content-style="font-size: 80%">{{ rstore.readerActions['loader'] }}</q-tooltip>
+                    </button>
+                </div>
 
                 <div>
                     <button ref="undoAction" v-show="showToolButton['undoAction']" class="tool-button" :class="buttonActiveClass('undoAction')" @click="buttonClick('undoAction')" v-ripple>
@@ -42,9 +44,9 @@
                         <q-tooltip :delay="1500" anchor="bottom middle" content-style="font-size: 80%">{{ rstore.readerActions['refresh'] }}</q-tooltip>
                     </button>
                     <div class="space"></div>
-                    <button ref="offlineMode" v-show="showToolButton['offlineMode']" class="tool-button" :class="buttonActiveClass('offlineMode')" @click="buttonClick('offlineMode')" v-ripple>
-                        <q-icon name="la la-unlink" size="32px"/>
-                        <q-tooltip :delay="1500" anchor="bottom middle" content-style="font-size: 80%">{{ rstore.readerActions['offlineMode'] }}</q-tooltip>
+                    <button ref="libs" v-show="showToolButton['libs']" class="tool-button" :class="buttonActiveClass('libs')" @click="buttonClick('libs')" v-ripple>
+                        <q-icon name="la la-sitemap" size="32px"/>
+                        <q-tooltip :delay="1500" anchor="bottom middle" content-style="font-size: 80%">{{ rstore.readerActions['libs'] }}</q-tooltip>
                     </button>
                     <button ref="recentBooks" v-show="showToolButton['recentBooks']" class="tool-button" :class="buttonActiveClass('recentBooks')" @click="buttonClick('recentBooks')" v-ripple>
                         <q-icon name="la la-book-open" size="32px"/>
@@ -52,10 +54,16 @@
                     </button>
                 </div>
 
-                <button ref="settings" class="tool-button" :class="buttonActiveClass('settings')" @click="buttonClick('settings')" v-ripple>
-                    <q-icon name="la la-cog" size="32px"/>
-                    <q-tooltip :delay="1500" anchor="bottom left" content-style="font-size: 80%">{{ rstore.readerActions['settings'] }}</q-tooltip>
-                </button>
+                <div>
+                    <button ref="offlineMode" v-show="showToolButton['offlineMode']" class="tool-button" :class="buttonActiveClass('offlineMode')" @click="buttonClick('offlineMode')" v-ripple>
+                        <q-icon name="la la-unlink" size="32px"/>
+                        <q-tooltip :delay="1500" anchor="bottom middle" content-style="font-size: 80%">{{ rstore.readerActions['offlineMode'] }}</q-tooltip>
+                    </button>
+                    <button ref="settings" class="tool-button" :class="buttonActiveClass('settings')" @click="buttonClick('settings')" v-ripple>
+                        <q-icon name="la la-cog" size="32px"/>
+                        <q-tooltip :delay="1500" anchor="bottom left" content-style="font-size: 80%">{{ rstore.readerActions['settings'] }}</q-tooltip>
+                    </button>
+                </div>
             </div>
         </div>
 
@@ -230,6 +238,7 @@ export default @Component({
 class Reader extends Vue {
     rstore = {};
     loaderActive = false;
+    offlineModeActive = false;
     progressActive = false;
     fullScreenActive = false;
 
@@ -237,8 +246,8 @@ class Reader extends Vue {
     setPositionActive = false;
     searchActive = false;
     copyTextActive = false;
+    libsActive = false;
     recentBooksActive = false;
-    offlineModeActive = false;
     settingsActive = false;
     helpActive = false;
     clickMapActive = false;
@@ -587,7 +596,7 @@ class Reader extends Vue {
         }
     }
 
-    closeAllTextPages() {
+    closeAllWindows() {
         this.setPositionActive = false;
         this.copyTextActive = false;
         this.recentBooksActive = false;
@@ -600,7 +609,7 @@ class Reader extends Vue {
     loaderToggle() {
         this.loaderActive = !this.loaderActive;
         if (this.loaderActive) {
-            this.closeAllTextPages();
+            this.closeAllWindows();
         }
     }
 
@@ -608,7 +617,7 @@ class Reader extends Vue {
         this.setPositionActive = !this.setPositionActive;
         const page = this.$refs.page;
         if (this.setPositionActive && this.activePage == 'TextPage' && page.parsed) {
-            this.closeAllTextPages();
+            this.closeAllWindows();
             this.setPositionActive = true;
 
             this.$nextTick(() => {
@@ -660,7 +669,7 @@ class Reader extends Vue {
         this.searchActive = !this.searchActive;
         const page = this.$refs.page;
         if (this.searchActive && this.activePage == 'TextPage' && page.parsed) {
-            this.closeAllTextPages();
+            this.closeAllWindows();
             this.searchActive = true;
 
             this.$nextTick(() => {
@@ -676,7 +685,7 @@ class Reader extends Vue {
         this.copyTextActive = !this.copyTextActive;
         const page = this.$refs.page;
         if (this.copyTextActive && this.activePage == 'TextPage' && page.parsed) {
-            this.closeAllTextPages();
+            this.closeAllWindows();
             this.copyTextActive = true;
 
             this.$nextTick(() => {
@@ -694,7 +703,7 @@ class Reader extends Vue {
     recentBooksToggle() {
         this.recentBooksActive = !this.recentBooksActive;
         if (this.recentBooksActive) {
-            this.closeAllTextPages();
+            this.closeAllWindows();
             this.$refs.recentBooksPage.init();
             this.recentBooksActive = true;
         } else {
@@ -710,7 +719,7 @@ class Reader extends Vue {
     settingsToggle() {
         this.settingsActive = !this.settingsActive;
         if (this.settingsActive) {
-            this.closeAllTextPages();
+            this.closeAllWindows();
             this.settingsActive = true;
 
             this.$nextTick(() => {
@@ -724,7 +733,7 @@ class Reader extends Vue {
     helpToggle() {
         this.helpActive = !this.helpActive;
         if (this.helpActive) {
-            this.closeAllTextPages();
+            this.closeAllWindows();
             this.helpActive = true;
         }
     }
@@ -791,8 +800,9 @@ class Reader extends Vue {
             case 'search':
             case 'copyText':
             case 'refresh':
-            case 'offlineMode':
+            case 'libs':
             case 'recentBooks':
+            case 'offlineMode':
             case 'settings':
                 if (this.progressActive) {
                     classResult = classDisabled;
@@ -896,7 +906,7 @@ class Reader extends Vue {
             return;
         }
 
-        this.closeAllTextPages();
+        this.closeAllWindows();
 
         let url = encodeURI(decodeURI(opts.url));
 
@@ -1071,9 +1081,6 @@ class Reader extends Vue {
             case 'help':
                 this.helpToggle();
                 break;
-            case 'settings':
-                this.settingsToggle();
-                break;
             case 'undoAction':
                 this.undoAction();
                 break;
@@ -1101,11 +1108,17 @@ class Reader extends Vue {
             case 'refresh':
                 this.refreshBook();
                 break;
-            case 'offlineMode':
-                this.offlineModeToggle();
+            case 'libs':
+                this.libsToogle();
                 break;
             case 'recentBooks':
                 this.recentBooksToggle();
+                break;
+            case 'offlineMode':
+                this.offlineModeToggle();
+                break;
+            case 'settings':
+                this.settingsToggle();
                 break;
             case 'switchToolbar':
                 this.toolBarToggle();

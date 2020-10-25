@@ -12,6 +12,7 @@ const readerActions = {
     'copyText': 'Скопировать текст со страницы',
     'refresh': 'Принудительно обновить книгу',
     'offlineMode': 'Автономный режим (без интернета)',
+    'libs': 'Библиотеки',
     'recentBooks': 'Открыть недавние',
     'switchToolbar': 'Показать/скрыть панель управления',
     'donate': '',
@@ -37,8 +38,9 @@ const toolButtons = [
     {name: 'search',      show: true},
     {name: 'copyText',    show: false},
     {name: 'refresh',     show: true},
-    {name: 'offlineMode', show: false},
+    {name: 'libs',        show: true},
     {name: 'recentBooks', show: true},
+    {name: 'offlineMode', show: false},
 ];
 
 //readerActions[name]
@@ -55,6 +57,7 @@ const hotKeys = [
     {name: 'copyText', codes: ['Ctrl+C']},
     {name: 'refresh', codes: ['R']},
     {name: 'offlineMode', codes: ['O']},
+    {name: 'libs', codes: ['L']},
     {name: 'recentBooks', codes: ['X']},
 
     {name: 'switchToolbar', codes: ['Tab', 'Q']},
