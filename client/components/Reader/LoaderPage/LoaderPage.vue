@@ -40,8 +40,8 @@
                 </div>
             </div>
             <div class="q-my-sm"></div-->
-            <span v-if="mode == 'omnireader' || mode == 'liberama.top'" class="bottom-span clickable" @click="openComments">Отзывы о читалке</span>
-            <span v-if="mode == 'omnireader' || mode == 'liberama.top'" class="bottom-span clickable" @click="openOldVersion">Старая версия</span>
+            <span v-if="mode == 'omnireader'" class="bottom-span clickable" @click="openComments">Отзывы о читалке</span>
+            <span v-if="mode == 'omnireader'" class="bottom-span clickable" @click="openOldVersion">Старая версия</span>
         </div>
 
         <div class="col column justify-end items-center no-wrap overflow-hidden">
