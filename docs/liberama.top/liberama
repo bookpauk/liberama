@@ -42,3 +42,36 @@ server {
 
   return 301 https://$host$request_uri;
 }
+
+server {
+  listen 23480;
+  server_name flibusta_proxy;
+
+  valid_referers omnireader.ru beta.omnireader.ru liberama.top;
+
+  if ($invalid_referer) {
+    return 403;
+  }
+
+  location / {
+    proxy_pass http://flibusta.is;
+    proxy_redirect http://static.flibusta.is:443 http://$server_addr:23481;
+  }
+}
+
+
+server {
+  listen 23481;
+  server_name flibusta_proxy_static;
+
+  valid_referers omnireader.ru beta.omnireader.ru liberama.top;
+
+  if ($invalid_referer) {
+    return 403;
+  }
+
+  location / {
+    proxy_pass http://static.flibusta.is:443;
+    proxy_set_header Referer "";
+  }
+}
