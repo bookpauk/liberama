@@ -39,11 +39,11 @@ sudo apt install poppler-utils
 ```
 
 ### nginx, server config
-Для своего домена необходимо будет подправить docs/omnireader/omnireader.
+Для своего домена необходимо будет подправить docs/omnireader.ru/omnireader.
 Можно также настроить сервер для HTTP, без SSL.
 ```
 sudo apt install nginx
-sudo cp docs/omnireader/omnireader /etc/nginx/sites-available/omnireader
+sudo cp docs/omnireader.ru/omnireader /etc/nginx/sites-available/omnireader
 sudo ln -s /etc/nginx/sites-available/omnireader /etc/nginx/sites-enabled/omnireader
 sudo rm /etc/nginx/sites-enabled/default
 sudo service nginx reload
@@ -59,12 +59,12 @@ sudo service php7.2-fpm restart
 
 sudo mkdir /home/oldreader
 sudo chown www-data.www-data /home/oldreader
-sudo -u www-data cp -r docs/omnireader/old/* /home/oldreader
+sudo -u www-data cp -r docs/omnireader.ru/old/* /home/oldreader
 ```
 
 ## Деплой и запуск
 ```
-cd docs/omnireader
+cd docs/omnireader.ru
 ./deploy.sh
 ./run_server.sh
 ```
