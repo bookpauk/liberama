@@ -8,7 +8,7 @@
 ![](docs/assets/reader.jpg)
 
 ## VPS
-Для разворачивания читалки на чистом VPS с нуля смотрите [docs/omnireader](docs/omnireader/README.md)
+Для разворачивания читалки на чистом VPS с нуля смотрите [docs/omnireader.ru](docs/omnireader.ru/README.md)
 
 ## Сборка проекта
 Необходима версия node.js не ниже 10.
