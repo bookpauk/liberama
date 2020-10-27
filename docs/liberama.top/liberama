@@ -1,4 +1,10 @@
 server {
+    listen       80  default_server;
+    server_name  _;
+    return       444;
+}
+
+server {
   listen 443 ssl; # managed by Certbot
   ssl_certificate /etc/letsencrypt/live/liberama.top/fullchain.pem; # managed by Certbot
   ssl_certificate_key /etc/letsencrypt/live/liberama.top/privkey.pem; # managed by Certbot
@@ -51,7 +57,7 @@ server {
   listen 23480;
   server_name flibusta_proxy;
 
-  valid_referers omnireader.ru beta.omnireader.ru liberama.top;
+  valid_referers omnireader.ru beta.omnireader.ru liberama.top popup.liberama.top;
 
   if ($invalid_referer) {
     return 403;
@@ -68,7 +74,7 @@ server {
   listen 23481;
   server_name flibusta_proxy_static;
 
-  valid_referers omnireader.ru beta.omnireader.ru liberama.top;
+  valid_referers omnireader.ru beta.omnireader.ru liberama.top popup.liberama.top;
 
   if ($invalid_referer) {
     return 403;
