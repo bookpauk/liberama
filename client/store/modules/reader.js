@@ -255,12 +255,13 @@ const settingDefaults = {
 
 const libsDefaults = {
     startLink: 'http://flibusta.is',
-    links: [
+    comment: 'Флибуста - книжное братство',
+    groups: [
         {r: 'http://flibusta.is', s: 'http://flibusta.is', list: [
-            {l: 'http://flibusta.is', c: 'Флибуста - книжное братство'}
+            {l: 'http://flibusta.is', c: 'Флибуста - книжное братство'},
         ]},
         {r: 'http://samlib.ru', s: 'http://samlib.ru', list: [
-            {l: 'http://samlib.ru', c: 'Журнал "Самиздат"'}
+            {l: 'http://samlib.ru', c: 'Журнал "Самиздат"'},
         ]},
     ]
 };
@@ -347,6 +348,7 @@ export default {
     fonts,
     webFonts,
     settingDefaults,
+    libsDefaults,
 
     namespaced: true,
     state,
