@@ -26,14 +26,18 @@
                 </q-select>
                 <q-input class="col q-mr-sm" ref="input" rounded outlined dense bg-color="white" v-model="bookUrl" placeholder="Скопируйте сюда URL книги" @focus="onInputFocus">
                     <template v-slot:prepend>
-                        <q-btn class="q-mr-xs" round dense color="blue" icon="la la-home" size="12px"/>
-                        <q-btn round dense color="blue" icon="la la-angle-double-down" @click="openBookUrlInFrame" size="12px"/>
+                        <q-btn class="q-mr-xs" round dense color="blue" icon="la la-home" @click="goToStartLink" size="12px">
+                            <q-tooltip :delay="1500" anchor="bottom middle" content-style="font-size: 80%">Вернуться на стартовую страницу</q-tooltip>
+                        </q-btn>
+                        <q-btn round dense color="blue" icon="la la-angle-double-down" @click="openBookUrlInFrame" size="12px">
+                            <q-tooltip :delay="1500" anchor="bottom middle" content-style="font-size: 80%">Загрузить URL во фрейм</q-tooltip>
+                        </q-btn>
                     </template>
                 </q-input>
                 <q-btn rounded color="green-5" no-caps size="14px" @click="submitUrl">Открыть</q-btn>
             </div>
             <div class="separator"></div>
-            <iframe class="col fit" :src="frameSrc" frameborder="0"></iframe>
+            <iframe v-if="frameVisible" class="col fit" ref="frame" :src="frameSrc" sandbox="allow-same-origin" frameborder="0"></iframe>
         </div>
     </Window>
 </template>
@@ -65,6 +69,7 @@ export default @Component({
     }    
 })
 class LibsPage extends Vue {
+    frameVisible = false;
     startLink = '';
     rootLink = '';
     selectedLink = '';
@@ -81,6 +86,8 @@ class LibsPage extends Vue {
         this.$refs.window.init();
         if (!this.frameSrc)
             this.frameSrc = this.libs.startLink;
+        this.frameVisible = false;
+        this.frameVisible = true;
     }
 
     get libs() {
@@ -139,6 +146,14 @@ class LibsPage extends Vue {
             this.frameSrc = this.addProtocol(this.bookUrl);
     }
 
+    goToStartLink() {
+        this.frameSrc = this.libs.startLink;
+        this.frameVisible = false;
+        this.$nextTick(() => {
+            this.frameVisible = true;
+        });
+    }
+
     addProtocol(url) {
         if ((url.indexOf('http://') != 0) && (url.indexOf('https://') != 0))
             return 'http://' + url;
@@ -184,7 +199,7 @@ class LibsPage extends Vue {
 
     submitUrl() {
         if (this.bookUrl) {
-            this.$emit('load-book', {url: this.bookUrl, force: true});
+            this.$emit('load-book', {url: this.addProtocol(this.bookUrl), force: true});
             this.bookUrl = '';
         }
     }
