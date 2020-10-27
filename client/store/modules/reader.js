@@ -253,6 +253,18 @@ const settingDefaults = {
     userHotKeys: {},
 };
 
+const libsDefaults = {
+    startLink: 'http://flibusta.is',
+    links: [
+        {r: 'http://flibusta.is', s: 'http://flibusta.is', list: [
+            {l: 'http://flibusta.is', c: 'Флибуста - книжное братство'}
+        ]},
+        {r: 'http://samlib.ru', s: 'http://samlib.ru', list: [
+            {l: 'http://samlib.ru', c: 'Журнал "Самиздат"'}
+        ]},
+    ]
+};
+
 for (const font of fonts)
     settingDefaults.fontShifts[font.name] = font.fontVertShift;
 for (const font of webFonts)
@@ -275,6 +287,8 @@ const state = {
     currentProfile: '',
     settings: Object.assign({}, settingDefaults),
     settingsRev: {},
+    libs: Object.assign({}, libsDefaults),
+    libsRev: 0,
 };
 
 // getters
@@ -317,6 +331,12 @@ const mutations = {
     },
     setSettingsRev(state, value) {
         state.settingsRev = Object.assign({}, state.settingsRev, value);
+    },
+    setLibs(state, value) {
+        state.libs = value;
+    },
+    setLibsRev(state, value) {
+        state.libsRev = value;
     },
 };
 

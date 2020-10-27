@@ -85,6 +85,7 @@
                 @stop-text-search="stopTextSearch">
             </SearchPage>
             <CopyTextPage v-if="copyTextActive" ref="copyTextPage" @do-action="doAction"></CopyTextPage>
+            <LibsPage v-show="libsActive" ref="libsPage" @do-action="doAction"></LibsPage>
             <RecentBooksPage v-show="recentBooksActive" ref="recentBooksPage" @load-book="loadBook" @recent-books-close="recentBooksClose"></RecentBooksPage>
             <SettingsPage v-show="settingsActive" ref="settingsPage" @do-action="doAction"></SettingsPage>
             <HelpPage v-if="helpActive" ref="helpPage" @do-action="doAction"></HelpPage>
@@ -167,6 +168,7 @@ import ProgressPage from './ProgressPage/ProgressPage.vue';
 import SetPositionPage from './SetPositionPage/SetPositionPage.vue';
 import SearchPage from './SearchPage/SearchPage.vue';
 import CopyTextPage from './CopyTextPage/CopyTextPage.vue';
+import LibsPage from './LibsPage/LibsPage.vue';
 import RecentBooksPage from './RecentBooksPage/RecentBooksPage.vue';
 import SettingsPage from './SettingsPage/SettingsPage.vue';
 import HelpPage from './HelpPage/HelpPage.vue';
@@ -189,6 +191,7 @@ export default @Component({
         SetPositionPage,
         SearchPage,
         CopyTextPage,
+        LibsPage,
         RecentBooksPage,
         SettingsPage,
         HelpPage,
@@ -599,6 +602,7 @@ class Reader extends Vue {
     closeAllWindows() {
         this.setPositionActive = false;
         this.copyTextActive = false;
+        this.libsActive = false;
         this.recentBooksActive = false;
         this.settingsActive = false;
         this.stopScrolling();
@@ -708,6 +712,17 @@ class Reader extends Vue {
             this.recentBooksActive = true;
         } else {
             this.recentBooksActive = false;
+        }
+    }
+
+    libsToogle() {
+        this.libsActive = !this.libsActive;
+        if (this.libsActive) {
+            this.closeAllWindows();
+            this.$refs.libsPage.init();
+            this.libsActive = true;
+        } else {
+            this.libsActive = false;
         }
     }
 
@@ -1204,6 +1219,9 @@ class Reader extends Vue {
 
             if (!handled && this.copyTextActive)
                 handled = this.$refs.copyTextPage.keyHook(event);
+
+            if (!handled && this.libsActive)
+                handled = this.$refs.libsPage.keyHook(event);
 
             if (!handled && this.$refs.page && this.$refs.page.keyHook)
                 handled = this.$refs.page.keyHook(event);
