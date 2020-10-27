@@ -98,7 +98,6 @@ class LibsPage extends Vue {
 
     loadLibs() {
         const libs = this.libs;
-        console.log(libs.comment);
         this.startLink = (libs.comment ? libs.comment + ' ': '') + this.removeProtocol(libs.startLink);
         this.rootLink = this.getOrigin(libs.startLink);
         this.updateSelectedLink();
