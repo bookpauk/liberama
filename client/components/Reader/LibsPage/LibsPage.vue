@@ -1,7 +1,7 @@
 <template>
     <Window ref="window" @close="close">
         <template slot="header">
-            Библиотеки <span v-show="startLink">(выбрано {{ startLink }})</span>
+            Библиотека <span v-show="startLink">(выбрано {{ startLink }})</span>
         </template>
 
         <div class="col column" style="min-width: 600px">
@@ -34,7 +34,7 @@
                         </q-btn>
                     </template>
                 </q-input>
-                <q-btn rounded color="green-5" no-caps size="14px" @click="submitUrl">Открыть
+                <q-btn rounded color="green-7" no-caps size="14px" @click="submitUrl">Открыть
                     <q-tooltip :delay="1500" anchor="bottom middle" content-style="font-size: 80%">Открыть в читалке</q-tooltip>
                 </q-btn>
             </div>
@@ -52,34 +52,6 @@ import _ from 'lodash';
 
 import Window from '../../share/Window.vue';
 //import rstore from '../../../store/modules/reader';
-
-const popupCenter = ({url, title, w, h}) => {
-    // Fixes dual-screen position                             Most browsers      Firefox
-    const dualScreenLeft = window.screenLeft !==  undefined ? window.screenLeft : window.screenX;
-    const dualScreenTop = window.screenTop !==  undefined   ? window.screenTop  : window.screenY;
-
-    const width = window.innerWidth ? window.innerWidth : document.documentElement.clientWidth ? document.documentElement.clientWidth : screen.width;
-    const height = window.innerHeight ? window.innerHeight : document.documentElement.clientHeight ? document.documentElement.clientHeight : screen.height;
-
-    const systemZoom = width / window.screen.availWidth;
-    const left = (width - w) / 2 / systemZoom + dualScreenLeft
-    const top = (height - h) / 2 / systemZoom + dualScreenTop
-    const newWindow = window.open(url, title, 
-      `
-      scrollbars=yes,
-      location=no,
-      toolbar=yes,
-      menubar=no,
-      width=${w / systemZoom}, 
-      height=${h / systemZoom}, 
-      top=${top}, 
-      left=${left}
-      `
-    )
-
-    if (window.focus) newWindow.focus();
-    //newWindow.close();
-}
 
 export default @Component({
     components: {
@@ -181,7 +153,6 @@ class LibsPage extends Vue {
         this.$nextTick(() => {
             this.frameVisible = true;
         });
-        popupCenter({url: this.libs.startLink, w: 900, h: 500});
     }
 
     addProtocol(url) {
