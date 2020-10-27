@@ -53,6 +53,31 @@ import _ from 'lodash';
 import Window from '../../share/Window.vue';
 //import rstore from '../../../store/modules/reader';
 
+const popupCenter = ({url, title, w, h}) => {
+    // Fixes dual-screen position                             Most browsers      Firefox
+    const dualScreenLeft = window.screenLeft !==  undefined ? window.screenLeft : window.screenX;
+    const dualScreenTop = window.screenTop !==  undefined   ? window.screenTop  : window.screenY;
+
+    const width = window.innerWidth ? window.innerWidth : document.documentElement.clientWidth ? document.documentElement.clientWidth : screen.width;
+    const height = window.innerHeight ? window.innerHeight : document.documentElement.clientHeight ? document.documentElement.clientHeight : screen.height;
+
+    const systemZoom = width / window.screen.availWidth;
+    const left = (width - w) / 2 / systemZoom + dualScreenLeft
+    const top = (height - h) / 2 / systemZoom + dualScreenTop
+    const newWindow = window.open(url, title, 
+      `
+      scrollbars=yes,
+      width=${w / systemZoom}, 
+      height=${h / systemZoom}, 
+      top=${top}, 
+      left=${left}
+      `
+    )
+
+    if (window.focus) newWindow.focus();
+    //newWindow.close();
+}
+
 export default @Component({
     components: {
         Window
@@ -153,6 +178,7 @@ class LibsPage extends Vue {
         this.$nextTick(() => {
             this.frameVisible = true;
         });
+        popupCenter({url: this.libs.startLink, w: 900, h: 500});
     }
 
     addProtocol(url) {
