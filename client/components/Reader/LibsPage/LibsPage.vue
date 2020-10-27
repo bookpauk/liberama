@@ -67,6 +67,9 @@ const popupCenter = ({url, title, w, h}) => {
     const newWindow = window.open(url, title, 
       `
       scrollbars=yes,
+      location=no,
+      toolbar=yes,
+      menubar=no,
       width=${w / systemZoom}, 
       height=${h / systemZoom}, 
       top=${top}, 
