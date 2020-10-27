@@ -6,6 +6,7 @@
     <meta name="viewport" content="width=device-width,initial-scale=1.0">
     <meta name="description" content="Браузерная онлайн-читалка книг. Поддерживаются форматы: fb2, html, txt, rtf, doc, docx, pdf, epub, mobi.">
     <meta name="keywords" content="онлайн,читалка,fb2,книги,читать,браузер,интернет">
+    <meta http-equiv="Content-Security-Policy" content="upgrade-insecure-requests">
     <script src="/sw-register.js"></script>
   </head>
   <body>

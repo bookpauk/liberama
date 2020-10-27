@@ -34,7 +34,9 @@
                         </q-btn>
                     </template>
                 </q-input>
-                <q-btn rounded color="green-5" no-caps size="14px" @click="submitUrl">Открыть</q-btn>
+                <q-btn rounded color="green-5" no-caps size="14px" @click="submitUrl">Открыть
+                    <q-tooltip :delay="1500" anchor="bottom middle" content-style="font-size: 80%">Открыть в читалке</q-tooltip>
+                </q-btn>
             </div>
             <div class="separator"></div>
             <iframe v-if="frameVisible" class="col fit" ref="frame" :src="frameSrc" sandbox="allow-same-origin" frameborder="0"></iframe>

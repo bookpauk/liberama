@@ -255,10 +255,10 @@ const settingDefaults = {
 
 const libsDefaults = {
     startLink: 'http://flibusta.is',
-    comment: 'Флибуста - книжное братство',
+    comment: 'Флибуста | Книжное братство',
     groups: [
         {r: 'http://flibusta.is', s: 'http://flibusta.is', list: [
-            {l: 'http://flibusta.is', c: 'Флибуста - книжное братство'},
+            {l: 'http://flibusta.is', c: 'Флибуста | Книжное братство'},
         ]},
         {r: 'http://samlib.ru', s: 'http://samlib.ru', list: [
             {l: 'http://samlib.ru', c: 'Журнал "Самиздат"'},
