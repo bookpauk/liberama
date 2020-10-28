@@ -1,56 +1,4 @@
 <template>
-    <!--q-layout view="lhr lpr lfr">
-        <q-drawer v-model="showAsideBar" :width="asideWidth">
-            <div class="app-name"><span v-html="appName"></span></div>
-            <q-btn class="el-button-collapse" @click="toggleCollapse"></q-btn>
-
-            <q-list>
-                <q-item clickable v-ripple>
-                    <q-item-section avatar>
-                        <q-icon name="inbox" />
-                    </q-item-section>
-
-                    <q-item-section>Inbox</q-item-section>
-                </q-item>
-            </q-list-->
-            <!--el-menu class="el-menu-vertical" :default-active="rootRoute" :collapse="isCollapse" router>
-              <el-menu-item index="/cardindex">
-                <i class="el-icon-search"></i>
-                <span :class="itemTitleClass('/cardindex')" slot="title">{{ this.itemRuText['/cardindex'] }}</span>
-              </el-menu-item>
-              <el-menu-item index="/reader">
-                <i class="el-icon-tickets"></i>
-                <span :class="itemTitleClass('/reader')" slot="title">{{ this.itemRuText['/reader'] }}</span>
-              </el-menu-item>
-              <el-menu-item index="/forum" disabled>
-                <i class="el-icon-message"></i>
-                <span :class="itemTitleClass('/forum')" slot="title">{{ this.itemRuText['/forum'] }}</span>
-              </el-menu-item>
-              <el-menu-item index="/income">
-                <i class="el-icon-upload"></i>
-                <span :class="itemTitleClass('/income')" slot="title">{{ this.itemRuText['/income'] }}</span>
-              </el-menu-item>
-              <el-menu-item index="/sources">
-                <i class="el-icon-menu"></i>
-                <span :class="itemTitleClass('/sources')" slot="title">{{ this.itemRuText['/sources'] }}</span>
-              </el-menu-item>
-              <el-menu-item index="/settings">
-                <i class="el-icon-setting"></i>
-                <span :class="itemTitleClass('/settings')" slot="title">{{ this.itemRuText['/settings'] }}</span>
-              </el-menu-item>
-              <el-menu-item index="/help">
-                <i class="el-icon-question"></i>
-                <span :class="itemTitleClass('/help')" slot="title">{{ this.itemRuText['/help'] }}</span>
-              </el-menu-item>
-            </el-menu-->
-        <!--/q-drawer>
-
-        <q-page-container>
-            <keep-alive>
-                <router-view></router-view>
-            </keep-alive>
-        </q-page-container>
-    </q-layout-->
     <div class="fit row">
         <Notify ref="notify"/>
         <StdDialog ref="stdDialog"/>
@@ -142,6 +90,14 @@ class App extends Vue {
         });
     }
 
+    routerReady() {
+        return new Promise ((resolve) => {
+            this.$router.onReady(() => {
+                resolve();
+            });
+        });
+    }
+
     mounted() {
         this.$root.notify = this.$refs.notify;
         this.$root.stdDialog = this.$refs.stdDialog;
@@ -157,7 +113,10 @@ class App extends Vue {
         });
 
         this.setAppTitle();
-        this.redirectIfNeeded();
+        (async() => {
+            await this.routerReady();
+            this.redirectIfNeeded();
+        })();
     }
 
     toggleCollapse() {
