@@ -199,6 +199,8 @@ class App extends Vue {
             const q = utils.parseQuery(search);
             if (q.p && `/${q.p}` != this.rootRoute) {
                 this.$router.replace('/404');
+                //чтобы ниоткуда нельзя было изменить путь (если какие-то страницы еще грузятся)
+                this.$router.push = this.$router.replace = null;
             }
 
             //распознавание параметра url вида "?url=<link>" и редирект при необходимости
