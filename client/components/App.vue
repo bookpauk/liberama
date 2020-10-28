@@ -38,7 +38,8 @@ class App extends Vue {
         '/sources': 'Источники',
         '/settings': 'Параметры',
         '/help': 'Справка',
-    }
+    };
+
     created() {
         this.commit = this.$store.commit;
         this.dispatch = this.$store.dispatch;
@@ -54,9 +55,19 @@ class App extends Vue {
                 cachedPath = this.$route.path;
                 const m = cachedPath.match(/^(\/[^/]*).*$/i);
                 cachedRoute = (m ? m[1] : this.$route.path);
+
             }
             return cachedRoute;
         }
+
+        this.$router.beforeEach((to, from, next) => {
+            //распознавание хоста, если присутствует домен 3-уровня "b.", то разрешена только определенная страница
+            if (window.location.host.indexOf('b.') == 0 && to.path != '/external-libs' && to.path != '/404') {
+                next('/404');
+            } else {
+                next();
+            }
+        });
 
         // set-app-title
         this.$root.$on('set-app-title', this.setAppTitle);
@@ -195,13 +206,6 @@ class App extends Vue {
     redirectIfNeeded() {
         if ((this.mode == 'reader' || this.mode == 'omnireader' || this.mode == 'liberama.top')) {
             const search = window.location.search.substr(1);
-
-            //распознавание хоста, если присутствует домен 3-уровня "b.", то разрешена только определенная страница
-            if (window.location.host.indexOf('b.') == 0 && this.rootRoute != '/external-libs') {
-                this.$router.replace('/404');
-                //чтобы ниоткуда нельзя было изменить путь (если какие-то страницы еще грузятся)
-                this.$router.push = this.$router.replace = null;
-            }
 
             //распознавание параметра url вида "?url=<link>" и редирект при необходимости
             if (!this.isReaderActive) {
