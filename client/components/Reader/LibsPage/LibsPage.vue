@@ -32,7 +32,7 @@ class LibsPage extends Vue {
         const subdomain = (window.location.protocol != 'http:' ? 'b.' : '');
         const origin = `http://${subdomain}${window.location.host}`;
 
-        this.popupWindow = window.open(`${origin}/?p=external-libs#/external-libs`);
+        this.popupWindow = window.open(`${origin}/#/external-libs`);
 
         if (this.popupWindow) {
 

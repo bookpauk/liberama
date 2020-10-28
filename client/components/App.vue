@@ -195,9 +195,9 @@ class App extends Vue {
     redirectIfNeeded() {
         if ((this.mode == 'reader' || this.mode == 'omnireader' || this.mode == 'liberama.top')) {
             const search = window.location.search.substr(1);
-            //распознавание параметра p , если присутствует, должен совпадать с rootRoute (необходимо для nginx)
-            const q = utils.parseQuery(search);
-            if (q.p && `/${q.p}` != this.rootRoute) {
+
+            //распознавание хоста, если присутствует домен 3-уровня "b.", то разрешена только определенная страница
+            if (window.location.host.indexOf('b.') == 0 && this.rootRoute != '/external-libs') {
                 this.$router.replace('/404');
                 //чтобы ниоткуда нельзя было изменить путь (если какие-то страницы еще грузятся)
                 this.$router.push = this.$router.replace = null;

@@ -96,7 +96,7 @@ class ExternalLibs extends Vue {
         const openerOrigin2 = `https://${openerHost}`;
 
         window.addEventListener('message', (event) => {
-            if (event.origin != openerOrigin1 && event.origin != openerOrigin2)
+            if (event.origin !== openerOrigin1 && event.origin !== openerOrigin2)
                 return;
             if (!_.isObject(event.data) || event.data.from != 'LibsPage')
                 return;
