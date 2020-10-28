@@ -193,18 +193,26 @@ class App extends Vue {
     }
 
     redirectIfNeeded() {
-        if ((this.mode == 'reader' || this.mode == 'omnireader' || this.mode == 'liberama.top') && (!this.isReaderActive)) {
-            //старый url
+        if ((this.mode == 'reader' || this.mode == 'omnireader' || this.mode == 'liberama.top')) {
             const search = window.location.search.substr(1);
-            const s = search.split('url=');
-            const url = s[1] || '';
-            const q = utils.parseQuery(s[0] || '');
-            if (url) {
-                q.url = decodeURIComponent(url);
+            //распознавание параметра p , если присутствует, должен совпадать с rootRoute (необходимо для nginx)
+            const q = utils.parseQuery(search);
+            if (q.p && `/${q.p}` != this.rootRoute) {
+                this.$router.replace('/404');
             }
 
-            window.history.replaceState({}, '', '/');
-            this.$router.replace({ path: '/reader', query: q });
+            //распознавание параметра url вида "?url=<link>" и редирект при необходимости
+            if (!this.isReaderActive) {
+                const s = search.split('url=');
+                const url = s[1] || '';
+                const q = utils.parseQuery(s[0] || '');
+                if (url) {
+                    q.url = decodeURIComponent(url);
+                }
+
+                window.history.replaceState({}, '', '/');
+                this.$router.replace({ path: '/reader', query: q });
+            }
         }
     }
 }

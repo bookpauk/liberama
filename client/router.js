@@ -17,7 +17,7 @@ const Income = () => import('./components/Income/Income.vue');
 const Sources = () => import('./components/Sources/Sources.vue');
 const Settings = () => import('./components/Settings/Settings.vue');
 const Help = () => import('./components/Help/Help.vue');
-//const NotFound404 = () => import('./components/NotFound404/NotFound404.vue');
+const NotFound404 = () => import('./components/NotFound404/NotFound404.vue');
 
 const myRoutes = [
     ['/', null, null, '/cardindex'],
@@ -35,6 +35,7 @@ const myRoutes = [
     ['/sources', Sources],
     ['/settings', Settings],
     ['/help', Help],
+    ['/404', NotFound404],
     ['*', null, null, '/cardindex'],
 ];
 
