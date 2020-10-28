@@ -8,6 +8,7 @@ import Vue from 'vue';
 import Component from 'vue-class-component';
 
 import Window from '../../share/Window.vue';
+import * as utils from '../../../share/utils';
 //import rstore from '../../../store/modules/reader';
 
 export default @Component({
@@ -29,6 +30,16 @@ class LibsPage extends Vue {
 
     init() {
         this.popupWindow = window.open(`http://${window.location.host}/?p=external-libs#/external-libs`);
+        if (this.popupWindow) {
+            //Проверка закрытия окна
+            (async() => {
+                while(this.popupWindow) {
+                    if (this.popupWindow && this.popupWindow.closed)
+                        this.close();
+                    await utils.sleep(1000);
+                }
+            })();
+        }
         this.loadLibs();
     }
 
@@ -54,7 +65,7 @@ class LibsPage extends Vue {
     }*/
 
     close() {
-        this.$emit('do-action', {action: 'libs'});
+        this.$emit('libs-close');
     }
 }
 //-----------------------------------------------------------------------------

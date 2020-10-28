@@ -85,7 +85,7 @@
                 @stop-text-search="stopTextSearch">
             </SearchPage>
             <CopyTextPage v-if="copyTextActive" ref="copyTextPage" @do-action="doAction"></CopyTextPage>
-            <LibsPage v-show="libsActive" ref="libsPage" @load-book="loadBook" @do-action="doAction"></LibsPage>
+            <LibsPage v-show="libsActive" ref="libsPage" @load-book="loadBook" @libs-close="libsClose"></LibsPage>
             <RecentBooksPage v-show="recentBooksActive" ref="recentBooksPage" @load-book="loadBook" @recent-books-close="recentBooksClose"></RecentBooksPage>
             <SettingsPage v-show="settingsActive" ref="settingsPage" @do-action="doAction"></SettingsPage>
             <HelpPage v-if="helpActive" ref="helpPage" @do-action="doAction"></HelpPage>
@@ -714,6 +714,11 @@ class Reader extends Vue {
         }
     }
 
+    libsClose() {
+        if (this.libsActive)
+            this.libsToogle();
+    }
+
     libsToogle() {
         this.libsActive = !this.libsActive;
         if (this.libsActive) {
@@ -1216,9 +1221,6 @@ class Reader extends Vue {
 
             if (!handled && this.copyTextActive)
                 handled = this.$refs.copyTextPage.keyHook(event);
-
-            if (!handled && this.libsActive)
-                handled = this.$refs.libsPage.keyHook(event);
 
             if (!handled && this.$refs.page && this.$refs.page.keyHook)
                 handled = this.$refs.page.keyHook(event);
