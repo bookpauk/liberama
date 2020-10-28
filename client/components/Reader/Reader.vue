@@ -602,7 +602,6 @@ class Reader extends Vue {
     closeAllWindows() {
         this.setPositionActive = false;
         this.copyTextActive = false;
-        this.libsActive = false;
         this.recentBooksActive = false;
         this.settingsActive = false;
         this.stopScrolling();
@@ -718,11 +717,9 @@ class Reader extends Vue {
     libsToogle() {
         this.libsActive = !this.libsActive;
         if (this.libsActive) {
-            this.closeAllWindows();
             this.$refs.libsPage.init();
-            this.libsActive = true;
         } else {
-            this.libsActive = false;
+            this.$refs.libsPage.done();
         }
     }
 

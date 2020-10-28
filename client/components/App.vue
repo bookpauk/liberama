@@ -189,7 +189,7 @@ class App extends Vue {
     }
 
     get isReaderActive() {
-        return this.rootRoute == '/reader';
+        return (this.rootRoute == '/reader' || this.rootRoute == '/external-libs');
     }
 
     redirectIfNeeded() {

@@ -50,8 +50,8 @@ import Vue from 'vue';
 import Component from 'vue-class-component';
 import _ from 'lodash';
 
-import Window from '../../share/Window.vue';
-//import rstore from '../../../store/modules/reader';
+import Window from '../share/Window.vue';
+//import rstore from '../../store/modules/reader';
 
 export default @Component({
     components: {
@@ -70,7 +70,7 @@ export default @Component({
         }
     }    
 })
-class LibsPage extends Vue {
+class ExternalLibs extends Vue {
     frameVisible = false;
     startLink = '';
     rootLink = '';
@@ -84,7 +84,7 @@ class LibsPage extends Vue {
         //this.commit('reader/setLibs', rstore.libsDefaults);
     }
 
-    init() {
+    mounted() {
         this.$refs.window.init();
         if (!this.frameSrc)
             this.frameSrc = this.libs.startLink;

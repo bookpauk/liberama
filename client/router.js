@@ -7,11 +7,12 @@ const Search = () => import('./components/CardIndex/Search/Search.vue');
 const Card = () => import('./components/CardIndex/Card/Card.vue');
 const Book = () => import('./components/CardIndex/Book/Book.vue');
 const History = () => import('./components/CardIndex/History/History.vue');
-const Reader = () => import('./components/Reader/Reader.vue');
+
 //немедленная загрузка
 //import Reader from './components/Reader/Reader.vue';
+const Reader = () => import('./components/Reader/Reader.vue');
+const ExternalLibs = () => import('./components/ExternalLibs/ExternalLibs.vue');
 
-//const Forum = () => import('./components/Forum/Forum.vue');
 const Income = () => import('./components/Income/Income.vue');
 const Sources = () => import('./components/Sources/Sources.vue');
 const Settings = () => import('./components/Settings/Settings.vue');
@@ -20,20 +21,21 @@ const Help = () => import('./components/Help/Help.vue');
 
 const myRoutes = [
     ['/', null, null, '/cardindex'],
-    ['/cardindex', CardIndex ],
-    ['/cardindex~search', Search ],
-    ['/cardindex~card', Card ],
-    ['/cardindex~card/:authorId', Card ],
-    ['/cardindex~book', Book ],
-    ['/cardindex~book/:bookId', Book ],
-    ['/cardindex~history', History ],
+    ['/cardindex', CardIndex],
+    ['/cardindex~search', Search],
+    ['/cardindex~card', Card],
+    ['/cardindex~card/:authorId', Card],
+    ['/cardindex~book', Book],
+    ['/cardindex~book/:bookId', Book],
+    ['/cardindex~history', History],
 
-    ['/reader', Reader ],
-    ['/income', Income ],
-    ['/sources', Sources ],
-    ['/settings', Settings ],
-    ['/help', Help ],
-    ['*', null, null, '/cardindex' ],
+    ['/reader', Reader],
+    ['/external-libs', ExternalLibs],
+    ['/income', Income],
+    ['/sources', Sources],
+    ['/settings', Settings],
+    ['/help', Help],
+    ['*', null, null, '/cardindex'],
 ];
 
 let routes = {};
