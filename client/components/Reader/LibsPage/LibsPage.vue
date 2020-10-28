@@ -29,8 +29,13 @@ class LibsPage extends Vue {
     }
 
     init() {
-        this.popupWindow = window.open(`http://${window.location.host}/?p=external-libs#/external-libs`);
+        const subdomain = (window.location.protocol != 'http:' ? 'b.' : '');
+        const origin = `http://${subdomain}${window.location.host}`;
+
+        this.popupWindow = window.open(`${origin}/?p=external-libs#/external-libs`);
+
         if (this.popupWindow) {
+
             //Проверка закрытия окна
             (async() => {
                 while(this.popupWindow) {
@@ -39,8 +44,22 @@ class LibsPage extends Vue {
                     await utils.sleep(1000);
                 }
             })();
+
+            window.addEventListener('message', (event) => {
+                if (event.origin !== origin)
+                    return;
+                console.log(event.data);
+            }, false);
+
+            (async() => {
+                while(this.popupWindow) {
+                    this.popupWindow.postMessage({from: 'LibsPage', type: 'mes', data: 'hello'}, origin);
+                    await utils.sleep(1000);
+                }
+            })();
+
+            this.loadLibs();
         }
-        this.loadLibs();
     }
 
     done() {

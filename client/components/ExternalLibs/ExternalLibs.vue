@@ -84,12 +84,47 @@ class ExternalLibs extends Vue {
         //this.commit('reader/setLibs', rstore.libsDefaults);
     }
 
-    mounted() {
+    mounted() {        
         this.$refs.window.init();
         if (!this.frameSrc)
-            this.frameSrc = this.libs.startLink;
-        this.frameVisible = false;
-        this.frameVisible = true;
+            this.goToStartLink();
+
+        this.opener = null;
+        const host = window.location.host;
+        const openerHost = (host.indexOf('b.') == 0 ? host.substring(2) : host);
+        const openerOrigin1 = `http://${openerHost}`;
+        const openerOrigin2 = `https://${openerHost}`;
+
+        window.addEventListener('message', (event) => {
+            if (event.origin != openerOrigin1 && event.origin != openerOrigin2)
+                return;
+            if (!_.isObject(event.data) || event.data.from != 'LibsPage')
+                return;
+            if (event.origin == openerOrigin1)
+                this.opener = window.opener;
+            else
+                this.opener = event.source;
+            this.openerOrigin = event.origin;
+
+console.log(event);
+
+            this.recvMessage(event.data);
+        }, false);        
+    }
+
+    recvMessage(d) {
+        if (d.type == 'mes') {
+            switch(d.data) {
+                case 'hello': this.sendMessage({type: 'mes', data: 'ready'}); break;
+            }
+        } else if (d.type == 'obj') {
+            //
+        }
+    }
+
+    sendMessage(d) {
+        if (this.opener && this.openerOrigin)
+            this.opener.postMessage(Object.assign({}, {from: 'ExternalLibs'}, d), this.openerOrigin);
     }
 
     get libs() {
