@@ -107,10 +107,9 @@ server {
 
   location / {
     proxy_pass http://flibusta.is;
-    proxy_redirect http://static.flibusta.is:443 http://$server_addr:23481;
+    proxy_redirect http://static.flibusta.is:443 http://b.liberama.top:23481;
   }
 }
-
 
 server {
   listen 23481;
