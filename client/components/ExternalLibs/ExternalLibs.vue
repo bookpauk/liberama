@@ -38,7 +38,7 @@
                 </q-select>
                 <q-input class="col q-mr-sm" ref="input" rounded outlined dense bg-color="white" v-model="bookUrl" placeholder="Скопируйте сюда URL книги" @focus="onInputFocus">
                     <template v-slot:prepend>
-                        <q-btn class="q-mr-xs" round dense color="blue" icon="la la-home" @click="goToStartLink" size="12px">
+                        <q-btn class="q-mr-xs" round dense color="blue" icon="la la-home" @click="goToLink(libs.startLink)" size="12px">
                             <q-tooltip :delay="1500" anchor="bottom middle" content-style="font-size: 80%">Вернуться на стартовую страницу</q-tooltip>
                         </q-btn>
                         <q-btn round dense color="blue" icon="la la-angle-double-down" @click="openBookUrlInFrame" size="12px">
@@ -64,7 +64,7 @@
 
                 <div class="q-mx-md row">
                     <q-input ref="bookmarkLink" class="col q-mr-sm" outlined dense bg-color="white" v-model="bookmarkLink" 
-                        placeholder="Ссылка на закладку" maxlength="2000" @focus="onInputFocus">
+                        placeholder="Ссылка для закладки" maxlength="2000" @focus="onInputFocus">
                     </q-input>
 
                     <q-select class="q-mr-sm" v-model="defaultRootLink" :options="defaultRootLinkOptions" style="width: 50px"
@@ -201,7 +201,8 @@ class ExternalLibs extends Vue {
         } else if (d.type == 'libs') {
             this.ready = true;
             this.libs = _.cloneDeep(d.data);
-            this.goToStartLink();
+            if (!this.frameSrc)
+                this.goToLink(this.libs.startLink);
         } else if (d.type == 'notify') {
             this.$root.notify.success(d.data, '', {position: 'bottom-right'});
         }
@@ -233,6 +234,10 @@ class ExternalLibs extends Vue {
         this.updateSelectedLink();
     }
 
+    get mode() {
+        return this.$store.state.config.mode;
+    }
+
     get header() {
         let result = (this.ready ? 'Библиотека' : 'Загрузка...');
         if (this.ready && this.startLink) {
@@ -259,7 +264,7 @@ class ExternalLibs extends Vue {
             libs.groups[index].s = this.selectedLink;
             libs.startLink = this.selectedLink;
             libs.comment = this.getCommentByLink(libs.groups[index].list, this.selectedLink);
-            this.frameSrc = this.selectedLink;
+            this.goToLink(this.selectedLink);
             this.commitLibs(libs);
         }
     }
@@ -303,15 +308,15 @@ class ExternalLibs extends Vue {
 
     openBookUrlInFrame() {
         if (this.bookUrl)
-            this.frameSrc = this.addProtocol(this.bookUrl);
+            this.goToLink(this.addProtocol(this.bookUrl));
     }
 
-    goToStartLink() {
+    goToLink(link) {
         if (!this.ready)
             return;
 
-        this.frameSrc = this.makeProxySubst(this.libs.startLink);
-        this.frameVisible = false;
+        this.frameSrc = this.makeProxySubst(link);
+        //this.frameVisible = false;
         this.$nextTick(() => {
             this.frameVisible = true;
         });
@@ -349,12 +354,17 @@ class ExternalLibs extends Vue {
         return -1;
     }
 
-    getCommentByLink(list, link) {
+    getListItemByLink(list, link) {
         for (const item of list) {
             if (item.l == link)
-                return item.c;
+                return item;
         }
-        return '';
+        return null;
+    }
+
+    getCommentByLink(list, link) {
+        const item = this.getListItemByLink(list, link);
+        return (item ? item.c : '');
     }
 
     makeProxySubst(url, reverse = false) {
@@ -386,6 +396,8 @@ class ExternalLibs extends Vue {
     }
 
     addBookmark() {
+        this.bookmarkLink = '';
+        this.bookmarkDesc = '';
         this.addBookmarkVisible = true;
         this.$nextTick(() => {
             this.$refs.bookmarkLink.focus();
@@ -403,6 +415,31 @@ class ExternalLibs extends Vue {
     }
 
     okAddBookmark() {
+        const link = this.addProtocol(this.bookmarkLink);
+        let index = this.getRootIndexByUrl(this.libs.groups, link);
+
+        //есть группа в закладках
+        if (index >= 0) {
+            const item = this.getListItemByLink(this.libs.groups[index].list, link);
+            
+            if (!item || item.c != this.bookmarkDesc) {
+                //добавляем
+                let libs = _.cloneDeep(this.libs);
+                libs.groups[index].list.push({l: link, c: this.bookmarkDesc});
+                this.commitLibs(libs);
+            }
+        } else {//нет группы в закладках
+            //добавляем сначала группу
+            let libs = _.cloneDeep(this.libs);
+            libs.groups.push({r: this.getOrigin(link), s: link, list: []});
+            
+            index = this.getRootIndexByUrl(libs.groups, link);
+            if (index >= 0)
+                libs.groups[index].list.push({l: link, c: this.bookmarkDesc});
+            this.commitLibs(libs);
+        }
+
+        this.addBookmarkVisible = false;
     }
 
     bookmarkSettings() {
