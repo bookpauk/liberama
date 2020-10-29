@@ -1,10 +1,10 @@
 <template>
     <Window ref="window" @close="close">
         <template slot="header">
-            Библиотека <span v-show="startLink">(выбрано {{ startLink }})</span>
+            {{ header }}
         </template>
 
-        <div class="col column" style="min-width: 600px">
+        <div v-show="ready" class="col column" style="min-width: 600px">
             <div class="row items-center q-px-sm" style="height: 50px">
                 <q-select class="q-mr-sm" v-model="rootLink" :options="rootLinkOptions"
                     style="width: 230px"
@@ -51,6 +51,7 @@ import Component from 'vue-class-component';
 import _ from 'lodash';
 
 import Window from '../share/Window.vue';
+import * as utils from '../../share/utils';
 //import rstore from '../../store/modules/reader';
 
 export default @Component({
@@ -71,23 +72,23 @@ export default @Component({
     }    
 })
 class ExternalLibs extends Vue {
+    ready = false;
     frameVisible = false;
     startLink = '';
     rootLink = '';
     selectedLink = '';
     frameSrc = '';
     bookUrl = '';
+    libs = {};
 
     created() {
-        this.commit = this.$store.commit;
-        this.loadLibs();
+        this.$root.addKeyHook(this.keyHook);
+        //this.commit = this.$store.commit;
         //this.commit('reader/setLibs', rstore.libsDefaults);
     }
 
     mounted() {        
         this.$refs.window.init();
-        if (!this.frameSrc)
-            this.goToStartLink();
 
         this.opener = null;
         const host = window.location.host;
@@ -106,10 +107,31 @@ class ExternalLibs extends Vue {
                 this.opener = event.source;
             this.openerOrigin = event.origin;
 
-console.log(event);
+            //console.log(event);
 
             this.recvMessage(event.data);
-        }, false);        
+        });
+
+        //Проверка закрытия родительского окна
+        (async() => {
+            let i = 0;
+            while(!this.opener && i < 10) {
+                await utils.sleep(1000);
+                i++;
+            }
+            if (i >= 10) {
+                await this.$root.stdDialog.alert('Нет связи с читалкой. Окно будет закрыто', 'Ошибка');
+                window.close();
+            }
+
+            while(this.opener) {
+                if (this.opener.closed) {                    
+                    await this.$root.stdDialog.alert('Потеряна связь с читалкой. Окно будет закрыто', 'Ошибка');
+                    window.close();
+                }
+                await utils.sleep(1000);
+            }
+        })();
     }
 
     recvMessage(d) {
@@ -117,8 +139,10 @@ console.log(event);
             switch(d.data) {
                 case 'hello': this.sendMessage({type: 'mes', data: 'ready'}); break;
             }
-        } else if (d.type == 'obj') {
-            //
+        } else if (d.type == 'libs') {
+            this.ready = true;
+            this.libs = _.cloneDeep(d.data);
+            this.goToStartLink();
         }
     }
 
@@ -127,8 +151,8 @@ console.log(event);
             this.opener.postMessage(Object.assign({}, {from: 'ExternalLibs'}, d), this.openerOrigin);
     }
 
-    get libs() {
-        return this.$store.state.reader.libs;
+    commitLibs(libs) {
+        this.sendMessage({type: 'libs', data: libs});
     }
 
     loadLibs() {
@@ -138,13 +162,26 @@ console.log(event);
         this.updateSelectedLink();
     }
 
+    get header() {
+        let result = (this.ready ? 'Библиотека' : 'Загрузка...');
+        if (this.ready && this.startLink) {
+            result += ` | ${this.startLink}`;
+        }
+        this.$root.$emit('set-app-title', result);
+        return result;
+    }
+
     updateSelectedLink() {
+        if (!this.ready)
+            return;
         const index = this.getRootIndexByUrl(this.rootLink);
         if (index >= 0)
             this.selectedLink = this.libs.groups[index].s;
     }
 
     updateStartLink() {
+        if (!this.ready)
+            return;
         const index = this.getRootIndexByUrl(this.rootLink);
         if (index >= 0) {
             let libs = _.cloneDeep(this.libs);
@@ -152,12 +189,15 @@ console.log(event);
             libs.startLink = this.selectedLink;
             libs.comment = this.getCommentByLink(libs.groups[index].list, this.selectedLink);
             this.frameSrc = this.selectedLink;
-            this.commit('reader/setLibs', libs);
+            this.commitLibs(libs);
         }
     }
 
     get rootLinkOptions() {
         let result = [];
+        if (!this.ready)
+            return result;
+
         this.libs.groups.forEach(group => {
             result.push({label: this.removeProtocol(group.r), value: group.r});
         });
@@ -167,6 +207,9 @@ console.log(event);
 
     get selectedLinkOptions() {
         let result = [];
+        if (!this.ready)
+            return result;
+
         const index = this.getRootIndexByUrl(this.rootLink);
         if (index >= 0) {
             this.libs.groups[index].list.forEach(link => {
@@ -183,6 +226,9 @@ console.log(event);
     }
 
     goToStartLink() {
+        if (!this.ready)
+            return;
+
         this.frameSrc = this.libs.startLink;
         this.frameVisible = false;
         this.$nextTick(() => {
@@ -212,6 +258,8 @@ console.log(event);
     }
 
     getRootIndexByUrl(url) {
+        if (!this.ready)
+            return -1;
         const origin = this.getOrigin(url);
         const groups = this.libs.groups;
         for (let i = 0; i < groups.length; i++) {
@@ -241,7 +289,7 @@ console.log(event);
     }
 
     close() {
-        this.$emit('do-action', {action: 'libs'});
+        this.sendMessage({type: 'close'});
     }
 
     keyHook() {

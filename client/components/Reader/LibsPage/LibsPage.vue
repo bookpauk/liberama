@@ -17,7 +17,7 @@ export default @Component({
     },
     watch: {
         libs: function() {
-            this.loadLibs();
+            this.sendLibs();
         },
     }    
 })
@@ -29,12 +29,24 @@ class LibsPage extends Vue {
     }
 
     init() {
+        this.childReady = false;
         const subdomain = (window.location.protocol != 'http:' ? 'b.' : '');
-        const origin = `http://${subdomain}${window.location.host}`;
+        this.origin = `http://${subdomain}${window.location.host}`;
 
-        this.popupWindow = window.open(`${origin}/#/external-libs`);
+        this.messageListener = (event) => {
+            if (event.origin !== this.origin)
+                return;
+
+            //console.log(event.data);
+
+            this.recvMessage(event.data);
+        };
+
+        this.popupWindow = window.open(`${this.origin}/#/external-libs`);
 
         if (this.popupWindow) {
+
+            window.addEventListener('message', this.messageListener);
 
             //Проверка закрытия окна
             (async() => {
@@ -45,24 +57,40 @@ class LibsPage extends Vue {
                 }
             })();
 
-            window.addEventListener('message', (event) => {
-                if (event.origin !== origin)
-                    return;
-                console.log(event.data);
-            }, false);
-
+            //Установление связи с окном
             (async() => {
-                while(this.popupWindow) {
-                    this.popupWindow.postMessage({from: 'LibsPage', type: 'mes', data: 'hello'}, origin);
-                    await utils.sleep(1000);
+                let i = 0;
+                while(!this.childReady && this.popupWindow && i < 100) {
+                    this.sendMessage({type: 'mes', data: 'hello'});
+                    await utils.sleep(100);
+                    i++;
                 }
+                this.sendLibs();
             })();
-
-            this.loadLibs();
         }
     }
 
+    recvMessage(d) {
+        if (d.type == 'mes') {
+            switch(d.data) {
+                case 'ready':
+                    this.childReady = true;                    
+                    break;
+            }
+        } else if (d.type == 'libs') {
+            this.commit('reader/setLibs', d.data);
+        } else if (d.type == 'close') {
+            this.close();
+        }
+    }
+
+    sendMessage(d) {
+        if (this.popupWindow)
+            this.popupWindow.postMessage(Object.assign({}, {from: 'LibsPage'}, d), this.origin);
+    }
+
     done() {
+        window.removeEventListener('message', this.messageListener);
         if (this.popupWindow) {
             this.popupWindow.close();
             this.popupWindow = null;
@@ -73,7 +101,8 @@ class LibsPage extends Vue {
         return this.$store.state.reader.libs;
     }
 
-    loadLibs() {
+    sendLibs() {
+        this.sendMessage({type: 'libs', data: this.libs});
     }
 
 /*    submitUrl() {
