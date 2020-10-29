@@ -85,7 +85,7 @@
                 @stop-text-search="stopTextSearch">
             </SearchPage>
             <CopyTextPage v-if="copyTextActive" ref="copyTextPage" @do-action="doAction"></CopyTextPage>
-            <LibsPage v-show="libsActive" ref="libsPage" @load-book="loadBook" @libs-close="libsClose"></LibsPage>
+            <LibsPage v-show="libsActive" ref="libsPage" @load-book="loadBook" @libs-close="libsClose" @do-action="doAction"></LibsPage>
             <RecentBooksPage v-show="recentBooksActive" ref="recentBooksPage" @load-book="loadBook" @recent-books-close="recentBooksClose"></RecentBooksPage>
             <SettingsPage v-show="settingsActive" ref="settingsPage" @do-action="doAction"></SettingsPage>
             <HelpPage v-if="helpActive" ref="helpPage" @do-action="doAction"></HelpPage>

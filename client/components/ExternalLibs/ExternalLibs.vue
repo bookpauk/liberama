@@ -4,6 +4,13 @@
             {{ header }}
         </template>
 
+        <template slot="buttons">
+            <span class="full-screen-button row justify-center items-center" @mousedown.stop @click="fullScreenToggle">
+                <q-icon :name="(fullScreenActive ? 'la la-compress-arrows-alt': 'la la-expand-arrows-alt')" size="16px"/>
+                <q-tooltip :delay="1500" anchor="bottom middle" content-style="font-size: 80%">На весь экран</q-tooltip>
+            </span>
+        </template>
+
         <div v-show="ready" class="col column" style="min-width: 600px">
             <div class="row items-center q-px-sm" style="height: 50px">
                 <q-select class="q-mr-sm" v-model="rootLink" :options="rootLinkOptions"
@@ -12,8 +19,12 @@
                     rounded outlined dense emit-value map-options display-value-sanitize options-sanitize
                 >
                     <template v-slot:prepend>
-                        <q-btn class="q-mr-xs" round dense color="blue" icon="la la-plus" size="12px"/>
-                        <q-btn round dense color="blue" icon="la la-bars" size="12px"/>
+                        <q-btn class="q-mr-xs" round dense color="blue" icon="la la-plus" @click="addBookmark" size="12px">
+                            <q-tooltip :delay="1500" anchor="bottom middle" content-style="font-size: 80%">Добавить закладку</q-tooltip>
+                        </q-btn>
+                        <q-btn round dense color="blue" icon="la la-bars" size="12px" disabled>
+                            <q-tooltip :delay="1500" anchor="bottom middle" content-style="font-size: 80%">Настроить закладки (пока недоступно)</q-tooltip>                            
+                        </q-btn>
                     </template>
                     <template v-slot:selected>
                         <div style="overflow: hidden; white-space: nowrap;">{{ removeProtocol(rootLink) }}</div>
@@ -39,7 +50,7 @@
                 </q-btn>
             </div>
             <div class="separator"></div>
-            <iframe v-if="frameVisible" class="col fit" ref="frame" :src="frameSrc" sandbox="allow-same-origin" frameborder="0"></iframe>
+            <iframe v-if="frameVisible" class="col fit" ref="frame" :src="frameSrc" frameborder="0"></iframe>
         </div>
     </Window>
 </template>
@@ -52,6 +63,10 @@ import _ from 'lodash';
 
 import Window from '../share/Window.vue';
 import * as utils from '../../share/utils';
+
+const proxySubst = {
+    'http://flibusta.is': 'http://b.liberama.top:23480',
+};
 
 export default @Component({
     components: {
@@ -79,9 +94,11 @@ class ExternalLibs extends Vue {
     frameSrc = '';
     bookUrl = '';
     libs = {};
+    fullScreenActive = false;
 
     created() {
         this.$root.addKeyHook(this.keyHook);
+
         //this.commit = this.$store.commit;
         //this.commit('reader/setLibs', rstore.libsDefaults);
     }
@@ -237,7 +254,7 @@ class ExternalLibs extends Vue {
         if (!this.ready)
             return;
 
-        this.frameSrc = this.libs.startLink;
+        this.frameSrc = this.makeProxySubst(this.libs.startLink);
         this.frameVisible = false;
         this.$nextTick(() => {
             this.frameVisible = true;
@@ -285,16 +302,43 @@ class ExternalLibs extends Vue {
         return '';
     }
 
+    makeProxySubst(url, reverse = false) {
+        for (const [key, value] of Object.entries(proxySubst)) {
+            if (reverse && value == url.substring(0, value.length)) {
+                return key + url.substring(value.length);
+            } else if (key == url.substring(0, key.length)) {
+                return value + url.substring(key.length);
+            }
+        }
+
+        return url;
+    }
+
     onInputFocus() {
         this.$refs.input.select();
     }
 
     submitUrl() {
         if (this.bookUrl) {
-            this.sendMessage({type: 'submitUrl', data: {url: this.addProtocol(this.bookUrl), force: true}});
+            this.sendMessage({type: 'submitUrl', data: {
+                url: this.makeProxySubst(this.addProtocol(this.bookUrl), true), 
+                force: true
+            }});
             this.bookUrl = '';
             if (this.libs.closeAfterSubmit)
                 this.close();
+        }
+    }
+
+    addBookmark() {
+    }
+
+    fullScreenToggle() {
+        this.fullScreenActive = !this.fullScreenActive;
+        if (this.fullScreenActive) {
+            this.$q.fullscreen.request();
+        } else {
+            this.$q.fullscreen.exit();
         }
     }
 
@@ -325,4 +369,15 @@ class ExternalLibs extends Vue {
     height: 1px;
     background-color: #A0A0A0;
 }
+
+.full-screen-button {
+    width: 30px;
+    height: 30px;
+    cursor: pointer;
+}
+
+.full-screen-button:hover {
+    background-color: #69C05F;
+}
+
 </style>

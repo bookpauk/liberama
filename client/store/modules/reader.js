@@ -264,6 +264,9 @@ const libsDefaults = {
         {r: 'http://samlib.ru', s: 'http://samlib.ru', list: [
             {l: 'http://samlib.ru', c: 'Журнал "Самиздат"'},
         ]},
+        {r: 'http://lib.ru', s: 'http://lib.ru', list: [
+            {l: 'http://lib.ru', c: 'Библиотека Максима Мошкова'},
+        ]},        
     ]
 };
 
