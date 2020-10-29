@@ -1,10 +1,12 @@
 export const versionHistory = [
 {
-    showUntil: '2020-09-01',
-    header: '0.9.4 (2020-10-??)',
+    showUntil: '2020-10-28',
+    header: '0.9.4 (2020-10-29)',
     content:
 `
 <ul>
+    <li>заработал новый сайт <a href="https://liberama.top">https://liberama.top</a>, где будет более свободный обмен книгами</li>
+    <li>для liberama.top добавлено новое окно: "Библиотека"</li>
     <li>исправления багов</li>
 </ul>
 `
