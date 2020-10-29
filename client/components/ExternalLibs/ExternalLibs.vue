@@ -149,7 +149,12 @@ class ExternalLibs extends Vue {
         //this.commit('reader/setLibs', rstore.libsDefaults);
     }
 
-    mounted() {        
+    mounted() {
+        if (this.mode != 'liberama.top') {
+            this.$router.replace('/404');
+            return;
+        }
+
         this.$refs.window.init();
 
         this.opener = null;

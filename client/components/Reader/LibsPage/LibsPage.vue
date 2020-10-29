@@ -25,10 +25,14 @@ class LibsPage extends Vue {
     created() {
         this.popupWindow = null;
         this.commit = this.$store.commit;
+        this.messageListener = null;
         //this.commit('reader/setLibs', rstore.libsDefaults);
     }
 
     init() {
+        if (this.mode != 'liberama.top')
+            return;
+        
         this.childReady = false;
         const subdomain = (window.location.protocol != 'http:' ? 'b.' : '');
         this.origin = `http://${subdomain}${window.location.host}`;
@@ -98,6 +102,10 @@ class LibsPage extends Vue {
             this.popupWindow.close();
             this.popupWindow = null;
         }
+    }
+
+    get mode() {
+        return this.$store.state.config.mode;
     }
 
     get libs() {
