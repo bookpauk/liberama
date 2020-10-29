@@ -266,7 +266,11 @@ const libsDefaults = {
         ]},
         {r: 'http://lib.ru', s: 'http://lib.ru', list: [
             {l: 'http://lib.ru', c: 'Библиотека Максима Мошкова'},
-        ]},        
+        ]},
+        {r: 'https://aldebaran.ru', s: 'https://aldebaran.ru', list: [
+            {l: 'https://aldebaran.ru', c: 'АЛЬДЕБАРАН | Электронная библиотека книг'},
+        ]},
+
     ]
 };
 

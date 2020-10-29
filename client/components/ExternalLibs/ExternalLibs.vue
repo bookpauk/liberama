@@ -19,10 +19,10 @@
                     rounded outlined dense emit-value map-options display-value-sanitize options-sanitize
                 >
                     <template v-slot:prepend>
-                        <q-btn class="q-mr-xs" round dense color="blue" icon="la la-plus" @click="addBookmark" size="12px">
+                        <q-btn class="q-mr-xs" round dense color="blue" icon="la la-plus" @click.stop="addBookmark" size="12px">
                             <q-tooltip :delay="1500" anchor="bottom middle" content-style="font-size: 80%">Добавить закладку</q-tooltip>
                         </q-btn>
-                        <q-btn round dense color="blue" icon="la la-bars" size="12px" disabled>
+                        <q-btn round dense color="blue" icon="la la-bars" @click.stop="bookmarkSettings"  size="12px" disabled>
                             <q-tooltip :delay="1500" anchor="bottom middle" content-style="font-size: 80%">Настроить закладки (пока недоступно)</q-tooltip>                            
                         </q-btn>
                     </template>
@@ -34,6 +34,7 @@
                     dropdown-icon="la la-angle-down la-sm"
                     rounded outlined dense emit-value map-options hide-selected display-value-sanitize options-sanitize
                 >
+                    <q-tooltip :delay="1500" anchor="bottom middle" content-style="font-size: 80%">Закладки</q-tooltip>
                 </q-select>
                 <q-input class="col q-mr-sm" ref="input" rounded outlined dense bg-color="white" v-model="bookUrl" placeholder="Скопируйте сюда URL книги" @focus="onInputFocus">
                     <template v-slot:prepend>
@@ -50,7 +51,41 @@
                 </q-btn>
             </div>
             <div class="separator"></div>
+
             <iframe v-if="frameVisible" class="col fit" ref="frame" :src="frameSrc" frameborder="0"></iframe>
+
+            <Dialog ref="dialogAddBookmark" v-model="addBookmarkVisible">
+                <template slot="header">
+                    <div class="row items-center">
+                        <q-icon class="q-mr-sm" name="la la-bookmark" size="28px"></q-icon>
+                        Добавить закладку
+                    </div>
+                </template>
+
+                <div class="q-mx-md row">
+                    <q-input ref="bookmarkLink" class="col q-mr-sm" outlined dense bg-color="white" v-model="bookmarkLink" 
+                        placeholder="Ссылка на закладку" maxlength="2000" @focus="onInputFocus">
+                    </q-input>
+
+                    <q-select class="q-mr-sm" v-model="defaultRootLink" :options="defaultRootLinkOptions" style="width: 50px"
+                        dropdown-icon="la la-angle-down la-sm"
+                        outlined dense emit-value map-options hide-selected display-value-sanitize options-sanitize
+                    >
+                        <q-tooltip :delay="1500" anchor="bottom middle" content-style="font-size: 80%">Предустановленные ссылки</q-tooltip>
+                    </q-select>
+                </div>
+
+                <div class="q-mx-md q-mt-md">
+                    <q-input class="col q-mr-sm" outlined dense bg-color="white" v-model="bookmarkDesc" 
+                        placeholder="Описание" style="width: 400px" maxlength="100" @focus="onInputFocus">
+                    </q-input>
+                </div>
+
+                <template slot="footer">
+                    <q-btn class="q-px-md q-ml-sm" dense no-caps v-close-popup>Отмена</q-btn>
+                    <q-btn class="q-px-md q-ml-sm" color="primary" dense no-caps @click="okAddBookmark" :disabled="!bookmarkLink">OK</q-btn>
+                </template>
+            </Dialog>
         </div>
     </Window>
 </template>
@@ -62,6 +97,8 @@ import Component from 'vue-class-component';
 import _ from 'lodash';
 
 import Window from '../share/Window.vue';
+import Dialog from '../share/Dialog.vue';
+import rstore from '../../store/modules/reader';
 import * as utils from '../../share/utils';
 
 const proxySubst = {
@@ -70,7 +107,8 @@ const proxySubst = {
 
 export default @Component({
     components: {
-        Window
+        Window,
+        Dialog
     },
     watch: {
         libs: function() {
@@ -82,6 +120,9 @@ export default @Component({
         },
         selectedLink: function() {
             this.updateStartLink();
+        },
+        defaultRootLink: function() {
+            this.updateBookmarkLink();
         }
     }    
 })
@@ -95,6 +136,11 @@ class ExternalLibs extends Vue {
     bookUrl = '';
     libs = {};
     fullScreenActive = false;
+    addBookmarkVisible = false;
+
+    bookmarkLink = '';
+    bookmarkDesc = '';
+    defaultRootLink = '';
 
     created() {
         this.$root.addKeyHook(this.keyHook);
@@ -199,7 +245,7 @@ class ExternalLibs extends Vue {
     updateSelectedLink() {
         if (!this.ready)
             return;
-        const index = this.getRootIndexByUrl(this.rootLink);
+        const index = this.getRootIndexByUrl(this.libs.groups, this.rootLink);
         if (index >= 0)
             this.selectedLink = this.libs.groups[index].s;
     }
@@ -207,7 +253,7 @@ class ExternalLibs extends Vue {
     updateStartLink() {
         if (!this.ready)
             return;
-        const index = this.getRootIndexByUrl(this.rootLink);
+        const index = this.getRootIndexByUrl(this.libs.groups, this.rootLink);
         if (index >= 0) {
             let libs = _.cloneDeep(this.libs);
             libs.groups[index].s = this.selectedLink;
@@ -230,12 +276,22 @@ class ExternalLibs extends Vue {
         return result;
     }
 
+    get defaultRootLinkOptions() {
+        let result = [];
+
+        rstore.libsDefaults.groups.forEach(group => {
+            result.push({label: this.removeProtocol(group.r), value: group.r});
+        });
+
+        return result;
+    }
+
     get selectedLinkOptions() {
         let result = [];
         if (!this.ready)
             return result;
 
-        const index = this.getRootIndexByUrl(this.rootLink);
+        const index = this.getRootIndexByUrl(this.libs.groups, this.rootLink);
         if (index >= 0) {
             this.libs.groups[index].list.forEach(link => {
                 result.push({label: (link.c ? link.c + ' ': '') + this.removeOrigin(link.l), value: link.l});
@@ -282,11 +338,10 @@ class ExternalLibs extends Vue {
         return (result ? result : '/');
     }
 
-    getRootIndexByUrl(url) {
+    getRootIndexByUrl(groups, url) {
         if (!this.ready)
             return -1;
         const origin = this.getOrigin(url);
-        const groups = this.libs.groups;
         for (let i = 0; i < groups.length; i++) {
             if (groups[i].r == origin)
                 return i;
@@ -314,8 +369,8 @@ class ExternalLibs extends Vue {
         return url;
     }
 
-    onInputFocus() {
-        this.$refs.input.select();
+    onInputFocus(event) {
+        event.target.select();
     }
 
     submitUrl() {
@@ -331,6 +386,26 @@ class ExternalLibs extends Vue {
     }
 
     addBookmark() {
+        this.addBookmarkVisible = true;
+        this.$nextTick(() => {
+            this.$refs.bookmarkLink.focus();
+        });
+    }
+
+    updateBookmarkLink() {
+        this.bookmarkLink = this.defaultRootLink;
+        const index = this.getRootIndexByUrl(rstore.libsDefaults.groups, this.bookmarkLink);
+        if (index >= 0) {
+            this.bookmarkDesc = this.getCommentByLink(rstore.libsDefaults.groups[index].list, this.bookmarkLink);
+        } else {
+            this.bookmarkDesc = '';
+        }
+    }
+
+    okAddBookmark() {
+    }
+
+    bookmarkSettings() {
     }
 
     fullScreenToggle() {
@@ -347,17 +422,23 @@ class ExternalLibs extends Vue {
     }
 
     keyHook() {
-        //недостатки сторонних ui
-        const input = this.$refs.input.$refs.input;
-        if (document.activeElement === input && event.type == 'keydown' && event.code == 'Enter') {
-            this.submitUrl();
+        if (this.$root.rootRoute() == '/external-libs') {
+            if (this.$refs.dialogAddBookmark.active)
+                return false;
+
+            //недостатки сторонних ui
+            const input = this.$refs.input.$refs.input;
+            if (document.activeElement === input && event.type == 'keydown' && event.code == 'Enter') {
+                this.submitUrl();
+                return true;
+            }
+
+            if (event.type == 'keydown' && (event.code == 'Escape')) {
+                this.close();
+            }
             return true;
         }
-
-        if (event.type == 'keydown' && (event.code == 'Escape')) {
-            this.close();
-        }
-        return true;
+        return false;
     }
 
 }
