@@ -410,11 +410,12 @@ class ExternalLibs extends Vue {
     }
 
     updateBookmarkLink() {
-        this.bookmarkLink = this.defaultRootLink;
-        const index = this.getRootIndexByUrl(rstore.libsDefaults.groups, this.bookmarkLink);
+        const index = this.getRootIndexByUrl(rstore.libsDefaults.groups, this.defaultRootLink);
         if (index >= 0) {
+            this.bookmarkLink = rstore.libsDefaults.groups[index].s;
             this.bookmarkDesc = this.getCommentByLink(rstore.libsDefaults.groups[index].list, this.bookmarkLink);
         } else {
+            this.bookmarkLink = '';
             this.bookmarkDesc = '';
         }
     }
