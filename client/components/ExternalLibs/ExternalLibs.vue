@@ -420,9 +420,15 @@ class ExternalLibs extends Vue {
         }
     }
 
-    okAddBookmark() {
+    async okAddBookmark() {
         const link = this.addProtocol(this.bookmarkLink);
-        let index = this.getRootIndexByUrl(this.libs.groups, link);
+        let index = -1;
+        try {
+            index = this.getRootIndexByUrl(this.libs.groups, link);
+        } catch (e) {
+            await this.$root.stdDialog.alert('Неверный формат ссылки', 'Ошибка');
+            return;
+        }
 
         //есть группа в закладках
         if (index >= 0) {
@@ -431,17 +437,30 @@ class ExternalLibs extends Vue {
             if (!item || item.c != this.bookmarkDesc) {
                 //добавляем
                 let libs = _.cloneDeep(this.libs);
+
+                if (libs.groups[index].list.length >= 100) {
+                    await this.$root.stdDialog.alert('Достигнут предел количества закладок для этого сайта', 'Ошибка');
+                    return;
+                }
+
                 libs.groups[index].list.push({l: link, c: this.bookmarkDesc});
                 this.commitLibs(libs);
             }
         } else {//нет группы в закладках
-            //добавляем сначала группу
             let libs = _.cloneDeep(this.libs);
+
+            if (libs.groups.length >= 100) {
+                await this.$root.stdDialog.alert('Достигнут предел количества различных сайтов в закладках', 'Ошибка');
+                return;
+            }
+
+            //добавляем сначала группу
             libs.groups.push({r: this.getOrigin(link), s: link, list: []});
             
             index = this.getRootIndexByUrl(libs.groups, link);
             if (index >= 0)
                 libs.groups[index].list.push({l: link, c: this.bookmarkDesc});
+
             this.commitLibs(libs);
         }
 
