@@ -32,7 +32,7 @@ class LibsPage extends Vue {
     init() {
         if (this.mode != 'liberama.top')
             return;
-        
+
         this.childReady = false;
         const subdomain = (window.location.protocol != 'http:' ? 'b.' : '');
         this.origin = `http://${subdomain}${window.location.host}`;

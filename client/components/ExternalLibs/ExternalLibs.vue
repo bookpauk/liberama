@@ -401,7 +401,7 @@ class ExternalLibs extends Vue {
     }
 
     addBookmark() {
-        this.bookmarkLink = '';
+        this.bookmarkLink = (this.bookUrl ? this.makeProxySubst(this.addProtocol(this.bookUrl), true) : '');
         this.bookmarkDesc = '';
         this.addBookmarkVisible = true;
         this.$nextTick(() => {
