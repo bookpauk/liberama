@@ -81,6 +81,9 @@ class LibsPage extends Vue {
             this.commit('reader/setLibs', d.data);
         } else if (d.type == 'close') {
             this.close();
+        } else if (d.type == 'submitUrl') {
+            this.$emit('load-book', d.data);
+            this.sendMessage({type: 'notify', data: 'Ссылка передана в читалку'});
         }
     }
 
@@ -104,13 +107,6 @@ class LibsPage extends Vue {
     sendLibs() {
         this.sendMessage({type: 'libs', data: this.libs});
     }
-
-/*    submitUrl() {
-        if (this.bookUrl) {
-            this.$emit('load-book', {url: this.addProtocol(this.bookUrl), force: true});
-            this.bookUrl = '';
-        }
-    }*/
 
     close() {
         this.$emit('libs-close');

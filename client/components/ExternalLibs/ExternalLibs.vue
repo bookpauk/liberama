@@ -125,10 +125,7 @@ class ExternalLibs extends Vue {
             }
 
             while(this.opener) {
-                if (this.opener.closed) {                    
-                    await this.$root.stdDialog.alert('Потеряна связь с читалкой. Окно будет закрыто', 'Ошибка');
-                    window.close();
-                }
+                await this.checkOpener();
                 await utils.sleep(1000);
             }
         })();
@@ -143,12 +140,24 @@ class ExternalLibs extends Vue {
             this.ready = true;
             this.libs = _.cloneDeep(d.data);
             this.goToStartLink();
+        } else if (d.type == 'notify') {
+            this.$root.notify.success(d.data);
         }
     }
 
     sendMessage(d) {
-        if (this.opener && this.openerOrigin)
-            this.opener.postMessage(Object.assign({}, {from: 'ExternalLibs'}, d), this.openerOrigin);
+        (async() => {
+            await this.checkOpener();
+            if (this.opener && this.openerOrigin)
+                this.opener.postMessage(Object.assign({}, {from: 'ExternalLibs'}, d), this.openerOrigin);
+        })();
+    }
+
+    async checkOpener() {
+        if (this.opener.closed) {
+            await this.$root.stdDialog.alert('Потеряна связь с читалкой. Окно будет закрыто', 'Ошибка');
+            window.close();
+        }
     }
 
     commitLibs(libs) {
@@ -283,8 +292,10 @@ class ExternalLibs extends Vue {
 
     submitUrl() {
         if (this.bookUrl) {
-            this.$emit('load-book', {url: this.addProtocol(this.bookUrl), force: true});
+            this.sendMessage({type: 'submitUrl', data: {url: this.addProtocol(this.bookUrl), force: true}});
             this.bookUrl = '';
+            if (this.libs.closeAfterSubmit)
+                this.close();
         }
     }
 

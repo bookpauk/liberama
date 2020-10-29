@@ -256,6 +256,7 @@ const settingDefaults = {
 const libsDefaults = {
     startLink: 'http://flibusta.is',
     comment: 'Флибуста | Книжное братство',
+    closeAfterSubmit: false,
     groups: [
         {r: 'http://flibusta.is', s: 'http://flibusta.is', list: [
             {l: 'http://flibusta.is', c: 'Флибуста | Книжное братство'},
