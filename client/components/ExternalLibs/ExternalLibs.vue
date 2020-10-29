@@ -321,7 +321,7 @@ class ExternalLibs extends Vue {
             return;
 
         this.frameSrc = this.makeProxySubst(link);
-        //this.frameVisible = false;
+        this.frameVisible = false;
         this.$nextTick(() => {
             this.frameVisible = true;
         });
