@@ -52,7 +52,6 @@ import _ from 'lodash';
 
 import Window from '../share/Window.vue';
 import * as utils from '../../share/utils';
-//import rstore from '../../store/modules/reader';
 
 export default @Component({
     components: {
@@ -141,7 +140,7 @@ class ExternalLibs extends Vue {
             this.libs = _.cloneDeep(d.data);
             this.goToStartLink();
         } else if (d.type == 'notify') {
-            this.$root.notify.success(d.data);
+            this.$root.notify.success(d.data, '', {position: 'bottom-right'});
         }
     }
 

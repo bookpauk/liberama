@@ -19,11 +19,12 @@ class Notify extends Vue {
             iconColor = 'white',
             message = '',
             messageColor = 'black',
+            position = 'top-right',
         } = opts;
 
         caption = (caption ? `<div style="font-size: 120%; color: ${captionColor}"><b>${caption}</b></div><br>` : '');
         return this.$q.notify({
-            position: 'top-right',
+            position,
             color,
             textColor: iconColor,
             icon,
@@ -38,20 +39,20 @@ class Notify extends Vue {
         });
     }
 
-    success(message, caption) {
-        this.notify({color: 'positive', icon: 'la la-check-circle', message, caption});
+    success(message, caption, options) {
+        this.notify(Object.assign({color: 'positive', icon: 'la la-check-circle', message, caption}, options));
     }
 
-    warning(message, caption) {
-        this.notify({color: 'warning', icon: 'la la-exclamation-circle', message, caption});
+    warning(message, caption, options) {
+        this.notify(Object.assign({color: 'warning', icon: 'la la-exclamation-circle', message, caption}, options));
     }
 
-    error(message, caption) {
-        this.notify({color: 'negative', icon: 'la la-exclamation-circle', messageColor: 'yellow', captionColor: 'white', message, caption});
+    error(message, caption, options) {
+        this.notify(Object.assign({color: 'negative', icon: 'la la-exclamation-circle', messageColor: 'yellow', captionColor: 'white', message, caption}, options));
     }
 
-    info(message, caption) {
-        this.notify({color: 'info', icon: 'la la-bell', message, caption});
+    info(message, caption, options) {
+        this.notify(Object.assign({color: 'info', icon: 'la la-bell', message, caption}, options));
     }
 }
 //-----------------------------------------------------------------------------
