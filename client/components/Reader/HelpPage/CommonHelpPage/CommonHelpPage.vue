@@ -22,15 +22,15 @@
         на файл из онлайн-библиотеки (например, скопировав адрес ссылки или кнопки "скачать fb2").</p>
         <p>Поддерживаемые форматы: <b>fb2, fb2.zip, html, txt</b> и другие.</p>
 
-        <div v-show="mode == 'omnireader'">
+        <div v-show="mode == 'omnireader' || mode == 'liberama.top'">
             <p>Вы можете добавить в свой браузер закладку, указав в ее свойствах вместо адреса следующий код:
-                <br><strong>javascript:location.href='https://omnireader.ru/?url='+location.href;</strong>
-                <q-icon class="copy-icon" name="la la-copy" @click="copyText('javascript:location.href=\'https://omnireader.ru/?url=\'+location.href;', 'Код для адреса закладки успешно скопирован в буфер обмена')">
+                <br><strong>{{ bookmarkText }}</strong>
+                <q-icon class="copy-icon" name="la la-copy" @click="copyText(bookmarkText, 'Код для адреса закладки успешно скопирован в буфер обмена')">
                     <q-tooltip :delay="1000" anchor="top middle" self="center middle" content-style="font-size: 80%">Скопировать</q-tooltip>                    
                 </q-icon>
 
                 <br>или перетащив на панель закладок следующую ссылку:
-                <br><a style="margin-left: 50px" href="javascript:location.href='https://omnireader.ru/?url='+location.href;">Omni Reader</a>
+                <br><a style="margin-left: 50px" :href="bookmarkText">{{ (mode == 'omnireader' ? 'Omni' : 'Liberama') }} Reader</a>
                 <br>Тогда, активировав получившуюся закладку на любой странице интернета, вы автоматически загрузите эту страницу в Omni Reader.
                 <br>В Chrome для Android можно вызывать такую закладку по имени прямо в адресной строке браузера (имя стоит сделать попроще).
             </p>
@@ -54,6 +54,10 @@ class CommonHelpPage extends Vue {
 
     get mode() {
         return this.$store.state.config.mode;
+    }
+
+    get bookmarkText() {
+        return `javascript:location.href='https://${window.location.host}/?url='+location.href;`
     }
 
     async copyText(text, mes) {

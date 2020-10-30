@@ -93,6 +93,12 @@ function parseSync(xstr, options) {
             }
             tag = tag.toLowerCase();
 
+            if (innerCut.has(tag) && (!cutCounter || cutTag === tag)) {
+                if (!cutCounter)
+                    cutTag = tag;
+                cutCounter++;
+            }
+
             let endTag = (singleTag ? tag : '');
             if (tag === '' || tag[0] !== '/') {
                 _onStartNode(tag, tail, singleTag, cutCounter, cutTag);
@@ -102,12 +108,6 @@ function parseSync(xstr, options) {
 
             if (endTag)
                 _onEndNode(endTag, tail, singleTag, cutCounter, cutTag);
-
-            if (innerCut.has(tag) && (!cutCounter || cutTag === tag)) {
-                if (!cutCounter)
-                    cutTag = tag;
-                cutCounter++;
-            }
 
             if (cutTag === endTag) {
                 cutCounter = (cutCounter > 0 ? cutCounter - 1 : 0);
@@ -125,9 +125,9 @@ function parseSync(xstr, options) {
 
     if (i < len) {
         if (inCdata) {
-            _onCdata(xstr.substr(leftData, len - leftData), cutCounter, cutTag);
+            _onCdata(xstr.substr(leftData + 1, len - leftData - 1), cutCounter, cutTag);
         } else if (inComment) {
-            _onComment(xstr.substr(leftData, len - leftData), cutCounter, cutTag);
+            _onComment(xstr.substr(leftData + 1, len - leftData - 1), cutCounter, cutTag);
         } else {
             _onTextNode(xstr.substr(i, len - i), cutCounter, cutTag);
         }
@@ -233,6 +233,12 @@ async function parse(xstr, options) {
             }
             tag = tag.toLowerCase();
 
+            if (innerCut.has(tag) && (!cutCounter || cutTag === tag)) {
+                if (!cutCounter)
+                    cutTag = tag;
+                cutCounter++;
+            }
+
             let endTag = (singleTag ? tag : '');
             if (tag === '' || tag[0] !== '/') {
                 await _onStartNode(tag, tail, singleTag, cutCounter, cutTag);
@@ -242,12 +248,6 @@ async function parse(xstr, options) {
 
             if (endTag)
                 await _onEndNode(endTag, tail, singleTag, cutCounter, cutTag);
-
-            if (innerCut.has(tag) && (!cutCounter || cutTag === tag)) {
-                if (!cutCounter)
-                    cutTag = tag;
-                cutCounter++;
-            }
 
             if (cutTag === endTag) {
                 cutCounter = (cutCounter > 0 ? cutCounter - 1 : 0);
@@ -265,9 +265,9 @@ async function parse(xstr, options) {
 
     if (i < len) {
         if (inCdata) {
-            await _onCdata(xstr.substr(leftData, len - leftData), cutCounter, cutTag);
+            await _onCdata(xstr.substr(leftData + 1, len - leftData - 1), cutCounter, cutTag);
         } else if (inComment) {
-            await _onComment(xstr.substr(leftData, len - leftData), cutCounter, cutTag);
+            await _onComment(xstr.substr(leftData + 1, len - leftData - 1), cutCounter, cutTag);
         } else {
             await _onTextNode(xstr.substr(i, len - i), cutCounter, cutTag);
         }

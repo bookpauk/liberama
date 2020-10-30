@@ -1,56 +1,4 @@
 <template>
-    <!--q-layout view="lhr lpr lfr">
-        <q-drawer v-model="showAsideBar" :width="asideWidth">
-            <div class="app-name"><span v-html="appName"></span></div>
-            <q-btn class="el-button-collapse" @click="toggleCollapse"></q-btn>
-
-            <q-list>
-                <q-item clickable v-ripple>
-                    <q-item-section avatar>
-                        <q-icon name="inbox" />
-                    </q-item-section>
-
-                    <q-item-section>Inbox</q-item-section>
-                </q-item>
-            </q-list-->
-            <!--el-menu class="el-menu-vertical" :default-active="rootRoute" :collapse="isCollapse" router>
-              <el-menu-item index="/cardindex">
-                <i class="el-icon-search"></i>
-                <span :class="itemTitleClass('/cardindex')" slot="title">{{ this.itemRuText['/cardindex'] }}</span>
-              </el-menu-item>
-              <el-menu-item index="/reader">
-                <i class="el-icon-tickets"></i>
-                <span :class="itemTitleClass('/reader')" slot="title">{{ this.itemRuText['/reader'] }}</span>
-              </el-menu-item>
-              <el-menu-item index="/forum" disabled>
-                <i class="el-icon-message"></i>
-                <span :class="itemTitleClass('/forum')" slot="title">{{ this.itemRuText['/forum'] }}</span>
-              </el-menu-item>
-              <el-menu-item index="/income">
-                <i class="el-icon-upload"></i>
-                <span :class="itemTitleClass('/income')" slot="title">{{ this.itemRuText['/income'] }}</span>
-              </el-menu-item>
-              <el-menu-item index="/sources">
-                <i class="el-icon-menu"></i>
-                <span :class="itemTitleClass('/sources')" slot="title">{{ this.itemRuText['/sources'] }}</span>
-              </el-menu-item>
-              <el-menu-item index="/settings">
-                <i class="el-icon-setting"></i>
-                <span :class="itemTitleClass('/settings')" slot="title">{{ this.itemRuText['/settings'] }}</span>
-              </el-menu-item>
-              <el-menu-item index="/help">
-                <i class="el-icon-question"></i>
-                <span :class="itemTitleClass('/help')" slot="title">{{ this.itemRuText['/help'] }}</span>
-              </el-menu-item>
-            </el-menu-->
-        <!--/q-drawer>
-
-        <q-page-container>
-            <keep-alive>
-                <router-view></router-view>
-            </keep-alive>
-        </q-page-container>
-    </q-layout-->
     <div class="fit row">
         <Notify ref="notify"/>
         <StdDialog ref="stdDialog"/>
@@ -90,7 +38,8 @@ class App extends Vue {
         '/sources': 'Источники',
         '/settings': 'Параметры',
         '/help': 'Справка',
-    }
+    };
+
     created() {
         this.commit = this.$store.commit;
         this.dispatch = this.$store.dispatch;
@@ -106,9 +55,19 @@ class App extends Vue {
                 cachedPath = this.$route.path;
                 const m = cachedPath.match(/^(\/[^/]*).*$/i);
                 cachedRoute = (m ? m[1] : this.$route.path);
+
             }
             return cachedRoute;
         }
+
+        this.$router.beforeEach((to, from, next) => {
+            //распознавание хоста, если присутствует домен 3-уровня "b.", то разрешена только определенная страница
+            if (window.location.host.indexOf('b.') == 0 && to.path != '/external-libs' && to.path != '/404') {
+                next('/404');
+            } else {
+                next();
+            }
+        });
 
         // set-app-title
         this.$root.$on('set-app-title', this.setAppTitle);
@@ -133,12 +92,23 @@ class App extends Vue {
 
         document.addEventListener('keyup', (event) => {
             this.keyHook(event);
-        });        
+        });
+        document.addEventListener('keypress', (event) => {
+            this.keyHook(event);
+        });
         document.addEventListener('keydown', (event) => {
             this.keyHook(event);
-        });        
+        });
         window.addEventListener('resize', () => {
             this.$root.$emit('resize');
+        });
+    }
+
+    routerReady() {
+        return new Promise ((resolve) => {
+            this.$router.onReady(() => {
+                resolve();
+            });
         });
     }
 
@@ -157,7 +127,10 @@ class App extends Vue {
         });
 
         this.setAppTitle();
-        this.redirectIfNeeded();
+        (async() => {
+            await this.routerReady();
+            this.redirectIfNeeded();
+        })();
     }
 
     toggleCollapse() {
@@ -202,7 +175,9 @@ class App extends Vue {
 
     setAppTitle(title) {
         if (!title) {
-            if (this.mode == 'omnireader') {
+            if (this.mode == 'liberama.top') {
+                document.title = `Liberama Reader - всегда с вами`;
+            } else if (this.mode == 'omnireader') {
                 document.title = `Omni Reader - всегда с вами`;
             } else if (this.config && this.mode !== null) {
                 document.title = `${this.config.name} - ${this.itemRuText[this.$root.rootRoute]}`;
@@ -221,29 +196,32 @@ class App extends Vue {
     }
 
     get showAsideBar() {
-        return (this.mode !== null && this.mode != 'reader' && this.mode != 'omnireader');
+        return (this.mode !== null && this.mode != 'reader' && this.mode != 'omnireader' && this.mode != 'liberama.top');
     }
 
     set showAsideBar(value) {
     }
 
     get isReaderActive() {
-        return this.rootRoute == '/reader';
+        return (this.rootRoute == '/reader' || this.rootRoute == '/external-libs');
     }
 
     redirectIfNeeded() {
-        if ((this.mode == 'reader' || this.mode == 'omnireader') && (!this.isReaderActive)) {
-            //старый url
+        if ((this.mode == 'reader' || this.mode == 'omnireader' || this.mode == 'liberama.top')) {
             const search = window.location.search.substr(1);
-            const s = search.split('url=');
-            const url = s[1] || '';
-            const q = utils.parseQuery(s[0] || '');
-            if (url) {
-                q.url = decodeURIComponent(url);
-            }
 
-            window.history.replaceState({}, '', '/');
-            this.$router.replace({ path: '/reader', query: q });
+            //распознавание параметра url вида "?url=<link>" и редирект при необходимости
+            if (!this.isReaderActive) {
+                const s = search.split('url=');
+                const url = s[1] || '';
+                const q = utils.parseQuery(s[0] || '');
+                if (url) {
+                    q.url = decodeURIComponent(url);
+                }
+
+                window.history.replaceState({}, '', '/');
+                this.$router.replace({ path: '/reader', query: q });
+            }
         }
     }
 }

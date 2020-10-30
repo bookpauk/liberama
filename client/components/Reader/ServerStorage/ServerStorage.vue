@@ -1,5 +1,5 @@
 <template>
-    <div></div>
+    <div class="hidden"></div>
 </template>
 
 <script>
@@ -35,6 +35,9 @@ export default @Component({
         currentProfile: function() {
             this.currentProfileChanged(true);
         },
+        libs: function() {
+            this.debouncedSaveLibs();
+        },
     },
 })
 class ServerStorage extends Vue {
@@ -49,12 +52,17 @@ class ServerStorage extends Vue {
             this.saveSettings();
         }, 500);
 
+        this.debouncedSaveLibs = _.debounce(() => {
+            this.saveLibs();
+        }, 500);
+
         this.debouncedNotifySuccess = _.debounce(() => {
             this.success('Данные синхронизированы с сервером');
         }, 1000);
 
         this.oldProfiles = {};
         this.oldSettings = {};
+        this.oldLibs = {};
     }
 
     async init() {
@@ -124,6 +132,8 @@ class ServerStorage extends Vue {
             await this.loadProfiles(force);
             this.checkCurrentProfile();
             await this.currentProfileChanged(force);
+            await this.loadLibs(force);
+
             const loadSuccess = await this.loadRecent();
             if (loadSuccess && force)
                 await this.saveRecent();
@@ -167,6 +177,14 @@ class ServerStorage extends Vue {
 
     get showServerStorageMessages() {
         return this.settings.showServerStorageMessages;
+    }
+
+    get libs() {
+        return this.$store.state.reader.libs;
+    }
+
+    get libsRev() {
+        return this.$store.state.reader.libsRev;
     }
 
     checkCurrentProfile() {
@@ -338,10 +356,82 @@ class ServerStorage extends Vue {
                 this.warning(`Последние изменения отменены. Данные синхронизированы с сервером.`);
             } else if (result.state == 'success') {
                 this.oldProfiles = _.cloneDeep(this.profiles);
-                this.commit('reader/setProfilesRev', this.profilesRev + 1);        
+                this.commit('reader/setProfilesRev', this.profilesRev + 1);
             }
         } finally {
             this.savingProfiles = false;
+        }
+    }
+
+    async loadLibs(force = false, doNotifySuccess = true) {
+        if (!this.keyInited || !this.serverSyncEnabled)
+            return;
+
+        const oldRev = this.libsRev;
+        //проверим ревизию на сервере
+        if (!force) {
+            try {
+                const revs = await this.storageCheck({libs: {}});
+                if (revs.state == 'success' && revs.items.libs.rev == oldRev) {
+                    return;
+                }
+            } catch(e) {
+                this.error(`Ошибка соединения с сервером: ${e.message}`);
+                return;
+            }
+        }
+
+        let libs = null;
+        try {
+            libs = await this.storageGet({libs: {}});
+        } catch(e) {
+            this.error(`Ошибка соединения с сервером: ${e.message}`);
+            return;
+        }
+
+        if (libs.state == 'success') {
+            libs = libs.items.libs;
+
+            if (libs.rev == 0)
+                libs.data = {};
+
+            this.oldLibs = _.cloneDeep(libs.data);
+            this.commit('reader/setLibs', libs.data);
+            this.commit('reader/setLibsRev', libs.rev);
+
+            if (doNotifySuccess)
+                this.debouncedNotifySuccess();
+        } else {
+            this.warning(`Неверный ответ сервера: ${libs.state}`);
+        }
+    }
+
+    async saveLibs() {
+        if (!this.keyInited || !this.serverSyncEnabled || this.savingLibs)
+            return;
+
+        const diff = utils.getObjDiff(this.oldLibs, this.libs);
+        if (utils.isEmptyObjDiff(diff))
+            return;
+
+        this.savingLibs = true;
+        try {
+            let result = {state: ''};
+            try {
+                result = await this.storageSet({libs: {rev: this.libsRev + 1, data: this.libs}});
+            } catch(e) {
+                this.error(`Ошибка соединения с сервером (${e.message}). Данные не сохранены и могут быть перезаписаны.`);
+            }
+
+            if (result.state == 'reject') {
+                await this.loadLibs(true, false);
+                this.warning(`Последние изменения отменены. Данные синхронизированы с сервером.`);
+            } else if (result.state == 'success') {
+                this.oldLibs = _.cloneDeep(this.libs);
+                this.commit('reader/setLibsRev', this.libsRev + 1);
+            }
+        } finally {
+            this.savingLibs = false;
         }
     }
 

@@ -1,3 +1,5 @@
+import * as utils from '../share/utils';
+
 const cleanPeriod = 60*1000;//1 минута
 
 class WebSocketConnection {
@@ -9,6 +11,8 @@ class WebSocketConnection {
         this.messageQueue = [];
         this.messageLifeTime = messageLifeTime;
         this.requestId = 0;
+
+        this.connecting = false;
     }
 
     addListener(listener) {
@@ -53,14 +57,22 @@ class WebSocketConnection {
     }
 
     open(url) {
-        return new Promise((resolve, reject) => {
+        return new Promise((resolve, reject) => { (async() => {
+            //Ожидаем окончания процесса подключения, если open уже был вызван
+            let i = 0;
+            while (this.connecting && i < 200) {//10 сек
+                await utils.sleep(50);
+                i++;
+            }
+            if (i >= 200)
+                this.connecting = false;
+
+            //проверим подключение, и если нет, то подключимся заново
             if (this.ws && this.ws.readyState == WebSocket.OPEN) {
                 resolve(this.ws);
             } else {
-                let protocol = 'ws:';
-                if (window.location.protocol == 'https:') {
-                    protocol = 'wss:'
-                }
+                this.connecting = true;
+                const protocol = (window.location.protocol == 'https:' ? 'wss:' : 'ws:');
 
                 url = url || `${protocol}//${window.location.host}/ws`;
                 
@@ -71,9 +83,8 @@ class WebSocketConnection {
                 }
                 this.timer = setTimeout(() => { this.periodicClean(); }, cleanPeriod);
 
-                let resolved = false;
                 this.ws.onopen = (e) => {
-                    resolved = true;
+                    this.connecting = false;
                     resolve(e);
                 };
 
@@ -97,11 +108,13 @@ class WebSocketConnection {
 
                 this.ws.onerror = (e) => {
                     this.emit(e.message, true);
-                    if (!resolved)
+                    if (this.connecting) {
+                        this.connecting = false;
                         reject(e);
+                    }
                 };
             }
-        });
+        })() });
     }
 
     //timeout в минутах (cleanPeriod)

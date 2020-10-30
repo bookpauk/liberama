@@ -284,12 +284,12 @@ class StdDialog extends Vue {
                     handled = true;
                 }
             } else {
-                if (event.code == 'Enter') {
+                if (event.key == 'Enter') {
                     this.okClick();
                     handled = true;
                 }
 
-                if (event.code == 'Escape') {
+                if (event.key == 'Escape') {
                     this.$nextTick(() => {
                         this.$refs.dialog.hide();
                     });

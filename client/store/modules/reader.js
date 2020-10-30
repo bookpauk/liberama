@@ -12,6 +12,7 @@ const readerActions = {
     'copyText': 'Скопировать текст со страницы',
     'refresh': 'Принудительно обновить книгу',
     'offlineMode': 'Автономный режим (без интернета)',
+    'libs': 'Библиотека',
     'recentBooks': 'Открыть недавние',
     'switchToolbar': 'Показать/скрыть панель управления',
     'donate': '',
@@ -37,8 +38,9 @@ const toolButtons = [
     {name: 'search',      show: true},
     {name: 'copyText',    show: false},
     {name: 'refresh',     show: true},
-    {name: 'offlineMode', show: false},
+    {name: 'libs',        show: true},
     {name: 'recentBooks', show: true},
+    {name: 'offlineMode', show: false},
 ];
 
 //readerActions[name]
@@ -55,6 +57,7 @@ const hotKeys = [
     {name: 'copyText', codes: ['Ctrl+C']},
     {name: 'refresh', codes: ['R']},
     {name: 'offlineMode', codes: ['O']},
+    {name: 'libs', codes: ['L']},
     {name: 'recentBooks', codes: ['X']},
 
     {name: 'switchToolbar', codes: ['Tab', 'Q']},
@@ -250,6 +253,29 @@ const settingDefaults = {
     userHotKeys: {},
 };
 
+const libsDefaults = {
+    startLink: 'http://flibusta.is',
+    comment: 'Флибуста | Книжное братство',
+    closeAfterSubmit: false,
+    groups: [
+        {r: 'http://flibusta.is', s: 'http://flibusta.is', list: [
+            {l: 'http://flibusta.is', c: 'Флибуста | Книжное братство'},
+        ]},
+        {r: 'http://samlib.ru', s: 'http://samlib.ru', list: [
+            {l: 'http://samlib.ru', c: 'Журнал "Самиздат"'},
+        ]},
+        {r: 'http://lib.ru', s: 'http://lib.ru', list: [
+            {l: 'http://lib.ru', c: 'Библиотека Максима Мошкова'},
+        ]},
+        {r: 'http://fantasy-worlds.org', s: 'http://fantasy-worlds.org', list: [
+            {l: 'http://fantasy-worlds.org', c: 'Миры Фэнтези'},
+        ]},
+        {r: 'https://aldebaran.ru', s: 'https://aldebaran.ru', list: [
+            {l: 'https://aldebaran.ru', c: 'АЛЬДЕБАРАН | Электронная библиотека книг'},
+        ]},
+    ]
+};
+
 for (const font of fonts)
     settingDefaults.fontShifts[font.name] = font.fontVertShift;
 for (const font of webFonts)
@@ -272,6 +298,8 @@ const state = {
     currentProfile: '',
     settings: Object.assign({}, settingDefaults),
     settingsRev: {},
+    libs: Object.assign({}, libsDefaults),
+    libsRev: 0,
 };
 
 // getters
@@ -315,6 +343,12 @@ const mutations = {
     setSettingsRev(state, value) {
         state.settingsRev = Object.assign({}, state.settingsRev, value);
     },
+    setLibs(state, value) {
+        state.libs = value;
+    },
+    setLibsRev(state, value) {
+        state.libsRev = value;
+    },
 };
 
 export default {
@@ -324,6 +358,7 @@ export default {
     fonts,
     webFonts,
     settingDefaults,
+    libsDefaults,
 
     namespaced: true,
     state,

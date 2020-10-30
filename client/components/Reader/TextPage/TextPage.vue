@@ -839,7 +839,7 @@ class TextPage extends Vue {
             let i = this.pageLineCount;
             if (this.keepLastToFirst)
                 i--;
-            if (i >= 0 && this.linesDown.length >= 2*i) {
+            if (i >= 0 && this.linesDown.length >= 2*i + (this.keepLastToFirst ? 1 : 0)) {
                 this.currentAnimation = this.pageChangeAnimation;
                 this.pageChangeDirectionDown = true;
                 this.bookPos = this.linesDown[i].begin;

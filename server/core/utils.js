@@ -14,6 +14,14 @@ function fromBase36(data) {
     return bs36.decode(data);
 }
 
+function bufferRemoveZeroes(buf) {
+    const i = buf.indexOf(0);
+    if (i >= 0) {
+        return buf.slice(0, i);
+    }
+    return buf;
+}
+
 function getFileHash(filename, hashName, enc) {
     return new Promise((resolve, reject) => {
         const hash = crypto.createHash(hashName);
@@ -86,6 +94,7 @@ function spawnProcess(cmd, opts) {
 module.exports = {
     toBase36,
     fromBase36,
+    bufferRemoveZeroes,
     getFileHash,
     sleep,
     randomHexString,

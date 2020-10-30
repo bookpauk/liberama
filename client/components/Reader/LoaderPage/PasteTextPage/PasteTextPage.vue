@@ -78,7 +78,7 @@ class PasteTextPage extends Vue {
 
     keyHook(event) {
         if (event.type == 'keydown') {
-            switch (event.code) {
+            switch (event.key) {
                 case 'F2':
                     this.loadBuffer();
                     break;

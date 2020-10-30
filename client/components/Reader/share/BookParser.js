@@ -656,6 +656,7 @@ export default class BookParser {
         let style = {};
         let ofs = 0;//смещение от начала параграфа para.offset
         let imgW = 0;
+        let imageInPara = false;
         const compactWidth = this.measureText('W', {})*this.compactTextPerc/100;
         // тут начинается самый замес, перенос по слогам и стилизация, а также изображения
         for (const part of parts) {
@@ -664,7 +665,7 @@ export default class BookParser {
 
             //изображения
             if (part.image.id && !part.image.inline) {
-                parsed.visible = this.showImages;
+                imageInPara = true;
                 let bin = this.binary[part.image.id];
                 if (!bin)
                     bin = {h: 1, w: 1};
@@ -832,10 +833,14 @@ export default class BookParser {
         }
 
         //parsed.visible
-        parsed.visible = !(
-            (para.addIndex > this.addEmptyParagraphs) ||
-            (para.addIndex == 0 && this.cutEmptyParagraphs && paragraphText.trim() == '')
-        );
+        if (imageInPara) {
+            parsed.visible = this.showImages;
+        } else {
+            parsed.visible = !(
+                (para.addIndex > this.addEmptyParagraphs) ||
+                (para.addIndex == 0 && this.cutEmptyParagraphs && paragraphText.trim() == '')
+            );
+        }
 
         parsed.lines = lines;
         para.parsed = parsed;

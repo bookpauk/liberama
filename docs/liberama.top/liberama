@@ -1,0 +1,128 @@
+server {
+    server_name _;
+    listen 80 default_server;
+    listen 443 ssl default_server;
+
+    #openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout /etc/nginx/ssl/nginx.key -out /etc/nginx/ssl/nginx.crt
+    ssl_certificate /etc/nginx/ssl/nginx.crt;
+    ssl_certificate_key /etc/nginx/ssl/nginx.key;
+    return 403;
+}
+
+server {
+  listen 443 ssl; # managed by Certbot
+  ssl_certificate /etc/letsencrypt/live/liberama.top/fullchain.pem; # managed by Certbot
+  ssl_certificate_key /etc/letsencrypt/live/liberama.top/privkey.pem; # managed by Certbot
+  include /etc/letsencrypt/options-ssl-nginx.conf; # managed by Certbot
+  ssl_dhparam /etc/letsencrypt/ssl-dhparams.pem; # managed by Certbot
+
+  server_name liberama.top;
+
+  client_max_body_size 50m;
+  proxy_read_timeout 1h;
+
+  gzip on;
+  gzip_min_length 1024;
+  gzip_proxied expired no-cache no-store private auth;
+  gzip_types *;
+
+  location /api {
+    proxy_pass http://127.0.0.1:55081;
+  }
+
+  location /ws {
+    proxy_pass http://127.0.0.1:55081;
+    proxy_http_version 1.1;
+    proxy_set_header Upgrade $http_upgrade;
+    proxy_set_header Connection "upgrade";
+  }
+
+  location / {
+    root /home/liberama/public;
+
+    location /tmp {
+      types { } default_type "application/xml; charset=utf-8";
+      add_header Content-Encoding gzip;
+    }
+
+    location ~* \.(?:manifest|appcache|html)$ {
+      expires -1;
+    }
+  }
+}
+
+server {
+  listen 80;
+  server_name liberama.top;
+
+  return 301 https://$host$request_uri;
+}
+
+server {
+  listen 80;
+  server_name b.liberama.top;
+
+  client_max_body_size 50m;
+  proxy_read_timeout 1h;
+
+  gzip on;
+  gzip_min_length 1024;
+  gzip_proxied expired no-cache no-store private auth;
+  gzip_types *;
+
+  location /api {
+    proxy_pass http://127.0.0.1:55081;
+  }
+
+  location /ws {
+    proxy_pass http://127.0.0.1:55081;
+    proxy_http_version 1.1;
+    proxy_set_header Upgrade $http_upgrade;
+    proxy_set_header Connection "upgrade";
+  }
+
+  location / {
+    root /home/liberama/public;
+
+    location /tmp {
+      types { } default_type "application/xml; charset=utf-8";
+      add_header Content-Encoding gzip;
+    }
+
+    location ~* \.(?:manifest|appcache|html)$ {
+      expires -1;
+    }
+  }
+}
+
+server {
+  listen 23480;
+  server_name flibusta_proxy;
+
+  valid_referers liberama.top b.liberama.top;
+
+  if ($invalid_referer) {
+    return 403;
+  }
+
+  location / {
+    proxy_pass http://flibusta.is;
+    proxy_redirect http://static.flibusta.is:443 http://b.liberama.top:23481;
+  }
+}
+
+server {
+  listen 23481;
+  server_name flibusta_proxy_static;
+
+  valid_referers liberama.top b.liberama.top;
+
+  if ($invalid_referer) {
+    return 403;
+  }
+
+  location / {
+    proxy_pass http://static.flibusta.is:443;
+    proxy_set_header Referer "";
+  }
+}
