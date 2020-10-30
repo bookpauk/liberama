@@ -499,12 +499,12 @@ class ExternalLibs extends Vue {
 
             //недостатки сторонних ui
             const input = this.$refs.input.$refs.input;
-            if (document.activeElement === input && event.type == 'keydown' && event.code == 'Enter') {
+            if (document.activeElement === input && event.type == 'keydown' && event.key == 'Enter') {
                 this.submitUrl();
                 return true;
             }
 
-            if (event.type == 'keydown' && (event.code == 'Escape')) {
+            if (event.type == 'keydown' && event.key == 'Escape') {
                 this.close();
             }
             return true;

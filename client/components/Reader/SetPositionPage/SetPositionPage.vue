@@ -60,7 +60,7 @@ class SetPositionPage extends Vue {
     keyHook(event) {
         if (event.type == 'keydown') {
             const action = this.$root.readerActionByKeyEvent(event);
-            if (event.code == 'Escape' || action == 'setPosition') {
+            if (event.key == 'Escape' || action == 'setPosition') {
                 this.close();
             }
         }

@@ -341,7 +341,7 @@ class RecentBooksPage extends Vue {
     }
 
     keyHook(event) {
-        if (!this.$root.stdDialog.active && event.type == 'keydown' && event.code == 'Escape') {
+        if (!this.$root.stdDialog.active && event.type == 'keydown' && event.key == 'Escape') {
             this.close();
         }
         return true;

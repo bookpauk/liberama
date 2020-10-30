@@ -95,7 +95,7 @@ class CopyTextPage extends Vue {
     }
 
     keyHook(event) {
-        if (event.type == 'keydown' && (event.code == 'Escape')) {
+        if (event.type == 'keydown' && event.key == 'Escape') {
             this.close();
         }
         return true;
