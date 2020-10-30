@@ -64,7 +64,7 @@ sudo -u www-data cp -r docs/omnireader.ru/old/* /home/oldreader
 
 ## Запуск по крону
 ```
-* * * * * /root/liberama/docs/omnireader/cron_server.sh
+* * * * * /root/liberama/docs/omnireader.ru/cron_server.sh
 ```
 
 ## Деплой и запуск
