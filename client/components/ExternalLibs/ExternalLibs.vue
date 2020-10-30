@@ -150,47 +150,55 @@ class ExternalLibs extends Vue {
     }
 
     mounted() {
-        if (this.mode != 'liberama.top') {
-            this.$router.replace('/404');
-            return;
-        }
-
-        this.$refs.window.init();
-
-        this.opener = null;
-        const host = window.location.host;
-        const openerHost = (host.indexOf('b.') == 0 ? host.substring(2) : host);
-        const openerOrigin1 = `http://${openerHost}`;
-        const openerOrigin2 = `https://${openerHost}`;
-
-        window.addEventListener('message', (event) => {
-            if (event.origin !== openerOrigin1 && event.origin !== openerOrigin2)
-                return;
-            if (!_.isObject(event.data) || event.data.from != 'LibsPage')
-                return;
-            if (event.origin == openerOrigin1)
-                this.opener = window.opener;
-            else
-                this.opener = event.source;
-            this.openerOrigin = event.origin;
-
-            //console.log(event);
-
-            this.recvMessage(event.data);
-        });
-
-        //Проверка закрытия родительского окна
         (async() => {
+            //подождем this.mode
             let i = 0;
-            while(!this.opener && i < 10) {
-                await utils.sleep(1000);
+            while(!this.mode && i < 100) {
+                await utils.sleep(100);
                 i++;
             }
-            if (i >= 10) {
-                await this.$root.stdDialog.alert('Нет связи с читалкой. Окно будет закрыто', 'Ошибка');
-                window.close();
+
+            if (this.mode != 'liberama.top') {
+                this.$router.replace('/404');
+                return;
             }
 
+            this.$refs.window.init();
+
+            this.opener = null;
+            const host = window.location.host;
+            const openerHost = (host.indexOf('b.') == 0 ? host.substring(2) : host);
+            const openerOrigin1 = `http://${openerHost}`;
+            const openerOrigin2 = `https://${openerHost}`;
+
+            window.addEventListener('message', (event) => {
+                if (event.origin !== openerOrigin1 && event.origin !== openerOrigin2)
+                    return;
+                if (!_.isObject(event.data) || event.data.from != 'LibsPage')
+                    return;
+                if (event.origin == openerOrigin1)
+                    this.opener = window.opener;
+                else
+                    this.opener = event.source;
+                this.openerOrigin = event.origin;
+
+                //console.log(event);
+
+                this.recvMessage(event.data);
+            });
+
+            //Ожидаем родителя
+            i = 0;
+            while(!this.opener) {
+                await utils.sleep(1000);
+                i++;
+                if (i >= 5) {
+                    await this.$root.stdDialog.alert('Нет связи с читалкой. Окно будет закрыто', 'Ошибка');
+                    window.close();
+                }
+            }
+
+            //Проверка закрытия родительского окна
             while(this.opener) {
                 await this.checkOpener();
                 await utils.sleep(1000);
