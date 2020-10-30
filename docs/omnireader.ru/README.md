@@ -62,11 +62,17 @@ sudo chown www-data.www-data /home/oldreader
 sudo -u www-data cp -r docs/omnireader.ru/old/* /home/oldreader
 ```
 
+## Запуск по крону
+```
+* * * * * /root/liberama/docs/omnireader/cron_server.sh
+```
+
 ## Деплой и запуск
 ```
 cd docs/omnireader.ru
+./stop_server.sh
 ./deploy.sh
-./run_server.sh
+./start_server.sh
 ```
 
 После первого запуска будет создан конфигурационный файл `/home/liberama/data/config.json`.
@@ -81,4 +87,4 @@ cd docs/omnireader.ru
         }
     ]
 ```
-и перезапустить `run_server.sh`
+и перезапустить сервер
