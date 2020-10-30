@@ -92,10 +92,13 @@ class App extends Vue {
 
         document.addEventListener('keyup', (event) => {
             this.keyHook(event);
-        });        
+        });
+        document.addEventListener('keypress', (event) => {
+            this.keyHook(event);
+        });
         document.addEventListener('keydown', (event) => {
             this.keyHook(event);
-        });        
+        });
         window.addEventListener('resize', () => {
             this.$root.$emit('resize');
         });
