@@ -76,7 +76,6 @@ class WebSocketConnection {
 
                 url = url || `${protocol}//${window.location.host}/ws`;
                 
-console.log('new connection');
                 this.ws = new WebSocket(url);
 
                 if (this.timer) {
@@ -85,7 +84,6 @@ console.log('new connection');
                 this.timer = setTimeout(() => { this.periodicClean(); }, cleanPeriod);
 
                 this.ws.onopen = (e) => {
-console.log(this.ws.readyState);
                     this.connecting = false;
                     resolve(e);
                 };
