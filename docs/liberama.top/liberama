@@ -38,7 +38,7 @@ server {
   }
 
   location / {
-    root /home/beta.liberama/public;
+    root /home/liberama/public;
 
     location /tmp {
       types { } default_type "application/xml; charset=utf-8";
@@ -82,7 +82,7 @@ server {
   }
 
   location / {
-    root /home/beta.liberama/public;
+    root /home/liberama/public;
 
     location /tmp {
       types { } default_type "application/xml; charset=utf-8";
@@ -99,7 +99,7 @@ server {
   listen 23480;
   server_name flibusta_proxy;
 
-  valid_referers omnireader.ru beta.omnireader.ru liberama.top b.liberama.top;
+  valid_referers liberama.top b.liberama.top;
 
   if ($invalid_referer) {
     return 403;
@@ -115,7 +115,7 @@ server {
   listen 23481;
   server_name flibusta_proxy_static;
 
-  valid_referers omnireader.ru beta.omnireader.ru liberama.top b.liberama.top;
+  valid_referers liberama.top b.liberama.top;
 
   if ($invalid_referer) {
     return 403;
