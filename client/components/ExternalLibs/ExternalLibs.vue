@@ -393,7 +393,8 @@ class ExternalLibs extends Vue {
     }
 
     onInputFocus(event) {
-        event.target.select();
+        if (event.target.select)
+            event.target.select();
     }
 
     submitUrl() {
