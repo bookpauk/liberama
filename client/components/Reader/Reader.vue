@@ -1203,29 +1203,28 @@ class Reader extends Vue {
             if (this.$root.stdDialog.active || this.$refs.dialog1.active || this.$refs.dialog2.active)
                 return result;
 
-            let handled = false;
-            if (!handled && this.helpActive)
-                handled = this.$refs.helpPage.keyHook(event);
+            if (!result && this.helpActive)
+                result = this.$refs.helpPage.keyHook(event);
 
-            if (!handled && this.settingsActive)
-                handled = this.$refs.settingsPage.keyHook(event);
+            if (!result && this.settingsActive)
+                result = this.$refs.settingsPage.keyHook(event);
 
-            if (!handled && this.recentBooksActive)
-                handled = this.$refs.recentBooksPage.keyHook(event);
+            if (!result && this.recentBooksActive)
+                result = this.$refs.recentBooksPage.keyHook(event);
 
-            if (!handled && this.setPositionActive)
-                handled = this.$refs.setPositionPage.keyHook(event);
+            if (!result && this.setPositionActive)
+                result = this.$refs.setPositionPage.keyHook(event);
 
-            if (!handled && this.searchActive)
-                handled = this.$refs.searchPage.keyHook(event);
+            if (!result && this.searchActive)
+                result = this.$refs.searchPage.keyHook(event);
 
-            if (!handled && this.copyTextActive)
-                handled = this.$refs.copyTextPage.keyHook(event);
+            if (!result && this.copyTextActive)
+                result = this.$refs.copyTextPage.keyHook(event);
 
-            if (!handled && this.$refs.page && this.$refs.page.keyHook)
-                handled = this.$refs.page.keyHook(event);
+            if (!result && this.$refs.page && this.$refs.page.keyHook)
+                result = this.$refs.page.keyHook(event);
 
-            if (!handled && event.type == 'keydown') {
+            if (!result && event.type == 'keydown') {
                 const action = this.$root.readerActionByKeyEvent(event);
 
                 if (action == 'loader') {
