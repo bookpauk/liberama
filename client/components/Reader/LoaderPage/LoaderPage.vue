@@ -1,6 +1,6 @@
 <template>
     <div ref="main" class="column no-wrap" style="min-height: 500px">
-        <div class="relative-position">
+        <div v-if="mode != 'liberama.top'" class="relative-position">
             <GithubCorner url="https://github.com/bookpauk/liberama" cornerColor="#1B695F" gitColor="#EBE2C9"></GithubCorner>
         </div>
         <div class="col column justify-center items-center no-wrap overflow-hidden" style="min-height: 230px">
