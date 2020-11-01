@@ -145,6 +145,10 @@ class ExternalLibs extends Vue {
     created() {
         this.$root.addKeyHook(this.keyHook);
 
+        document.addEventListener('fullscreenchange', () => {
+            this.fullScreenActive = (document.fullscreenElement !== null);
+        });
+
         //this.commit = this.$store.commit;
         //this.commit('reader/setLibs', rstore.libsDefaults);
     }
