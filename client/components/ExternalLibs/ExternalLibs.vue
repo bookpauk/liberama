@@ -14,6 +14,7 @@
         <div v-show="ready" class="col column" style="min-width: 600px">
             <div class="row items-center q-px-sm" style="height: 50px">
                 <q-select class="q-mr-sm" ref="rootLink" v-model="rootLink" :options="rootLinkOptions" @input="rootLinkInput"
+                    @popup-show="onSelectPopupShow" @popup-hide="onSelectPopupHide"
                     style="width: 230px"
                     dropdown-icon="la la-angle-down la-sm"
                     rounded outlined dense emit-value map-options display-value-sanitize options-sanitize
@@ -32,6 +33,7 @@
                 </q-select>
 
                 <q-select class="q-mr-sm" ref="selectedLink" v-model="selectedLink" :options="selectedLinkOptions" @input="selectedLinkInput" style="width: 50px"
+                    @popup-show="onSelectPopupShow" @popup-hide="onSelectPopupHide"
                     dropdown-icon="la la-angle-down la-sm"
                     rounded outlined dense emit-value map-options hide-selected display-value-sanitize options-sanitize
                 >
@@ -55,7 +57,10 @@
             </div>
             <div class="separator"></div>
 
-            <iframe v-if="frameVisible" class="col fit" ref="frame" :src="frameSrc" frameborder="0"></iframe>
+            <div class="col fit" style="position: relative;">
+                <iframe v-if="frameVisible" class="fit" ref="frame" :src="frameSrc" frameborder="0"></iframe>
+                <div v-show="transparentLayoutVisible" ref="transparentLayout" class="fit transparent-layout" @click="transparentLayoutClick"></div>
+            </div>
 
             <Dialog ref="dialogAddBookmark" v-model="addBookmarkVisible">
                 <template slot="header">
@@ -140,6 +145,7 @@ class ExternalLibs extends Vue {
     libs = {};
     fullScreenActive = false;
     addBookmarkVisible = false;
+    transparentLayoutVisible = false;
 
     bookmarkLink = '';
     bookmarkDesc = '';
@@ -536,6 +542,18 @@ class ExternalLibs extends Vue {
         }
     }
 
+    transparentLayoutClick() {
+        this.transparentLayoutVisible = false;
+    }
+
+    onSelectPopupShow() {
+        this.transparentLayoutVisible = true;
+    }
+
+    onSelectPopupHide() {
+        this.transparentLayoutVisible = false;
+    }
+
     close() {
         this.sendMessage({type: 'close'});
     }
@@ -552,7 +570,10 @@ class ExternalLibs extends Vue {
                 return true;
             }
 
-            if (event.type == 'keydown' && event.key == 'Escape') {
+            if (event.type == 'keydown' && event.key == 'Escape' &&
+                (document.activeElement != this.$refs.rootLink.$refs.target || !this.$refs.rootLink.menu) &&
+                (document.activeElement != this.$refs.selectedLink.$refs.target || !this.$refs.selectedLink.menu)
+               ) {
                 this.close();
             }
             return true;
@@ -580,4 +601,9 @@ class ExternalLibs extends Vue {
     background-color: #69C05F;
 }
 
+.transparent-layout {
+    top: 0;
+    left: 0;
+    position: absolute;
+}
 </style>
