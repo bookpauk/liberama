@@ -1,5 +1,5 @@
 <template>
-    <Window ref="window" @close="close">
+    <Window ref="window" @close="close" margin="2px">
         <template slot="header">
             {{ header }}
         </template>
