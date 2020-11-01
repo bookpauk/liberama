@@ -40,7 +40,9 @@
                     <q-tooltip :delay="1500" anchor="bottom middle" content-style="font-size: 80%">Закладки</q-tooltip>
                 </q-select>
 
-                <q-input class="col q-mr-sm" ref="input" rounded outlined dense bg-color="white" v-model="bookUrl" placeholder="Скопируйте сюда URL книги" @focus="onInputFocus">
+                <q-input class="col q-mr-sm" ref="input" rounded outlined dense bg-color="white" v-model="bookUrl" placeholder="Скопируйте сюда URL книги"
+                    @focus="selectAllOnFocus" @keydown="bookUrlKeyDown"
+                >
                     <template v-slot:prepend>
                         <q-btn class="q-mr-xs" round dense color="blue" icon="la la-home" @click="goToLink(libs.startLink)" size="12px">
                             <q-tooltip :delay="1500" anchor="bottom middle" content-style="font-size: 80%">Вернуться на стартовую страницу</q-tooltip>
@@ -71,8 +73,8 @@
                 </template>
 
                 <div class="q-mx-md row">
-                    <q-input ref="bookmarkLink" class="col q-mr-sm" outlined dense bg-color="white" v-model="bookmarkLink" 
-                        placeholder="Ссылка для закладки" maxlength="2000" @focus="onInputFocus">
+                    <q-input ref="bookmarkLink" class="col q-mr-sm" outlined dense bg-color="white" v-model="bookmarkLink" @keydown="bookmarkLinkKeyDown"
+                        placeholder="Ссылка для закладки" maxlength="2000" @focus="selectAllOnFocus">
                     </q-input>
 
                     <q-select class="q-mr-sm" ref="defaultRootLink" v-model="defaultRootLink" :options="defaultRootLinkOptions" @input="defaultRootLinkInput" style="width: 50px"
@@ -84,8 +86,8 @@
                 </div>
 
                 <div class="q-mx-md q-mt-md">
-                    <q-input class="col q-mr-sm" outlined dense bg-color="white" v-model="bookmarkDesc" 
-                        placeholder="Описание" style="width: 400px" maxlength="100" @focus="onInputFocus">
+                    <q-input class="col q-mr-sm" ref="bookmarkDesc" outlined dense bg-color="white" v-model="bookmarkDesc" @keydown="bookmarkDescKeyDown"
+                        placeholder="Описание" style="width: 400px" maxlength="100" @focus="selectAllOnFocus">
                     </q-input>
                 </div>
 
@@ -432,7 +434,7 @@ class ExternalLibs extends Vue {
         return url;
     }
 
-    onInputFocus(event) {
+    selectAllOnFocus(event) {
         if (event.target.select)
             event.target.select();
     }
@@ -483,7 +485,24 @@ class ExternalLibs extends Vue {
         this.updateBookmarkLink();
     }
 
+    bookmarkLinkKeyDown(event) {
+        if (event.key == 'Enter') {
+            this.$refs.bookmarkDesc.focus();
+            event.preventDefault();
+        }
+    }
+
+    bookmarkDescKeyDown(event) {
+        if (event.key == 'Enter') {
+            this.okAddBookmark();
+            event.preventDefault();
+        }
+    }
+
     async okAddBookmark() {
+        if (!this.bookmarkLink)
+            return;
+
         const link = this.addProtocol(this.bookmarkLink);
         let index = -1;
         try {
@@ -558,16 +577,21 @@ class ExternalLibs extends Vue {
         this.sendMessage({type: 'close'});
     }
 
+    bookUrlKeyDown(event) {
+        if (event.key == 'Enter') {
+            this.submitUrl();
+            event.preventDefault();
+        }
+    }
+
     keyHook() {
         if (this.$root.rootRoute() == '/external-libs') {
             if (this.$refs.dialogAddBookmark.active)
                 return false;
 
-            //недостатки сторонних ui
-            const input = this.$refs.input.$refs.input;
-            if (document.activeElement === input && event.type == 'keydown' && event.key == 'Enter') {
-                this.submitUrl();
-                return true;
+            if (event.type == 'keydown' && event.key == 'F4') {
+                this.addBookmark()
+                return;
             }
 
             if (event.type == 'keydown' && event.key == 'Escape' &&
