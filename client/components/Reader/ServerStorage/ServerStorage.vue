@@ -69,15 +69,15 @@ class ServerStorage extends Vue {
         try {
             this.cachedRecent = await ssCacheStore.getItem('recent');
             if (!this.cachedRecent)
-                await this.setCachedRecent({rev: 0, data: {}});
+                await this.cleanCachedRecent('cachedRecent');
 
             this.cachedRecentPatch = await ssCacheStore.getItem('recent-patch');
             if (!this.cachedRecentPatch)
-                await this.setCachedRecentPatch({rev: 0, data: {}});
+                await this.cleanCachedRecent('cachedRecentPatch');
 
             this.cachedRecentMod = await ssCacheStore.getItem('recent-mod');
             if (!this.cachedRecentMod)
-                await this.setCachedRecentMod({rev: 0, data: {}});
+                await this.cleanCachedRecent('cachedRecentMod');
 
             if (!this.serverStorageKey) {
                 //генерируем новый ключ
@@ -103,6 +103,15 @@ class ServerStorage extends Vue {
     async setCachedRecentMod(value) {
         await ssCacheStore.setItem('recent-mod', value);
         this.cachedRecentMod = value;
+    }
+
+    async cleanCachedRecent(whatToClean) {
+        if (whatToClean == 'cachedRecent' || whatToClean == 'all')
+            await this.setCachedRecent({rev: 0, data: {}});
+        if (whatToClean == 'cachedRecentPatch' || whatToClean == 'all')
+            await this.setCachedRecentPatch({rev: 0, data: {}});
+        if (whatToClean == 'cachedRecentMod' || whatToClean == 'all')
+            await this.setCachedRecentMod({rev: 0, data: {}});
     }
 
     async generateNewServerStorageKey() {
@@ -134,9 +143,12 @@ class ServerStorage extends Vue {
             await this.currentProfileChanged(force);
             await this.loadLibs(force);
 
+            if (force)
+                await this.cleanCachedRecent('all');
             const loadSuccess = await this.loadRecent();
-            if (loadSuccess && force)
+            if (loadSuccess && force) {
                 await this.saveRecent();
+            }
         }
     }
 
