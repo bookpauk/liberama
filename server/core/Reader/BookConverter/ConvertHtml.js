@@ -200,7 +200,7 @@ class ConvertHtml extends ConvertBase {
 
         titleInfo['book-title'] = title;
         //подозрение на чистый текст, надо разбить на параграфы
-        if (isText || pars.length < buf.length/2000) {
+        if (isText || (buf.length > 30*1024 && pars.length < buf.length/2000)) {
             let total = 0;
             let count = 1;
             for (let i = 0; i < spaceCounter.length; i++) {

@@ -19,7 +19,9 @@ class ReaderController extends BaseController {
                 throw new Error(`key 'url' is empty`);
             const workerId = this.readerWorker.loadBookUrl({
                 url: request.url, 
-                enableSitesFilter: (request.hasOwnProperty('enableSitesFilter') ? request.enableSitesFilter : true)
+                enableSitesFilter: (request.hasOwnProperty('enableSitesFilter') ? request.enableSitesFilter : true),
+                skipCheck: (request.hasOwnProperty('skipCheck') ? request.skipCheck : false),
+                isText: (request.hasOwnProperty('isText') ? request.isText : false),
             });
             const state = this.workerState.getState(workerId);
             return (state ? state : {});

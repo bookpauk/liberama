@@ -39,6 +39,10 @@
                         <q-icon name="la la-copy" size="32px"/>
                         <q-tooltip :delay="1500" anchor="bottom middle" content-style="font-size: 80%">{{ rstore.readerActions['copyText'] }}</q-tooltip>
                     </button>
+                    <button ref="splitToPara" v-show="showToolButton['splitToPara']" class="tool-button" :class="buttonActiveClass('splitToPara')" @click="buttonClick('splitToPara')" v-ripple>
+                        <q-icon name="la la-indent" style="transform: rotate(0.5turn); top: 1px" size="32px"/>
+                        <q-tooltip :delay="1500" anchor="bottom middle" content-style="font-size: 80%">{{ rstore.readerActions['splitToPara'] }}</q-tooltip>
+                    </button>
                     <button ref="refresh" v-show="showToolButton['refresh']" class="tool-button" :class="buttonActiveClass('refresh')" @click="buttonClick('refresh')" v-ripple>
                         <q-icon name="la la-sync" size="32px" :class="{clear: !showRefreshIcon}"/>
                         <q-tooltip :delay="1500" anchor="bottom middle" content-style="font-size: 80%">{{ rstore.readerActions['refresh'] }}</q-tooltip>
@@ -699,6 +703,12 @@ class Reader extends Vue {
         }
     }
 
+    refreshBookSplitToPara() {
+        if (this.mostRecentBook()) {
+            this.loadBook({url: this.mostRecentBook().url, skipCheck: true, isText: true, force: true});
+        }
+    }
+
     recentBooksClose() {
         this.recentBooksActive = false;
     }
@@ -816,6 +826,7 @@ class Reader extends Vue {
             case 'scrolling':
             case 'search':
             case 'copyText':
+            case 'splitToPara':
             case 'refresh':
             case 'libs':
             case 'recentBooks':
@@ -847,8 +858,9 @@ class Reader extends Vue {
                 case 'copyText':
                     classResult = classDisabled;
                     break;
-                case 'recentBooks':
+                case 'splitToPara':
                 case 'refresh':
+                case 'recentBooks':
                     if (!this.mostRecentBookReactive)
                         classResult = classDisabled;
                     break;
@@ -1001,9 +1013,16 @@ class Reader extends Vue {
             // не удалось, скачиваем книгу полностью с конвертацией
             let loadCached = true;
             if (!book) {
-                book = await readerApi.loadBook({url, enableSitesFilter: this.enableSitesFilter}, (state) => {
-                    progress.setState(state);
-                });
+                book = await readerApi.loadBook({
+                        url,
+                        skipCheck: (opts.skipCheck ? true : false),
+                        isText: (opts.isText ? true : false),
+                        enableSitesFilter: this.enableSitesFilter
+                    },
+                    (state) => {
+                        progress.setState(state);
+                    }
+                );
                 loadCached = false;
             }
 
@@ -1121,6 +1140,9 @@ class Reader extends Vue {
                 break;
             case 'copyText':
                 this.copyTextToggle();
+                break;
+            case 'splitToPara':
+                this.refreshBookSplitToPara();
                 break;
             case 'refresh':
                 this.refreshBook();
