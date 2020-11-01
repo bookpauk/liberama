@@ -13,7 +13,7 @@
 
         <div v-show="ready" class="col column" style="min-width: 600px">
             <div class="row items-center q-px-sm" style="height: 50px">
-                <q-select class="q-mr-sm" v-model="rootLink" :options="rootLinkOptions"
+                <q-select class="q-mr-sm" ref="rootLink" v-model="rootLink" :options="rootLinkOptions" @input="rootLinkInput"
                     style="width: 230px"
                     dropdown-icon="la la-angle-down la-sm"
                     rounded outlined dense emit-value map-options display-value-sanitize options-sanitize
@@ -30,12 +30,14 @@
                         <div style="overflow: hidden; white-space: nowrap;">{{ removeProtocol(rootLink) }}</div>
                     </template>
                 </q-select>
-                <q-select class="q-mr-sm" v-model="selectedLink" :options="selectedLinkOptions" style="width: 50px"
+
+                <q-select class="q-mr-sm" ref="selectedLink" v-model="selectedLink" :options="selectedLinkOptions" @input="selectedLinkInput" style="width: 50px"
                     dropdown-icon="la la-angle-down la-sm"
                     rounded outlined dense emit-value map-options hide-selected display-value-sanitize options-sanitize
                 >
                     <q-tooltip :delay="1500" anchor="bottom middle" content-style="font-size: 80%">Закладки</q-tooltip>
                 </q-select>
+
                 <q-input class="col q-mr-sm" ref="input" rounded outlined dense bg-color="white" v-model="bookUrl" placeholder="Скопируйте сюда URL книги" @focus="onInputFocus">
                     <template v-slot:prepend>
                         <q-btn class="q-mr-xs" round dense color="blue" icon="la la-home" @click="goToLink(libs.startLink)" size="12px">
@@ -46,6 +48,7 @@
                         </q-btn>
                     </template>
                 </q-input>
+
                 <q-btn rounded color="green-7" no-caps size="14px" @click="submitUrl">Открыть
                     <q-tooltip :delay="1500" anchor="bottom middle" content-style="font-size: 80%">Открыть в читалке</q-tooltip>
                 </q-btn>
@@ -67,7 +70,7 @@
                         placeholder="Ссылка для закладки" maxlength="2000" @focus="onInputFocus">
                     </q-input>
 
-                    <q-select class="q-mr-sm" v-model="defaultRootLink" :options="defaultRootLinkOptions" style="width: 50px"
+                    <q-select class="q-mr-sm" ref="defaultRootLink" v-model="defaultRootLink" :options="defaultRootLinkOptions" @input="defaultRootLinkInput" style="width: 50px"
                         dropdown-icon="la la-angle-down la-sm"
                         outlined dense emit-value map-options hide-selected display-value-sanitize options-sanitize
                     >
@@ -154,6 +157,29 @@ class ExternalLibs extends Vue {
     }
 
     mounted() {
+        //Поправка метода toggleOption компонента select фреймворка quasar, необходимо другое поведение
+        //$emit('input'.. вызывается всегда
+        this.toggleOption = function(opt, keepOpen) {
+            if (this.editable !== true || opt === void 0 || this.isOptionDisabled(opt) === true) {
+                return;
+            }
+
+            const optValue = this.getOptionValue(opt);
+
+            if (this.multiple !== true) {
+                if (keepOpen !== true) {
+                    this.updateInputValue(this.fillInput === true ? this.getOptionLabel(opt) : '', true, true);
+                    this.hidePopup();
+                }
+
+                this.$refs.target !== void 0 && this.$refs.target.focus();
+                this.$emit('input', this.emitValue === true ? optValue : opt);
+            }
+        };
+
+        this.$refs.rootLink.toggleOption = this.toggleOption;
+        this.$refs.selectedLink.toggleOption = this.toggleOption;
+
         (async() => {
             //подождем this.mode
             let i = 0;
@@ -405,6 +431,15 @@ class ExternalLibs extends Vue {
             event.target.select();
     }
 
+    rootLinkInput() {
+        this.updateSelectedLink();
+        this.updateStartLink();
+    }
+
+    selectedLinkInput() {
+        this.updateStartLink();
+    }
+
     submitUrl() {
         if (this.bookUrl) {
             this.sendMessage({type: 'submitUrl', data: {
@@ -423,6 +458,7 @@ class ExternalLibs extends Vue {
         this.addBookmarkVisible = true;
         this.$nextTick(() => {
             this.$refs.bookmarkLink.focus();
+            this.$refs.defaultRootLink.toggleOption = this.toggleOption;
         });
     }
 
@@ -435,6 +471,10 @@ class ExternalLibs extends Vue {
             this.bookmarkLink = '';
             this.bookmarkDesc = '';
         }
+    }
+
+    defaultRootLinkInput() {
+        this.updateBookmarkLink();
     }
 
     async okAddBookmark() {
