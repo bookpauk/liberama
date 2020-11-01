@@ -324,8 +324,9 @@ class ExternalLibs extends Vue {
     }
 
     openBookUrlInFrame() {
-        if (this.bookUrl)
+        if (this.bookUrl) {
             this.goToLink(this.addProtocol(this.bookUrl));
+        }
     }
 
     goToLink(link) {
@@ -336,6 +337,9 @@ class ExternalLibs extends Vue {
         this.frameVisible = false;
         this.$nextTick(() => {
             this.frameVisible = true;
+            this.$nextTick(() => {
+                this.$refs.frame.contentWindow.focus();
+            });
         });
     }
 
