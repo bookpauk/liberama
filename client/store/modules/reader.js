@@ -38,7 +38,7 @@ const toolButtons = [
     {name: 'setPosition', show: true},
     {name: 'search',      show: true},
     {name: 'copyText',    show: false},
-    {name: 'splitToPara', show: true},
+    {name: 'splitToPara', show: false},
     {name: 'refresh',     show: true},
     {name: 'libs',        show: true},
     {name: 'recentBooks', show: true},

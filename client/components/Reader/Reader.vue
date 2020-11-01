@@ -40,7 +40,7 @@
                         <q-tooltip :delay="1500" anchor="bottom middle" content-style="font-size: 80%">{{ rstore.readerActions['copyText'] }}</q-tooltip>
                     </button>
                     <button ref="splitToPara" v-show="showToolButton['splitToPara']" class="tool-button" :class="buttonActiveClass('splitToPara')" @click="buttonClick('splitToPara')" v-ripple>
-                        <q-icon name="la la-indent" style="transform: rotate(0.5turn); top: 1px" size="32px"/>
+                        <q-icon name="la la-retweet" size="32px"/>
                         <q-tooltip :delay="1500" anchor="bottom middle" content-style="font-size: 80%">{{ rstore.readerActions['splitToPara'] }}</q-tooltip>
                     </button>
                     <button ref="refresh" v-show="showToolButton['refresh']" class="tool-button" :class="buttonActiveClass('refresh')" @click="buttonClick('refresh')" v-ripple>
