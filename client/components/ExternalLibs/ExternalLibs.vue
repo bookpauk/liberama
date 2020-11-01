@@ -1,5 +1,5 @@
 <template>
-    <Window ref="window" @close="close">
+    <Window ref="window" @close="close" margin="2px">
         <template slot="header">
             {{ header }}
         </template>
@@ -13,7 +13,8 @@
 
         <div v-show="ready" class="col column" style="min-width: 600px">
             <div class="row items-center q-px-sm" style="height: 50px">
-                <q-select class="q-mr-sm" v-model="rootLink" :options="rootLinkOptions"
+                <q-select class="q-mr-sm" ref="rootLink" v-model="rootLink" :options="rootLinkOptions" @input="rootLinkInput"
+                    @popup-show="onSelectPopupShow" @popup-hide="onSelectPopupHide"
                     style="width: 230px"
                     dropdown-icon="la la-angle-down la-sm"
                     rounded outlined dense emit-value map-options display-value-sanitize options-sanitize
@@ -30,13 +31,18 @@
                         <div style="overflow: hidden; white-space: nowrap;">{{ removeProtocol(rootLink) }}</div>
                     </template>
                 </q-select>
-                <q-select class="q-mr-sm" v-model="selectedLink" :options="selectedLinkOptions" style="width: 50px"
+
+                <q-select class="q-mr-sm" ref="selectedLink" v-model="selectedLink" :options="selectedLinkOptions" @input="selectedLinkInput" style="width: 50px"
+                    @popup-show="onSelectPopupShow" @popup-hide="onSelectPopupHide"
                     dropdown-icon="la la-angle-down la-sm"
                     rounded outlined dense emit-value map-options hide-selected display-value-sanitize options-sanitize
                 >
                     <q-tooltip :delay="1500" anchor="bottom middle" content-style="font-size: 80%">Закладки</q-tooltip>
                 </q-select>
-                <q-input class="col q-mr-sm" ref="input" rounded outlined dense bg-color="white" v-model="bookUrl" placeholder="Скопируйте сюда URL книги" @focus="onInputFocus">
+
+                <q-input class="col q-mr-sm" ref="input" rounded outlined dense bg-color="white" v-model="bookUrl" placeholder="Скопируйте сюда URL книги"
+                    @focus="selectAllOnFocus" @keydown="bookUrlKeyDown"
+                >
                     <template v-slot:prepend>
                         <q-btn class="q-mr-xs" round dense color="blue" icon="la la-home" @click="goToLink(libs.startLink)" size="12px">
                             <q-tooltip :delay="1500" anchor="bottom middle" content-style="font-size: 80%">Вернуться на стартовую страницу</q-tooltip>
@@ -46,13 +52,17 @@
                         </q-btn>
                     </template>
                 </q-input>
+
                 <q-btn rounded color="green-7" no-caps size="14px" @click="submitUrl">Открыть
                     <q-tooltip :delay="1500" anchor="bottom middle" content-style="font-size: 80%">Открыть в читалке</q-tooltip>
                 </q-btn>
             </div>
             <div class="separator"></div>
 
-            <iframe v-if="frameVisible" class="col fit" ref="frame" :src="frameSrc" frameborder="0"></iframe>
+            <div class="col fit" style="position: relative;">
+                <iframe v-if="frameVisible" class="fit" ref="frame" :src="frameSrc" frameborder="0"></iframe>
+                <div v-show="transparentLayoutVisible" ref="transparentLayout" class="fit transparent-layout" @click="transparentLayoutClick"></div>
+            </div>
 
             <Dialog ref="dialogAddBookmark" v-model="addBookmarkVisible">
                 <template slot="header">
@@ -63,11 +73,11 @@
                 </template>
 
                 <div class="q-mx-md row">
-                    <q-input ref="bookmarkLink" class="col q-mr-sm" outlined dense bg-color="white" v-model="bookmarkLink" 
-                        placeholder="Ссылка для закладки" maxlength="2000" @focus="onInputFocus">
+                    <q-input ref="bookmarkLink" class="col q-mr-sm" outlined dense bg-color="white" v-model="bookmarkLink" @keydown="bookmarkLinkKeyDown"
+                        placeholder="Ссылка для закладки" maxlength="2000" @focus="selectAllOnFocus">
                     </q-input>
 
-                    <q-select class="q-mr-sm" v-model="defaultRootLink" :options="defaultRootLinkOptions" style="width: 50px"
+                    <q-select class="q-mr-sm" ref="defaultRootLink" v-model="defaultRootLink" :options="defaultRootLinkOptions" @input="defaultRootLinkInput" style="width: 50px"
                         dropdown-icon="la la-angle-down la-sm"
                         outlined dense emit-value map-options hide-selected display-value-sanitize options-sanitize
                     >
@@ -76,8 +86,8 @@
                 </div>
 
                 <div class="q-mx-md q-mt-md">
-                    <q-input class="col q-mr-sm" outlined dense bg-color="white" v-model="bookmarkDesc" 
-                        placeholder="Описание" style="width: 400px" maxlength="100" @focus="onInputFocus">
+                    <q-input class="col q-mr-sm" ref="bookmarkDesc" outlined dense bg-color="white" v-model="bookmarkDesc" @keydown="bookmarkDescKeyDown"
+                        placeholder="Описание" style="width: 400px" maxlength="100" @focus="selectAllOnFocus">
                     </q-input>
                 </div>
 
@@ -137,6 +147,7 @@ class ExternalLibs extends Vue {
     libs = {};
     fullScreenActive = false;
     addBookmarkVisible = false;
+    transparentLayoutVisible = false;
 
     bookmarkLink = '';
     bookmarkDesc = '';
@@ -145,11 +156,38 @@ class ExternalLibs extends Vue {
     created() {
         this.$root.addKeyHook(this.keyHook);
 
+        document.addEventListener('fullscreenchange', () => {
+            this.fullScreenActive = (document.fullscreenElement !== null);
+        });
+
         //this.commit = this.$store.commit;
         //this.commit('reader/setLibs', rstore.libsDefaults);
     }
 
     mounted() {
+        //Поправка метода toggleOption компонента select фреймворка quasar, необходимо другое поведение
+        //$emit('input'.. вызывается всегда
+        this.toggleOption = function(opt, keepOpen) {
+            if (this.editable !== true || opt === void 0 || this.isOptionDisabled(opt) === true) {
+                return;
+            }
+
+            const optValue = this.getOptionValue(opt);
+
+            if (this.multiple !== true) {
+                if (keepOpen !== true) {
+                    this.updateInputValue(this.fillInput === true ? this.getOptionLabel(opt) : '', true, true);
+                    this.hidePopup();
+                }
+
+                this.$refs.target !== void 0 && this.$refs.target.focus();
+                this.$emit('input', this.emitValue === true ? optValue : opt);
+            }
+        };
+
+        this.$refs.rootLink.toggleOption = this.toggleOption;
+        this.$refs.selectedLink.toggleOption = this.toggleOption;
+
         (async() => {
             //подождем this.mode
             let i = 0;
@@ -320,8 +358,9 @@ class ExternalLibs extends Vue {
     }
 
     openBookUrlInFrame() {
-        if (this.bookUrl)
+        if (this.bookUrl) {
             this.goToLink(this.addProtocol(this.bookUrl));
+        }
     }
 
     goToLink(link) {
@@ -332,6 +371,9 @@ class ExternalLibs extends Vue {
         this.frameVisible = false;
         this.$nextTick(() => {
             this.frameVisible = true;
+            this.$nextTick(() => {
+                this.$refs.frame.contentWindow.focus();
+            });
         });
     }
 
@@ -392,9 +434,18 @@ class ExternalLibs extends Vue {
         return url;
     }
 
-    onInputFocus(event) {
+    selectAllOnFocus(event) {
         if (event.target.select)
             event.target.select();
+    }
+
+    rootLinkInput() {
+        this.updateSelectedLink();
+        this.updateStartLink();
+    }
+
+    selectedLinkInput() {
+        this.updateStartLink();
     }
 
     submitUrl() {
@@ -415,6 +466,7 @@ class ExternalLibs extends Vue {
         this.addBookmarkVisible = true;
         this.$nextTick(() => {
             this.$refs.bookmarkLink.focus();
+            this.$refs.defaultRootLink.toggleOption = this.toggleOption;
         });
     }
 
@@ -429,7 +481,28 @@ class ExternalLibs extends Vue {
         }
     }
 
+    defaultRootLinkInput() {
+        this.updateBookmarkLink();
+    }
+
+    bookmarkLinkKeyDown(event) {
+        if (event.key == 'Enter') {
+            this.$refs.bookmarkDesc.focus();
+            event.preventDefault();
+        }
+    }
+
+    bookmarkDescKeyDown(event) {
+        if (event.key == 'Enter') {
+            this.okAddBookmark();
+            event.preventDefault();
+        }
+    }
+
     async okAddBookmark() {
+        if (!this.bookmarkLink)
+            return;
+
         const link = this.addProtocol(this.bookmarkLink);
         let index = -1;
         try {
@@ -488,8 +561,27 @@ class ExternalLibs extends Vue {
         }
     }
 
+    transparentLayoutClick() {
+        this.transparentLayoutVisible = false;
+    }
+
+    onSelectPopupShow() {
+        this.transparentLayoutVisible = true;
+    }
+
+    onSelectPopupHide() {
+        this.transparentLayoutVisible = false;
+    }
+
     close() {
         this.sendMessage({type: 'close'});
+    }
+
+    bookUrlKeyDown(event) {
+        if (event.key == 'Enter') {
+            this.submitUrl();
+            event.preventDefault();
+        }
     }
 
     keyHook() {
@@ -497,14 +589,15 @@ class ExternalLibs extends Vue {
             if (this.$refs.dialogAddBookmark.active)
                 return false;
 
-            //недостатки сторонних ui
-            const input = this.$refs.input.$refs.input;
-            if (document.activeElement === input && event.type == 'keydown' && event.key == 'Enter') {
-                this.submitUrl();
-                return true;
+            if (event.type == 'keydown' && event.key == 'F4') {
+                this.addBookmark()
+                return;
             }
 
-            if (event.type == 'keydown' && event.key == 'Escape') {
+            if (event.type == 'keydown' && event.key == 'Escape' &&
+                (document.activeElement != this.$refs.rootLink.$refs.target || !this.$refs.rootLink.menu) &&
+                (document.activeElement != this.$refs.selectedLink.$refs.target || !this.$refs.selectedLink.menu)
+               ) {
                 this.close();
             }
             return true;
@@ -532,4 +625,9 @@ class ExternalLibs extends Vue {
     background-color: #69C05F;
 }
 
+.transparent-layout {
+    top: 0;
+    left: 0;
+    position: absolute;
+}
 </style>

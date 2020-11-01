@@ -1,7 +1,7 @@
 <template>
     <div ref="main" class="main xyfit absolute" @click="close" @mouseup="onMouseUp" @mousemove="onMouseMove">
         <div ref="windowBox" class="xyfit absolute flex no-wrap" @click.stop>
-            <div class="window flexfit column no-wrap">
+            <div ref="window" class="window flexfit column no-wrap">
                 <div ref="header" class="header row justify-end" @mousedown.prevent.stop="onMouseDown"
                     @touchstart.stop="onTouchStart" @touchend.stop="onTouchEnd" @touchmove.stop="onTouchMove">
                     <span class="header-text col"><slot name="header"></slot></span>
@@ -26,6 +26,7 @@ export default @Component({
         width: { type: String, default: '100%' },
         maxWidth: { type: String, default: '' },
         topShift: { type: Number, default: 0 },
+        margin: '',
     }
 })
 class Window extends Vue {
@@ -40,6 +41,9 @@ class Window extends Vue {
             const top = (this.$refs.main.offsetHeight - this.$refs.windowBox.offsetHeight)/2 + this.topShift;
             this.$refs.windowBox.style.left = (left > 0 ? left : 0) + 'px';
             this.$refs.windowBox.style.top = (top > 0 ? top : 0) + 'px';
+
+            if (this.margin)
+                this.$refs.window.style.margin = this.margin;
         });
     }
 
