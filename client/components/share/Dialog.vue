@@ -32,7 +32,7 @@ const DialogProps = Vue.extend({
     props: {
         value: Boolean,
     }
-})
+});
 
 export default @Component({
 })
