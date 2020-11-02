@@ -108,8 +108,10 @@ export default @Component({
         },
         vertShift: function(newValue) {
             const font = (this.webFontName ? this.webFontName : this.fontName);
-            this.fontShifts = Object.assign({}, this.fontShifts, {[font]: newValue});
-            this.fontVertShift = newValue;
+            if (this.fontShifts[font] != newValue) {
+                this.fontShifts = Object.assign({}, this.fontShifts, {[font]: newValue});
+                this.fontVertShift = newValue;
+            }
         },
         fontName: function(newValue) {
             const font = (this.webFontName ? this.webFontName : newValue);
@@ -185,10 +187,18 @@ class SettingsPage extends Vue {
     settingsChanged() {
         if (_.isEqual(this.form, this.settings))
             return;
+
         this.form = Object.assign({}, this.settings);
+        if (!this.unwatch)
+            this.unwatch = {};
+
         for (let prop in rstore.settingDefaults) {
+            if (this.unwatch && this.unwatch[prop])
+                this.unwatch[prop]();
+
             this[prop] = this.form[prop];
-            this.$watch(prop, (newValue) => {
+
+            this.unwatch[prop] = this.$watch(prop, (newValue) => {
                 this.form = Object.assign({}, this.form, {[prop]: newValue});
             });
         }
