@@ -130,20 +130,53 @@ export function getObjDiff(oldObj, newObj) {
 }
 
 export function isObjDiff(diff) {
-    return (_.isObject(diff) && diff.__isDiff);
+    return (_.isObject(diff) && diff.__isDiff && diff.change && diff.add && diff.del);
 }
 
 export function isEmptyObjDiff(diff) {
-    return (!_.isObject(diff) || !diff.__isDiff ||
-        (!Object.keys(diff.change).length &&
-            !Object.keys(diff.add).length &&
-            !diff.del.length
+    return (!isObjDiff(diff) ||
+        !(Object.keys(diff.change).length ||
+          Object.keys(diff.add).length ||
+          diff.del.length
         )
     );
 }
 
-export function applyObjDiff(obj, diff, isAddChanged) {
-    const result = _.cloneDeep(obj);
+export function isEmptyObjDiffDeep(diff, opts = {}) {
+    if (!isObjDiff(diff))
+        return true;
+
+    const {
+        isApplyChange = true,
+        isApplyAdd = true,
+        isApplyDel = true,
+    } = opts;
+
+    let notEmptyDeep = false;
+    const change = diff.change;
+    for (const key of Object.keys(change)) {
+        if (_.isObject(change[key]))
+            notEmptyDeep |= !isEmptyObjDiffDeep(change[key], opts);
+        else if (isApplyChange)
+            notEmptyDeep = true;
+    }
+
+    return !(
+        notEmptyDeep ||
+        (isApplyAdd && Object.keys(diff.add).length) ||
+        (isApplyDel && diff.del.length)
+    );
+}
+
+export function applyObjDiff(obj, diff, opts = {}) {
+    const {
+        isAddChanged = false,
+        isApplyChange = true,
+        isApplyAdd = true,
+        isApplyDel = true,
+    } = opts;
+
+    let result = _.cloneDeep(obj);
     if (!diff.__isDiff)
         return result;
 
@@ -151,21 +184,28 @@ export function applyObjDiff(obj, diff, isAddChanged) {
     for (const key of Object.keys(change)) {
         if (result.hasOwnProperty(key)) {
             if (_.isObject(change[key])) {
-                result[key] = applyObjDiff(result[key], change[key], isAddChanged);
+                result[key] = applyObjDiff(result[key], change[key], opts);
             } else {
-                result[key] = _.cloneDeep(change[key]);
+                if (isApplyChange)
+                    result[key] = _.cloneDeep(change[key]);
             }
         } else if (isAddChanged) {
             result[key] = _.cloneDeep(change[key]);
         }
     }
 
-    for (const key of Object.keys(diff.add)) {
-        result[key] = _.cloneDeep(diff.add[key]);
+    if (isApplyAdd) {
+        for (const key of Object.keys(diff.add)) {
+            result[key] = _.cloneDeep(diff.add[key]);
+        }
     }
 
-    for (const key of diff.del) {
-        delete result[key];
+    if (isApplyDel && diff.del.length) {
+        for (const key of diff.del) {
+            delete result[key];
+        }
+        if (_.isArray(result))
+            result = result.filter(v => v);
     }
 
     return result;

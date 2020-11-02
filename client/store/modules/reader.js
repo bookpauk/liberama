@@ -1,3 +1,5 @@
+import * as utils from '../../share/utils';
+
 const readerActions = {
     'help': 'Вызвать cправку',
     'loader': 'На страницу загрузки',
@@ -256,6 +258,25 @@ const settingDefaults = {
     userHotKeys: {},
 };
 
+for (const font of fonts)
+    settingDefaults.fontShifts[font.name] = font.fontVertShift;
+for (const font of webFonts)
+    settingDefaults.fontShifts[font.name] = font.fontVertShift;
+for (const button of toolButtons)
+    settingDefaults.showToolButton[button.name] = button.show;
+for (const hotKey of hotKeys)
+    settingDefaults.userHotKeys[hotKey.name] = hotKey.codes;
+
+function addDefaultsToSettings(settings) {
+    const diff = utils.getObjDiff(settings, settingDefaults);
+    
+    if (!utils.isEmptyObjDiffDeep(diff, {isApplyChange: false})) {
+        return utils.applyObjDiff(settings, diff, {isApplyChange: false});
+    }
+
+    return false;
+}
+
 const libsDefaults = {
     startLink: 'http://flibusta.is',
     comment: 'Флибуста | Книжное братство',
@@ -278,15 +299,6 @@ const libsDefaults = {
         ]},
     ]
 };
-
-for (const font of fonts)
-    settingDefaults.fontShifts[font.name] = font.fontVertShift;
-for (const font of webFonts)
-    settingDefaults.fontShifts[font.name] = font.fontVertShift;
-for (const button of toolButtons)
-    settingDefaults.showToolButton[button.name] = button.show;
-for (const hotKey of hotKeys)
-    settingDefaults.userHotKeys[hotKey.name] = hotKey.codes;
 
 // initial state
 const state = {
@@ -341,7 +353,13 @@ const mutations = {
         state.currentProfile = value;
     },
     setSettings(state, value) {
-        state.settings = Object.assign({}, state.settings, value);
+        const newSettings = Object.assign({}, state.settings, value);
+        const added = addDefaultsToSettings(newSettings);
+        if (added) {
+            state.settings = added;
+        } else {
+            state.settings = newSettings;
+        }
     },
     setSettingsRev(state, value) {
         state.settingsRev = Object.assign({}, state.settingsRev, value);
@@ -361,6 +379,7 @@ export default {
     fonts,
     webFonts,
     settingDefaults,
+    addDefaultsToSettings,
     libsDefaults,
 
     namespaced: true,
