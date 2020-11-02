@@ -23,8 +23,8 @@
                         <q-btn class="q-mr-xs" round dense color="blue" icon="la la-plus" @click.stop="addBookmark" size="12px">
                             <q-tooltip :delay="1500" anchor="bottom middle" content-style="font-size: 80%">Добавить закладку</q-tooltip>
                         </q-btn>
-                        <q-btn round dense color="blue" icon="la la-bars" @click.stop="bookmarkSettings"  size="12px" disabled>
-                            <q-tooltip :delay="1500" anchor="bottom middle" content-style="font-size: 80%">Настроить закладки (пока недоступно)</q-tooltip>                            
+                        <q-btn round dense color="blue" icon="la la-bars" @click.stop="bookmarkSettings" size="12px">
+                            <q-tooltip :delay="1500" anchor="bottom middle" content-style="font-size: 80%">Настроить закладки</q-tooltip>
                         </q-btn>
                     </template>
                     <template v-slot:selected>
@@ -97,6 +97,7 @@
                 </template>
             </Dialog>
         </div>
+        <BookmarkSettings v-if="bookmarkSettingsActive" ref="bookmarkSettings" :libs="libs" @close="closeBookmarkSettings"></BookmarkSettings>
     </Window>
 </template>
 
@@ -108,6 +109,8 @@ import _ from 'lodash';
 
 import Window from '../share/Window.vue';
 import Dialog from '../share/Dialog.vue';
+import BookmarkSettings from './BookmarkSettings/BookmarkSettings.vue';
+
 import rstore from '../../store/modules/reader';
 import * as utils from '../../share/utils';
 
@@ -118,7 +121,8 @@ const proxySubst = {
 export default @Component({
     components: {
         Window,
-        Dialog
+        Dialog,
+        BookmarkSettings
     },
     watch: {
         libs: function() {
@@ -152,6 +156,8 @@ class ExternalLibs extends Vue {
     bookmarkLink = '';
     bookmarkDesc = '';
     defaultRootLink = '';
+
+    bookmarkSettingsActive = false;
 
     created() {
         this.$root.addKeyHook(this.keyHook);
@@ -549,9 +555,6 @@ class ExternalLibs extends Vue {
         this.addBookmarkVisible = false;
     }
 
-    bookmarkSettings() {
-    }
-
     fullScreenToggle() {
         this.fullScreenActive = !this.fullScreenActive;
         if (this.fullScreenActive) {
@@ -584,14 +587,28 @@ class ExternalLibs extends Vue {
         }
     }
 
-    keyHook() {
+    bookmarkSettings() {
+        this.bookmarkSettingsActive = true;
+        this.$nextTick(() => {
+            this.$refs.bookmarkSettings.init();
+        });
+    }
+
+    closeBookmarkSettings() {
+        this.bookmarkSettingsActive = false;
+    }
+
+    keyHook(event) {
         if (this.$root.rootRoute() == '/external-libs') {
+            if (this.bookmarkSettingsActive && this.$refs.bookmarkSettings.keyHook(event))
+                return true;
+
             if (this.$refs.dialogAddBookmark.active)
                 return false;
 
             if (event.type == 'keydown' && event.key == 'F4') {
-                this.addBookmark()
-                return;
+                this.addBookmark();
+                return true;
             }
 
             if (event.type == 'keydown' && event.key == 'Escape' &&
@@ -599,8 +616,8 @@ class ExternalLibs extends Vue {
                 (document.activeElement != this.$refs.selectedLink.$refs.target || !this.$refs.selectedLink.menu)
                ) {
                 this.close();
+                return true;
             }
-            return true;
         }
         return false;
     }

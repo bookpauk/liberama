@@ -124,6 +124,7 @@ class Window extends Vue {
 .main {
     background-color: transparent !important;
     z-index: 50;
+    overflow: hidden;
 }
 
 .xyfit {
