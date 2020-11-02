@@ -505,7 +505,7 @@ class ServerStorage extends Vue {
 
                 const md = newRecentMod.data;
                 if (md.key && result[md.key])
-                    result[md.key] = utils.applyObjDiff(result[md.key], md.mod, true);
+                    result[md.key] = utils.applyObjDiff(result[md.key], md.mod, {isAddChanged: true});
 
                 if (!bookManager.loaded) {
                     this.warning('Ожидание загрузки списка книг перед синхронизацией');
@@ -569,7 +569,7 @@ class ServerStorage extends Vue {
 
                 let applyMod = this.cachedRecentMod.data;
                 if (applyMod && applyMod.key && newRecentPatch.data[applyMod.key])
-                    newRecentPatch.data[applyMod.key] = utils.applyObjDiff(newRecentPatch.data[applyMod.key], applyMod.mod, true);
+                    newRecentPatch.data[applyMod.key] = utils.applyObjDiff(newRecentPatch.data[applyMod.key], applyMod.mod, {isAddChanged: true});
 
                 newRecentMod = {rev: this.cachedRecentMod.rev + 1, data: {}};
                 needSaveRecentPatch = true;

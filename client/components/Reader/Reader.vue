@@ -331,6 +331,12 @@ class Reader extends Vue {
             this.checkActivateDonateHelpPage();
             this.loading = false;
 
+            //проверим состояние Settings, и обновим, если надо
+            const newSettings = rstore.addDefaultsToSettings(this.settings);
+            if (newSettings) {
+                this.commit('reader/setSettings', newSettings);
+            }
+
             this.updateRoute();
 
             await this.showWhatsNew();
