@@ -32,6 +32,9 @@ export default @Component({
 class Window extends Vue {
     init() {
         this.$nextTick(() => {
+            this.$refs.main.style.top = 0;
+            this.$refs.main.style.left = 0;
+
             this.$refs.windowBox.style.height = this.height;
             this.$refs.windowBox.style.width = this.width;
             if (this.maxWidth)
@@ -124,7 +127,6 @@ class Window extends Vue {
 .main {
     background-color: transparent !important;
     z-index: 50;
-    overflow: hidden;
 }
 
 .xyfit {
