@@ -103,11 +103,14 @@ class BookmarkSettings extends BookmarkSettingsProps {
     get nodes() {
         const result = [];
 
-        this.expanded = [];
+        const expanded = [];
+        this.links = {};
         let i = 0;
         this.libs.groups.forEach(group => {
             const rkey = `${i}`;
             const g = {label: group.r, key: rkey, children: []};
+            this.links[rkey] = group.r;
+
             let j = 0;
             group.list.forEach(link => {
                 const key = `${i}-${j}`;
@@ -115,8 +118,10 @@ class BookmarkSettings extends BookmarkSettingsProps {
                     label: (link.c ? link.c + ' ': '') + lu.removeOrigin(link.l),
                     key
                 });
-                if (link.l == this.libs.startLink && this.expanded.indexOf(rkey) < 0) {
-                    this.expanded.push(rkey);
+
+                this.links[key] = link.l;
+                if (link.l == this.libs.startLink && expanded.indexOf(rkey) < 0) {
+                    expanded.push(rkey);
                 }
 
                 j++;
@@ -124,6 +129,10 @@ class BookmarkSettings extends BookmarkSettingsProps {
 
             result.push(g);
             i++;
+        });
+
+        this.$nextTick(() => {
+            this.expanded = expanded;
         });
 
         return result;
@@ -135,6 +144,15 @@ class BookmarkSettings extends BookmarkSettingsProps {
     }
 
     openSelected() {
+        if (!this.selected)
+            return;
+        if (this.selected.indexOf('-') < 0) {//rootLink
+            this.$emit('do-action', {action: 'setRootLink', data: this.links[this.selected]});
+        } else {//selectedLink
+            this.$emit('do-action', {action: 'setSelectedLink', data: this.links[this.selected]});
+        }
+
+        //this.close();
     }
 
     openOptions() {

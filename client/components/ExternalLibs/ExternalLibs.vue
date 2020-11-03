@@ -47,7 +47,7 @@
                         <q-btn class="q-mr-xs" round dense color="blue" icon="la la-home" @click="goToLink(libs.startLink)" size="12px">
                             <q-tooltip :delay="1500" anchor="bottom middle" content-style="font-size: 80%">Вернуться на стартовую страницу</q-tooltip>
                         </q-btn>
-                        <q-btn round dense color="blue" icon="la la-angle-double-down" @click="openBookUrlInFrame" size="12px">
+                        <q-btn round dense color="blue" icon="la la-angle-double-down" @click="openBookUrlInFrame" size="12px" :disabled="!bookUrl">
                             <q-tooltip :delay="1500" anchor="bottom middle" content-style="font-size: 80%">Загрузить URL во фрейм</q-tooltip>
                         </q-btn>
                     </template>
@@ -97,7 +97,7 @@
                 </template>
             </Dialog>
         </div>
-        <BookmarkSettings v-if="bookmarkSettingsActive" ref="bookmarkSettings" :libs="libs" @close="closeBookmarkSettings"></BookmarkSettings>
+        <BookmarkSettings v-if="bookmarkSettingsActive" ref="bookmarkSettings" :libs="libs" @do-action="doAction" @close="closeBookmarkSettings"></BookmarkSettings>
     </Window>
 </template>
 
@@ -290,6 +290,14 @@ class ExternalLibs extends Vue {
         this.startLink = (libs.comment ? libs.comment + ' ': '') + lu.removeProtocol(libs.startLink);
         this.rootLink = lu.getOrigin(libs.startLink);
         this.updateSelectedLink();
+    }
+
+    doAction(event) {
+        switch (event.action) {
+            case 'setLibs': this.commitLibs(event.data); break;
+            case 'setRootLink': this.rootLink = event.data; this.rootLinkInput(); break;
+            case 'setSelectedLink': this.selectedLink = event.data; this.selectedLinkInput(); break;
+        }
     }
 
     get mode() {
