@@ -23,7 +23,7 @@
                         <q-btn class="q-mr-xs" round dense color="blue" icon="la la-plus" @click.stop="addBookmark" size="12px">
                             <q-tooltip :delay="1500" anchor="bottom middle" content-style="font-size: 80%">Добавить закладку</q-tooltip>
                         </q-btn>
-                        <q-btn round dense color="blue" icon="la la-bars" @click.stop="bookmarkSettings" size="12px" disabled>
+                        <q-btn round dense color="blue" icon="la la-bars" @click.stop="bookmarkSettings" size="12px">
                             <q-tooltip :delay="1500" anchor="bottom middle" content-style="font-size: 80%">Настроить закладки</q-tooltip>
                         </q-btn>
                     </template>
@@ -621,7 +621,6 @@ class ExternalLibs extends Vue {
         }
         return false;
     }
-
 }
 //-----------------------------------------------------------------------------
 </script>
