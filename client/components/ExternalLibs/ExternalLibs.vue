@@ -28,7 +28,7 @@
                         </q-btn>
                     </template>
                     <template v-slot:selected>
-                        <div style="overflow: hidden; white-space: nowrap;">{{ removeProtocol(rootLink) }}</div>
+                        <div style="overflow: hidden; white-space: nowrap;">{{ rootLinkWithoutProtocol }}</div>
                     </template>
                 </q-select>
 
@@ -113,6 +113,7 @@ import BookmarkSettings from './BookmarkSettings/BookmarkSettings.vue';
 
 import rstore from '../../store/modules/reader';
 import * as utils from '../../share/utils';
+import * as lu from './linkUtils';
 
 const proxySubst = {
     'http://flibusta.is': 'http://b.liberama.top:23480',
@@ -286,8 +287,8 @@ class ExternalLibs extends Vue {
 
     loadLibs() {
         const libs = this.libs;
-        this.startLink = (libs.comment ? libs.comment + ' ': '') + this.removeProtocol(libs.startLink);
-        this.rootLink = this.getOrigin(libs.startLink);
+        this.startLink = (libs.comment ? libs.comment + ' ': '') + lu.removeProtocol(libs.startLink);
+        this.rootLink = lu.getOrigin(libs.startLink);
         this.updateSelectedLink();
     }
 
@@ -304,10 +305,14 @@ class ExternalLibs extends Vue {
         return result;
     }
 
+    get rootLinkWithoutProtocol() {
+        return lu.removeProtocol(this.rootLink);
+    }
+
     updateSelectedLink() {
         if (!this.ready)
             return;
-        const index = this.getRootIndexByUrl(this.libs.groups, this.rootLink);
+        const index = lu.getRootIndexByUrl(this.libs.groups, this.rootLink);
         if (index >= 0)
             this.selectedLink = this.libs.groups[index].s;
     }
@@ -315,7 +320,7 @@ class ExternalLibs extends Vue {
     updateStartLink() {
         if (!this.ready)
             return;
-        const index = this.getRootIndexByUrl(this.libs.groups, this.rootLink);
+        const index = lu.getRootIndexByUrl(this.libs.groups, this.rootLink);
         if (index >= 0) {
             let libs = _.cloneDeep(this.libs);
             libs.groups[index].s = this.selectedLink;
@@ -332,7 +337,7 @@ class ExternalLibs extends Vue {
             return result;
 
         this.libs.groups.forEach(group => {
-            result.push({label: this.removeProtocol(group.r), value: group.r});
+            result.push({label: lu.removeProtocol(group.r), value: group.r});
         });
 
         return result;
@@ -342,7 +347,7 @@ class ExternalLibs extends Vue {
         let result = [];
 
         rstore.libsDefaults.groups.forEach(group => {
-            result.push({label: this.removeProtocol(group.r), value: group.r});
+            result.push({label: lu.removeProtocol(group.r), value: group.r});
         });
 
         return result;
@@ -353,10 +358,10 @@ class ExternalLibs extends Vue {
         if (!this.ready)
             return result;
 
-        const index = this.getRootIndexByUrl(this.libs.groups, this.rootLink);
+        const index = lu.getRootIndexByUrl(this.libs.groups, this.rootLink);
         if (index >= 0) {
             this.libs.groups[index].list.forEach(link => {
-                result.push({label: (link.c ? link.c + ' ': '') + this.removeOrigin(link.l), value: link.l});
+                result.push({label: (link.c ? link.c + ' ': '') + lu.removeOrigin(link.l), value: link.l});
             });
         }
 
@@ -365,7 +370,7 @@ class ExternalLibs extends Vue {
 
     openBookUrlInFrame() {
         if (this.bookUrl) {
-            this.goToLink(this.addProtocol(this.bookUrl));
+            this.goToLink(lu.addProtocol(this.bookUrl));
         }
     }
 
@@ -383,48 +388,8 @@ class ExternalLibs extends Vue {
         });
     }
 
-    addProtocol(url) {
-        if ((url.indexOf('http://') != 0) && (url.indexOf('https://') != 0))
-            return 'http://' + url;
-        return url;
-    }
-
-    removeProtocol(url) {
-        return url.replace(/(^\w+:|^)\/\//, '');
-    }
-
-    getOrigin(url) {
-        const parsed = new URL(url);
-        return parsed.origin;
-    }
-
-    removeOrigin(url) {
-        const parsed = new URL(url);
-        const result = url.substring(parsed.origin.length);
-        return (result ? result : '/');
-    }
-
-    getRootIndexByUrl(groups, url) {
-        if (!this.ready)
-            return -1;
-        const origin = this.getOrigin(url);
-        for (let i = 0; i < groups.length; i++) {
-            if (groups[i].r == origin)
-                return i;
-        }
-        return -1;
-    }
-
-    getListItemByLink(list, link) {
-        for (const item of list) {
-            if (item.l == link)
-                return item;
-        }
-        return null;
-    }
-
     getCommentByLink(list, link) {
-        const item = this.getListItemByLink(list, link);
+        const item = lu.getListItemByLink(list, link);
         return (item ? item.c : '');
     }
 
@@ -457,7 +422,7 @@ class ExternalLibs extends Vue {
     submitUrl() {
         if (this.bookUrl) {
             this.sendMessage({type: 'submitUrl', data: {
-                url: this.makeProxySubst(this.addProtocol(this.bookUrl), true), 
+                url: this.makeProxySubst(lu.addProtocol(this.bookUrl), true), 
                 force: true
             }});
             this.bookUrl = '';
@@ -467,7 +432,7 @@ class ExternalLibs extends Vue {
     }
 
     addBookmark() {
-        this.bookmarkLink = (this.bookUrl ? this.makeProxySubst(this.addProtocol(this.bookUrl), true) : '');
+        this.bookmarkLink = (this.bookUrl ? this.makeProxySubst(lu.addProtocol(this.bookUrl), true) : '');
         this.bookmarkDesc = '';
         this.addBookmarkVisible = true;
         this.$nextTick(() => {
@@ -477,7 +442,7 @@ class ExternalLibs extends Vue {
     }
 
     updateBookmarkLink() {
-        const index = this.getRootIndexByUrl(rstore.libsDefaults.groups, this.defaultRootLink);
+        const index = lu.getRootIndexByUrl(rstore.libsDefaults.groups, this.defaultRootLink);
         if (index >= 0) {
             this.bookmarkLink = rstore.libsDefaults.groups[index].s;
             this.bookmarkDesc = this.getCommentByLink(rstore.libsDefaults.groups[index].list, this.bookmarkLink);
@@ -509,10 +474,10 @@ class ExternalLibs extends Vue {
         if (!this.bookmarkLink)
             return;
 
-        const link = this.addProtocol(this.bookmarkLink);
+        const link = lu.addProtocol(this.bookmarkLink);
         let index = -1;
         try {
-            index = this.getRootIndexByUrl(this.libs.groups, link);
+            index = lu.getRootIndexByUrl(this.libs.groups, link);
         } catch (e) {
             await this.$root.stdDialog.alert('Неверный формат ссылки', 'Ошибка');
             return;
@@ -520,7 +485,7 @@ class ExternalLibs extends Vue {
 
         //есть группа в закладках
         if (index >= 0) {
-            const item = this.getListItemByLink(this.libs.groups[index].list, link);
+            const item = lu.getListItemByLink(this.libs.groups[index].list, link);
             
             if (!item || item.c != this.bookmarkDesc) {
                 //добавляем
@@ -543,9 +508,9 @@ class ExternalLibs extends Vue {
             }
 
             //добавляем сначала группу
-            libs.groups.push({r: this.getOrigin(link), s: link, list: []});
+            libs.groups.push({r: lu.getOrigin(link), s: link, list: []});
             
-            index = this.getRootIndexByUrl(libs.groups, link);
+            index = lu.getRootIndexByUrl(libs.groups, link);
             if (index >= 0)
                 libs.groups[index].list.push({l: link, c: this.bookmarkDesc});
 

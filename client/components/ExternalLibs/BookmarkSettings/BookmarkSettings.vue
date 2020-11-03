@@ -6,10 +6,13 @@
 
         <div class="column fit">
             <div class="row items-center top-panel bg-grey-3">
-                <q-btn class="q-mr-md" round dense color="blue" icon="la la-check" @click.stop="openSelected" size="16px">
+                <q-btn class="q-mr-md" round dense color="blue" icon="la la-check" @click.stop="openSelected" size="16px" :disabled="!selected">
                     <q-tooltip :delay="1500" anchor="bottom middle" content-style="font-size: 80%">Открыть выбранную закладку</q-tooltip>
                 </q-btn>
-                <q-input class="col q-mr-sm" ref="input" rounded outlined dense bg-color="white" placeholder="Найти" v-model="search">
+                <q-input class="col q-mr-sm" ref="search" rounded outlined dense bg-color="white" placeholder="Найти" v-model="search">
+                    <template v-slot:append>
+                        <q-icon v-if="search !== ''" name="la la-times" class="cursor-pointer" @click="resetSearch"/>
+                    </template>
                 </q-input>
                 <q-btn round dense color="blue" icon="la la-cog" @click.stop="openOptions" size="14px">
                     <q-tooltip :delay="1500" anchor="bottom middle" content-style="font-size: 80%">Опции</q-tooltip>
@@ -39,13 +42,19 @@
                     <q-tree
                       :nodes="nodes"
                       node-key="key"
-                      tick-strategy="leaf-filtered"
+                      tick-strategy="leaf"
                       :selected.sync="selected"
                       :ticked.sync="ticked"
                       :expanded.sync="expanded"
-                      text-color="grey-7"
                       selected-color="black"
-                    />    
+                      :filter="search"
+                      no-nodes-label="Закладок пока нет"
+                      no-results-label="Ничего не найдено"
+                    >
+                        <template v-slot:default-header="p">
+                            <div class="q-px-xs" :class="{selected: selected == p.key}">{{ p.node.label }}</div>
+                        </template>
+                    </q-tree>
                 </div>
             </div>
         </div>
@@ -57,6 +66,8 @@
 import Vue from 'vue';
 import Component from 'vue-class-component';
 import Window from '../../share/Window.vue';
+
+import * as lu from '../linkUtils';
 
 const BookmarkSettingsProps = Vue.extend({
     props: {
@@ -92,12 +103,23 @@ class BookmarkSettings extends BookmarkSettingsProps {
     get nodes() {
         const result = [];
 
+        this.expanded = [];
         let i = 0;
         this.libs.groups.forEach(group => {
-            const g = {label: group.r, key: `${i}`, children: []};
+            const rkey = `${i}`;
+            const g = {label: group.r, key: rkey, children: []};
             let j = 0;
             group.list.forEach(link => {
-                g.children.push({label: (link.c ? link.c + ' ': '') + link.l, key: `${i}-${j}`});
+                const key = `${i}-${j}`;
+                g.children.push({
+                    label: (link.c ? link.c + ' ': '') + lu.removeOrigin(link.l),
+                    key
+                });
+                if (link.l == this.libs.startLink && this.expanded.indexOf(rkey) < 0) {
+                    this.expanded.push(rkey);
+                }
+
+                j++;
             });
 
             result.push(g);
@@ -105,6 +127,11 @@ class BookmarkSettings extends BookmarkSettingsProps {
         });
 
         return result;
+    }
+
+    resetSearch() {
+        this.search = '';
+        this.$refs.search.focus();
     }
 
     openSelected() {
@@ -144,5 +171,9 @@ class BookmarkSettings extends BookmarkSettingsProps {
 
 .tree {
     padding: 10px;
+}
+
+.selected {
+    text-shadow: 0 0 20px yellow, 0 0 15px yellow, 0 0 10px yellow, 0 0 10px yellow, 0 0 5px yellow;
 }
 </style>
