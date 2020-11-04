@@ -180,6 +180,11 @@ class BookmarkSettings extends BookmarkSettingsProps {
                 g.list = g.list.filter(v => v);
                 if (!g.list.length)
                     delete newLibs.groups[i];
+                else {
+                    const item = lu.getListItemByLink(g.list, g.s);
+                    if (!item)
+                        g.s = g.list[0].l;
+                }
             }
 
             newLibs.groups = newLibs.groups.filter(v => v);
