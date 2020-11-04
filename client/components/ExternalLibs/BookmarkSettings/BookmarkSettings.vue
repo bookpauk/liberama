@@ -9,7 +9,7 @@
                 <q-btn class="q-mr-md" round dense color="blue" icon="la la-check" @click.stop="openSelected" size="16px" :disabled="!selected">
                     <q-tooltip :delay="1500" anchor="bottom middle" content-style="font-size: 80%">Открыть выбранную закладку</q-tooltip>
                 </q-btn>
-                <q-input class="col q-mr-sm" ref="search" rounded outlined dense bg-color="white" placeholder="Найти" v-model="search">
+                <q-input class="col" ref="search" rounded outlined dense bg-color="white" placeholder="Найти" v-model="search">
                     <template v-slot:append>
                         <q-icon v-if="search !== ''" name="la la-times" class="cursor-pointer" @click="resetSearch"/>
                     </template>
@@ -194,7 +194,58 @@ class BookmarkSettings extends BookmarkSettingsProps {
         }
     }
 
-    moveBookmark() {
+    moveBookmark(down = false) {
+        const newLibs = _.cloneDeep(this.libs);
+
+        const ticked = new Set(this.ticked);
+        let moved = false;
+        let prevFull = false;
+        if (!down) {
+            for (let i = 0; i < newLibs.groups.length; i++) {
+                const g = newLibs.groups[i];
+                let count = 0;
+                for (let j = 0; j < g.list.length; j++) {
+                    if (ticked.has(g.list[j].l)) {
+                        if (j > 0 && !ticked.has(g.list[j - 1].l)) {
+                            [g.list[j], g.list[j - 1]] = [g.list[j - 1], g.list[j]];
+                            moved = true;
+                        }
+                        count++;
+                    }
+                }
+
+                if (count == g.list.length && !prevFull && i > 0) {
+                    const gs = newLibs.groups;
+                    [gs[i], gs[i - 1]] = [gs[i - 1], gs[i]];
+                    moved = true;
+                } else
+                    prevFull = (count == g.list.length);
+            }
+        } else {
+            for (let i = newLibs.groups.length - 1; i >= 0; i--) {
+                const g = newLibs.groups[i];
+                let count = 0;
+                for (let j = g.list.length - 1; j >= 0; j--) {
+                    if (ticked.has(g.list[j].l)) {
+                        if (j < g.list.length - 1 && !ticked.has(g.list[j + 1].l)) {
+                            [g.list[j], g.list[j + 1]] = [g.list[j + 1], g.list[j]];
+                            moved = true;
+                        }
+                        count++;
+                    }
+                }
+
+                if (count == g.list.length && !prevFull && i < newLibs.groups.length - 1) {
+                    const gs = newLibs.groups;
+                    [gs[i], gs[i + 1]] = [gs[i + 1], gs[i]];
+                    moved = true;
+                } else
+                    prevFull = (count == g.list.length);
+            }
+        }
+
+        if (moved)
+            this.$emit('do-action', {action: 'setLibs', data: newLibs});
     }
 
     async setDefaultBookmarks() {
