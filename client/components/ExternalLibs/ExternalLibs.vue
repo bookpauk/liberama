@@ -58,7 +58,7 @@
                     </template>
                 </q-input>
 
-                <q-btn rounded color="green-7" no-caps size="14px" @click="submitUrl">Открыть
+                <q-btn rounded color="green-7" no-caps size="14px" @click="submitUrl" :disabled="!bookUrl">Открыть
                     <q-tooltip :delay="1500" anchor="bottom middle" content-style="font-size: 80%">Открыть в читалке</q-tooltip>
                 </q-btn>
             </div>
@@ -139,14 +139,31 @@ export default @Component({
         },
         rootLink: function() {
             this.updateSelectedLink();
-            this.updateStartLink();
         },
         selectedLink: function() {
             this.updateStartLink();
         },
         defaultRootLink: function() {
             this.updateBookmarkLink();
-        }
+        },
+        bookUrl: function(newValue) {
+            const value = lu.addProtocol(newValue);
+            const subst = this.makeProxySubst(value, true);
+            if (value != subst) {
+                this.$nextTick(() => {
+                    this.bookUrl = subst;
+                });
+            }
+        },
+        bookmarkLink: function(newValue) {
+            const value = lu.addProtocol(newValue);
+            const subst = this.makeProxySubst(value, true);
+            if (value != subst) {
+                this.$nextTick(() => {
+                    this.bookmarkLink = subst;
+                });
+            }
+        },
     }    
 })
 class ExternalLibs extends Vue {
@@ -175,6 +192,8 @@ class ExternalLibs extends Vue {
         document.addEventListener('fullscreenchange', () => {
             this.fullScreenActive = (document.fullscreenElement !== null);
         });
+
+        this.commitInProgress = false;
 
         //this.commit = this.$store.commit;
         //this.commit('reader/setLibs', rstore.libsDefaults);
@@ -266,6 +285,7 @@ class ExternalLibs extends Vue {
                 case 'hello': this.sendMessage({type: 'mes', data: 'ready'}); break;
             }
         } else if (d.type == 'libs') {
+            this.commitInProgress = false;
             this.ready = true;
             this.libs = _.cloneDeep(d.data);
         } else if (d.type == 'notify') {
@@ -289,7 +309,20 @@ class ExternalLibs extends Vue {
     }
 
     commitLibs(libs) {
-        this.sendMessage({type: 'libs', data: libs});
+        (async() => {
+            let i = 0;
+            while (this.commitInProgress && i < 50) {//1 сек
+                await utils.sleep(20);
+                i++;
+            }
+
+            if (!this.commitInProgress) {
+                this.commitInProgress = true;
+                this.sendMessage({type: 'libs', data: libs});
+            } else {
+                throw new Error('Commit failed');
+            }
+        })();
     }
 
     loadLibs() {
@@ -308,11 +341,17 @@ class ExternalLibs extends Vue {
     doAction(event) {
         switch (event.action) {
             case 'setLibs': this.commitLibs(event.data); break;
-            case 'setRootLink': this.rootLink = event.data; this.rootLinkInput(); break;
+            case 'setRootLink': this.rootLink = event.data; break;
             case 'setSelectedLink': 
-                this.selectedLink = event.data;
-                this.rootLink = lu.getOrigin(this.selectedLink);
-                this.selectedLinkInput();
+                this.rootLink = lu.getOrigin(event.data);
+                this.$nextTick(async() => {
+                    let i = 0;
+                    while (this.commitInProgress && i < 50) {//1 сек
+                        await utils.sleep(20);
+                        i++;
+                    }
+                    this.selectedLink = event.data;
+                });
                 break;
             case 'editBookmark': this.addBookmark('edit', event.data.link, event.data.desc); break;
             case 'addBookmark': this.addBookmark('add'); break;
@@ -425,7 +464,8 @@ class ExternalLibs extends Vue {
         this.$nextTick(() => {
             this.frameVisible = true;
             this.$nextTick(() => {
-                this.$refs.frame.contentWindow.focus();
+                if (this.$refs.frame)
+                    this.$refs.frame.contentWindow.focus();
             });
         });
     }
@@ -439,7 +479,7 @@ class ExternalLibs extends Vue {
         for (const [key, value] of Object.entries(proxySubst)) {
             if (reverse && value == url.substring(0, value.length)) {
                 return key + url.substring(value.length);
-            } else if (key == url.substring(0, key.length)) {
+            } else if (!reverse && key == url.substring(0, key.length)) {
                 return value + url.substring(key.length);
             }
         }
@@ -464,7 +504,7 @@ class ExternalLibs extends Vue {
     submitUrl() {
         if (this.bookUrl) {
             this.sendMessage({type: 'submitUrl', data: {
-                url: this.makeProxySubst(lu.addProtocol(this.bookUrl), true), 
+                url: this.bookUrl,
                 force: true
             }});
             this.bookUrl = '';
@@ -479,7 +519,7 @@ class ExternalLibs extends Vue {
             this.editBookmarkLink = this.bookmarkLink = link;
             this.editBookmarkDesc = this.bookmarkDesc = desc;
         } else {
-            this.bookmarkLink = (this.bookUrl ? this.makeProxySubst(lu.addProtocol(this.bookUrl), true) : '');
+            this.bookmarkLink = this.bookUrl;
             this.bookmarkDesc = '';
         }
 
