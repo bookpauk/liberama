@@ -24,7 +24,7 @@
                     <q-btn class="q-mb-sm" round dense color="blue" icon="la la-minus" @click.stop="delBookmark" size="14px" :disabled="!ticked.length">
                         <q-tooltip :delay="1500" anchor="bottom middle" content-style="font-size: 80%">Удалить отмеченные закладки</q-tooltip>
                     </q-btn>
-                    <q-btn class="q-mb-sm" round dense color="blue" icon="la la-edit" @click.stop="editBookmark" size="14px" :disabled="!selected || selected.indexOf('-') < 0">
+                    <q-btn class="q-mb-sm" round dense color="blue" icon="la la-edit" @click.stop="editBookmark" size="14px" :disabled="!selected || selected.indexOf('r-') == 0">
                         <q-tooltip :delay="1500" anchor="bottom middle" content-style="font-size: 80%">Редактировать закладку</q-tooltip>
                     </q-btn>
                     <q-btn class="q-mb-sm" round dense color="blue" icon="la la-arrow-up" @click.stop="moveBookmark(false)" size="14px" :disabled="!ticked.length">

@@ -294,8 +294,13 @@ class ExternalLibs extends Vue {
 
     loadLibs() {
         const libs = this.libs;
-        this.startLink = libs.startLink;
-        this.rootLink = lu.getOrigin(libs.startLink);
+        try {
+            this.startLink = libs.startLink;
+            this.rootLink = lu.getOrigin(libs.startLink);
+        } catch(e) {
+            this.startLink = '';
+            this.rootLink = '';
+        }
 
         this.updateSelectedLink();
     }
@@ -304,7 +309,11 @@ class ExternalLibs extends Vue {
         switch (event.action) {
             case 'setLibs': this.commitLibs(event.data); break;
             case 'setRootLink': this.rootLink = event.data; this.rootLinkInput(); break;
-            case 'setSelectedLink': this.selectedLink = event.data; this.selectedLinkInput(); break;
+            case 'setSelectedLink': 
+                this.selectedLink = event.data;
+                this.rootLink = lu.getOrigin(this.selectedLink);
+                this.selectedLinkInput();
+                break;
             case 'editBookmark': this.addBookmark('edit', event.data.link, event.data.desc); break;
             case 'addBookmark': this.addBookmark('add'); break;
         }
@@ -552,7 +561,7 @@ class ExternalLibs extends Vue {
                 libs.groups[index].list.push({l: link, c: this.bookmarkDesc});
                 this.commitLibs(libs);
             } else if (item.c != this.bookmarkDesc) {
-                if (await this.$root.stdDialog.confirm(`Такая закладка уже существует с другим описанием<br>` +
+                if (await this.$root.stdDialog.confirm(`Такая закладка уже существует с другим описанием.<br>` +
                     `Заменить '${this.$sanitize(item.c)}' на '${this.$sanitize(this.bookmarkDesc)}'?`, ' ')) {
                     item.c = this.bookmarkDesc;
                     this.commitLibs(libs);                    
