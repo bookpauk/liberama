@@ -20,12 +20,22 @@ export function removeOrigin(url) {
 }
 
 export function getRootIndexByUrl(groups, url) {
-    const origin = this.getOrigin(url);
+    const origin = getOrigin(url);
     for (let i = 0; i < groups.length; i++) {
         if (groups[i].r == origin)
             return i;
     }
     return -1;
+}
+
+export function getSafeRootIndexByUrl(groups, url) {
+    let index = -1;
+    try {
+        index = getRootIndexByUrl(groups, url);
+    } catch(e) {
+        //
+    }
+    return index;
 }
 
 export function getListItemByLink(list, link) {

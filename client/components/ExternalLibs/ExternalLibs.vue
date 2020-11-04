@@ -51,6 +51,11 @@
                             <q-tooltip :delay="1500" anchor="bottom middle" content-style="font-size: 80%">Загрузить URL во фрейм</q-tooltip>
                         </q-btn>
                     </template>
+                    <template v-slot:append>
+                        <q-btn round dense color="blue" icon="la la-cog" @click.stop="openOptions" size="12px">
+                            <q-tooltip :delay="1500" anchor="bottom middle" content-style="font-size: 80%">Опции</q-tooltip>
+                        </q-btn>
+                    </template>
                 </q-input>
 
                 <q-btn rounded color="green-7" no-caps size="14px" @click="submitUrl">Открыть
@@ -263,8 +268,6 @@ class ExternalLibs extends Vue {
         } else if (d.type == 'libs') {
             this.ready = true;
             this.libs = _.cloneDeep(d.data);
-            if (!this.frameSrc)
-                this.goToLink(this.libs.startLink);
         } else if (d.type == 'notify') {
             this.$root.notify.success(d.data, '', {position: 'bottom-right'});
         }
@@ -291,8 +294,9 @@ class ExternalLibs extends Vue {
 
     loadLibs() {
         const libs = this.libs;
-        this.startLink = (libs.comment ? libs.comment + ' ': '') + lu.removeProtocol(libs.startLink);
+        this.startLink = libs.startLink;
         this.rootLink = lu.getOrigin(libs.startLink);
+
         this.updateSelectedLink();
     }
 
@@ -313,7 +317,7 @@ class ExternalLibs extends Vue {
     get header() {
         let result = (this.ready ? 'Библиотека' : 'Загрузка...');
         if (this.ready && this.startLink) {
-            result += ` | ${this.startLink}`;
+            result += ` | ${(this.libs.comment ? this.libs.comment + ' ': '') + lu.removeProtocol(this.startLink)}`;
         }
         this.$root.$emit('set-app-title', result);
         return result;
@@ -326,22 +330,37 @@ class ExternalLibs extends Vue {
     updateSelectedLink() {
         if (!this.ready)
             return;
-        const index = lu.getRootIndexByUrl(this.libs.groups, this.rootLink);
+
+        const index = lu.getSafeRootIndexByUrl(this.libs.groups, this.rootLink);
         if (index >= 0)
             this.selectedLink = this.libs.groups[index].s;
+        else
+            this.selectedLink = '';
     }
 
     updateStartLink() {
         if (!this.ready)
             return;
-        const index = lu.getRootIndexByUrl(this.libs.groups, this.rootLink);
+        const index = lu.getSafeRootIndexByUrl(this.libs.groups, this.rootLink);
         if (index >= 0) {
             let libs = _.cloneDeep(this.libs);
-            libs.groups[index].s = this.selectedLink;
-            libs.startLink = this.selectedLink;
-            libs.comment = this.getCommentByLink(libs.groups[index].list, this.selectedLink);
-            this.goToLink(this.selectedLink);
-            this.commitLibs(libs);
+            try {
+                if (lu.getOrigin(libs.groups[index].r) == lu.getOrigin(this.selectedLink)) {
+                    libs.groups[index].s = this.selectedLink;
+                    libs.startLink = this.selectedLink;
+                    libs.comment = this.getCommentByLink(libs.groups[index].list, this.selectedLink);
+                    this.goToLink(this.selectedLink);
+                    this.commitLibs(libs);
+                } else {
+                    console.error(`${lu.getOrigin(libs.groups[index].r)} != ${lu.getOrigin(this.selectedLink)}`);
+                }
+            } catch(e) {
+                console.log(e);
+            }
+        } else {
+            this.rootLink = '';
+            this.startLink = '';
+            this.frameVisible = false;
         }
     }
 
@@ -372,7 +391,7 @@ class ExternalLibs extends Vue {
         if (!this.ready)
             return result;
 
-        const index = lu.getRootIndexByUrl(this.libs.groups, this.rootLink);
+        const index = lu.getSafeRootIndexByUrl(this.libs.groups, this.rootLink);
         if (index >= 0) {
             this.libs.groups[index].list.forEach(link => {
                 result.push({label: (link.c ? link.c + ' ': '') + lu.removeOrigin(link.l), value: link.l});
@@ -389,7 +408,7 @@ class ExternalLibs extends Vue {
     }
 
     goToLink(link) {
-        if (!this.ready)
+        if (!this.ready || !link)
             return;
 
         this.frameSrc = this.makeProxySubst(link);
@@ -464,7 +483,7 @@ class ExternalLibs extends Vue {
     }
 
     updateBookmarkLink() {
-        const index = lu.getRootIndexByUrl(rstore.libsDefaults.groups, this.defaultRootLink);
+        const index = lu.getSafeRootIndexByUrl(rstore.libsDefaults.groups, this.defaultRootLink);
         if (index >= 0) {
             this.bookmarkLink = rstore.libsDefaults.groups[index].s;
             this.bookmarkDesc = this.getCommentByLink(rstore.libsDefaults.groups[index].list, this.bookmarkLink);
@@ -487,6 +506,8 @@ class ExternalLibs extends Vue {
 
     bookmarkDescKeyDown(event) {
         if (event.key == 'Enter') {
+            event.stopPropagation();
+            event.preventDefault();
             this.okAddBookmark();
         }
     }
@@ -550,7 +571,7 @@ class ExternalLibs extends Vue {
             //добавляем сначала группу
             libs.groups.push({r: lu.getOrigin(link), s: link, list: []});
             
-            index = lu.getRootIndexByUrl(libs.groups, link);
+            index = lu.getSafeRootIndexByUrl(libs.groups, link);
             if (index >= 0)
                 libs.groups[index].list.push({l: link, c: this.bookmarkDesc});
 
@@ -601,6 +622,9 @@ class ExternalLibs extends Vue {
 
     closeBookmarkSettings() {
         this.bookmarkSettingsActive = false;
+    }
+
+    openOptions() {
     }
 
     keyHook(event) {

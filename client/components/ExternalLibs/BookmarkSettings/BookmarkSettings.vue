@@ -14,27 +14,27 @@
                         <q-icon v-if="search !== ''" name="la la-times" class="cursor-pointer" @click="resetSearch"/>
                     </template>
                 </q-input>
-                <q-btn round dense color="blue" icon="la la-cog" @click.stop="openOptions" size="14px">
-                    <q-tooltip :delay="1500" anchor="bottom middle" content-style="font-size: 80%">Опции</q-tooltip>
-                </q-btn>
             </div>
 
             <div class="col row">
                 <div class="left-panel column items-center bg-grey-3">
-                    <q-btn class="q-mb-sm" round dense color="blue" icon="la la-edit" @click.stop="editBookmark" size="14px" :disabled="!selected">
-                        <q-tooltip :delay="1500" anchor="bottom middle" content-style="font-size: 80%">Редактировать закладку</q-tooltip>
-                    </q-btn>
                     <q-btn class="q-mb-sm" round dense color="blue" icon="la la-plus" @click.stop="addBookmark" size="14px">
                         <q-tooltip :delay="1500" anchor="bottom middle" content-style="font-size: 80%">Добавить закладку</q-tooltip>
                     </q-btn>
-                    <q-btn class="q-mb-sm" round dense color="blue" icon="la la-minus" @click.stop="delBookmark" size="14px">
-                        <q-tooltip :delay="1500" anchor="bottom middle" content-style="font-size: 80%">Удалить закладку</q-tooltip>
+                    <q-btn class="q-mb-sm" round dense color="blue" icon="la la-minus" @click.stop="delBookmark" size="14px" :disabled="!ticked.length">
+                        <q-tooltip :delay="1500" anchor="bottom middle" content-style="font-size: 80%">Удалить отмеченные закладки</q-tooltip>
                     </q-btn>
-                    <q-btn class="q-mb-sm" round dense color="blue" icon="la la-arrow-up" @click.stop="moveUp" size="14px">
-                        <q-tooltip :delay="1500" anchor="bottom middle" content-style="font-size: 80%">Переместить вверх</q-tooltip>
+                    <q-btn class="q-mb-sm" round dense color="blue" icon="la la-edit" @click.stop="editBookmark" size="14px" :disabled="!selected || selected.indexOf('-') < 0">
+                        <q-tooltip :delay="1500" anchor="bottom middle" content-style="font-size: 80%">Редактировать закладку</q-tooltip>
                     </q-btn>
-                    <q-btn class="q-mb-sm" round dense color="blue" icon="la la-arrow-down" @click.stop="moveDown" size="14px">
-                        <q-tooltip :delay="1500" anchor="bottom middle" content-style="font-size: 80%">Переместить вниз</q-tooltip>
+                    <q-btn class="q-mb-sm" round dense color="blue" icon="la la-arrow-up" @click.stop="moveBookmark(false)" size="14px" :disabled="!ticked.length">
+                        <q-tooltip :delay="1500" anchor="bottom middle" content-style="font-size: 80%">Переместить отмеченные вверх</q-tooltip>
+                    </q-btn>
+                    <q-btn class="q-mb-sm" round dense color="blue" icon="la la-arrow-down" @click.stop="moveBookmark(true)" size="14px" :disabled="!ticked.length">
+                        <q-tooltip :delay="1500" anchor="bottom middle" content-style="font-size: 80%">Переместить отмеченные вниз</q-tooltip>
+                    </q-btn>
+                    <q-btn class="q-mb-sm" round dense color="blue" icon="la la-broom" @click.stop="setDefaultBookmarks" size="14px">
+                        <q-tooltip :delay="1500" anchor="bottom middle" content-style="font-size: 80%">Установить по умолчанию</q-tooltip>
                     </q-btn>
                 </div>
 
@@ -65,9 +65,11 @@
 //-----------------------------------------------------------------------------
 import Vue from 'vue';
 import Component from 'vue-class-component';
-import Window from '../../share/Window.vue';
+import _ from 'lodash';
 
+import Window from '../../share/Window.vue';
 import * as lu from '../linkUtils';
+import rstore from '../../../store/modules/reader';
 
 const BookmarkSettingsProps = Vue.extend({
     props: {
@@ -107,15 +109,13 @@ class BookmarkSettings extends BookmarkSettingsProps {
 
         const expanded = [];
         this.links = {};
-        let i = 0;
         this.libs.groups.forEach(group => {
-            const rkey = `${i}`;
+            const rkey = `r-${group.r}`;
             const g = {label: group.r, key: rkey, children: []};
             this.links[rkey] = {l: group.r, c: ''};
 
-            let j = 0;
             group.list.forEach(link => {
-                const key = `${i}-${j}`;
+                const key = link.l;
                 g.children.push({
                     label: (link.c ? link.c + ' ': '') + lu.removeOrigin(link.l),
                     key
@@ -126,11 +126,9 @@ class BookmarkSettings extends BookmarkSettingsProps {
                     expanded.push(rkey);
                 }
 
-                j++;
             });
 
             result.push(g);
-            i++;
         });
 
         if (this.afterInit) {
@@ -151,15 +149,12 @@ class BookmarkSettings extends BookmarkSettingsProps {
     openSelected() {
         if (!this.selected)
             return;
-        if (this.selected.indexOf('-') < 0) {//rootLink
+        if (this.selected.indexOf('r-') === 0) {//rootLink
             this.$emit('do-action', {action: 'setRootLink', data: this.links[this.selected].l});
         } else {//selectedLink
             this.$emit('do-action', {action: 'setSelectedLink', data: this.links[this.selected].l});
         }
         this.close();
-    }
-
-    openOptions() {
     }
 
     editBookmark() {
@@ -170,7 +165,41 @@ class BookmarkSettings extends BookmarkSettingsProps {
         this.$emit('do-action', {action: 'addBookmark'});
     }
 
-    delBookmark() {
+    async delBookmark() {
+        const newLibs = _.cloneDeep(this.libs);
+
+        if (await this.$root.stdDialog.confirm(`Подтвердите удаление ${this.ticked.length} закладок:`, ' ')) {
+            const ticked = new Set(this.ticked);
+            for (let i = newLibs.groups.length - 1; i >= 0; i--) {
+                const g = newLibs.groups[i];
+                for (let j = g.list.length - 1; j >= 0; j--) {
+                    if (ticked.has(g.list[j].l)) {
+                        delete g.list[j];
+                    }
+                }
+                g.list = g.list.filter(v => v);
+                if (!g.list.length)
+                    delete newLibs.groups[i];
+            }
+
+            newLibs.groups = newLibs.groups.filter(v => v);
+            this.ticked = [];
+            this.selected = '';
+            this.$emit('do-action', {action: 'setLibs', data: newLibs});
+        }
+    }
+
+    moveBookmark() {
+    }
+
+    async setDefaultBookmarks() {
+        const result = await this.$root.stdDialog.prompt(`Введите 'да' для сброса всех закладок в предустановленные значения:`, ' ', {
+            inputValidator: (str) => { if (str && str.toLowerCase() === 'да') return true; else return 'Удаление не подтверждено'; },
+        });
+
+        if (result && result.value && result.value.toLowerCase() == 'да') {
+            this.$emit('do-action', {action: 'setLibs', data: _.cloneDeep(rstore.libsDefaults)});
+        }
     }
 
     close() {
