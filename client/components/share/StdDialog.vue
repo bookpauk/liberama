@@ -144,6 +144,7 @@ class StdDialog extends Vue {
         this.inputValidator = null;
         this.inputValue = '';
         this.error = '';
+        this.showed = false;
 
         this.iconColor = 'text-warning';
         if (opts && opts.color) {
@@ -161,6 +162,7 @@ class StdDialog extends Vue {
             this.hideTrigger();
             this.hideTrigger = null;
         }
+        this.showed = false;
     }
 
     onShow() {
@@ -170,6 +172,7 @@ class StdDialog extends Vue {
                 this.validate(this.inputValue);
             this.$refs.input.focus();
         }
+        this.showed = true;
     }
 
     validate(value) {
@@ -276,7 +279,7 @@ class StdDialog extends Vue {
     }
 
     keyHook(event) {
-        if (this.active) {
+        if (this.active && this.showed) {
             let handled = false;
             if (this.type == 'hotKey') {
                 if (event.type == 'keydown') {
