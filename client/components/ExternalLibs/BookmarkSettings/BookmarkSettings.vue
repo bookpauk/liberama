@@ -21,7 +21,7 @@
 
             <div class="col row">
                 <div class="left-panel column items-center bg-grey-3">
-                    <q-btn class="q-mb-sm" round dense color="blue" icon="la la-edit" @click.stop="editBookmark" size="14px">
+                    <q-btn class="q-mb-sm" round dense color="blue" icon="la la-edit" @click.stop="editBookmark" size="14px" :disabled="!selected">
                         <q-tooltip :delay="1500" anchor="bottom middle" content-style="font-size: 80%">Редактировать закладку</q-tooltip>
                     </q-btn>
                     <q-btn class="q-mb-sm" round dense color="blue" icon="la la-plus" @click.stop="addBookmark" size="14px">
@@ -72,6 +72,7 @@ import * as lu from '../linkUtils';
 const BookmarkSettingsProps = Vue.extend({
     props: {
         libs: Object,
+        addBookmarkVisible: Boolean,
     }
 });
 
@@ -91,6 +92,7 @@ class BookmarkSettings extends BookmarkSettingsProps {
     expanded = [];
 
     created() {
+        this.afterInit = true;
     }
 
     mounted() {
@@ -109,7 +111,7 @@ class BookmarkSettings extends BookmarkSettingsProps {
         this.libs.groups.forEach(group => {
             const rkey = `${i}`;
             const g = {label: group.r, key: rkey, children: []};
-            this.links[rkey] = group.r;
+            this.links[rkey] = {l: group.r, c: ''};
 
             let j = 0;
             group.list.forEach(link => {
@@ -119,7 +121,7 @@ class BookmarkSettings extends BookmarkSettingsProps {
                     key
                 });
 
-                this.links[key] = link.l;
+                this.links[key] = link;
                 if (link.l == this.libs.startLink && expanded.indexOf(rkey) < 0) {
                     expanded.push(rkey);
                 }
@@ -131,9 +133,12 @@ class BookmarkSettings extends BookmarkSettingsProps {
             i++;
         });
 
-        this.$nextTick(() => {
-            this.expanded = expanded;
-        });
+        if (this.afterInit) {
+            this.$nextTick(() => {
+                this.expanded = expanded;
+            });
+            this.afterInit = false;
+        }
 
         return result;
     }
@@ -147,22 +152,36 @@ class BookmarkSettings extends BookmarkSettingsProps {
         if (!this.selected)
             return;
         if (this.selected.indexOf('-') < 0) {//rootLink
-            this.$emit('do-action', {action: 'setRootLink', data: this.links[this.selected]});
+            this.$emit('do-action', {action: 'setRootLink', data: this.links[this.selected].l});
         } else {//selectedLink
-            this.$emit('do-action', {action: 'setSelectedLink', data: this.links[this.selected]});
+            this.$emit('do-action', {action: 'setSelectedLink', data: this.links[this.selected].l});
         }
-
-        //this.close();
+        this.close();
     }
 
     openOptions() {
     }
 
+    editBookmark() {
+        this.$emit('do-action', {action: 'editBookmark', data: {link: this.links[this.selected].l, desc: this.links[this.selected].c}});
+    }
+
+    addBookmark() {
+        this.$emit('do-action', {action: 'addBookmark'});
+    }
+
+    delBookmark() {
+    }
+
     close() {
+        this.afterInit = false;
         this.$emit('close');
     }
 
     keyHook(event) {
+        if (this.addBookmarkVisible)
+            return false;
+
         if (event.type == 'keydown' && event.key == 'Escape') {
             this.close();
             return true;

@@ -68,7 +68,8 @@
                 <template slot="header">
                     <div class="row items-center">
                         <q-icon class="q-mr-sm" name="la la-bookmark" size="28px"></q-icon>
-                        Добавить закладку
+                        <div v-if="addBookmarkMode == 'edit'">Редактировать закладку</div>
+                        <div v-else>Добавить закладку</div>
                     </div>
                 </template>
 
@@ -97,7 +98,9 @@
                 </template>
             </Dialog>
         </div>
-        <BookmarkSettings v-if="bookmarkSettingsActive" ref="bookmarkSettings" :libs="libs" @do-action="doAction" @close="closeBookmarkSettings"></BookmarkSettings>
+        <BookmarkSettings v-if="bookmarkSettingsActive" ref="bookmarkSettings" :libs="libs" :addBookmarkVisible="addBookmarkVisible"
+            @do-action="doAction" @close="closeBookmarkSettings">
+        </BookmarkSettings>
     </Window>
 </template>
 
@@ -154,6 +157,7 @@ class ExternalLibs extends Vue {
     addBookmarkVisible = false;
     transparentLayoutVisible = false;
 
+    addBookmarkMode = '';
     bookmarkLink = '';
     bookmarkDesc = '';
     defaultRootLink = '';
@@ -297,6 +301,8 @@ class ExternalLibs extends Vue {
             case 'setLibs': this.commitLibs(event.data); break;
             case 'setRootLink': this.rootLink = event.data; this.rootLinkInput(); break;
             case 'setSelectedLink': this.selectedLink = event.data; this.selectedLinkInput(); break;
+            case 'editBookmark': this.addBookmark('edit', event.data.link, event.data.desc); break;
+            case 'addBookmark': this.addBookmark('add'); break;
         }
     }
 
@@ -439,9 +445,17 @@ class ExternalLibs extends Vue {
         }
     }
 
-    addBookmark() {
-        this.bookmarkLink = (this.bookUrl ? this.makeProxySubst(lu.addProtocol(this.bookUrl), true) : '');
-        this.bookmarkDesc = '';
+    addBookmark(mode = 'add', link = '', desc = '') {
+
+        if (mode == 'edit') {
+            this.editBookmarkLink = this.bookmarkLink = link;
+            this.editBookmarkDesc = this.bookmarkDesc = desc;
+        } else {
+            this.bookmarkLink = (this.bookUrl ? this.makeProxySubst(lu.addProtocol(this.bookUrl), true) : '');
+            this.bookmarkDesc = '';
+        }
+
+        this.addBookmarkMode = mode;
         this.addBookmarkVisible = true;
         this.$nextTick(() => {
             this.$refs.bookmarkLink.focus();
@@ -474,7 +488,6 @@ class ExternalLibs extends Vue {
     bookmarkDescKeyDown(event) {
         if (event.key == 'Enter') {
             this.okAddBookmark();
-            event.preventDefault();
         }
     }
 
@@ -482,7 +495,7 @@ class ExternalLibs extends Vue {
         if (!this.bookmarkLink)
             return;
 
-        const link = lu.addProtocol(this.bookmarkLink);
+        const link = (this.addBookmarkMode == 'edit' ? lu.addProtocol(this.editBookmarkLink) : lu.addProtocol(this.bookmarkLink));
         let index = -1;
         try {
             index = lu.getRootIndexByUrl(this.libs.groups, link);
@@ -491,14 +504,25 @@ class ExternalLibs extends Vue {
             return;
         }
 
+        let libs = _.cloneDeep(this.libs);
+
+        //добавление
         //есть группа в закладках
         if (index >= 0) {
-            const item = lu.getListItemByLink(this.libs.groups[index].list, link);
-            
-            if (!item || item.c != this.bookmarkDesc) {
-                //добавляем
-                let libs = _.cloneDeep(this.libs);
+            const item = lu.getListItemByLink(libs.groups[index].list, link);
 
+            //редактирование
+            if (item && this.addBookmarkMode == 'edit') {
+                if (item) {
+                    //редактируем
+                    item.l = link;
+                    item.c = this.bookmarkDesc;
+                    this.commitLibs(libs);
+                } else {
+                    await this.$root.stdDialog.alert('Не удалось отредактировать закладку', 'Ошибка');
+                }
+            } else if (!item) {
+                //добавляем
                 if (libs.groups[index].list.length >= 100) {
                     await this.$root.stdDialog.alert('Достигнут предел количества закладок для этого сайта', 'Ошибка');
                     return;
@@ -506,10 +530,18 @@ class ExternalLibs extends Vue {
 
                 libs.groups[index].list.push({l: link, c: this.bookmarkDesc});
                 this.commitLibs(libs);
+            } else if (item.c != this.bookmarkDesc) {
+                if (await this.$root.stdDialog.confirm(`Такая закладка уже существует с другим описанием<br>` +
+                    `Заменить '${this.$sanitize(item.c)}' на '${this.$sanitize(this.bookmarkDesc)}'?`, ' ')) {
+                    item.c = this.bookmarkDesc;
+                    this.commitLibs(libs);                    
+                } else 
+                    return;
+            } else {
+                await this.$root.stdDialog.alert('Такая закладка уже существует', ' ');
+                return;
             }
         } else {//нет группы в закладках
-            let libs = _.cloneDeep(this.libs);
-
             if (libs.groups.length >= 100) {
                 await this.$root.stdDialog.alert('Достигнут предел количества различных сайтов в закладках', 'Ошибка');
                 return;
@@ -573,10 +605,13 @@ class ExternalLibs extends Vue {
 
     keyHook(event) {
         if (this.$root.rootRoute() == '/external-libs') {
+            if (this.$root.stdDialog.active)
+                return false;
+
             if (this.bookmarkSettingsActive && this.$refs.bookmarkSettings.keyHook(event))
                 return true;
 
-            if (this.$refs.dialogAddBookmark.active)
+            if (this.addBookmarkVisible)
                 return false;
 
             if (event.type == 'keydown' && event.key == 'F4') {
