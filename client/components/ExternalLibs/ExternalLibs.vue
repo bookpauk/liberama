@@ -234,7 +234,10 @@ class ExternalLibs extends Vue {
         this.justOpened = true;
         this.$root.addKeyHook(this.keyHook);
 
-        this.$root.$on('resize', this.frameResize);
+        this.$root.$on('resize', async() => {
+            await utils.sleep(200);
+            this.frameResize();
+        });
 
         document.addEventListener('fullscreenchange', () => {
             this.fullScreenActive = (document.fullscreenElement !== null);
@@ -521,18 +524,21 @@ class ExternalLibs extends Vue {
     }
 
     frameResize() {
-        if (this.$refs.frame) {
-            const w = this.$refs.frameBox.offsetWidth;
-            const h = this.$refs.frameBox.offsetHeight;
-            const normalSize = `width: ${w}px; height: ${h}px;`;
-            this.$refs.frameWrap.style = normalSize;
-            if (this.frameScale != 1) {
-                const s = this.frameScale;
-                this.$refs.frame.style = `width: ${w/s}px; height: ${h/s}px; transform: scale(${s}); transform-origin: 0 0;`;
-            } else {
-                this.$refs.frame.style = normalSize;
+        this.$refs.frameWrap.style = 'width: 1px; height: 1px;';
+        this.$nextTick(() => {
+            if (this.$refs.frame) {
+                const w = this.$refs.frameBox.offsetWidth;
+                const h = this.$refs.frameBox.offsetHeight;
+                const normalSize = `width: ${w}px; height: ${h}px;`;
+                this.$refs.frameWrap.style = normalSize;
+                if (this.frameScale != 1) {
+                    const s = this.frameScale;
+                    this.$refs.frame.style = `width: ${w/s}px; height: ${h/s}px; transform: scale(${s}); transform-origin: 0 0;`;
+                } else {
+                    this.$refs.frame.style = normalSize;
+                }
             }
-        }
+        });
     }
 
     changeScale(delta) {
