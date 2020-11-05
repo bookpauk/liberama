@@ -4,7 +4,7 @@
             Настроить закладки
         </template>
 
-        <div class="column fit">
+        <div class="col column fit">
             <div class="row items-center top-panel bg-grey-3">
                 <q-btn class="q-mr-md" round dense color="blue" icon="la la-check" @click.stop="openSelected" size="16px" :disabled="!selected">
                     <q-tooltip :delay="1500" anchor="bottom middle" content-style="font-size: 80%">Открыть выбранную закладку</q-tooltip>
@@ -17,8 +17,8 @@
             </div>
 
             <div class="col row">
-                <div class="left-panel column items-center bg-grey-3">
-                    <q-btn class="q-mb-sm" round dense color="blue" icon="la la-plus" @click.stop="addBookmark" size="14px">
+                <div class="left-panel column items-center no-wrap bg-grey-3">
+                    <q-btn class="q-my-sm" round dense color="blue" icon="la la-plus" @click.stop="addBookmark" size="14px">
                         <q-tooltip :delay="1500" anchor="bottom middle" content-style="font-size: 80%">Добавить закладку</q-tooltip>
                     </q-btn>
                     <q-btn class="q-mb-sm" round dense color="blue" icon="la la-minus" @click.stop="delBookmark" size="14px" :disabled="!ticked.length">
@@ -36,20 +36,25 @@
                     <q-btn class="q-mb-sm" round dense color="blue" icon="la la-broom" @click.stop="setDefaultBookmarks" size="14px">
                         <q-tooltip :delay="1500" anchor="bottom middle" content-style="font-size: 80%">Установить по умолчанию</q-tooltip>
                     </q-btn>
+                    <div class="space"/>
                 </div>
 
-                <div class="col tree">
+                <div class="col fit tree">
+                    <div v-show="nodes.length" class="checkbox-tick-all">
+                        <q-checkbox v-model="tickAll" @input="makeTickAll" size="36px" label="Выбрать все" />
+                    </div>
                     <q-tree
-                      :nodes="nodes"
-                      node-key="key"
-                      tick-strategy="leaf"
-                      :selected.sync="selected"
-                      :ticked.sync="ticked"
-                      :expanded.sync="expanded"
-                      selected-color="black"
-                      :filter="search"
-                      no-nodes-label="Закладок пока нет"
-                      no-results-label="Ничего не найдено"
+                        class="q-my-xs"
+                        :nodes="nodes"
+                        node-key="key"
+                        tick-strategy="leaf"
+                        :selected.sync="selected"
+                        :ticked.sync="ticked"
+                        :expanded.sync="expanded"
+                        selected-color="black"
+                        :filter="search"
+                        no-nodes-label="Закладок пока нет"
+                        no-results-label="Ничего не найдено"
                     >
                         <template v-slot:default-header="p">
                             <div class="q-px-xs" :class="{selected: selected == p.key}">{{ p.node.label }}</div>
@@ -83,7 +88,8 @@ export default @Component({
         Window,
     },
     watch: {
-        libs: function() {
+        ticked: function() {
+            this.checkAllTicked();
         },
     }    
 })
@@ -92,6 +98,7 @@ class BookmarkSettings extends BookmarkSettingsProps {
     selected = '';
     ticked = [];
     expanded = [];
+    tickAll = false;
 
     created() {
         this.afterInit = true;
@@ -139,6 +146,30 @@ class BookmarkSettings extends BookmarkSettingsProps {
         }
 
         return result;
+    }
+
+    makeTickAll() {
+        if (this.tickAll) {
+            const newTicked = [];
+            for (const key of Object.keys(this.links)) {
+                if (key.indexOf('r-') != 0)
+                    newTicked.push(key);
+            }
+            this.ticked = newTicked;
+        } else {
+            this.ticked = [];
+        }
+    }
+
+    checkAllTicked() {
+        const ticked = new Set(this.ticked);
+
+        let newTickAll = !!(this.nodes.length);
+        for (const key of Object.keys(this.links)) {
+            if (key.indexOf('r-') != 0 && !ticked.has(key))
+                newTickAll = false;
+        }
+        this.tickAll = newTickAll;
     }
 
     resetSearch() {
@@ -287,15 +318,30 @@ class BookmarkSettings extends BookmarkSettingsProps {
 
 .left-panel {
     width: 60px;
+    height: 100%;
     border-right: 1px solid gray;
-    padding: 10px 0 10px 0;
+    overflow-x: hidden;
+    overflow-y: auto;
 }
 
 .tree {
-    padding: 10px;
+    padding: 0px 10px 10px 10px;
+    overflow-x: auto;
+    overflow-y: auto;
 }
 
 .selected {
     text-shadow: 0 0 20px yellow, 0 0 15px yellow, 0 0 10px yellow, 0 0 10px yellow, 0 0 5px yellow;
+}
+
+.checkbox-tick-all {
+    border-bottom: 1px solid #bbbbbb;
+    margin-bottom: 7px;
+    padding: 5px 5px 2px 16px;
+}
+
+.space {
+    min-height: 1px;
+    width: 1px;
 }
 </style>

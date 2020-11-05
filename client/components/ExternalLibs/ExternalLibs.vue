@@ -379,7 +379,7 @@ class ExternalLibs extends Vue {
         } else {
             this.rootLink = '';
             this.selectedLink = '';
-            this.debouncedGoToLink(this.selectedLink, force);
+            this.debouncedGoToLink(this.selectedLink, true);
         }
     }
 
