@@ -407,7 +407,7 @@ class SettingsPage extends Vue {
             return;
 
         try {
-            const result = await this.$root.stdDialog.prompt(`<b>Предупреждение!</b> Удаление профиля '${this.currentProfile}' необратимо.` +
+            const result = await this.$root.stdDialog.prompt(`<b>Предупреждение!</b> Удаление профиля '${this.$sanitize(this.currentProfile)}' необратимо.` +
                     `<br>Все настройки профиля будут потеряны, однако список читаемых книг сохранится.` +
                     `<br><br>Введите 'да' для подтверждения удаления:`, ' ', {
                 inputValidator: (str) => { if (str && str.toLowerCase() === 'да') return true; else return 'Удаление не подтверждено'; },
