@@ -118,6 +118,7 @@
                 <div class="q-mx-md column">
                     <q-checkbox v-model="closeAfterSubmit" size="36px" label="Закрыть окно при отправке ссылки в читалку" />
                     <q-checkbox v-model="openInFrameOnEnter" size="36px" label="Открывать ссылку во фрейме при нажатии 'Enter'" />
+                    <q-checkbox v-model="openInFrameOnAdd" size="36px" label="Активировать новую закладку после добавления" />
                 </div>
 
                 <template slot="footer">
@@ -187,6 +188,9 @@ export default @Component({
         openInFrameOnEnter: function(newValue) {
             this.commitProp('openInFrameOnEnter', newValue);
         },
+        openInFrameOnAdd: function(newValue) {
+            this.commitProp('openInFrameOnAdd', newValue);
+        },
     }    
 })
 class ExternalLibs extends Vue {
@@ -212,6 +216,7 @@ class ExternalLibs extends Vue {
 
     closeAfterSubmit = false;
     openInFrameOnEnter = false;
+    openInFrameOnAdd = false;
 
     created() {
         this.oldStartLink = '';
@@ -353,6 +358,7 @@ class ExternalLibs extends Vue {
         this.selectedLink = libs.startLink;
         this.closeAfterSubmit = libs.closeAfterSubmit || false;
         this.openInFrameOnEnter = libs.openInFrameOnEnter || false;
+        this.openInFrameOnAdd = libs.openInFrameOnAdd || false;
 
         this.updateStartLink();
     }
@@ -623,6 +629,12 @@ class ExternalLibs extends Vue {
                 }
 
                 libs.groups[index].list.push({l: link, c: this.bookmarkDesc});
+
+                if (this.openInFrameOnAdd) {
+                    libs.startLink = link;
+                    libs.comment = this.bookmarkDesc;
+                }
+
                 this.commitLibs(libs);
             } else if (item.c != this.bookmarkDesc) {
                 if (await this.$root.stdDialog.confirm(`Такая закладка уже существует с другим описанием.<br>` +
@@ -647,6 +659,11 @@ class ExternalLibs extends Vue {
             index = lu.getSafeRootIndexByUrl(libs.groups, link);
             if (index >= 0)
                 libs.groups[index].list.push({l: link, c: this.bookmarkDesc});
+
+            if (this.openInFrameOnAdd) {
+                libs.startLink = link;
+                libs.comment = this.bookmarkDesc;
+            }
 
             this.commitLibs(libs);
         }
@@ -707,9 +724,9 @@ class ExternalLibs extends Vue {
 <p>Окно 'Библиотека' позволяет открывать ссылки в читалке без переключения между окнами,
 что особенно актуально для мобильных устройств.</p>
 
-<p>Имеется возможность управлять закладками
+<p>'Библиотека' разрешает свободный доступ к сайту flibusta.is. Имеется возможность управлять закладками
 на понравившиеся ресурсы, книги или страницы авторов. Открытие ссылок и навигация осуществляется во фрейме, но,
-к сожалению, в нем открываются не все страницы. 'Библиотека' также разрешает свободный доступ к сайту flibusta.is.
+к сожалению, в нем открываются не все страницы.
 </p>
 
 <p>Из-за проблем с безопасностью, навигация 'вперед-назад' во фрейме осуществляется с помощью контекстного меню правой кнопкой мыши.
