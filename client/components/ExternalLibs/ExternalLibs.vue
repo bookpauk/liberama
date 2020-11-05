@@ -44,7 +44,7 @@
                     @focus="selectAllOnFocus" @keydown="bookUrlKeyDown"
                 >
                     <template v-slot:prepend>
-                        <q-btn class="q-mr-xs" round dense color="blue" icon="la la-home" @click="goToLink(selectedLink, true)" size="12px">
+                        <q-btn class="q-mr-xs" round dense color="blue" icon="la la-home" @click="goToLink(selectedLink)" size="12px">
                             <q-tooltip :delay="1500" anchor="bottom middle" content-style="font-size: 80%">Вернуться на стартовую страницу</q-tooltip>
                         </q-btn>
                         <q-btn round dense color="blue" icon="la la-angle-double-down" @click="openBookUrlInFrame" size="12px" :disabled="!bookUrl">
@@ -215,14 +215,15 @@ class ExternalLibs extends Vue {
     openFullscreen = false;
 
     created() {
+        this.oldStartLink = '';
         this.$root.addKeyHook(this.keyHook);
 
         document.addEventListener('fullscreenchange', () => {
             this.fullScreenActive = (document.fullscreenElement !== null);
         });
 
-        this.debouncedGoToLink = _.debounce((link, force) => {
-            this.goToLink(link, force);
+        this.debouncedGoToLink = _.debounce((link) => {
+            this.goToLink(link);
         }, 100, {'maxWait':200});
         //this.commit = this.$store.commit;
         //this.commit('reader/setLibs', rstore.libsDefaults);
@@ -419,11 +420,14 @@ class ExternalLibs extends Vue {
                 this.commitLibs(libs);
             }
 
-            this.debouncedGoToLink(this.selectedLink, force);
+            if (force || this.oldStartLink != libs.startLink) {
+                this.oldStartLink = libs.startLink;
+                this.debouncedGoToLink(this.selectedLink);
+            }
         } else {
             this.rootLink = '';
             this.selectedLink = '';
-            this.debouncedGoToLink(this.selectedLink, true);
+            this.debouncedGoToLink(this.selectedLink);
         }
     }
 
@@ -466,11 +470,11 @@ class ExternalLibs extends Vue {
 
     openBookUrlInFrame() {
         if (this.bookUrl) {
-            this.goToLink(lu.addProtocol(this.bookUrl), true);
+            this.goToLink(lu.addProtocol(this.bookUrl));
         }
     }
 
-    goToLink(link, force) {
+    goToLink(link) {
         if (!this.ready || !link)
             return;
 
@@ -479,19 +483,16 @@ class ExternalLibs extends Vue {
             return;
         }
 
-        const newLink = this.makeProxySubst(link);
-        if (force || newLink != this.frameSrc) {
-            this.frameSrc = newLink;
+        this.frameSrc = this.makeProxySubst(link);
 
-            this.frameVisible = false;
+        this.frameVisible = false;
+        this.$nextTick(() => {
+            this.frameVisible = true;
             this.$nextTick(() => {
-                this.frameVisible = true;
-                this.$nextTick(() => {
-                    if (this.$refs.frame)
-                        this.$refs.frame.contentWindow.focus();
-                });
+                if (this.$refs.frame)
+                    this.$refs.frame.contentWindow.focus();
             });
-        }
+        });
     }
 
     getCommentByLink(list, link) {
@@ -685,7 +686,7 @@ class ExternalLibs extends Vue {
                 this.submitUrl();
             } else {
                 if (this.bookUrl)
-                    this.goToLink(this.bookUrl, true);
+                    this.goToLink(this.bookUrl);
             }
             event.preventDefault();
         }
