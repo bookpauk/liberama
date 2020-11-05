@@ -248,7 +248,7 @@ body, html, #app {
 }
 
 .dborder {
-    border: 2px solid yellow !important;
+    border: 2px solid magenta !important;
 }
 
 .icon-rotate {

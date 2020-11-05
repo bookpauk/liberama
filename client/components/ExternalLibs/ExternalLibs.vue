@@ -5,6 +5,10 @@
         </template>
 
         <template slot="buttons">
+            <span class="full-screen-button row justify-center items-center" @mousedown.stop @click="showHelp">
+                <q-icon name="la la-question-circle" size="16px"/>
+                <q-tooltip :delay="1500" anchor="bottom middle" content-style="font-size: 80%">Справка</q-tooltip>
+            </span>
             <span class="full-screen-button row justify-center items-center" @mousedown.stop @click="fullScreenToggle">
                 <q-icon :name="(fullScreenActive ? 'la la-compress-arrows-alt': 'la la-expand-arrows-alt')" size="16px"/>
                 <q-tooltip :delay="1500" anchor="bottom middle" content-style="font-size: 80%">На весь экран</q-tooltip>
@@ -23,12 +27,12 @@
                         <q-btn class="q-mr-xs" round dense color="blue" icon="la la-plus" @click.stop="addBookmark" size="12px">
                             <q-tooltip :delay="1500" anchor="bottom middle" content-style="font-size: 80%">Добавить закладку</q-tooltip>
                         </q-btn>
-                        <q-btn round dense color="blue" icon="la la-bars" @click.stop="bookmarkSettings" size="12px" disabled>
+                        <q-btn round dense color="blue" icon="la la-bars" @click.stop="bookmarkSettings" size="12px">
                             <q-tooltip :delay="1500" anchor="bottom middle" content-style="font-size: 80%">Настроить закладки</q-tooltip>
                         </q-btn>
                     </template>
                     <template v-slot:selected>
-                        <div style="overflow: hidden; white-space: nowrap;">{{ removeProtocol(rootLink) }}</div>
+                        <div style="overflow: hidden; white-space: nowrap;">{{ rootLinkWithoutProtocol }}</div>
                     </template>
                 </q-select>
 
@@ -44,16 +48,21 @@
                     @focus="selectAllOnFocus" @keydown="bookUrlKeyDown"
                 >
                     <template v-slot:prepend>
-                        <q-btn class="q-mr-xs" round dense color="blue" icon="la la-home" @click="goToLink(libs.startLink)" size="12px">
+                        <q-btn class="q-mr-xs" round dense color="blue" icon="la la-home" @click="goToLink(selectedLink)" size="12px">
                             <q-tooltip :delay="1500" anchor="bottom middle" content-style="font-size: 80%">Вернуться на стартовую страницу</q-tooltip>
                         </q-btn>
-                        <q-btn round dense color="blue" icon="la la-angle-double-down" @click="openBookUrlInFrame" size="12px">
+                        <q-btn round dense color="blue" icon="la la-angle-double-down" @click="openBookUrlInFrame" size="12px" :disabled="!bookUrl">
                             <q-tooltip :delay="1500" anchor="bottom middle" content-style="font-size: 80%">Загрузить URL во фрейм</q-tooltip>
+                        </q-btn>
+                    </template>
+                    <template v-slot:append>
+                        <q-btn round dense color="blue" icon="la la-cog" @click.stop="optionsVisible = true" size="12px">
+                            <q-tooltip :delay="1500" anchor="bottom middle" content-style="font-size: 80%">Опции</q-tooltip>
                         </q-btn>
                     </template>
                 </q-input>
 
-                <q-btn rounded color="green-7" no-caps size="14px" @click="submitUrl">Открыть
+                <q-btn rounded color="green-7" no-caps size="14px" @click="submitUrl" :disabled="!bookUrl">Открыть
                     <q-tooltip :delay="1500" anchor="bottom middle" content-style="font-size: 80%">Открыть в читалке</q-tooltip>
                 </q-btn>
             </div>
@@ -68,7 +77,8 @@
                 <template slot="header">
                     <div class="row items-center">
                         <q-icon class="q-mr-sm" name="la la-bookmark" size="28px"></q-icon>
-                        Добавить закладку
+                        <div v-if="addBookmarkMode == 'edit'">Редактировать закладку</div>
+                        <div v-else>Добавить закладку</div>
                     </div>
                 </template>
 
@@ -96,8 +106,30 @@
                     <q-btn class="q-px-md q-ml-sm" color="primary" dense no-caps @click="okAddBookmark" :disabled="!bookmarkLink">OK</q-btn>
                 </template>
             </Dialog>
+
+            <Dialog ref="options" v-model="optionsVisible">
+                <template slot="header">
+                    <div class="row items-center">
+                        <q-icon class="q-mr-sm" name="la la-cog" size="28px"></q-icon>
+                        Опции
+                    </div>
+                </template>
+
+                <div class="q-mx-md column">
+                    <q-checkbox v-model="closeAfterSubmit" size="36px" label="Закрыть окно при отправке ссылки в читалку" />
+                    <q-checkbox v-model="openInFrameOnEnter" size="36px" label="Открывать ссылку во фрейме при нажатии 'Enter'" />
+                    <q-checkbox v-model="openInFrameOnAdd" size="36px" label="Активировать новую закладку после добавления" />
+                </div>
+
+                <template slot="footer">
+                    <q-btn class="q-px-md q-ml-sm" color="primary" dense no-caps @click="optionsVisible = false">OK</q-btn>
+                </template>
+            </Dialog>
         </div>
-        <BookmarkSettings v-if="bookmarkSettingsActive" ref="bookmarkSettings" :libs="libs" @close="closeBookmarkSettings"></BookmarkSettings>
+
+        <BookmarkSettings v-if="bookmarkSettingsActive" ref="bookmarkSettings" :libs="libs" :addBookmarkVisible="addBookmarkVisible"
+            @do-action="doAction" @close="closeBookmarkSettings">
+        </BookmarkSettings>
     </Window>
 </template>
 
@@ -113,6 +145,7 @@ import BookmarkSettings from './BookmarkSettings/BookmarkSettings.vue';
 
 import rstore from '../../store/modules/reader';
 import * as utils from '../../share/utils';
+import * as lu from './linkUtils';
 
 const proxySubst = {
     'http://flibusta.is': 'http://b.liberama.top:23480',
@@ -128,44 +161,75 @@ export default @Component({
         libs: function() {
             this.loadLibs();
         },
-        rootLink: function() {
-            this.updateSelectedLink();
-            this.updateStartLink();
-        },
-        selectedLink: function() {
-            this.updateStartLink();
-        },
         defaultRootLink: function() {
             this.updateBookmarkLink();
-        }
+        },
+        bookUrl: function(newValue) {
+            const value = lu.addProtocol(newValue);
+            const subst = this.makeProxySubst(value, true);
+            if (value != subst) {
+                this.$nextTick(() => {
+                    this.bookUrl = subst;
+                });
+            }
+        },
+        bookmarkLink: function(newValue) {
+            const value = lu.addProtocol(newValue);
+            const subst = this.makeProxySubst(value, true);
+            if (value != subst) {
+                this.$nextTick(() => {
+                    this.bookmarkLink = subst;
+                });
+            }
+        },
+        closeAfterSubmit: function(newValue) {
+            this.commitProp('closeAfterSubmit', newValue);
+        },
+        openInFrameOnEnter: function(newValue) {
+            this.commitProp('openInFrameOnEnter', newValue);
+        },
+        openInFrameOnAdd: function(newValue) {
+            this.commitProp('openInFrameOnAdd', newValue);
+        },
     }    
 })
 class ExternalLibs extends Vue {
     ready = false;
     frameVisible = false;
-    startLink = '';
     rootLink = '';
     selectedLink = '';
     frameSrc = '';
     bookUrl = '';
     libs = {};
     fullScreenActive = false;
-    addBookmarkVisible = false;
     transparentLayoutVisible = false;
 
+    addBookmarkVisible = false;
+    optionsVisible = false;
+
+    addBookmarkMode = '';
     bookmarkLink = '';
     bookmarkDesc = '';
     defaultRootLink = '';
 
     bookmarkSettingsActive = false;
 
+    closeAfterSubmit = false;
+    openInFrameOnEnter = false;
+    openInFrameOnAdd = false;
+
     created() {
+        this.oldStartLink = '';
+        this.justOpened = true;
         this.$root.addKeyHook(this.keyHook);
 
         document.addEventListener('fullscreenchange', () => {
             this.fullScreenActive = (document.fullscreenElement !== null);
         });
 
+        this.debouncedGoToLink = _.debounce((link) => {
+            this.goToLink(link);
+        }, 100, {'maxWait':200});
         //this.commit = this.$store.commit;
         //this.commit('reader/setLibs', rstore.libsDefaults);
     }
@@ -258,8 +322,6 @@ class ExternalLibs extends Vue {
         } else if (d.type == 'libs') {
             this.ready = true;
             this.libs = _.cloneDeep(d.data);
-            if (!this.frameSrc)
-                this.goToLink(this.libs.startLink);
         } else if (d.type == 'notify') {
             this.$root.notify.success(d.data, '', {position: 'bottom-right'});
         }
@@ -284,11 +346,31 @@ class ExternalLibs extends Vue {
         this.sendMessage({type: 'libs', data: libs});
     }
 
+    commitProp(prop, value) {
+        let libs = _.cloneDeep(this.libs);
+        libs[prop] = value;
+        this.commitLibs(libs);
+    }
+
     loadLibs() {
         const libs = this.libs;
-        this.startLink = (libs.comment ? libs.comment + ' ': '') + this.removeProtocol(libs.startLink);
-        this.rootLink = this.getOrigin(libs.startLink);
-        this.updateSelectedLink();
+
+        this.selectedLink = libs.startLink;
+        this.closeAfterSubmit = libs.closeAfterSubmit || false;
+        this.openInFrameOnEnter = libs.openInFrameOnEnter || false;
+        this.openInFrameOnAdd = libs.openInFrameOnAdd || false;
+
+        this.updateStartLink();
+    }
+
+    doAction(event) {
+        switch (event.action) {
+            case 'setLibs': this.commitLibs(event.data); break;
+            case 'setRootLink': this.rootLink = event.data; this.rootLinkInput(); break;
+            case 'setSelectedLink': this.selectedLink = event.data; this.selectedLinkInput(); break;
+            case 'editBookmark': this.addBookmark('edit', event.data.link, event.data.desc); break;
+            case 'addBookmark': this.addBookmark('add'); break;
+        }
     }
 
     get mode() {
@@ -297,32 +379,60 @@ class ExternalLibs extends Vue {
 
     get header() {
         let result = (this.ready ? 'Библиотека' : 'Загрузка...');
-        if (this.ready && this.startLink) {
-            result += ` | ${this.startLink}`;
+        if (this.ready && this.selectedLink) {
+            result += ` | ${(this.libs.comment ? this.libs.comment + ' ': '') + lu.removeProtocol(this.libs.startLink)}`;
         }
         this.$root.$emit('set-app-title', result);
         return result;
     }
 
-    updateSelectedLink() {
-        if (!this.ready)
-            return;
-        const index = this.getRootIndexByUrl(this.libs.groups, this.rootLink);
-        if (index >= 0)
-            this.selectedLink = this.libs.groups[index].s;
+    get rootLinkWithoutProtocol() {
+        return lu.removeProtocol(this.rootLink);
     }
 
-    updateStartLink() {
+    updateSelectedLinkByRoot() {
         if (!this.ready)
             return;
-        const index = this.getRootIndexByUrl(this.libs.groups, this.rootLink);
+
+        const index = lu.getSafeRootIndexByUrl(this.libs.groups, this.rootLink);
+        if (index >= 0)
+            this.selectedLink = this.libs.groups[index].s;
+        else
+            this.selectedLink = '';
+    }
+
+    updateStartLink(force) {
+        if (!this.ready)
+            return;
+
+        let index = -1;
+        try {
+            this.rootLink = lu.getOrigin(this.selectedLink);
+            index = lu.getRootIndexByUrl(this.libs.groups, this.rootLink);
+        } catch(e) {
+            //
+        }
+
         if (index >= 0) {
             let libs = _.cloneDeep(this.libs);
-            libs.groups[index].s = this.selectedLink;
-            libs.startLink = this.selectedLink;
-            libs.comment = this.getCommentByLink(libs.groups[index].list, this.selectedLink);
-            this.goToLink(this.selectedLink);
-            this.commitLibs(libs);
+            const com = this.getCommentByLink(libs.groups[index].list, this.selectedLink);
+            if (libs.groups[index].s != this.selectedLink ||
+                libs.startLink != this.selectedLink ||
+                libs.comment != com) {
+                libs.groups[index].s = this.selectedLink;
+                libs.startLink = this.selectedLink;
+                libs.comment = com;
+                this.commitLibs(libs);
+            }
+
+            if (force || this.oldStartLink != libs.startLink) {
+                this.oldStartLink = libs.startLink;
+                this.debouncedGoToLink(this.selectedLink);
+            }
+        } else {
+            this.rootLink = '';
+            this.selectedLink = '';
+            this.debouncedGoToLink(this.selectedLink);
         }
     }
 
@@ -332,7 +442,7 @@ class ExternalLibs extends Vue {
             return result;
 
         this.libs.groups.forEach(group => {
-            result.push({label: this.removeProtocol(group.r), value: group.r});
+            result.push({label: lu.removeProtocol(group.r), value: group.r});
         });
 
         return result;
@@ -342,7 +452,7 @@ class ExternalLibs extends Vue {
         let result = [];
 
         rstore.libsDefaults.groups.forEach(group => {
-            result.push({label: this.removeProtocol(group.r), value: group.r});
+            result.push({label: lu.removeProtocol(group.r), value: group.r});
         });
 
         return result;
@@ -353,10 +463,10 @@ class ExternalLibs extends Vue {
         if (!this.ready)
             return result;
 
-        const index = this.getRootIndexByUrl(this.libs.groups, this.rootLink);
+        const index = lu.getSafeRootIndexByUrl(this.libs.groups, this.rootLink);
         if (index >= 0) {
             this.libs.groups[index].list.forEach(link => {
-                result.push({label: (link.c ? link.c + ' ': '') + this.removeOrigin(link.l), value: link.l});
+                result.push({label: (link.c ? link.c + ' ': '') + lu.removeOrigin(link.l), value: link.l});
             });
         }
 
@@ -365,66 +475,33 @@ class ExternalLibs extends Vue {
 
     openBookUrlInFrame() {
         if (this.bookUrl) {
-            this.goToLink(this.addProtocol(this.bookUrl));
+            this.goToLink(lu.addProtocol(this.bookUrl));
         }
     }
 
     goToLink(link) {
-        if (!this.ready)
+        if (!this.ready || !link)
             return;
 
+        if (!link) {
+            this.frameVisible = false;
+            return;
+        }
+
         this.frameSrc = this.makeProxySubst(link);
+
         this.frameVisible = false;
         this.$nextTick(() => {
             this.frameVisible = true;
             this.$nextTick(() => {
-                this.$refs.frame.contentWindow.focus();
+                if (this.$refs.frame)
+                    this.$refs.frame.contentWindow.focus();
             });
         });
     }
 
-    addProtocol(url) {
-        if ((url.indexOf('http://') != 0) && (url.indexOf('https://') != 0))
-            return 'http://' + url;
-        return url;
-    }
-
-    removeProtocol(url) {
-        return url.replace(/(^\w+:|^)\/\//, '');
-    }
-
-    getOrigin(url) {
-        const parsed = new URL(url);
-        return parsed.origin;
-    }
-
-    removeOrigin(url) {
-        const parsed = new URL(url);
-        const result = url.substring(parsed.origin.length);
-        return (result ? result : '/');
-    }
-
-    getRootIndexByUrl(groups, url) {
-        if (!this.ready)
-            return -1;
-        const origin = this.getOrigin(url);
-        for (let i = 0; i < groups.length; i++) {
-            if (groups[i].r == origin)
-                return i;
-        }
-        return -1;
-    }
-
-    getListItemByLink(list, link) {
-        for (const item of list) {
-            if (item.l == link)
-                return item;
-        }
-        return null;
-    }
-
     getCommentByLink(list, link) {
-        const item = this.getListItemByLink(list, link);
+        const item = lu.getListItemByLink(list, link);
         return (item ? item.c : '');
     }
 
@@ -432,7 +509,7 @@ class ExternalLibs extends Vue {
         for (const [key, value] of Object.entries(proxySubst)) {
             if (reverse && value == url.substring(0, value.length)) {
                 return key + url.substring(value.length);
-            } else if (key == url.substring(0, key.length)) {
+            } else if (!reverse && key == url.substring(0, key.length)) {
                 return value + url.substring(key.length);
             }
         }
@@ -446,29 +523,37 @@ class ExternalLibs extends Vue {
     }
 
     rootLinkInput() {
-        this.updateSelectedLink();
-        this.updateStartLink();
+        this.updateSelectedLinkByRoot();
+        this.updateStartLink(true);
     }
 
     selectedLinkInput() {
-        this.updateStartLink();
+        this.updateStartLink(true);
     }
 
     submitUrl() {
         if (this.bookUrl) {
             this.sendMessage({type: 'submitUrl', data: {
-                url: this.makeProxySubst(this.addProtocol(this.bookUrl), true), 
+                url: this.bookUrl,
                 force: true
             }});
             this.bookUrl = '';
-            if (this.libs.closeAfterSubmit)
+            if (this.closeAfterSubmit)
                 this.close();
         }
     }
 
-    addBookmark() {
-        this.bookmarkLink = (this.bookUrl ? this.makeProxySubst(this.addProtocol(this.bookUrl), true) : '');
-        this.bookmarkDesc = '';
+    addBookmark(mode = 'add', link = '', desc = '') {
+
+        if (mode == 'edit') {
+            this.editBookmarkLink = this.bookmarkLink = link;
+            this.editBookmarkDesc = this.bookmarkDesc = desc;
+        } else {
+            this.bookmarkLink = this.bookUrl;
+            this.bookmarkDesc = '';
+        }
+
+        this.addBookmarkMode = mode;
         this.addBookmarkVisible = true;
         this.$nextTick(() => {
             this.$refs.bookmarkLink.focus();
@@ -477,7 +562,7 @@ class ExternalLibs extends Vue {
     }
 
     updateBookmarkLink() {
-        const index = this.getRootIndexByUrl(rstore.libsDefaults.groups, this.defaultRootLink);
+        const index = lu.getSafeRootIndexByUrl(rstore.libsDefaults.groups, this.defaultRootLink);
         if (index >= 0) {
             this.bookmarkLink = rstore.libsDefaults.groups[index].s;
             this.bookmarkDesc = this.getCommentByLink(rstore.libsDefaults.groups[index].list, this.bookmarkLink);
@@ -500,8 +585,9 @@ class ExternalLibs extends Vue {
 
     bookmarkDescKeyDown(event) {
         if (event.key == 'Enter') {
-            this.okAddBookmark();
+            event.stopPropagation();
             event.preventDefault();
+            this.okAddBookmark();
         }
     }
 
@@ -509,45 +595,75 @@ class ExternalLibs extends Vue {
         if (!this.bookmarkLink)
             return;
 
-        const link = this.addProtocol(this.bookmarkLink);
+        const link = (this.addBookmarkMode == 'edit' ? lu.addProtocol(this.editBookmarkLink) : lu.addProtocol(this.bookmarkLink));
         let index = -1;
         try {
-            index = this.getRootIndexByUrl(this.libs.groups, link);
+            index = lu.getRootIndexByUrl(this.libs.groups, link);
         } catch (e) {
             await this.$root.stdDialog.alert('Неверный формат ссылки', 'Ошибка');
             return;
         }
 
+        let libs = _.cloneDeep(this.libs);
+
+        //добавление
         //есть группа в закладках
         if (index >= 0) {
-            const item = this.getListItemByLink(this.libs.groups[index].list, link);
-            
-            if (!item || item.c != this.bookmarkDesc) {
-                //добавляем
-                let libs = _.cloneDeep(this.libs);
+            const item = lu.getListItemByLink(libs.groups[index].list, link);
 
+            //редактирование
+            if (item && this.addBookmarkMode == 'edit') {
+                if (item) {
+                    //редактируем
+                    item.l = link;
+                    item.c = this.bookmarkDesc;
+                    this.commitLibs(libs);
+                } else {
+                    await this.$root.stdDialog.alert('Не удалось отредактировать закладку', 'Ошибка');
+                }
+            } else if (!item) {
+                //добавляем
                 if (libs.groups[index].list.length >= 100) {
                     await this.$root.stdDialog.alert('Достигнут предел количества закладок для этого сайта', 'Ошибка');
                     return;
                 }
 
                 libs.groups[index].list.push({l: link, c: this.bookmarkDesc});
+
+                if (this.openInFrameOnAdd) {
+                    libs.startLink = link;
+                    libs.comment = this.bookmarkDesc;
+                }
+
                 this.commitLibs(libs);
+            } else if (item.c != this.bookmarkDesc) {
+                if (await this.$root.stdDialog.confirm(`Такая закладка уже существует с другим описанием.<br>` +
+                    `Заменить '${this.$sanitize(item.c)}' на '${this.$sanitize(this.bookmarkDesc)}'?`, ' ')) {
+                    item.c = this.bookmarkDesc;
+                    this.commitLibs(libs);                    
+                } else 
+                    return;
+            } else {
+                await this.$root.stdDialog.alert('Такая закладка уже существует', ' ');
+                return;
             }
         } else {//нет группы в закладках
-            let libs = _.cloneDeep(this.libs);
-
             if (libs.groups.length >= 100) {
                 await this.$root.stdDialog.alert('Достигнут предел количества различных сайтов в закладках', 'Ошибка');
                 return;
             }
 
             //добавляем сначала группу
-            libs.groups.push({r: this.getOrigin(link), s: link, list: []});
+            libs.groups.push({r: lu.getOrigin(link), s: link, list: []});
             
-            index = this.getRootIndexByUrl(libs.groups, link);
+            index = lu.getSafeRootIndexByUrl(libs.groups, link);
             if (index >= 0)
                 libs.groups[index].list.push({l: link, c: this.bookmarkDesc});
+
+            if (this.openInFrameOnAdd) {
+                libs.startLink = link;
+                libs.comment = this.bookmarkDesc;
+            }
 
             this.commitLibs(libs);
         }
@@ -582,7 +698,12 @@ class ExternalLibs extends Vue {
 
     bookUrlKeyDown(event) {
         if (event.key == 'Enter') {
-            this.submitUrl();
+            if (!this.openInFrameOnEnter) {
+                this.submitUrl();
+            } else {
+                if (this.bookUrl)
+                    this.goToLink(this.bookUrl);
+            }
             event.preventDefault();
         }
     }
@@ -598,12 +719,34 @@ class ExternalLibs extends Vue {
         this.bookmarkSettingsActive = false;
     }
 
+    showHelp() {
+        this.$root.stdDialog.alert(`
+<p>Окно 'Библиотека' позволяет открывать ссылки в читалке без переключения между окнами,
+что особенно актуально для мобильных устройств.</p>
+
+<p>'Библиотека' разрешает свободный доступ к сайту flibusta.is. Имеется возможность управлять закладками
+на понравившиеся ресурсы, книги или страницы авторов. Открытие ссылок и навигация осуществляется во фрейме, но,
+к сожалению, в нем открываются не все страницы.
+</p>
+
+<p>Из-за проблем с безопасностью, навигация 'вперед-назад' во фрейме осуществляется с помощью контекстного меню правой кнопкой мыши.
+На мобильных устройствах для этого служит системная клавиша 'Назад (стрелка влево)' и опция 'Вперед (стрелка вправо)' в меню браузера. 
+</p>
+
+<p>Приятного пользования ;-)
+</p>
+            `, 'Справка', {iconName: 'la la-info-circle'});
+    }
+
     keyHook(event) {
         if (this.$root.rootRoute() == '/external-libs') {
+            if (this.$root.stdDialog.active)
+                return false;
+
             if (this.bookmarkSettingsActive && this.$refs.bookmarkSettings.keyHook(event))
                 return true;
 
-            if (this.$refs.dialogAddBookmark.active)
+            if (this.addBookmarkVisible || this.optionsVisible)
                 return false;
 
             if (event.type == 'keydown' && event.key == 'F4') {
@@ -621,7 +764,6 @@ class ExternalLibs extends Vue {
         }
         return false;
     }
-
 }
 //-----------------------------------------------------------------------------
 </script>
