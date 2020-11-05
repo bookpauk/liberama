@@ -5,13 +5,21 @@
         </template>
 
         <template slot="buttons">
-            <span class="full-screen-button row justify-center items-center" @mousedown.stop @click="showHelp">
-                <q-icon name="la la-question-circle" size="16px"/>
-                <q-tooltip :delay="1500" anchor="bottom middle" content-style="font-size: 80%">Справка</q-tooltip>
-            </span>
             <span class="full-screen-button row justify-center items-center" @mousedown.stop @click="fullScreenToggle">
                 <q-icon :name="(fullScreenActive ? 'la la-compress-arrows-alt': 'la la-expand-arrows-alt')" size="16px"/>
                 <q-tooltip :delay="1500" anchor="bottom middle" content-style="font-size: 80%">На весь экран</q-tooltip>
+            </span>
+            <span class="full-screen-button row justify-center items-center" @mousedown.stop @click="changeScale(0.1)">
+                <q-icon name="la la-plus" size="16px"/>
+                <q-tooltip :delay="1500" anchor="bottom middle" content-style="font-size: 80%">Увеличить масштаб</q-tooltip>
+            </span>
+            <span class="full-screen-button row justify-center items-center" @mousedown.stop @click="changeScale(-0.1)">
+                <q-icon name="la la-minus" size="16px"/>
+                <q-tooltip :delay="1500" anchor="bottom middle" content-style="font-size: 80%">Уменьшить масштаб</q-tooltip>
+            </span>
+            <span class="full-screen-button row justify-center items-center" @mousedown.stop @click="showHelp">
+                <q-icon name="la la-question-circle" size="16px"/>
+                <q-tooltip :delay="1500" anchor="bottom middle" content-style="font-size: 80%">Справка</q-tooltip>
             </span>
         </template>
 
@@ -68,8 +76,10 @@
             </div>
             <div class="separator"></div>
 
-            <div class="col fit" style="position: relative;">
-                <iframe v-if="frameVisible" class="fit" ref="frame" :src="frameSrc" frameborder="0"></iframe>
+            <div class="col fit" ref="frameBox" style="position: relative;">
+                <div ref="frameWrap" class="overflow-hidden">
+                    <iframe v-if="frameVisible" ref="frame" :src="frameSrc" frameborder="0"></iframe>
+                </div>
                 <div v-show="transparentLayoutVisible" ref="transparentLayout" class="fit transparent-layout" @click="transparentLayoutClick"></div>
             </div>
 
@@ -217,11 +227,14 @@ class ExternalLibs extends Vue {
     closeAfterSubmit = false;
     openInFrameOnEnter = false;
     openInFrameOnAdd = false;
+    frameScale = 1;
 
     created() {
         this.oldStartLink = '';
         this.justOpened = true;
         this.$root.addKeyHook(this.keyHook);
+
+        this.$root.$on('resize', this.frameResize);
 
         document.addEventListener('fullscreenchange', () => {
             this.fullScreenActive = (document.fullscreenElement !== null);
@@ -360,6 +373,11 @@ class ExternalLibs extends Vue {
         this.openInFrameOnEnter = libs.openInFrameOnEnter || false;
         this.openInFrameOnAdd = libs.openInFrameOnAdd || false;
 
+        this.frameScale = 1;
+        const index = lu.getSafeRootIndexByUrl(this.libs.groups, this.selectedLink);
+        if (index >= 0)
+            this.frameScale = this.libs.groups[index].frameScale || 1;
+
         this.updateStartLink();
     }
 
@@ -494,10 +512,43 @@ class ExternalLibs extends Vue {
         this.$nextTick(() => {
             this.frameVisible = true;
             this.$nextTick(() => {
-                if (this.$refs.frame)
+                if (this.$refs.frame) {
                     this.$refs.frame.contentWindow.focus();
+                    this.frameResize();
+                }
             });
         });
+    }
+
+    frameResize() {
+        if (this.$refs.frame) {
+            const w = this.$refs.frameBox.offsetWidth;
+            const h = this.$refs.frameBox.offsetHeight;
+            const normalSize = `width: ${w}px; height: ${h}px;`;
+            this.$refs.frameWrap.style = normalSize;
+            if (this.frameScale != 1) {
+                const s = this.frameScale;
+                this.$refs.frame.style = `width: ${w/s}px; height: ${h/s}px; transform: scale(${s}); transform-origin: 0 0;`;
+            } else {
+                this.$refs.frame.style = normalSize;
+            }
+        }
+    }
+
+    changeScale(delta) {
+        if ((this.frameScale > 0.1 && delta <= 0) || (this.frameScale < 5 && delta >= 0)) {
+             this.frameScale = _.round(this.frameScale + delta, 1);
+
+            const index = lu.getSafeRootIndexByUrl(this.libs.groups, this.selectedLink);
+            if (index >= 0) {
+                let libs = _.cloneDeep(this.libs);
+                libs.groups[index].frameScale = this.frameScale;
+                this.commitLibs(libs);
+            }
+
+            this.frameResize();
+            this.$root.notify.success(`Масштаб изменен: ${(this.frameScale*100).toFixed(0)}%`, '', {position: 'bottom-right'});
+        }
     }
 
     getCommentByLink(list, link) {
