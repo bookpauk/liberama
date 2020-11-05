@@ -52,7 +52,7 @@
                         </q-btn>
                     </template>
                     <template v-slot:append>
-                        <q-btn round dense color="blue" icon="la la-cog" @click.stop="openOptions" size="12px">
+                        <q-btn round dense color="blue" icon="la la-cog" @click.stop="optionsVisible = true" size="12px">
                             <q-tooltip :delay="1500" anchor="bottom middle" content-style="font-size: 80%">Опции</q-tooltip>
                         </q-btn>
                     </template>
@@ -102,7 +102,27 @@
                     <q-btn class="q-px-md q-ml-sm" color="primary" dense no-caps @click="okAddBookmark" :disabled="!bookmarkLink">OK</q-btn>
                 </template>
             </Dialog>
+
+            <Dialog ref="options" v-model="optionsVisible">
+                <template slot="header">
+                    <div class="row items-center">
+                        <q-icon class="q-mr-sm" name="la la-cog" size="28px"></q-icon>
+                        Опции
+                    </div>
+                </template>
+
+                <div class="q-mx-md column">
+                    <q-checkbox v-model="closeAfterSubmit" size="36px" label="Закрыть окно при отправке ссылки в читалку" />
+                    <q-checkbox v-model="openInFrameOnEnter" size="36px" label="Открывать ссылку во фрейме при нажатии 'Enter'" />
+                    <q-checkbox v-model="openFullscreen" size="36px" label="Открывать окно на весь экран" />                    
+                </div>
+
+                <template slot="footer">
+                    <q-btn class="q-px-md q-ml-sm" color="primary" dense no-caps @click="optionsVisible = false">OK</q-btn>
+                </template>
+            </Dialog>
         </div>
+
         <BookmarkSettings v-if="bookmarkSettingsActive" ref="bookmarkSettings" :libs="libs" :addBookmarkVisible="addBookmarkVisible"
             @do-action="doAction" @close="closeBookmarkSettings">
         </BookmarkSettings>
@@ -158,6 +178,15 @@ export default @Component({
                 });
             }
         },
+        closeAfterSubmit: function(newValue) {
+            this.commitProp('closeAfterSubmit', newValue);
+        },
+        openInFrameOnEnter: function(newValue) {
+            this.commitProp('openInFrameOnEnter', newValue);
+        },
+        openFullscreen: function(newValue) {
+            this.commitProp('openFullscreen', newValue);
+        },
     }    
 })
 class ExternalLibs extends Vue {
@@ -169,8 +198,10 @@ class ExternalLibs extends Vue {
     bookUrl = '';
     libs = {};
     fullScreenActive = false;
-    addBookmarkVisible = false;
     transparentLayoutVisible = false;
+
+    addBookmarkVisible = false;
+    optionsVisible = false;
 
     addBookmarkMode = '';
     bookmarkLink = '';
@@ -178,6 +209,10 @@ class ExternalLibs extends Vue {
     defaultRootLink = '';
 
     bookmarkSettingsActive = false;
+
+    closeAfterSubmit = false;
+    openInFrameOnEnter = false;
+    openFullscreen = false;
 
     created() {
         this.$root.addKeyHook(this.keyHook);
@@ -305,10 +340,19 @@ class ExternalLibs extends Vue {
         this.sendMessage({type: 'libs', data: libs});
     }
 
+    commitProp(prop, value) {
+        let libs = _.cloneDeep(this.libs);
+        libs[prop] = value;
+        this.commitLibs(libs);
+    }
+
     loadLibs() {
         const libs = this.libs;
 
         this.selectedLink = libs.startLink;
+        this.closeAfterSubmit = libs.closeAfterSubmit || false;
+        this.openInFrameOnEnter = libs.openInFrameOnEnter || false;
+        this.openFullscreen = libs.openFullscreen || false;
 
         this.updateStartLink();
     }
@@ -488,7 +532,7 @@ class ExternalLibs extends Vue {
                 force: true
             }});
             this.bookUrl = '';
-            if (this.libs.closeAfterSubmit)
+            if (this.closeAfterSubmit)
                 this.close();
         }
     }
@@ -637,7 +681,12 @@ class ExternalLibs extends Vue {
 
     bookUrlKeyDown(event) {
         if (event.key == 'Enter') {
-            this.submitUrl();
+            if (!this.openInFrameOnEnter) {
+                this.submitUrl();
+            } else {
+                if (this.bookUrl)
+                    this.goToLink(this.bookUrl, true);
+            }
             event.preventDefault();
         }
     }
@@ -653,9 +702,6 @@ class ExternalLibs extends Vue {
         this.bookmarkSettingsActive = false;
     }
 
-    openOptions() {
-    }
-
     keyHook(event) {
         if (this.$root.rootRoute() == '/external-libs') {
             if (this.$root.stdDialog.active)
@@ -664,7 +710,7 @@ class ExternalLibs extends Vue {
             if (this.bookmarkSettingsActive && this.$refs.bookmarkSettings.keyHook(event))
                 return true;
 
-            if (this.addBookmarkVisible)
+            if (this.addBookmarkVisible || this.optionsVisible)
                 return false;
 
             if (event.type == 'keydown' && event.key == 'F4') {
