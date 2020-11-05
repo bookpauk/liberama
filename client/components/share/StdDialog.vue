@@ -6,7 +6,7 @@
         <div v-show="type == 'alert'" class="bg-white no-wrap">
             <div class="header row">
                 <div class="caption col row items-center q-ml-md">
-                    <q-icon v-show="caption" class="q-mr-sm" :class="iconColor" name="las la-exclamation-circle" size="28px"></q-icon>
+                    <q-icon v-show="caption" class="q-mr-sm" :class="iconColor" :name="iconName" size="28px"></q-icon>
                     <div v-html="caption"></div>
                 </div>
                 <div class="close-icon column justify-center items-center">
@@ -29,7 +29,7 @@
         <div v-show="type == 'confirm'" class="bg-white no-wrap">
             <div class="header row">
                 <div class="caption col row items-center q-ml-md">
-                    <q-icon v-show="caption" class="q-mr-sm" :class="iconColor" name="las la-exclamation-circle" size="28px"></q-icon>
+                    <q-icon v-show="caption" class="q-mr-sm" :class="iconColor" :name="iconName" size="28px"></q-icon>
                     <div v-html="caption"></div>
                 </div>
                 <div class="close-icon column justify-center items-center">
@@ -53,7 +53,7 @@
         <div v-show="type == 'prompt'" class="bg-white no-wrap">
             <div class="header row">
                 <div class="caption col row items-center q-ml-md">
-                    <q-icon v-show="caption" class="q-mr-sm" :class="iconColor" name="las la-exclamation-circle" size="28px"></q-icon>
+                    <q-icon v-show="caption" class="q-mr-sm" :class="iconColor" :name="iconName" size="28px"></q-icon>
                     <div v-html="caption"></div>
                 </div>
                 <div class="close-icon column justify-center items-center">
@@ -79,7 +79,7 @@
         <div v-show="type == 'hotKey'" class="bg-white no-wrap">
             <div class="header row">
                 <div class="caption col row items-center q-ml-md">
-                    <q-icon v-show="caption" class="q-mr-sm" :class="iconColor" name="las la-exclamation-circle" size="28px"></q-icon>
+                    <q-icon v-show="caption" class="q-mr-sm" :class="iconColor" :name="iconName" size="28px"></q-icon>
                     <div v-html="caption"></div>
                 </div>
                 <div class="close-icon column justify-center items-center">
@@ -127,6 +127,7 @@ class StdDialog extends Vue {
     inputValue = '';
     error = '';
     iconColor = '';
+    iconName = '';
     hotKeyCode = '';
 
     created() {
@@ -149,6 +150,11 @@ class StdDialog extends Vue {
         this.iconColor = 'text-warning';
         if (opts && opts.color) {
             this.iconColor = `text-${opts.color}`;
+        }
+
+        this.iconName = 'las la-exclamation-circle';
+        if (opts && opts.iconName) {
+            this.iconName = opts.iconName;
         }
 
         this.hotKeyCode = '';

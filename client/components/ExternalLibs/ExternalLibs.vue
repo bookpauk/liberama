@@ -5,6 +5,10 @@
         </template>
 
         <template slot="buttons">
+            <span class="full-screen-button row justify-center items-center" @mousedown.stop @click="showHelp">
+                <q-icon name="la la-question-circle" size="16px"/>
+                <q-tooltip :delay="1500" anchor="bottom middle" content-style="font-size: 80%">Справка</q-tooltip>
+            </span>
             <span class="full-screen-button row justify-center items-center" @mousedown.stop @click="fullScreenToggle">
                 <q-icon :name="(fullScreenActive ? 'la la-compress-arrows-alt': 'la la-expand-arrows-alt')" size="16px"/>
                 <q-tooltip :delay="1500" anchor="bottom middle" content-style="font-size: 80%">На весь экран</q-tooltip>
@@ -114,7 +118,6 @@
                 <div class="q-mx-md column">
                     <q-checkbox v-model="closeAfterSubmit" size="36px" label="Закрыть окно при отправке ссылки в читалку" />
                     <q-checkbox v-model="openInFrameOnEnter" size="36px" label="Открывать ссылку во фрейме при нажатии 'Enter'" />
-                    <q-checkbox v-model="openFullscreen" size="36px" label="Открывать окно на весь экран" />                    
                 </div>
 
                 <template slot="footer">
@@ -184,9 +187,6 @@ export default @Component({
         openInFrameOnEnter: function(newValue) {
             this.commitProp('openInFrameOnEnter', newValue);
         },
-        openFullscreen: function(newValue) {
-            this.commitProp('openFullscreen', newValue);
-        },
     }    
 })
 class ExternalLibs extends Vue {
@@ -212,10 +212,10 @@ class ExternalLibs extends Vue {
 
     closeAfterSubmit = false;
     openInFrameOnEnter = false;
-    openFullscreen = false;
 
     created() {
         this.oldStartLink = '';
+        this.justOpened = true;
         this.$root.addKeyHook(this.keyHook);
 
         document.addEventListener('fullscreenchange', () => {
@@ -353,7 +353,6 @@ class ExternalLibs extends Vue {
         this.selectedLink = libs.startLink;
         this.closeAfterSubmit = libs.closeAfterSubmit || false;
         this.openInFrameOnEnter = libs.openInFrameOnEnter || false;
-        this.openFullscreen = libs.openFullscreen || false;
 
         this.updateStartLink();
     }
@@ -701,6 +700,25 @@ class ExternalLibs extends Vue {
 
     closeBookmarkSettings() {
         this.bookmarkSettingsActive = false;
+    }
+
+    showHelp() {
+        this.$root.stdDialog.alert(`
+<p>Окно 'Библиотека' позволяет открывать ссылки в читалке без переключения между окнами,
+что особенно актуально для мобильных устройств.</p>
+
+<p>Имеется возможность управлять закладками
+на понравившиеся ресурсы, книги или страницы авторов. Открытие ссылок и навигация осуществляется во фрейме, но,
+к сожалению, в нем открываются не все страницы. 'Библиотека' также разрешает свободный доступ к сайту flibusta.is.
+</p>
+
+<p>Из-за проблем с безопасностью, навигация 'вперед-назад' во фрейме осуществляется с помощью контекстного меню правой кнопкой мыши.
+На мобильных устройствах для этого служит системная клавиша 'Назад (стрелка влево)' и опция 'Вперед (стрелка вправо)' в меню браузера. 
+</p>
+
+<p>Приятного пользования ;-)
+</p>
+            `, 'Справка', {iconName: 'la la-info-circle'});
     }
 
     keyHook(event) {
