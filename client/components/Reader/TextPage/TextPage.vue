@@ -904,8 +904,7 @@ class TextPage extends Vue {
         if (!this.settingsChanging) {
             this.settingsChanging = true;
             const newSize = (this.settings.fontSize + 1 < 200 ? this.settings.fontSize + 1 : 100);
-            const newSettings = Object.assign({}, this.settings, {fontSize: newSize});
-            this.commit('reader/setSettings', newSettings);
+            this.commit('reader/setSettings', {fontSize: newSize});
             await sleep(50);
             this.settingsChanging = false;
         }
@@ -915,8 +914,7 @@ class TextPage extends Vue {
         if (!this.settingsChanging) {
             this.settingsChanging = true;
             const newSize = (this.settings.fontSize - 1 > 5 ? this.settings.fontSize - 1 : 5);
-            const newSettings = Object.assign({}, this.settings, {fontSize: newSize});
-            this.commit('reader/setSettings', newSettings);
+            this.commit('reader/setSettings', {fontSize: newSize});
             await sleep(50);
             this.settingsChanging = false;
         }
@@ -926,8 +924,7 @@ class TextPage extends Vue {
         if (!this.settingsChanging) {
             this.settingsChanging = true;
             const newDelay = (this.settings.scrollingDelay - 50 > 1 ? this.settings.scrollingDelay - 50 : 1);
-            const newSettings = Object.assign({}, this.settings, {scrollingDelay: newDelay});
-            this.commit('reader/setSettings', newSettings);
+            this.commit('reader/setSettings', {scrollingDelay: newDelay});
             await sleep(50);
             this.settingsChanging = false;
         }
@@ -937,8 +934,7 @@ class TextPage extends Vue {
         if (!this.settingsChanging) {
             this.settingsChanging = true;
             const newDelay = (this.settings.scrollingDelay + 50 < 10000 ? this.settings.scrollingDelay + 50 : 10000);
-            const newSettings = Object.assign({}, this.settings, {scrollingDelay: newDelay});
-            this.commit('reader/setSettings', newSettings);
+            this.commit('reader/setSettings', {scrollingDelay: newDelay});
             await sleep(50);
             this.settingsChanging = false;
         }
