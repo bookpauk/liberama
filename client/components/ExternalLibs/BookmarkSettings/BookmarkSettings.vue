@@ -285,7 +285,9 @@ class BookmarkSettings extends BookmarkSettingsProps {
         });
 
         if (result && result.value && result.value.toLowerCase() == 'да') {
-            this.$emit('do-action', {action: 'setLibs', data: _.cloneDeep(rstore.libsDefaults)});
+            this.$emit('do-action', {action: 'setLibs', data: _.cloneDeep(
+                Object.assign({helpShowed: true}, rstore.libsDefaults)
+            )});
         }
     }
 

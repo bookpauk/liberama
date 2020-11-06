@@ -371,6 +371,14 @@ class ExternalLibs extends Vue {
     loadLibs() {
         const libs = this.libs;
 
+        if (!libs.helpShowed) {
+            this.showHelp();
+            (async() => {
+                await utils.sleep(1000);
+                this.commitProp('helpShowed', true);
+            })();
+        }
+
         this.selectedLink = libs.startLink;
         this.closeAfterSubmit = libs.closeAfterSubmit || false;
         this.openInFrameOnEnter = libs.openInFrameOnEnter || false;
