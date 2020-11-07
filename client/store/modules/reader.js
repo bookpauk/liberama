@@ -288,6 +288,9 @@ const libsDefaults = {
         {r: 'http://flibusta.is', s: 'http://flibusta.is', list: [
             {l: 'http://flibusta.is', c: 'Флибуста | Книжное братство'},
         ]},
+        {r: 'https://flibs.in', s: 'https://flibs.in', list: [
+            {l: 'https://flibs.in', c: 'Flibs'},
+        ]},
         {r: 'http://samlib.ru', s: 'http://samlib.ru', list: [
             {l: 'http://samlib.ru', c: 'Журнал "Самиздат"'},
         ]},
