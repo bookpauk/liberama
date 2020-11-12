@@ -266,30 +266,38 @@ class ReaderWorker {
                     files.push({name, stat});
                 }
             }
-            log(`clean dir ${dir}, maxSize=${maxSize}, found ${files.length} files`);
+            log(`clean dir ${dir}, maxSize=${maxSize}, found ${files.length} files, total size=${size}`);
 
             files.sort((a, b) => a.stat.mtimeMs - b.stat.mtimeMs);
 
             let i = 0;
+            let j = 0;
             while (i < files.length && size > maxSize) {
                 const file = files[i];
                 const oldFile = `${dir}/${file.name}`;
 
+                let remoteSuccess = true;
                 //отправляем только this.config.tempPublicDir
-                //TODO: убрать в будущем, т.к. уже делается ленивое сохранение compFilename в удаленном хранилище
                 if (this.remoteWebDavStorage && dir === this.config.tempPublicDir) {
+                    remoteSuccess = false;
                     try {
                         //log(`remoteWebDavStorage.putFile ${path.basename(oldFile)}`);
                         await this.remoteWebDavStorage.putFile(oldFile);
+                        remoteSuccess = true;
                     } catch (e) {
                         log(LM_ERR, e.stack);
                     }
                 }
-                await fs.remove(oldFile);
+                //реально удаляем только если сохранили в хранилище
+                if (remoteSuccess || size > maxSize*1.2) {
+                    await fs.remove(oldFile);
+                    j++;
+                }
+                
                 size -= file.stat.size;
                 i++;
             }
-            log(`removed ${i} files`);
+            log(`removed ${j} files`);
         } catch(e) {
             log(LM_ERR, e.stack);
         } finally {

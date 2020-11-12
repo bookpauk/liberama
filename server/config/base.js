@@ -18,7 +18,7 @@ module.exports = {
     loggingEnabled: true,
 
     maxUploadFileSize: 50*1024*1024,//50Мб
-    maxTempPublicDirSize: 512*1024*1024,//512Мб
+    maxTempPublicDirSize: 512*1024*1024,//512Мб + 20% квота если проблема с remoteWebDavStorage
     maxUploadPublicDirSize: 200*1024*1024,//100Мб
 
     useExternalBookConverter: false,
