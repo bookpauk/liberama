@@ -103,30 +103,57 @@ export function fromBase64(data) {
     ));
 }
 
-export function getObjDiff(oldObj, newObj) {
-    const result = {__isDiff: true, change: {}, add: {}, del: []};
+export function getObjDiff(oldObj, newObj, opts = {}) {
+    const {
+        exclude = [],
+        excludeAdd = [],
+        excludeDel = [],
+    } = opts;
 
-    for (const key of Object.keys(oldObj)) {
-        if (newObj.hasOwnProperty(key)) {
-            if (!_.isEqual(oldObj[key], newObj[key])) {
-                if (_.isObject(oldObj[key]) && _.isObject(newObj[key])) {
-                    result.change[key] = getObjDiff(oldObj[key], newObj[key]);
-                } else {
-                    result.change[key] = _.cloneDeep(newObj[key]);
+    const ex = new Set(exclude);
+    const exAdd = new Set(excludeAdd);
+    const exDel = new Set(excludeDel);
+
+    const makeObjDiff = (oldObj, newObj, keyPath) => {
+        const result = {__isDiff: true, change: {}, add: {}, del: []};
+
+        keyPath = `${keyPath}${keyPath ? '/' : ''}`;
+
+        for (const key of Object.keys(oldObj)) {
+            const kp = `${keyPath}${key}`;
+
+            if (newObj.hasOwnProperty(key)) {
+                if (ex.has(kp))
+                    continue;
+
+                if (!_.isEqual(oldObj[key], newObj[key])) {
+                    if (_.isObject(oldObj[key]) && _.isObject(newObj[key])) {
+                        result.change[key] = makeObjDiff(oldObj[key], newObj[key], kp);
+                    } else {
+                        result.change[key] = _.cloneDeep(newObj[key]);
+                    }
                 }
+            } else {
+                if (exDel.has(kp))
+                    continue;
+                result.del.push(key);
             }
-        } else {
-            result.del.push(key);
         }
+
+        for (const key of Object.keys(newObj)) {
+            const kp = `${keyPath}${key}`;
+            if (exAdd.has(kp))
+                continue;
+
+            if (!oldObj.hasOwnProperty(key)) {
+                result.add[key] = _.cloneDeep(newObj[key]);
+            }
+        }
+
+        return result;
     }
 
-    for (const key of Object.keys(newObj)) {
-        if (!oldObj.hasOwnProperty(key)) {
-            result.add[key] = _.cloneDeep(newObj[key]);
-        }
-    }
-
-    return result;
+    return makeObjDiff(oldObj, newObj, '');
 }
 
 export function isObjDiff(diff) {

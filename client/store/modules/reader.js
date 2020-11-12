@@ -268,9 +268,12 @@ for (const button of toolButtons)
 for (const hotKey of hotKeys)
     settingDefaults.userHotKeys[hotKey.name] = hotKey.codes;
 
+const excludeDiffHotKeys = [];
+for (const hotKey of hotKeys)
+    excludeDiffHotKeys.push(`userHotKeys/${hotKey.name}`);
+
 function addDefaultsToSettings(settings) {
-    const diff = utils.getObjDiff(settings, settingDefaults);
-    
+    const diff = utils.getObjDiff(settings, settingDefaults, {exclude: excludeDiffHotKeys});
     if (!utils.isEmptyObjDiffDeep(diff, {isApplyChange: false})) {
         return utils.applyObjDiff(settings, diff, {isApplyChange: false});
     }
