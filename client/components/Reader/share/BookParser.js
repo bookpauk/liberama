@@ -46,10 +46,20 @@ export default class BookParser {
         let isFirstSection = true;
         let isFirstTitlePara = false;
 
+        //изображения
         this.binary = {};
         let binaryId = '';
         let binaryType = '';
         let dimPromises = [];
+
+        //оглавление
+        this.contents = [];
+        let curTitle = {paraIndex: -1, title: '', subtitles: []};
+        let curSubtitle = {paraIndex: -1, title: ''};
+        let inTitle = false;
+        let inSubtitle = false;
+        let sectionLevel = 0;
+        let bodyIndex = 0;
 
         let paraIndex = -1;
         let paraOffset = 0;
@@ -118,6 +128,12 @@ export default class BookParser {
                 addIndex: (addIndex ? addIndex : 0),
             };
 
+            if (inSubtitle) {
+                curSubtitle.title += '<p>';
+            } else if (inTitle) {
+                curTitle.title += '<p>';
+            }
+
             para[paraIndex] = p;
             paraOffset += p.length;
         };
@@ -129,6 +145,7 @@ export default class BookParser {
                 return;
             }
 
+            const prevParaIndex = paraIndex;
             let p = para[paraIndex];
             paraOffset -= p.length;
             //добавление пустых (addEmptyParagraphs) параграфов перед текущим
@@ -143,6 +160,11 @@ export default class BookParser {
                 p.offset = paraOffset;
                 para[paraIndex] = p;
 
+                if (curTitle.paraIndex == prevParaIndex)
+                    curTitle.paraIndex = paraIndex;
+                if (curSubtitle.paraIndex == prevParaIndex)
+                    curSubtitle.paraIndex = paraIndex;
+
                 //уберем начальный пробел
                 p.length = 0;
                 p.text = p.text.substr(1);
@@ -150,6 +172,13 @@ export default class BookParser {
 
             p.length += len;
             p.text += text;
+
+            
+            if (inSubtitle) {
+                curSubtitle.title += text;
+            } else if (inTitle) {
+                curTitle.title += text;
+            }
 
             para[paraIndex] = p;
             paraOffset += p.length;
@@ -160,7 +189,7 @@ export default class BookParser {
                 return;
 
             tag = elemName;
-            path += '/' + elemName;
+            path += '/' + tag;
 
             if (tag == 'binary') {
                 let attrs = sax.getAttrsSync(tail);
@@ -187,7 +216,7 @@ export default class BookParser {
                 }
             }
 
-            if (elemName == 'author' && path.indexOf('/fictionbook/description/title-info/author') == 0) {
+            if (tag == 'author' && path.indexOf('/fictionbook/description/title-info/author') == 0) {
                 if (!fb2.author)
                     fb2.author = [];
                 fb2.author.push({});
@@ -198,6 +227,7 @@ export default class BookParser {
                     if (!isFirstBody)
                         newParagraph(' ', 1);
                     isFirstBody = false;
+                    bodyIndex++;
                 }
 
                 if (tag == 'title') {
@@ -205,12 +235,17 @@ export default class BookParser {
                     isFirstTitlePara = true;
                     bold = true;
                     center = true;
+
+                    inTitle = true;
+                    curTitle = {paraIndex, title: '', inset: sectionLevel, bodyIndex, subtitles: []};
+                    this.contents.push(curTitle);
                 }
 
                 if (tag == 'section') {
                     if (!isFirstSection)
                         newParagraph(' ', 1);
                     isFirstSection = false;
+                    sectionLevel++;
                 }
 
                 if (tag == 'emphasis' || tag == 'strong') {
@@ -231,9 +266,13 @@ export default class BookParser {
                     isFirstTitlePara = true;
                     bold = true;
                     center = true;
+
+                    inSubtitle = true;
+                    curSubtitle = {paraIndex, inset: sectionLevel, title: ''};
+                    curTitle.subtitles.push(curSubtitle);
                 }
 
-                if (tag == 'epigraph') {
+                if (tag == 'epigraph' || tag == 'annotation') {
                     italic = true;
                     space += 1;
                 }
@@ -260,6 +299,11 @@ export default class BookParser {
                         isFirstTitlePara = false;
                         bold = false;
                         center = false;
+                        inTitle = false;
+                    }
+
+                    if (tag == 'section') {
+                        sectionLevel--;
                     }
 
                     if (tag == 'emphasis' || tag == 'strong') {
@@ -274,11 +318,14 @@ export default class BookParser {
                         isFirstTitlePara = false;
                         bold = false;
                         center = false;
+                        inSubtitle = false;
                     }
 
-                    if (tag == 'epigraph') {
+                    if (tag == 'epigraph' || tag == 'annotation') {
                         italic = false;
                         space -= 1;
+                        if (tag == 'annotation')
+                            newParagraph(' ', 1);
                     }
 
                     if (tag == 'stanza') {

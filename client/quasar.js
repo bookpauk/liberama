@@ -32,6 +32,8 @@ import {QPopupProxy} from 'quasar/src/components/popup-proxy';
 import {QDialog} from 'quasar/src/components/dialog';
 import {QChip} from 'quasar/src/components/chip';
 import {QTree} from 'quasar/src/components/tree';
+import {QExpansionItem} from 'quasar/src/components/expansion-item';
+
 
 const components = {
     //QLayout,
@@ -58,7 +60,8 @@ const components = {
     QPopupProxy,
     QDialog,
     QChip,
-    QTree
+    QTree,
+    QExpansionItem,
 };
 
 //directives 
