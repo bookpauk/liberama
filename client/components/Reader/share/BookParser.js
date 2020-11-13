@@ -58,6 +58,7 @@ export default class BookParser {
         let curSubtitle = {paraIndex: -1, title: ''};
         let inTitle = false;
         let inSubtitle = false;
+        let sectionLevel = 0;
 
         let paraIndex = -1;
         let paraOffset = 0;
@@ -234,7 +235,7 @@ export default class BookParser {
                     center = true;
 
                     inTitle = true;
-                    curTitle = {paraIndex, title: '', subtitles: []};
+                    curTitle = {paraIndex, title: '', inset: sectionLevel, subtitles: []};
                     this.contents.push(curTitle);
                 }
 
@@ -242,6 +243,7 @@ export default class BookParser {
                     if (!isFirstSection)
                         newParagraph(' ', 1);
                     isFirstSection = false;
+                    sectionLevel++;
                 }
 
                 if (tag == 'emphasis' || tag == 'strong') {
@@ -264,7 +266,7 @@ export default class BookParser {
                     center = true;
 
                     inSubtitle = true;
-                    curSubtitle = {paraIndex, title: ''};
+                    curSubtitle = {paraIndex, inset: sectionLevel, title: ''};
                     curTitle.subtitles.push(curSubtitle);
                 }
 
@@ -296,6 +298,10 @@ export default class BookParser {
                         bold = false;
                         center = false;
                         inTitle = false;
+                    }
+
+                    if (tag == 'section') {
+                        sectionLevel--;
                     }
 
                     if (tag == 'emphasis' || tag == 'strong') {

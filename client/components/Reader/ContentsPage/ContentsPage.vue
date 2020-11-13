@@ -26,33 +26,34 @@
         <div>
             <div class="row" v-for="item in contents" :key="item.key">                
                 <q-expansion-item v-if="item.list.length"
-                    class="item"
+                    class="item separator-bottom"
                     expand-icon-toggle
                     switch-toggle-side
                     expand-icon="la la-arrow-circle-down"
                 >
                     <template slot="header">
-                        <div class="row no-wrap clickable" style="width: 470px" @click="setBookPos(item.offset)">
+                        <div class="row no-wrap clickable" style="width: 465px" @click="setBookPos(item.offset)">
+                            <div :style="item.style"></div>
                             <div class="q-mr-sm col overflow-hidden column justify-center" v-html="item.label"></div>
                             <div class="column justify-center">{{ item.perc }}%</div>
                         </div>
                     </template>
 
-                    <q-item class="subitem" v-for="subitem in item.list" :key="subitem.key">
-                        <div class="row no-wrap clickable" style="padding-left: 115px; width: 470px" @click="setBookPos(subitem.offset)">
+                    <q-item class="subitem separator-top column justify-center" v-for="subitem in item.list" :key="subitem.key">
+                        <div class="row no-wrap clickable" style="padding-left: 55px; width: 520px" @click="setBookPos(subitem.offset)">
+                            <div :style="subitem.style"></div>
                             <div class="q-mr-sm col overflow-hidden column justify-center"  v-html="subitem.label"></div>
                             <div class="column justify-center">{{ subitem.perc }}%</div>
                         </div>
                     </q-item>
                 </q-expansion-item>
-                <q-item v-else class="item">
-                    <div class="row no-wrap clickable" style="margin-left: 55px; width: 470px" @click="setBookPos(item.offset)">
+                <q-item v-else class="item separator-bottom">
+                    <div class="row no-wrap clickable" style="padding-left: 55px; width: 520px" @click="setBookPos(item.offset)">
+                        <div :style="item.style"></div>
                         <div class="q-mr-sm col overflow-hidden column justify-center" v-html="item.label"></div>
                         <div class="column justify-center">{{ item.perc }}%</div>
                     </div>
                 </q-item>
-
-                <q-separator />
             </div>
         </div>
     </div>
@@ -91,28 +92,34 @@ class ContentsPage extends Vue {
     init(currentBook, parsed) {
         this.$refs.window.init();
 
-        const prepareLabel = (title) => {
+        const prepareLabel = (title, bolder = false) => {
             let titleParts = title.split('<p>');
-            const textParts = titleParts.filter(v => v).map(v => v.replace(/(&nbsp;|<([^>]+)>)/ig, ''));
-            return textParts.join('<br>');
+            const textParts = titleParts.filter(v => v).map(v => `<div>${v.replace(/(<([^>]+)>)/ig, '')}</div>`);
+            if (bolder && textParts.length > 1)
+                textParts[0] = `<b>${textParts[0]}</b>`;
+            return textParts.join('');
         }
+
+        const insetStyle = inset => `width: ${(inset > 1 ? inset - 1 : 0)*20}px`;
 
         let i = 0;
         const newContents = [];
         parsed.contents.forEach((cont) => {
-            const label = prepareLabel(cont.title);
+            const label = prepareLabel(cont.title, true);
+            const style = insetStyle(cont.inset);
 
             let j = 0;
             const list = [];
             cont.subtitles.forEach((sub) => {
                 const l = prepareLabel(sub.title);
+                const s = insetStyle(sub.inset + 1);
                 const p = parsed.para[sub.paraIndex];
-                list.push({perc: (p.offset/parsed.textLength*100).toFixed(2), label: l, key: j, offset: p.offset});
+                list.push({perc: (p.offset/parsed.textLength*100).toFixed(2), label: l, key: j, offset: p.offset, style: s});
                 j++;
             });
 
             const p = parsed.para[cont.paraIndex];
-            newContents.push({perc: (p.offset/parsed.textLength*100).toFixed(0), label, key: i, offset: p.offset, list});
+            newContents.push({perc: (p.offset/parsed.textLength*100).toFixed(0), label, key: i, offset: p.offset, style, list});
 
             i++;
         });
@@ -156,5 +163,12 @@ class ContentsPage extends Vue {
 
 .subitem:hover {
     background-color: #e0e0e0;
+}
+
+.separator-top {
+    border-top: 1px solid #e0e0e0;
+}
+.separator-bottom {
+    border-top: 1px solid #e0e0e0;
 }
 </style>
