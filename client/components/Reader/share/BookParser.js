@@ -53,9 +53,11 @@ export default class BookParser {
         let dimPromises = [];
 
         //оглавление
-        this.contents = [];//[{paraIndex: <number>, subtitles: [{paraIndex: <number>}, ... ]}, ... ]
-        let curTitle = {paraIndex: -1, subtitles: []};
-        let curSubtitle = {paraIndex: -1};
+        this.contents = [];//[{paraIndex: <number>, title: <string>, subtitles: [{paraIndex: <number>, title: <string>}, ... ]}, ... ]
+        let curTitle = {paraIndex: -1, title: '', subtitles: []};
+        let curSubtitle = {paraIndex: -1, title: ''};
+        let inTitle = false;
+        let inSubtitle = false;
 
         let paraIndex = -1;
         let paraOffset = 0;
@@ -124,6 +126,12 @@ export default class BookParser {
                 addIndex: (addIndex ? addIndex : 0),
             };
 
+            if (inSubtitle) {
+                curSubtitle.title += '<p>';
+            } else if (inTitle) {
+                curTitle.title += '<p>';
+            }
+
             para[paraIndex] = p;
             paraOffset += p.length;
         };
@@ -162,6 +170,13 @@ export default class BookParser {
 
             p.length += len;
             p.text += text;
+
+            
+            if (inSubtitle) {
+                curSubtitle.title += text;
+            } else if (inTitle) {
+                curTitle.title += text;
+            }
 
             para[paraIndex] = p;
             paraOffset += p.length;
@@ -218,7 +233,8 @@ export default class BookParser {
                     bold = true;
                     center = true;
 
-                    curTitle = {paraIndex, subtitles: []};
+                    inTitle = true;
+                    curTitle = {paraIndex, title: '', subtitles: []};
                     this.contents.push(curTitle);
                 }
 
@@ -247,7 +263,8 @@ export default class BookParser {
                     bold = true;
                     center = true;
 
-                    curSubtitle = {paraIndex};
+                    inSubtitle = true;
+                    curSubtitle = {paraIndex, title: ''};
                     curTitle.subtitles.push(curSubtitle);
                 }
 
@@ -278,6 +295,7 @@ export default class BookParser {
                         isFirstTitlePara = false;
                         bold = false;
                         center = false;
+                        inTitle = false;
                     }
 
                     if (tag == 'emphasis' || tag == 'strong') {
@@ -292,6 +310,7 @@ export default class BookParser {
                         isFirstTitlePara = false;
                         bold = false;
                         center = false;
+                        inSubtitle = false;
                     }
 
                     if (tag == 'epigraph') {

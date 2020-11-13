@@ -616,10 +616,14 @@ class Reader extends Vue {
 
     contentsPageToggle() {
         this.contentsPageActive = !this.contentsPageActive;
-        if (this.contentsPageActive) {
+        const page = this.$refs.page;
+        if (this.contentsPageActive && this.activePage == 'TextPage' && page.parsed) {
             this.closeAllWindows();
-            this.$refs.contentsPage.init();
             this.contentsPageActive = true;
+
+            this.$nextTick(() => {
+                this.$refs.contentsPage.init(this.mostRecentBook(), page.parsed);
+            });
         } else {
             this.contentsPageActive = false;
         }
