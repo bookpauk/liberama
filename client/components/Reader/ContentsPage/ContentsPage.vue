@@ -32,21 +32,21 @@
                     expand-icon="la la-arrow-circle-down"
                 >
                     <template slot="header">
-                        <div class="row no-wrap clickable" style="width: 470px">
+                        <div class="row no-wrap clickable" style="width: 470px" @click="setBookPos(item.offset)">
                             <div class="q-mr-sm col overflow-hidden column justify-center" v-html="item.label"></div>
                             <div class="column justify-center">{{ item.perc }}%</div>
                         </div>
                     </template>
 
-                    <q-item class="subitem clickable" v-for="subitem in item.list" :key="subitem.key">
-                        <div class="row no-wrap" style="margin-left: 55px; padding-left: 60px; width: 470px">
+                    <q-item class="subitem" v-for="subitem in item.list" :key="subitem.key">
+                        <div class="row no-wrap clickable" style="padding-left: 115px; width: 470px" @click="setBookPos(subitem.offset)">
                             <div class="q-mr-sm col overflow-hidden column justify-center"  v-html="subitem.label"></div>
-                            <div class="column justify-center">{{ item.perc }}%</div>
+                            <div class="column justify-center">{{ subitem.perc }}%</div>
                         </div>
                     </q-item>
                 </q-expansion-item>
-                <q-item v-else class="item clickable">
-                    <div class="row no-wrap" style="margin-left: 55px; width: 470px">
+                <q-item v-else class="item">
+                    <div class="row no-wrap clickable" style="margin-left: 55px; width: 470px" @click="setBookPos(item.offset)">
                         <div class="q-mr-sm col overflow-hidden column justify-center" v-html="item.label"></div>
                         <div class="column justify-center">{{ item.perc }}%</div>
                     </div>
@@ -107,17 +107,21 @@ class ContentsPage extends Vue {
             cont.subtitles.forEach((sub) => {
                 const l = prepareLabel(sub.title);
                 const p = parsed.para[sub.paraIndex];
-                list.push({perc: (p.offset/parsed.textLength*100).toFixed(2), label: l, key: j});
+                list.push({perc: (p.offset/parsed.textLength*100).toFixed(2), label: l, key: j, offset: p.offset});
                 j++;
             });
 
             const p = parsed.para[cont.paraIndex];
-            newContents.push({perc: (p.offset/parsed.textLength*100).toFixed(0), label, key: i, list});
+            newContents.push({perc: (p.offset/parsed.textLength*100).toFixed(0), label, key: i, offset: p.offset, list});
 
             i++;
         });
 
         this.contents = newContents;
+    }
+
+    setBookPos(newValue) {
+        this.$emit('book-pos-changed', {bookPos: newValue});
     }
 
     close() {
