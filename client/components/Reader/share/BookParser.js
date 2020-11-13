@@ -46,10 +46,16 @@ export default class BookParser {
         let isFirstSection = true;
         let isFirstTitlePara = false;
 
+        //изображения
         this.binary = {};
         let binaryId = '';
         let binaryType = '';
         let dimPromises = [];
+
+        //оглавление
+        this.contents = [];//[{paraIndex: <number>, subtitles: [{paraIndex: <number>}, ... ]}, ... ]
+        let curTitle = {paraIndex: -1, subtitles: []};
+        let curSubtitle = {paraIndex: -1};
 
         let paraIndex = -1;
         let paraOffset = 0;
@@ -129,6 +135,7 @@ export default class BookParser {
                 return;
             }
 
+            const prevParaIndex = paraIndex;
             let p = para[paraIndex];
             paraOffset -= p.length;
             //добавление пустых (addEmptyParagraphs) параграфов перед текущим
@@ -142,6 +149,11 @@ export default class BookParser {
                 p.index = paraIndex;
                 p.offset = paraOffset;
                 para[paraIndex] = p;
+
+                if (curTitle.paraIndex == prevParaIndex)
+                    curTitle.paraIndex = paraIndex;
+                if (curSubtitle.paraIndex == prevParaIndex)
+                    curSubtitle.paraIndex = paraIndex;
 
                 //уберем начальный пробел
                 p.length = 0;
@@ -205,6 +217,9 @@ export default class BookParser {
                     isFirstTitlePara = true;
                     bold = true;
                     center = true;
+
+                    curTitle = {paraIndex, subtitles: []};
+                    this.contents.push(curTitle);
                 }
 
                 if (tag == 'section') {
@@ -231,6 +246,9 @@ export default class BookParser {
                     isFirstTitlePara = true;
                     bold = true;
                     center = true;
+
+                    curSubtitle = {paraIndex};
+                    curTitle.subtitles.push(curSubtitle);
                 }
 
                 if (tag == 'epigraph') {

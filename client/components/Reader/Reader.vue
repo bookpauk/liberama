@@ -48,6 +48,10 @@
                         <q-tooltip :delay="1500" anchor="bottom middle" content-style="font-size: 80%">{{ rstore.readerActions['refresh'] }}</q-tooltip>
                     </button>
                     <div class="space"></div>
+                    <button ref="contents" v-show="showToolButton['contents']" class="tool-button" :class="buttonActiveClass('contents')" @click="buttonClick('contents')" v-ripple>
+                        <q-icon name="la la-list" size="32px"/>
+                        <q-tooltip :delay="1500" anchor="bottom middle" content-style="font-size: 80%">{{ rstore.readerActions['contents'] }}</q-tooltip>
+                    </button>
                     <button ref="libs" v-show="mode == 'liberama.top' && showToolButton['libs']" class="tool-button" :class="buttonActiveClass('libs')" @click="buttonClick('libs')" v-ripple>
                         <q-icon name="la la-sitemap" size="32px"/>
                         <q-tooltip :delay="1500" anchor="bottom middle" content-style="font-size: 80%">{{ rstore.readerActions['libs'] }}</q-tooltip>
@@ -89,12 +93,13 @@
                 @stop-text-search="stopTextSearch">
             </SearchPage>
             <CopyTextPage v-if="copyTextActive" ref="copyTextPage" @do-action="doAction"></CopyTextPage>
-            <LibsPage v-show="libsActive" ref="libsPage" @load-book="loadBook" @libs-close="libsClose" @do-action="doAction"></LibsPage>
+            <LibsPage v-show="hidden" ref="libsPage" @load-book="loadBook" @libs-close="libsClose" @do-action="doAction"></LibsPage>
             <RecentBooksPage v-show="recentBooksActive" ref="recentBooksPage" @load-book="loadBook" @recent-books-close="recentBooksClose"></RecentBooksPage>
             <SettingsPage v-show="settingsActive" ref="settingsPage" @do-action="doAction"></SettingsPage>
             <HelpPage v-if="helpActive" ref="helpPage" @do-action="doAction"></HelpPage>
             <ClickMapPage v-show="clickMapActive" ref="clickMapPage"></ClickMapPage>
             <ServerStorage v-show="hidden" ref="serverStorage"></ServerStorage>
+            <ContentsPage v-show="contentsPageActive" ref="contentsPage" @do-action="doAction"></ContentsPage>
 
             <ReaderDialogs ref="dialogs" @donate-toggle="donateToggle" @version-history-toggle="versionHistoryToggle"></ReaderDialogs>
         </div>
@@ -121,6 +126,8 @@ import SettingsPage from './SettingsPage/SettingsPage.vue';
 import HelpPage from './HelpPage/HelpPage.vue';
 import ClickMapPage from './ClickMapPage/ClickMapPage.vue';
 import ServerStorage from './ServerStorage/ServerStorage.vue';
+import ContentsPage from './ContentsPage/ContentsPage.vue';
+
 import ReaderDialogs from './ReaderDialogs/ReaderDialogs.vue';
 
 import bookManager from './share/bookManager';
@@ -143,6 +150,8 @@ export default @Component({
         HelpPage,
         ClickMapPage,
         ServerStorage,
+        ContentsPage,
+
         ReaderDialogs,
     },
     watch: {
@@ -200,6 +209,7 @@ class Reader extends Vue {
     settingsActive = false;
     helpActive = false;
     clickMapActive = false;
+    contentsPageActive = false;
 
     bookPos = null;
     allowUrlParamBookPos = false;
@@ -490,6 +500,7 @@ class Reader extends Vue {
         this.stopScrolling();
         this.stopSearch();
         this.helpActive = false;
+        this.contentsPageActive = false;
     }
 
     loaderToggle() {
@@ -603,6 +614,17 @@ class Reader extends Vue {
         }
     }
 
+    contentsPageToggle() {
+        this.contentsPageActive = !this.contentsPageActive;
+        if (this.contentsPageActive) {
+            this.closeAllWindows();
+            this.$refs.contentsPage.init();
+            this.contentsPageActive = true;
+        } else {
+            this.contentsPageActive = false;
+        }
+    }
+
     libsClose() {
         if (this.libsActive)
             this.libsToogle();
@@ -707,6 +729,7 @@ class Reader extends Vue {
             case 'copyText':
             case 'splitToPara':
             case 'refresh':
+            case 'contents':
             case 'libs':
             case 'recentBooks':
             case 'offlineMode':
@@ -735,6 +758,7 @@ class Reader extends Vue {
                 case 'scrolling':
                 case 'search':
                 case 'copyText':
+                case 'contents':
                     classResult = classDisabled;
                     break;
                 case 'splitToPara':
@@ -1026,6 +1050,9 @@ class Reader extends Vue {
             case 'refresh':
                 this.refreshBook();
                 break;
+            case 'contents':
+                this.contentsPageToggle();
+                break;
             case 'libs':
                 this.libsToogle();
                 break;
@@ -1124,6 +1151,9 @@ class Reader extends Vue {
 
             if (!result && this.copyTextActive)
                 result = this.$refs.copyTextPage.keyHook(event);
+
+            if (!result && this.contentsPageActive)
+                result = this.$refs.contentsPage.keyHook(event);
 
             if (!result && this.$refs.page && this.$refs.page.keyHook)
                 result = this.$refs.page.keyHook(event);
