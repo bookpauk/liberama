@@ -189,7 +189,7 @@ export default class BookParser {
                 return;
 
             tag = elemName;
-            path += '/' + elemName;
+            path += '/' + tag;
 
             if (tag == 'binary') {
                 let attrs = sax.getAttrsSync(tail);
@@ -216,7 +216,7 @@ export default class BookParser {
                 }
             }
 
-            if (elemName == 'author' && path.indexOf('/fictionbook/description/title-info/author') == 0) {
+            if (tag == 'author' && path.indexOf('/fictionbook/description/title-info/author') == 0) {
                 if (!fb2.author)
                     fb2.author = [];
                 fb2.author.push({});
@@ -272,7 +272,7 @@ export default class BookParser {
                     curTitle.subtitles.push(curSubtitle);
                 }
 
-                if (tag == 'epigraph') {
+                if (tag == 'epigraph' || tag == 'annotation') {
                     italic = true;
                     space += 1;
                 }
@@ -321,9 +321,11 @@ export default class BookParser {
                         inSubtitle = false;
                     }
 
-                    if (tag == 'epigraph') {
+                    if (tag == 'epigraph' || tag == 'annotation') {
                         italic = false;
                         space -= 1;
+                        if (tag == 'annotation')
+                            newParagraph(' ', 1);
                     }
 
                     if (tag == 'stanza') {
