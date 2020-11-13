@@ -59,7 +59,8 @@
     </div>
 
     <div class="tab-panel" v-show="selectedTab == 'bookmarks'">
-        <div>
+        <div class="column justify-center items-center" style="height: 100px">
+            Раздел находится в разработке
         </div>
     </div>
 
@@ -89,8 +90,14 @@ class ContentsPage extends Vue {
     created() {
     }
 
-    init(currentBook, parsed) {
+    async init(currentBook, parsed) {
         this.$refs.window.init();
+
+        if (this.parsed != parsed) {
+            this.contents = [];
+            await this.$nextTick();
+            this.parsed = parsed;
+        }
 
         const prepareLabel = (title, bolder = false) => {
             let titleParts = title.split('<p>');
@@ -100,11 +107,35 @@ class ContentsPage extends Vue {
             return textParts.join('');
         }
 
-        const insetStyle = inset => `width: ${(inset > 1 ? inset - 1 : 0)*20}px`;
+        const insetStyle = inset => `width: ${inset*20}px`;
+        const pc = parsed.contents;
+        const newpc = [];
 
+        //преобразуем не первые разделы body в title-subtitle
+        let curSubtitles = [];
+        let prevBodyIndex = -1;
+        for (let i = 0; i < pc.length; i++) {
+            const cont = pc[i];
+            if (prevBodyIndex != cont.bodyIndex)
+                curSubtitles = [];
+
+            prevBodyIndex = cont.bodyIndex;
+
+            if (cont.bodyIndex > 1) {
+                if (cont.inset < 1) {
+                    newpc.push(Object.assign({}, cont, {subtitles: curSubtitles}));
+                } else {
+                    curSubtitles.push(Object.assign({}, cont, {inset: cont.inset - 1}));
+                }
+            } else {
+                newpc.push(cont);
+            }
+        }
+
+        //формируем newContents
         let i = 0;
         const newContents = [];
-        parsed.contents.forEach((cont) => {
+        newpc.forEach((cont) => {
             const label = prepareLabel(cont.title, true);
             const style = insetStyle(cont.inset);
 
@@ -127,8 +158,10 @@ class ContentsPage extends Vue {
         this.contents = newContents;
     }
 
-    setBookPos(newValue) {
+    async setBookPos(newValue) {
         this.$emit('book-pos-changed', {bookPos: newValue});
+        await this.$nextTick();
+        this.close();
     }
 
     close() {

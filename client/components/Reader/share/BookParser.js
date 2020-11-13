@@ -53,12 +53,13 @@ export default class BookParser {
         let dimPromises = [];
 
         //оглавление
-        this.contents = [];//[{paraIndex: <number>, title: <string>, subtitles: [{paraIndex: <number>, title: <string>}, ... ]}, ... ]
+        this.contents = [];
         let curTitle = {paraIndex: -1, title: '', subtitles: []};
         let curSubtitle = {paraIndex: -1, title: ''};
         let inTitle = false;
         let inSubtitle = false;
         let sectionLevel = 0;
+        let bodyIndex = 0;
 
         let paraIndex = -1;
         let paraOffset = 0;
@@ -226,6 +227,7 @@ export default class BookParser {
                     if (!isFirstBody)
                         newParagraph(' ', 1);
                     isFirstBody = false;
+                    bodyIndex++;
                 }
 
                 if (tag == 'title') {
@@ -235,7 +237,7 @@ export default class BookParser {
                     center = true;
 
                     inTitle = true;
-                    curTitle = {paraIndex, title: '', inset: sectionLevel, subtitles: []};
+                    curTitle = {paraIndex, title: '', inset: sectionLevel, bodyIndex, subtitles: []};
                     this.contents.push(curTitle);
                 }
 

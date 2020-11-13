@@ -99,7 +99,7 @@
             <HelpPage v-if="helpActive" ref="helpPage" @do-action="doAction"></HelpPage>
             <ClickMapPage v-show="clickMapActive" ref="clickMapPage"></ClickMapPage>
             <ServerStorage v-show="hidden" ref="serverStorage"></ServerStorage>
-            <ContentsPage v-show="contentsPageActive" ref="contentsPage" @do-action="doAction" @book-pos-changed="bookPosChanged"></ContentsPage>
+            <ContentsPage v-show="contentsActive" ref="contentsPage" @do-action="doAction" @book-pos-changed="bookPosChanged"></ContentsPage>
 
             <ReaderDialogs ref="dialogs" @donate-toggle="donateToggle" @version-history-toggle="versionHistoryToggle"></ReaderDialogs>
         </div>
@@ -209,7 +209,7 @@ class Reader extends Vue {
     settingsActive = false;
     helpActive = false;
     clickMapActive = false;
-    contentsPageActive = false;
+    contentsActive = false;
 
     bookPos = null;
     allowUrlParamBookPos = false;
@@ -500,7 +500,7 @@ class Reader extends Vue {
         this.stopScrolling();
         this.stopSearch();
         this.helpActive = false;
-        this.contentsPageActive = false;
+        this.contentsActive = false;
     }
 
     loaderToggle() {
@@ -615,17 +615,17 @@ class Reader extends Vue {
     }
 
     contentsPageToggle() {
-        this.contentsPageActive = !this.contentsPageActive;
+        this.contentsActive = !this.contentsActive;
         const page = this.$refs.page;
-        if (this.contentsPageActive && this.activePage == 'TextPage' && page.parsed) {
+        if (this.contentsActive && this.activePage == 'TextPage' && page.parsed) {
             this.closeAllWindows();
-            this.contentsPageActive = true;
+            this.contentsActive = true;
 
             this.$nextTick(() => {
                 this.$refs.contentsPage.init(this.mostRecentBook(), page.parsed);
             });
         } else {
-            this.contentsPageActive = false;
+            this.contentsActive = false;
         }
     }
 
@@ -1156,7 +1156,7 @@ class Reader extends Vue {
             if (!result && this.copyTextActive)
                 result = this.$refs.copyTextPage.keyHook(event);
 
-            if (!result && this.contentsPageActive)
+            if (!result && this.contentsActive)
                 result = this.$refs.contentsPage.keyHook(event);
 
             if (!result && this.$refs.page && this.$refs.page.keyHook)
