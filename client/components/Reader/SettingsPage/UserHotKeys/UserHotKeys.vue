@@ -104,8 +104,12 @@ class UserHotKeys extends UserHotKeysProps {
         this.updateTableData();
     }
 
+    get mode() {
+        return this.$store.state.config.mode;
+    }
+
     updateTableData() {
-        let result = rstore.hotKeys.map(hk => hk.name);
+        let result = rstore.hotKeys.map(hk => hk.name).filter(name => (this.mode == 'liberama.top' || name != 'libs'));
 
         const search = this.search.toLowerCase();
         const codesIncludeSearch = (action) => {
