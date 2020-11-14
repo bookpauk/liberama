@@ -224,6 +224,15 @@ export default class BookParser {
 
             if (path.indexOf('/fictionbook/body') == 0) {
                 if (tag == 'body') {
+                    if (isFirstBody && fb2.annotation) {
+                        const ann = fb2.annotation.split('<p>').filter(v => v).map(v => utils.removeHtmlTags(v));
+                        ann.forEach(a => {
+                            newParagraph(`<emphasis><space w="1">${a}</space></emphasis>`, a.length);
+                        });
+                        if (ann.length)
+                            newParagraph(' ', 1);
+                    }
+
                     if (!isFirstBody)
                         newParagraph(' ', 1);
                     isFirstBody = false;
