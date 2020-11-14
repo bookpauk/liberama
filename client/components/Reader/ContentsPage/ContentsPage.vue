@@ -24,36 +24,30 @@
 
     <div class="tab-panel" v-show="selectedTab == 'contents'">
         <div>
-            <div class="row" v-for="item in contents" :key="item.key">                
-                <q-expansion-item v-if="item.list.length"
-                    class="item separator-bottom"
-                    expand-icon-toggle
-                    switch-toggle-side
-                    expand-icon="la la-arrow-circle-down"
-                >
-                    <template slot="header">
-                        <div class="row no-wrap clickable" style="width: 465px" @click="setBookPos(item.offset)">
-                            <div :style="item.style"></div>
-                            <div class="q-mr-sm col overflow-hidden column justify-center" v-html="item.label"></div>
-                            <div class="column justify-center">{{ item.perc }}%</div>
-                        </div>
-                    </template>
-
-                    <q-item class="subitem separator-top column justify-center" v-for="subitem in item.list" :key="subitem.key">
-                        <div class="row no-wrap clickable" style="padding-left: 55px; width: 520px" @click="setBookPos(subitem.offset)">
-                            <div :style="subitem.style"></div>
-                            <div class="q-mr-sm col overflow-hidden column justify-center"  v-html="subitem.label"></div>
-                            <div class="column justify-center">{{ subitem.perc }}%</div>
-                        </div>
-                    </q-item>
-                </q-expansion-item>
-                <q-item v-else class="item separator-bottom">
-                    <div class="row no-wrap clickable" style="padding-left: 55px; width: 520px" @click="setBookPos(item.offset)">
-                        <div :style="item.style"></div>
+            <div v-for="item in contents" :key="item.key" class="column" style="width: 540px">
+                <div class="row item q-px-sm no-wrap">
+                    <div v-if="item.list.length" class="row justify-center items-center expand-button clickable" @click="expandClick(item.key)">
+                        <q-icon name="la la-arrow-circle-down" class="icon" :class="{'expanded-icon': item.expanded}" color="green-8" size="24px"/>
+                    </div>
+                    <div v-else class="no-expand-button clickable" @click="setBookPos(item.offset)">
+                    </div>
+                    <div class="col row clickable" @click="setBookPos(item.offset)">
+                        <div :style="item.indentStyle"></div>
                         <div class="q-mr-sm col overflow-hidden column justify-center" v-html="item.label"></div>
                         <div class="column justify-center">{{ item.perc }}%</div>
                     </div>
-                </q-item>
+                </div>
+                
+                <div v-if="item.expanded" :ref="`subitem${item.key}`" class="subitems-transition">
+                    <div v-for="subitem in item.list" :key="subitem.key" class="row subitem q-px-sm no-wrap">
+                        <div class="col row clickable" @click="setBookPos(subitem.offset)">
+                            <div class="no-expand-button"></div>
+                            <div :style="subitem.indentStyle"></div>
+                            <div class="q-mr-sm col overflow-hidden column justify-center" v-html="subitem.label"></div>
+                            <div class="column justify-center">{{ subitem.perc }}%</div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -74,7 +68,7 @@ import Component from 'vue-class-component';
 //import _ from 'lodash';
 
 import Window from '../../share/Window.vue';
-//import * as utils from '../../../share/utils';
+import * as utils from '../../../share/utils';
 
 export default @Component({
     components: {
@@ -93,11 +87,15 @@ class ContentsPage extends Vue {
     async init(currentBook, parsed) {
         this.$refs.window.init();
 
-        if (this.parsed != parsed) {
-            this.contents = [];
-            await this.$nextTick();
-            this.parsed = parsed;
-        }
+        //закладки
+
+        //далее формаирование оглавления
+        if (this.parsed == parsed)
+            return;
+
+        this.parsed = parsed;
+        this.contents = [];
+        await this.$nextTick();
 
         const prepareLabel = (title, bolder = false) => {
             let titleParts = title.split('<p>');
@@ -137,7 +135,7 @@ class ContentsPage extends Vue {
         const newContents = [];
         newpc.forEach((cont) => {
             const label = prepareLabel(cont.title, true);
-            const style = insetStyle(cont.inset);
+            const indentStyle = insetStyle(cont.inset);
 
             let j = 0;
             const list = [];
@@ -145,17 +143,36 @@ class ContentsPage extends Vue {
                 const l = prepareLabel(sub.title);
                 const s = insetStyle(sub.inset + 1);
                 const p = parsed.para[sub.paraIndex];
-                list.push({perc: (p.offset/parsed.textLength*100).toFixed(2), label: l, key: j, offset: p.offset, style: s});
+                list[j] = {perc: (p.offset/parsed.textLength*100).toFixed(2), label: l, key: j, offset: p.offset, indentStyle: s};
                 j++;
             });
 
             const p = parsed.para[cont.paraIndex];
-            newContents.push({perc: (p.offset/parsed.textLength*100).toFixed(0), label, key: i, offset: p.offset, style, list});
+            newContents[i] = {perc: (p.offset/parsed.textLength*100).toFixed(0), label, key: i, offset: p.offset, indentStyle, expanded: false, list};
 
             i++;
         });
 
         this.contents = newContents;
+    }
+
+    async expandClick(key) {
+        const item = this.contents[key];
+        const expanded = !item.expanded;
+
+        if (!expanded) {
+            const subitems = this.$refs[`subitem${key}`][0];
+            subitems.style.height = '0';
+            await utils.sleep(200);
+        }
+
+        this.$set(this.contents, key, Object.assign({}, item, {expanded}));
+
+        if (expanded) {
+            await this.$nextTick();
+            const subitems = this.$refs[`subitem${key}`][0];
+            subitems.style.height = subitems.scrollHeight + 'px';
+        }
     }
 
     async setBookPos(newValue) {
@@ -190,18 +207,36 @@ class ContentsPage extends Vue {
     cursor: pointer;
 }
 
-.item:hover {
+.item, .subitem {
+    height: 40px;
+    border-bottom: 1px solid #e0e0e0;
+}
+
+.item:hover, .subitem:hover {
     background-color: #f0f0f0;
 }
 
-.subitem:hover {
-    background-color: #e0e0e0;
+.expand-button, .no-expand-button {
+    width: 40px;
 }
 
-.separator-top {
-    border-top: 1px solid #e0e0e0;
+.expand-button:hover {
+    background-color: white;
+    border-radius: 15px;
+    border: 1px solid #d0d0d0;
 }
-.separator-bottom {
-    border-top: 1px solid #e0e0e0;
+
+.subitems-transition {
+    height: 0;
+    transition: height 0.2s linear;
+    overflow: hidden;
+}
+
+.icon {
+    transition: transform 0.2s;
+}
+
+.expanded-icon {
+    transform: rotate(180deg);
 }
 </style>
