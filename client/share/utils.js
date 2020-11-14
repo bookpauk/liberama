@@ -304,3 +304,7 @@ export function userHotKeysObjectSwap(userHotKeys) {
     }
     return result;
 }
+
+export function removeHtmlTags(s) {
+    return s.replace(/(<([^>]+)>)/ig, '');
+}

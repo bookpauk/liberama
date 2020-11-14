@@ -1,6 +1,6 @@
 import he from 'he';
 import sax from '../../../../server/core/sax';
-import {sleep} from '../../../share/utils';
+import * as utils from '../../../share/utils';
 
 const maxImageLineCount = 100;
 
@@ -90,7 +90,7 @@ export default class BookParser {
                 i.onerror = reject;
 
                 i.src = `data:${binaryType};base64,${data}`;
-                await sleep(30*1000);
+                await utils.sleep(30*1000);
                 if (!resolved)
                     reject('Не удалось получить размер изображения');
             })().catch(reject); });
@@ -112,7 +112,7 @@ export default class BookParser {
                 i.onerror = reject;
 
                 i.src = src;
-                await sleep(30*1000);
+                await utils.sleep(30*1000);
                 if (!resolved)
                     reject('Не удалось получить размер изображения');
             })().catch(reject); });
@@ -224,6 +224,15 @@ export default class BookParser {
 
             if (path.indexOf('/fictionbook/body') == 0) {
                 if (tag == 'body') {
+                    if (isFirstBody && fb2.annotation) {
+                        const ann = fb2.annotation.split('<p>').filter(v => v).map(v => utils.removeHtmlTags(v));
+                        ann.forEach(a => {
+                            newParagraph(`<emphasis><space w="1">${a}</space></emphasis>`, a.length);
+                        });
+                        if (ann.length)
+                            newParagraph(' ', 1);
+                    }
+
                     if (!isFirstBody)
                         newParagraph(' ', 1);
                     isFirstBody = false;
@@ -419,7 +428,7 @@ export default class BookParser {
         };
 
         const onProgress = async(prog) => {
-            await sleep(1);
+            await utils.sleep(1);
             callback(prog);
         };
 
@@ -441,7 +450,7 @@ export default class BookParser {
         this.textLength = paraOffset;
 
         callback(100);
-        await sleep(10);
+        await utils.sleep(10);
 
         return {fb2};
     }

@@ -99,7 +99,7 @@ class ContentsPage extends Vue {
 
         const prepareLabel = (title, bolder = false) => {
             let titleParts = title.split('<p>');
-            const textParts = titleParts.filter(v => v).map(v => `<div>${v.replace(/(<([^>]+)>)/ig, '')}</div>`);
+            const textParts = titleParts.filter(v => v).map(v => `<div>${utils.removeHtmlTags(v)}</div>`);
             if (bolder && textParts.length > 1)
                 textParts[0] = `<b>${textParts[0]}</b>`;
             return textParts.join('');
@@ -109,7 +109,7 @@ class ContentsPage extends Vue {
         const pc = parsed.contents;
         const newpc = [];
 
-        //преобразуем не первые разделы body в title-subtitle
+        //преобразуем все, кроме первого, разделы body в title-subtitle
         let curSubtitles = [];
         let prevBodyIndex = -1;
         for (let i = 0; i < pc.length; i++) {
@@ -177,7 +177,6 @@ class ContentsPage extends Vue {
 
     async setBookPos(newValue) {
         this.$emit('book-pos-changed', {bookPos: newValue});
-        await this.$nextTick();
         this.close();
     }
 
