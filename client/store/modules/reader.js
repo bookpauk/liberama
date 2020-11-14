@@ -297,14 +297,14 @@ const libsDefaults = {
         {r: 'https://flibs.in', s: 'https://flibs.in', list: [
             {l: 'https://flibs.in', c: 'Flibs'},
         ]},
+        {r: 'http://fantasy-worlds.org', s: 'http://fantasy-worlds.org', list: [
+            {l: 'http://fantasy-worlds.org', c: 'Миры Фэнтези'},
+        ]},
         {r: 'http://samlib.ru', s: 'http://samlib.ru', list: [
             {l: 'http://samlib.ru', c: 'Журнал "Самиздат"'},
         ]},
         {r: 'http://lib.ru', s: 'http://lib.ru', list: [
             {l: 'http://lib.ru', c: 'Библиотека Максима Мошкова'},
-        ]},
-        {r: 'http://fantasy-worlds.org', s: 'http://fantasy-worlds.org', list: [
-            {l: 'http://fantasy-worlds.org', c: 'Миры Фэнтези'},
         ]},
         {r: 'https://aldebaran.ru', s: 'https://aldebaran.ru', list: [
             {l: 'https://aldebaran.ru', c: 'АЛЬДЕБАРАН | Электронная библиотека книг'},

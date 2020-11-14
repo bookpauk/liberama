@@ -126,3 +126,18 @@ server {
     proxy_set_header Referer "";
   }
 }
+
+server {
+  listen 23580;
+  server_name fw_proxy;
+
+  valid_referers liberama.top b.liberama.top;
+
+  if ($invalid_referer) {
+    return 403;
+  }
+
+  location / {
+    proxy_pass http://fantasy-worlds.org;
+  }
+}
