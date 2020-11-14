@@ -177,7 +177,6 @@ class ContentsPage extends Vue {
 
     async setBookPos(newValue) {
         this.$emit('book-pos-changed', {bookPos: newValue});
-        await this.$nextTick();
         this.close();
     }
 
