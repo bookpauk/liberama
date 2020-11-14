@@ -159,6 +159,7 @@ import * as lu from './linkUtils';
 
 const proxySubst = {
     'http://flibusta.is': 'http://b.liberama.top:23480',
+    'http://fantasy-worlds.org': 'http://b.liberama.top:23580',
 };
 
 export default @Component({
