@@ -1,6 +1,6 @@
 import he from 'he';
 import sax from '../../../../server/core/sax';
-import {sleep} from '../../../share/utils';
+import * as utils from '../../../share/utils';
 
 const maxImageLineCount = 100;
 
@@ -90,7 +90,7 @@ export default class BookParser {
                 i.onerror = reject;
 
                 i.src = `data:${binaryType};base64,${data}`;
-                await sleep(30*1000);
+                await utils.sleep(30*1000);
                 if (!resolved)
                     reject('Не удалось получить размер изображения');
             })().catch(reject); });
@@ -112,7 +112,7 @@ export default class BookParser {
                 i.onerror = reject;
 
                 i.src = src;
-                await sleep(30*1000);
+                await utils.sleep(30*1000);
                 if (!resolved)
                     reject('Не удалось получить размер изображения');
             })().catch(reject); });
@@ -419,7 +419,7 @@ export default class BookParser {
         };
 
         const onProgress = async(prog) => {
-            await sleep(1);
+            await utils.sleep(1);
             callback(prog);
         };
 
@@ -441,7 +441,7 @@ export default class BookParser {
         this.textLength = paraOffset;
 
         callback(100);
-        await sleep(10);
+        await utils.sleep(10);
 
         return {fb2};
     }
