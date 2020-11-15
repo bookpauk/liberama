@@ -27,13 +27,14 @@
             <div v-for="item in contents" :key="item.key" class="column" style="width: 540px">
                 <div class="row item q-px-sm no-wrap">
                     <div v-if="item.list.length" class="row justify-center items-center expand-button clickable" @click="expandClick(item.key)">
-                        <q-icon name="la la-arrow-circle-down" class="icon" :class="{'expanded-icon': item.expanded}" color="green-8" size="24px"/>
+                        <q-icon name="la la-caret-right" class="icon" :class="{'expanded-icon': item.expanded}" color="green-8" size="20px"/>
                     </div>
                     <div v-else class="no-expand-button clickable" @click="setBookPos(item.offset)">
+                        <q-icon name="la la-stop" class="icon" style="visibility: hidden" size="20px"/>
                     </div>
                     <div class="col row clickable" @click="setBookPos(item.offset)">
                         <div :style="item.indentStyle"></div>
-                        <div class="q-mr-sm col overflow-hidden column justify-center" v-html="item.label"></div>
+                        <div class="q-mr-sm col overflow-hidden column justify-center" :style="item.labelStyle" v-html="item.label"></div>
                         <div class="column justify-center">{{ item.perc }}%</div>
                     </div>
                 </div>
@@ -43,7 +44,7 @@
                         <div class="col row clickable" @click="setBookPos(subitem.offset)">
                             <div class="no-expand-button"></div>
                             <div :style="subitem.indentStyle"></div>
-                            <div class="q-mr-sm col overflow-hidden column justify-center" v-html="subitem.label"></div>
+                            <div class="q-mr-sm col overflow-hidden column justify-center" :style="item.labelStyle" v-html="subitem.label"></div>
                             <div class="column justify-center">{{ subitem.perc }}%</div>
                         </div>
                     </div>
@@ -97,18 +98,8 @@ class ContentsPage extends Vue {
         this.contents = [];
         await this.$nextTick();
 
-        const prepareLabel = (title, bolder = false) => {
-            let titleParts = title.split('<p>');
-            const textParts = titleParts.filter(v => v).map(v => `<div>${utils.removeHtmlTags(v)}</div>`);
-            if (bolder && textParts.length > 1)
-                textParts[0] = `<b>${textParts[0]}</b>`;
-            return textParts.join('');
-        }
-
-        const insetStyle = inset => `width: ${inset*20}px`;
         const pc = parsed.contents;
         const newpc = [];
-
         //преобразуем все, кроме первого, разделы body в title-subtitle
         let curSubtitles = [];
         let prevBodyIndex = -1;
@@ -130,25 +121,43 @@ class ContentsPage extends Vue {
             }
         }
 
+        const prepareLabel = (title, bolder = false) => {
+            let titleParts = title.split('<p>');
+            const textParts = titleParts.filter(v => v).map(v => `<div>${utils.removeHtmlTags(v)}</div>`);
+            if (bolder && textParts.length > 1)
+                textParts[0] = `<b>${textParts[0]}</b>`;
+            return textParts.join('');
+        }
+
+        const getIndentStyle = inset => `width: ${inset*20}px`;
+
+        const getLabelStyle = (inset) => {
+            const fontSizes = ['110%', '100%', '90%', '85%'];
+            inset = (inset > 3 ? 3 : inset);
+            return `font-size: ${fontSizes[inset]}`;
+        };
+
         //формируем newContents
         let i = 0;
         const newContents = [];
         newpc.forEach((cont) => {
             const label = prepareLabel(cont.title, true);
-            const indentStyle = insetStyle(cont.inset);
+            const indentStyle = getIndentStyle(cont.inset);
+            const labelStyle = getLabelStyle(cont.inset);
 
             let j = 0;
             const list = [];
             cont.subtitles.forEach((sub) => {
                 const l = prepareLabel(sub.title);
-                const s = insetStyle(sub.inset + 1);
+                const s = getIndentStyle(sub.inset + 1);
+                const ls = getLabelStyle(cont.inset + 1);
                 const p = parsed.para[sub.paraIndex];
-                list[j] = {perc: (p.offset/parsed.textLength*100).toFixed(2), label: l, key: j, offset: p.offset, indentStyle: s};
+                list[j] = {perc: (p.offset/parsed.textLength*100).toFixed(2), label: l, key: j, offset: p.offset, indentStyle: s, labelStyle: ls};
                 j++;
             });
 
             const p = parsed.para[cont.paraIndex];
-            newContents[i] = {perc: (p.offset/parsed.textLength*100).toFixed(0), label, key: i, offset: p.offset, indentStyle, expanded: false, list};
+            newContents[i] = {perc: (p.offset/parsed.textLength*100).toFixed(0), label, key: i, offset: p.offset, indentStyle, labelStyle, expanded: false, list};
 
             i++;
         });
@@ -204,10 +213,10 @@ class ContentsPage extends Vue {
 
 .clickable {
     cursor: pointer;
+    padding: 10px 0 10px 0;
 }
 
 .item, .subitem {
-    height: 40px;
     border-bottom: 1px solid #e0e0e0;
 }
 
@@ -217,12 +226,6 @@ class ContentsPage extends Vue {
 
 .expand-button, .no-expand-button {
     width: 40px;
-}
-
-.expand-button:hover {
-    background-color: white;
-    border-radius: 15px;
-    border: 1px solid #d0d0d0;
 }
 
 .subitems-transition {
@@ -236,6 +239,6 @@ class ContentsPage extends Vue {
 }
 
 .expanded-icon {
-    transform: rotate(180deg);
+    transform: rotate(90deg);
 }
 </style>
