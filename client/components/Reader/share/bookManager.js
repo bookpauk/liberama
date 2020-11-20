@@ -6,14 +6,17 @@ import BookParser from './BookParser';
 
 const maxDataSize = 300*1024*1024;//compressed bytes
 
+//локальный кэш метаданных книг, ограничение maxDataSize
 const bmMetaStore = localForage.createInstance({
     name: 'bmMetaStore'
 });
 
+//локальный кэш самих книг, ограничение maxDataSize
 const bmDataStore = localForage.createInstance({
     name: 'bmDataStore'
 });
 
+//список недавно открытых книг
 const bmRecentStore = localForage.createInstance({
     name: 'bmRecentStore'
 });
@@ -238,7 +241,7 @@ class BookManager {
         let book = this.books[meta.key];
 
         if (!book && !this.loaded) {
-            book = await bmDataStore.getItem(`bmMeta-${meta.key}`);
+            book = await bmMetaStore.getItem(`bmMeta-${meta.key}`);
             if (book)
                 this.books[meta.key] = book;
         }
@@ -254,7 +257,7 @@ class BookManager {
         result = this.books[meta.key];
 
         if (!result) {
-            result = await bmDataStore.getItem(`bmMeta-${meta.key}`);
+            result = await bmMetaStore.getItem(`bmMeta-${meta.key}`);
             if (result)
                 this.books[meta.key] = result;
         }
