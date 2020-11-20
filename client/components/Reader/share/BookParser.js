@@ -216,10 +216,30 @@ export default class BookParser {
                 }
             }
 
-            if (tag == 'author' && path.indexOf('/fictionbook/description/title-info/author') == 0) {
+            if (path == '/fictionbook/description/title-info/author') {
                 if (!fb2.author)
                     fb2.author = [];
+
                 fb2.author.push({});
+            }
+
+            const isPublishSequence = (path == '/fictionbook/description/publish-info/sequence');
+            if (path == '/fictionbook/description/title-info/sequence' || isPublishSequence) {
+                if (!fb2.sequence)
+                    fb2.sequence = [];
+
+                if (!isPublishSequence || !fb2.sequence.length) {
+                    const attrs = sax.getAttrsSync(tail);
+                    const seq = {};
+                    if (attrs.name && attrs.name.value) {
+                        seq.name = attrs.name.value;
+                    }
+                    if (attrs.number && attrs.number.value) {
+                        seq.number = attrs.number.value;
+                    }
+
+                    fb2.sequence.push(seq);
+                }
             }
 
             if (path.indexOf('/fictionbook/body') == 0) {
@@ -231,6 +251,14 @@ export default class BookParser {
                         });
                         if (ann.length)
                             newParagraph(' ', 1);
+                    }
+
+                    if (isFirstBody && fb2.sequence && fb2.sequence.length) {
+                        const bt = utils.getBookTitle(fb2);
+                        if (bt.sequence) {
+                            newParagraph(bt.sequence, bt.sequence.length);
+                            newParagraph(' ', 1);
+                        }
                     }
 
                     if (!isFirstBody)

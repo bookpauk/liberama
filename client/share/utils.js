@@ -336,8 +336,18 @@ export function getBookTitle(fb2) {
         result.author = authorNames.join(', ');
     }
 
-    if (fb2.bookTitle)
-        result.bookTitle = fb2.bookTitle;
+    if (fb2.sequence) {
+        const seqs = fb2.sequence.map(s => _.compact([
+            s.name,
+            (s.number ? `#${s.number}` : null),
+        ]).join(' '));
+
+        result.sequence = seqs.join(', ');
+        if (result.sequence)
+            result.sequenceTitle = `(${result.sequence})`;
+    }
+
+    result.bookTitle = _.compact([result.sequenceTitle, fb2.bookTitle]).join(' ');
 
     result.title = _.compact([
         result.author,
