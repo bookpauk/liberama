@@ -171,6 +171,7 @@ class ReaderWorker {
 
         } catch (e) {
             log(LM_ERR, e.stack);
+            log(LM_ERR, `downloadedFilename: ${downloadedFilename}`);
             if (e.message == 'abort')
                 e.message = overLoadMes;
             wState.set({state: 'error', error: e.message});
