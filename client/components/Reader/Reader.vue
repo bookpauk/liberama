@@ -250,11 +250,11 @@ class Reader extends Vue {
                 await this.$nextTick();
                 this.paramPosIgnore = false;
             }
-        }, 500, {'maxWait':5000});
+        }, 500, {maxWait: 5000});
 
         this.scrollingSetRecentBook = _.debounce((newValue) => {
             this.debouncedSetRecentBook(newValue);
-        }, 15000, {'maxWait':20000});
+        }, 15000, {maxWait: 20000});
 
         document.addEventListener('fullscreenchange', () => {
             this.fullScreenActive = (document.fullscreenElement !== null);
