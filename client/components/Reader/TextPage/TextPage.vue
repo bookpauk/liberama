@@ -393,7 +393,7 @@ class TextPage extends Vue {
                     this.meta = bookManager.metaOnly(this.book);
                     const bt = utils.getBookTitle(this.meta.fb2);
 
-                    this.title = bt.title;
+                    this.title = bt.fullTitle;
 
                     this.$root.$emit('set-app-title', this.title);
 

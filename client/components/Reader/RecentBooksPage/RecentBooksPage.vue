@@ -59,7 +59,7 @@
                     <q-td key="links" :props="props" class="td-mp" auto-width>
                         <div class="break-word" style="width: 75px; font-size: 90%">
                             <a v-show="isUrl(props.row.url)" :href="props.row.url" target="_blank">Оригинал</a><br>
-                            <a :href="props.row.path" @click.prevent="downloadBook(props.row.path)">Скачать FB2</a>
+                            <a :href="props.row.path" @click.prevent="downloadBook(props.row.path, props.row.fullTitle)">Скачать FB2</a>
                         </div>
                     </q-td>
 
@@ -237,9 +237,10 @@ class RecentBooksPage extends Vue {
                     author,
                     title: `${title}${perc}${textLen}`,
                 },
-                descString: `${author}${title}${perc}${textLen}`,
+                descString: `${author}${title}${perc}${textLen}`,//для сортировки
                 url: book.url,
                 path: book.path,
+                fullTitle: bt.fullTitle,
                 key: book.key,
             });
         }
@@ -272,13 +273,18 @@ class RecentBooksPage extends Vue {
         return `${(this.search ? 'Найдено' : 'Всего')} ${len} книг${this.wordEnding(len)}`;
     }
 
-    async downloadBook(fb2path) {
+    async downloadBook(fb2path, fullTitle) {
         try {
             await readerApi.checkCachedBook(fb2path);
 
             const d = this.$refs.download;
             d.href = fb2path;
-            d.download = path.basename(fb2path).substr(0, 10) + '.fb2';
+            try {
+                const fn = utils.makeValidFilename(fullTitle);
+                d.download = fn.substring(0, 100) + '.fb2';
+            } catch(e) {
+                d.download = path.basename(fb2path).substr(0, 10) + '.fb2';
+            }
 
             d.click();
         } catch (e) {
@@ -287,14 +293,6 @@ class RecentBooksPage extends Vue {
                 errMes = 'Файл не найден на сервере (возможно был удален как устаревший)';
             this.$root.stdDialog.alert(errMes, 'Ошибка', {color: 'negative'});
         }
-    }
-
-    openOriginal(url) {
-        window.open(url, '_blank');
-    }
-
-    openFb2(path) {
-        window.open(path, '_blank');
     }
 
     async handleDel(key) {

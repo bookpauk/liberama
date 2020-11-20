@@ -349,7 +349,7 @@ export function getBookTitle(fb2) {
 
     result.bookTitle = _.compact([result.sequenceTitle, fb2.bookTitle]).join(' ');
 
-    result.title = _.compact([
+    result.fullTitle = _.compact([
         result.author,
         result.bookTitle
     ]).join(' - ');
