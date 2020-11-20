@@ -87,7 +87,7 @@
 import Vue from 'vue';
 import Component from 'vue-class-component';
 import path from 'path';
-import _ from 'lodash';
+//import _ from 'lodash';
 
 import * as utils from '../../../share/utils';
 import Window from '../../share/Window.vue';
@@ -222,30 +222,11 @@ class RecentBooksPage extends Vue {
                 textLen = ` ${Math.round(book.textLength/1000)}k`;
             }
 
-            const fb2 = (book.fb2 ? book.fb2 : {});
+            const bt = utils.getBookTitle(book.fb2);
 
-            let title = fb2.bookTitle;
-            if (title)
-                title = `"${title}"`;
-            else
-                title = '';
-
-            let author = '';
-            if (fb2.author) {
-                const authorNames = fb2.author.map(a => _.compact([
-                    a.lastName,
-                    a.firstName,
-                    a.middleName
-                ]).join(' '));
-                author = authorNames.join(', ');
-            } else {//TODO: убрать в будущем
-                author = _.compact([
-                    fb2.lastName,
-                    fb2.firstName,
-                    fb2.middleName
-                ]).join(' ');
-            }
-            author = (author ? author : (fb2.bookTitle ? fb2.bookTitle : book.url));
+            let title = bt.bookTitle;
+            title = (title ? `"${title}"`: '');
+            const author = (bt.author ? bt.author : (bt.bookTitle ? bt.bookTitle : book.url));
 
             result.push({
                 num,

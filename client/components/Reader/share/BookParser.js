@@ -455,6 +455,8 @@ export default class BookParser {
         return {fb2};
     }
 
+    getAuthor
+
     findParaIndex(bookPos) {
         let result = undefined;
         //дихотомия

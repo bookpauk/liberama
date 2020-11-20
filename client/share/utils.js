@@ -308,3 +308,41 @@ export function userHotKeysObjectSwap(userHotKeys) {
 export function removeHtmlTags(s) {
     return s.replace(/(<([^>]+)>)/ig, '');
 }
+
+export function makeValidFilename(filename, repl = '_') {
+    let f = filename.replace(/[\x00\\/:*"<>|]/g, repl); // eslint-disable-line no-control-regex
+    f = f.trim();
+    while (f.length && (f[f.length - 1] == '.' || f[f.length - 1] == '_')) {
+        f = f.substring(0, f.length - 1);
+    }
+
+    if (f)
+        return f;
+    else
+        throw new Error('Invalid filename');
+}
+
+export function getBookTitle(fb2) {
+    fb2 = (fb2 ? fb2 : {});
+    const result = {};
+
+   if (fb2.author) {
+        const authorNames = fb2.author.map(a => _.compact([
+            a.lastName,
+            a.firstName,
+            a.middleName
+        ]).join(' '));
+
+        result.author = authorNames.join(', ');
+    }
+
+    if (fb2.bookTitle)
+        result.bookTitle = fb2.bookTitle;
+
+    result.title = _.compact([
+        result.author,
+        result.bookTitle
+    ]).join(' - ');
+
+    return result;
+}
