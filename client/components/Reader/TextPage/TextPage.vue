@@ -40,7 +40,7 @@ import Component from 'vue-class-component';
 import {loadCSS} from 'fg-loadcss';
 import _ from 'lodash';
 
-import {sleep} from '../../../share/utils';
+import * as utils from '../../../share/utils';
 import bookManager from '../share/bookManager';
 import DrawHelper from './DrawHelper';
 import rstore from '../../../store/modules/reader';
@@ -134,7 +134,7 @@ class TextPage extends Vue {
 
         this.$root.$on('resize', async() => {
             this.$nextTick(this.onResize);
-            await sleep(500);
+            await utils.sleep(500);
             this.$nextTick(this.onResize);
         });
     }
@@ -285,7 +285,7 @@ class TextPage extends Vue {
 
         let close = null;
         (async() => {
-            await sleep(500);
+            await utils.sleep(500);
             if (this.fontsLoading)
                 close = this.$root.notify.info('Загрузка шрифта &nbsp;<i class="la la-snowflake icon-rotate" style="font-size: 150%"></i>');
         })();
@@ -342,7 +342,7 @@ class TextPage extends Vue {
             let i = 0;
             const t = this.parsed.testText;
             while (i++ < 50 && this.parsed === parsed && this.drawHelper.measureText(t, {}) === this.parsed.testWidth)
-                await sleep(100);
+                await utils.sleep(100);
 
             if (this.parsed === parsed) {
                 this.parsed.testWidth = this.drawHelper.measureText(t, {});
@@ -366,7 +366,6 @@ class TextPage extends Vue {
         this.updateLayout();
         this.book = null;
         this.meta = null;
-        this.fb2 = null;
         this.parsed = null;
 
         this.linesUp = null;
@@ -383,7 +382,7 @@ class TextPage extends Vue {
                 try {
                     //подождем ленивый парсинг
                     this.stopLazyParse = true;
-                    while (this.doingLazyParse) await sleep(10);
+                    while (this.doingLazyParse) await utils.sleep(10);
 
                     const isParsed = await bookManager.hasBookParsed(this.lastBook);
                     if (!isParsed) {
@@ -392,21 +391,9 @@ class TextPage extends Vue {
 
                     this.book = await bookManager.getBook(this.lastBook);
                     this.meta = bookManager.metaOnly(this.book);
-                    this.fb2 = this.meta.fb2;
+                    const bt = utils.getBookTitle(this.meta.fb2);
 
-                    let authorNames = [];
-                    if (this.fb2.author) {
-                        authorNames = this.fb2.author.map(a => _.compact([
-                            a.lastName,
-                            a.firstName,
-                            a.middleName
-                        ]).join(' '));
-                    }
-
-                    this.title = _.compact([
-                        authorNames.join(', '),
-                        this.fb2.bookTitle
-                    ]).join(' - ');
+                    this.title = bt.fullTitle;
 
                     this.$root.$emit('set-app-title', this.title);
 
@@ -493,7 +480,7 @@ class TextPage extends Vue {
                 let wait = (timeout + 201)/100;
                 while (wait > 0 && !this[stopPropertyName]) {
                     wait--;
-                    await sleep(100);
+                    await utils.sleep(100);
                 }
                 resolve();
             })().catch(reject); });
@@ -509,7 +496,7 @@ class TextPage extends Vue {
         }
 
         //ждем анимацию
-        while (this.inAnimation) await sleep(10);
+        while (this.inAnimation) await utils.sleep(10);
 
         this.stopScrolling = false;
         this.doingScrolling = true;
@@ -520,7 +507,7 @@ class TextPage extends Vue {
             this.page1 = this.page2;
         this.toggleLayout = true;
         await this.$nextTick();
-        await sleep(50);
+        await utils.sleep(50);
 
         this.cachedPos = -1;
         this.draw();
@@ -557,7 +544,7 @@ class TextPage extends Vue {
         page.style.transform = 'none';
         page.offsetHeight;
 
-        while (this.doingScrolling) await sleep(10);
+        while (this.doingScrolling) await utils.sleep(10);
     }
 
     draw() {
@@ -766,7 +753,7 @@ class TextPage extends Vue {
         for (let i = 0; i < this.parsed.para.length; i++) {
             j++;
             if (j > 1) {
-                await sleep(1);
+                await utils.sleep(1);
                 j = 0;
             }
             if (this.stopLazyParse)
@@ -788,7 +775,7 @@ class TextPage extends Vue {
     async refreshTime() {
         if (!this.timeRefreshing) {
             this.timeRefreshing = true;
-            await sleep(60*1000);
+            await utils.sleep(60*1000);
 
             if (this.book && this.parsed.textLength) {
                 this.debouncedDrawStatusBar();
@@ -905,7 +892,7 @@ class TextPage extends Vue {
             this.settingsChanging = true;
             const newSize = (this.settings.fontSize + 1 < 200 ? this.settings.fontSize + 1 : 100);
             this.commit('reader/setSettings', {fontSize: newSize});
-            await sleep(50);
+            await utils.sleep(50);
             this.settingsChanging = false;
         }
     }
@@ -915,7 +902,7 @@ class TextPage extends Vue {
             this.settingsChanging = true;
             const newSize = (this.settings.fontSize - 1 > 5 ? this.settings.fontSize - 1 : 5);
             this.commit('reader/setSettings', {fontSize: newSize});
-            await sleep(50);
+            await utils.sleep(50);
             this.settingsChanging = false;
         }
     }
@@ -925,7 +912,7 @@ class TextPage extends Vue {
             this.settingsChanging = true;
             const newDelay = (this.settings.scrollingDelay - 50 > 1 ? this.settings.scrollingDelay - 50 : 1);
             this.commit('reader/setSettings', {scrollingDelay: newDelay});
-            await sleep(50);
+            await utils.sleep(50);
             this.settingsChanging = false;
         }
     }
@@ -935,7 +922,7 @@ class TextPage extends Vue {
             this.settingsChanging = true;
             const newDelay = (this.settings.scrollingDelay + 50 < 10000 ? this.settings.scrollingDelay + 50 : 10000);
             this.commit('reader/setSettings', {scrollingDelay: newDelay});
-            await sleep(50);
+            await utils.sleep(50);
             this.settingsChanging = false;
         }
     }
@@ -949,7 +936,7 @@ class TextPage extends Vue {
             let delay = 400;
             while (this.repDoing) {
                 this.handleClick(pointX, pointY);
-                await sleep(delay);
+                await utils.sleep(delay);
                 if (delay > 15)
                     delay *= 0.8;
             }

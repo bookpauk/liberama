@@ -50,6 +50,9 @@
                     </div>
                 </div>
             </div>
+            <div v-if="!contents.length" class="column justify-center items-center" style="height: 100px">
+                Оглавление отсутствует
+            </div>
         </div>
     </div>
 
