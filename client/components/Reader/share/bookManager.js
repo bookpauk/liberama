@@ -39,7 +39,7 @@ class BookManager {
 
         this.saveRecentItem = _.debounce(() => {
             bmRecentStoreNew.setItem('recent-item', this.recentItem);
-            this.recentRev++;
+            this.recentRev = (this.recentRev < 1000 ? this.recentRev + 1 : 1);
             bmRecentStoreNew.setItem('rev', this.recentRev);
         }, 200, {maxWait: 300});
 
@@ -64,6 +64,8 @@ class BookManager {
 
             await this.cleanRecentBooks();
 
+            if (this.recentRev > 10)
+                await bmRecentStoreOld.clear();
         } else {//TODO: убрать после 06.2021, когда bmRecentStoreOld устареет
             this.recentLast = await bmRecentStoreOld.getItem('recent-last');
             if (this.recentLast) {

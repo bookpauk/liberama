@@ -580,8 +580,8 @@ class ServerStorage extends Vue {
             let newRecent = {};
             if (!itemKey || (needSaveRecentPatch && Object.keys(newRecentPatch.data).length > 10)) {
                 //ждем весь bm.recent
-                while (!bookManager.loaded)
-                    await utils.sleep(100);
+                /*while (!bookManager.loaded)
+                    await utils.sleep(100);*/
 
                 newRecent = {rev: this.cachedRecent.rev + 1, data: _.cloneDeep(bm.recent)};
                 newRecentPatch = {rev: this.cachedRecentPatch.rev + 1, data: {}};
