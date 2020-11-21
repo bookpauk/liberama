@@ -112,6 +112,7 @@ class RecentBooksPage extends Vue {
     pagination = {};
 
     created() {
+        this.firstInit = true;
         this.pagination = {rowsPerPage: 0};
 
         this.columns = [
@@ -167,26 +168,11 @@ class RecentBooksPage extends Vue {
             this.initing = true;
 
 
-            if (!bookManager.loaded) {
-                await this.updateTableData(10);
-                //для отзывчивости
-                await utils.sleep(100);
-                let i = 0;
-                let j = 5;
-                while (i < 500 && !bookManager.loaded) {
-                    if (i % j == 0) {
-                        bookManager.sortedRecentCached = null;
-                        await this.updateTableData(20);
-                        j *= 2;
-                    }
-
-                    await utils.sleep(100);
-                    i++;
-                }
-            } else {
-                //для отзывчивости
-                await utils.sleep(100);
+            if (this.firstInit) {//для отзывчивости
+                await this.updateTableData(20);
+                this.firstInit = false;
             }
+            await utils.sleep(50);
             await this.updateTableData();
             this.initing = false;
         })();
