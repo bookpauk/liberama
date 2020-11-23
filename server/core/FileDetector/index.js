@@ -54,7 +54,7 @@ class FileDetector {
 
     fromBuffer(buffer, callback) {
         let result = null;
-
+        //console.log(buffer);
         const invalidSignaturesList = this.validateSigantures();
         if (invalidSignaturesList.length) {
             return callback(invalidSignaturesList);

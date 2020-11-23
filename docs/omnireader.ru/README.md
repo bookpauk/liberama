@@ -27,9 +27,9 @@ sudo chown www-data.www-data /home/liberama
 
 ### external converter `calibre`, download from https://download.calibre-ebook.com/
 ```
-wget "https://download.calibre-ebook.com/3.39.1/calibre-3.39.1-x86_64.txz"
+wget "https://download.calibre-ebook.com/5.5.0/calibre-5.5.0-x86_64.txz"
 sudo -u www-data mkdir -p /home/liberama/data/calibre
-sudo -u www-data tar xvf calibre-3.39.1-x86_64.txz -C /home/liberama/data/calibre
+sudo -u www-data tar xvf calibre-5.5.0-x86_64.txz -C /home/liberama/data/calibre
 ```
 
 ### external converters
