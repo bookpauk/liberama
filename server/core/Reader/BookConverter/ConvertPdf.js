@@ -24,7 +24,7 @@ class ConvertPdf extends ConvertHtml {
 
         //конвертируем в xml
         let perc = 0;
-        await this.execConverter(this.pdfToHtmlPath, ['-c', '-s', '-xml', inputFiles.sourceFile, outFile], () => {
+        await this.execConverter(this.pdfToHtmlPath, ['-nodrm', '-c', '-s', '-xml', inputFiles.sourceFile, outFile], () => {
             perc = (perc < 80 ? perc + 10 : 40);
             callback(perc);
         }, abort);
