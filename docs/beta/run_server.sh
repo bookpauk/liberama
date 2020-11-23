@@ -1,3 +1,3 @@
 #!/bin/bash
 
-sudo -H -u www-data /home/beta.liberama/liberama
+sudo -H -u www-data bash -c "cd /var/www; /home/beta.liberama/liberama"
