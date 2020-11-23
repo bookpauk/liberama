@@ -171,10 +171,15 @@ class ReaderWorker {
 
         } catch (e) {
             log(LM_ERR, e.stack);
+            let mes = e.message.split('|FORLOG|');
+            if (mes[1])
+                log(LM_ERR, mes[0] + mes[1]);
             log(LM_ERR, `downloadedFilename: ${downloadedFilename}`);
-            if (e.message == 'abort')
-                e.message = overLoadMes;
-            wState.set({state: 'error', error: e.message});
+
+            mes = mes[0];
+            if (mes == 'abort')
+                mes = overLoadMes;
+            wState.set({state: 'error', error: mes});
         } finally {
             //clean
             if (q)

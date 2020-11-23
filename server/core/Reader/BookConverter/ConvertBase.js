@@ -53,9 +53,7 @@ class ConvertBase {
                 abort
             });
             if (result.code != 0) {
-                let error = result.code;
-                if (this.config.branch == 'development')
-                    error = `exec: ${path}, stdout: ${result.stdout}, stderr: ${result.stderr}`;
+                const error = `${result.code}|FORLOG|, exec: ${path}, args: ${args.join(' ')}, stdout: ${result.stdout}, stderr: ${result.stderr}`;
                 throw new Error(`Внешний конвертер завершился с ошибкой: ${error}`);
             }
         } catch(e) {
