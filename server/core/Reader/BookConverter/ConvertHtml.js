@@ -218,7 +218,7 @@ class ConvertHtml extends ConvertBase {
 
             let i = 0;
             //если разброс не слишком большой, выделяем параграфы
-            if (d < 10 && spaceCounter.length) {
+            if (d < 20 && spaceCounter.length) {
                 total /= 20;
                 i = spaceCounter.length - 1;
                 while (i > 0 && (!spaceCounter[i] || spaceCounter[i] < total)) i--;
