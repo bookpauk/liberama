@@ -64,8 +64,12 @@ class BookManager {
 
             await this.cleanRecentBooks();
 
-            if (this.recentRev > 10)
-                await bmRecentStoreOld.clear();
+            //TODO: убрать после 06.2021, когда bmRecentStoreOld устареет
+            {
+                await this.convertFileToDiskPrefix();
+                if (this.recentRev > 10)
+                    await bmRecentStoreOld.clear();
+            }
         } else {//TODO: убрать после 06.2021, когда bmRecentStoreOld устареет
             this.recentLast = await bmRecentStoreOld.getItem('recent-last');
             if (this.recentLast) {
@@ -453,6 +457,33 @@ class BookManager {
         if (isDel)
             await this.recentSetItem();
         return isDel;
+    }
+
+    async convertFileToDiskPrefix() {
+        let isConverted = false;
+
+        const newRecent = {};
+        for (let key of Object.keys(this.recent)) {
+            let newKey = key;
+            let newUrl = this.recent[key].url;
+
+            if (newKey.indexOf('66696c65') == 0) {
+                newKey = newKey.replace(/^66696c65/, '6469736b');
+                if (newUrl)
+                    newUrl = newUrl.replace(/^file/, 'disk');
+                isConverted = true;
+            }
+
+            newRecent[newKey] = this.recent[key];
+            newRecent[newKey].key = newKey;
+            if (newUrl)
+                newRecent[newKey].url = newUrl;
+        }
+        if (isConverted) {
+            this.recent = newRecent;
+            await this.recentSetItem(null, true);
+        }
+        return isConverted;
     }
 
     mostRecentBook() {

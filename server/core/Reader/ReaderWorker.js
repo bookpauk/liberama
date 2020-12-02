@@ -81,7 +81,7 @@ class ReaderWorker {
             const decompDirname = utils.randomHexString(30);
 
             //download or use uploaded
-            if (url.indexOf('file://') != 0) {//download
+            if (url.indexOf('disk://') != 0) {//download
                 const downdata = await this.down.load(url, (progress) => {
                     wState.set({progress});
                 }, q.abort);
@@ -214,7 +214,7 @@ class ReaderWorker {
             await fs.remove(file.path);
         }
 
-        return `file://${hash}`;
+        return `disk://${hash}`;
     }
 
     async restoreRemoteFile(filename) {

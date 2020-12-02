@@ -846,8 +846,12 @@ class Reader extends Vue {
 
         let url = encodeURI(decodeURI(opts.url));
 
+        //TODO: убрать конвертирование 'file://' после 06.2021
+        if (url.length == 71 && url.indexOf('file://') == 0)
+            url = url.replace(/^file/, 'disk');
+
         if ((url.indexOf('http://') != 0) && (url.indexOf('https://') != 0) &&
-            (url.indexOf('file://') != 0))
+            (url.indexOf('disk://') != 0))
             url = 'http://' + url;
 
         // уже просматривается сейчас

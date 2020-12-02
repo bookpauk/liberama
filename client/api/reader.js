@@ -181,9 +181,8 @@ class Reader {
             maxUploadFileSize = 10*1024*1024;
         if (file.size > maxUploadFileSize)
             throw new Error(`Размер файла превышает ${maxUploadFileSize} байт`);
-
         let formData = new FormData();
-        formData.append('file', file);
+        formData.append('file', file, file.name);
 
         const options = {
             headers: {
