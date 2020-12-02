@@ -34,6 +34,7 @@ sudo -u www-data tar xvf calibre-5.5.0-x86_64.txz -C /home/liberama/data/calibre
 
 ### external converters
 ```
+sudo apt install rar
 sudo apt install libreoffice
 sudo apt install poppler-utils
 ```

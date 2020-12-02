@@ -1,5 +1,6 @@
 const { spawn } = require('child_process');
 const fs = require('fs-extra');
+const path = require('path');
 const crypto = require('crypto');
 const baseX = require('base-x');
 
@@ -91,6 +92,22 @@ function spawnProcess(cmd, opts) {
     })().catch(reject); });
 }
 
+async function findFiles(callback, dir) {
+    if (!(callback && dir))
+        return;
+    let result = true;
+    const files = await fs.readdir(dir, { withFileTypes: true });
+
+    for (const file of files) {
+        const found = path.resolve(dir, file.name);
+        if (file.isDirectory())
+            result = await findFiles(callback, found);
+        else
+            await callback(found);
+    }
+    return result;
+}
+
 module.exports = {
     toBase36,
     fromBase36,
@@ -99,5 +116,6 @@ module.exports = {
     sleep,
     randomHexString,
     touchFile,
-    spawnProcess
+    spawnProcess,
+    findFiles
 };
