@@ -1,5 +1,5 @@
 <template>
-    <q-dialog ref="dialog" v-model="active" @show="onShow" @hide="onHide">
+    <q-dialog ref="dialog" v-model="active" @show="onShow" @hide="onHide" no-route-dismiss>
         <slot></slot>
 
         <!--------------------------------------------------->

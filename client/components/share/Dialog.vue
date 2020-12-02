@@ -1,5 +1,5 @@
 <template>
-    <q-dialog v-model="active">
+    <q-dialog v-model="active" no-route-dismiss>
         <div class="column bg-white no-wrap">
             <div class="header row">
                 <div class="caption col row items-center q-ml-md">
