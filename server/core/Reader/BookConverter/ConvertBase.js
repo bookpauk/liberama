@@ -6,7 +6,7 @@ const LimitedQueue = require('../../LimitedQueue');
 const textUtils = require('./textUtils');
 const utils = require('../../utils');
 
-const queue = new LimitedQueue(2, 20, 3*60*1000);//3 минуты ожидание подвижек
+const queue = new LimitedQueue(3, 20, 3*60*1000);//3 минуты ожидание подвижек
 
 class ConvertBase {
     constructor(config) {
@@ -44,11 +44,16 @@ class ConvertBase {
 
         try {
             const result = await utils.spawnProcess(path, {
-                killAfter: 600,
+                killAfter: 3600,//1 час
                 args, 
                 onData: (data) => {
                     q.resetTimeout();
                     onData(data);
+                },
+                //будем периодически проверять работу конвертера и если очереди нет, то разрешаем работу пинком onData
+                onUsage: (stats) => {
+                    if (queue.freed > 1 && stats.cpu >= 10)
+                        onData('.');
                 },
                 abort
             });

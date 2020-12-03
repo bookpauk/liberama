@@ -130,6 +130,7 @@ class ReaderWorker {
             convertFilename = `${this.config.tempDownloadDir}/${tempFilename2}`;
             await this.bookConverter.convertToFb2(decompFiles, convertFilename, opts, progress => {
                 wState.set({progress});
+                q.resetTimeout();
             }, q.abort);
 
             //сжимаем файл в tmp, если там уже нет с тем же именем-sha256
