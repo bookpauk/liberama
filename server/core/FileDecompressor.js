@@ -241,7 +241,7 @@ class FileDecompressor {
 
     async unRar(filename, outputDir) {
         try {
-            const args = ['e', '-y', filename, `${outputDir}/`];
+            const args = ['x', '-p-', '-y', filename, `${outputDir}`];
             const result = await utils.spawnProcess(this.rarPath, {
                 killAfter: 60,
                 args
