@@ -7,8 +7,8 @@
             <span class="greeting"><b>{{ title }}</b></span>
             <div class="q-my-sm"></div>
             <span class="greeting">Добро пожаловать!</span>
-            <span class="greeting">Поддерживаются форматы: <b>fb2, html, txt</b> и сжатие: <b>zip, bz2, gz</b></span>
-            <span v-if="isExternalConverter" class="greeting">...а также форматы: <b>rtf, doc, docx, pdf, epub, mobi</b></span>
+            <span class="greeting">Поддерживаются форматы: <b>fb2, html, txt</b> и сжатие: <b>zip, bz2, gz<span v-if="isExternalConverter">, rar</span></b></span>
+            <span v-if="isExternalConverter" class="greeting">...а также частично форматы: <b>epub, mobi, rtf, doc, docx, pdf, djvu</b></span>
         </div>
 
         <div class="col-auto column justify-start items-center no-wrap overflow-hidden">
