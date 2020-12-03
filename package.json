@@ -72,6 +72,7 @@
     "multer": "^1.4.2",
     "pako": "^1.0.11",
     "path-browserify": "^1.0.0",
+    "pidusage": "^2.0.21",
     "quasar": "^1.14.3",
     "safe-buffer": "^5.2.0",
     "sjcl": "^1.0.8",
