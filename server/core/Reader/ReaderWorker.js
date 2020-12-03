@@ -30,7 +30,7 @@ class ReaderWorker {
 
             this.workerState = new WorkerState();
             this.down = new FileDownloader(config.maxUploadFileSize);
-            this.decomp = new FileDecompressor(2*config.maxUploadFileSize);
+            this.decomp = new FileDecompressor(3*config.maxUploadFileSize);
             this.bookConverter = new BookConverter(this.config);
 
             this.remoteWebDavStorage = false;
