@@ -296,7 +296,7 @@ class RecentBooksPage extends Vue {
 
     isUrl(url) {
         if (url)
-            return (url.indexOf('file://') != 0);
+            return (url.indexOf('disk://') != 0);
         else
             return false;
     }

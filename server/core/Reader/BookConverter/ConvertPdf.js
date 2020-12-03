@@ -14,17 +14,20 @@ class ConvertPdf extends ConvertHtml {
     }
 
     async run(notUsed, opts) {
-        if (!this.check(notUsed, opts))
-            return false;
+        if (!opts.skipCheck) {
+            if (!this.check(notUsed, opts))
+                return false;
+        }
         await this.checkExternalConverterPresent();
 
-        const {inputFiles, callback, abort} = opts;
+        const {inputFiles, callback, abort, uploadFileName} = opts;
 
+        const inpFile = (opts.pdfFile ? opts.pdfFile : inputFiles.sourceFile);
         const outFile = `${inputFiles.filesDir}/${utils.randomHexString(10)}.xml`;
 
         //конвертируем в xml
         let perc = 0;
-        await this.execConverter(this.pdfToHtmlPath, ['-nodrm', '-c', '-s', '-xml', inputFiles.sourceFile, outFile], () => {
+        await this.execConverter(this.pdfToHtmlPath, ['-nodrm', '-c', '-s', '-xml', inpFile, outFile], () => {
             perc = (perc < 80 ? perc + 10 : 40);
             callback(perc);
         }, abort);
@@ -186,6 +189,8 @@ class ConvertPdf extends ConvertHtml {
         indents[0] = 0;
 
         //формируем текст
+        if (!title && uploadFileName)
+            title = uploadFileName;
         let text = `<title>${title}</title>`;
         let concat = '';
         let sp = '';

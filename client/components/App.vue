@@ -128,6 +128,10 @@ class App extends Vue {
 
         this.setAppTitle();
         (async() => {
+            //запросим persistent storage
+            if (navigator.storage && navigator.storage.persist) {
+                navigator.storage.persist();
+            }
             await this.routerReady();
             this.redirectIfNeeded();
         })();

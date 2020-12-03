@@ -12,7 +12,7 @@ const utils = require('../utils');
 const log = new (require('../AppLogger'))().log;//singleton
 
 const cleanDirPeriod = 60*60*1000;//1 раз в час
-const queue = new LimitedQueue(5, 100, 5*60*1000);//5 минут ожидание подвижек
+const queue = new LimitedQueue(5, 100, 4*60*1000);//4 минуты ожидание подвижек
 
 let instance = null;
 
@@ -30,7 +30,7 @@ class ReaderWorker {
 
             this.workerState = new WorkerState();
             this.down = new FileDownloader(config.maxUploadFileSize);
-            this.decomp = new FileDecompressor(2*config.maxUploadFileSize);
+            this.decomp = new FileDecompressor(3*config.maxUploadFileSize);
             this.bookConverter = new BookConverter(this.config);
 
             this.remoteWebDavStorage = false;
@@ -81,7 +81,7 @@ class ReaderWorker {
             const decompDirname = utils.randomHexString(30);
 
             //download or use uploaded
-            if (url.indexOf('file://') != 0) {//download
+            if (url.indexOf('disk://') != 0) {//download
                 const downdata = await this.down.load(url, (progress) => {
                     wState.set({progress});
                 }, q.abort);
@@ -130,6 +130,7 @@ class ReaderWorker {
             convertFilename = `${this.config.tempDownloadDir}/${tempFilename2}`;
             await this.bookConverter.convertToFb2(decompFiles, convertFilename, opts, progress => {
                 wState.set({progress});
+                q.resetTimeout();
             }, q.abort);
 
             //сжимаем файл в tmp, если там уже нет с тем же именем-sha256
@@ -214,7 +215,7 @@ class ReaderWorker {
             await fs.remove(file.path);
         }
 
-        return `file://${hash}`;
+        return `disk://${hash}`;
     }
 
     async restoreRemoteFile(filename) {

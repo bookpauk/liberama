@@ -1053,7 +1053,7 @@ class TextPage extends Vue {
 
     onStatusBarClick() {
         const url = this.meta.url;
-        if (url && url.indexOf('file://') != 0) {
+        if (url && url.indexOf('disk://') != 0) {
             window.open(url, '_blank');
         } else {
             this.$root.stdDialog.alert('Оригинал недоступен, т.к. файл книги был загружен с локального диска.', ' ', {color: 'info'});

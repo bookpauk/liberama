@@ -1,7 +1,9 @@
 const { spawn } = require('child_process');
 const fs = require('fs-extra');
+const path = require('path');
 const crypto = require('crypto');
 const baseX = require('base-x');
+const pidusage = require('pidusage');
 
 const BASE36 = '0123456789abcdefghijklmnopqrstuvwxyz';
 const bs36 = baseX(BASE36);
@@ -45,10 +47,11 @@ async function touchFile(filename) {
 }
 
 function spawnProcess(cmd, opts) {
-    let {args, killAfter, onData, abort} = opts;
+    let {args, killAfter, onData, onUsage, onUsageInterval, abort} = opts;
     killAfter = (killAfter ? killAfter : 120);//seconds
     onData = (onData ? onData : () => {});
     args = (args ? args : []);
+    onUsageInterval = (onUsageInterval ? onUsageInterval : 30);//seconds
 
     return new Promise((resolve, reject) => { (async() => {
         let resolved = false;
@@ -75,9 +78,19 @@ function spawnProcess(cmd, opts) {
             reject({status: 'error', error, stdout, stderr});
         });
 
+        //ждем процесс, контролируем его работу раз в секунду
+        let onUsageCounter = onUsageInterval;
         while (!resolved) {
             await sleep(1000);
-            killAfter -= 1;
+
+            onUsageCounter--;
+            if (onUsage && onUsageCounter <= 0) {
+                const stats = await pidusage(proc.pid);
+                onUsage(stats);
+                onUsageCounter = onUsageInterval;
+            }
+
+            killAfter--;
             if (killAfter <= 0 || (abort && abort())) {
                 process.kill(proc.pid);
                 if (killAfter <= 0) {
@@ -91,6 +104,22 @@ function spawnProcess(cmd, opts) {
     })().catch(reject); });
 }
 
+async function findFiles(callback, dir) {
+    if (!(callback && dir))
+        return;
+    let result = true;
+    const files = await fs.readdir(dir, { withFileTypes: true });
+
+    for (const file of files) {
+        const found = path.resolve(dir, file.name);
+        if (file.isDirectory())
+            result = await findFiles(callback, found);
+        else
+            await callback(found);
+    }
+    return result;
+}
+
 module.exports = {
     toBase36,
     fromBase36,
@@ -99,5 +128,6 @@ module.exports = {
     sleep,
     randomHexString,
     touchFile,
-    spawnProcess
+    spawnProcess,
+    findFiles
 };

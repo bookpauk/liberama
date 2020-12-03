@@ -4,6 +4,7 @@ const FileDetector = require('../../FileDetector');
 //порядок важен
 const convertClassFactory = [
     require('./ConvertEpub'),
+    require('./ConvertDjvu'),
     require('./ConvertPdf'),
     require('./ConvertRtf'),
     require('./ConvertDocX'),

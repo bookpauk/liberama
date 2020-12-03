@@ -6,7 +6,7 @@ const LimitedQueue = require('../../LimitedQueue');
 const textUtils = require('./textUtils');
 const utils = require('../../utils');
 
-const queue = new LimitedQueue(2, 20, 3*60*1000);//3 минуты ожидание подвижек
+const queue = new LimitedQueue(3, 20, 3*60*1000);//3 минуты ожидание подвижек
 
 class ConvertBase {
     constructor(config) {
@@ -15,6 +15,7 @@ class ConvertBase {
         this.calibrePath = `${config.dataDir}/calibre/ebook-convert`;
         this.sofficePath = '/usr/bin/soffice';
         this.pdfToHtmlPath = '/usr/bin/pdftohtml';
+        this.ddjvuPath = '/usr/bin/ddjvu';
     }
 
     async run(data, opts) {// eslint-disable-line no-unused-vars
@@ -30,6 +31,9 @@ class ConvertBase {
 
         if (!await fs.pathExists(this.pdfToHtmlPath))
             throw new Error('Внешний конвертер pdftohtml не найден');
+
+        if (!await fs.pathExists(this.ddjvuPath))
+            throw new Error('Внешний конвертер ddjvu не найден');
     }
 
     async execConverter(path, args, onData, abort) {
@@ -44,12 +48,18 @@ class ConvertBase {
 
         try {
             const result = await utils.spawnProcess(path, {
-                killAfter: 600,
+                killAfter: 3600,//1 час
                 args, 
                 onData: (data) => {
                     q.resetTimeout();
                     onData(data);
                 },
+                //будем периодически проверять работу конвертера и если очереди нет, то разрешаем работу пинком onData
+                onUsage: (stats) => {
+                    if (queue.freed > 1 && stats.cpu >= 10)
+                        onData('.');
+                },
+                onUsageInterval: 10,
                 abort
             });
             if (result.code != 0) {

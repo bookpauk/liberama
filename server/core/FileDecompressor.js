@@ -15,6 +15,13 @@ class FileDecompressor {
     constructor(limitFileSize = 0) {
         this.detector = new FileDetector();
         this.limitFileSize = limitFileSize;
+
+        this.rarPath = '/usr/bin/rar';
+        this.rarExists = false;
+        (async() => {
+            if (await fs.pathExists(this.rarPath))
+                this.rarExists = true;
+        })();
     }
 
     async decompressNested(filename, outputDir) {
@@ -30,7 +37,11 @@ class FileDecompressor {
             files: []
         };
 
-        if (!fileType || !(fileType.ext == 'zip' || fileType.ext == 'bz2' || fileType.ext == 'gz' || fileType.ext == 'tar')) {
+        if (!fileType || !(
+                    fileType.ext == 'zip' || fileType.ext == 'bz2' || fileType.ext == 'gz'
+                    || fileType.ext == 'tar' || (this.rarExists && fileType.ext == 'rar')
+                )
+            ) {
             return result;
         }
 
@@ -94,6 +105,11 @@ class FileDecompressor {
     async decompress(fileExt, filename, outputDir) {
         let files = [];
 
+        if (fileExt == 'rar' && this.rarExists) {
+            files = await this.unRar(filename, outputDir);
+            return files;
+        }
+
         switch (fileExt) {
             case 'zip':
                 files = await this.unZip(filename, outputDir);
@@ -123,8 +139,7 @@ class FileDecompressor {
                 decodeEntryNameCallback: (nameRaw) => {
                     return utils.bufferRemoveZeroes(nameRaw);
                 }
-            }
-);
+            });
         } catch (e) {
             fs.emptyDir(outputDir);
             return await zip.unpack(filename, outputDir, {
@@ -222,7 +237,39 @@ class FileDecompressor {
         
             inputStream.pipe(stream).pipe(outputStream);
         })().catch(reject); });
-   }
+    }
+
+    async unRar(filename, outputDir) {
+        try {
+            const args = ['x', '-p-', '-y', filename, `${outputDir}`];
+            const result = await utils.spawnProcess(this.rarPath, {
+                killAfter: 60,
+                args
+            });
+
+            if (result.code == 0) {
+                const files = [];
+                await utils.findFiles(async(file) => {
+                    const stat = await fs.stat(file);
+                    files.push({path: path.relative(outputDir, file), size: stat.size});
+                }, outputDir);
+
+                return files;
+
+            } else {
+                const error = `${result.code}|FORLOG|, exec: ${this.rarPath}, args: ${args.join(' ')}, stdout: ${result.stdout}, stderr: ${result.stderr}`;
+                throw new Error(`Архиватор Rar завершился с ошибкой: ${error}`);
+            }
+        } catch(e) {
+            if (e.status == 'killed') {
+                throw new Error('Слишком долгое ожидание архиватора Rar');
+            } else if (e.status == 'error') {
+                throw new Error(e.error);
+            } else {
+                throw new Error(e);
+            }
+        }
+    }
 
     async gzipBuffer(buf) {
         return new Promise((resolve, reject) => {

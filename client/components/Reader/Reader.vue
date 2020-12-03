@@ -846,8 +846,12 @@ class Reader extends Vue {
 
         let url = encodeURI(decodeURI(opts.url));
 
+        //TODO: убрать конвертирование 'file://' после 06.2021
+        if (url.length == 71 && url.indexOf('file://') == 0)
+            url = url.replace(/^file/, 'disk');
+
         if ((url.indexOf('http://') != 0) && (url.indexOf('https://') != 0) &&
-            (url.indexOf('file://') != 0))
+            (url.indexOf('disk://') != 0))
             url = 'http://' + url;
 
         // уже просматривается сейчас
@@ -924,7 +928,8 @@ class Reader extends Vue {
                         url,
                         skipCheck: (opts.skipCheck ? true : false),
                         isText: (opts.isText ? true : false),
-                        enableSitesFilter: this.enableSitesFilter
+                        enableSitesFilter: this.enableSitesFilter,
+                        uploadFileName: (opts.uploadFileName ? opts.uploadFileName : ''),
                     },
                     (state) => {
                         progress.setState(state);
@@ -977,7 +982,7 @@ class Reader extends Vue {
 
             progress.hide(); this.progressActive = false;
 
-            await this.loadBook({url});
+            await this.loadBook({url, uploadFileName: opts.file.name});
         } catch (e) {
             progress.hide(); this.progressActive = false;
             this.loaderActive = true;

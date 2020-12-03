@@ -22,6 +22,7 @@ class ReaderController extends BaseController {
                 enableSitesFilter: (request.hasOwnProperty('enableSitesFilter') ? request.enableSitesFilter : true),
                 skipCheck: (request.hasOwnProperty('skipCheck') ? request.skipCheck : false),
                 isText: (request.hasOwnProperty('isText') ? request.isText : false),
+                uploadFileName: (request.hasOwnProperty('uploadFileName') ? request.uploadFileName : false),
             });
             const state = this.workerState.getState(workerId);
             return (state ? state : {});
