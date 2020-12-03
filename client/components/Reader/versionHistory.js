@@ -1,5 +1,18 @@
 export const versionHistory = [
 {
+    showUntil: '2020-12-10',
+    header: '0.9.10 (2020-12-03)',
+    content:
+`
+<ul>
+    <li>добавлена частичная поддержка формата Djvu</li>
+    <li>добавлена поддержка Rar-архивов</li>
+    <li>исправления багов</li>
+</ul>
+`
+},
+
+{
     showUntil: '2020-11-20',
     header: '0.9.9 (2020-11-21)',
     content:
