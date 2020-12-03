@@ -159,7 +159,7 @@ export default class DrawHelper {
         const fh = h - 2*pad;
         const fh2 = fh/2;
 
-        const t1 = `${Math.floor((bookPos + 1)/1000)}k/${Math.floor(textLength/1000)}k`;
+        const t1 = `${Math.floor((bookPos + 1)/1000)}/${Math.floor(textLength/1000)}`;
         const w1 = this.measureTextFont(t1, font) + fh2;
         const read = (bookPos + 1)/textLength;
         const t2 = `${(read*100).toFixed(2)}%`;
