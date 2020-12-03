@@ -4,7 +4,7 @@ import _ from 'lodash';
 import * as utils from '../../../share/utils';
 import BookParser from './BookParser';
 
-const maxDataSize = 300*1024*1024;//compressed bytes
+const maxDataSize = 500*1024*1024;//compressed bytes
 
 //локальный кэш метаданных книг, ограничение maxDataSize
 const bmMetaStore = localForage.createInstance({
