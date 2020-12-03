@@ -928,7 +928,8 @@ class Reader extends Vue {
                         url,
                         skipCheck: (opts.skipCheck ? true : false),
                         isText: (opts.isText ? true : false),
-                        enableSitesFilter: this.enableSitesFilter
+                        enableSitesFilter: this.enableSitesFilter,
+                        uploadFileName: (opts.uploadFileName ? opts.uploadFileName : ''),
                     },
                     (state) => {
                         progress.setState(state);
@@ -981,7 +982,7 @@ class Reader extends Vue {
 
             progress.hide(); this.progressActive = false;
 
-            await this.loadBook({url});
+            await this.loadBook({url, uploadFileName: opts.file.name});
         } catch (e) {
             progress.hide(); this.progressActive = false;
             this.loaderActive = true;
