@@ -12,7 +12,7 @@ const utils = require('../utils');
 const log = new (require('../AppLogger'))().log;//singleton
 
 const cleanDirPeriod = 60*60*1000;//1 раз в час
-const queue = new LimitedQueue(5, 100, 5*60*1000);//5 минут ожидание подвижек
+const queue = new LimitedQueue(5, 100, 4*60*1000);//4 минуты ожидание подвижек
 
 let instance = null;
 
