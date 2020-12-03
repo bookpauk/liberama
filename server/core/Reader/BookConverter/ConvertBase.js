@@ -59,6 +59,7 @@ class ConvertBase {
                     if (queue.freed > 1 && stats.cpu >= 10)
                         onData('.');
                 },
+                onUsageInterval: 10,
                 abort
             });
             if (result.code != 0) {
