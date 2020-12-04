@@ -593,12 +593,6 @@ class Reader extends Vue {
         }
     }
 
-    refreshBookSplitToPara() {
-        if (this.mostRecentBook()) {
-            this.loadBook({url: this.mostRecentBook().url, skipCheck: true, isText: true, force: true});
-        }
-    }
-
     recentBooksClose() {
         this.recentBooksActive = false;
     }
@@ -688,9 +682,14 @@ class Reader extends Vue {
         }
     }
 
-    refreshBook() {
-        if (this.mostRecentBook()) {
-            this.loadBook({url: this.mostRecentBook().url, force: true});
+    refreshBook(mode) {
+        const mrb = this.mostRecentBook();
+        if (mrb) {
+            if (mode && mode == 'split') {
+                this.loadBook({url: mrb.url, uploadFileName: mrb.uploadFileName, skipCheck: true, isText: true, force: true});
+            } else {
+                this.loadBook({url: mrb.url, uploadFileName: mrb.uploadFileName, force: true});
+            }
         }
     }
 
@@ -882,6 +881,7 @@ class Reader extends Vue {
             wasOpened = (wasOpened ? wasOpened : {});
             const bookPos = (opts.bookPos !== undefined ? opts.bookPos : wasOpened.bookPos);
             const bookPosSeen = (opts.bookPos !== undefined ? opts.bookPos : wasOpened.bookPosSeen);
+            const uploadFileName = (opts.uploadFileName ? opts.uploadFileName : '');
 
             let book = null;
 
@@ -929,7 +929,7 @@ class Reader extends Vue {
                         skipCheck: (opts.skipCheck ? true : false),
                         isText: (opts.isText ? true : false),
                         enableSitesFilter: this.enableSitesFilter,
-                        uploadFileName: (opts.uploadFileName ? opts.uploadFileName : ''),
+                        uploadFileName
                     },
                     (state) => {
                         progress.setState(state);
@@ -945,7 +945,7 @@ class Reader extends Vue {
             });
 
             // добавляем в историю
-            await bookManager.setRecentBook(Object.assign({bookPos, bookPosSeen}, addedBook));
+            await bookManager.setRecentBook(Object.assign({bookPos, bookPosSeen, uploadFileName}, addedBook));
             this.mostRecentBook();
             this.addAction(bookPos);
             this.updateRoute(true);
@@ -982,7 +982,7 @@ class Reader extends Vue {
 
             progress.hide(); this.progressActive = false;
 
-            await this.loadBook({url, uploadFileName: opts.file.name});
+            await this.loadBook({url, uploadFileName: opts.file.name, force: true});
         } catch (e) {
             progress.hide(); this.progressActive = false;
             this.loaderActive = true;
@@ -1054,7 +1054,7 @@ class Reader extends Vue {
                 this.copyTextToggle();
                 break;
             case 'splitToPara':
-                this.refreshBookSplitToPara();
+                this.refreshBook('split');
                 break;
             case 'refresh':
                 this.refreshBook();

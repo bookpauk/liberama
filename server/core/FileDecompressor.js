@@ -135,7 +135,7 @@ class FileDecompressor {
         try {
             return await zip.unpack(filename, outputDir, {
                 limitFileSize: this.limitFileSize, 
-                limitFileCount: 1000,
+                limitFileCount: 10000,
                 decodeEntryNameCallback: (nameRaw) => {
                     return utils.bufferRemoveZeroes(nameRaw);
                 }
@@ -144,7 +144,7 @@ class FileDecompressor {
             fs.emptyDir(outputDir);
             return await zip.unpack(filename, outputDir, {
                 limitFileSize: this.limitFileSize, 
-                limitFileCount: 1000,
+                limitFileCount: 10000,
                 decodeEntryNameCallback: (nameRaw) => {
                     nameRaw = utils.bufferRemoveZeroes(nameRaw);
                     const enc = textUtils.getEncodingLite(nameRaw);
@@ -171,7 +171,7 @@ class FileDecompressor {
 
             if (this.limitFileSize) {
                 if ((await fs.stat(filename)).size > this.limitFileSize) {
-                    reject('Файл слишком большой');
+                    reject(new Error('Файл слишком большой'));
                     return;
                 }
             }
