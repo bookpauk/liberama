@@ -216,8 +216,15 @@ class ServerStorage extends Vue {
     }
 
     error(message) {
-        if (this.showServerStorageMessages && !this.offlineModeActive)
-            this.$root.notify.error(message);
+        if (this.showServerStorageMessages && !this.offlineModeActive) {
+            this.errorMessageCounter = (this.errorMessageCounter ? this.errorMessageCounter + 1 : 1);
+            const hint = (this.errorMessageCounter < 2 ? '' :
+                '<div><br>Надоело это сообщение? Добавьте в настройках кнопку "Автономный режим" ' +
+                '<i class="la la-unlink" style="font-size: 20px; color: white"></i> на панель инструментов и активируйте ее.</div>'
+            );
+
+            this.$root.notify.error(message + hint);
+        }
     }
 
     async loadSettings(force = false, doNotifySuccess = true) {
