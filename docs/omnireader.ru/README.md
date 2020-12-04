@@ -38,6 +38,8 @@ sudo apt install rar
 sudo apt install libreoffice
 sudo apt install poppler-utils
 sudo apt install djvulibre-bin
+sudo apt install libtiff-tools
+sudo apt install graphicsmagick-imagemagick-compat
 ```
 
 ### nginx, server config

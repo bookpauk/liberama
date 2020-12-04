@@ -15,7 +15,6 @@ class ConvertBase {
         this.calibrePath = `${config.dataDir}/calibre/ebook-convert`;
         this.sofficePath = '/usr/bin/soffice';
         this.pdfToHtmlPath = '/usr/bin/pdftohtml';
-        this.ddjvuPath = '/usr/bin/ddjvu';
     }
 
     async run(data, opts) {// eslint-disable-line no-unused-vars
@@ -31,9 +30,6 @@ class ConvertBase {
 
         if (!await fs.pathExists(this.pdfToHtmlPath))
             throw new Error('Внешний конвертер pdftohtml не найден');
-
-        if (!await fs.pathExists(this.ddjvuPath))
-            throw new Error('Внешний конвертер ddjvu не найден');
     }
 
     async execConverter(path, args, onData, abort) {
