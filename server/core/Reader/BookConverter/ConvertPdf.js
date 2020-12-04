@@ -14,15 +14,14 @@ class ConvertPdf extends ConvertHtml {
     }
 
     async run(notUsed, opts) {
-        if (!opts.skipCheck) {
-            if (!this.check(notUsed, opts))
-                return false;
-        }
+        if (!this.check(notUsed, opts))
+            return false;
+
         await this.checkExternalConverterPresent();
 
         const {inputFiles, callback, abort, uploadFileName} = opts;
 
-        const inpFile = (opts.pdfFile ? opts.pdfFile : inputFiles.sourceFile);
+        const inpFile = inputFiles.sourceFile;
         const outFile = `${inputFiles.filesDir}/${utils.randomHexString(10)}.xml`;
 
         //конвертируем в xml
@@ -189,12 +188,17 @@ class ConvertPdf extends ConvertHtml {
         indents[0] = 0;
 
         //формируем текст
+        const limitSize = 2*this.config.maxUploadFileSize;
         if (!title && uploadFileName)
             title = uploadFileName;
         let text = `<title>${title}</title>`;
         let concat = '';
         let sp = '';
         for (const line of lines) {
+            if (text.length > limitSize) {
+                throw new Error(`Файл для конвертирования слишком большой|FORLOG| text.length: ${text.length} > ${limitSize}`);
+            }
+            
             if (line.isImage) {
                 text += `<fb2-image type="${line.type}" name="${line.name}">${line.data}</fb2-image>`;
                 continue;
