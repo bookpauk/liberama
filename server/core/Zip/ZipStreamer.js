@@ -76,13 +76,13 @@ class ZipStreamer {
                 if (limitFileCount || limitFileSize || decodeEntryNameCallback) {
                     const entries = Object.values(unzip.entries());
                     if (limitFileCount && entries.length > limitFileCount) {
-                        reject('Слишком много файлов');
+                        reject(new Error('Слишком много файлов'));
                         return;
                     }
 
                     for (const entry of entries) {
                         if (limitFileSize && !entry.isDirectory && entry.size > limitFileSize) {
-                            reject('Файл слишком большой');
+                            reject(new Error('Файл слишком большой'));
                             return;
                         }
 

@@ -171,7 +171,7 @@ class FileDecompressor {
 
             if (this.limitFileSize) {
                 if ((await fs.stat(filename)).size > this.limitFileSize) {
-                    reject('Файл слишком большой');
+                    reject(new Error('Файл слишком большой'));
                     return;
                 }
             }

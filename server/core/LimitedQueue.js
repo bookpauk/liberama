@@ -28,7 +28,7 @@ class LimitedQueue {
     get(onPlaceChange) {
         return new Promise((resolve, reject) => {
             if (this.destroyed)
-                reject('destroyed');
+                reject(new Error('destroyed'));
 
             const take = () => {
                 if (this.freed <= 0)
@@ -73,7 +73,7 @@ class LimitedQueue {
                     if (onPlaceChange)
                         onPlaceChange(this.listeners.length);
                 } else {
-                    reject('Превышен размер очереди ожидания');
+                    reject(new Error('Превышен размер очереди ожидания'));
                 }
             }
         });
