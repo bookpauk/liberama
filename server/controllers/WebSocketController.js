@@ -136,7 +136,7 @@ class WebSocketController {
                 break;
 
             i++;
-            if (i > 2*60*1000/refreshPause) {//2 мин ждем телодвижений воркера
+            if (i > 3*60*1000/refreshPause) {//3 мин ждем телодвижений воркера
                 this.send({state: 'error', error: 'Время ожидания процесса истекло'}, req, ws);
                 break;
             }

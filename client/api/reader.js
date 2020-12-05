@@ -66,7 +66,7 @@ class Reader {
                 await utils.sleep(refreshPause);
 
             i++;
-            if (i > 120*1000/refreshPause) {//2 мин ждем телодвижений воркера
+            if (i > 180*1000/refreshPause) {//3 мин ждем телодвижений воркера
                 throw new Error('Слишком долгое время ожидания');
             }
             //проверка воркера
