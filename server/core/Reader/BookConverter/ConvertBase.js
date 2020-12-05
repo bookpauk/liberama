@@ -42,21 +42,32 @@ class ConvertBase {
             throw new Error('Слишком большая очередь конвертирования. Пожалуйста, попробуйте позже.');
         }
 
+        abort = (abort ? abort : () => false);
+        const myAbort = () => {
+            return q.abort() || abort();
+        }
+
         try {
+            if (myAbort())
+                throw new Error('abort');
+
             const result = await utils.spawnProcess(path, {
                 killAfter: 3600,//1 час
                 args, 
                 onData: (data) => {
-                    q.resetTimeout();
+                    if (queue.freed > 0)
+                        q.resetTimeout();
                     onData(data);
                 },
                 //будем периодически проверять работу конвертера и если очереди нет, то разрешаем работу пинком onData
                 onUsage: (stats) => {
-                    if (queue.freed > 1 && stats.cpu >= 10)
+                    if (queue.freed > 0 && stats.cpu >= 10) {
+                        q.resetTimeout();
                         onData('.');
+                    }
                 },
                 onUsageInterval: 10,
-                abort
+                abort: myAbort
             });
             if (result.code != 0) {
                 const error = `${result.code}|FORLOG|, exec: ${path}, args: ${args.join(' ')}, stdout: ${result.stdout}, stderr: ${result.stderr}`;

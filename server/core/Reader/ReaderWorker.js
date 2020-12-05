@@ -12,7 +12,7 @@ const utils = require('../utils');
 const log = new (require('../AppLogger'))().log;//singleton
 
 const cleanDirPeriod = 60*60*1000;//1 раз в час
-const queue = new LimitedQueue(5, 100, 4*60*1000);//4 минуты ожидание подвижек
+const queue = new LimitedQueue(5, 100, 2*60*1000 + 15000);//2 минуты ожидание подвижек
 
 let instance = null;
 
@@ -130,7 +130,8 @@ class ReaderWorker {
             convertFilename = `${this.config.tempDownloadDir}/${tempFilename2}`;
             await this.bookConverter.convertToFb2(decompFiles, convertFilename, opts, progress => {
                 wState.set({progress});
-                q.resetTimeout();
+                if (queue.freed > 0)
+                    q.resetTimeout();
             }, q.abort);
 
             //сжимаем файл в tmp, если там уже нет с тем же именем-sha256
