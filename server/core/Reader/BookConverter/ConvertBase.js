@@ -6,7 +6,7 @@ const LimitedQueue = require('../../LimitedQueue');
 const textUtils = require('./textUtils');
 const utils = require('../../utils');
 
-const queue = new LimitedQueue(3, 20, 3*60*1000);//3 минуты ожидание подвижек
+const queue = new LimitedQueue(3, 20, 2*60*1000);//2 минуты ожидание подвижек
 
 class ConvertBase {
     constructor(config) {
