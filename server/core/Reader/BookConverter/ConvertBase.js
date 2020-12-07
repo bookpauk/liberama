@@ -14,7 +14,6 @@ class ConvertBase {
 
         this.calibrePath = `${config.dataDir}/calibre/ebook-convert`;
         this.sofficePath = '/usr/bin/soffice';
-        this.pdfToHtmlPath = '/usr/bin/pdftohtml';
     }
 
     async run(data, opts) {// eslint-disable-line no-unused-vars
@@ -27,9 +26,6 @@ class ConvertBase {
 
         if (!await fs.pathExists(this.sofficePath))
             throw new Error('Внешний конвертер LibreOffice не найден');
-
-        if (!await fs.pathExists(this.pdfToHtmlPath))
-            throw new Error('Внешний конвертер pdftohtml не найден');
     }
 
     async execConverter(path, args, onData, abort) {
