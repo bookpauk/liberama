@@ -148,7 +148,7 @@ class ConvertHtml extends ConvertBase {
                     cutTitle = true;
             }
 
-            if (tag == 'subtitle') {
+            if (tag == 'fb2-subtitle') {
                 inSubTitle = true;
             }
 
@@ -184,7 +184,7 @@ class ConvertHtml extends ConvertBase {
             if (tag == 'title' || tag == 'cut-title')
                 inTitle = false;
 
-            if (tag == 'subtitle')
+            if (tag == 'fb2-subtitle')
                 inSubTitle = false;
 
             if (tag == 'fb2-image')
