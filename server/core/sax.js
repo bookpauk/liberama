@@ -287,6 +287,7 @@ function getAttrsSync(tail) {
     let waitEq = false;
 
     const pushResult = () => {
+        name = name.toLowerCase();
         if (name != '') {
             let ns = '';
             if (name.indexOf(':') >= 0) {

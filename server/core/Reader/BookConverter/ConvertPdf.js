@@ -24,9 +24,14 @@ class ConvertPdf extends ConvertHtml {
         const inpFile = inputFiles.sourceFile;
         const outFile = `${inputFiles.filesDir}/${utils.randomHexString(10)}.xml`;
 
+        const pdfaltoPath = `${this.config.dataDir}/pdfalto/pdfalto`;
+
+        if (!await fs.pathExists(pdfaltoPath))
+            throw new Error('Внешний конвертер pdfalto не найден');
+
         //конвертируем в xml
         let perc = 0;
-        await this.execConverter(this.pdfToHtmlPath, ['-nodrm', '-c', '-s', '-xml', inpFile, outFile], () => {
+        await this.execConverter(pdfaltoPath, [inpFile, outFile], () => {
             perc = (perc < 80 ? perc + 10 : 40);
             callback(perc);
         }, abort);
@@ -39,13 +44,10 @@ class ConvertPdf extends ConvertHtml {
         let lines = [];
         let images = [];
         let loading = [];
-        let inText = false;
-        let bold = false;
-        let italic = false;
+
         let title = '';
         let prevTop = 0;
         let i = -1;
-        let titleCount = 0;
 
         const loadImage = async(image) => {
             const src = path.parse(image.src);
@@ -71,97 +73,68 @@ class ConvertPdf extends ConvertHtml {
             }
         }
 
-        const onTextNode = (text, cutCounter, cutTag) => {// eslint-disable-line no-unused-vars
-            if (!cutCounter && inText) {
-                let tOpen = (bold ? '<b>' : '');
+/*                let tOpen = (bold ? '<b>' : '');
                 tOpen += (italic ? '<i>' : '');
                 let tClose = (italic ? '</i>' : '');
                 tClose += (bold ? '</b>' : '');
+                lines[i].text += `${tOpen}${text}${tClose} `;*/
+        const onStartNode = (tag, tail, singleTag, cutCounter, cutTag) => {// eslint-disable-line no-unused-vars
+            if (tag == 'page')
+                putImage(100000);
 
-                lines[i].text += `${tOpen}${text}${tClose} `;
-                if (titleCount < 2 && text.trim() != '') {
-                    title += text + (titleCount ? '' : ' - ');
-                    titleCount++;
+            if (tag == 'textline') {
+                const attrs = sax.getAttrsSync(tail);
+                const line = {
+                    text: '',
+                    top: parseInt((attrs.vpos && attrs.vpos.value ? attrs.vpos.value : null), 10),
+                    left: parseInt((attrs.hpos && attrs.hpos.value ? attrs.hpos.value : null), 10),
+                    width: parseInt((attrs.width && attrs.width.value ? attrs.width.value : null), 10),
+                    height: parseInt((attrs.height && attrs.height.value ? attrs.height.value : null), 10),
+                };
+
+                if (line.width != 0 || line.height != 0) {
+                    if (isNaN(line.top) || isNaN(prevTop) || (Math.abs(prevTop - line.top) > 3)) {
+                        putImage(line.top);
+                        i++;
+                        lines[i] = line;
+                    }
+                    prevTop = line.top;
                 }
             }
-        };
 
-        const onStartNode = (tag, tail, singleTag, cutCounter, cutTag) => {// eslint-disable-line no-unused-vars
-            if (!cutCounter) {
-                if (inText) {
-                    switch (tag) {
-                        case 'i':
-                            italic = true;
-                            break;
-                        case 'b':
-                            bold = true;
-                            break;
-                    }
+            if (tag == 'string') {
+                const attrs = sax.getAttrsSync(tail);
+                if (attrs.content && attrs.content.value) {
+                    lines[i].text += `${attrs.content.value} `;
                 }
+            }
 
-                if (tag == 'text' && !inText) {
-                    let attrs = sax.getAttrsSync(tail);
-                    const line = {
-                        text: '',
-                        top: parseInt((attrs.top && attrs.top.value ? attrs.top.value : null), 10),
-                        left: parseInt((attrs.left && attrs.left.value ? attrs.left.value : null), 10),
-                        width: parseInt((attrs.width && attrs.width.value ? attrs.width.value : null), 10),
-                        height: parseInt((attrs.height && attrs.height.value ? attrs.height.value : null), 10),
-                    };
-
-                    if (line.width != 0 || line.height != 0) {
-                        inText = true;
-                        if (isNaN(line.top) || isNaN(prevTop) || (Math.abs(prevTop - line.top) > 3)) {
-                            putImage(line.top);
-                            i++;
-                            lines[i] = line;
-                        }
-                        prevTop = line.top;
-                    }
-                }
-
-                if (tag == 'image') {
-                    const attrs = sax.getAttrsSync(tail);
-                    const src = (attrs.src && attrs.src.value ? attrs.src.value : '');
+            if (tag == 'illustration') {
+                const attrs = sax.getAttrsSync(tail);
+                if (attrs.type && attrs.type.value == 'image') {
+                    let src = (attrs.fileid && attrs.fileid.value ? attrs.fileid.value : '');
                     if (src) {
                         const image = {
                             isImage: true,
                             src,
                             data: '',
                             type: '',
-                            top: parseInt((attrs.top && attrs.top.value ? attrs.top.value : null), 10) || 0,
+                            top: parseInt((attrs.vpos && attrs.vpos.value ? attrs.vpos.value : null), 10) || 0,
                         };
                         loading.push(loadImage(image));
                         images.push(image);
                         images.sort((a, b) => a.top - b.top)
                     }
                 }
-
-                if (tag == 'page') {
-                    putImage(100000);
-                }
             }
         };
-
+/*
         const onEndNode = (tag, tail, singleTag, cutCounter, cutTag) => {// eslint-disable-line no-unused-vars
-            if (inText) {
-                switch (tag) {
-                    case 'i':
-                        italic = false;
-                        break;
-                    case 'b':
-                        bold = false;
-                        break;
-                }
-            }
-
-            if (tag == 'text')
-                inText = false;
         };
-
+*/
         let buf = this.decode(data).toString();
         sax.parseSync(buf, {
-            onStartNode, onEndNode, onTextNode
+            onStartNode
         });
 
         putImage(100000);
