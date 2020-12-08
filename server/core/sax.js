@@ -294,13 +294,13 @@ function getAttrsSync(tail, lowerCase = true) {
         if (lowerCase)
             name = name.toLowerCase();
         if (name != '') {
-            const fullname = name;
+            const fn = name;
             let ns = '';
-            if (fullname.indexOf(':') >= 0) {
-                [ns, name] = fullname.split(':');
+            if (fn.indexOf(':') >= 0) {
+                [ns, name] = fn.split(':');
             }
 
-            result[name] = {value, ns, fullname};
+            result[name] = {value, ns, fn};
         }
         name = '';
         value = '';

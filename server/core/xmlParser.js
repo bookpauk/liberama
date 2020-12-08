@@ -1,8 +1,8 @@
-const sax = require('../../sax');
+const sax = require('./sax');
 
-function formatXml(parsedXml, textFilterFunc) {
-    let out = '<?xml version="1.0" encoding="utf-8"?>';
-    out += formatXmlNode(parsedXml, textFilterFunc);
+function formatXml(xmlParsed, encoding = 'utf-8', textFilterFunc) {
+    let out = `<?xml version="1.0" encoding="${encoding}"?>`;
+    out += formatXmlNode(xmlParsed, textFilterFunc);
     return out;
 }
 
@@ -68,6 +68,9 @@ function parseXml(xmlString, lowerCase = true) {
     };
 
     const onStartNode = (tag, tail, singleTag, cutCounter, cutTag) => {// eslint-disable-line no-unused-vars
+        if (tag == '?xml')
+            return;
+        
         const newNode = {_n: tag, _p: node};
 
         if (tail) {
@@ -77,7 +80,7 @@ function parseXml(xmlString, lowerCase = true) {
                 const attrs = {};
                 for (let i = 0; i < atKeys.length; i++) {
                     const attrName = atKeys[i];
-                    attrs[parsedAttrs[attrName].fullname] = parsedAttrs[attrName].value;
+                    attrs[parsedAttrs[attrName].fn] = parsedAttrs[attrName].value;
                 }
 
                 newNode._attrs = attrs;
@@ -105,16 +108,36 @@ function parseXml(xmlString, lowerCase = true) {
     return result;
 }
 
-function simplifyXml(parsedXml) {
-}
+function simplifyXmlParsed(node) {
+    
+    const simplifyNodeArray = (a) => {
+        const result = {};
 
-function desimplifyXml(parsedXml) {
+        for (let i = 0; i < a.length; i++) {
+            const child = a[i];
+            if (child._n && !result[child._n]) {
+                result[child._n] = {};
+                if (child._a) {
+                    result[child._n] = simplifyNodeArray(child._a);
+                }
+                if (child._t) {
+                    result[child._n]._t = child._t;
+                }
+                if (child._attrs) {
+                    result[child._n]._attrs = child._attrs;
+                }
+            }
+        }
+
+        return result;
+    };
+
+    return simplifyNodeArray([node]);
 }
 
 module.exports = {
     formatXml,
     formatXmlNode,
     parseXml,
-    simplifyXml,
-    desimplifyXml
+    simplifyXmlParsed
 }
