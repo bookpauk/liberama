@@ -1,9 +1,11 @@
+const _ = require('lodash');
 const fs = require('fs-extra');
 const path = require('path');
 
 const sax = require('../../sax');
 const utils = require('../../utils');
 const ConvertHtml = require('./ConvertHtml');
+const xmlParser = require('../../xmlParser');
 
 class ConvertPdf extends ConvertHtml {
     check(data, opts) {
@@ -22,7 +24,9 @@ class ConvertPdf extends ConvertHtml {
         const {inputFiles, callback, abort, uploadFileName} = opts;
 
         const inpFile = inputFiles.sourceFile;
-        const outFile = `${inputFiles.filesDir}/${utils.randomHexString(10)}.xml`;
+        const outBasename = `${inputFiles.filesDir}/${utils.randomHexString(10)}`;
+        const outFile = `${outBasename}.xml`;
+        const metaFile = `${outBasename}_metadata.xml`;
 
         const pdfaltoPath = `${this.config.dataDir}/pdfalto/pdfalto`;
 
@@ -49,6 +53,7 @@ class ConvertPdf extends ConvertHtml {
         let loading = [];
 
         let title = '';
+        let author = '';
         let prevTop = 0;
         let i = -1;
 
@@ -182,11 +187,26 @@ class ConvertPdf extends ConvertHtml {
         }
         indents[0] = 0;
 
-        //формируем текст
-        const limitSize = 2*this.config.maxUploadFileSize;
+        //title
+        if (fs.pathExists(metaFile)) {
+            const metaXmlString = (await fs.readFile(metaFile)).toString();
+            let metaXmlParsed = xmlParser.parseXml(metaXmlString);
+            metaXmlParsed = xmlParser.simplifyXmlParsed(metaXmlParsed);
+            if (metaXmlParsed.metadata) {
+                title = (metaXmlParsed.metadata.title ? metaXmlParsed.metadata.title._t : null);
+                author = (metaXmlParsed.metadata.author ? metaXmlParsed.metadata.author._t : null);
+            }
+        }
+
         if (!title && uploadFileName)
             title = uploadFileName;
-        let text = `<title>${title}</title>`;
+
+        //формируем текст
+        const limitSize = 2*this.config.maxUploadFileSize;
+        let text = '';
+        text += `<fb2-title>${title}</fb2-title>`;
+        text += `<fb2-author>${author}</fb2-author>`;
+
         let concat = '';
         let sp = '';
         for (const line of lines) {
@@ -216,7 +236,7 @@ class ConvertPdf extends ConvertHtml {
         if (concat)
             text += sp + concat + "\n";
 
-        return await super.run(Buffer.from(text), {skipCheck: true, isText: true, cutTitle: true});
+        return await super.run(Buffer.from(text), {skipCheck: true, isText: true});
     }
 }
 
