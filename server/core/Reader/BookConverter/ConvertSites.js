@@ -48,7 +48,7 @@ class ConvertSites extends ConvertHtml {
         if (text === false)
             return false;
 
-        return await super.run(Buffer.from(text), {skipCheck: true, cutTitle: true});
+        return await super.run(Buffer.from(text), {skipCheck: true});
     }
 
     getTitle(text) {
@@ -79,7 +79,7 @@ class ConvertSites extends ConvertHtml {
         let book = this.getTitle(text);
         book = book.replace(' (fb2) | Флибуста', '');
 
-        const title = `<title>${author}${(author ? ' - ' : '')}${book}</title>`;
+        const title = `<fb2-title>${author}${(author ? ' - ' : '')}${book}</fb2-title>`;
 
         let begin = '<h3 class="book">';
         if (text.indexOf(begin) <= 0)

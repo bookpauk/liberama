@@ -39,13 +39,13 @@ class ConvertFb3 extends ConvertHtml {
         const title = this.getTitle(text)
             .replace(/<\/?p>/g, '')
         ;
-        text = `<title>${title}</title>` + text
+        text = `<fb2-title>${title}</fb2-title>` + text
             .replace(/<title>/g, '<br><b>')
             .replace(/<\/title>/g, '</b><br>')
             .replace(/<subtitle>/g, '<br><br><fb2-subtitle>')
             .replace(/<\/subtitle>/g, '</fb2-subtitle>')
         ;
-        return await super.run(Buffer.from(text), {skipCheck: true, cutTitle: true});
+        return await super.run(Buffer.from(text), {skipCheck: true});
     }
 }
 
