@@ -169,7 +169,7 @@ class BookManager {
     }
 
     async deflateWithProgress(data, callback) {
-        const chunkSize = 128*1024;
+        const chunkSize = 512*1024;
         const deflator = new utils.pako.Deflate({level: 5});
 
         let chunkTotal = 1 + Math.floor(data.length/chunkSize);
@@ -203,7 +203,7 @@ class BookManager {
     }
 
     async inflateWithProgress(data, callback) {
-        const chunkSize = 64*1024;
+        const chunkSize = 512*1024;
         const inflator = new utils.pako.Inflate({to: 'string'});
 
         let chunkTotal = 1 + Math.floor(data.length/chunkSize);
