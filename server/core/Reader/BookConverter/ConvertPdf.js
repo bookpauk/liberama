@@ -1,4 +1,4 @@
-const _ = require('lodash');
+//const _ = require('lodash');
 const fs = require('fs-extra');
 const path = require('path');
 
@@ -44,10 +44,13 @@ class ConvertPdf extends ConvertHtml {
         const data = await fs.readFile(outFile);
         callback(90);
 
+        await utils.sleep(100);
+
         //парсим xml
         let lines = [];
         let pagelines = [];
         let line = {text: ''};
+        let fonts = {};
 
         let images = [];
         let loading = [];
@@ -108,6 +111,26 @@ class ConvertPdf extends ConvertHtml {
         };
 
         const onStartNode = (tag, tail, singleTag, cutCounter, cutTag) => {// eslint-disable-line no-unused-vars
+            if (tag == 'textstyle') {
+                const attrs = sax.getAttrsSync(tail);
+                const fontId = (attrs.id && attrs.id.value ? attrs.id.value : '');
+                const fontStyle = (attrs.fontstyle && attrs.fontstyle.value ? attrs.fontstyle.value : '');
+
+                if (fontId && fontStyle) {
+                    const styles = fontStyle.split(' ');
+                    const styleTags = {bold: 'b', italics: 'i', superscript: 'sup', subscript: 'sub'};
+                    const f = fonts[fontId] = {tOpen: '', tClose: ''};
+
+                    styles.forEach(style => {
+                        const s = styleTags[style];
+                        if (s) {
+                            f.tOpen += `<${s}>`;
+                            f.tClose = `</${s}>${f.tClose}`;
+                        }
+                    });
+                }
+            }
+
             if (tag == 'page') {
                 putPageLines();
                 putImage(100000);
@@ -125,6 +148,7 @@ class ConvertPdf extends ConvertHtml {
 
                 if (line.width != 0 || line.height != 0) {
                     if (Math.abs(prevTop - line.top) > 3) {
+                        putImage(line.top);
                         pagelines.push(line);
                     }
                     prevTop = line.top;
@@ -134,7 +158,16 @@ class ConvertPdf extends ConvertHtml {
             if (tag == 'string') {
                 const attrs = sax.getAttrsSync(tail);
                 if (attrs.content && attrs.content.value) {
-                    line.text += `${attrs.content.value} `;
+
+                    let tOpen = '';
+                    let tClose = '';
+                    const fontId = (attrs.stylerefs && attrs.stylerefs.value ? attrs.stylerefs.value : '');
+                    if (fontId && fonts[fontId]) {
+                        tOpen = fonts[fontId].tOpen;
+                        tClose = fonts[fontId].tClose;
+                    }
+
+                    line.text += `${tOpen}${attrs.content.value}${tClose} `;
                 }
             }
 
@@ -149,10 +182,16 @@ class ConvertPdf extends ConvertHtml {
                             data: '',
                             type: '',
                             top: parseInt((attrs.vpos && attrs.vpos.value ? attrs.vpos.value : null), 10) || 0,
+                            left: parseInt((attrs.hpos && attrs.hpos.value ? attrs.hpos.value : null), 10) || 0,
+                            width: parseInt((attrs.width && attrs.width.value ? attrs.width.value : null), 10) || 0,
+                            height: parseInt((attrs.height && attrs.height.value ? attrs.height.value : null), 10) || 0,
                         };
-                        loading.push(loadImage(image));
-                        images.push(image);
-                        images.sort((a, b) => a.top - b.top)
+                        const exists = images.filter(img => (img.top == image.top && img.left == image.left && img.width == image.width && img.height == image.height));
+                        if (!exists.length) {
+                            loading.push(loadImage(image));
+                            images.push(image);
+                            images.sort((a, b) => (a.top - b.top)*10000 + (a.left - b.left));
+                        }
                     }
                 }
             }
@@ -167,6 +206,7 @@ class ConvertPdf extends ConvertHtml {
         putImage(100000);
 
         await Promise.all(loading);
+        await utils.sleep(100);
 
         //найдем параграфы и отступы
         const indents = [];
@@ -236,6 +276,7 @@ class ConvertPdf extends ConvertHtml {
         if (concat)
             text += sp + concat + "\n";
 
+        await utils.sleep(100);
         return await super.run(Buffer.from(text), {skipCheck: true, isText: true});
     }
 }

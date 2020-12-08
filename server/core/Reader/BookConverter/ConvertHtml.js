@@ -256,21 +256,19 @@ class ConvertHtml extends ConvertBase {
                 }
 
                 newPar();
-
-                let j = 0;
+                
                 const lines = par._t.split('\n');
-                for (let line of lines) {
-                    line = repCrLfTab(line);
+                for (let j = 0; j < lines.length; j++) {
+                    const line = repCrLfTab(lines[j]);
 
                     let l = 0;
                     while (l < line.length && line[l] == ' ') {
                         l++;
                     }
 
-                    if (l >= parIndent || line == '') {
-                        if (j > 0)
-                            newPar();
-                        j++;
+                    if ((j > 0 && l >= parIndent) ||
+                        (j < lines.length - 1 && line == '') ){
+                        newPar();
                     }
 
                     curPar._t += line.trim() + ' ';
