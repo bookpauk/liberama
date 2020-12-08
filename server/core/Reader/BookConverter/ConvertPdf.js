@@ -42,6 +42,9 @@ class ConvertPdf extends ConvertHtml {
 
         //парсим xml
         let lines = [];
+        let pagelines = [];
+        let line = {text: ''};
+
         let images = [];
         let loading = [];
 
@@ -61,7 +64,7 @@ class ConvertPdf extends ConvertHtml {
                 image.type = type;
                 image.name = src.base;
             }
-        }
+        };
 
         const putImage = (curTop) => {
             if (!isNaN(curTop) && images.length) {
@@ -71,20 +74,43 @@ class ConvertPdf extends ConvertHtml {
                     images.shift();
                 }
             }
-        }
+        };
 
-/*                let tOpen = (bold ? '<b>' : '');
-                tOpen += (italic ? '<i>' : '');
-                let tClose = (italic ? '</i>' : '');
-                tClose += (bold ? '</b>' : '');
-                lines[i].text += `${tOpen}${text}${tClose} `;*/
+        const putPageLines = () => {
+            pagelines.sort((a, b) => (a.top - b.top)*10000 + (a.left - b.left))
+            
+            //объединяем в одну строку равные по высоте
+            const pl = [];
+            let pt = -100;
+            let j = -1;
+            pagelines.forEach(line => {
+                if (Math.abs(pt - line.top) > 3) {
+                    j++;
+                    pl[j] = line;
+                } else {
+                    pl[j].text += line.text;
+                }
+                pt = line.top;
+            });
+
+            //заполняем lines
+            pl.forEach(line => {
+                putImage(line.top);
+                i++;
+                lines[i] = line;
+            });
+            pagelines = [];
+        };
+
         const onStartNode = (tag, tail, singleTag, cutCounter, cutTag) => {// eslint-disable-line no-unused-vars
-            if (tag == 'page')
+            if (tag == 'page') {
+                putPageLines();
                 putImage(100000);
+            }
 
             if (tag == 'textline') {
                 const attrs = sax.getAttrsSync(tail);
-                const line = {
+                line = {
                     text: '',
                     top: parseInt((attrs.vpos && attrs.vpos.value ? attrs.vpos.value : null), 10),
                     left: parseInt((attrs.hpos && attrs.hpos.value ? attrs.hpos.value : null), 10),
@@ -93,10 +119,8 @@ class ConvertPdf extends ConvertHtml {
                 };
 
                 if (line.width != 0 || line.height != 0) {
-                    if (isNaN(line.top) || isNaN(prevTop) || (Math.abs(prevTop - line.top) > 3)) {
-                        putImage(line.top);
-                        i++;
-                        lines[i] = line;
+                    if (Math.abs(prevTop - line.top) > 3) {
+                        pagelines.push(line);
                     }
                     prevTop = line.top;
                 }
@@ -105,7 +129,7 @@ class ConvertPdf extends ConvertHtml {
             if (tag == 'string') {
                 const attrs = sax.getAttrsSync(tail);
                 if (attrs.content && attrs.content.value) {
-                    lines[i].text += `${attrs.content.value} `;
+                    line.text += `${attrs.content.value} `;
                 }
             }
 
@@ -128,15 +152,13 @@ class ConvertPdf extends ConvertHtml {
                 }
             }
         };
-/*
-        const onEndNode = (tag, tail, singleTag, cutCounter, cutTag) => {// eslint-disable-line no-unused-vars
-        };
-*/
+
         let buf = this.decode(data).toString();
         sax.parseSync(buf, {
             onStartNode
         });
 
+        putPageLines();
         putImage(100000);
 
         await Promise.all(loading);
