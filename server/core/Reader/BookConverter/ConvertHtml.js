@@ -214,6 +214,8 @@ class ConvertHtml extends ConvertBase {
 
         body.section._a[0] = pars;
 
+        //console.log(JSON.stringify(fb2, null, 2));
+
         //подозрение на чистый текст, надо разбить на параграфы
         if (isText || (buf.length > 30*1024 && pars.length < buf.length/2000)) {
             let total = 0;
@@ -266,8 +268,11 @@ class ConvertHtml extends ConvertBase {
                         l++;
                     }
 
-                    if ((j > 0 && l >= parIndent) ||
-                        (j < lines.length - 1 && line == '') ){
+                    if (j > 0 &&
+                        (l >= parIndent ||
+                            (j < lines.length - 1 && line == '')
+                        )
+                    ) {
                         newPar();
                     }
 

@@ -92,6 +92,9 @@ class ConvertPdf extends ConvertHtml {
             let pt = -100;
             let j = -1;
             pagelines.forEach(line => {
+                //добавим закрывающий тег стиля
+                line.text += line.tClose;
+
                 if (Math.abs(pt - line.top) > 3) {
                     j++;
                     pl[j] = line;
@@ -144,6 +147,8 @@ class ConvertPdf extends ConvertHtml {
                     left: parseInt((attrs.hpos && attrs.hpos.value ? attrs.hpos.value : null), 10),
                     width: parseInt((attrs.width && attrs.width.value ? attrs.width.value : null), 10),
                     height: parseInt((attrs.height && attrs.height.value ? attrs.height.value : null), 10),
+                    tOpen: '',
+                    tClose: '',
                 };
 
                 if (line.width != 0 || line.height != 0) {
@@ -167,7 +172,13 @@ class ConvertPdf extends ConvertHtml {
                         tClose = fonts[fontId].tClose;
                     }
 
-                    line.text += `${tOpen}${attrs.content.value}${tClose} `;
+                    if (line.tOpen != tOpen) {
+                        line.text += line.tClose + tOpen;
+                        line.tOpen = tOpen;
+                        line.tClose = tClose;
+                    }
+
+                    line.text += `${line.text.length ? ' ' : ''}${attrs.content.value}`;
                 }
             }
 
