@@ -9,12 +9,12 @@ function formatXml(xmlParsed, encoding = 'utf-8', textFilterFunc) {
 function formatXmlNode(node, textFilterFunc) {
     textFilterFunc = (textFilterFunc ? textFilterFunc : text => text);
 
-    const formatXmlNodeImpl = (node, name) => {
+    const formatNode = (node, name) => {
         let out = '';
 
         if (Array.isArray(node)) {
             for (const n of node) {
-                out += formatXmlNode(n);
+                out += formatNode(n);
             }
         } else if (typeof node == 'string') {
             if (name)
@@ -45,7 +45,7 @@ function formatXmlNode(node, textFilterFunc) {
                     continue;
 
                 const n = node[nodeName];
-                tBody += formatXmlNodeImpl(n, nodeName);
+                tBody += formatNode(n, nodeName);
             }
             
             if (name)
@@ -56,7 +56,7 @@ function formatXmlNode(node, textFilterFunc) {
         return out;
     }
 
-    return formatXmlNodeImpl(node);
+    return formatNode(node);
 }
 
 function parseXml(xmlString, lowerCase = true) {
