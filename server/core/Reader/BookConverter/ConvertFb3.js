@@ -2,7 +2,7 @@ const fs = require('fs-extra');
 
 const ConvertHtml = require('./ConvertHtml');
 
-class ConvertDocX extends ConvertHtml {
+class ConvertFb3 extends ConvertHtml {
     async check(data, opts) {
         const {inputFiles} = opts;
         if (this.config.useExternalBookConverter && 
@@ -39,13 +39,14 @@ class ConvertDocX extends ConvertHtml {
         const title = this.getTitle(text)
             .replace(/<\/?p>/g, '')
         ;
-        text = `<title>${title}</title>` + text
+        text = `<fb2-title>${title}</fb2-title>` + text
             .replace(/<title>/g, '<br><b>')
             .replace(/<\/title>/g, '</b><br>')
-            .replace(/<subtitle>/g, '<br><br><subtitle>')
+            .replace(/<subtitle>/g, '<br><br><fb2-subtitle>')
+            .replace(/<\/subtitle>/g, '</fb2-subtitle>')
         ;
-        return await super.run(Buffer.from(text), {skipCheck: true, cutTitle: true});
+        return await super.run(Buffer.from(text), {skipCheck: true});
     }
 }
 
-module.exports = ConvertDocX;
+module.exports = ConvertFb3;

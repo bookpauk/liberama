@@ -34,7 +34,6 @@ class ConvertHtml extends ConvertBase {
         } else {
             isText = opts.isText;
         }
-        let {cutTitle} = opts;
 
         let titleInfo = {};
         let desc = {_n: 'description', 'title-info': titleInfo};
@@ -44,12 +43,17 @@ class ConvertHtml extends ConvertBase {
         let fb2 = [desc, body, binary];
 
         let title = '';
+        let author = '';
         let inTitle = false;
+        let inSectionTitle = false;
+        let inAuthor = false;
         let inSubTitle = false;
         let inImage = false;
         let image = {};
         let bold = false;
         let italic = false;
+        let superscript = false;
+        let subscript = false;
         let begining = true;
 
         let spaceCounter = [];
@@ -62,7 +66,7 @@ class ConvertHtml extends ConvertBase {
         };
 
         const growParagraph = (text) => {
-            if (!pars.length)
+            if (!pars.length || pars[pars.length - 1]._n != 'p')
                 newParagraph();
 
             const l = pars.length;
@@ -94,12 +98,16 @@ class ConvertHtml extends ConvertBase {
         const onTextNode = (text, cutCounter, cutTag) => {// eslint-disable-line no-unused-vars
             text = this.escapeEntities(text);
 
-            if (!cutCounter && !(cutTitle && inTitle)) {
+            if (!(cutCounter || inTitle || inSectionTitle || inSubTitle)) {
                 let tOpen = '';
                 tOpen += (inSubTitle ? '<subtitle>' : '');
                 tOpen += (bold ? '<strong>' : '');
                 tOpen += (italic ? '<emphasis>' : '');
+                tOpen += (superscript ? '<sup>' : '');
+                tOpen += (subscript ? '<sub>' : '');
                 let tClose = ''
+                tClose += (subscript ? '</sub>' : '');
+                tClose += (superscript ? '</sup>' : '');
                 tClose +=  (italic ? '</emphasis>' : '');
                 tClose += (bold ? '</strong>' : '');
                 tClose += (inSubTitle ? '</subtitle>' : '');
@@ -110,12 +118,22 @@ class ConvertHtml extends ConvertBase {
             if (inTitle && !title)
                 title = text;
 
+            if (inAuthor && !author)
+                author = text;
+
+            if (inSectionTitle) {
+                pars.unshift({_n: 'title', _t: text});
+            }
+
+            if (inSubTitle) {
+                pars.push({_n: 'subtitle', _t: text});
+            }
+
             if (inImage) {
                 image._t = text;
                 binary.push(image);
 
                 pars.push({_n: 'image', _attrs: {'l:href': '#' + image._attrs.id}, _t: ''});
-                newParagraph();
             }
 
         };
@@ -140,15 +158,27 @@ class ConvertHtml extends ConvertBase {
                         bold = true;
                         break;
                 }
+
+                if (tag == 'sup')
+                    superscript = true;
+        
+                if (tag == 'sub')
+                    subscript = true;
             }
 
-            if (tag == 'title' || tag == 'cut-title') {
+            if (tag == 'title' || tag == 'fb2-title') {
                 inTitle = true;
-                if (tag == 'cut-title')
-                    cutTitle = true;
             }
 
-            if (tag == 'subtitle') {
+            if (tag == 'fb2-author') {
+                inAuthor = true;
+            }
+
+            if (tag == 'fb2-section-title') {
+                inSectionTitle = true;
+            }
+
+            if (tag == 'fb2-subtitle') {
                 inSubTitle = true;
             }
 
@@ -156,7 +186,7 @@ class ConvertHtml extends ConvertBase {
                 inImage = true;
                 const attrs = sax.getAttrsSync(tail);
                 image = {_n: 'binary', _attrs: {id: attrs.name.value, 'content-type': attrs.type.value}, _t: ''};
-            }
+            }            
         };
 
         const onEndNode = (tag, tail, singleTag, cutCounter, cutTag) => {// eslint-disable-line no-unused-vars
@@ -179,12 +209,26 @@ class ConvertHtml extends ConvertBase {
                         bold = false;
                         break;
                 }
+
+                if (tag == 'sup')
+                    superscript = false;
+        
+                if (tag == 'sub')
+                    subscript = false;
             }
 
-            if (tag == 'title' || tag == 'cut-title')
+            if (tag == 'title' || tag == 'fb2-title')
                 inTitle = false;
 
-            if (tag == 'subtitle')
+            if (tag == 'fb2-author') {
+                inAuthor = false;
+            }
+
+            if (tag == 'fb2-section-title') {
+                inSectionTitle = false;
+            }
+
+            if (tag == 'fb2-subtitle')
                 inSubTitle = false;
 
             if (tag == 'fb2-image')
@@ -195,10 +239,17 @@ class ConvertHtml extends ConvertBase {
 
         sax.parseSync(buf, {
             onStartNode, onEndNode, onTextNode,
-            innerCut: new Set(['head', 'script', 'style', 'binary', 'fb2-image'])
+            innerCut: new Set(['head', 'script', 'style', 'binary', 'fb2-image', 'fb2-title', 'fb2-author'])
         });
 
         titleInfo['book-title'] = title;
+        if (author)
+            titleInfo.author = {'last-name': author};
+
+        body.section._a[0] = pars;
+
+        //console.log(JSON.stringify(fb2, null, 2));
+
         //подозрение на чистый текст, надо разбить на параграфы
         if (isText || (buf.length > 30*1024 && pars.length < buf.length/2000)) {
             let total = 0;
@@ -228,56 +279,49 @@ class ConvertHtml extends ConvertBase {
             if (parIndent > 2) parIndent--;
 
             let newPars = [];
+            let curPar = {};
             const newPar = () => {
-                newPars.push({_n: 'p', _t: ''});
+                curPar = {_n: 'p', _t: ''};
+                newPars.push(curPar);
             };
 
-            const growPar = (text) => {
-                if (!newPars.length)
-                    newPar();
-
-                const l = newPars.length;
-                newPars[l - 1]._t += text;
-            }
-
-            i = 0;
             for (const par of pars) {
                 if (par._n != 'p') {
                     newPars.push(par);
                     continue;
                 }
 
-                if (i > 0)
-                    newPar();
-                i++;
-
-                let j = 0;
+                newPar();
+                
                 const lines = par._t.split('\n');
-                for (let line of lines) {
-                    line = repCrLfTab(line);
+                for (let j = 0; j < lines.length; j++) {
+                    const line = repCrLfTab(lines[j]);
 
                     let l = 0;
                     while (l < line.length && line[l] == ' ') {
                         l++;
                     }
 
-                    if (l >= parIndent || line == '') {
-                        if (j > 0)
-                            newPar();
-                        j++;
+                    if (j > 0 &&
+                        (l >= parIndent ||
+                            (j < lines.length - 1 && line == '')
+                        )
+                    ) {
+                        newPar();
                     }
-                    growPar(line.trim() + ' ');
+
+                    curPar._t += line.trim() + ' ';
                 }
             }
 
             body.section._a[0] = newPars;
-        } else {
-            body.section._a[0] = pars;
         }
 
         //убираем лишнее, делаем валидный fb2, т.к. в рез-те разбиения на параграфы бьются теги
         bold = false;
         italic = false;
+        superscript = false;
+        subscript = false;
         inSubTitle = false;
         pars = body.section._a[0];
         for (let i = 0; i < pars.length; i++) {
@@ -297,7 +341,11 @@ class ConvertHtml extends ConvertBase {
                     tOpen += (inSubTitle ? '<subtitle>' : '');
                     tOpen += (bold ? '<strong>' : '');
                     tOpen += (italic ? '<emphasis>' : '');
+                    tOpen += (superscript ? '<sup>' : '');
+                    tOpen += (subscript ? '<sub>' : '');
                     let tClose = ''
+                    tClose += (subscript ? '</sub>' : '');
+                    tClose += (superscript ? '</sup>' : '');
                     tClose +=  (italic ? '</emphasis>' : '');
                     tClose += (bold ? '</strong>' : '');
                     tClose += (inSubTitle ? '</subtitle>' : '');
@@ -313,6 +361,10 @@ class ConvertHtml extends ConvertBase {
                         bold = true;
                     if (tag == 'emphasis')
                         italic = true;
+                    if (tag == 'sup')
+                        superscript = true;
+                    if (tag == 'sub')
+                        subscript = true;
                     if (tag == 'subtitle')
                         inSubTitle = true;
                 }
@@ -322,6 +374,10 @@ class ConvertHtml extends ConvertBase {
                         bold = false;
                     if (tag == 'emphasis')
                         italic = false;
+                    if (tag == 'sup')
+                        superscript = false;
+                    if (tag == 'sub')
+                        subscript = false;
                     if (tag == 'subtitle')
                         inSubTitle = false;
                 }

@@ -285,7 +285,7 @@ export default class BookParser {
                     sectionLevel++;
                 }
 
-                if (tag == 'emphasis' || tag == 'strong') {
+                if (tag == 'emphasis' || tag == 'strong' || tag == 'sup' || tag == 'sub') {
                     growParagraph(`<${tag}>`, 0);
                 }
 
@@ -343,7 +343,7 @@ export default class BookParser {
                         sectionLevel--;
                     }
 
-                    if (tag == 'emphasis' || tag == 'strong') {
+                    if (tag == 'emphasis' || tag == 'strong' || tag == 'sup' || tag == 'sub') {
                         growParagraph(`</${tag}>`, 0);
                     }
 
@@ -507,7 +507,7 @@ export default class BookParser {
 
     splitToStyle(s) {
         let result = [];/*array of {
-            style: {bold: Boolean, italic: Boolean, center: Boolean, space: Number},
+            style: {bold: Boolean, italic: Boolean, sup: Boolean, sub: Boolean, center: Boolean, space: Number},
             image: {local: Boolean, inline: Boolean, id: String},
             text: String,
         }*/
@@ -529,6 +529,12 @@ export default class BookParser {
                     break;
                 case 'emphasis':
                     style.italic = true;
+                    break;
+                case 'sup': 
+                    style.sup = true;
+                    break;
+                case 'sub':
+                    style.sub = true;
                     break;
                 case 'center':
                     style.center = true;
@@ -579,6 +585,12 @@ export default class BookParser {
                     break;
                 case 'emphasis':
                     style.italic = false;
+                    break;
+                case 'sup': 
+                    style.sup = false;
+                    break;
+                case 'sub':
+                    style.sub = false;
                     break;
                 case 'center':
                     style.center = false;

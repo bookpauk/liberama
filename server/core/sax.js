@@ -6,7 +6,8 @@ function parseSync(xstr, options) {
         onCdata: _onCdata = dummy,
         onComment: _onComment = dummy,
         onProgress: _onProgress = dummy,
-        innerCut = new Set()
+        innerCut = new Set(),
+        lowerCase = true,
     } = options;
 
     let i = 0;
@@ -91,7 +92,8 @@ function parseSync(xstr, options) {
             } else {
                 tag = tagData;
             }
-            tag = tag.toLowerCase();
+            if (lowerCase)
+                tag = tag.toLowerCase();
 
             if (innerCut.has(tag) && (!cutCounter || cutTag === tag)) {
                 if (!cutCounter)
@@ -146,7 +148,8 @@ async function parse(xstr, options) {
         onCdata: _onCdata = dummy,
         onComment: _onComment = dummy,
         onProgress: _onProgress = dummy,
-        innerCut = new Set()
+        innerCut = new Set(),
+        lowerCase = true,
     } = options;
 
     let i = 0;
@@ -231,7 +234,8 @@ async function parse(xstr, options) {
             } else {
                 tag = tagData;
             }
-            tag = tag.toLowerCase();
+            if (lowerCase)
+                tag = tag.toLowerCase();
 
             if (innerCut.has(tag) && (!cutCounter || cutTag === tag)) {
                 if (!cutCounter)
@@ -276,7 +280,7 @@ async function parse(xstr, options) {
     await _onProgress(100);
 }
 
-function getAttrsSync(tail) {
+function getAttrsSync(tail, lowerCase = true) {
     let result = {};
     let name = '';    
     let value = '';
@@ -287,13 +291,16 @@ function getAttrsSync(tail) {
     let waitEq = false;
 
     const pushResult = () => {
+        if (lowerCase)
+            name = name.toLowerCase();
         if (name != '') {
+            const fn = name;
             let ns = '';
-            if (name.indexOf(':') >= 0) {
-                [ns, name] = name.split(':');
+            if (fn.indexOf(':') >= 0) {
+                [ns, name] = fn.split(':');
             }
 
-            result[name] = {value, ns};
+            result[name] = {value, ns, fn};
         }
         name = '';
         value = '';

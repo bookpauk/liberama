@@ -77,9 +77,15 @@ export default class DrawHelper {
             let j = 0;
             //формируем строку
             for (const part of line.parts) {
-                let tOpen = (part.style.bold ? '<b>' : '');
+                let tOpen = '';
+                tOpen += (part.style.bold ? '<b>' : '');
                 tOpen += (part.style.italic ? '<i>' : '');
-                let tClose = (part.style.italic ? '</i>' : '');
+                tOpen += (part.style.sup ? '<span style="vertical-align: baseline; position: relative; line-height: 0; top: -0.3em">' : '');
+                tOpen += (part.style.sub ? '<span style="vertical-align: baseline; position: relative; line-height: 0; top: 0.3em">' : '');
+                let tClose = '';
+                tClose += (part.style.sub ? '</span>' : '');
+                tClose += (part.style.sup ? '</span>' : '');
+                tClose += (part.style.italic ? '</i>' : '');
                 tClose += (part.style.bold ? '</b>' : '');
 
                 let text = '';

@@ -32,11 +32,23 @@ sudo -u www-data mkdir -p /home/liberama/data/calibre
 sudo -u www-data tar xvf calibre-5.5.0-x86_64.txz -C /home/liberama/data/calibre
 ```
 
+### external converter `pdfalto`, github https://github.com/kermitt2/pdfalto
+```
+git clone https://github.com/kermitt2/pdfalto
+cd pdfalto
+git submodule update --init --recursive
+cmake ./
+добавить в начало CMakeLists.txt строчку: set(CMAKE_EXE_LINKER_FLAGS "-no-pie")
+make
+
+sudo -u www-data mkdir -p /home/liberama/data/pdfalto
+sudo -u www-data cp pdfalto /home/liberama/data/pdfalto
+```
+
 ### external converters
 ```
 sudo apt install rar
 sudo apt install libreoffice
-sudo apt install poppler-utils
 sudo apt install djvulibre-bin
 sudo apt install libtiff-tools
 sudo apt install graphicsmagick-imagemagick-compat

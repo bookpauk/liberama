@@ -2,9 +2,9 @@ const fs = require('fs-extra');
 const path = require('path');
 const utils = require('../../utils');
 
-const ConvertHtml = require('./ConvertHtml');
+const ConvertBase = require('./ConvertBase');
 
-class ConvertDjvu extends ConvertHtml {
+class ConvertDjvu extends ConvertBase {
     check(data, opts) {
         const {inputFiles} = opts;
 
@@ -59,9 +59,17 @@ class ConvertDjvu extends ConvertHtml {
         }, abort);
 
         //читаем изображения
+        limitSize = 2*this.config.maxUploadFileSize;
+        let imagesSize = 0;
+
         const loadImage = async(image) => {
             image.data = (await fs.readFile(image.file)).toString('base64');
             image.name = path.basename(image.file);
+
+            imagesSize += image.data.length;
+            if (imagesSize > limitSize) {
+                throw new Error(`Файл для конвертирования слишком большой|FORLOG| imagesSize: ${imagesSize} > ${limitSize}`);
+            }
         }
 
         let files = [];
@@ -82,20 +90,29 @@ class ConvertDjvu extends ConvertHtml {
 
         await Promise.all(loading);
 
-        //формируем текст
-        limitSize = 2*this.config.maxUploadFileSize;
+        //формируем fb2
+        let titleInfo = {};
+        let desc = {_n: 'description', 'title-info': titleInfo};
+        let pars = [];
+        let body = {_n: 'body', section: {_a: [pars]}};
+        let binary = [];
+        let fb2 = [desc, body, binary];
+
         let title = '';
         if (uploadFileName)
             title = uploadFileName;
-        let text = `<title>${title}</title>`;
-        for (const image of images) {
-            text += `<fb2-image type="image/jpeg" name="${image.name}">${image.data}</fb2-image>`;
 
-            if (text.length > limitSize) {
-                throw new Error(`Файл для конвертирования слишком большой|FORLOG| text.length: ${text.length} > ${limitSize}`);
-            }
+        titleInfo['book-title'] = title;
+
+        for (const image of images) {
+            const img = {_n: 'binary', _attrs: {id: image.name, 'content-type': 'image/jpeg'}, _t: image.data};
+            binary.push(img);
+
+            pars.push({_n: 'p', _t: ''});
+            pars.push({_n: 'image', _attrs: {'l:href': `#${image.name}`}});
         }
-        return await super.run(Buffer.from(text), {skipCheck: true, isText: true, cutTitle: true});
+
+        return this.formatFb2(fb2);
     }
 }
 

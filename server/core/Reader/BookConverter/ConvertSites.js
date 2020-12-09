@@ -48,7 +48,7 @@ class ConvertSites extends ConvertHtml {
         if (text === false)
             return false;
 
-        return await super.run(Buffer.from(text), {skipCheck: true, cutTitle: true});
+        return await super.run(Buffer.from(text), {skipCheck: true});
     }
 
     getTitle(text) {
@@ -79,7 +79,7 @@ class ConvertSites extends ConvertHtml {
         let book = this.getTitle(text);
         book = book.replace(' (fb2) | Флибуста', '');
 
-        const title = `<title>${author}${(author ? ' - ' : '')}${book}</title>`;
+        const title = `<fb2-title>${author}${(author ? ' - ' : '')}${book}</fb2-title>`;
 
         let begin = '<h3 class="book">';
         if (text.indexOf(begin) <= 0)
@@ -95,12 +95,12 @@ class ConvertSites extends ConvertHtml {
         return text.substring(l, r)
             .replace(/blockquote class="?book"?/g, 'p')
             .replace(/<br\/?>\s*<\/h3>/g, '</h3>')
-            .replace(/<h3 class="?book"?>/g, '<br><br><subtitle>')
-            .replace(/<h5 class="?book"?>/g, '<br><br><subtitle>')
-            .replace(/<h3>/g, '<br><br><subtitle>')
-            .replace(/<h5>/g, '<br><br><subtitle>')
-            .replace(/<\/h3>/g, '</subtitle><br>')
-            .replace(/<\/h5>/g, '</subtitle><br>')
+            .replace(/<h3 class="?book"?>/g, '<br><br><fb2-subtitle>')
+            .replace(/<h5 class="?book"?>/g, '<br><br><fb2-subtitle>')
+            .replace(/<h3>/g, '<br><br><fb2-subtitle>')
+            .replace(/<h5>/g, '<br><br><fb2-subtitle>')
+            .replace(/<\/h3>/g, '</fb2-subtitle><br>')
+            .replace(/<\/h5>/g, '</fb2-subtitle><br>')
             .replace(/<div class="?stanza"?>/g, '<br>')
             .replace(/<div>/g, '<br>')
             + title;
