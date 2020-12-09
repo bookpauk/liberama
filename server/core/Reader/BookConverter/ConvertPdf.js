@@ -283,8 +283,8 @@ class ConvertPdf extends ConvertHtml {
             let metaXmlParsed = xmlParser.parseXml(metaXmlString);
             metaXmlParsed = xmlParser.simplifyXmlParsed(metaXmlParsed);
             if (metaXmlParsed.metadata) {
-                title = (metaXmlParsed.metadata.title ? metaXmlParsed.metadata.title._t : null);
-                author = (metaXmlParsed.metadata.author ? metaXmlParsed.metadata.author._t : null);
+                title = (metaXmlParsed.metadata.title ? metaXmlParsed.metadata.title._t : '');
+                author = (metaXmlParsed.metadata.author ? metaXmlParsed.metadata.author._t : '');
             }
         }
 
@@ -295,8 +295,10 @@ class ConvertPdf extends ConvertHtml {
         //формируем текст
         const limitSize = 2*this.config.maxUploadFileSize;
         let text = '';
-        text += `<fb2-title>${title}</fb2-title>`;
-        text += `<fb2-author>${author}</fb2-author>`;
+        if (title)
+            text += `<fb2-title>${title}</fb2-title>`;
+        if (author)
+            text += `<fb2-author>${author}</fb2-author>`;
 
         let concat = '';
         let sp = '';
