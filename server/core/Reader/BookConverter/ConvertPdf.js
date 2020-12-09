@@ -59,7 +59,6 @@ class ConvertPdf extends ConvertHtml {
 
         let title = '';
         let author = '';
-        let prevTop = 0;
         let i = -1;
 
         const loadImage = async(image) => {
@@ -97,10 +96,9 @@ class ConvertPdf extends ConvertHtml {
                 //добавим закрывающий тег стиля
                 line.text += line.tClose;
 
-                const f = (line.fonts.length ? fonts[line.fonts[0]] : null);
-
                 //проверим, возможно это заголовок
                 if (line.fonts.length == 1 && line.pageWidth) {
+                    const f = (line.fonts.length ? fonts[line.fonts[0]] : null);
                     const centerLeft = (line.pageWidth - line.width)/2;
                     if (f && f.isBold && Math.abs(centerLeft - line.left) < 3) {
                         if (!sectionTitleFound) {
@@ -110,12 +108,6 @@ class ConvertPdf extends ConvertHtml {
                             line.isSubtitle = true;
                         }
                     }
-                }
-
-                //добавим пустую строку, если надо
-                if (f && f.fontSize && Math.abs(pt - line.top) > f.fontSize*1.5) {
-                    j++;
-                    pl[j] = {text: '<br>'};
                 }
 
                 //объединяем
@@ -129,13 +121,25 @@ class ConvertPdf extends ConvertHtml {
             });
 
             //заполняем lines
+            const lastIndex = i;
             pl.forEach(line => {
                 putImage(line.top);
+
+                //добавим пустую строку, если надо
+                const prevLine = (i > lastIndex ? lines[i] : {fonts: [], top: 0});
+                if (prevLine && !prevLine.isImage) {
+                    const f = (prevLine.fonts.length ? fonts[prevLine.fonts[0]] : (line.fonts.length ? fonts[line.fonts[0]] : null));
+                    if (f && f.fontSize && !line.isImage && line.top - prevLine.top > f.fontSize*1.8) {
+                        i++;
+                        lines[i] = {text: '<br>'};
+                    }
+                }
+
                 i++;
                 lines[i] = line;
             });
             pagelines = [];
-            prevTop = 0;
+            putImage(100000);
         };
 
         const onStartNode = (tag, tail, singleTag, cutCounter, cutTag) => {// eslint-disable-line no-unused-vars
@@ -171,7 +175,6 @@ class ConvertPdf extends ConvertHtml {
                 };
 
                 putPageLines();
-                putImage(100000);
             }
 
             if (tag == 'textline') {
@@ -191,11 +194,7 @@ class ConvertPdf extends ConvertHtml {
                 };
 
                 if (line.width != 0 || line.height != 0) {
-                    if (Math.abs(prevTop - line.top) > 3) {
-                        putImage(line.top);
-                    }
                     pagelines.push(line);
-                    prevTop = line.top;
                 }
             }
 
@@ -255,7 +254,6 @@ class ConvertPdf extends ConvertHtml {
         });
 
         putPageLines();
-        putImage(100000);
 
         await Promise.all(loading);
         await utils.sleep(100);
