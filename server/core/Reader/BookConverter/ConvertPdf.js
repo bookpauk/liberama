@@ -50,7 +50,9 @@ class ConvertPdf extends ConvertHtml {
         let lines = [];
         let pagelines = [];
         let line = {text: ''};
+        let page = {};
         let fonts = {};
+        let sectionTitleFound = false;
 
         let images = [];
         let loading = [];
@@ -95,11 +97,26 @@ class ConvertPdf extends ConvertHtml {
                 //добавим закрывающий тег стиля
                 line.text += line.tClose;
 
+                //проверим, возможно это заголовок
+                if (line.fonts.length == 1 && line.pageWidth) {
+                    const f = fonts[line.fonts[0]];
+                    const centerLeft = (line.pageWidth - line.width)/2;
+                    if (f && f.isBold && Math.abs(centerLeft - line.left) < 3) {
+                        if (!sectionTitleFound) {
+                            line.isSectionTitle = true;
+                            sectionTitleFound = true;
+                        } else {
+                            line.isSubtitle = true;
+                        }
+                    }
+                }
+
+                //объедняем
                 if (Math.abs(pt - line.top) > 3) {
                     j++;
                     pl[j] = line;
                 } else {
-                    pl[j].text += line.text;
+                    pl[j].text += ` ${line.text}`;
                 }
                 pt = line.top;
             });
@@ -111,6 +128,7 @@ class ConvertPdf extends ConvertHtml {
                 lines[i] = line;
             });
             pagelines = [];
+            prevTop = 0;
         };
 
         const onStartNode = (tag, tail, singleTag, cutCounter, cutTag) => {// eslint-disable-line no-unused-vars
@@ -122,19 +140,26 @@ class ConvertPdf extends ConvertHtml {
                 if (fontId && fontStyle) {
                     const styles = fontStyle.split(' ');
                     const styleTags = {bold: 'b', italics: 'i', superscript: 'sup', subscript: 'sub'};
-                    const f = fonts[fontId] = {tOpen: '', tClose: ''};
+                    const f = fonts[fontId] = {tOpen: '', tClose: '', isBold: false};
 
                     styles.forEach(style => {
                         const s = styleTags[style];
                         if (s) {
                             f.tOpen += `<${s}>`;
                             f.tClose = `</${s}>${f.tClose}`;
+                            if (s == 'b')
+                                f.isBold = true;
                         }
                     });
                 }
             }
 
             if (tag == 'page') {
+                const attrs = sax.getAttrsSync(tail);
+                page = {
+                    width: parseInt((attrs.width && attrs.width.value ? attrs.width.value : null), 10),
+                };
+
                 putPageLines();
                 putImage(100000);
             }
@@ -149,13 +174,17 @@ class ConvertPdf extends ConvertHtml {
                     height: parseInt((attrs.height && attrs.height.value ? attrs.height.value : null), 10),
                     tOpen: '',
                     tClose: '',
+                    isSectionTitle: false,
+                    isSubtitle: false,
+                    pageWidth: page.width,
+                    fonts: [],
                 };
 
                 if (line.width != 0 || line.height != 0) {
                     if (Math.abs(prevTop - line.top) > 3) {
                         putImage(line.top);
-                        pagelines.push(line);
                     }
+                    pagelines.push(line);
                     prevTop = line.top;
                 }
             }
@@ -170,6 +199,8 @@ class ConvertPdf extends ConvertHtml {
                     if (fontId && fonts[fontId]) {
                         tOpen = fonts[fontId].tOpen;
                         tClose = fonts[fontId].tClose;
+                        if (!line.fonts.length || line.fonts[0] != fontId)
+                            line.fonts.push(fontId);
                     }
 
                     if (line.tOpen != tOpen) {
@@ -252,6 +283,7 @@ class ConvertPdf extends ConvertHtml {
         if (!title && uploadFileName)
             title = uploadFileName;
 
+        //console.log(JSON.stringify(lines, null, 2));
         //формируем текст
         const limitSize = 2*this.config.maxUploadFileSize;
         let text = '';
@@ -267,6 +299,16 @@ class ConvertPdf extends ConvertHtml {
             
             if (line.isImage) {
                 text += `<fb2-image type="${line.type}" name="${line.name}">${line.data}</fb2-image>`;
+                continue;
+            }
+
+            if (line.isSectionTitle) {
+                text += `<fb2-section-title>${line.text.trim()}</fb2-section-title>`;
+                continue;
+            }
+
+            if (line.isSubtitle) {
+                text += `<br><fb2-subtitle>${line.text.trim()}</fb2-subtitle>`;
                 continue;
             }
 
@@ -287,6 +329,7 @@ class ConvertPdf extends ConvertHtml {
         if (concat)
             text += sp + concat + "\n";
 
+        //console.log(text);
         await utils.sleep(100);
         return await super.run(Buffer.from(text), {skipCheck: true, isText: true});
     }

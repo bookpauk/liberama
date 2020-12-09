@@ -45,6 +45,7 @@ class ConvertHtml extends ConvertBase {
         let title = '';
         let author = '';
         let inTitle = false;
+        let inSectionTitle = false;
         let inAuthor = false;
         let inSubTitle = false;
         let inImage = false;
@@ -63,7 +64,7 @@ class ConvertHtml extends ConvertBase {
         };
 
         const growParagraph = (text) => {
-            if (!pars.length)
+            if (!pars.length || pars[pars.length - 1]._n != 'p')
                 newParagraph();
 
             const l = pars.length;
@@ -95,7 +96,7 @@ class ConvertHtml extends ConvertBase {
         const onTextNode = (text, cutCounter, cutTag) => {// eslint-disable-line no-unused-vars
             text = this.escapeEntities(text);
 
-            if (!(cutCounter || inTitle) || inSubTitle) {
+            if (!(cutCounter || inTitle || inSectionTitle || inSubTitle)) {
                 let tOpen = '';
                 tOpen += (inSubTitle ? '<subtitle>' : '');
                 tOpen += (bold ? '<strong>' : '');
@@ -114,12 +115,19 @@ class ConvertHtml extends ConvertBase {
             if (inAuthor && !author)
                 author = text;
 
+            if (inSectionTitle) {
+                pars.unshift({_n: 'title', _t: text});
+            }
+
+            if (inSubTitle) {
+                pars.push({_n: 'subtitle', _t: text});
+            }
+
             if (inImage) {
                 image._t = text;
                 binary.push(image);
 
                 pars.push({_n: 'image', _attrs: {'l:href': '#' + image._attrs.id}, _t: ''});
-                newParagraph();
             }
 
         };
@@ -152,6 +160,10 @@ class ConvertHtml extends ConvertBase {
 
             if (tag == 'fb2-author') {
                 inAuthor = true;
+            }
+
+            if (tag == 'fb2-section-title') {
+                inSectionTitle = true;
             }
 
             if (tag == 'fb2-subtitle') {
@@ -192,6 +204,10 @@ class ConvertHtml extends ConvertBase {
 
             if (tag == 'fb2-author') {
                 inAuthor = false;
+            }
+
+            if (tag == 'fb2-section-title') {
+                inSectionTitle = false;
             }
 
             if (tag == 'fb2-subtitle')
