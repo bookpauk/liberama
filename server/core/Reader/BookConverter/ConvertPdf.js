@@ -91,15 +91,16 @@ class ConvertPdf extends ConvertHtml {
             
             //объединяем в одну строку равные по высоте
             const pl = [];
-            let pt = -100;
+            let pt = 0;
             let j = -1;
             pagelines.forEach(line => {
                 //добавим закрывающий тег стиля
                 line.text += line.tClose;
 
+                const f = (line.fonts.length ? fonts[line.fonts[0]] : null);
+
                 //проверим, возможно это заголовок
                 if (line.fonts.length == 1 && line.pageWidth) {
-                    const f = fonts[line.fonts[0]];
                     const centerLeft = (line.pageWidth - line.width)/2;
                     if (f && f.isBold && Math.abs(centerLeft - line.left) < 3) {
                         if (!sectionTitleFound) {
@@ -111,8 +112,14 @@ class ConvertPdf extends ConvertHtml {
                     }
                 }
 
-                //объедняем
-                if (Math.abs(pt - line.top) > 3) {
+                //добавим пустую строку, если надо
+                if (f && f.fontSize && Math.abs(pt - line.top) > f.fontSize*1.5) {
+                    j++;
+                    pl[j] = {text: '<br>'};
+                }
+
+                //объединяем
+                if (pt == 0 || Math.abs(pt - line.top) > 3) {
                     j++;
                     pl[j] = line;
                 } else {
@@ -136,21 +143,24 @@ class ConvertPdf extends ConvertHtml {
                 const attrs = sax.getAttrsSync(tail);
                 const fontId = (attrs.id && attrs.id.value ? attrs.id.value : '');
                 const fontStyle = (attrs.fontstyle && attrs.fontstyle.value ? attrs.fontstyle.value : '');
+                const fontSize = (attrs.fontsize && attrs.fontsize.value ? attrs.fontsize.value : '');
 
-                if (fontId && fontStyle) {
-                    const styles = fontStyle.split(' ');
+                if (fontId) {
                     const styleTags = {bold: 'b', italics: 'i', superscript: 'sup', subscript: 'sub'};
-                    const f = fonts[fontId] = {tOpen: '', tClose: '', isBold: false};
+                    const f = fonts[fontId] = {tOpen: '', tClose: '', isBold: false, fontSize};
 
-                    styles.forEach(style => {
-                        const s = styleTags[style];
-                        if (s) {
-                            f.tOpen += `<${s}>`;
-                            f.tClose = `</${s}>${f.tClose}`;
-                            if (s == 'b')
-                                f.isBold = true;
-                        }
-                    });
+                    if (fontStyle) {
+                        const styles = fontStyle.split(' ');
+                        styles.forEach(style => {
+                            const s = styleTags[style];
+                            if (s) {
+                                f.tOpen += `<${s}>`;
+                                f.tClose = `</${s}>${f.tClose}`;
+                                if (s == 'b')
+                                    f.isBold = true;
+                            }
+                        });
+                    }
                 }
             }
 

@@ -52,6 +52,8 @@ class ConvertHtml extends ConvertBase {
         let image = {};
         let bold = false;
         let italic = false;
+        let superscript = false;
+        let subscript = false;
         let begining = true;
 
         let spaceCounter = [];
@@ -101,7 +103,11 @@ class ConvertHtml extends ConvertBase {
                 tOpen += (inSubTitle ? '<subtitle>' : '');
                 tOpen += (bold ? '<strong>' : '');
                 tOpen += (italic ? '<emphasis>' : '');
+                tOpen += (superscript ? '<sup>' : '');
+                tOpen += (subscript ? '<sub>' : '');
                 let tClose = ''
+                tClose += (subscript ? '</sub>' : '');
+                tClose += (superscript ? '</sup>' : '');
                 tClose +=  (italic ? '</emphasis>' : '');
                 tClose += (bold ? '</strong>' : '');
                 tClose += (inSubTitle ? '</subtitle>' : '');
@@ -152,6 +158,12 @@ class ConvertHtml extends ConvertBase {
                         bold = true;
                         break;
                 }
+
+                if (tag == 'sup')
+                    superscript = true;
+        
+                if (tag == 'sub')
+                    subscript = true;
             }
 
             if (tag == 'title' || tag == 'fb2-title') {
@@ -174,7 +186,7 @@ class ConvertHtml extends ConvertBase {
                 inImage = true;
                 const attrs = sax.getAttrsSync(tail);
                 image = {_n: 'binary', _attrs: {id: attrs.name.value, 'content-type': attrs.type.value}, _t: ''};
-            }
+            }            
         };
 
         const onEndNode = (tag, tail, singleTag, cutCounter, cutTag) => {// eslint-disable-line no-unused-vars
@@ -197,6 +209,12 @@ class ConvertHtml extends ConvertBase {
                         bold = false;
                         break;
                 }
+
+                if (tag == 'sup')
+                    superscript = false;
+        
+                if (tag == 'sub')
+                    subscript = false;
             }
 
             if (tag == 'title' || tag == 'fb2-title')
@@ -302,6 +320,8 @@ class ConvertHtml extends ConvertBase {
         //убираем лишнее, делаем валидный fb2, т.к. в рез-те разбиения на параграфы бьются теги
         bold = false;
         italic = false;
+        superscript = false;
+        subscript = false;
         inSubTitle = false;
         pars = body.section._a[0];
         for (let i = 0; i < pars.length; i++) {
@@ -321,7 +341,11 @@ class ConvertHtml extends ConvertBase {
                     tOpen += (inSubTitle ? '<subtitle>' : '');
                     tOpen += (bold ? '<strong>' : '');
                     tOpen += (italic ? '<emphasis>' : '');
+                    tOpen += (superscript ? '<sup>' : '');
+                    tOpen += (subscript ? '<sub>' : '');
                     let tClose = ''
+                    tClose += (subscript ? '</sub>' : '');
+                    tClose += (superscript ? '</sup>' : '');
                     tClose +=  (italic ? '</emphasis>' : '');
                     tClose += (bold ? '</strong>' : '');
                     tClose += (inSubTitle ? '</subtitle>' : '');
@@ -337,6 +361,10 @@ class ConvertHtml extends ConvertBase {
                         bold = true;
                     if (tag == 'emphasis')
                         italic = true;
+                    if (tag == 'sup')
+                        superscript = true;
+                    if (tag == 'sub')
+                        subscript = true;
                     if (tag == 'subtitle')
                         inSubTitle = true;
                 }
@@ -346,6 +374,10 @@ class ConvertHtml extends ConvertBase {
                         bold = false;
                     if (tag == 'emphasis')
                         italic = false;
+                    if (tag == 'sup')
+                        superscript = false;
+                    if (tag == 'sub')
+                        subscript = false;
                     if (tag == 'subtitle')
                         inSubTitle = false;
                 }
