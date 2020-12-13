@@ -70,6 +70,7 @@ class ConvertBase {
                 const error = `${result.code}|FORLOG|, exec: ${path}, args: ${args.join(' ')}, stdout: ${result.stdout}, stderr: ${result.stderr}`;
                 throw new Error(`Внешний конвертер завершился с ошибкой: ${error}`);
             }
+            return result;
         } catch(e) {
             if (e.status == 'killed') {
                 throw new Error('Слишком долгое ожидание конвертера');

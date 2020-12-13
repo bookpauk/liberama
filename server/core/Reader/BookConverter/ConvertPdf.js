@@ -5,7 +5,6 @@ const path = require('path');
 const sax = require('../../sax');
 const utils = require('../../utils');
 const ConvertHtml = require('./ConvertHtml');
-const xmlParser = require('../../xmlParser');
 
 class ConvertPdf extends ConvertHtml {
     check(data, opts) {
@@ -26,16 +25,15 @@ class ConvertPdf extends ConvertHtml {
         const inpFile = inputFiles.sourceFile;
         const outBasename = `${inputFiles.filesDir}/${utils.randomHexString(10)}`;
         const outFile = `${outBasename}.xml`;
-        const metaFile = `${outBasename}_metadata.xml`;
 
-        const pdfaltoPath = `${this.config.dataDir}/pdfalto/pdfalto`;
+        const pdftohtmlPath = '/usr/bin/pdftohtml';
 
-        if (!await fs.pathExists(pdfaltoPath))
-            throw new Error('Внешний конвертер pdfalto не найден');
+        if (!await fs.pathExists(pdftohtmlPath))
+            throw new Error('Внешний конвертер pdftohtml не найден');
 
         //конвертируем в xml
         let perc = 0;
-        await this.execConverter(pdfaltoPath, [inpFile, outFile], () => {
+        await this.execConverter(pdftohtmlPath, ['-nodrm', '-c', '-s', '-xml', inpFile, outFile], () => {
             perc = (perc < 80 ? perc + 10 : 40);
             callback(perc);
         }, abort);
@@ -57,8 +55,6 @@ class ConvertPdf extends ConvertHtml {
         let images = [];
         let loading = [];
 
-        let title = '';
-        let author = '';
         let i = -1;
 
         const loadImage = async(image) => {
@@ -277,16 +273,8 @@ class ConvertPdf extends ConvertHtml {
         }
         indents[0] = 0;
 
-        //title
-        if (fs.pathExists(metaFile)) {
-            const metaXmlString = (await fs.readFile(metaFile)).toString();
-            let metaXmlParsed = xmlParser.parseXml(metaXmlString);
-            metaXmlParsed = xmlParser.simplifyXmlParsed(metaXmlParsed);
-            if (metaXmlParsed.metadata) {
-                title = (metaXmlParsed.metadata.title ? metaXmlParsed.metadata.title._t : '');
-                author = (metaXmlParsed.metadata.author ? metaXmlParsed.metadata.author._t : '');
-            }
-        }
+        //author & title
+        let {author, title} = await this.getPdfTitleAndAuthor(inpFile);
 
         if (!title && uploadFileName)
             title = uploadFileName;
@@ -343,6 +331,32 @@ class ConvertPdf extends ConvertHtml {
         await utils.sleep(100);
         return await super.run(Buffer.from(text), {skipCheck: true, isText: true});
     }
+
+    async getPdfTitleAndAuthor(pdfFile) {
+        const result = {author: '', title: ''};
+
+        const pdfinfoPath = '/usr/bin/pdfinfo';
+
+        if (!await fs.pathExists(pdfinfoPath))
+            throw new Error('Внешний конвертер pdfinfo не найден');
+
+        const execResult = await this.execConverter(pdfinfoPath, [pdfFile]);
+
+        const titlePrefix = 'Title:';
+        const authorPrefix = 'Author:';
+
+        const stdout = execResult.stdout.split("\n");
+        stdout.forEach(line => {
+            if (line.indexOf(titlePrefix) == 0) 
+                result.title = line.substring(titlePrefix.length).trim();
+
+            if (line.indexOf(authorPrefix) == 0)
+                result.author = line.substring(authorPrefix.length).trim();
+        });
+
+        return result;
+    }
 }
+
 
 module.exports = ConvertPdf;
