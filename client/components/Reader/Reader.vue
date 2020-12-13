@@ -312,7 +312,7 @@ class Reader extends Vue {
                         if (this.version != this.clientVersion)
                             this.$root.notify.info(`Вышла новая версия (v${this.version}) читалки.<br>Пожалуйста, обновите страницу${againMes}.`, 'Обновление');
                     } catch(e) {
-                        //
+                        console.error(e);
                     }
                 }
 
