@@ -415,13 +415,6 @@ class BookManager {
         result.deleted = 0;
 
         if (this.recent[result.key]) {
-            //восстановим из небытия пользовательские данные
-            if (this.recent[result.key].deleted) {
-                if (!result.bookPos)
-                    result.bookPos = this.recent[result.key].bookPos;
-                if (!result.bookPosSeen)
-                    result.bookPosSeen = this.recent[result.key].bookPosSeen;
-            }
             result = Object.assign({}, this.recent[result.key], result);
         }
 
