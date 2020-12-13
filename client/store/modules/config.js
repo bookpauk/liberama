@@ -10,18 +10,7 @@ const state = {
 const getters = {};
 
 // actions
-const actions = {
-    async loadConfig({ commit, state }) {
-        commit('setApiError', null, { root: true });
-        commit('setConfig', {});
-        try {
-            const config = await miscApi.loadConfig();
-            commit('setConfig', config);
-        } catch (e) {
-            commit('setApiError', e, { root: true });
-        }
-    },
-};
+const actions = {};
 
 // mutations
 const mutations = {
