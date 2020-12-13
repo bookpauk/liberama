@@ -251,11 +251,13 @@ const settingDefaults = {
     compactTextPerc: 0,
     imageHeightLines: 100,
     imageFitWidth: true,
+    enableSitesFilter: true,
+
     showServerStorageMessages: true,
     showWhatsNewDialog: true,
     showDonationDialog2020: true,
     showLiberamaTopDialog2020: true,
-    enableSitesFilter: true,
+    showNeedUpdateNotify: true,
 
     fontShifts: {},
     showToolButton: {},

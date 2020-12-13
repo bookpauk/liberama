@@ -304,6 +304,11 @@ export default class BookParser {
                     bold = true;
                     center = true;
 
+                    if (curTitle.paraIndex < 0) {
+                        curTitle = {paraIndex, title: 'Оглавление', inset: sectionLevel, bodyIndex, subtitles: []};
+                        this.contents.push(curTitle);
+                    }
+
                     inSubtitle = true;
                     curSubtitle = {paraIndex, inset: sectionLevel, title: ''};
                     curTitle.subtitles.push(curSubtitle);

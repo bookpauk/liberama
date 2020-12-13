@@ -410,16 +410,12 @@ class BookManager {
     }
 
     async setRecentBook(value) {
-        const result = this.metaOnly(value);
+        let result = this.metaOnly(value);
         result.touchTime = Date.now();
         result.deleted = 0;
 
-        if (this.recent[result.key] && this.recent[result.key].deleted) {
-            //восстановим из небытия пользовательские данные
-            if (!result.bookPos)
-                result.bookPos = this.recent[result.key].bookPos;
-            if (!result.bookPosSeen)
-                result.bookPosSeen = this.recent[result.key].bookPosSeen;
+        if (this.recent[result.key]) {
+            result = Object.assign({}, this.recent[result.key], result);
         }
 
         await this.recentSetLastKey(result.key);

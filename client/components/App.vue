@@ -2,7 +2,7 @@
     <div class="fit row">
         <Notify ref="notify"/>
         <StdDialog ref="stdDialog"/>
-        <keep-alive>
+        <keep-alive v-if="showPage">
             <router-view class="col"></router-view>
         </keep-alive>
     </div>
@@ -12,8 +12,11 @@
 //-----------------------------------------------------------------------------
 import Vue from 'vue';
 import Component from 'vue-class-component';
+
 import Notify from './share/Notify.vue';
 import StdDialog from './share/StdDialog.vue';
+
+import miscApi from '../api/misc';
 import * as utils from '../share/utils';
 
 export default @Component({
@@ -30,6 +33,8 @@ export default @Component({
 
 })
 class App extends Vue {
+    showPage = false;
+
     itemRuText = {
         '/cardindex': 'Картотека',
         '/reader': 'Читалка',
@@ -42,7 +47,6 @@ class App extends Vue {
 
     created() {
         this.commit = this.$store.commit;
-        this.dispatch = this.$store.dispatch;
         this.state = this.$store.state;
         this.uistate = this.$store.state.uistate;
         this.config = this.$store.state.config;
@@ -116,18 +120,24 @@ class App extends Vue {
         this.$root.notify = this.$refs.notify;
         this.$root.stdDialog = this.$refs.stdDialog;
 
-        this.dispatch('config/loadConfig');
-        this.$watch('apiError', function(newError) {
-            if (newError) {
-                let mes = newError.message;
-                if (newError.response && newError.response.config)
-                    mes = newError.response.config.url + '<br>' + newError.response.statusText;
-                this.$root.notify.error(mes, 'Ошибка API');
-            }
-        });
-
         this.setAppTitle();
         (async() => {
+            //загрузим конфиг сревера
+            try {
+                const config = await miscApi.loadConfig();
+                this.commit('config/setConfig', config);
+                this.showPage = true;
+            } catch(e) {
+                //проверим, не получен ли конфиг ранее
+                if (!this.mode) {
+                    this.$root.notify.error(e.message, 'Ошибка API');
+                } else {
+                    //вероятно, работаем в оффлайне
+                    this.showPage = true;
+                }
+                console.error(e);
+            }
+
             //запросим persistent storage
             if (navigator.storage && navigator.storage.persist) {
                 navigator.storage.persist();

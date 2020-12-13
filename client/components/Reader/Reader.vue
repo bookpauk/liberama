@@ -133,6 +133,9 @@ import ReaderDialogs from './ReaderDialogs/ReaderDialogs.vue';
 import bookManager from './share/bookManager';
 import rstore from '../../store/modules/reader';
 import readerApi from '../../api/reader';
+import miscApi from '../../api/misc';
+
+import {versionHistory} from './versionHistory';
 import * as utils from '../../share/utils';
 
 export default @Component({
@@ -229,7 +232,6 @@ class Reader extends Vue {
         this.rstore = rstore;
         this.loading = true;
         this.commit = this.$store.commit;
-        this.dispatch = this.$store.dispatch;
         this.reader = this.$store.state.reader;
         this.config = this.$store.state.config;
 
@@ -293,6 +295,16 @@ class Reader extends Vue {
 
             await this.$refs.dialogs.init();
         })();
+
+        (async() => {
+            this.isFirstNeedUpdateNotify = true;
+            //вечный цикл, запрашиваем периодически конфиг для проверки выхода новой версии читалки
+            while (true) {// eslint-disable-line no-constant-condition
+                await this.checkNewVersionAvailable();
+                await utils.sleep(3600*1000); //каждый час
+            }
+            //дальше кода нет
+        })();
     }
 
     loadSettings() {
@@ -304,6 +316,7 @@ class Reader extends Vue {
         this.blinkCachedLoad = settings.blinkCachedLoad;
         this.showToolButton = settings.showToolButton;
         this.enableSitesFilter = settings.enableSitesFilter;
+        this.showNeedUpdateNotify = settings.showNeedUpdateNotify;
 
         this.readerActionByKeyCode = utils.userHotKeysObjectSwap(settings.userHotKeys);
         this.$root.readerActionByKeyEvent = (event) => {
@@ -311,6 +324,30 @@ class Reader extends Vue {
         }
 
         this.updateHeaderMinWidth();
+    }
+
+    async checkNewVersionAvailable() {
+        if (!this.checkingNewVersion && this.showNeedUpdateNotify) {
+            this.checkingNewVersion = true;
+            try {
+                await utils.sleep(15*1000); //подождем 15 секунд, чтобы прогрузился ServiceWorker при выходе новой версии
+                const config = await miscApi.loadConfig();
+                this.commit('config/setConfig', config);
+
+                let againMes = '';
+                if (this.isFirstNeedUpdateNotify) {
+                    againMes = ' ЕЩЕ один раз';
+                }
+
+                if (this.version != this.clientVersion)
+                    this.$root.notify.info(`Вышла новая версия (v${this.version}) читалки.<br>Пожалуйста, обновите страницу${againMes}.`, 'Обновление');
+            } catch(e) {
+                console.error(e);
+            } finally {
+                this.checkingNewVersion = false;
+            }
+        }
+        this.isFirstNeedUpdateNotify = false;
     }
 
     updateHeaderMinWidth() {
@@ -392,6 +429,16 @@ class Reader extends Vue {
 
     get mode() {
         return this.$store.state.config.mode;
+    }
+
+    get version() {
+        return this.$store.state.config.version;
+    }
+
+    get clientVersion() {
+        let v = versionHistory[0].header;
+        v = v.split(' ')[0];
+        return v;
     }
 
     get routeParamUrl() {
@@ -963,6 +1010,8 @@ class Reader extends Vue {
             progress.hide(); this.progressActive = false;
             this.loaderActive = true;
             this.$root.stdDialog.alert(e.message, 'Ошибка', {color: 'negative'});
+        } finally {
+            this.checkNewVersionAvailable();
         }
     }
 
