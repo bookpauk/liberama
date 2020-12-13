@@ -294,30 +294,14 @@ class Reader extends Vue {
             this.updateRoute();
 
             await this.$refs.dialogs.init();
+        })();
 
-            await utils.sleep(15*1000); //подождем 15 секунд, чтобы прогрузился ServiceWorker при выходе новой версии
+        (async() => {
             this.isFirstNeedUpdateNotify = true;
             //вечный цикл, запрашиваем периодически конфиг для проверки выхода новой версии читалки
             while (true) {// eslint-disable-line no-constant-condition
-                if (this.showNeedUpdateNotify) {
-                    try {
-                        const config = await miscApi.loadConfig();
-                        this.commit('config/setConfig', config);
-
-                        let againMes = '';
-                        if (this.isFirstNeedUpdateNotify) {
-                            againMes = ' ЕЩЕ один раз';
-                        }
-
-                        if (this.version != this.clientVersion)
-                            this.$root.notify.info(`Вышла новая версия (v${this.version}) читалки.<br>Пожалуйста, обновите страницу${againMes}.`, 'Обновление');
-                    } catch(e) {
-                        console.error(e);
-                    }
-                }
-
+                await this.checkNewVersionAvailable();
                 await utils.sleep(3600*1000); //каждый час
-                this.isFirstNeedUpdateNotify = false;
             }
             //дальше кода нет
         })();
@@ -340,6 +324,30 @@ class Reader extends Vue {
         }
 
         this.updateHeaderMinWidth();
+    }
+
+    async checkNewVersionAvailable() {
+        if (!this.checkingNewVersion && this.showNeedUpdateNotify) {
+            this.checkingNewVersion = true;
+            try {
+                await utils.sleep(15*1000); //подождем 15 секунд, чтобы прогрузился ServiceWorker при выходе новой версии
+                const config = await miscApi.loadConfig();
+                this.commit('config/setConfig', config);
+
+                let againMes = '';
+                if (this.isFirstNeedUpdateNotify) {
+                    againMes = ' ЕЩЕ один раз';
+                }
+
+                if (this.version != this.clientVersion)
+                    this.$root.notify.info(`Вышла новая версия (v${this.version}) читалки.<br>Пожалуйста, обновите страницу${againMes}.`, 'Обновление');
+            } catch(e) {
+                console.error(e);
+            } finally {
+                this.checkingNewVersion = false;
+            }
+        }
+        this.isFirstNeedUpdateNotify = false;
     }
 
     updateHeaderMinWidth() {
@@ -1002,6 +1010,8 @@ class Reader extends Vue {
             progress.hide(); this.progressActive = false;
             this.loaderActive = true;
             this.$root.stdDialog.alert(e.message, 'Ошибка', {color: 'negative'});
+        } finally {
+            this.checkNewVersionAvailable();
         }
     }
 
