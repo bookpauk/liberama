@@ -42,7 +42,7 @@ class ConvertDjvu extends ConvertBase {
         }, abort);
 
         const tifFileSize = (await fs.stat(tifFile)).size;
-        let limitSize = 3*this.config.maxUploadFileSize;
+        let limitSize = 4*this.config.maxUploadFileSize;
         if (tifFileSize > limitSize) {
             throw new Error(`Файл для конвертирования слишком большой|FORLOG| ${tifFileSize} > ${limitSize}`);
         }
@@ -53,7 +53,7 @@ class ConvertDjvu extends ConvertBase {
         await fs.remove(tifFile);
 
         //конвертируем в jpg
-        await this.execConverter(mogrifyPath, ['-quality', '20', '-scale', '2048', '-verbose', '-format', 'jpg', `${dir}*.tif`], () => {
+        await this.execConverter(mogrifyPath, ['-quality', '20', '-scale', '2048>', '-verbose', '-format', 'jpg', `${dir}*.tif`], () => {
             perc = (perc < 100 ? perc + 1 : 40);
             callback(perc);
         }, abort);
