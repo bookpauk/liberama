@@ -103,6 +103,11 @@ class ConvertBase {
         return he.escape(he.decode(text.replace(/&nbsp;/g, ' ')));
     }
 
+    isDataXml(data) {
+        const str = data.toString().trim();
+        return (str.indexOf('<?xml version="1.0"') == 0 || str.indexOf('<?xml version=\'1.0\'') == 0 );
+    }
+
     formatFb2(fb2) {
         const out = xmlParser.formatXml({
             FictionBook: {

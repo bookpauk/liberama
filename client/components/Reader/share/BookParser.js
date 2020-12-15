@@ -54,12 +54,14 @@ export default class BookParser {
 
         //оглавление
         this.contents = [];
+        this.images = [];
         let curTitle = {paraIndex: -1, title: '', subtitles: []};
         let curSubtitle = {paraIndex: -1, title: ''};
         let inTitle = false;
         let inSubtitle = false;
         let sectionLevel = 0;
         let bodyIndex = 0;
+        let imageNum = 0;
 
         let paraIndex = -1;
         let paraOffset = 0;
@@ -202,16 +204,26 @@ export default class BookParser {
                 let attrs = sax.getAttrsSync(tail);
                 if (attrs.href && attrs.href.value) {
                     const href = attrs.href.value;
+                    const {id} = this.imageHrefToId(href);
                     if (href[0] == '#') {//local
+                        imageNum++;
+
                         if (inPara && !this.showInlineImagesInCenter && !center)
-                            growParagraph(`<image-inline href="${href}"></image-inline>`, 0);
+                            growParagraph(`<image-inline href="${href}" num="${imageNum}"></image-inline>`, 0);
                         else
-                            newParagraph(`<image href="${href}">${' '.repeat(maxImageLineCount)}</image>`, maxImageLineCount);
+                            newParagraph(`<image href="${href}" num="${imageNum}">${' '.repeat(maxImageLineCount)}</image>`, maxImageLineCount);
+
+                        this.images.push({paraIndex, num: imageNum, id});
+
                         if (inPara && this.showInlineImagesInCenter)
                             newParagraph(' ', 1);
                     } else {//external
+                        imageNum++;
+
                         dimPromises.push(getExternalImageDimensions(href));
-                        newParagraph(`<image href="${href}">${' '.repeat(maxImageLineCount)}</image>`, maxImageLineCount);
+                        newParagraph(`<image href="${href}" num="${imageNum}">${' '.repeat(maxImageLineCount)}</image>`, maxImageLineCount);
+
+                        this.images.push({paraIndex, num: imageNum, id});
                     }
                 }
             }
@@ -488,6 +500,15 @@ export default class BookParser {
         return {fb2};
     }
 
+    imageHrefToId(id) {
+        let local = false;
+        if (id[0] == '#') {
+            id = id.substr(1);
+            local = true;
+        }
+        return {id, local};
+    }
+
     findParaIndex(bookPos) {
         let result = undefined;
         //дихотомия
@@ -553,28 +574,21 @@ export default class BookParser {
                 case 'image': {
                     let attrs = sax.getAttrsSync(tail);
                     if (attrs.href && attrs.href.value) {
-                        let id = attrs.href.value;
-                        let local = false;
-                        if (id[0] == '#') {
-                            id = id.substr(1);
-                            local = true;
-                        }
-                        image = {local, inline: false, id};
+                        image = this.imageHrefToId(attrs.href.value);
+                        image.inline = false;
+                        image.num = (attrs.num && attrs.num.value ? attrs.num.value : 0);
                     }
                     break;
                 }
                 case 'image-inline': {
                     let attrs = sax.getAttrsSync(tail);
                     if (attrs.href && attrs.href.value) {
-                        let id = attrs.href.value;
-                        let local = false;
-                        if (id[0] == '#') {
-                            id = id.substr(1);
-                            local = true;
-                        }
+                        const img = this.imageHrefToId(attrs.href.value);
+                        img.inline = true;
+                        img.num = (attrs.num && attrs.num.value ? attrs.num.value : 0);
                         result.push({
                             style: Object.assign({}, style),
-                            image: {local, inline: true, id},
+                            image: img,
                             text: ''
                         });
                     }
@@ -801,6 +815,7 @@ export default class BookParser {
                         paraIndex,
                         w: imageWidth,
                         h: imageHeight,
+                        num: part.image.num
                     }});
                     lines.push(line);
                     line = {begin: line.end + 1, parts: []};
@@ -811,7 +826,7 @@ export default class BookParser {
                 line.last = true;
                 line.parts.push({style, text: ' ',
                     image: {local: part.image.local, inline: false, id: part.image.id,
-                        imageLine: i, lineCount, paraIndex, w: imageWidth, h: imageHeight}
+                        imageLine: i, lineCount, paraIndex, w: imageWidth, h: imageHeight, num: part.image.num}
                 });
                 
                 continue;
@@ -823,7 +838,7 @@ export default class BookParser {
                     let imgH = (bin.h > this.fontSize ? this.fontSize : bin.h);
                     imgW += bin.w*imgH/bin.h;
                     line.parts.push({style, text: '',
-                        image: {local: part.image.local, inline: true, id: part.image.id}});
+                        image: {local: part.image.local, inline: true, id: part.image.id, num: part.image.num}});
                 }
             }
 

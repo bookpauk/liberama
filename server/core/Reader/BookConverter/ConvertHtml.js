@@ -7,7 +7,7 @@ class ConvertHtml extends ConvertBase {
         const {dataType} = opts;
 
         //html?
-        if (dataType && (dataType.ext == 'html' || dataType.ext == 'xml')) 
+        if ( ( (dataType && (dataType.ext == 'html' || dataType.ext == 'xml')) ) || this.isDataXml(data) )
             return {isText: false};
 
         //может это чистый текст?

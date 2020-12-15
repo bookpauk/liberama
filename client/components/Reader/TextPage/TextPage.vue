@@ -722,8 +722,24 @@ class TextPage extends Vue {
                     message = this.statusBarMessage;
                 if (!message)
                     message = this.title;
+
+                //check image num
+                let imageNum = 0;
+                const len = (lines.length > 2 ? 2 : lines.length);
+                loop:
+                for (let j = 0; j < len; j++) {
+                    const line = lines[j];
+                    for (const part of line.parts) {
+                        if (part.image) {
+                            imageNum = part.image.num;
+                            break loop;
+                        }
+                    }
+                }
+                //drawing
                 this.statusBar = this.drawHelper.drawStatusBar(this.statusBarTop, this.statusBarHeight, 
-                    lines[i].end, this.parsed.textLength, message);
+                    lines[i].end, this.parsed.textLength, message, imageNum, this.parsed.images.length);
+
                 this.bookPosSeen = lines[i].end;
             }
         } else {

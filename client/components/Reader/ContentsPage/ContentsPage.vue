@@ -16,6 +16,7 @@
             class="no-mp bg-grey-4 text-grey-7"
         >
             <q-tab name="contents" icon="la la-list" label="Оглавление" />
+            <q-tab name="images" icon="la la-image" label="Изображения" />
             <q-tab name="bookmarks"  icon="la la-bookmark" label="Закладки" />
         </q-tabs>
     </div>
@@ -56,6 +57,31 @@
         </div>
     </div>
 
+    <div class="tab-panel" v-show="selectedTab == 'images'">
+        <div>
+            <div v-for="item in images" :key="item.key" class="column" style="width: 540px">
+                <div class="row item q-px-sm no-wrap">
+                    <div class="col row clickable" @click="setBookPos(item.offset)">
+                        <div class="image-thumb-box row justify-center items-center">
+                            <div v-show="!imageLoaded" class="image-thumb column justify-center"><i class="loading-img-icon la la-images"></i></div>
+                            <img v-show="imageLoaded" class="image-thumb" :src="imageSrc[item.imageId]"/>
+                        </div>
+                        <div class="no-expand-button column justify-center items-center">
+                            <div v-show="item.type == 'image/jpeg'" class="image-type it-jpg-color row justify-center">JPG</div>
+                            <div v-show="item.type == 'image/png'" class="image-type it-png-color row justify-center">PNG</div>
+                        </div>
+                        <div :style="item.indentStyle"></div>
+                        <div class="q-mr-sm col overflow-hidden column justify-center" :style="item.labelStyle" v-html="item.label"></div>
+                        <div class="column justify-center">{{ item.perc }}%</div>
+                    </div>
+                </div>
+            </div>
+            <div v-if="!images.length" class="column justify-center items-center" style="height: 100px">
+                Изображения отсутствуют
+            </div>
+        </div>
+    </div>
+
     <div class="tab-panel" v-show="selectedTab == 'bookmarks'">
         <div class="column justify-center items-center" style="height: 100px">
             Раздел находится в разработке
@@ -84,6 +110,9 @@ export default @Component({
 class ContentsPage extends Vue {
     selectedTab = 'contents';
     contents = [];
+    images = [];
+    imageSrc = [];
+    imageLoaded = false;
 
     created() {
     }
@@ -93,7 +122,7 @@ class ContentsPage extends Vue {
 
         //закладки
 
-        //далее формаирование оглавления
+        //далее формирование оглавления
         if (this.parsed == parsed)
             return;
 
@@ -166,6 +195,42 @@ class ContentsPage extends Vue {
         });
 
         this.contents = newContents;
+
+        //формируем newImages
+        const newImages = [];
+        const ims = parsed.images;
+        for (i = 0; i < ims.length; i++) {
+            const image = ims[i];
+            const bin = parsed.binary[image.id];
+            const type = (bin ? bin.type : '');
+            
+            const label = `Изображение ${image.num}`;
+            const indentStyle = getIndentStyle(1);
+            const labelStyle = getLabelStyle(0);
+
+            const p = parsed.para[image.paraIndex];
+            newImages.push({perc: (p.offset/parsed.textLength*100).toFixed(0), label, key: i, offset: p.offset,
+                indentStyle, labelStyle, type, imageId: image.id});
+        }
+
+        this.images = newImages;
+
+        if (this.selectedTab == 'contents' && !this.contents.length && this.images.length)
+            this.selectedTab = 'images';
+
+        //асинхронная загрузка изображений
+        this.imageSrc = [];
+        this.imageLoaded = false;
+        await utils.sleep(50);
+        (async() => {
+            for (i = 0; i < ims.length; i++) {
+                const id = ims[i].id;
+                const bin = this.parsed.binary[id];
+                this.$set(this.imageSrc, id, (bin ? `data:${bin.type};base64,${bin.data}` : ''));
+                await utils.sleep(5);
+            }
+            this.imageLoaded = true;
+        })();
     }
 
     async expandClick(key) {
@@ -243,5 +308,32 @@ class ContentsPage extends Vue {
 
 .expanded-icon {
     transform: rotate(90deg);
+}
+
+.image-type {
+    border: 1px solid black;
+    border-radius: 6px;
+    font-size: 80%;
+    padding: 2px 0 2px 0;
+    width: 34px;
+}
+.it-jpg-color {
+    background: linear-gradient(to right, #fabc3d, #ffec6d);
+}
+.it-png-color {
+    background: linear-gradient(to right, #4bc4e5, #6bf4ff);
+}
+
+.image-thumb-box {
+    width: 120px;
+    overflow: hidden;
+}
+
+.image-thumb {
+    height: 50px;
+}
+
+.loading-img-icon {
+    font-size: 250%;
 }
 </style>
