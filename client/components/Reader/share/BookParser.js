@@ -61,7 +61,7 @@ export default class BookParser {
         let inSubtitle = false;
         let sectionLevel = 0;
         let bodyIndex = 0;
-        let imageIndex = 0;
+        let imageNum = 0;
 
         let paraIndex = -1;
         let paraOffset = 0;
@@ -206,22 +206,24 @@ export default class BookParser {
                     const href = attrs.href.value;
                     const {id} = this.imageHrefToId(href);
                     if (href[0] == '#') {//local
-                        if (inPara && !this.showInlineImagesInCenter && !center)
-                            growParagraph(`<image-inline href="${href}"></image-inline>`, 0);
-                        else
-                            newParagraph(`<image href="${href}">${' '.repeat(maxImageLineCount)}</image>`, maxImageLineCount);
+                        imageNum++;
 
-                        imageIndex++;
-                        this.images.push({paraIndex, num: imageIndex, id});
+                        if (inPara && !this.showInlineImagesInCenter && !center)
+                            growParagraph(`<image-inline href="${href}" num="${imageNum}"></image-inline>`, 0);
+                        else
+                            newParagraph(`<image href="${href}" num="${imageNum}">${' '.repeat(maxImageLineCount)}</image>`, maxImageLineCount);
+
+                        this.images.push({paraIndex, num: imageNum, id});
 
                         if (inPara && this.showInlineImagesInCenter)
                             newParagraph(' ', 1);
                     } else {//external
-                        dimPromises.push(getExternalImageDimensions(href));
-                        newParagraph(`<image href="${href}">${' '.repeat(maxImageLineCount)}</image>`, maxImageLineCount);
+                        imageNum++;
 
-                        imageIndex++;
-                        this.images.push({paraIndex, num: imageIndex, id});
+                        dimPromises.push(getExternalImageDimensions(href));
+                        newParagraph(`<image href="${href}" num="${imageNum}">${' '.repeat(maxImageLineCount)}</image>`, maxImageLineCount);
+
+                        this.images.push({paraIndex, num: imageNum, id});
                     }
                 }
             }
@@ -574,6 +576,7 @@ export default class BookParser {
                     if (attrs.href && attrs.href.value) {
                         image = this.imageHrefToId(attrs.href.value);
                         image.inline = false;
+                        image.num = (attrs.num && attrs.num.value ? attrs.num.value : 0);
                     }
                     break;
                 }
@@ -582,6 +585,7 @@ export default class BookParser {
                     if (attrs.href && attrs.href.value) {
                         const img = this.imageHrefToId(attrs.href.value);
                         img.inline = true;
+                        img.num = (attrs.num && attrs.num.value ? attrs.num.value : 0);
                         result.push({
                             style: Object.assign({}, style),
                             image: img,
@@ -811,6 +815,7 @@ export default class BookParser {
                         paraIndex,
                         w: imageWidth,
                         h: imageHeight,
+                        num: part.image.num
                     }});
                     lines.push(line);
                     line = {begin: line.end + 1, parts: []};
@@ -821,7 +826,7 @@ export default class BookParser {
                 line.last = true;
                 line.parts.push({style, text: ' ',
                     image: {local: part.image.local, inline: false, id: part.image.id,
-                        imageLine: i, lineCount, paraIndex, w: imageWidth, h: imageHeight}
+                        imageLine: i, lineCount, paraIndex, w: imageWidth, h: imageHeight, num: part.image.num}
                 });
                 
                 continue;
@@ -833,7 +838,7 @@ export default class BookParser {
                     let imgH = (bin.h > this.fontSize ? this.fontSize : bin.h);
                     imgW += bin.w*imgH/bin.h;
                     line.parts.push({style, text: '',
-                        image: {local: part.image.local, inline: true, id: part.image.id}});
+                        image: {local: part.image.local, inline: true, id: part.image.id, num: part.image.num}});
                 }
             }
 
