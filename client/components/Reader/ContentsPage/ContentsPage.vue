@@ -220,8 +220,8 @@ class ContentsPage extends Vue {
 
         //асинхронная загрузка изображений
         this.imageSrc = [];
-        await utils.sleep(50);
         this.imageLoaded = false;
+        await utils.sleep(50);
         (async() => {
             for (i = 0; i < ims.length; i++) {
                 const id = ims[i].id;
