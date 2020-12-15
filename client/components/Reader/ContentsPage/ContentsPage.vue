@@ -62,6 +62,10 @@
             <div v-for="item in images" :key="item.key" class="column" style="width: 540px">
                 <div class="row item q-px-sm no-wrap">
                     <div class="col row clickable" @click="setBookPos(item.offset)">
+                        <div class="image-thumb-box row justify-center items-center">
+                            <div v-show="!imageLoaded" class="image-thumb column justify-center"><i class="loading-img-icon la la-images"></i></div>
+                            <img v-show="imageLoaded" class="image-thumb" :src="imageSrc[item.imageId]"/>
+                        </div>
                         <div class="no-expand-button column justify-center items-center">
                             <div v-show="item.type == 'image/jpeg'" class="image-type it-jpg-color row justify-center">JPG</div>
                             <div v-show="item.type == 'image/png'" class="image-type it-png-color row justify-center">PNG</div>
@@ -107,6 +111,8 @@ class ContentsPage extends Vue {
     selectedTab = 'contents';
     contents = [];
     images = [];
+    imageSrc = [];
+    imageLoaded = false;
 
     created() {
     }
@@ -195,20 +201,36 @@ class ContentsPage extends Vue {
         const ims = parsed.images;
         for (i = 0; i < ims.length; i++) {
             const image = ims[i];
-
+            const bin = parsed.binary[image.id];
+            const type = (bin ? bin.type : '');
+            
             const label = `Изображение ${image.num}`;
             const indentStyle = getIndentStyle(1);
             const labelStyle = getLabelStyle(0);
 
             const p = parsed.para[image.paraIndex];
             newImages.push({perc: (p.offset/parsed.textLength*100).toFixed(0), label, key: i, offset: p.offset,
-                indentStyle, labelStyle, type: (parsed.binary[image.id] ? parsed.binary[image.id].type : '')});
+                indentStyle, labelStyle, type, imageId: image.id});
         }
 
         this.images = newImages;
 
         if (this.selectedTab == 'contents' && !this.contents.length && this.images.length)
             this.selectedTab = 'images';
+
+        //асинхронная загрузка изображений
+        this.imageSrc = [];
+        await utils.sleep(50);
+        this.imageLoaded = false;
+        (async() => {
+            for (i = 0; i < ims.length; i++) {
+                const id = ims[i].id;
+                const bin = this.parsed.binary[id];
+                this.$set(this.imageSrc, id, (bin ? `data:${bin.type};base64,${bin.data}` : ''));
+                await utils.sleep(5);
+            }
+            this.imageLoaded = true;
+        })();
     }
 
     async expandClick(key) {
@@ -300,5 +322,18 @@ class ContentsPage extends Vue {
 }
 .it-png-color {
     background: linear-gradient(to right, #4bc4e5, #6bf4ff);
+}
+
+.image-thumb-box {
+    width: 120px;
+    overflow: hidden;
+}
+
+.image-thumb {
+    height: 50px;
+}
+
+.loading-img-icon {
+    font-size: 250%;
 }
 </style>
