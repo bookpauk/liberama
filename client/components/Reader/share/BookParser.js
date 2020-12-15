@@ -54,12 +54,14 @@ export default class BookParser {
 
         //оглавление
         this.contents = [];
+        this.images = [];
         let curTitle = {paraIndex: -1, title: '', subtitles: []};
         let curSubtitle = {paraIndex: -1, title: ''};
         let inTitle = false;
         let inSubtitle = false;
         let sectionLevel = 0;
         let bodyIndex = 0;
+        let imageIndex = 0;
 
         let paraIndex = -1;
         let paraOffset = 0;
@@ -207,11 +209,18 @@ export default class BookParser {
                             growParagraph(`<image-inline href="${href}"></image-inline>`, 0);
                         else
                             newParagraph(`<image href="${href}">${' '.repeat(maxImageLineCount)}</image>`, maxImageLineCount);
+
+                        imageIndex++;
+                        this.images.push({paraIndex, num: imageIndex});
+
                         if (inPara && this.showInlineImagesInCenter)
                             newParagraph(' ', 1);
                     } else {//external
                         dimPromises.push(getExternalImageDimensions(href));
                         newParagraph(`<image href="${href}">${' '.repeat(maxImageLineCount)}</image>`, maxImageLineCount);
+
+                        imageIndex++;
+                        this.images.push({paraIndex, num: imageIndex});
                     }
                 }
             }

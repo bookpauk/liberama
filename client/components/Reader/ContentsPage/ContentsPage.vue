@@ -16,6 +16,7 @@
             class="no-mp bg-grey-4 text-grey-7"
         >
             <q-tab name="contents" icon="la la-list" label="Оглавление" />
+            <q-tab name="images" icon="la la-image" label="Изображения" />
             <q-tab name="bookmarks"  icon="la la-bookmark" label="Закладки" />
         </q-tabs>
     </div>
@@ -56,6 +57,24 @@
         </div>
     </div>
 
+    <div class="tab-panel" v-show="selectedTab == 'images'">
+        <div>
+            <div v-for="item in images" :key="item.key" class="column" style="width: 540px">
+                <div class="row item q-px-sm no-wrap">
+                    <div class="col row clickable" @click="setBookPos(item.offset)">
+                        <div class="no-expand-button"></div>
+                        <div :style="item.indentStyle"></div>
+                        <div class="q-mr-sm col overflow-hidden column justify-center" :style="item.labelStyle" v-html="item.label"></div>
+                        <div class="column justify-center">{{ item.perc }}%</div>
+                    </div>
+                </div>
+            </div>
+            <div v-if="!images.length" class="column justify-center items-center" style="height: 100px">
+                Изображения отсутствуют
+            </div>
+        </div>
+    </div>
+
     <div class="tab-panel" v-show="selectedTab == 'bookmarks'">
         <div class="column justify-center items-center" style="height: 100px">
             Раздел находится в разработке
@@ -84,6 +103,7 @@ export default @Component({
 class ContentsPage extends Vue {
     selectedTab = 'contents';
     contents = [];
+    images = [];
 
     created() {
     }
@@ -166,6 +186,22 @@ class ContentsPage extends Vue {
         });
 
         this.contents = newContents;
+
+        //формируем newImages
+        const newImages = [];
+        const ims = parsed.images;
+        for (i = 0; i < ims.length; i++) {
+            const image = ims[i];
+
+            const label = `Изображение ${image.num}`;
+            const indentStyle = getIndentStyle(0);
+            const labelStyle = getLabelStyle(0);
+
+            const p = parsed.para[image.paraIndex];
+            newImages.push({perc: (p.offset/parsed.textLength*100).toFixed(0), label, key: i, offset: p.offset, indentStyle, labelStyle});
+        }
+
+        this.images = newImages;
     }
 
     async expandClick(key) {
