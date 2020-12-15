@@ -195,9 +195,7 @@ class ContentsPage extends Vue {
         const ims = parsed.images;
         for (i = 0; i < ims.length; i++) {
             const image = ims[i];
-            let id = image.href;
-            if (id[0] == "#")
-                id = id.substr(1);
+            let {id} = parsed.imageHrefToId(image.href);
 
             const label = `Изображение ${image.num}`;
             const indentStyle = getIndentStyle(1);

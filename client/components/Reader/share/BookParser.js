@@ -497,6 +497,15 @@ export default class BookParser {
         return {fb2};
     }
 
+    imageHrefToId(id) {
+        let local = false;
+        if (id[0] == '#') {
+            id = id.substr(1);
+            local = true;
+        }
+        return {id, local};
+    }
+
     findParaIndex(bookPos) {
         let result = undefined;
         //дихотомия
@@ -562,28 +571,19 @@ export default class BookParser {
                 case 'image': {
                     let attrs = sax.getAttrsSync(tail);
                     if (attrs.href && attrs.href.value) {
-                        let id = attrs.href.value;
-                        let local = false;
-                        if (id[0] == '#') {
-                            id = id.substr(1);
-                            local = true;
-                        }
-                        image = {local, inline: false, id};
+                        image = this.imageHrefToId(attrs.href.value);
+                        image.inline = false;
                     }
                     break;
                 }
                 case 'image-inline': {
                     let attrs = sax.getAttrsSync(tail);
                     if (attrs.href && attrs.href.value) {
-                        let id = attrs.href.value;
-                        let local = false;
-                        if (id[0] == '#') {
-                            id = id.substr(1);
-                            local = true;
-                        }
+                        const img = this.imageHrefToId(attrs.href.value);
+                        img.inline = true;
                         result.push({
                             style: Object.assign({}, style),
-                            image: {local, inline: true, id},
+                            image: img,
                             text: ''
                         });
                     }
