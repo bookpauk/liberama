@@ -211,7 +211,7 @@ export default class BookParser {
                             newParagraph(`<image href="${href}">${' '.repeat(maxImageLineCount)}</image>`, maxImageLineCount);
 
                         imageIndex++;
-                        this.images.push({paraIndex, num: imageIndex});
+                        this.images.push({paraIndex, num: imageIndex, href});
 
                         if (inPara && this.showInlineImagesInCenter)
                             newParagraph(' ', 1);
@@ -220,7 +220,7 @@ export default class BookParser {
                         newParagraph(`<image href="${href}">${' '.repeat(maxImageLineCount)}</image>`, maxImageLineCount);
 
                         imageIndex++;
-                        this.images.push({paraIndex, num: imageIndex});
+                        this.images.push({paraIndex, num: imageIndex, href});
                     }
                 }
             }
