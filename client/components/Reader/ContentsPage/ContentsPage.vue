@@ -195,7 +195,6 @@ class ContentsPage extends Vue {
         const ims = parsed.images;
         for (i = 0; i < ims.length; i++) {
             const image = ims[i];
-            let {id} = parsed.imageHrefToId(image.href);
 
             const label = `Изображение ${image.num}`;
             const indentStyle = getIndentStyle(1);
@@ -203,7 +202,7 @@ class ContentsPage extends Vue {
 
             const p = parsed.para[image.paraIndex];
             newImages.push({perc: (p.offset/parsed.textLength*100).toFixed(0), label, key: i, offset: p.offset,
-                indentStyle, labelStyle, type: (parsed.binary[id] ? parsed.binary[id].type : '')});
+                indentStyle, labelStyle, type: (parsed.binary[image.id] ? parsed.binary[image.id].type : '')});
         }
 
         this.images = newImages;
