@@ -63,8 +63,8 @@
                 <div class="row item q-px-sm no-wrap">
                     <div class="col row clickable" @click="setBookPos(item.offset)">
                         <div class="image-thumb-box row justify-center items-center">
-                            <div v-show="!imageLoaded" class="image-thumb column justify-center"><i class="loading-img-icon la la-images"></i></div>
-                            <img v-show="imageLoaded" class="image-thumb" :src="imageSrc[item.imageId]"/>
+                            <div v-show="!imageLoaded[item.imageId]" class="image-thumb column justify-center"><i class="loading-img-icon la la-images"></i></div>
+                            <img v-show="imageLoaded[item.imageId]" class="image-thumb" :src="imageSrc[item.imageId]"/>
                         </div>
                         <div class="no-expand-button column justify-center items-center">
                             <div v-show="item.type == 'image/jpeg'" class="image-type it-jpg-color row justify-center">JPG</div>
@@ -112,7 +112,7 @@ class ContentsPage extends Vue {
     contents = [];
     images = [];
     imageSrc = [];
-    imageLoaded = false;
+    imageLoaded = [];
 
     created() {
     }
@@ -220,16 +220,16 @@ class ContentsPage extends Vue {
 
         //асинхронная загрузка изображений
         this.imageSrc = [];
-        this.imageLoaded = false;
+        this.imageLoaded = [];
         await utils.sleep(50);
         (async() => {
             for (i = 0; i < ims.length; i++) {
                 const id = ims[i].id;
                 const bin = this.parsed.binary[id];
                 this.$set(this.imageSrc, id, (bin ? `data:${bin.type};base64,${bin.data}` : ''));
+                this.imageLoaded[id] = true;
                 await utils.sleep(5);
             }
-            this.imageLoaded = true;
         })();
     }
 
