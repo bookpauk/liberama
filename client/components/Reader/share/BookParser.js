@@ -196,6 +196,7 @@ export default class BookParser {
             if (tag == 'binary') {
                 let attrs = sax.getAttrsSync(tail);
                 binaryType = (attrs['content-type'] && attrs['content-type'].value ? attrs['content-type'].value : '');
+                binaryType = (binaryType == 'image/jpg' ? 'image/jpeg' : binaryType);
                 if (binaryType == 'image/jpeg' || binaryType == 'image/png' || binaryType == 'application/octet-stream')
                     binaryId = (attrs.id.value ? attrs.id.value : '');
             }
