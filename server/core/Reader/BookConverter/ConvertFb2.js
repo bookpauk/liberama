@@ -24,6 +24,11 @@ class ConvertFb2 extends ConvertBase {
         if (!this.check(newData, opts))
             return false;
 
+        //Корректируем пробелы, всякие файлы попадаются :(
+        if (newData[0] == 32) {
+            newData = Buffer.from(newData.toString().trim());
+        }
+
         return this.checkEncoding(newData);
     }
 
