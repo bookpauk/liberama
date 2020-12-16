@@ -196,6 +196,7 @@ export default class BookParser {
             if (tag == 'binary') {
                 let attrs = sax.getAttrsSync(tail);
                 binaryType = (attrs['content-type'] && attrs['content-type'].value ? attrs['content-type'].value : '');
+                binaryType = (binaryType == 'image/jpg' ? 'image/jpeg' : binaryType);
                 if (binaryType == 'image/jpeg' || binaryType == 'image/png' || binaryType == 'application/octet-stream')
                     binaryId = (attrs.id.value ? attrs.id.value : '');
             }
@@ -204,7 +205,7 @@ export default class BookParser {
                 let attrs = sax.getAttrsSync(tail);
                 if (attrs.href && attrs.href.value) {
                     const href = attrs.href.value;
-                    const {id} = this.imageHrefToId(href);
+                    const {id, local} = this.imageHrefToId(href);
                     if (href[0] == '#') {//local
                         imageNum++;
 
@@ -213,7 +214,7 @@ export default class BookParser {
                         else
                             newParagraph(`<image href="${href}" num="${imageNum}">${' '.repeat(maxImageLineCount)}</image>`, maxImageLineCount);
 
-                        this.images.push({paraIndex, num: imageNum, id});
+                        this.images.push({paraIndex, num: imageNum, id, local});
 
                         if (inPara && this.showInlineImagesInCenter)
                             newParagraph(' ', 1);
@@ -223,7 +224,7 @@ export default class BookParser {
                         dimPromises.push(getExternalImageDimensions(href));
                         newParagraph(`<image href="${href}" num="${imageNum}">${' '.repeat(maxImageLineCount)}</image>`, maxImageLineCount);
 
-                        this.images.push({paraIndex, num: imageNum, id});
+                        this.images.push({paraIndex, num: imageNum, id, local});
                     }
                 }
             }

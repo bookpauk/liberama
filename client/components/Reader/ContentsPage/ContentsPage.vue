@@ -26,7 +26,7 @@
     <div class="tab-panel" v-show="selectedTab == 'contents'">
         <div>
             <div v-for="item in contents" :key="item.key" class="column" style="width: 540px">
-                <div class="row item q-px-sm no-wrap">
+                <div class="row q-px-sm no-wrap" :class="{'item': !item.isBookPos, 'item-book-pos': item.isBookPos}">
                     <div v-if="item.list.length" class="row justify-center items-center expand-button clickable" @click="expandClick(item.key)">
                         <q-icon name="la la-caret-right" class="icon" :class="{'expanded-icon': item.expanded}" color="green-8" size="20px"/>
                     </div>
@@ -41,7 +41,7 @@
                 </div>
                 
                 <div v-if="item.expanded" :ref="`subitem${item.key}`" class="subitems-transition">
-                    <div v-for="subitem in item.list" :key="subitem.key" class="row subitem q-px-sm no-wrap">
+                    <div v-for="subitem in item.list" :key="subitem.key" class="row q-px-sm no-wrap" :class="{'subitem': !subitem.isBookPos, 'subitem-book-pos': subitem.isBookPos}">
                         <div class="col row clickable" @click="setBookPos(subitem.offset)">
                             <div class="no-expand-button"></div>
                             <div :style="subitem.indentStyle"></div>
@@ -60,15 +60,16 @@
     <div class="tab-panel" v-show="selectedTab == 'images'">
         <div>
             <div v-for="item in images" :key="item.key" class="column" style="width: 540px">
-                <div class="row item q-px-sm no-wrap">
+                <div class="row q-px-sm no-wrap" :class="{'item': !item.isBookPos, 'item-book-pos': item.isBookPos}">
                     <div class="col row clickable" @click="setBookPos(item.offset)">
                         <div class="image-thumb-box row justify-center items-center">
-                            <div v-show="!imageLoaded" class="image-thumb column justify-center"><i class="loading-img-icon la la-images"></i></div>
-                            <img v-show="imageLoaded" class="image-thumb" :src="imageSrc[item.imageId]"/>
+                            <div v-show="!imageLoaded[item.id]" class="image-thumb column justify-center"><i class="loading-img-icon la la-images"></i></div>
+                            <img v-show="imageLoaded[item.id]" class="image-thumb" :src="imageSrc[item.id]"/>
                         </div>
                         <div class="no-expand-button column justify-center items-center">
                             <div v-show="item.type == 'image/jpeg'" class="image-type it-jpg-color row justify-center">JPG</div>
                             <div v-show="item.type == 'image/png'" class="image-type it-png-color row justify-center">PNG</div>
+                            <div v-show="!item.local" class="image-type it-net-color row justify-center">INET</div>
                         </div>
                         <div :style="item.indentStyle"></div>
                         <div class="q-mr-sm col overflow-hidden column justify-center" :style="item.labelStyle" v-html="item.label"></div>
@@ -100,19 +101,28 @@ import Component from 'vue-class-component';
 import Window from '../../share/Window.vue';
 import * as utils from '../../../share/utils';
 
+const ContentsPageProps = Vue.extend({
+    props: {
+        bookPos: Number
+    }
+});
+
 export default @Component({
     components: {
         Window,
     },
     watch: {
+        bookPos: function(newValue) {
+            this.updateBookPosSelection(newValue);
+        }
     },
 })
-class ContentsPage extends Vue {
+class ContentsPage extends ContentsPageProps {
     selectedTab = 'contents';
     contents = [];
     images = [];
     imageSrc = [];
-    imageLoaded = false;
+    imageLoaded = [];
 
     created() {
     }
@@ -122,10 +132,12 @@ class ContentsPage extends Vue {
 
         //закладки
 
-        //далее формирование оглавления
-        if (this.parsed == parsed)
+        //проверим, надо ли обновлять списки
+        if (this.parsed == parsed) {
             return;
+        }
 
+        //далее формирование оглавления
         this.parsed = parsed;
         this.contents = [];
         await this.$nextTick();
@@ -210,7 +222,7 @@ class ContentsPage extends Vue {
 
             const p = parsed.para[image.paraIndex];
             newImages.push({perc: (p.offset/parsed.textLength*100).toFixed(0), label, key: i, offset: p.offset,
-                indentStyle, labelStyle, type, imageId: image.id});
+                indentStyle, labelStyle, type, id: image.id, local: image.local});
         }
 
         this.images = newImages;
@@ -218,19 +230,63 @@ class ContentsPage extends Vue {
         if (this.selectedTab == 'contents' && !this.contents.length && this.images.length)
             this.selectedTab = 'images';
 
+        //выделим на bookPos
+        this.updateBookPosSelection(currentBook.bookPos);
+
         //асинхронная загрузка изображений
         this.imageSrc = [];
-        this.imageLoaded = false;
+        this.imageLoaded = [];
         await utils.sleep(50);
         (async() => {
             for (i = 0; i < ims.length; i++) {
-                const id = ims[i].id;
+                const {id, local} = ims[i];
                 const bin = this.parsed.binary[id];
-                this.$set(this.imageSrc, id, (bin ? `data:${bin.type};base64,${bin.data}` : ''));
+                if (local)
+                    this.$set(this.imageSrc, id, (bin ? `data:${bin.type};base64,${bin.data}` : ''));
+                else
+                    this.$set(this.imageSrc, id, id);
+                this.imageLoaded[id] = true;
                 await utils.sleep(5);
             }
-            this.imageLoaded = true;
         })();
+    }
+
+    async updateBookPosSelection(bp) {
+        await utils.sleep(100);
+        for (let i = 0; i < this.contents.length; i++) {
+            const item = this.contents[i];
+            const nextOffset = (i < this.contents.length - 1 ? this.contents[i + 1].offset : this.parsed.textLength);
+
+            for (let j = 0; j < item.list.length; j++) {
+                const subitem = item.list[j];
+                const nextSubOffset = (j < item.list.length - 1 ? item.list[j + 1].offset : nextOffset);
+
+                if (bp >= subitem.offset && bp < nextSubOffset) {
+                    subitem.isBookPos = true;
+                    this.$set(this.contents, i, Object.assign(item, {list: item.list}));
+                } else if (subitem.isBookPos) {
+                    subitem.isBookPos = false;
+                    this.$set(this.contents, i, Object.assign(item, {list: item.list}));
+                }
+            }
+
+            if (bp >= item.offset && bp < nextOffset) {
+                this.$set(this.contents, i, Object.assign(item, {isBookPos: true}));
+            } else if (item.isBookPos) {
+                this.$set(this.contents, i, Object.assign(item, {isBookPos: false}));
+            }
+        }
+
+        for (let i = 0; i < this.images.length; i++) {
+            const img = this.images[i];
+            const nextOffset = (i < this.images.length - 1 ? this.images[i + 1].offset : this.parsed.textLength);
+
+            if (bp >= img.offset && bp < nextOffset) {
+                this.$set(this.images, i, Object.assign(img, {isBookPos: true}));
+            } else if (img.isBookPos) {
+                this.$set(this.images, i, Object.assign(img, {isBookPos: false}));
+            }
+        }
     }
 
     async expandClick(key) {
@@ -284,12 +340,28 @@ class ContentsPage extends Vue {
     padding: 10px 0 10px 0;
 }
 
-.item, .subitem {
+.item, .subitem, .item-book-pos, .subitem-book-pos {
     border-bottom: 1px solid #e0e0e0;
 }
 
 .item:hover, .subitem:hover {
     background-color: #f0f0f0;
+}
+
+.item-book-pos {
+    background-color: #b0f0b0;
+}
+
+.subitem-book-pos {
+    background-color: #d0f5d0;
+}
+
+.item-book-pos:hover {
+    background-color: #b0e0b0;
+}
+
+.subitem-book-pos:hover {
+    background-color: #d0f0d0;
 }
 
 .expand-button, .no-expand-button {
@@ -322,6 +394,9 @@ class ContentsPage extends Vue {
 }
 .it-png-color {
     background: linear-gradient(to right, #4bc4e5, #6bf4ff);
+}
+.it-net-color {
+    background: linear-gradient(to right, #00c400, #00f400);
 }
 
 .image-thumb-box {
