@@ -103,7 +103,8 @@ import * as utils from '../../../share/utils';
 
 const ContentsPageProps = Vue.extend({
     props: {
-        bookPos: Number
+        bookPos: Number,
+        isVisible: Boolean,
     }
 });
 
@@ -112,8 +113,8 @@ export default @Component({
         Window,
     },
     watch: {
-        bookPos: function(newValue) {
-            this.updateBookPosSelection(newValue);
+        bookPos: function() {
+            this.updateBookPosSelection();
         }
     },
 })
@@ -134,6 +135,7 @@ class ContentsPage extends ContentsPageProps {
 
         //проверим, надо ли обновлять списки
         if (this.parsed == parsed) {
+            this.updateBookPosSelection();
             return;
         }
 
@@ -231,7 +233,7 @@ class ContentsPage extends ContentsPageProps {
             this.selectedTab = 'images';
 
         //выделим на bookPos
-        this.updateBookPosSelection(currentBook.bookPos);
+        this.updateBookPosSelection();
 
         //асинхронная загрузка изображений
         this.imageSrc = [];
@@ -251,8 +253,13 @@ class ContentsPage extends ContentsPageProps {
         })();
     }
 
-    async updateBookPosSelection(bp) {
-        await utils.sleep(100);
+    async updateBookPosSelection() {
+        if (!this.isVisible)
+            return;
+
+        await utils.sleep(50);
+        const bp = this.bookPos;
+        
         for (let i = 0; i < this.contents.length; i++) {
             const item = this.contents[i];
             const nextOffset = (i < this.contents.length - 1 ? this.contents[i + 1].offset : this.parsed.textLength);
