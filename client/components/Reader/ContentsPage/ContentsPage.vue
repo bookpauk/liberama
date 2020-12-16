@@ -63,12 +63,13 @@
                 <div class="row item q-px-sm no-wrap">
                     <div class="col row clickable" @click="setBookPos(item.offset)">
                         <div class="image-thumb-box row justify-center items-center">
-                            <div v-show="!imageLoaded[item.imageId]" class="image-thumb column justify-center"><i class="loading-img-icon la la-images"></i></div>
-                            <img v-show="imageLoaded[item.imageId]" class="image-thumb" :src="imageSrc[item.imageId]"/>
+                            <div v-show="!imageLoaded[item.id]" class="image-thumb column justify-center"><i class="loading-img-icon la la-images"></i></div>
+                            <img v-show="imageLoaded[item.id]" class="image-thumb" :src="imageSrc[item.id]"/>
                         </div>
                         <div class="no-expand-button column justify-center items-center">
                             <div v-show="item.type == 'image/jpeg'" class="image-type it-jpg-color row justify-center">JPG</div>
                             <div v-show="item.type == 'image/png'" class="image-type it-png-color row justify-center">PNG</div>
+                            <div v-show="!item.local" class="image-type it-net-color row justify-center">INET</div>
                         </div>
                         <div :style="item.indentStyle"></div>
                         <div class="q-mr-sm col overflow-hidden column justify-center" :style="item.labelStyle" v-html="item.label"></div>
@@ -210,7 +211,7 @@ class ContentsPage extends Vue {
 
             const p = parsed.para[image.paraIndex];
             newImages.push({perc: (p.offset/parsed.textLength*100).toFixed(0), label, key: i, offset: p.offset,
-                indentStyle, labelStyle, type, imageId: image.id});
+                indentStyle, labelStyle, type, id: image.id, local: image.local});
         }
 
         this.images = newImages;
@@ -224,9 +225,12 @@ class ContentsPage extends Vue {
         await utils.sleep(50);
         (async() => {
             for (i = 0; i < ims.length; i++) {
-                const id = ims[i].id;
+                const {id, local} = ims[i];
                 const bin = this.parsed.binary[id];
-                this.$set(this.imageSrc, id, (bin ? `data:${bin.type};base64,${bin.data}` : ''));
+                if (local)
+                    this.$set(this.imageSrc, id, (bin ? `data:${bin.type};base64,${bin.data}` : ''));
+                else
+                    this.$set(this.imageSrc, id, id);
                 this.imageLoaded[id] = true;
                 await utils.sleep(5);
             }
@@ -322,6 +326,9 @@ class ContentsPage extends Vue {
 }
 .it-png-color {
     background: linear-gradient(to right, #4bc4e5, #6bf4ff);
+}
+.it-net-color {
+    background: linear-gradient(to right, #00c400, #00f400);
 }
 
 .image-thumb-box {
