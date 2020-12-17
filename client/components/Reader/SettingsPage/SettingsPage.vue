@@ -26,6 +26,7 @@
                     <q-tab class="tab" name="buttons" icon="la la-grip-horizontal" label="Кнопки" />
                     <q-tab class="tab" name="keys" icon="la la-gamepad" label="Управление" />
                     <q-tab class="tab" name="pagemove" icon="la la-school" label="Листание" />
+                    <q-tab class="tab" name="convert" icon="la la-magic" label="Конвертир." />
                     <q-tab class="tab" name="others" icon="la la-list-ul" label="Прочее" />
                     <q-tab class="tab" name="reset" icon="la la-broom" label="Сброс" />
                     <div v-show="tabsScrollable" class="q-pt-lg"/>
@@ -52,6 +53,10 @@
                 <!-- Листание -------------------------------------------------------------------->
                 <div v-if="selectedTab == 'pagemove'" class="fit tab-panel">
                     @@include('./include/PageMoveTab.inc');
+                </div>
+                <!-- Конвертирование ------------------------------------------------------------->
+                <div v-if="selectedTab == 'convert'" class="fit tab-panel">
+                    @@include('./include/ConvertTab.inc');
                 </div>
                 <!-- Прочее ---------------------------------------------------------------------->
                 <div v-if="selectedTab == 'others'" class="fit tab-panel">
