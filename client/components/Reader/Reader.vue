@@ -336,7 +336,7 @@ class Reader extends Vue {
 
                 let againMes = '';
                 if (this.isFirstNeedUpdateNotify) {
-                    againMes = ' ЕЩЕ один раз';
+                    againMes = ' еще один раз';
                 }
 
                 if (this.version != this.clientVersion)
@@ -345,9 +345,9 @@ class Reader extends Vue {
                 console.error(e);
             } finally {
                 this.checkingNewVersion = false;
-            }
+            }        
+            this.isFirstNeedUpdateNotify = false;
         }
-        this.isFirstNeedUpdateNotify = false;
     }
 
     updateHeaderMinWidth() {
