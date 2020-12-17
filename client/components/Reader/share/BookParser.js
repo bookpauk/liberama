@@ -205,6 +205,7 @@ export default class BookParser {
                 let attrs = sax.getAttrsSync(tail);
                 if (attrs.href && attrs.href.value) {
                     const href = attrs.href.value;
+                    const alt = (attrs.alt && attrs.alt.value ? attrs.alt.value : '');
                     const {id, local} = this.imageHrefToId(href);
                     if (href[0] == '#') {//local
                         imageNum++;
@@ -214,7 +215,7 @@ export default class BookParser {
                         else
                             newParagraph(`<image href="${href}" num="${imageNum}">${' '.repeat(maxImageLineCount)}</image>`, maxImageLineCount);
 
-                        this.images.push({paraIndex, num: imageNum, id, local});
+                        this.images.push({paraIndex, num: imageNum, id, local, alt});
 
                         if (inPara && this.showInlineImagesInCenter)
                             newParagraph(' ', 1);
@@ -224,7 +225,7 @@ export default class BookParser {
                         dimPromises.push(getExternalImageDimensions(href));
                         newParagraph(`<image href="${href}" num="${imageNum}">${' '.repeat(maxImageLineCount)}</image>`, maxImageLineCount);
 
-                        this.images.push({paraIndex, num: imageNum, id, local});
+                        this.images.push({paraIndex, num: imageNum, id, local, alt});
                     }
                 }
             }

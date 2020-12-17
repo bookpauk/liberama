@@ -67,6 +67,7 @@
                             <img v-show="imageLoaded[item.id]" class="image-thumb" :src="imageSrc[item.id]"/>
                         </div>
                         <div class="no-expand-button column justify-center items-center">
+                            <div class="image-num">{{ item.num }}</div>
                             <div v-show="item.type == 'image/jpeg'" class="image-type it-jpg-color row justify-center">JPG</div>
                             <div v-show="item.type == 'image/png'" class="image-type it-png-color row justify-center">PNG</div>
                             <div v-show="!item.local" class="image-type it-net-color row justify-center">INET</div>
@@ -218,13 +219,13 @@ class ContentsPage extends ContentsPageProps {
             const bin = parsed.binary[image.id];
             const type = (bin ? bin.type : '');
             
-            const label = `Изображение ${image.num}`;
+            const label = (image.alt ? image.alt : '<span style="font-size: 90%; color: #dddddd"><i>Без названия</i></span>');
             const indentStyle = getIndentStyle(1);
             const labelStyle = getLabelStyle(0);
 
             const p = parsed.para[image.paraIndex];
             newImages.push({perc: (p.offset/parsed.textLength*100).toFixed(0), label, key: i, offset: p.offset,
-                indentStyle, labelStyle, type, id: image.id, local: image.local});
+                indentStyle, labelStyle, type, num: image.num, id: image.id, local: image.local});
         }
 
         this.images = newImages;
@@ -389,6 +390,10 @@ class ContentsPage extends ContentsPageProps {
     transform: rotate(90deg);
 }
 
+.image-num {
+    font-size: 120%;
+    padding-bottom: 3px;
+}
 .image-type {
     border: 1px solid black;
     border-radius: 6px;

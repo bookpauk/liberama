@@ -22,6 +22,10 @@ class ConvertDjvu extends ConvertJpegPng {
         if (!await fs.pathExists(ddjvuPath))
             throw new Error('Внешний конвертер ddjvu не найден');
 
+        const djvusedPath = '/usr/bin/djvused';
+        if (!await fs.pathExists(djvusedPath))
+            throw new Error('Внешний конвертер djvused не найден');
+
         const tiffsplitPath = '/usr/bin/tiffsplit';
         if (!await fs.pathExists(tiffsplitPath))
             throw new Error('Внешний конвертер tiffsplitPath не найден');
@@ -67,8 +71,27 @@ class ConvertDjvu extends ConvertJpegPng {
 
         files.sort((a, b) => a.base.localeCompare(b.base));
 
+        //схема документа (outline)
+        const djvusedResult = await this.execConverter(djvusedPath, ['-u', '-e', 'print-outline', inputFiles.sourceFile]);
+        const outline = [];
+        const lines = djvusedResult.stdout.match(/\(".*"\s*?"#\d+".*?\)/g);
+        if (lines) {
+            lines.forEach(l => {
+                const m = l.match(/"(.*)"\s*?"#(\d+)"/);
+                if (m) {
+                    outline[m[2]] = m[1];
+                }
+            });
+        }
+
         await utils.sleep(100);
-        return await super.run(data, Object.assign({}, opts, {imageFiles: files.map(f => f.name)}));
+        let i = 0;
+        const imageFiles = files.map(f => {
+            i++;
+            let alt = (outline[i] ? outline[i] : '');
+            return {src: f.name, alt};
+        });
+        return await super.run(data, Object.assign({}, opts, {imageFiles}));
     }
 }
 
