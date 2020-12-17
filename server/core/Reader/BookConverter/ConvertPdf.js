@@ -342,7 +342,7 @@ class ConvertPdf extends ConvertHtml {
 
         //console.log(text);
         await utils.sleep(100);
-        return await super.run(Buffer.from(text), {skipCheck: true, isText: true});
+        return await super.run(Buffer.from(text), {skipHtmlCheck: true, isText: true});
     }
 
     async getPdfTitleAndAuthor(pdfFile) {

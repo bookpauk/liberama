@@ -45,7 +45,7 @@ class ConvertFb3 extends ConvertHtml {
             .replace(/<subtitle>/g, '<br><br><fb2-subtitle>')
             .replace(/<\/subtitle>/g, '</fb2-subtitle>')
         ;
-        return await super.run(Buffer.from(text), {skipCheck: true});
+        return await super.run(Buffer.from(text), {skipHtmlCheck: true});
     }
 }
 

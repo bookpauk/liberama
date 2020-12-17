@@ -20,7 +20,7 @@ class ReaderController extends BaseController {
             const workerId = this.readerWorker.loadBookUrl({
                 url: request.url, 
                 enableSitesFilter: (request.hasOwnProperty('enableSitesFilter') ? request.enableSitesFilter : true),
-                skipCheck: (request.hasOwnProperty('skipCheck') ? request.skipCheck : false),
+                skipHtmlCheck: (request.hasOwnProperty('skipHtmlCheck') ? request.skipHtmlCheck : false),
                 isText: (request.hasOwnProperty('isText') ? request.isText : false),
                 uploadFileName: (request.hasOwnProperty('uploadFileName') ? request.uploadFileName : false),
             });

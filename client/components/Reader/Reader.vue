@@ -733,7 +733,7 @@ class Reader extends Vue {
         const mrb = this.mostRecentBook();
         if (mrb) {
             if (mode && mode == 'split') {
-                this.loadBook({url: mrb.url, uploadFileName: mrb.uploadFileName, skipCheck: true, isText: true, force: true});
+                this.loadBook({url: mrb.url, uploadFileName: mrb.uploadFileName, skipHtmlCheck: true, isText: true, force: true});
             } else {
                 this.loadBook({url: mrb.url, uploadFileName: mrb.uploadFileName, force: true});
             }
@@ -973,7 +973,7 @@ class Reader extends Vue {
             if (!book) {
                 book = await readerApi.loadBook({
                         url,
-                        skipCheck: (opts.skipCheck ? true : false),
+                        skipHtmlCheck: (opts.skipHtmlCheck ? true : false),
                         isText: (opts.isText ? true : false),
                         enableSitesFilter: this.enableSitesFilter,
                         uploadFileName
