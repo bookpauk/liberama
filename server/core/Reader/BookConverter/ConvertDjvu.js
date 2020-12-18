@@ -16,7 +16,12 @@ class ConvertDjvu extends ConvertJpegPng {
         if (!this.check(data, opts))
             return false;
 
-        const {inputFiles, callback, abort} = opts;
+        let {inputFiles, callback, abort, djvuQuality} = opts;
+        
+        djvuQuality = (djvuQuality && djvuQuality <= 100 && djvuQuality >= 10 ? djvuQuality : 20);
+        let jpegQuality = djvuQuality;
+        let tiffQuality = djvuQuality + 30;
+        tiffQuality = (tiffQuality < 85 ? tiffQuality : 85);
 
         const ddjvuPath = '/usr/bin/ddjvu';
         if (!await fs.pathExists(ddjvuPath))
@@ -40,7 +45,7 @@ class ConvertDjvu extends ConvertJpegPng {
 
         //конвертируем в tiff
         let perc = 0;
-        await this.execConverter(ddjvuPath, ['-format=tiff', '-quality=50', '-verbose', inputFiles.sourceFile, tifFile], () => {
+        await this.execConverter(ddjvuPath, ['-format=tiff', `-quality=${tiffQuality}`, '-verbose', inputFiles.sourceFile, tifFile], () => {
             perc = (perc < 100 ? perc + 1 : 40);
             callback(perc);
         }, abort);
@@ -57,16 +62,24 @@ class ConvertDjvu extends ConvertJpegPng {
         await fs.remove(tifFile);
 
         //конвертируем в jpg
-        await this.execConverter(mogrifyPath, ['-quality', '20', '-scale', '2048>', '-verbose', '-format', 'jpg', `${dir}*.tif`], () => {
+        await this.execConverter(mogrifyPath, ['-quality', jpegQuality, '-scale', '2048>', '-verbose', '-format', 'jpg', `${dir}*.tif`], () => {
             perc = (perc < 100 ? perc + 1 : 40);
             callback(perc);
         }, abort);
 
+        limitSize = 2*this.config.maxUploadFileSize;
+        let jpgFilesSize = 0;
         //ищем изображения
         let files = [];
         await utils.findFiles(async(file) => {
-            if (path.extname(file) == '.jpg')
+            if (path.extname(file) == '.jpg') {
+                jpgFilesSize += (await fs.stat(file)).size;
+                if (jpgFilesSize > limitSize) {
+                    throw new Error(`Файл для конвертирования слишком большой|FORLOG| jpgFilesSize: ${jpgFilesSize} > ${limitSize}`);
+                }
+
                 files.push({name: file, base: path.basename(file)});
+            }
         }, dir);
 
         files.sort((a, b) => a.base.localeCompare(b.base));

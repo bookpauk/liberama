@@ -318,6 +318,7 @@ class Reader extends Vue {
         this.enableSitesFilter = settings.enableSitesFilter;
         this.showNeedUpdateNotify = settings.showNeedUpdateNotify;
         this.splitToPara = settings.splitToPara;
+        this.djvuQuality = settings.djvuQuality;
 
         this.readerActionByKeyCode = utils.userHotKeysObjectSwap(settings.userHotKeys);
         this.$root.readerActionByKeyEvent = (event) => {
@@ -973,10 +974,11 @@ class Reader extends Vue {
             if (!book) {
                 book = await readerApi.loadBook({
                         url,
+                        uploadFileName,
+                        enableSitesFilter: this.enableSitesFilter,
                         skipHtmlCheck: (this.splitToPara ? true : false),
                         isText: (this.splitToPara ? true : false),
-                        enableSitesFilter: this.enableSitesFilter,
-                        uploadFileName
+                        djvuQuality: this.djvuQuality,
                     },
                     (state) => {
                         progress.setState(state);

@@ -23,6 +23,7 @@ class ReaderController extends BaseController {
                 skipHtmlCheck: (request.hasOwnProperty('skipHtmlCheck') ? request.skipHtmlCheck : false),
                 isText: (request.hasOwnProperty('isText') ? request.isText : false),
                 uploadFileName: (request.hasOwnProperty('uploadFileName') ? request.uploadFileName : false),
+                djvuQuality: (request.hasOwnProperty('djvuQuality') ? request.djvuQuality : false),
             });
             const state = this.workerState.getState(workerId);
             return (state ? state : {});

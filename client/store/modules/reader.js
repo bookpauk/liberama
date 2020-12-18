@@ -253,6 +253,7 @@ const settingDefaults = {
     imageFitWidth: true,
     enableSitesFilter: true,
     splitToPara: false,
+    djvuQuality: 20,
 
     showServerStorageMessages: true,
     showWhatsNewDialog: true,
