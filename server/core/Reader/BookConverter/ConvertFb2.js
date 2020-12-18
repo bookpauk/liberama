@@ -26,8 +26,9 @@ class ConvertFb2 extends ConvertBase {
             return false;
 
         //Корректируем кодировку всего объема
+        newData = data;
         if (encoding.indexOf('UTF-16') == 0) {
-            newData = Buffer.from(iconv.decode(data, encoding));
+            newData = Buffer.from(iconv.decode(newData, encoding));
         }
 
         //Корректируем пробелы, всякие файлы попадаются :(
