@@ -146,25 +146,36 @@ class ContentsPage extends ContentsPageProps {
         await this.$nextTick();
 
         const pc = parsed.contents;
-        const newpc = [];
-        //преобразуем все, кроме первого, разделы body в title-subtitle
-        let curSubtitles = [];
-        let prevBodyIndex = -1;
-        for (let i = 0; i < pc.length; i++) {
-            const cont = pc[i];
-            if (prevBodyIndex != cont.bodyIndex)
-                curSubtitles = [];
+        const ims = parsed.images;
+        const newpc = [];        
+        if (pc.length) {//если есть оглавление
+            //преобразуем все, кроме первого, разделы body в title-subtitle
+            let curSubtitles = [];
+            let prevBodyIndex = -1;
+            for (let i = 0; i < pc.length; i++) {
+                const cont = pc[i];
+                if (prevBodyIndex != cont.bodyIndex)
+                    curSubtitles = [];
 
-            prevBodyIndex = cont.bodyIndex;
+                prevBodyIndex = cont.bodyIndex;
 
-            if (cont.bodyIndex > 1) {
-                if (cont.inset < 1) {
-                    newpc.push(Object.assign({}, cont, {subtitles: curSubtitles}));
+                if (cont.bodyIndex > 1) {
+                    if (cont.inset < 1) {
+                        newpc.push(Object.assign({}, cont, {subtitles: curSubtitles}));
+                    } else {
+                        curSubtitles.push(Object.assign({}, cont, {inset: cont.inset - 1}));
+                    }
                 } else {
-                    curSubtitles.push(Object.assign({}, cont, {inset: cont.inset - 1}));
+                    newpc.push(cont);
                 }
-            } else {
-                newpc.push(cont);
+            }
+        } else {//попробуем вытащить из images
+            for (let i = 0; i < ims.length; i++) {
+                const image = ims[i];
+
+                if (image.alt) {
+                    newpc.push({paraIndex: image.paraIndex, title: image.alt, inset: 1, bodyIndex: 0, subtitles: []});
+                }
             }
         }
 
@@ -213,7 +224,6 @@ class ContentsPage extends ContentsPageProps {
 
         //формируем newImages
         const newImages = [];
-        const ims = parsed.images;
         for (i = 0; i < ims.length; i++) {
             const image = ims[i];
             const bin = parsed.binary[image.id];
