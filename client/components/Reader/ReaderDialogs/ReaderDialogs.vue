@@ -57,37 +57,6 @@
                 <q-btn class="q-px-sm" dense no-caps @click="donationDialogRemind">Напомнить позже</q-btn>
             </span>
         </Dialog>
-
-        <Dialog ref="dialog3" v-model="liberamaTopVisible">
-            <template slot="header">
-                Здравствуйте, уважаемые читатели!
-            </template>
-
-            <div style="word-break: normal">
-                Создан новый ресурс:<br><br>
-
-                <a href="https://liberama.top" target="_blank">https://liberama.top</a>
-                <br><br>
-                Это клон читалки Omni Reader, но с некоторыми дополнениями, ориентированными в сторону более свободного обмена книгами:
-
-                <ul>
-                    <li>добавлено новое окно "Библиотека" для свободного доступа к Флибусте и другим ресурсам по желанию читателя</li>
-                    <li>планируется добавить возможность создания подборок книг и обмена ими между пользователями</li>
-                </ul>
-
-                Легко мигрировать на новый сайт можно с помощью синхронизации с сервером.
-                О багах и предложениях просьба сообщать на почту <a href="mailto:bookpauk@gmail.com">bookpauk@gmail.com</a><br><br>
-                Спасибо, что вы с нами!
-                <br><br>
-                <div class="row justify-center">
-                    <q-btn class="q-px-sm" color="primary" dense no-caps rounded @click="openDonate">Помочь проекту</q-btn>
-                </div>
-            </div>
-
-            <span slot="footer">
-                <q-btn class="q-px-sm" dense no-caps @click="liberamaTopDialogDisable">Больше не показывать</q-btn>
-            </span>
-        </Dialog>
     </div>
 </template>
 
@@ -114,7 +83,6 @@ class ReaderDialogs extends Vue {
     whatsNewVisible = false;
     whatsNewContent = '';
     donationVisible = false;
-    liberamaTopVisible = false;
 
     created() {
         this.commit = this.$store.commit;
@@ -127,14 +95,12 @@ class ReaderDialogs extends Vue {
     async init() {
         await this.showWhatsNew();
         await this.showDonation();
-        await this.showLiberamaTop();
     }
 
     loadSettings() {
         const settings = this.settings;
         this.showWhatsNewDialog = settings.showWhatsNewDialog;
         this.showDonationDialog2020 = settings.showDonationDialog2020;
-        this.showLiberamaTopDialog2020 = settings.showLiberamaTopDialog2020;
     }
 
     async showWhatsNew() {
@@ -171,7 +137,6 @@ class ReaderDialogs extends Vue {
 
     openDonate() {
         this.donationVisible = false;
-        this.liberamaTopVisible = false;
         this.$emit('donate-toggle');
     }
 
@@ -210,24 +175,8 @@ class ReaderDialogs extends Vue {
         return this.$store.state.reader.donationRemindDate;
     }
 
-    async showLiberamaTop() {
-        const today = utils.formatDate(new Date(), 'coDate');
-
-        if (this.mode == 'omnireader' && today < '2020-12-01' && this.showLiberamaTopDialog2020) {
-            await utils.sleep(3000);
-            this.liberamaTopVisible = true;
-        }
-    }
-
-    liberamaTopDialogDisable()  {
-        this.liberamaTopVisible = false;
-        if (this.showLiberamaTopDialog2020) {
-            this.commit('reader/setSettings', { showLiberamaTopDialog2020: false });
-        }
-    }
-
     keyHook() {
-        if (this.$refs.dialog1.active || this.$refs.dialog2.active || this.$refs.dialog3.active)
+        if (this.$refs.dialog1.active || this.$refs.dialog2.active)
             return true;
         return false;
     }
