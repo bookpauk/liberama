@@ -16,7 +16,7 @@ class ConvertHtml extends ConvertBase {
         }
 
         //из буфера обмена?
-        if (data.toString().indexOf('<buffer>') == 0) {
+        if (data.slice(0, 50).toString().indexOf('<buffer>') == 0) {
             return {isText: false};
         }
 
