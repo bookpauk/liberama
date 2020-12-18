@@ -86,13 +86,21 @@ class ConvertDjvu extends ConvertJpegPng {
 
         //схема документа (outline)
         const djvusedResult = await this.execConverter(djvusedPath, ['-u', '-e', 'print-outline', inputFiles.sourceFile], null, abort);
+
         const outline = [];
-        const lines = djvusedResult.stdout.match(/\(".*"\s*?"#\d+".*?\)/g);
+        const lines = djvusedResult.stdout.match(/\(\s*".*"\s*?"#\d+"/g);
         if (lines) {
             lines.forEach(l => {
                 const m = l.match(/"(.*)"\s*?"#(\d+)"/);
                 if (m) {
-                    outline[m[2]] = m[1];
+                    const pageNum = m[2];
+                    let s = outline[pageNum];
+                    if (!s)
+                        s = m[1].trim();
+                    else
+                        s += `${(s[s.length - 1] != '.' ? '.' : '')} ${m[1].trim()}`;
+
+                    outline[pageNum] = s;
                 }
             });
         }

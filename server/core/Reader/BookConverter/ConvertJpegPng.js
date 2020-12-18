@@ -82,8 +82,10 @@ class ConvertJpegPng extends ConvertBase {
                 binary.push(img);
 
                 const attrs = {'l:href': `#${image.name}`};
-                if (image.alt)
+                if (image.alt) {
+                    image.alt = (image.alt.length > 256 ? image.alt.substring(0, 256) : image.alt);
                     attrs.alt = image.alt;
+                }
 
                 pars.push({_n: 'p', _t: ''});
                 pars.push({_n: 'image', _attrs: attrs});
