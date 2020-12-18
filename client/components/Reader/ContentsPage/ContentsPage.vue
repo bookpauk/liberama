@@ -231,7 +231,7 @@ class ContentsPage extends ContentsPageProps {
             
             const label = (image.alt ? image.alt : '<span style="font-size: 90%; color: #dddddd"><i>Без названия</i></span>');
             const indentStyle = getIndentStyle(1);
-            const labelStyle = getLabelStyle(0);
+            const labelStyle = getLabelStyle(1);
 
             const p = parsed.para[image.paraIndex];
             newImages.push({perc: (p.offset/parsed.textLength*100).toFixed(0), label, key: i, offset: p.offset,
