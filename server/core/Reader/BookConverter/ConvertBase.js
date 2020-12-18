@@ -104,7 +104,7 @@ class ConvertBase {
     }
 
     isDataXml(data) {
-        const str = data.toString().trim();
+        const str = data.slice(0, 100).toString().trim();
         return (str.indexOf('<?xml version="1.0"') == 0 || str.indexOf('<?xml version=\'1.0\'') == 0 );
     }
 

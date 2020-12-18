@@ -48,7 +48,7 @@ class ConvertSites extends ConvertHtml {
         if (text === false)
             return false;
 
-        return await super.run(Buffer.from(text), {skipCheck: true});
+        return await super.run(Buffer.from(text), {skipHtmlCheck: true});
     }
 
     getTitle(text) {

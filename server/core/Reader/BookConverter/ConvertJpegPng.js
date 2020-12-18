@@ -27,7 +27,7 @@ class ConvertJpegPng extends ConvertBase {
         } else {
             const imageFile = `${inputFiles.filesDir}/${path.basename(inputFiles.sourceFile)}.${inputFiles.sourceFileType.ext}`;
             await fs.copy(inputFiles.sourceFile, imageFile);
-            files.push(imageFile);
+            files.push({src: imageFile});
         }
 
         //читаем изображения
@@ -55,10 +55,9 @@ class ConvertJpegPng extends ConvertBase {
 
         let images = [];
         let loading = [];
-        files.forEach(f => {
-            const image = {src: f};
-            images.push(image);
-            loading.push(loadImage(image));
+        files.forEach(img => {
+            images.push(img);
+            loading.push(loadImage(img));
         });
 
         await Promise.all(loading);
@@ -82,8 +81,14 @@ class ConvertJpegPng extends ConvertBase {
                 const img = {_n: 'binary', _attrs: {id: image.name, 'content-type': image.type}, _t: image.data};
                 binary.push(img);
 
+                const attrs = {'l:href': `#${image.name}`};
+                if (image.alt) {
+                    image.alt = (image.alt.length > 256 ? image.alt.substring(0, 256) : image.alt);
+                    attrs.alt = image.alt;
+                }
+
                 pars.push({_n: 'p', _t: ''});
-                pars.push({_n: 'image', _attrs: {'l:href': `#${image.name}`}});
+                pars.push({_n: 'image', _attrs: attrs});
             }
         }
         pars.push({_n: 'p', _t: ''});

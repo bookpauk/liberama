@@ -39,9 +39,9 @@
                         <q-icon name="la la-copy" size="32px"/>
                         <q-tooltip :delay="1500" anchor="bottom middle" content-style="font-size: 80%">{{ rstore.readerActions['copyText'] }}</q-tooltip>
                     </button>
-                    <button ref="splitToPara" v-show="showToolButton['splitToPara']" class="tool-button" :class="buttonActiveClass('splitToPara')" @click="buttonClick('splitToPara')" v-ripple>
-                        <q-icon name="la la-retweet" size="32px"/>
-                        <q-tooltip :delay="1500" anchor="bottom middle" content-style="font-size: 80%">{{ rstore.readerActions['splitToPara'] }}</q-tooltip>
+                    <button ref="convOptions" v-show="showToolButton['convOptions']" class="tool-button" :class="buttonActiveClass('convOptions')" @click="buttonClick('convOptions')" v-ripple>
+                        <q-icon name="la la-magic" size="32px"/>
+                        <q-tooltip :delay="1500" anchor="bottom middle" content-style="font-size: 80%">{{ rstore.readerActions['convOptions'] }}</q-tooltip>
                     </button>
                     <button ref="refresh" v-show="showToolButton['refresh']" class="tool-button" :class="buttonActiveClass('refresh')" @click="buttonClick('refresh')" v-ripple>
                         <q-icon name="la la-sync" size="32px" :class="{clear: !showRefreshIcon}"/>
@@ -317,6 +317,10 @@ class Reader extends Vue {
         this.showToolButton = settings.showToolButton;
         this.enableSitesFilter = settings.enableSitesFilter;
         this.showNeedUpdateNotify = settings.showNeedUpdateNotify;
+        this.splitToPara = settings.splitToPara;
+        this.djvuQuality = settings.djvuQuality;
+        this.pdfAsText = settings.pdfAsText;
+        this.pdfQuality = settings.pdfQuality;
 
         this.readerActionByKeyCode = utils.userHotKeysObjectSwap(settings.userHotKeys);
         this.$root.readerActionByKeyEvent = (event) => {
@@ -336,7 +340,7 @@ class Reader extends Vue {
 
                 let againMes = '';
                 if (this.isFirstNeedUpdateNotify) {
-                    againMes = ' ЕЩЕ один раз';
+                    againMes = ' еще один раз';
                 }
 
                 if (this.version != this.clientVersion)
@@ -345,9 +349,9 @@ class Reader extends Vue {
                 console.error(e);
             } finally {
                 this.checkingNewVersion = false;
-            }
+            }        
+            this.isFirstNeedUpdateNotify = false;
         }
-        this.isFirstNeedUpdateNotify = false;
     }
 
     updateHeaderMinWidth() {
@@ -703,6 +707,12 @@ class Reader extends Vue {
         }
     }
 
+    convOptionsToggle() {
+        this.settingsToggle();
+        if (this.settingsActive)
+            this.$refs.settingsPage.selectedTab = 'convert';
+    }
+
     helpToggle() {
         this.helpActive = !this.helpActive;
         if (this.helpActive) {
@@ -729,15 +739,9 @@ class Reader extends Vue {
         }
     }
 
-    refreshBook(mode) {
+    refreshBook() {
         const mrb = this.mostRecentBook();
-        if (mrb) {
-            if (mode && mode == 'split') {
-                this.loadBook({url: mrb.url, uploadFileName: mrb.uploadFileName, skipCheck: true, isText: true, force: true});
-            } else {
-                this.loadBook({url: mrb.url, uploadFileName: mrb.uploadFileName, force: true});
-            }
-        }
+        this.loadBook({url: mrb.url, uploadFileName: mrb.uploadFileName, force: true});
     }
 
     undoAction() {
@@ -777,7 +781,7 @@ class Reader extends Vue {
             case 'scrolling':
             case 'search':
             case 'copyText':
-            case 'splitToPara':
+            case 'convOptions':
             case 'refresh':
             case 'contents':
             case 'libs':
@@ -811,7 +815,6 @@ class Reader extends Vue {
                 case 'contents':
                     classResult = classDisabled;
                     break;
-                case 'splitToPara':
                 case 'refresh':
                 case 'recentBooks':
                     if (!this.mostRecentBookReactive)
@@ -973,10 +976,13 @@ class Reader extends Vue {
             if (!book) {
                 book = await readerApi.loadBook({
                         url,
-                        skipCheck: (opts.skipCheck ? true : false),
-                        isText: (opts.isText ? true : false),
+                        uploadFileName,
                         enableSitesFilter: this.enableSitesFilter,
-                        uploadFileName
+                        skipHtmlCheck: (this.splitToPara ? true : false),
+                        isText: (this.splitToPara ? true : false),
+                        djvuQuality: this.djvuQuality,
+                        pdfAsText: this.pdfAsText,
+                        pdfQuality: this.pdfQuality,
                     },
                     (state) => {
                         progress.setState(state);
@@ -1102,8 +1108,8 @@ class Reader extends Vue {
             case 'copyText':
                 this.copyTextToggle();
                 break;
-            case 'splitToPara':
-                this.refreshBook('split');
+            case 'convOptions':
+                this.convOptionsToggle();
                 break;
             case 'refresh':
                 this.refreshBook();

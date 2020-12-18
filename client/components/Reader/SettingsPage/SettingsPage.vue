@@ -26,6 +26,7 @@
                     <q-tab class="tab" name="buttons" icon="la la-grip-horizontal" label="Кнопки" />
                     <q-tab class="tab" name="keys" icon="la la-gamepad" label="Управление" />
                     <q-tab class="tab" name="pagemove" icon="la la-school" label="Листание" />
+                    <q-tab class="tab" name="convert" icon="la la-magic" label="Конвертир." />
                     <q-tab class="tab" name="others" icon="la la-list-ul" label="Прочее" />
                     <q-tab class="tab" name="reset" icon="la la-broom" label="Сброс" />
                     <div v-show="tabsScrollable" class="q-pt-lg"/>
@@ -52,6 +53,10 @@
                 <!-- Листание -------------------------------------------------------------------->
                 <div v-if="selectedTab == 'pagemove'" class="fit tab-panel">
                     @@include('./include/PageMoveTab.inc');
+                </div>
+                <!-- Конвертирование ------------------------------------------------------------->
+                <div v-if="selectedTab == 'convert'" class="fit tab-panel">
+                    @@include('./include/ConvertTab.inc');
                 </div>
                 <!-- Прочее ---------------------------------------------------------------------->
                 <div v-if="selectedTab == 'others'" class="fit tab-panel">
@@ -216,6 +221,10 @@ class SettingsPage extends Vue {
 
     get mode() {
         return this.$store.state.config.mode;
+    }
+
+    get isExternalConverter() {
+        return this.$store.state.config.useExternalBookConverter;
     }
 
     get settings() {
@@ -544,7 +553,7 @@ class SettingsPage extends Vue {
     margin-bottom: 5px;
 }
 
-.label-1 {
+.label-1, .label-7 {
     width: 75px;
 }
 
@@ -556,7 +565,7 @@ class SettingsPage extends Vue {
     width: 100px;
 }
 
-.label-1, .label-2, .label-3, .label-4, .label-5, .label-6 {
+.label-1, .label-2, .label-3, .label-4, .label-5, .label-6, .label-7 {
     display: flex;
     flex-direction: column;
     justify-content: center;

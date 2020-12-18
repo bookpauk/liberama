@@ -16,7 +16,7 @@ class ConvertHtml extends ConvertBase {
         }
 
         //из буфера обмена?
-        if (data.toString().indexOf('<buffer>') == 0) {
+        if (data.slice(0, 50).toString().indexOf('<buffer>') == 0) {
             return {isText: false};
         }
 
@@ -24,15 +24,13 @@ class ConvertHtml extends ConvertBase {
     }
 
     async run(data, opts) {
-        let isText = false;
-        if (!opts.skipCheck) {
+        let {isText = false, uploadFileName = ''} = opts;
+        if (!opts.skipHtmlCheck) {
             const checkResult = this.check(data, opts);
             if (!checkResult)
                 return false;
 
             isText = checkResult.isText;
-        } else {
-            isText = opts.isText;
         }
 
         let titleInfo = {};
@@ -242,6 +240,9 @@ class ConvertHtml extends ConvertBase {
             innerCut: new Set(['head', 'script', 'style', 'binary', 'fb2-image', 'fb2-title', 'fb2-author'])
         });
 
+        if (!title)
+            title = uploadFileName;
+        
         titleInfo['book-title'] = title;
         if (author)
             titleInfo.author = {'last-name': author};

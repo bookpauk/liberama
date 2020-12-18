@@ -13,22 +13,30 @@ class ConvertFb2 extends ConvertBase {
     }
 
     async run(data, opts) {
-        let newData = data;
+        let newData = data.slice(0, 1024);
 
-        //Корректируем кодировку, 16-битные кодировки должны стать utf-8
+        //Корректируем кодировку для проверки, 16-битные кодировки должны стать utf-8
         const encoding = textUtils.getEncoding(newData);
         if (encoding.indexOf('UTF-16') == 0) {
             newData = Buffer.from(iconv.decode(newData, encoding));
         }
 
+        //Проверяем
         if (!this.check(newData, opts))
             return false;
+
+        //Корректируем кодировку всего объема
+        newData = data;
+        if (encoding.indexOf('UTF-16') == 0) {
+            newData = Buffer.from(iconv.decode(newData, encoding));
+        }
 
         //Корректируем пробелы, всякие файлы попадаются :(
         if (newData[0] == 32) {
             newData = Buffer.from(newData.toString().trim());
         }
 
+        //Окончательно корректируем кодировку
         return this.checkEncoding(newData);
     }
 

@@ -15,7 +15,7 @@ class ConvertPdf extends ConvertHtml {
     }
 
     async run(notUsed, opts) {
-        if (!this.check(notUsed, opts))
+        if (!opts.pdfAsText || !this.check(notUsed, opts))
             return false;
 
         await this.checkExternalConverterPresent();
@@ -27,7 +27,6 @@ class ConvertPdf extends ConvertHtml {
         const outFile = `${outBasename}.xml`;
 
         const pdftohtmlPath = '/usr/bin/pdftohtml';
-
         if (!await fs.pathExists(pdftohtmlPath))
             throw new Error('Внешний конвертер pdftohtml не найден');
 
@@ -342,7 +341,7 @@ class ConvertPdf extends ConvertHtml {
 
         //console.log(text);
         await utils.sleep(100);
-        return await super.run(Buffer.from(text), {skipCheck: true, isText: true});
+        return await super.run(Buffer.from(text), {skipHtmlCheck: true, isText: true});
     }
 
     async getPdfTitleAndAuthor(pdfFile) {
