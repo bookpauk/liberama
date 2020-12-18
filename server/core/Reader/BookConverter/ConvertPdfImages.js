@@ -2,6 +2,8 @@ const fs = require('fs-extra');
 const path = require('path');
 const utils = require('../../utils');
 
+const sax = require('../../sax');
+
 const ConvertJpegPng = require('./ConvertJpegPng');
 
 class ConvertPdfImages extends ConvertJpegPng {
@@ -24,19 +26,25 @@ class ConvertPdfImages extends ConvertJpegPng {
         if (!await fs.pathExists(pdftoppmPath))
             throw new Error('Внешний конвертер pdftoppm не найден');
 
+        const pdftohtmlPath = '/usr/bin/pdftohtml';
+        if (!await fs.pathExists(pdftohtmlPath))
+            throw new Error('Внешний конвертер pdftohtml не найден');
+
+        const inpFile = inputFiles.sourceFile;
         const dir = `${inputFiles.filesDir}/`;
-        const baseFile = `${dir}${path.basename(inputFiles.sourceFile)}`;
-        const jpgFiles = `${baseFile}.tmp`;
+        const outBasename = `${dir}${utils.randomHexString(10)}`;
+        const outFile = `${outBasename}.tmp`;
 
         //конвертируем в jpeg
         let perc = 0;
-        await this.execConverter(pdftoppmPath, ['-jpeg', '-jpegopt', `quality=${pdfQuality},progressive=y`, inputFiles.sourceFile, jpgFiles], () => {
+        await this.execConverter(pdftoppmPath, ['-jpeg', '-jpegopt', `quality=${pdfQuality},progressive=y`, inpFile, outFile], () => {
             perc = (perc < 100 ? perc + 1 : 40);
             callback(perc);
         }, abort);
 
         const limitSize = 2*this.config.maxUploadFileSize;
         let jpgFilesSize = 0;
+
         //ищем изображения
         let files = [];
         await utils.findFiles(async(file) => {
@@ -53,19 +61,47 @@ class ConvertPdfImages extends ConvertJpegPng {
         files.sort((a, b) => a.base.localeCompare(b.base));
 
         //схема документа (outline)
-        //const djvusedResult = await this.execConverter(djvusedPath, ['-u', '-e', 'print-outline', inputFiles.sourceFile]);
+        const outXml = `${outBasename}.xml`;
+        await this.execConverter(pdftohtmlPath, ['-nodrm', '-i', '-c', '-s', '-xml', inpFile, outXml], null, abort);
         const outline = [];
-        /*const lines = djvusedResult.stdout.match(/\(".*"\s*?"#\d+".*?\)/g);
-        if (lines) {
-            lines.forEach(l => {
-                const m = l.match(/"(.*)"\s*?"#(\d+)"/);
-                if (m) {
-                    outline[m[2]] = m[1];
-                }
-            });
-        }*/
+
+        let inOutline = 0;
+        let inItem = false;
+        let pageNum = 0;
+
+        const onTextNode = (text, cutCounter, cutTag) => {// eslint-disable-line no-unused-vars
+            if (inOutline > 0 && inItem && pageNum) {
+                outline[pageNum] = text;
+            }
+        };
+
+        const onStartNode = (tag, tail, singleTag, cutCounter, cutTag) => {// eslint-disable-line no-unused-vars
+            if (tag == 'outline')
+                inOutline++;
+
+            if (inOutline > 0 && tag == 'item') {
+                const attrs = sax.getAttrsSync(tail);
+                pageNum = (attrs.page && attrs.page.value ? attrs.page.value : 0);
+                inItem = true;
+            }
+        };
+
+        const onEndNode = (tag, tail, singleTag, cutCounter, cutTag) => {// eslint-disable-line no-unused-vars
+            if (tag == 'outline')
+                inOutline--;
+            if (tag == 'item')
+                inItem = false;
+        };
+
+        const dataXml = await fs.readFile(outXml);
+        const buf = this.decode(dataXml).toString();
+        sax.parseSync(buf, {
+            onStartNode, onEndNode, onTextNode
+        });
+
 
         await utils.sleep(100);
+        //формируем список файлов
         let i = 0;
         const imageFiles = files.map(f => {
             i++;

@@ -17,7 +17,7 @@ class ConvertDjvu extends ConvertJpegPng {
             return false;
 
         let {inputFiles, callback, abort, djvuQuality} = opts;
-        
+
         djvuQuality = (djvuQuality && djvuQuality <= 100 && djvuQuality >= 10 ? djvuQuality : 20);
         let jpegQuality = djvuQuality;
         let tiffQuality = djvuQuality + 30;
@@ -85,7 +85,7 @@ class ConvertDjvu extends ConvertJpegPng {
         files.sort((a, b) => a.base.localeCompare(b.base));
 
         //схема документа (outline)
-        const djvusedResult = await this.execConverter(djvusedPath, ['-u', '-e', 'print-outline', inputFiles.sourceFile]);
+        const djvusedResult = await this.execConverter(djvusedPath, ['-u', '-e', 'print-outline', inputFiles.sourceFile], null, abort);
         const outline = [];
         const lines = djvusedResult.stdout.match(/\(".*"\s*?"#\d+".*?\)/g);
         if (lines) {

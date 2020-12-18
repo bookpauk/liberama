@@ -27,7 +27,6 @@ class ConvertPdf extends ConvertHtml {
         const outFile = `${outBasename}.xml`;
 
         const pdftohtmlPath = '/usr/bin/pdftohtml';
-
         if (!await fs.pathExists(pdftohtmlPath))
             throw new Error('Внешний конвертер pdftohtml не найден');
 
