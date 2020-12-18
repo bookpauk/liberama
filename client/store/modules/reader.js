@@ -254,6 +254,8 @@ const settingDefaults = {
     enableSitesFilter: true,
     splitToPara: false,
     djvuQuality: 20,
+    pdfAsText: true,
+    pdfQuality: 20,
 
     showServerStorageMessages: true,
     showWhatsNewDialog: true,

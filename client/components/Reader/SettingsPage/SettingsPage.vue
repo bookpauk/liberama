@@ -223,6 +223,10 @@ class SettingsPage extends Vue {
         return this.$store.state.config.mode;
     }
 
+    get isExternalConverter() {
+        return this.$store.state.config.useExternalBookConverter;
+    }
+
     get settings() {
         return this.$store.state.reader.settings;
     }

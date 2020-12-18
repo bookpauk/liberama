@@ -7,6 +7,7 @@ const convertClassFactory = [
     require('./ConvertEpub'),
     require('./ConvertDjvu'),
     require('./ConvertPdf'),
+    require('./ConvertPdfImages'),
     require('./ConvertRtf'),
     require('./ConvertDocX'),
     require('./ConvertFb3'),

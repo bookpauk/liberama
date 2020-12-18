@@ -24,6 +24,8 @@ class ReaderController extends BaseController {
                 isText: (request.hasOwnProperty('isText') ? request.isText : false),
                 uploadFileName: (request.hasOwnProperty('uploadFileName') ? request.uploadFileName : false),
                 djvuQuality: (request.hasOwnProperty('djvuQuality') ? request.djvuQuality : false),
+                pdfAsText: (request.hasOwnProperty('pdfAsText') ? request.pdfAsText : false),
+                pdfQuality: (request.hasOwnProperty('pdfQuality') ? request.pdfQuality : false),
             });
             const state = this.workerState.getState(workerId);
             return (state ? state : {});

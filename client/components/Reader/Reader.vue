@@ -319,6 +319,8 @@ class Reader extends Vue {
         this.showNeedUpdateNotify = settings.showNeedUpdateNotify;
         this.splitToPara = settings.splitToPara;
         this.djvuQuality = settings.djvuQuality;
+        this.pdfAsText = settings.pdfAsText;
+        this.pdfQuality = settings.pdfQuality;
 
         this.readerActionByKeyCode = utils.userHotKeysObjectSwap(settings.userHotKeys);
         this.$root.readerActionByKeyEvent = (event) => {
@@ -979,6 +981,8 @@ class Reader extends Vue {
                         skipHtmlCheck: (this.splitToPara ? true : false),
                         isText: (this.splitToPara ? true : false),
                         djvuQuality: this.djvuQuality,
+                        pdfAsText: this.pdfAsText,
+                        pdfQuality: this.pdfQuality,
                     },
                     (state) => {
                         progress.setState(state);

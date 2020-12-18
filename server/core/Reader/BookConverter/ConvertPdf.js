@@ -15,7 +15,7 @@ class ConvertPdf extends ConvertHtml {
     }
 
     async run(notUsed, opts) {
-        if (!this.check(notUsed, opts))
+        if (!opts.pdfAsText || !this.check(notUsed, opts))
             return false;
 
         await this.checkExternalConverterPresent();
