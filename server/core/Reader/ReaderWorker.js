@@ -36,7 +36,7 @@ class ReaderWorker {
             this.remoteWebDavStorage = false;
             if (config.remoteWebDavStorage) {
                 this.remoteWebDavStorage = new RemoteWebDavStorage(
-                    Object.assign({maxContentLength: 2*config.maxUploadFileSize}, config.remoteWebDavStorage)
+                    Object.assign({maxContentLength: 3*config.maxUploadFileSize}, config.remoteWebDavStorage)
                 );
             }
 
