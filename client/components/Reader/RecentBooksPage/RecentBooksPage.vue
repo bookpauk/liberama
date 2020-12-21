@@ -27,8 +27,11 @@
                             placeholder="Найти"
                             v-model="search"
                             @click.stop
-                        />
-
+                        >
+                            <template v-slot:append>
+                                <q-icon v-if="search !== ''" name="la la-times" class="cursor-pointer" @click.stop="resetSearch"/>
+                            </template>
+                        </q-input>
                         <span v-html="props.cols[2].label"></span>
                     </q-th>
                 </q-tr>
@@ -106,7 +109,7 @@ export default @Component({
 })
 class RecentBooksPage extends Vue {
     loading = false;
-    search = null;
+    search = '';
     tableData = [];
     columns = [];
     pagination = {};
@@ -242,6 +245,11 @@ class RecentBooksPage extends Vue {
 
         this.tableData = result;
         this.updating = false;
+    }
+
+    resetSearch() {
+        this.search = '';
+        this.$refs.input.focus();
     }
 
     wordEnding(num) {
