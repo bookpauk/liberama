@@ -3,10 +3,10 @@
         <div class="box">
             <p class="p">Вы можете пожертвовать на развитие проекта любую сумму:</p>
             <div class="address">
-                <img class="logo" src="./assets/yandex.png">
-                <q-btn class="q-ml-sm q-px-sm" dense no-caps @click="donateYandexMoney">Пожертвовать</q-btn><br>
-                <div class="para">{{ yandexAddress }}
-                    <q-icon class="copy-icon" name="la la-copy" @click="copyAddress(yandexAddress, 'Яндекс кошелек')">
+                <img class="logo" src="./assets/yoomoney.png">
+                <q-btn class="q-ml-sm q-px-sm" dense no-caps @click="donateYooMoney">Пожертвовать</q-btn><br>
+                <div class="para">{{ yooAddress }}
+                    <q-icon class="copy-icon" name="la la-copy" @click="copyAddress(yooAddress, 'Кошелёк ЮMoney')">
                         <q-tooltip :delay="1000" anchor="top middle" self="center middle" content-style="font-size: 80%">Скопировать</q-tooltip>                    
                     </q-icon>
                 </div>
@@ -60,7 +60,7 @@ import {copyTextToClipboard} from '../../../../share/utils';
 export default @Component({
 })
 class DonateHelpPage extends Vue {
-    yandexAddress = '410018702323056';
+    yooAddress = '410018702323056';
     paypalAddress = 'bookpauk@gmail.com';
     bitcoinAddress = '3EbgZ7MK1UVaN38Gty5DCBtS4PknM4Ut85';
     litecoinAddress = 'MP39Riec4oSNB3XMjiquKoLWxbufRYNXxZ';
@@ -69,8 +69,8 @@ class DonateHelpPage extends Vue {
     created() {
     }
 
-    donateYandexMoney() {
-        window.open(`https://money.yandex.ru/to/${this.yandexAddress}`, '_blank');
+    donateYooMoney() {
+        window.open(`https://yoomoney.ru/to/${this.yooAddress}`, '_blank');
     }
 
     async copyAddress(address, prefix) {
