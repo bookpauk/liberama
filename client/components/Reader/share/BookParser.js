@@ -22,6 +22,7 @@ const defaultSettings = {
     imageFitWidth: true, //ширина изображения не более ширины страницы
     compactTextPerc: 0, //проценты, степень компактности текста
     testWidth: 0, //ширина тестовой строки, пересчитывается извне при изменении шрифта браузером
+    isTesting: false, //тестовый режим
 
     //заглушка, измеритель ширины текста
     measureText: (text, style) => {// eslint-disable-line no-unused-vars
@@ -243,7 +244,8 @@ export default class BookParser {
                     } else {//external
                         imageNum++;
 
-                        dimPromises.push(getExternalImageDimensions(href));
+                        if (!this.sets.isTesting)
+                            dimPromises.push(getExternalImageDimensions(href));
                         newParagraph(`<image href="${href}" num="${imageNum}">${' '.repeat(maxImageLineCount)}</image>`, maxImageLineCount);
 
                         this.images.push({paraIndex, num: imageNum, id, local, alt});
@@ -490,7 +492,7 @@ export default class BookParser {
                 growParagraph(`${tOpen}${text}${tClose}`, text.length);
             }
 
-            if (binaryId) {
+            if (binaryId && !this.sets.isTesting) {
                 dimPromises.push(getImageDimensions(binaryId, binaryType, text));
             }
         };
@@ -563,9 +565,19 @@ export default class BookParser {
         let style = {};
         let image = {};
 
+        //оптимизация по памяти
+        const copyStyle = (s) => {
+            const r = {};
+            for (const prop in s) {
+                if (s[prop])
+                    r[prop] = s[prop];
+            }
+            return r;
+        };
+
         const onTextNode = async(text) => {// eslint-disable-line no-unused-vars
             result.push({
-                style: Object.assign({}, style),
+                style: copyStyle(style),
                 image,
                 text
             });
@@ -610,7 +622,7 @@ export default class BookParser {
                         img.inline = true;
                         img.num = (attrs.num && attrs.num.value ? attrs.num.value : 0);
                         result.push({
-                            style: Object.assign({}, style),
+                            style: copyStyle(style),
                             image: img,
                             text: ''
                         });
