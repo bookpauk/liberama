@@ -228,28 +228,31 @@ class TextPage extends Vue {
 
         //parsed
         if (this.parsed) {
-            this.parsed.p = this.p;
-            this.parsed.w = this.w;// px, ширина текста
-            this.parsed.font = this.font;
-            this.parsed.fontSize = this.fontSize;
-            this.parsed.wordWrap = this.wordWrap;
-            this.parsed.cutEmptyParagraphs = this.cutEmptyParagraphs;
-            this.parsed.addEmptyParagraphs = this.addEmptyParagraphs;
-            let t = wideLetter;
-            if (!this.drawHelper.measureText(t, {}))
-                throw new Error('Ошибка measureText');
-            while (this.drawHelper.measureText(t, {}) < this.w) t += wideLetter;
-            this.parsed.maxWordLength = t.length - 1;
-            this.parsed.measureText = this.drawHelper.measureText.bind(this.drawHelper);
-            this.parsed.lineHeight = this.lineHeight;
-            this.parsed.showImages = this.showImages;
-            this.parsed.showInlineImagesInCenter = this.showInlineImagesInCenter;
-            this.parsed.imageHeightLines = this.imageHeightLines;
-            this.parsed.imageFitWidth = this.imageFitWidth;
-            this.parsed.compactTextPerc = this.compactTextPerc;
+            this.testText = 'Это тестовый текст. Его ширина выдается системой неправильно некоторое время.';
 
-            this.parsed.testText = 'Это тестовый текст. Его ширина выдается системой неверно некоторое время.';
-            this.parsed.testWidth = this.drawHelper.measureText(this.parsed.testText, {});
+            let wideLine = wideLetter;
+            if (!this.drawHelper.measureText(wideLine, {}))
+                throw new Error('Ошибка measureText');
+            while (this.drawHelper.measureText(wideLine, {}) < this.w) wideLine += wideLetter;
+
+            this.parsed.setSettings({
+                p: this.p,
+                w: this.w,
+                font: this.font,
+                fontSize: this.fontSize,
+                wordWrap: this.wordWrap,
+                cutEmptyParagraphs: this.cutEmptyParagraphs,
+                addEmptyParagraphs: this.addEmptyParagraphs,
+                maxWordLength: wideLine.length - 1,
+                lineHeight: this.lineHeight,
+                showImages: this.showImages,
+                showInlineImagesInCenter: this.showInlineImagesInCenter,
+                imageHeightLines: this.imageHeightLines,
+                imageFitWidth: this.imageFitWidth,
+                compactTextPerc: this.compactTextPerc,
+                testWidth: this.drawHelper.measureText(this.testText, {}),
+                measureText: this.drawHelper.measureText.bind(this.drawHelper),
+            });
         }
 
         //scrolling page
@@ -333,19 +336,25 @@ class TextPage extends Vue {
         if (!omitLoadFonts)
             await this.loadFonts();
 
-        this.draw();
-
-        // ширина шрифта некоторое время выдается неверно, поэтому
-        if (!omitLoadFonts) {
+        if (omitLoadFonts) {
+            this.draw();
+        } else {
+            // ширина шрифта некоторое время выдается неверно,
+            // не получилось событийно отловить этот момент, поэтому костыль
             const parsed = this.parsed;
 
             let i = 0;
-            const t = this.parsed.testText;
-            while (i++ < 50 && this.parsed === parsed && this.drawHelper.measureText(t, {}) === this.parsed.testWidth)
+            const t = this.testText;
+            const tw = this.drawHelper.measureText(t, {});
+            //5 секунд проверяем изменения шрифта
+            while (i++ < 50 && this.parsed === parsed && this.drawHelper.measureText(t, {}) === tw) {
+                if (i == 10) //через 1 сек
+                    this.draw();
                 await utils.sleep(100);
+            }
 
             if (this.parsed === parsed) {
-                this.parsed.testWidth = this.drawHelper.measureText(t, {});
+                this.parsed.setSettings({testWidth: this.drawHelper.measureText(t, {})});
                 this.draw();
             }
         }

@@ -4,23 +4,44 @@ import * as utils from '../../../share/utils';
 
 const maxImageLineCount = 100;
 
+// defaults
+const defaultSettings = {
+    p: 30,  //px, отступ параграфа
+    w: 500, //px, ширина страницы
+
+    font: '', //css описание шрифта
+    fontSize: 20, //px, размер шрифта
+    wordWrap: false, //перенос по слогам
+    cutEmptyParagraphs: false, //убирать пустые параграфы
+    addEmptyParagraphs: 0, //добавлять n пустых параграфов перед непустым
+    maxWordLength: 500, //px, максимальная длина слова без пробелов
+    lineHeight: 26, //px, высота строки
+    showImages: true, //показыввать изображения
+    showInlineImagesInCenter: true, //выносить изображения в центр, работает на этапе первичного парсинга (parse)
+    imageHeightLines: 100, //кол-во строк, максимальная высота изображения
+    imageFitWidth: true, //ширина изображения не более ширины страницы
+    compactTextPerc: 0, //проценты, степень компактности текста
+    testWidth: 0, //ширина тестовой строки, пересчитывается извне при изменении шрифта браузером
+
+    //заглушка, измеритель ширины текста
+    measureText: (text, style) => {// eslint-disable-line no-unused-vars
+        return text.length*20;
+    },
+};
+
 export default class BookParser {
-    constructor(settings) {
-        if (settings) {
-            this.showInlineImagesInCenter = settings.showInlineImagesInCenter;
-        }
+    constructor(settings = {}) {
+        this.sets = {};
 
-        // defaults
-        this.p = 30;// px, отступ параграфа
-        this.w = 300;// px, ширина страницы
-        this.wordWrap = false;// перенос по слогам
-
-        //заглушка
-        this.measureText = (text, style) => {// eslint-disable-line no-unused-vars
-            return text.length*20;
-        };
+        this.setSettings(defaultSettings);
+        this.setSettings(settings);
     }
 
+    setSettings(settings = {}) {
+        this.sets = Object.assign({}, this.sets, settings);
+        this.measureText = this.sets.measureText;
+    }
+    
     async parse(data, callback) {
         if (!callback)
             callback = () => {};
@@ -210,14 +231,14 @@ export default class BookParser {
                     if (href[0] == '#') {//local
                         imageNum++;
 
-                        if (inPara && !this.showInlineImagesInCenter && !center)
+                        if (inPara && !this.sets.showInlineImagesInCenter && !center)
                             growParagraph(`<image-inline href="${href}" num="${imageNum}"></image-inline>`, 0);
                         else
                             newParagraph(`<image href="${href}" num="${imageNum}">${' '.repeat(maxImageLineCount)}</image>`, maxImageLineCount);
 
                         this.images.push({paraIndex, num: imageNum, id, local, alt});
 
-                        if (inPara && this.showInlineImagesInCenter)
+                        if (inPara && this.sets.showInlineImagesInCenter)
                             newParagraph(' ', 1);
                     } else {//external
                         imageNum++;
@@ -632,7 +653,7 @@ export default class BookParser {
         });
 
         //длинные слова (или белиберду без пробелов) тоже разобьем
-        const maxWordLength = this.maxWordLength;
+        const maxWordLength = this.sets.maxWordLength;
         const parts = result;
         result = [];
         for (const part of parts) {
@@ -712,37 +733,43 @@ export default class BookParser {
 
     parsePara(paraIndex) {
         const para = this.para[paraIndex];
+        const s = this.sets;
 
+        //перераспарсиваем только при изменении одного из параметров
         if (!this.force &&
             para.parsed && 
-            para.parsed.testWidth === this.testWidth &&
-            para.parsed.w === this.w &&
-            para.parsed.p === this.p &&
-            para.parsed.wordWrap === this.wordWrap &&
-            para.parsed.maxWordLength === this.maxWordLength &&
-            para.parsed.font === this.font &&
-            para.parsed.cutEmptyParagraphs === this.cutEmptyParagraphs &&
-            para.parsed.addEmptyParagraphs === this.addEmptyParagraphs &&
-            para.parsed.showImages === this.showImages &&
-            para.parsed.imageHeightLines === this.imageHeightLines &&
-            para.parsed.imageFitWidth === this.imageFitWidth &&
-            para.parsed.compactTextPerc === this.compactTextPerc
+            para.parsed.p === s.p &&
+            para.parsed.w === s.w &&
+            para.parsed.font === s.font &&
+            para.parsed.fontSize === s.fontSize &&
+            para.parsed.wordWrap === s.wordWrap &&
+            para.parsed.cutEmptyParagraphs === s.cutEmptyParagraphs &&
+            para.parsed.addEmptyParagraphs === s.addEmptyParagraphs &&
+            para.parsed.maxWordLength === s.maxWordLength &&
+            para.parsed.lineHeight === s.lineHeight &&
+            para.parsed.showImages === s.showImages &&
+            para.parsed.imageHeightLines === s.imageHeightLines &&
+            para.parsed.imageFitWidth === s.imageFitWidth &&
+            para.parsed.compactTextPerc === s.compactTextPerc &&
+            para.parsed.testWidth === s.testWidth
             )
             return para.parsed;
 
         const parsed = {
-            testWidth: this.testWidth,
-            w: this.w,
-            p: this.p,
-            wordWrap: this.wordWrap,
-            maxWordLength: this.maxWordLength,
-            font: this.font,
-            cutEmptyParagraphs: this.cutEmptyParagraphs,
-            addEmptyParagraphs: this.addEmptyParagraphs,
-            showImages: this.showImages,
-            imageHeightLines: this.imageHeightLines,
-            imageFitWidth: this.imageFitWidth,
-            compactTextPerc: this.compactTextPerc,
+            p: s.p,
+            w: s.w,
+            font: s.font,
+            fontSize: s.fontSize,
+            wordWrap: s.wordWrap,
+            cutEmptyParagraphs: s.cutEmptyParagraphs,
+            addEmptyParagraphs: s.addEmptyParagraphs,
+            maxWordLength: s.maxWordLength,
+            lineHeight: s.lineHeight,
+            showImages: s.showImages,
+            imageHeightLines: s.imageHeightLines,
+            imageFitWidth: s.imageFitWidth,
+            compactTextPerc: s.compactTextPerc,
+            testWidth: s.testWidth,
             visible: true, //вычисляется позже
         };
 
@@ -774,7 +801,7 @@ export default class BookParser {
         let ofs = 0;//смещение от начала параграфа para.offset
         let imgW = 0;
         let imageInPara = false;
-        const compactWidth = this.measureText('W', {})*this.compactTextPerc/100;
+        const compactWidth = this.measureText('W', {})*parsed.compactTextPerc/100;
         // тут начинается самый замес, перенос по слогам и стилизация, а также изображения
         for (const part of parts) {
             style = part.style;
@@ -787,14 +814,14 @@ export default class BookParser {
                 if (!bin)
                     bin = {h: 1, w: 1};
 
-                let lineCount = this.imageHeightLines;
-                let c = Math.ceil(bin.h/this.lineHeight);
+                let lineCount = parsed.imageHeightLines;
+                let c = Math.ceil(bin.h/parsed.lineHeight);
 
-                const maxH = lineCount*this.lineHeight;
+                const maxH = lineCount*parsed.lineHeight;
                 let maxH2 = maxH;
-                if (this.imageFitWidth && bin.w > this.w) {
+                if (parsed.imageFitWidth && bin.w > this.w) {
                     maxH2 = bin.h*this.w/bin.w;
-                    c = Math.ceil(maxH2/this.lineHeight);
+                    c = Math.ceil(maxH2/parsed.lineHeight);
                 }
                 lineCount = (c < lineCount ? c : lineCount);
 
@@ -834,10 +861,10 @@ export default class BookParser {
                 continue;
             }
 
-            if (part.image.id && part.image.inline && this.showImages) {
+            if (part.image.id && part.image.inline && parsed.showImages) {
                 const bin = this.binary[part.image.id];
                 if (bin) {
-                    let imgH = (bin.h > this.fontSize ? this.fontSize : bin.h);
+                    let imgH = (bin.h > parsed.fontSize ? parsed.fontSize : bin.h);
                     imgW += bin.w*imgH/bin.h;
                     line.parts.push({style, text: '',
                         image: {local: part.image.local, inline: true, id: part.image.id, num: part.image.num}});
@@ -952,11 +979,11 @@ export default class BookParser {
 
         //parsed.visible
         if (imageInPara) {
-            parsed.visible = this.showImages;
+            parsed.visible = parsed.showImages;
         } else {
             parsed.visible = !(
-                (para.addIndex > this.addEmptyParagraphs) ||
-                (para.addIndex == 0 && this.cutEmptyParagraphs && paragraphText.trim() == '')
+                (para.addIndex > parsed.addEmptyParagraphs) ||
+                (para.addIndex == 0 && parsed.cutEmptyParagraphs && paragraphText.trim() == '')
             );
         }
 
