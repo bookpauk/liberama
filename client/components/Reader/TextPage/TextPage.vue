@@ -228,8 +228,6 @@ class TextPage extends Vue {
 
         //parsed
         if (this.parsed) {
-            this.testText = 'Это тестовый текст. Его ширина выдается системой неправильно некоторое время.';
-
             let wideLine = wideLetter;
             if (!this.drawHelper.measureText(wideLine, {}))
                 throw new Error('Ошибка measureText');
@@ -250,7 +248,7 @@ class TextPage extends Vue {
                 imageHeightLines: this.imageHeightLines,
                 imageFitWidth: this.imageFitWidth,
                 compactTextPerc: this.compactTextPerc,
-                testWidth: this.drawHelper.measureText(this.testText, {}),
+                testWidth: 0,
                 measureText: this.drawHelper.measureText.bind(this.drawHelper),
             });
         }
@@ -340,22 +338,32 @@ class TextPage extends Vue {
             this.draw();
         } else {
             // ширина шрифта некоторое время выдается неверно,
-            // не получилось событийно отловить этот момент, поэтому костыль
-            const parsed = this.parsed;
-
-            let i = 0;
-            const t = this.testText;
-            const tw = this.drawHelper.measureText(t, {});
-            //5 секунд проверяем изменения шрифта
-            while (i++ < 50 && this.parsed === parsed && this.drawHelper.measureText(t, {}) === tw) {
-                if (i == 10) //через 1 сек
-                    this.draw();
+            // не удалось событийно отловить этот момент, поэтому костыль
+            while (this.checkingFont) {
+                this.stopCheckingFont = true;
                 await utils.sleep(100);
             }
 
-            if (this.parsed === parsed) {
-                this.parsed.setSettings({testWidth: this.drawHelper.measureText(t, {})});
-                this.draw();
+            this.checkingFont = true;
+            this.stopCheckingFont = false;
+            try {
+                const parsed = this.parsed;
+
+                let i = 0;
+                const t = 'Это тестовый текст. Его ширина выдается системой неправильно некоторое время.';
+                let twprev = 0;
+                //5 секунд проверяем изменения шрифта
+                while (!this.stopCheckingFont && i++ < 50 && this.parsed === parsed) {
+                    const tw = this.drawHelper.measureText(t, {});
+                    if (tw !== twprev) {
+                        this.parsed.setSettings({testWidth: tw});
+                        this.draw();
+                        twprev = tw;
+                    }
+                    await utils.sleep(100);
+                }
+            } finally {
+                this.checkingFont = false;
             }
         }
     }
