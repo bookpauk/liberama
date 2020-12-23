@@ -270,6 +270,14 @@ body, html, #app {
     animation: rotating 2s linear infinite;
 }
 
+@keyframes rotating { 
+    from { 
+        transform: rotate(0deg); 
+    } to { 
+        transform: rotate(360deg); 
+    }
+}
+
 .notify-button-icon {
     font-size: 16px !important;
 }
