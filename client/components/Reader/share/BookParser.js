@@ -678,7 +678,7 @@ export default class BookParser {
                         spaceIndex = i;
 
                     if (i - spaceIndex >= maxWordLength && i < p.text.length - 1 && 
-                        this.measureText(p.text.substr(spaceIndex + 1, i - spaceIndex), p.style) >= this.w - this.p) {
+                        this.measureText(p.text.substr(spaceIndex + 1, i - spaceIndex), p.style) >= this.sets.w - this.sets.p) {
                         result.push({style: p.style, image: p.image, text: p.text.substr(0, i + 1)});
                         p = {style: p.style, image: p.image, text: p.text.substr(i + 1)};
                         spaceIndex = -1;
@@ -831,8 +831,8 @@ export default class BookParser {
 
                 const maxH = lineCount*parsed.lineHeight;
                 let maxH2 = maxH;
-                if (parsed.imageFitWidth && bin.w > this.w) {
-                    maxH2 = bin.h*this.w/bin.w;
+                if (parsed.imageFitWidth && bin.w > parsed.w) {
+                    maxH2 = bin.h*parsed.w/bin.w;
                     c = Math.ceil(maxH2/parsed.lineHeight);
                 }
                 lineCount = (c < lineCount ? c : lineCount);
