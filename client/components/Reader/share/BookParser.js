@@ -393,6 +393,7 @@ export default class BookParser {
 
                 if (tag == 'text-author') {
                     newParagraph();
+                    bold = true;
                     space += 1;
                 }
             }
@@ -443,7 +444,9 @@ export default class BookParser {
                     }
 
                     if (tag == 'text-author') {
+                        bold = false;
                         space -= 1;
+                        newParagraph();
                     }
                 }
 
