@@ -98,6 +98,7 @@ export default class BookParser {
         */
         const getImageDimensions = (binaryId, binaryType, data) => {
             return new Promise ((resolve, reject) => { (async() => {
+                data = data.replace(/[\n\r\s]/g, '');
                 const i = new Image();
                 let resolved = false;
                 i.onload = () => {
@@ -218,8 +219,8 @@ export default class BookParser {
             if (tag == 'binary') {
                 let attrs = sax.getAttrsSync(tail);
                 binaryType = (attrs['content-type'] && attrs['content-type'].value ? attrs['content-type'].value : '');
-                binaryType = (binaryType == 'image/jpg' ? 'image/jpeg' : binaryType);
-                if (binaryType == 'image/jpeg' || binaryType == 'image/png' || binaryType == 'application/octet-stream')
+                binaryType = (binaryType == 'image/jpg' || binaryType == 'application/octet-stream' ? 'image/jpeg' : binaryType);
+                if (binaryType == 'image/jpeg' || binaryType == 'image/png')
                     binaryId = (attrs.id.value ? attrs.id.value : '');
             }
 
@@ -244,8 +245,11 @@ export default class BookParser {
                     } else {//external
                         imageNum++;
 
-                        if (!this.sets.isTesting)
+                        if (!this.sets.isTesting) {
                             dimPromises.push(getExternalImageDimensions(href));
+                        } else {
+                            dimPromises.push(this.sets.getExternalImageDimensions(this, href));
+                        }
                         newParagraph(`<image href="${href}" num="${imageNum}">${' '.repeat(maxImageLineCount)}</image>`, maxImageLineCount);
 
                         this.images.push({paraIndex, num: imageNum, id, local, alt});
@@ -492,8 +496,12 @@ export default class BookParser {
                 growParagraph(`${tOpen}${text}${tClose}`, text.length);
             }
 
-            if (binaryId && !this.sets.isTesting) {
-                dimPromises.push(getImageDimensions(binaryId, binaryType, text));
+            if (binaryId) {
+                if (!this.sets.isTesting) {
+                    dimPromises.push(getImageDimensions(binaryId, binaryType, text));
+                } else {
+                    dimPromises.push(this.sets.getImageDimensions(this, binaryId, binaryType, text));
+                }
             }
         };
 
