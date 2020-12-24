@@ -435,8 +435,7 @@ export default class BookParser {
                     if (tag == 'epigraph' || tag == 'annotation') {
                         italic = false;
                         space -= 1;
-                        if (tag == 'annotation')
-                            newParagraph();
+                        newParagraph();
                     }
 
                     if (tag == 'stanza') {
@@ -446,7 +445,6 @@ export default class BookParser {
                     if (tag == 'text-author') {
                         bold = false;
                         space -= 1;
-                        newParagraph();
                     }
                 }
 
