@@ -152,14 +152,59 @@ export default class BookParser {
             })().catch(reject); });
         };
 
-        const newParagraph = (text, len, addIndex) => {
+        const correctCurrentPara = () => {
+            //коррекция текущего параграфа
+            if (paraIndex >= 0) {
+                const prevParaIndex = paraIndex;
+                let p = para[paraIndex];
+                paraOffset -= p.length;
+                //добавление пустых (addEmptyParagraphs) параграфов перед текущим непустым
+                if (p.text.trim() != '') {
+                    for (let i = 0; i < 2; i++) {
+                        para[paraIndex] = {
+                            index: paraIndex,
+                            offset: paraOffset,
+                            length: 1,
+                            text: ' ',
+                            addIndex: i + 1,
+                        };
+                        paraIndex++;
+                        paraOffset++;
+                    }
+
+                    if (curTitle.paraIndex == prevParaIndex)
+                        curTitle.paraIndex = paraIndex;
+                    if (curSubtitle.paraIndex == prevParaIndex)
+                        curSubtitle.paraIndex = paraIndex;
+                }
+
+                //уберем пробелы с концов параграфа, минимум 1 пробел должен быть у пустого параграфа
+                let newParaText = p.text.trim();
+                newParaText = (newParaText.length ? newParaText : ' ');
+                const ldiff = p.text.length - newParaText.length;
+                if (ldiff != 0) {
+                    p.text = newParaText;
+                    p.length -= ldiff;
+                }
+
+                p.index = paraIndex;
+                p.offset = paraOffset;
+                para[paraIndex] = p;
+                paraOffset += p.length;
+            }
+        };
+
+        const newParagraph = (text = '', len = 0) => {
+            correctCurrentPara();
+
+            //новый параграф
             paraIndex++;
             let p = {
                 index: paraIndex,
                 offset: paraOffset,
                 length: len,
                 text: text,
-                addIndex: (addIndex ? addIndex : 0),
+                addIndex: 0,
             };
 
             if (inSubtitle) {
@@ -169,53 +214,26 @@ export default class BookParser {
             }
 
             para[paraIndex] = p;
-            paraOffset += p.length;
+            paraOffset += len;
         };
 
         const growParagraph = (text, len) => {
             if (paraIndex < 0) {
-                newParagraph(' ', 1);
+                newParagraph();
                 growParagraph(text, len);
                 return;
             }
 
-            const prevParaIndex = paraIndex;
-            let p = para[paraIndex];
-            paraOffset -= p.length;
-            //добавление пустых (addEmptyParagraphs) параграфов перед текущим
-            if (p.length == 1 && p.text[0] == ' ' && len > 0) {
-                paraIndex--;
-                for (let i = 0; i < 2; i++) {
-                    newParagraph(' ', 1, i + 1);
-                }
-
-                paraIndex++;
-                p.index = paraIndex;
-                p.offset = paraOffset;
-                para[paraIndex] = p;
-
-                if (curTitle.paraIndex == prevParaIndex)
-                    curTitle.paraIndex = paraIndex;
-                if (curSubtitle.paraIndex == prevParaIndex)
-                    curSubtitle.paraIndex = paraIndex;
-
-                //уберем начальный пробел
-                p.length = 0;
-                p.text = p.text.substr(1);
-            }
-
-            p.length += len;
-            p.text += text;
-
-            
             if (inSubtitle) {
                 curSubtitle.title += text;
             } else if (inTitle) {
                 curTitle.title += text;
             }
 
-            para[paraIndex] = p;
-            paraOffset += p.length;
+            const p = para[paraIndex];
+            p.length += len;
+            p.text += text;
+            paraOffset += len;
         };
 
         const onStartNode = (elemName, tail) => {// eslint-disable-line no-unused-vars
@@ -250,7 +268,7 @@ export default class BookParser {
                         this.images.push({paraIndex, num: imageNum, id, local, alt});
 
                         if (inPara && this.sets.showInlineImagesInCenter)
-                            newParagraph(' ', 1);
+                            newParagraph();
                     } else {//external
                         imageNum++;
 
@@ -300,25 +318,25 @@ export default class BookParser {
                             newParagraph(`<emphasis><space w="1">${a}</space></emphasis>`, a.length);
                         });
                         if (ann.length)
-                            newParagraph(' ', 1);
+                            newParagraph();
                     }
 
                     if (isFirstBody && fb2.sequence && fb2.sequence.length) {
                         const bt = utils.getBookTitle(fb2);
                         if (bt.sequence) {
                             newParagraph(bt.sequence, bt.sequence.length);
-                            newParagraph(' ', 1);
+                            newParagraph();
                         }
                     }
 
                     if (!isFirstBody)
-                        newParagraph(' ', 1);
+                        newParagraph();
                     isFirstBody = false;
                     bodyIndex++;
                 }
 
                 if (tag == 'title') {
-                    newParagraph(' ', 1);
+                    newParagraph();
                     isFirstTitlePara = true;
                     bold = true;
                     center = true;
@@ -330,7 +348,7 @@ export default class BookParser {
 
                 if (tag == 'section') {
                     if (!isFirstSection)
-                        newParagraph(' ', 1);
+                        newParagraph();
                     isFirstSection = false;
                     sectionLevel++;
                 }
@@ -341,7 +359,7 @@ export default class BookParser {
 
                 if ((tag == 'p' || tag == 'empty-line' || tag == 'v')) {
                     if (!(tag == 'p' && isFirstTitlePara))
-                        newParagraph(' ', 1);
+                        newParagraph();
                     if (tag == 'p') {
                         inPara = true;
                         isFirstTitlePara = false;
@@ -349,7 +367,7 @@ export default class BookParser {
                 }
 
                 if (tag == 'subtitle') {
-                    newParagraph(' ', 1);
+                    newParagraph();
                     isFirstTitlePara = true;
                     bold = true;
                     center = true;
@@ -370,11 +388,11 @@ export default class BookParser {
                 }
 
                 if (tag == 'poem') {
-                    newParagraph(' ', 1);
+                    newParagraph();
                 }
 
                 if (tag == 'text-author') {
-                    newParagraph(' ', 1);
+                    newParagraph();
                     space += 1;
                 }
             }
@@ -417,11 +435,11 @@ export default class BookParser {
                         italic = false;
                         space -= 1;
                         if (tag == 'annotation')
-                            newParagraph(' ', 1);
+                            newParagraph();
                     }
 
                     if (tag == 'stanza') {
-                        newParagraph(' ', 1);
+                        newParagraph();
                     }
 
                     if (tag == 'text-author') {
@@ -441,16 +459,13 @@ export default class BookParser {
 
         const onTextNode = (text) => {// eslint-disable-line no-unused-vars
             text = he.decode(text);
-            text = text.replace(/>/g, '&gt;');
-            text = text.replace(/</g, '&lt;');
+            text = text.replace(/>/g, '&gt;').replace(/</g, '&lt;').replace(/[\t\n\r\xa0]/g, ' ');
 
             if (text && text.trim() == '')
-                text = (text.indexOf(' ') >= 0 ? ' ' : '');
+                text = ' ';
 
             if (!text)
                 return;
-
-            text = text.replace(/[\t\n\r\xa0]/g, ' ');
 
             const authorLength = (fb2.author && fb2.author.length ? fb2.author.length : 0);
             switch (path) {
@@ -489,28 +504,31 @@ export default class BookParser {
                     fb2.annotation += text;
             }
 
-            let tOpen = (center ? '<center>' : '');
-            tOpen += (bold ? '<strong>' : '');
-            tOpen += (italic ? '<emphasis>' : '');
-            tOpen += (space ? `<space w="${space}">` : '');
-            let tClose = (space ? '</space>' : '');
-            tClose += (italic ? '</emphasis>' : '');
-            tClose += (bold ? '</strong>' : '');
-            tClose += (center ? '</center>' : '');
-
-            if (path.indexOf('/fictionbook/body/title') == 0 ||
-                path.indexOf('/fictionbook/body/section') == 0 ||
-                path.indexOf('/fictionbook/body/epigraph') == 0
-                ) {
-                growParagraph(`${tOpen}${text}${tClose}`, text.length);
-            }
-
             if (binaryId) {
                 if (!this.sets.isTesting) {
                     dimPromises.push(getImageDimensions(binaryId, binaryType, text));
                 } else {
                     dimPromises.push(this.sets.getImageDimensions(this, binaryId, binaryType, text));
                 }
+            }
+
+            if (path.indexOf('/fictionbook/body/title') == 0 ||
+                path.indexOf('/fictionbook/body/section') == 0 ||
+                path.indexOf('/fictionbook/body/epigraph') == 0
+                ) {
+                let tOpen = (center ? '<center>' : '');
+                tOpen += (bold ? '<strong>' : '');
+                tOpen += (italic ? '<emphasis>' : '');
+                tOpen += (space ? `<space w="${space}">` : '');
+                let tClose = (space ? '</space>' : '');
+                tClose += (italic ? '</emphasis>' : '');
+                tClose += (bold ? '</strong>' : '');
+                tClose += (center ? '</center>' : '');
+
+                if (text != ' ')
+                    growParagraph(`${tOpen}${text}${tClose}`, text.length);
+                else
+                    growParagraph(' ', 1);
             }
         };
 
@@ -522,6 +540,7 @@ export default class BookParser {
         await sax.parse(data, {
             onStartNode, onEndNode, onTextNode, onProgress
         });
+        correctCurrentPara();
 
         if (dimPromises.length) {
             try {
