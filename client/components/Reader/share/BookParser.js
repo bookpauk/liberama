@@ -723,13 +723,12 @@ export default class BookParser {
 
             if (slogLen > 1 && i < len - 2 && (
                     //гласная, а следом не 2 согласные буквы
-                    (glas.has(word[i]) && !(soglas.has(word[i + 1]) && 
-                        soglas.has(word[i + 2])) && alpha.has(word[i + 1]) && alpha.has(word[i + 2])
+                    (glas.has(word[i]) && !( soglas.has(word[i + 1]) && soglas.has(word[i + 2]) ) &&
+                        alpha.has(word[i + 1]) && alpha.has(word[i + 2])
                     ) ||
                     //предыдущая не согласная буква, текущая согласная, а следом согласная и согласная|гласная буквы
-                    (alpha.has(word[i - 1]) && !soglas.has(word[i - 1]) && 
-                        soglas.has(word[i]) && soglas.has(word[i + 1]) && 
-                        (glas.has(word[i + 2]) || soglas.has(word[i + 2])) && 
+                    (alpha.has(word[i - 1]) && !soglas.has(word[i - 1]) && soglas.has(word[i]) && soglas.has(word[i + 1]) && 
+                        ( glas.has(word[i + 2]) || soglas.has(word[i + 2]) ) && 
                         alpha.has(word[i + 1]) && alpha.has(word[i + 2])
                     ) ||
                     //мягкий или твердый знак или Й
