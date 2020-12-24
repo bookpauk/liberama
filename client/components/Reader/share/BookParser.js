@@ -30,6 +30,15 @@ const defaultSettings = {
     },
 };
 
+//for splitToSlogi()
+const glas = new Set(['а', 'А', 'о', 'О', 'и', 'И', 'е', 'Е', 'ё', 'Ё', 'э', 'Э', 'ы', 'Ы', 'у', 'У', 'ю', 'Ю', 'я', 'Я']);
+const soglas = new Set([
+    'б', 'в', 'г', 'д', 'ж', 'з', 'й', 'к', 'л', 'м', 'н', 'п', 'р', 'с', 'т', 'ф', 'х', 'ц', 'ч', 'ш', 'щ',
+    'Б', 'В', 'Г', 'Д', 'Ж', 'З', 'Й', 'К', 'Л', 'М', 'Н', 'П', 'Р', 'С', 'Т', 'Ф', 'Х', 'Ч', 'Ц', 'Ш', 'Щ'
+]);
+const znak = new Set(['ь', 'Ь', 'ъ', 'Ъ', 'й', 'Й']);
+const alpha = new Set([...glas, ...soglas, ...znak]);
+
 export default class BookParser {
     constructor(settings = {}) {
         this.sets = {};
@@ -704,48 +713,44 @@ export default class BookParser {
     splitToSlogi(word) {
         let result = [];
 
-        const glas = new Set(['а', 'А', 'о', 'О', 'и', 'И', 'е', 'Е', 'ё', 'Ё', 'э', 'Э', 'ы', 'Ы', 'у', 'У', 'ю', 'Ю', 'я', 'Я']);
-        const soglas = new Set([
-            'б', 'в', 'г', 'д', 'ж', 'з', 'й', 'к', 'л', 'м', 'н', 'п', 'р', 'с', 'т', 'ф', 'х', 'ц', 'ч', 'ш', 'щ',
-            'Б', 'В', 'Г', 'Д', 'Ж', 'З', 'Й', 'К', 'Л', 'М', 'Н', 'П', 'Р', 'С', 'Т', 'Ф', 'Х', 'Ч', 'Ц', 'Ш', 'Щ'
-        ]);
-        const znak = new Set(['ь', 'Ь', 'ъ', 'Ъ', 'й', 'Й']);
-        const alpha = new Set([...glas, ...soglas, ...znak]);
-
-        let slog = '';
-        let slogLen = 0;
         const len = word.length;
-        word += '   ';
-        for (let i = 0; i < len; i++) {
-            slog += word[i];
-            if (alpha.has(word[i]))
-                slogLen++;
+        if (len > 3) {
+            let slog = '';
+            let slogLen = 0;
+            word += '   ';
+            for (let i = 0; i < len; i++) {
+                slog += word[i];
+                if (alpha.has(word[i]))
+                    slogLen++;
 
-            if (slogLen > 1 && i < len - 2 && (
-                    //гласная, а следом не 2 согласные буквы
-                    (glas.has(word[i]) && !( soglas.has(word[i + 1]) && soglas.has(word[i + 2]) ) &&
-                        alpha.has(word[i + 1]) && alpha.has(word[i + 2])
-                    ) ||
-                    //предыдущая не согласная буква, текущая согласная, а следом согласная и согласная|гласная буквы
-                    (alpha.has(word[i - 1]) && !soglas.has(word[i - 1]) && soglas.has(word[i]) && soglas.has(word[i + 1]) && 
-                        ( glas.has(word[i + 2]) || soglas.has(word[i + 2]) ) && 
-                        alpha.has(word[i + 1]) && alpha.has(word[i + 2])
-                    ) ||
-                    //мягкий или твердый знак или Й
-                    (znak.has(word[i]) && alpha.has(word[i + 1]) && alpha.has(word[i + 2])) ||
-                    (word[i] == '-')
-                ) &&
-                //нельзя оставлять окончания на ь, ъ, й
-                !(znak.has(word[i + 2]) && !alpha.has(word[i + 3]))
+                if (slogLen > 1 && i < len - 2 && (
+                        //гласная, а следом не 2 согласные буквы
+                        (glas.has(word[i]) && !( soglas.has(word[i + 1]) && soglas.has(word[i + 2]) ) &&
+                            alpha.has(word[i + 1]) && alpha.has(word[i + 2])
+                        ) ||
+                        //предыдущая не согласная буква, текущая согласная, а следом согласная и согласная|гласная буквы
+                        (alpha.has(word[i - 1]) && !soglas.has(word[i - 1]) && soglas.has(word[i]) && soglas.has(word[i + 1]) && 
+                            ( glas.has(word[i + 2]) || soglas.has(word[i + 2]) ) && 
+                            alpha.has(word[i + 1]) && alpha.has(word[i + 2])
+                        ) ||
+                        //мягкий или твердый знак или Й
+                        (znak.has(word[i]) && alpha.has(word[i + 1]) && alpha.has(word[i + 2])) ||
+                        (word[i] == '-')
+                    ) &&
+                    //нельзя оставлять окончания на ь, ъ, й
+                    !(znak.has(word[i + 2]) && !alpha.has(word[i + 3]))
 
-                ) {
-                result.push(slog);
-                slog = '';
-                slogLen = 0;
+                    ) {
+                    result.push(slog);
+                    slog = '';
+                    slogLen = 0;
+                }
             }
+            if (slog)
+                result.push(slog);
+        } else {
+            result.push(word);            
         }
-        if (slog)
-            result.push(slog);
 
         return result;
     }
