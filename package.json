@@ -10,8 +10,8 @@
   "scripts": {
     "dev": "nodemon --inspect --ignore server/public --ignore server/data --ignore client --exec 'node server'",
     "build:client": "webpack --config build/webpack.prod.config.js",
-    "build:linux": "npm run build:client && node build/linux && pkg -t latest-linux-x64 -o dist/linux/liberama .",
-    "build:win": "npm run build:client && node build/win && pkg -t latest-win-x64 -o dist/win/liberama .",
+    "build:linux": "npm run build:client && node build/linux && pkg -t node12-linux-x64 -o dist/linux/liberama .",
+    "build:win": "npm run build:client && node build/win && pkg -t node12-win-x64 -o dist/win/liberama .",
     "lint": "eslint --ext=.js,.vue client server",
     "build:client-dev": "webpack --config build/webpack.dev.config.js",
     "postinstall": "npm run build:client-dev && node build/linux"
