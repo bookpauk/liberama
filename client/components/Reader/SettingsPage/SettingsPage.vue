@@ -148,7 +148,7 @@ export default @Component({
 })
 class SettingsPage extends Vue {
     selectedTab = 'profiles';
-    selectedViewTab = 'color';
+    selectedViewTab = 'mode';
     selectedKeysTab = 'mouse';
     form = {};
     fontBold = false;

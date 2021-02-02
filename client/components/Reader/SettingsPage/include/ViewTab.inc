@@ -7,6 +7,7 @@
     no-caps
     class="no-mp bg-grey-4 text-grey-7"
 >
+    <q-tab name="mode" label="Режим" />
     <q-tab name="color" label="Цвет" />
     <q-tab name="font" label="Шрифт" />
     <q-tab name="text" label="Текст" />
@@ -16,6 +17,10 @@
 <div class="q-mb-sm"/>
 
 <div class="col tab-panel">
+    <div v-if="selectedViewTab == 'mode'">
+        @@include('./ViewTab/Mode.inc');
+    </div>
+
     <div v-if="selectedViewTab == 'color'">
         @@include('./ViewTab/Color.inc');
     </div>

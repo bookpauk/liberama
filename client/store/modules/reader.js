@@ -225,6 +225,8 @@ const settingDefaults = {
     indentTB: 0,// px, отступ всего текста сверху и снизу
     wordWrap: true,//перенос по слогам
     keepLastToFirst: false,// перенос последней строки в первую при листании
+    dualPageMode: false,
+    dualIndentLR: 10,// px, отступ слева и справа внутри страницы в двухстраничном режиме
 
     showStatusBar: true,
     statusBarTop: false,// top, bottom

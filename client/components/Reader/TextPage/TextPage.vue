@@ -165,7 +165,8 @@ class TextPage extends Vue {
         this.scrollHeight = this.realHeight - (this.showStatusBar ? this.statusBarHeight : 0);
         this.h = this.scrollHeight - 2*this.indentTB;
         this.lineHeight = this.fontSize + this.lineInterval;
-        this.pageLineCount = 1 + Math.floor((this.h - this.lineHeight + this.lineInterval/2)/this.lineHeight);
+        const pageRowsCount = 1 + Math.floor((this.h - this.lineHeight + this.lineInterval/2)/this.lineHeight);
+        this.pageLineCount = (this.dualPageMode ? pageRowsCount*2 : pageRowsCount)
 
         this.$refs.scrollingPage1.style.width = this.w + 'px';
         this.$refs.scrollingPage2.style.width = this.w + 'px';
@@ -189,6 +190,7 @@ class TextPage extends Vue {
         this.drawHelper.book = this.book;
         this.drawHelper.parsed = this.parsed;
         this.drawHelper.pageLineCount = this.pageLineCount;
+        this.drawHelper.dualPageMode = this.dualPageMode;
 
         this.drawHelper.backgroundColor = this.backgroundColor;
         this.drawHelper.statusBarColor = this.statusBarColor;
@@ -203,6 +205,7 @@ class TextPage extends Vue {
         this.drawHelper.w = this.w;
         this.drawHelper.h = this.h;
         this.drawHelper.indentLR = this.indentLR;
+        this.drawHelper.dualIndentLR = this.dualIndentLR;
         this.drawHelper.textAlignJustify = this.textAlignJustify;
         this.drawHelper.lineHeight = this.lineHeight;
         this.drawHelper.context = this.context;
@@ -254,7 +257,7 @@ class TextPage extends Vue {
         }
 
         //scrolling page
-        const pageSpace = this.scrollHeight - this.pageLineCount*this.lineHeight;
+        const pageSpace = this.scrollHeight - pageRowsCount*this.lineHeight;
         let top = pageSpace/2;
         if (this.showStatusBar)
             top += this.statusBarHeight*(this.statusBarTop ? 1 : 0);
