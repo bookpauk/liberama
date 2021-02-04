@@ -20,6 +20,7 @@ const defaultSettings = {
     showInlineImagesInCenter: true, //выносить изображения в центр, работает на этапе первичного парсинга (parse)
     imageHeightLines: 100, //кол-во строк, максимальная высота изображения
     imageFitWidth: true, //ширина изображения не более ширины страницы
+    dualPageMode: false, //двухстраничный режим
     compactTextPerc: 0, //проценты, степень компактности текста
     testWidth: 0, //ширина тестовой строки, пересчитывается извне при изменении шрифта браузером
     isTesting: false, //тестовый режим
@@ -793,7 +794,7 @@ export default class BookParser {
             para.parsed.lineHeight === s.lineHeight &&
             para.parsed.showImages === s.showImages &&
             para.parsed.imageHeightLines === s.imageHeightLines &&
-            para.parsed.imageFitWidth === s.imageFitWidth &&
+            para.parsed.imageFitWidth === (s.imageFitWidth || s.dualPageMode) &&
             para.parsed.compactTextPerc === s.compactTextPerc &&
             para.parsed.testWidth === s.testWidth
             )
@@ -811,7 +812,7 @@ export default class BookParser {
             lineHeight: s.lineHeight,
             showImages: s.showImages,
             imageHeightLines: s.imageHeightLines,
-            imageFitWidth: s.imageFitWidth,
+            imageFitWidth: (s.imageFitWidth || s.dualPageMode),
             compactTextPerc: s.compactTextPerc,
             testWidth: s.testWidth,
             visible: true, //вычисляется позже

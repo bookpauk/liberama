@@ -19,7 +19,7 @@ export default class DrawHelper {
         return this.context.measureText(text).width;
     }
 
-    drawLine(line, lineIndex, sel, imageDrawn) {
+    drawLine(line, lineIndex, baseLineIndex, sel, imageDrawn) {
         /* line:
         {
             begin: Number,
@@ -81,7 +81,7 @@ export default class DrawHelper {
                     }
 
                     const left = (this.w - img.w)/2;
-                    const top = ((img.lineCount*this.lineHeight - img.h)/2) + (lineIndex - img.imageLine)*this.lineHeight;
+                    const top = ((img.lineCount*this.lineHeight - img.h)/2) + (lineIndex - baseLineIndex - img.imageLine)*this.lineHeight;
                     if (img.local) {
                         lineText += `<img src="data:${bin.type};base64,${bin.data}" style="position: absolute; left: ${left}px; top: ${top}px; ${resize}"/>`;
                     } else {
@@ -131,10 +131,11 @@ export default class DrawHelper {
 
         const boxH = this.h + (isScrolling ? this.lineHeight : 0);
         let out = `<div style="width: ${this.boxW}px; height: ${boxH}px;` + 
-            ` position: absolute; top: ${this.fontSize*this.textShift}px; color: ${this.textColor}; font: ${font}; ${justify}` +
+            ` position: relative; top: ${this.fontSize*this.textShift}px; color: ${this.textColor}; font: ${font}; ${justify}` +
             ` line-height: ${this.lineHeight}px; white-space: nowrap;">`;
 
-        let imageDrawn = new Set();
+        let imageDrawn1 = new Set();
+        let imageDrawn2 = new Set();
         let len = lines.length;
         const lineCount = this.pageLineCount + (isScrolling ? 1 : 0);
         len = (len > lineCount ? lineCount : len);
@@ -165,19 +166,19 @@ export default class DrawHelper {
         //отрисовка строк
         if (!this.dualPageMode) {
             for (let i = 0; i < len; i++) {
-                out += this.drawLine(lines[i], i, sel, imageDrawn);
+                out += this.drawLine(lines[i], i, 0, sel, imageDrawn1);
             }
         } else {
-            out += `<div style="width: ${this.w}px; margin: 0 ${this.dualIndentLR}px 0 ${this.dualIndentLR}px; display: inline-block;">`;
-            const l2 = len/2;
+            out += `<div style="width: ${this.w}px; margin: 0 ${this.dualIndentLR}px 0 ${this.dualIndentLR}px; position: relative; display: inline-block;">`;
+            const l2 = parseInt(Math.ceil(len/2), 10);
             for (let i = 0; i < l2; i++) {
-                out += this.drawLine(lines[i], i, sel, imageDrawn);
+                out += this.drawLine(lines[i], i, 0, sel, imageDrawn1);
             }
             out += '</div>';
 
-            out += `<div style="width: ${this.w}px; margin: 0 ${this.dualIndentLR}px 0 ${this.dualIndentLR}px; display: inline-block;">`;
+            out += `<div style="width: ${this.w}px; margin: 0 ${this.dualIndentLR}px 0 ${this.dualIndentLR}px; position: relative; display: inline-block;">`;
             for (let i = l2; i < len; i++) {
-                out += this.drawLine(lines[i], i, sel, imageDrawn);
+                out += this.drawLine(lines[i], i, l2, sel, imageDrawn2);
             }
             out += '</div>';
         }

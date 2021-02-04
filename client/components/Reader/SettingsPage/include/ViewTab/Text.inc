@@ -123,7 +123,7 @@
 <div class="item row">
     <div class="label-2"></div>
     <div class="col row">
-        <q-checkbox v-model="imageFitWidth" :disable="!showImages" size="xs" label="Ширина не более размера экрана" />
+        <q-checkbox v-model="imageFitWidth" size="xs" label="Ширина не более размера страницы" :disable="!showImages || dualPageMode"/>
     </div>
 </div>
 
