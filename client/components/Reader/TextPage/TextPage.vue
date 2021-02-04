@@ -161,15 +161,16 @@ class TextPage extends Vue {
         this.$refs.layoutEvents.style.width = this.realWidth + 'px';
         this.$refs.layoutEvents.style.height = this.realHeight + 'px';
 
-        this.w = this.realWidth - 2*this.indentLR;
+        const dual = (this.dualPageMode ? 2 : 1);
+        this.boxW = this.realWidth - 2*this.indentLR;
+        this.w = this.boxW/dual - (this.dualPageMode ? 2*this.dualIndentLR : 0);
+
         this.scrollHeight = this.realHeight - (this.showStatusBar ? this.statusBarHeight : 0);
         this.h = this.scrollHeight - 2*this.indentTB;
+
         this.lineHeight = this.fontSize + this.lineInterval;
         const pageRowsCount = 1 + Math.floor((this.h - this.lineHeight + this.lineInterval/2)/this.lineHeight);
         this.pageLineCount = (this.dualPageMode ? pageRowsCount*2 : pageRowsCount)
-
-        this.$refs.scrollingPage1.style.width = this.w + 'px';
-        this.$refs.scrollingPage2.style.width = this.w + 'px';
 
         //stuff
         this.currentAnimation = '';
@@ -202,6 +203,7 @@ class TextPage extends Vue {
         this.drawHelper.textColor = this.textColor;
         this.drawHelper.textShift = this.textShift;
         this.drawHelper.p = this.p;
+        this.drawHelper.boxW = this.boxW;
         this.drawHelper.w = this.w;
         this.drawHelper.h = this.h;
         this.drawHelper.indentLR = this.indentLR;
@@ -266,14 +268,14 @@ class TextPage extends Vue {
         
         page1.perspective = page2.perspective = '3072px';
 
-        page1.width = page2.width = this.w + this.indentLR + 'px';
+        page1.width = page2.width = this.boxW + this.indentLR + 'px';
         page1.height = page2.height = this.scrollHeight - (pageSpace > 0 ? pageSpace : 0) + 'px';
         page1.top = page2.top = top + 'px';
         page1.left = page2.left = this.indentLR + 'px';
 
         page1 = this.$refs.scrollingPage1.style;
         page2 = this.$refs.scrollingPage2.style;
-        page1.width = page2.width = this.w + this.indentLR + 'px';
+        page1.width = page2.width = this.boxW + this.indentLR + 'px';
         page1.height = page2.height = this.scrollHeight + this.lineHeight + 'px';
     }
 

@@ -20,7 +20,20 @@ export default class DrawHelper {
     }
 
     drawLine(line, lineIndex, sel, imageDrawn) {
-        let out = '';
+        /* line:
+        {
+            begin: Number,
+            end: Number,
+            first: Boolean,
+            last: Boolean,
+            parts: array of {
+                style: {bold: Boolean, italic: Boolean, center: Boolean},
+                image: {local: Boolean, inline: Boolean, id: String, imageLine: Number, lineCount: Number, paraIndex: Number},
+                text: String,
+            }            
+        }*/
+
+        let out = '<div>';
 
         let lineText = '';
         let center = false;
@@ -104,7 +117,7 @@ export default class DrawHelper {
         if (line.last || center)
             lineText = `<span style="display: inline-block; ${centerStyle}">${lineText}</span>`;
 
-        out += (lineIndex > 0 ? '<br>' : '') + lineText;
+        out += lineText + '</div>';
 
         return out;
     }
@@ -116,7 +129,8 @@ export default class DrawHelper {
         const font = this.fontByStyle({});
         const justify = (this.textAlignJustify ? 'text-align: justify; text-align-last: justify;' : '');
 
-        let out = `<div style="width: ${this.w}px; height: ${this.h + (isScrolling ? this.lineHeight : 0)}px;` + 
+        const boxH = this.h + (isScrolling ? this.lineHeight : 0);
+        let out = `<div style="width: ${this.boxW}px; height: ${boxH}px;` + 
             ` position: absolute; top: ${this.fontSize*this.textShift}px; color: ${this.textColor}; font: ${font}; ${justify}` +
             ` line-height: ${this.lineHeight}px; white-space: nowrap;">`;
 
@@ -125,43 +139,47 @@ export default class DrawHelper {
         const lineCount = this.pageLineCount + (isScrolling ? 1 : 0);
         len = (len > lineCount ? lineCount : len);
 
-        for (let i = 0; i < len; i++) {
-            const line = lines[i];
-            /* line:
-            {
-                begin: Number,
-                end: Number,
-                first: Boolean,
-                last: Boolean,
-                parts: array of {
-                    style: {bold: Boolean, italic: Boolean, center: Boolean},
-                    image: {local: Boolean, inline: Boolean, id: String, imageLine: Number, lineCount: Number, paraIndex: Number},
-                    text: String,
-                }
-            }*/
-            let sel = new Set();
-            //поиск
-            if (i == 0 && this.searching) {
-                let pureText = '';
-                for (const part of line.parts) {
-                    pureText += part.text;
-                }
-
-                pureText = pureText.toLowerCase();
-                let j = 0;
-                while (1) {// eslint-disable-line no-constant-condition
-                    j = pureText.indexOf(this.needle, j);
-                    if (j >= 0) {
-                        for (let k = 0; k < this.needle.length; k++) {
-                            sel.add(j + k);
-                        }
-                    } else
-                        break;
-                    j++;
-                }
+        //поиск
+        let sel = new Set();
+        if (len > 0 && this.searching) {
+            const line = lines[0];
+            let pureText = '';
+            for (const part of line.parts) {
+                pureText += part.text;
             }
 
-            out += this.drawLine(line, i, sel, imageDrawn);
+            pureText = pureText.toLowerCase();
+            let j = 0;
+            while (1) {// eslint-disable-line no-constant-condition
+                j = pureText.indexOf(this.needle, j);
+                if (j >= 0) {
+                    for (let k = 0; k < this.needle.length; k++) {
+                        sel.add(j + k);
+                    }
+                } else
+                    break;
+                j++;
+            }
+        }
+
+        //отрисовка строк
+        if (!this.dualPageMode) {
+            for (let i = 0; i < len; i++) {
+                out += this.drawLine(lines[i], i, sel, imageDrawn);
+            }
+        } else {
+            out += `<div style="width: ${this.w}px; margin: 0 ${this.dualIndentLR}px 0 ${this.dualIndentLR}px; display: inline-block;">`;
+            const l2 = len/2;
+            for (let i = 0; i < l2; i++) {
+                out += this.drawLine(lines[i], i, sel, imageDrawn);
+            }
+            out += '</div>';
+
+            out += `<div style="width: ${this.w}px; margin: 0 ${this.dualIndentLR}px 0 ${this.dualIndentLR}px; display: inline-block;">`;
+            for (let i = l2; i < len; i++) {
+                out += this.drawLine(lines[i], i, sel, imageDrawn);
+            }
+            out += '</div>';
         }
 
         out += '</div>';
