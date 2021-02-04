@@ -169,8 +169,8 @@ class TextPage extends Vue {
         this.h = this.scrollHeight - 2*this.indentTB;
 
         this.lineHeight = this.fontSize + this.lineInterval;
-        const pageRowsCount = 1 + Math.floor((this.h - this.lineHeight + this.lineInterval/2)/this.lineHeight);
-        this.pageLineCount = (this.dualPageMode ? pageRowsCount*2 : pageRowsCount)
+        this.pageRowsCount = 1 + Math.floor((this.h - this.lineHeight + this.lineInterval/2)/this.lineHeight);
+        this.pageLineCount = (this.dualPageMode ? this.pageRowsCount*2 : this.pageRowsCount)
 
         //stuff
         this.currentAnimation = '';
@@ -190,8 +190,16 @@ class TextPage extends Vue {
         this.drawHelper.lastBook = this.lastBook;
         this.drawHelper.book = this.book;
         this.drawHelper.parsed = this.parsed;
+        this.drawHelper.pageRowsCount = this.pageRowsCount;
         this.drawHelper.pageLineCount = this.pageLineCount;
+
         this.drawHelper.dualPageMode = this.dualPageMode;
+        this.drawHelper.dualIndentLR = this.dualIndentLR;
+        this.drawHelper.dualDivWidth = this.dualDivWidth;
+        this.drawHelper.dualDivHeight = this.dualDivHeight;
+        this.drawHelper.dualDivColor = this.hex2rgba(this.textColor || '#000000', this.dualDivColorAlpha);
+        this.drawHelper.dualDivStrokeFill = this.dualDivStrokeFill;
+        this.drawHelper.dualDivStrokeGap = this.dualDivStrokeGap;
 
         this.drawHelper.backgroundColor = this.backgroundColor;
         this.drawHelper.statusBarColor = this.statusBarColor;
@@ -207,7 +215,6 @@ class TextPage extends Vue {
         this.drawHelper.w = this.w;
         this.drawHelper.h = this.h;
         this.drawHelper.indentLR = this.indentLR;
-        this.drawHelper.dualIndentLR = this.dualIndentLR;
         this.drawHelper.textAlignJustify = this.textAlignJustify;
         this.drawHelper.lineHeight = this.lineHeight;
         this.drawHelper.context = this.context;
@@ -259,7 +266,7 @@ class TextPage extends Vue {
         }
 
         //scrolling page
-        const pageSpace = this.scrollHeight - pageRowsCount*this.lineHeight;
+        const pageSpace = this.scrollHeight - this.pageRowsCount*this.lineHeight;
         let top = pageSpace/2;
         if (this.showStatusBar)
             top += this.statusBarHeight*(this.statusBarTop ? 1 : 0);

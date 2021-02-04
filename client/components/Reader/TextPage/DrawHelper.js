@@ -130,9 +130,9 @@ export default class DrawHelper {
         const justify = (this.textAlignJustify ? 'text-align: justify; text-align-last: justify;' : '');
 
         const boxH = this.h + (isScrolling ? this.lineHeight : 0);
-        let out = `<div style="width: ${this.boxW}px; height: ${boxH}px;` + 
-            ` position: relative; top: ${this.fontSize*this.textShift}px; color: ${this.textColor}; font: ${font}; ${justify}` +
-            ` line-height: ${this.lineHeight}px; white-space: nowrap;">`;
+        let out = `<div class="row no-wrap" style="width: ${this.boxW}px; height: ${boxH}px;` + 
+            ` position: absolute; top: ${this.fontSize*this.textShift}px; color: ${this.textColor}; font: ${font}; ${justify}` +
+            ` line-height: ${this.lineHeight}px; white-space: nowrap; vertical-align: middle;">`;
 
         let imageDrawn1 = new Set();
         let imageDrawn2 = new Set();
@@ -165,18 +165,34 @@ export default class DrawHelper {
 
         //отрисовка строк
         if (!this.dualPageMode) {
+            out += `<div class="fit">`;
             for (let i = 0; i < len; i++) {
                 out += this.drawLine(lines[i], i, 0, sel, imageDrawn1);
             }
+            out += `</div>`;
         } else {
-            out += `<div style="width: ${this.w}px; margin: 0 ${this.dualIndentLR}px 0 ${this.dualIndentLR}px; position: relative; display: inline-block;">`;
-            const l2 = parseInt(Math.ceil(len/2), 10);
+            //левая страница
+            out += `<div style="width: ${this.w}px; margin-left: ${this.dualIndentLR}px; position: relative;">`;
+            const l2 = (this.pageRowsCount > len ? len : this.pageRowsCount);
             for (let i = 0; i < l2; i++) {
                 out += this.drawLine(lines[i], i, 0, sel, imageDrawn1);
             }
             out += '</div>';
 
-            out += `<div style="width: ${this.w}px; margin: 0 ${this.dualIndentLR}px 0 ${this.dualIndentLR}px; position: relative; display: inline-block;">`;
+            //разделитель
+            out += `<div style="width: ${this.dualIndentLR*2}px; top: ${-this.fontSize*this.textShift}px; position: relative">` +
+                `<div class="fit row justify-center items-center">` +
+                    `<div style="height: ${Math.round(boxH*this.dualDivHeight/100)}px; width: ${this.dualDivWidth}px;` + 
+                        `background-image: url(&quot;data:image/svg+xml;utf8,<svg width='100%' height='100%' xmlns='http://www.w3.org/2000/svg'>` +
+                            //`<rect width='100%' height='100%' style='fill: none; stroke: white; stroke-width: 4; stroke-dasharray: 5 20'/>` +
+                            `<line x1='0' y1='0' x2='0' y2='100%' stroke='${this.dualDivColor}' stroke-width='100%' stroke-dasharray='${this.dualDivStrokeFill} ${this.dualDivStrokeGap}'/>` +
+                        `</svg>&quot;);">` +
+                    `</div>` +
+                `</div>` +
+            `</div>`;
+
+            //правая страница
+            out += `<div style="width: ${this.w}px; margin-right: ${this.dualIndentLR}px; position: relative;">`;
             for (let i = l2; i < len; i++) {
                 out += this.drawLine(lines[i], i, l2, sel, imageDrawn2);
             }
