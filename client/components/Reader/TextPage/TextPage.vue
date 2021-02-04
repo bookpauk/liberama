@@ -519,7 +519,7 @@ class TextPage extends Vue {
 
     async startTextScrolling() {
         if (this.doingScrolling || !this.book || !this.parsed.textLength || !this.linesDown || this.pageLineCount < 1 ||
-            this.linesDown.length <= this.pageLineCount) {
+            this.linesDown.length <= this.pageLineCount || this.dualPageMode) {
             this.doStopScrolling();
             return;
         }

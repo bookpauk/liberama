@@ -194,6 +194,10 @@ export default @Component({
                 }
             })();
         },
+        dualPageMode(newValue) {
+            if (newValue)
+                this.stopScrolling();
+        },
     },
 })
 class Reader extends Vue {
@@ -227,6 +231,7 @@ class Reader extends Vue {
     whatsNewVisible = false;
     whatsNewContent = '';
     donationVisible = false;
+    dualPageMode = false;
 
     created() {
         this.rstore = rstore;
@@ -321,6 +326,7 @@ class Reader extends Vue {
         this.djvuQuality = settings.djvuQuality;
         this.pdfAsText = settings.pdfAsText;
         this.pdfQuality = settings.pdfQuality;
+        this.dualPageMode = settings.dualPageMode;
 
         this.readerActionByKeyCode = utils.userHotKeysObjectSwap(settings.userHotKeys);
         this.$root.readerActionByKeyEvent = (event) => {
@@ -778,7 +784,6 @@ class Reader extends Vue {
             case 'loader':
             case 'fullScreen':
             case 'setPosition':
-            case 'scrolling':
             case 'search':
             case 'copyText':
             case 'convOptions':
@@ -789,6 +794,13 @@ class Reader extends Vue {
             case 'offlineMode':
             case 'settings':
                 if (this.progressActive) {
+                    classResult = classDisabled;
+                } else if (this[`${action}Active`]) {
+                    classResult = classActive;
+                }
+                break;
+            case 'scrolling':
+                if (this.progressActive || this.dualPageMode) {
                     classResult = classDisabled;
                 } else if (this[`${action}Active`]) {
                     classResult = classActive;

@@ -317,7 +317,7 @@ export default class DrawHelper {
     }
 
     async doPageAnimationRightShift(page1, page2, duration, isDown, animation1Finish) {
-        const s = this.w + this.fontSize;
+        const s = this.boxW + this.fontSize;
 
         if (isDown) {
             page1.style.transform = `translateX(${s}px)`;

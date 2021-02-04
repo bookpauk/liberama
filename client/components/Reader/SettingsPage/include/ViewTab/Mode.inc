@@ -69,7 +69,7 @@
     </div>
 
     <div class="item row">
-        <div class="label-2">Заполнение (px)</div>
+        <div class="label-2">Заполнение</div>
         <div class="col row">
             <NumInput class="col-left" v-model="dualDivStrokeFill" :min="0" :max="2000">
                 <q-tooltip :delay="1000" anchor="top middle" self="bottom middle" content-style="font-size: 80%">
@@ -80,7 +80,7 @@
     </div>
 
     <div class="item row">
-        <div class="label-2">Промежуток (px)</div>
+        <div class="label-2">Промежуток</div>
         <div class="col row">
             <NumInput class="col-left" v-model="dualDivStrokeGap" :min="0" :max="2000">
                 <q-tooltip :delay="1000" anchor="top middle" self="bottom middle" content-style="font-size: 80%">
