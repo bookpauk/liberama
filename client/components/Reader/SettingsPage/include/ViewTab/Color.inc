@@ -22,8 +22,6 @@
                 </q-icon>
             </template>
         </q-input>
-
-        <span class="col" style="position: relative; top: 35px; left: 15px;">Обои:</span>
     </div>
 </div>
 
@@ -48,11 +46,33 @@
                 </q-icon>
             </template>
         </q-input>
+    </div>
+</div>
 
-        <div class="q-px-sm"/>
-        <q-select class="col" v-model="wallpaper" :options="wallpaperOptions"
+<div class="q-mt-md"/>
+<div class="item row">
+    <div class="label-2">Обои</div>
+    <div class="col row">
+        <q-select class="col-left no-mp" v-model="wallpaper" :options="wallpaperOptions"
             dropdown-icon="la la-angle-down la-sm"
             outlined dense emit-value map-options
-        />
+        >
+            <template v-slot:selected-item="scope">
+                <div >{{ scope.opt.label }}</div>
+                <div v-show="scope.opt.value" class="q-ml-sm" :class="scope.opt.value" style="width: 50px; height: 30px;"></div>
+            </template>
+
+            <template v-slot:option="scope">
+                <q-item
+                    v-bind="scope.itemProps"
+                    v-on="scope.itemEvents"
+                >
+                    <q-item-section>
+                        <q-item-label v-html="scope.opt.label" />
+                    </q-item-section>
+                    <q-item-section v-show="scope.opt.value" :class="scope.opt.value" style="min-width: 70px; min-height: 50px"/>
+                </q-item>
+            </template>
+        </q-select>
     </div>
 </div>
