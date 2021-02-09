@@ -495,8 +495,18 @@ class TextPage extends Vue {
     }
 
     setBackground() {
-        this.background = `<div class="layout ${this.wallpaper}" style="width: ${this.realWidth}px; height: ${this.realHeight}px;` + 
-            ` background-color: ${this.backgroundColor}"></div>`;
+        if (this.wallpaperIgnoreStatusBar) {
+            this.background = `<div class="layout" style="width: ${this.realWidth}px; height: ${this.realHeight}px;` +
+                ` background-color: ${this.backgroundColor}">` +
+                `<div class="layout ${this.wallpaper}" style="width: ${this.realWidth}px; height: ${this.scrollHeight}px; ` +
+                    `top: ${(this.showStatusBar && this.statusBarTop ? this.statusBarHeight + 1 : 0)}px; position: relative;">` +
+                `</div>` +
+            `</div>`;
+        } else {
+            this.background = `<div class="layout ${this.wallpaper}" style="width: ${this.realWidth}px; height: ${this.realHeight}px;` +
+                ` background-color: ${this.backgroundColor}"></div>`;
+        }
+
     }
 
     async onResize() {

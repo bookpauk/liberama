@@ -107,6 +107,7 @@ const settingDefaults = {
     textColor: '#000000',
     backgroundColor: '#ebe2c9',
     wallpaper: '',
+    wallpaperIgnoreStatusBar: false,
     fontStyle: '',// 'italic'
     fontWeight: '',// 'bold'
     fontSize: 20,// px

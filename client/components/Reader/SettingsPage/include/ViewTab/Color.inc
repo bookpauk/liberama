@@ -84,4 +84,12 @@
     </div>
 </div>
 
+<div class="q-mt-sm"/>
+<div class="item row">
+    <div class="label-2"></div>
+    <div class="col row items-center">
+        <q-checkbox v-model="wallpaperIgnoreStatusBar" size="xs" label="Не включать строку статуса в обои" />
+    </div>
+</div>
+
 <input type="file" ref="file" @change="loadWallpaperFile" style='display: none;'/>
