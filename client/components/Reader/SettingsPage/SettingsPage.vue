@@ -148,6 +148,20 @@ export default @Component({
             if (hex.test(newValue))
                 this.backgroundColor = newValue;
         },
+        dualDivColor(newValue) {
+            this.dualDivColorFiltered = newValue;
+        },
+        dualDivColorFiltered(newValue) {
+            if (hex.test(newValue))
+                this.dualDivColor = newValue;
+        },
+        statusBarColor(newValue) {
+            this.statusBarColorFiltered = newValue;
+        },
+        statusBarColorFiltered(newValue) {
+            if (hex.test(newValue))
+                this.statusBarColor = newValue;
+        },
     },
 })
 class SettingsPage extends Vue {
@@ -161,6 +175,7 @@ class SettingsPage extends Vue {
     tabsScrollable = false;
     textColorFiltered = '';
     bgColorFiltered = '';
+    dualDivColorFiltered = '';
 
     webFonts = [];
     fonts = [];
@@ -221,6 +236,8 @@ class SettingsPage extends Vue {
         this.vertShift = this.fontShifts[font] || 0;
         this.textColorFiltered = this.textColor;
         this.bgColorFiltered = this.backgroundColor;
+        this.dualDivColorFiltered = this.dualDivColor;
+        this.statusBarColorFiltered = this.statusBarColor;
     }
 
     get mode() {
@@ -356,6 +373,12 @@ class SettingsPage extends Vue {
                 break;
             case 'bg':
                 result += `background-color: ${this.backgroundColor};`
+                break;
+            case 'div':
+                result += `background-color: ${this.dualDivColor};`
+                break;
+            case 'statusbar':
+                result += `background-color: ${this.statusBarColor};`
                 break;
         }
         return result;

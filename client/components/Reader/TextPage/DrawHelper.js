@@ -213,8 +213,8 @@ export default class DrawHelper {
         
         if (w1 + w2 + w3 <= w && w3 > (10 + fh2)) {
             const barWidth = w - w1 - w2 - fh2;
-            out += this.strokeRect(x + w1, y + pad, barWidth, fh - 2, this.statusBarColor);
-            out += this.fillRect(x + w1 + 2, y + pad + 2, (barWidth - 4)*read, fh - 6, this.statusBarColor);
+            out += this.strokeRect(x + w1, y + pad, barWidth, fh - 2, this.statusBarRgbaColor);
+            out += this.fillRect(x + w1 + 2, y + pad + 2, (barWidth - 4)*read, fh - 6, this.statusBarRgbaColor);
         }
 
         if (w1 <= w)
@@ -227,12 +227,12 @@ export default class DrawHelper {
 
         let out = `<div class="layout" style="` + 
             `width: ${this.realWidth}px; height: ${statusBarHeight}px; ` + 
-            `color: ${this.statusBarColor}">`;
+            `color: ${this.statusBarRgbaColor}">`;
 
         const fontSize = statusBarHeight*0.75;
         const font = 'bold ' + this.fontBySize(fontSize);
 
-        out += this.fillRect(0, (statusBarTop ? statusBarHeight : 0), this.realWidth, 1, this.statusBarColor);
+        out += this.fillRect(0, (statusBarTop ? statusBarHeight : 0), this.realWidth, 1, this.statusBarRgbaColor);
 
         const date = new Date();
         const time = `${date.getHours().toString().padStart(2, '0')}:${date.getMinutes().toString().padStart(2, '0')}`;

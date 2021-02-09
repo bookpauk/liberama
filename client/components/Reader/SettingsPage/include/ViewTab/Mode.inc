@@ -39,6 +39,42 @@
 
 <div v-show="dualPageMode">
     <div class="part-header">Разделитель</div>
+
+    <div class="item row no-wrap">
+        <div class="label-2">Цвет</div>
+        <div class="col-left row">
+            <q-input class="col-left no-mp"
+                outlined dense
+                v-model="dualDivColorFiltered"
+                :rules="['hexColor']"
+                style="max-width: 150px"
+                :disable="dualDivColorAsText"
+            >
+                <template v-slot:prepend>
+                    <q-icon name="la la-angle-down la-xs" class="cursor-pointer text-white" :style="colorPanStyle('div')">
+                        <q-popup-proxy anchor="bottom middle" self="top middle">
+                            <div>
+                                <q-color v-model="dualDivColor"
+                                    no-header default-view="palette" :palette="predefineTextColors"
+                                />
+                            </div>
+                        </q-popup-proxy>
+                    </q-icon>
+                </template>
+            </q-input>
+        </div>
+        
+        <div class="q-px-xs"/>
+        <q-checkbox v-model="dualDivColorAsText" size="xs" label="Как у текста" />
+    </div>
+
+    <div class="item row">
+        <div class="label-2">Прозрачность</div>
+        <div class="col row">
+            <NumInput class="col-left" v-model="dualDivColorAlpha" :min="0" :max="1" :digits="2" :step="0.1"/>
+        </div>
+    </div>
+
     <div class="item row">
         <div class="label-2">Ширина (px)</div>
         <div class="col row">
@@ -58,13 +94,6 @@
                     Высота разделителя
                 </q-tooltip>
             </NumInput>
-        </div>
-    </div>
-
-    <div class="item row">
-        <div class="label-2">Прозрачность</div>
-        <div class="col row">
-            <NumInput class="col-left" v-model="dualDivColorAlpha" :min="0" :max="1" :digits="2" :step="0.1"/>
         </div>
     </div>
 

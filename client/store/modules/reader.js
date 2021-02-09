@@ -208,7 +208,7 @@ const webFonts = [
 //----------------------------------------------------------------------------------------------------------
 const settingDefaults = {
     textColor: '#000000',
-    backgroundColor: '#EBE2C9',
+    backgroundColor: '#ebe2c9',
     wallpaper: '',
     fontStyle: '',// 'italic'
     fontWeight: '',// 'bold'
@@ -230,6 +230,8 @@ const settingDefaults = {
     dualIndentLR: 10,// px, отступ слева и справа внутри страницы в двухстраничном режиме
     dualDivWidth: 2,// px, ширина разделителя
     dualDivHeight: 100,// процент, высота разделителя
+    dualDivColorAsText: true,//цвет как у текста
+    dualDivColor: '#000000',
     dualDivColorAlpha: 0.7,// прозрачность разделителя
     dualDivStrokeFill: 1,// px, заполнение пунктира
     dualDivStrokeGap: 1,// px, промежуток пунктира
@@ -238,6 +240,8 @@ const settingDefaults = {
     showStatusBar: true,
     statusBarTop: false,// top, bottom
     statusBarHeight: 19,// px
+    statusBarColorAsText: true,//цвет как у текста
+    statusBarColor: '#000000',
     statusBarColorAlpha: 0.4,
     statusBarClickOpen: true,
 

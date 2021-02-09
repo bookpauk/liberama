@@ -189,8 +189,10 @@ class TextPage extends Vue {
         this.$refs.statusBar.style.left = '0px';
         this.$refs.statusBar.style.top = (this.statusBarTop ? 1 : this.realHeight - this.statusBarHeight) + 'px';
 
-        this.statusBarColor = this.hex2rgba(this.textColor || '#000000', this.statusBarColorAlpha);
-        this.dualDivColor = this.hex2rgba(this.textColor || '#000000', this.dualDivColorAlpha);
+        const sbColor = (this.statusBarColorAsText ? this.textColor : this.statusBarColor);
+        this.statusBarRgbaColor = this.hex2rgba(sbColor || '#000000', this.statusBarColorAlpha);
+        const ddColor = (this.dualDivColorAsText ? this.textColor : this.dualDivColor);
+        this.dualDivRgbaColor = this.hex2rgba(ddColor || '#000000', this.dualDivColorAlpha);
 
         //drawHelper
         this.drawHelper.realWidth = this.realWidth;
@@ -205,13 +207,13 @@ class TextPage extends Vue {
         this.drawHelper.dualIndentLR = this.dualIndentLR;
         /*this.drawHelper.dualDivWidth = this.dualDivWidth;
         this.drawHelper.dualDivHeight = this.dualDivHeight;
-        this.drawHelper.dualDivColor = this.dualDivColor;
+        this.drawHelper.dualDivRgbaColor = this.dualDivRgbaColor;
         this.drawHelper.dualDivStrokeFill = this.dualDivStrokeFill;
         this.drawHelper.dualDivStrokeGap = this.dualDivStrokeGap;
         this.drawHelper.dualDivShadowWidth = this.dualDivShadowWidth;*/
 
         this.drawHelper.backgroundColor = this.backgroundColor;
-        this.drawHelper.statusBarColor = this.statusBarColor;
+        this.drawHelper.statusBarRgbaColor = this.statusBarRgbaColor;
         this.drawHelper.fontStyle = this.fontStyle;
         this.drawHelper.fontWeight = this.fontWeight;
         this.drawHelper.fontSize = this.fontSize;
@@ -792,9 +794,9 @@ class TextPage extends Vue {
                 `top: ${(this.showStatusBar && this.statusBarTop ? this.statusBarHeight + 1 : 0)}px; position: relative;">` +
                 `<div class="fit row justify-center items-center no-wrap">` +
                     `<div style="height: ${Math.round(this.scrollHeight*this.dualDivHeight/100)}px; width: ${this.dualDivWidth}px; ` +
-                        `box-shadow: 0 0 ${this.dualDivShadowWidth}px ${this.dualDivColor}; ` + 
+                        `box-shadow: 0 0 ${this.dualDivShadowWidth}px ${this.dualDivRgbaColor}; ` + 
                         `background-image: url(&quot;data:image/svg+xml;utf8,<svg width='100%' height='100%' xmlns='http://www.w3.org/2000/svg'>` +
-                            `<line x1='${this.dualDivWidth/2}' y1='0' x2='${this.dualDivWidth/2}' y2='100%' stroke='${this.dualDivColor}' ` +
+                            `<line x1='${this.dualDivWidth/2}' y1='0' x2='${this.dualDivWidth/2}' y2='100%' stroke='${this.dualDivRgbaColor}' ` +
                                 `stroke-width='${this.dualDivWidth}' stroke-dasharray='${this.dualDivStrokeFill} ${this.dualDivStrokeGap}'/>` +
                         `</svg>&quot;);">` +
                     `</div>` +
