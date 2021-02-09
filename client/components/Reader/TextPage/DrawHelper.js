@@ -132,7 +132,7 @@ export default class DrawHelper {
         const boxH = this.h + (isScrolling ? this.lineHeight : 0);
         let out = `<div class="row no-wrap" style="width: ${this.boxW}px; height: ${boxH}px;` + 
             ` position: absolute; top: ${this.fontSize*this.textShift}px; color: ${this.textColor}; font: ${font}; ${justify}` +
-            ` line-height: ${this.lineHeight}px; white-space: nowrap; vertical-align: middle;">`;
+            ` line-height: ${this.lineHeight}px; white-space: nowrap;">`;
 
         let imageDrawn1 = new Set();
         let imageDrawn2 = new Set();
@@ -182,7 +182,7 @@ export default class DrawHelper {
             //разделитель
             out += `<div style="width: ${this.dualIndentLR*2}px; top: ${-this.fontSize*this.textShift}px; position: relative">` +
                 `<div class="fit row justify-center items-center">` +
-                    `<div style="height: ${Math.round(boxH*this.dualDivHeight/100)}px; width: ${this.dualDivWidth}px;` + 
+                    `<div style="height: ${Math.round(boxH*this.dualDivHeight/100)}px; width: ${this.dualDivWidth}px; box-shadow: 0 0 ${this.dualDivShadowWidth}px ${this.dualDivColor}; ` + 
                         `background-image: url(&quot;data:image/svg+xml;utf8,<svg width='100%' height='100%' xmlns='http://www.w3.org/2000/svg'>` +
                             //`<rect width='100%' height='100%' style='fill: none; stroke: white; stroke-width: 4; stroke-dasharray: 5 20'/>` +
                             `<line x1='0' y1='0' x2='0' y2='100%' stroke='${this.dualDivColor}' stroke-width='100%' stroke-dasharray='${this.dualDivStrokeFill} ${this.dualDivStrokeGap}'/>` +

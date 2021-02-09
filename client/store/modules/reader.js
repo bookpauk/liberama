@@ -228,11 +228,12 @@ const settingDefaults = {
 
     dualPageMode: false,
     dualIndentLR: 10,// px, отступ слева и справа внутри страницы в двухстраничном режиме
-    dualDivWidth: 4,// px, ширина разделителя
-    dualDivHeight: 96,// процент, высота разделителя
-    dualDivColorAlpha: 1,// прозрачность разделителя
+    dualDivWidth: 2,// px, ширина разделителя
+    dualDivHeight: 100,// процент, высота разделителя
+    dualDivColorAlpha: 0.7,// прозрачность разделителя
     dualDivStrokeFill: 1,// px, заполнение пунктира
     dualDivStrokeGap: 1,// px, промежуток пунктира
+    dualDivShadowWidth: 0,// px, ширина тени
 
     showStatusBar: true,
     statusBarTop: false,// top, bottom

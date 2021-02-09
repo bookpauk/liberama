@@ -27,7 +27,7 @@
         <div v-show="!clickControl && showStatusBar && statusBarClickOpen" class="layout" v-html="statusBarClickable" @mousedown.prevent.stop @touchstart.stop
             @click.prevent.stop="onStatusBarClick">
         </div>
-        <!-- невидимым делать нельзя, вовремя не подгружаютя шрифты -->
+        <!-- невидимым делать нельзя (display: none), вовремя не подгружаютя шрифты -->
         <canvas ref="offscreenCanvas" class="layout" style="visibility: hidden"></canvas>
         <div ref="measureWidth" style="position: absolute; visibility: hidden"></div>
     </div>
@@ -39,6 +39,8 @@ import Vue from 'vue';
 import Component from 'vue-class-component';
 import {loadCSS} from 'fg-loadcss';
 import _ from 'lodash';
+
+import './TextPage.css';
 
 import * as utils from '../../../share/utils';
 import bookManager from '../share/bookManager';
@@ -200,6 +202,7 @@ class TextPage extends Vue {
         this.drawHelper.dualDivColor = this.hex2rgba(this.textColor || '#000000', this.dualDivColorAlpha);
         this.drawHelper.dualDivStrokeFill = this.dualDivStrokeFill;
         this.drawHelper.dualDivStrokeGap = this.dualDivStrokeGap;
+        this.drawHelper.dualDivShadowWidth = this.dualDivShadowWidth;
 
         this.drawHelper.backgroundColor = this.backgroundColor;
         this.drawHelper.statusBarColor = this.statusBarColor;
@@ -1187,63 +1190,6 @@ class TextPage extends Vue {
 .events {
     z-index: 20;
     background-color: rgba(0,0,0,0);
-}
-
-</style>
-
-<style>
-.paper1 {
-    background: url("images/paper1.jpg") center;
-    background-size: cover;
-}
-
-.paper2 {
-    background: url("images/paper2.jpg") center;
-    background-size: cover;
-}
-
-.paper3 {
-    background: url("images/paper3.jpg") center;
-    background-size: cover;
-}
-
-.paper4 {
-    background: url("images/paper4.jpg") center;
-    background-size: cover;
-}
-
-.paper5 {
-    background: url("images/paper5.jpg") center;
-    background-size: cover;
-}
-
-.paper6 {
-    background: url("images/paper6.jpg") center;
-    background-size: cover;
-}
-
-.paper7 {
-    background: url("images/paper7.jpg") center;
-    background-size: cover;
-}
-
-.paper8 {
-    background: url("images/paper8.jpg") center;
-    background-size: cover;
-}
-
-.paper9 {
-    background: url("images/paper9.jpg");
-}
-
-@keyframes page1-animation-thaw {
-    0%   { opacity: 0; }
-    100% { opacity: 1; }
-}
-
-@keyframes page2-animation-thaw {
-    0%   { opacity: 1; }
-    100% { opacity: 0; }
 }
 
 </style>

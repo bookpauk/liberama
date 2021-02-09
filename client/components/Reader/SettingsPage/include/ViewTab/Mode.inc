@@ -90,4 +90,11 @@
         </div>
     </div>
 
+    <div class="item row">
+        <div class="label-2">Ширина тени</div>
+        <div class="col row">
+            <NumInput class="col-left" v-model="dualDivShadowWidth" :min="0" :max="100"/>
+        </div>
+    </div>    
+
 </div>
