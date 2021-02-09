@@ -95,7 +95,6 @@ const fonts = [
 //webFonts: [{css: 'https://fonts.googleapis.com/css?family=Alegreya', name: 'Alegreya', fontVertShift: 0}, ...],
 const webFonts = [];
 for (const family of googleFonts) {
-console.log(`https://fonts.googleapis.com/css?family=${family.replace(/\s/g, '+')}`);    
     webFonts.push({
         css: `https://fonts.googleapis.com/css?family=${family.replace(/\s/g, '+')}`,
         name: family,
