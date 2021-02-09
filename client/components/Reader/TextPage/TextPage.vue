@@ -794,7 +794,8 @@ class TextPage extends Vue {
                     `<div style="height: ${Math.round(this.scrollHeight*this.dualDivHeight/100)}px; width: ${this.dualDivWidth}px; ` +
                         `box-shadow: 0 0 ${this.dualDivShadowWidth}px ${this.dualDivColor}; ` + 
                         `background-image: url(&quot;data:image/svg+xml;utf8,<svg width='100%' height='100%' xmlns='http://www.w3.org/2000/svg'>` +
-                            `<line x1='${this.dualDivWidth/2}' y1='0' x2='${this.dualDivWidth/2}' y2='100%' stroke='${this.dualDivColor}' stroke-width='${this.dualDivWidth}' stroke-dasharray='${this.dualDivStrokeFill} ${this.dualDivStrokeGap}'/>` +
+                            `<line x1='${this.dualDivWidth/2}' y1='0' x2='${this.dualDivWidth/2}' y2='100%' stroke='${this.dualDivColor}' ` +
+                                `stroke-width='${this.dualDivWidth}' stroke-dasharray='${this.dualDivStrokeFill} ${this.dualDivStrokeGap}'/>` +
                         `</svg>&quot;);">` +
                     `</div>` +
                 `</div>` +
