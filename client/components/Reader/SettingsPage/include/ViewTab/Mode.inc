@@ -69,20 +69,15 @@
     </div>
 
     <div class="item row">
-        <div class="label-2">Заполнение</div>
+        <div class="label-2">Пунктир</div>
         <div class="col row">
             <NumInput class="col-left" v-model="dualDivStrokeFill" :min="0" :max="2000">
                 <q-tooltip :delay="1000" anchor="top middle" self="bottom middle" content-style="font-size: 80%">
                     Заполнение пунктира
                 </q-tooltip>
             </NumInput>
-        </div>
-    </div>
-
-    <div class="item row">
-        <div class="label-2">Промежуток</div>
-        <div class="col row">
-            <NumInput class="col-left" v-model="dualDivStrokeGap" :min="0" :max="2000">
+            <div class="q-px-sm"/>
+            <NumInput class="col" v-model="dualDivStrokeGap" :min="0" :max="2000">
                 <q-tooltip :delay="1000" anchor="top middle" self="bottom middle" content-style="font-size: 80%">
                     Промежуток пунктира
                 </q-tooltip>
