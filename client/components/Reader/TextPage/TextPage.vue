@@ -43,7 +43,10 @@ import _ from 'lodash';
 import './TextPage.css';
 
 import * as utils from '../../../share/utils';
+import dynamicCss from '../../../share/dynamicCss';
+
 import bookManager from '../share/bookManager';
+import wallpaperStorage from '../share/wallpaperStorage';
 import DrawHelper from './DrawHelper';
 import rstore from '../../../store/modules/reader';
 import {clickMap} from '../share/clickMap';
@@ -248,6 +251,28 @@ class TextPage extends Vue {
 
         //statusBar
         this.statusBarClickable = this.drawHelper.statusBarClickable(this.statusBarTop, this.statusBarHeight);
+
+        //wallpaper css, асинхронно
+        (async() => {
+            const wallpaperDataLength = await wallpaperStorage.getLength();
+            if (wallpaperDataLength !== this.wallpaperDataLength) {//оптимизация
+                this.wallpaperDataLength = wallpaperDataLength;
+
+                let newCss = '';
+                for (const wp of this.userWallpapers) {
+                    const data = await wallpaperStorage.getData(wp.cssClass);
+
+                    if (!data) {
+                        //здесь будем восстанавливать данные с сервера
+                    }
+
+                    if (data) {
+                        newCss += `.${wp.cssClass} {background: url(${data}) center; background-size: 100% 100%;}`;                
+                    }
+                }
+                dynamicCss.replace('wallpapers', newCss);
+            }
+        })();
 
         //parsed
         if (this.parsed) {

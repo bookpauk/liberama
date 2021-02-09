@@ -34,7 +34,6 @@
             v-model="bgColorFiltered"
             :rules="['hexColor']"
             style="max-width: 150px"
-            :disable="wallpaper != ''"
         >
             <template v-slot:prepend>
                 <q-icon name="la la-angle-down la-xs" class="cursor-pointer text-white" :style="colorPanStyle('bg')">
@@ -52,7 +51,7 @@
 <div class="q-mt-md"/>
 <div class="item row">
     <div class="label-2">Обои</div>
-    <div class="col row">
+    <div class="col row items-center">
         <q-select class="col-left no-mp" v-model="wallpaper" :options="wallpaperOptions"
             dropdown-icon="la la-angle-down la-sm"
             outlined dense emit-value map-options
@@ -74,5 +73,15 @@
                 </q-item>
             </template>
         </q-select>
+
+        <div class="q-px-xs"/>
+        <q-btn class="q-ml-sm" round dense color="blue" icon="la la-plus" @click.stop="loadWallpaperFileClick">
+            <q-tooltip :delay="1500" anchor="bottom middle" content-style="font-size: 80%">Добавить файл обоев</q-tooltip>
+        </q-btn>
+        <q-btn class="q-ml-sm" round dense color="blue" icon="la la-minus" @click.stop="delWallpaper" :disable="wallpaper.indexOf('user-paper') != 0">
+            <q-tooltip :delay="1500" anchor="bottom middle" content-style="font-size: 80%">Удалить выбранные обои</q-tooltip>
+        </q-btn>
     </div>
 </div>
+
+<input type="file" ref="file" @change="loadWallpaperFile" style='display: none;'/>

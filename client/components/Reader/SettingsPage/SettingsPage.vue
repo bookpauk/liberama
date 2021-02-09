@@ -82,6 +82,7 @@ import * as utils from '../../../share/utils';
 import Window from '../../share/Window.vue';
 import NumInput from '../../share/NumInput.vue';
 import UserHotKeys from './UserHotKeys/UserHotKeys.vue';
+import wallpaperStorage from '../share/wallpaperStorage';
 
 import rstore from '../../../store/modules/reader';
 import defPalette from './defPalette';
@@ -277,9 +278,15 @@ class SettingsPage extends Vue {
 
     get wallpaperOptions() {
         let result = [{label: 'Нет', value: ''}];
-        for (let i = 1; i < 10; i++) {
+
+        for (const wp of this.userWallpapers) {
+            result.push({label: wp.label, value: wp.cssClass});
+        }
+
+        for (let i = 1; i <= 17; i++) {
             result.push({label: i, value: `paper${i}`});
         }
+
         return result;
     }
 
@@ -544,6 +551,71 @@ class SettingsPage extends Vue {
             //
         }
 
+    }
+
+    loadWallpaperFileClick() {
+        this.$refs.file.click();
+    }
+
+    loadWallpaperFile() {
+        const file = this.$refs.file.files[0];        
+        if (file.size > 10*1024*1024) {
+            this.$root.stdDialog.alert('Файл обоев не должен превышать в размере 10Mb', 'Ошибка');
+            return;
+        }
+
+        if (file.type != 'image/png' && file.type != 'image/jpeg') {
+            this.$root.stdDialog.alert('Файл обоев должен иметь тип PNG или JPEG', 'Ошибка');
+            return;
+        }
+
+        if (this.userWallpapers.length >= 100) {
+            this.$root.stdDialog.alert('Превышено максимальное количество пользовательских обоев.', 'Ошибка');
+            return;
+        }
+
+        this.$refs.file.value = '';
+        if (file) {
+            const reader = new FileReader();
+
+            reader.onload = (e) => {
+                const newUserWallpapers = _.cloneDeep(this.userWallpapers);
+                let n = 0;
+                for (const wp of newUserWallpapers) {
+                    const newN = parseInt(wp.label.replace(/\D/g, ''), 10);
+                    if (newN > n)
+                        n = newN;
+                }
+                n++;
+
+                const cssClass = `user-paper${n}`;
+                newUserWallpapers.push({label: `#${n}`, cssClass});
+                (async() => {
+                    await wallpaperStorage.setData(cssClass, e.target.result);
+
+                    this.userWallpapers = newUserWallpapers;
+                    this.wallpaper = cssClass;
+                })();
+            }
+
+            reader.readAsDataURL(file);
+        }
+    }
+
+    async delWallpaper() {
+        if (this.wallpaper.indexOf('user-paper') == 0) {
+            const newUserWallpapers = [];
+            for (const wp of this.userWallpapers) {
+                if (wp.cssClass != this.wallpaper) {
+                    newUserWallpapers.push(wp);
+                }
+            }
+
+            await wallpaperStorage.removeData(this.wallpaper);
+
+            this.userWallpapers = newUserWallpapers;
+            this.wallpaper = '';
+        }
     }
 
     keyHook(event) {

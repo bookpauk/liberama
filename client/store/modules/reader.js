@@ -175,6 +175,7 @@ const settingDefaults = {
     fontShifts: {},
     showToolButton: {},
     userHotKeys: {},
+    userWallpapers: [],
 };
 
 for (const font of fonts)
@@ -186,12 +187,13 @@ for (const button of toolButtons)
 for (const hotKey of hotKeys)
     settingDefaults.userHotKeys[hotKey.name] = hotKey.codes;
 
-const excludeDiffHotKeys = [];
+const diffExclude = [];
 for (const hotKey of hotKeys)
-    excludeDiffHotKeys.push(`userHotKeys/${hotKey.name}`);
+    diffExclude.push(`userHotKeys/${hotKey.name}`);
+diffExclude.push('userWallpapers');
 
 function addDefaultsToSettings(settings) {
-    const diff = utils.getObjDiff(settings, settingDefaults, {exclude: excludeDiffHotKeys});
+    const diff = utils.getObjDiff(settings, settingDefaults, {exclude: diffExclude});
     if (!utils.isEmptyObjDiffDeep(diff, {isApplyChange: false})) {
         return utils.applyObjDiff(settings, diff, {isApplyChange: false});
     }
