@@ -113,7 +113,7 @@ export default @Component({
         },
         vertShift: function(newValue) {
             const font = (this.webFontName ? this.webFontName : this.fontName);
-            if (this.fontShifts[font] != newValue) {
+            if (this.fontShifts[font] != newValue || this.fontVertShift != newValue) {
                 this.fontShifts = Object.assign({}, this.fontShifts, {[font]: newValue});
                 this.fontVertShift = newValue;
             }
