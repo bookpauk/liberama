@@ -82,6 +82,7 @@ import * as utils from '../../../share/utils';
 import Window from '../../share/Window.vue';
 import NumInput from '../../share/NumInput.vue';
 import UserHotKeys from './UserHotKeys/UserHotKeys.vue';
+import wallpaperStorage from '../share/wallpaperStorage';
 
 import rstore from '../../../store/modules/reader';
 import defPalette from './defPalette';
@@ -113,7 +114,7 @@ export default @Component({
         },
         vertShift: function(newValue) {
             const font = (this.webFontName ? this.webFontName : this.fontName);
-            if (this.fontShifts[font] != newValue) {
+            if (this.fontShifts[font] != newValue || this.fontVertShift != newValue) {
                 this.fontShifts = Object.assign({}, this.fontShifts, {[font]: newValue});
                 this.fontVertShift = newValue;
             }
@@ -130,6 +131,10 @@ export default @Component({
             if (newValue != '' && this.pageChangeAnimation == 'flip')
                 this.pageChangeAnimation = '';
         },
+        dualPageMode(newValue) {
+            if (newValue && this.pageChangeAnimation == 'flip' || this.pageChangeAnimation == 'rightShift')
+                this.pageChangeAnimation = '';
+        },
         textColor: function(newValue) {
             this.textColorFiltered = newValue;
         },
@@ -144,11 +149,25 @@ export default @Component({
             if (hex.test(newValue))
                 this.backgroundColor = newValue;
         },
+        dualDivColor(newValue) {
+            this.dualDivColorFiltered = newValue;
+        },
+        dualDivColorFiltered(newValue) {
+            if (hex.test(newValue))
+                this.dualDivColor = newValue;
+        },
+        statusBarColor(newValue) {
+            this.statusBarColorFiltered = newValue;
+        },
+        statusBarColorFiltered(newValue) {
+            if (hex.test(newValue))
+                this.statusBarColor = newValue;
+        },
     },
 })
 class SettingsPage extends Vue {
     selectedTab = 'profiles';
-    selectedViewTab = 'color';
+    selectedViewTab = 'mode';
     selectedKeysTab = 'mouse';
     form = {};
     fontBold = false;
@@ -157,6 +176,7 @@ class SettingsPage extends Vue {
     tabsScrollable = false;
     textColorFiltered = '';
     bgColorFiltered = '';
+    dualDivColorFiltered = '';
 
     webFonts = [];
     fonts = [];
@@ -217,6 +237,8 @@ class SettingsPage extends Vue {
         this.vertShift = this.fontShifts[font] || 0;
         this.textColorFiltered = this.textColor;
         this.bgColorFiltered = this.backgroundColor;
+        this.dualDivColorFiltered = this.dualDivColor;
+        this.statusBarColorFiltered = this.statusBarColor;
     }
 
     get mode() {
@@ -256,9 +278,15 @@ class SettingsPage extends Vue {
 
     get wallpaperOptions() {
         let result = [{label: 'Нет', value: ''}];
-        for (let i = 1; i < 10; i++) {
+
+        for (const wp of this.userWallpapers) {
+            result.push({label: wp.label, value: wp.cssClass});
+        }
+
+        for (let i = 1; i <= 17; i++) {
             result.push({label: i, value: `paper${i}`});
         }
+
         return result;
     }
 
@@ -282,13 +310,15 @@ class SettingsPage extends Vue {
         let result = [
             {label: 'Нет', value: ''},
             {label: 'Вверх-вниз', value: 'downShift'},
-            {label: 'Вправо-влево', value: 'rightShift'},
+            (!this.dualPageMode ? {label: 'Вправо-влево', value: 'rightShift'} : null),
             {label: 'Протаивание', value: 'thaw'},
             {label: 'Мерцание', value: 'blink'},
             {label: 'Вращение', value: 'rotate'},
-        ];
-        if (this.wallpaper == '')
-            result.push({label: 'Листание', value: 'flip'});
+            (this.wallpaper == '' && !this.dualPageMode ? {label: 'Листание', value: 'flip'} : null),
+        ];        
+
+        result = result.filter(v => v);
+
         return result;
     }
 
@@ -350,6 +380,12 @@ class SettingsPage extends Vue {
                 break;
             case 'bg':
                 result += `background-color: ${this.backgroundColor};`
+                break;
+            case 'div':
+                result += `background-color: ${this.dualDivColor};`
+                break;
+            case 'statusbar':
+                result += `background-color: ${this.statusBarColor};`
                 break;
         }
         return result;
@@ -515,6 +551,71 @@ class SettingsPage extends Vue {
             //
         }
 
+    }
+
+    loadWallpaperFileClick() {
+        this.$refs.file.click();
+    }
+
+    loadWallpaperFile() {
+        const file = this.$refs.file.files[0];        
+        if (file.size > 10*1024*1024) {
+            this.$root.stdDialog.alert('Файл обоев не должен превышать в размере 10Mb', 'Ошибка');
+            return;
+        }
+
+        if (file.type != 'image/png' && file.type != 'image/jpeg') {
+            this.$root.stdDialog.alert('Файл обоев должен иметь тип PNG или JPEG', 'Ошибка');
+            return;
+        }
+
+        if (this.userWallpapers.length >= 100) {
+            this.$root.stdDialog.alert('Превышено максимальное количество пользовательских обоев.', 'Ошибка');
+            return;
+        }
+
+        this.$refs.file.value = '';
+        if (file) {
+            const reader = new FileReader();
+
+            reader.onload = (e) => {
+                const newUserWallpapers = _.cloneDeep(this.userWallpapers);
+                let n = 0;
+                for (const wp of newUserWallpapers) {
+                    const newN = parseInt(wp.label.replace(/\D/g, ''), 10);
+                    if (newN > n)
+                        n = newN;
+                }
+                n++;
+
+                const cssClass = `user-paper${n}`;
+                newUserWallpapers.push({label: `#${n}`, cssClass});
+                (async() => {
+                    await wallpaperStorage.setData(cssClass, e.target.result);
+
+                    this.userWallpapers = newUserWallpapers;
+                    this.wallpaper = cssClass;
+                })();
+            }
+
+            reader.readAsDataURL(file);
+        }
+    }
+
+    async delWallpaper() {
+        if (this.wallpaper.indexOf('user-paper') == 0) {
+            const newUserWallpapers = [];
+            for (const wp of this.userWallpapers) {
+                if (wp.cssClass != this.wallpaper) {
+                    newUserWallpapers.push(wp);
+                }
+            }
+
+            await wallpaperStorage.removeData(this.wallpaper);
+
+            this.userWallpapers = newUserWallpapers;
+            this.wallpaper = '';
+        }
     }
 
     keyHook(event) {

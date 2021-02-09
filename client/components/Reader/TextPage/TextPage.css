@@ -1,0 +1,93 @@
+@keyframes page1-animation-thaw {
+    0%   { opacity: 0; }
+    100% { opacity: 1; }
+}
+
+@keyframes page2-animation-thaw {
+    0%   { opacity: 1; }
+    100% { opacity: 0; }
+}
+
+.paper1 {
+    background: url("images/paper1.jpg") center;
+    background-size: 100% 100%;
+}
+
+.paper2 {
+    background: url("images/paper2.jpg") center;
+    background-size: 100% 100%;
+}
+
+.paper3 {
+    background: url("images/paper3.jpg") center;
+    background-size: 100% 100%;
+}
+
+.paper4 {
+    background: url("images/paper4.jpg") center;
+    background-size: 100% 100%;
+}
+
+.paper5 {
+    background: url("images/paper5.jpg") center;
+    background-size: 100% 100%;
+}
+
+.paper6 {
+    background: url("images/paper6.jpg") center;
+    background-size: 100% 100%;
+}
+
+.paper7 {
+    background: url("images/paper7.jpg") center;
+    background-size: 100% 100%;
+}
+
+.paper8 {
+    background: url("images/paper8.jpg") center;
+    background-size: 100% 100%;
+}
+
+.paper9 {
+    background: url("images/paper9.jpg");
+}
+
+.paper10 {
+    background: url("images/paper10.png") center;
+    background-size: 100% 100%;
+}
+
+.paper11 {
+    background: url("images/paper11.png") center;
+    background-size: 100% 100%;
+}
+
+.paper12 {
+    background: url("images/paper12.png") center;
+    background-size: 100% 100%;
+}
+
+.paper13 {
+    background: url("images/paper13.png") center;
+    background-size: 100% 100%;
+}
+
+.paper14 {
+    background: url("images/paper14.png") center;
+    background-size: 100% 100%;
+}
+
+.paper15 {
+    background: url("images/paper15.png") center;
+    background-size: 100% 100%;
+}
+
+.paper16 {
+    background: url("images/paper16.png") center;
+    background-size: 100% 100%;
+}
+
+.paper17 {
+    background: url("images/paper17.png") center;
+    background-size: 100% 100%;
+}

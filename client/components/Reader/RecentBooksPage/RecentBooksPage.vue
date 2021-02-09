@@ -27,8 +27,11 @@
                             placeholder="Найти"
                             v-model="search"
                             @click.stop
-                        />
-
+                        >
+                            <template v-slot:append>
+                                <q-icon v-if="search !== ''" name="la la-times" class="cursor-pointer" @click.stop="resetSearch"/>
+                            </template>
+                        </q-input>
                         <span v-html="props.cols[2].label"></span>
                     </q-th>
                 </q-tr>
@@ -53,6 +56,7 @@
                         <div class="break-word" style="width: 332px; font-size: 90%">
                             <div style="color: green">{{ props.row.desc.author }}</div>
                             <div>{{ props.row.desc.title }}</div>
+                            <div class="read-bar" :style="`width: ${332*props.row.readPart}px`"></div>
                         </div>
                     </q-td>
 
@@ -106,7 +110,7 @@ export default @Component({
 })
 class RecentBooksPage extends Vue {
     loading = false;
-    search = null;
+    search = '';
     tableData = [];
     columns = [];
     pagination = {};
@@ -200,11 +204,13 @@ class RecentBooksPage extends Vue {
             d.setTime(book.touchTime);
             const t = utils.formatDate(d).split(' ');
 
+            let readPart = 0;
             let perc = '';
             let textLen = '';
             const p = (book.bookPosSeen ? book.bookPosSeen : (book.bookPos ? book.bookPos : 0));
             if (book.textLength) {
-                perc = ` [${((p/book.textLength)*100).toFixed(2)}%]`;
+                readPart = p/book.textLength;
+                perc = ` [${(readPart*100).toFixed(2)}%]`;
                 textLen = ` ${Math.round(book.textLength/1000)}k`;
             }
 
@@ -223,6 +229,7 @@ class RecentBooksPage extends Vue {
                     author,
                     title: `${title}${perc}${textLen}`,
                 },
+                readPart,
                 descString: `${author}${title}${perc}${textLen}`,//для сортировки
                 url: book.url,
                 path: book.path,
@@ -242,6 +249,11 @@ class RecentBooksPage extends Vue {
 
         this.tableData = result;
         this.updating = false;
+    }
+
+    resetSearch() {
+        this.search = '';
+        this.$refs.input.focus();
     }
 
     wordEnding(num) {
@@ -346,6 +358,10 @@ class RecentBooksPage extends Vue {
     white-space: normal;
 }
 
+.read-bar {
+    height: 3px;
+    background-color: #aaaaaa;
+}
 </style>
 
 <style>

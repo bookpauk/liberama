@@ -16,23 +16,6 @@
 </div>
 
 <div class="item row">
-    <div class="label-2">Отступ</div>
-    <div class="col row">
-        <NumInput class="col-left" v-model="indentLR" :min="0" :max="2000">
-            <q-tooltip :delay="1000" anchor="top middle" self="bottom middle" content-style="font-size: 80%">
-                Слева/справа
-            </q-tooltip>
-        </NumInput>
-        <div class="q-px-sm"/>
-        <NumInput class="col" v-model="indentTB" :min="0" :max="2000">
-            <q-tooltip :delay="1000" anchor="top middle" self="bottom middle" content-style="font-size: 80%">
-                Сверху/снизу
-            </q-tooltip>
-        </NumInput>
-    </div>
-</div>
-
-<div class="item row">
     <div class="label-2">Сдвиг</div>
     <div class="col row">
         <NumInput class="col-left" v-model="textVertShift" :min="-100" :max="100">
@@ -123,7 +106,7 @@
 <div class="item row">
     <div class="label-2"></div>
     <div class="col row">
-        <q-checkbox v-model="imageFitWidth" :disable="!showImages" size="xs" label="Ширина не более размера экрана" />
+        <q-checkbox v-model="imageFitWidth" size="xs" label="Ширина не более размера страницы" :disable="!showImages || dualPageMode"/>
     </div>
 </div>
 

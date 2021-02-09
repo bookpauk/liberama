@@ -1,8 +1,8 @@
 <template>
     <div ref="main" class="main">
         <div class="layout back" @wheel.prevent.stop="onMouseWheel">
-            <div v-html="background"></div>
-            <!-- img -->
+            <div class="absolute" v-html="background"></div>
+            <div class="absolute" v-html="pageDivider"></div>
         </div>
         <div ref="scrollBox1" class="layout over-hidden" @wheel.prevent.stop="onMouseWheel">
             <div ref="scrollingPage1" class="layout over-hidden" @transitionend="onPage1TransitionEnd" @animationend="onPage1AnimationEnd">
@@ -27,7 +27,7 @@
         <div v-show="!clickControl && showStatusBar && statusBarClickOpen" class="layout" v-html="statusBarClickable" @mousedown.prevent.stop @touchstart.stop
             @click.prevent.stop="onStatusBarClick">
         </div>
-        <!-- невидимым делать нельзя, вовремя не подгружаютя шрифты -->
+        <!-- невидимым делать нельзя (display: none), вовремя не подгружаютя шрифты -->
         <canvas ref="offscreenCanvas" class="layout" style="visibility: hidden"></canvas>
         <div ref="measureWidth" style="position: absolute; visibility: hidden"></div>
     </div>
@@ -40,8 +40,13 @@ import Component from 'vue-class-component';
 import {loadCSS} from 'fg-loadcss';
 import _ from 'lodash';
 
+import './TextPage.css';
+
 import * as utils from '../../../share/utils';
+import dynamicCss from '../../../share/dynamicCss';
+
 import bookManager from '../share/bookManager';
+import wallpaperStorage from '../share/wallpaperStorage';
 import DrawHelper from './DrawHelper';
 import rstore from '../../../store/modules/reader';
 import {clickMap} from '../share/clickMap';
@@ -74,6 +79,7 @@ class TextPage extends Vue {
     clickControl = true;
 
     background = null;
+    pageDivider = null;
     page1 = null;
     page2 = null;
     statusBar = null;
@@ -110,7 +116,11 @@ class TextPage extends Vue {
 
         this.debouncedDrawStatusBar = _.throttle(() => {
             this.drawStatusBar();
-        }, 60);        
+        }, 60);
+
+        this.debouncedDrawPageDividerAndOrnament = _.throttle(() => {
+            this.drawPageDividerAndOrnament();
+        }, 65);
 
         this.debouncedLoadSettings = _.debounce(() => {
             this.loadSettings();
@@ -161,14 +171,16 @@ class TextPage extends Vue {
         this.$refs.layoutEvents.style.width = this.realWidth + 'px';
         this.$refs.layoutEvents.style.height = this.realHeight + 'px';
 
-        this.w = this.realWidth - 2*this.indentLR;
+        const dual = (this.dualPageMode ? 2 : 1);
+        this.boxW = this.realWidth - 2*this.indentLR;
+        this.w = this.boxW/dual - (this.dualPageMode ? 2*this.dualIndentLR : 0);
+
         this.scrollHeight = this.realHeight - (this.showStatusBar ? this.statusBarHeight : 0);
         this.h = this.scrollHeight - 2*this.indentTB;
-        this.lineHeight = this.fontSize + this.lineInterval;
-        this.pageLineCount = 1 + Math.floor((this.h - this.lineHeight + this.lineInterval/2)/this.lineHeight);
 
-        this.$refs.scrollingPage1.style.width = this.w + 'px';
-        this.$refs.scrollingPage2.style.width = this.w + 'px';
+        this.lineHeight = this.fontSize + this.lineInterval;
+        this.pageRowsCount = 1 + Math.floor((this.h - this.lineHeight + this.lineInterval/2)/this.lineHeight);
+        this.pageLineCount = (this.dualPageMode ? this.pageRowsCount*2 : this.pageRowsCount)
 
         //stuff
         this.currentAnimation = '';
@@ -180,7 +192,10 @@ class TextPage extends Vue {
         this.$refs.statusBar.style.left = '0px';
         this.$refs.statusBar.style.top = (this.statusBarTop ? 1 : this.realHeight - this.statusBarHeight) + 'px';
 
-        this.statusBarColor = this.hex2rgba(this.textColor || '#000000', this.statusBarColorAlpha);
+        const sbColor = (this.statusBarColorAsText ? this.textColor : this.statusBarColor);
+        this.statusBarRgbaColor = this.hex2rgba(sbColor || '#000000', this.statusBarColorAlpha);
+        const ddColor = (this.dualDivColorAsText ? this.textColor : this.dualDivColor);
+        this.dualDivRgbaColor = this.hex2rgba(ddColor || '#000000', this.dualDivColorAlpha);
 
         //drawHelper
         this.drawHelper.realWidth = this.realWidth;
@@ -188,10 +203,20 @@ class TextPage extends Vue {
         this.drawHelper.lastBook = this.lastBook;
         this.drawHelper.book = this.book;
         this.drawHelper.parsed = this.parsed;
+        this.drawHelper.pageRowsCount = this.pageRowsCount;
         this.drawHelper.pageLineCount = this.pageLineCount;
 
+        this.drawHelper.dualPageMode = this.dualPageMode;
+        this.drawHelper.dualIndentLR = this.dualIndentLR;
+        /*this.drawHelper.dualDivWidth = this.dualDivWidth;
+        this.drawHelper.dualDivHeight = this.dualDivHeight;
+        this.drawHelper.dualDivRgbaColor = this.dualDivRgbaColor;
+        this.drawHelper.dualDivStrokeFill = this.dualDivStrokeFill;
+        this.drawHelper.dualDivStrokeGap = this.dualDivStrokeGap;
+        this.drawHelper.dualDivShadowWidth = this.dualDivShadowWidth;*/
+
         this.drawHelper.backgroundColor = this.backgroundColor;
-        this.drawHelper.statusBarColor = this.statusBarColor;
+        this.drawHelper.statusBarRgbaColor = this.statusBarRgbaColor;
         this.drawHelper.fontStyle = this.fontStyle;
         this.drawHelper.fontWeight = this.fontWeight;
         this.drawHelper.fontSize = this.fontSize;
@@ -200,6 +225,7 @@ class TextPage extends Vue {
         this.drawHelper.textColor = this.textColor;
         this.drawHelper.textShift = this.textShift;
         this.drawHelper.p = this.p;
+        this.drawHelper.boxW = this.boxW;
         this.drawHelper.w = this.w;
         this.drawHelper.h = this.h;
         this.drawHelper.indentLR = this.indentLR;
@@ -226,34 +252,57 @@ class TextPage extends Vue {
         //statusBar
         this.statusBarClickable = this.drawHelper.statusBarClickable(this.statusBarTop, this.statusBarHeight);
 
+        //wallpaper css, асинхронно
+        (async() => {
+            const wallpaperDataLength = await wallpaperStorage.getLength();
+            if (wallpaperDataLength !== this.wallpaperDataLength) {//оптимизация
+                this.wallpaperDataLength = wallpaperDataLength;
+
+                let newCss = '';
+                for (const wp of this.userWallpapers) {
+                    const data = await wallpaperStorage.getData(wp.cssClass);
+
+                    if (!data) {
+                        //здесь будем восстанавливать данные с сервера
+                    }
+
+                    if (data) {
+                        newCss += `.${wp.cssClass} {background: url(${data}) center; background-size: 100% 100%;}`;                
+                    }
+                }
+                dynamicCss.replace('wallpapers', newCss);
+            }
+        })();
+
         //parsed
         if (this.parsed) {
-            this.parsed.p = this.p;
-            this.parsed.w = this.w;// px, ширина текста
-            this.parsed.font = this.font;
-            this.parsed.fontSize = this.fontSize;
-            this.parsed.wordWrap = this.wordWrap;
-            this.parsed.cutEmptyParagraphs = this.cutEmptyParagraphs;
-            this.parsed.addEmptyParagraphs = this.addEmptyParagraphs;
-            let t = wideLetter;
-            if (!this.drawHelper.measureText(t, {}))
+            let wideLine = wideLetter;
+            if (!this.drawHelper.measureText(wideLine, {}))
                 throw new Error('Ошибка measureText');
-            while (this.drawHelper.measureText(t, {}) < this.w) t += wideLetter;
-            this.parsed.maxWordLength = t.length - 1;
-            this.parsed.measureText = this.drawHelper.measureText.bind(this.drawHelper);
-            this.parsed.lineHeight = this.lineHeight;
-            this.parsed.showImages = this.showImages;
-            this.parsed.showInlineImagesInCenter = this.showInlineImagesInCenter;
-            this.parsed.imageHeightLines = this.imageHeightLines;
-            this.parsed.imageFitWidth = this.imageFitWidth;
-            this.parsed.compactTextPerc = this.compactTextPerc;
+            while (this.drawHelper.measureText(wideLine, {}) < this.w) wideLine += wideLetter;
 
-            this.parsed.testText = 'Это тестовый текст. Его ширина выдается системой неверно некоторое время.';
-            this.parsed.testWidth = this.drawHelper.measureText(this.parsed.testText, {});
+            this.parsed.setSettings({
+                p: this.p,
+                w: this.w,
+                font: this.font,
+                fontSize: this.fontSize,
+                wordWrap: this.wordWrap,
+                cutEmptyParagraphs: this.cutEmptyParagraphs,
+                addEmptyParagraphs: this.addEmptyParagraphs,
+                maxWordLength: wideLine.length - 1,
+                lineHeight: this.lineHeight,
+                showImages: this.showImages,
+                showInlineImagesInCenter: this.showInlineImagesInCenter,
+                imageHeightLines: this.imageHeightLines,
+                imageFitWidth: this.imageFitWidth,
+                compactTextPerc: this.compactTextPerc,
+                testWidth: 0,
+                measureText: this.drawHelper.measureText.bind(this.drawHelper),
+            });
         }
 
         //scrolling page
-        const pageSpace = this.scrollHeight - this.pageLineCount*this.lineHeight;
+        const pageSpace = this.scrollHeight - this.pageRowsCount*this.lineHeight;
         let top = pageSpace/2;
         if (this.showStatusBar)
             top += this.statusBarHeight*(this.statusBarTop ? 1 : 0);
@@ -262,14 +311,14 @@ class TextPage extends Vue {
         
         page1.perspective = page2.perspective = '3072px';
 
-        page1.width = page2.width = this.w + this.indentLR + 'px';
+        page1.width = page2.width = this.boxW + this.indentLR + 'px';
         page1.height = page2.height = this.scrollHeight - (pageSpace > 0 ? pageSpace : 0) + 'px';
         page1.top = page2.top = top + 'px';
         page1.left = page2.left = this.indentLR + 'px';
 
         page1 = this.$refs.scrollingPage1.style;
         page2 = this.$refs.scrollingPage2.style;
-        page1.width = page2.width = this.w + this.indentLR + 'px';
+        page1.width = page2.width = this.boxW + this.indentLR + 'px';
         page1.height = page2.height = this.scrollHeight + this.lineHeight + 'px';
     }
 
@@ -333,20 +382,36 @@ class TextPage extends Vue {
         if (!omitLoadFonts)
             await this.loadFonts();
 
-        this.draw();
-
-        // ширина шрифта некоторое время выдается неверно, поэтому
-        if (!omitLoadFonts) {
-            const parsed = this.parsed;
-
-            let i = 0;
-            const t = this.parsed.testText;
-            while (i++ < 50 && this.parsed === parsed && this.drawHelper.measureText(t, {}) === this.parsed.testWidth)
+        if (omitLoadFonts) {
+            this.draw();
+        } else {
+            // ширина шрифта некоторое время выдается неверно,
+            // не удалось событийно отловить этот момент, поэтому костыль
+            while (this.checkingFont) {
+                this.stopCheckingFont = true;
                 await utils.sleep(100);
+            }
 
-            if (this.parsed === parsed) {
-                this.parsed.testWidth = this.drawHelper.measureText(t, {});
-                this.draw();
+            this.checkingFont = true;
+            this.stopCheckingFont = false;
+            try {
+                const parsed = this.parsed;
+
+                let i = 0;
+                const t = 'Это тестовый текст. Его ширина выдается системой неправильно некоторое время.';
+                let twprev = 0;
+                //5 секунд проверяем изменения шрифта
+                while (!this.stopCheckingFont && i++ < 50 && this.parsed === parsed) {
+                    const tw = this.drawHelper.measureText(t, {});
+                    if (tw !== twprev) {
+                        this.parsed.setSettings({testWidth: tw});
+                        this.draw();
+                        twprev = tw;
+                    }
+                    await utils.sleep(100);
+                }
+            } finally {
+                this.checkingFont = false;
             }
         }
     }
@@ -430,8 +495,18 @@ class TextPage extends Vue {
     }
 
     setBackground() {
-        this.background = `<div class="layout ${this.wallpaper}" style="width: ${this.realWidth}px; height: ${this.realHeight}px;` + 
-            ` background-color: ${this.backgroundColor}"></div>`;
+        if (this.wallpaperIgnoreStatusBar) {
+            this.background = `<div class="layout" style="width: ${this.realWidth}px; height: ${this.realHeight}px;` +
+                ` background-color: ${this.backgroundColor}">` +
+                `<div class="layout ${this.wallpaper}" style="width: ${this.realWidth}px; height: ${this.scrollHeight}px; ` +
+                    `top: ${(this.showStatusBar && this.statusBarTop ? this.statusBarHeight + 1 : 0)}px; position: relative;">` +
+                `</div>` +
+            `</div>`;
+        } else {
+            this.background = `<div class="layout ${this.wallpaper}" style="width: ${this.realWidth}px; height: ${this.realHeight}px;` +
+                ` background-color: ${this.backgroundColor}"></div>`;
+        }
+
     }
 
     async onResize() {
@@ -490,7 +565,7 @@ class TextPage extends Vue {
 
     async startTextScrolling() {
         if (this.doingScrolling || !this.book || !this.parsed.textLength || !this.linesDown || this.pageLineCount < 1 ||
-            this.linesDown.length <= this.pageLineCount) {
+            this.linesDown.length <= this.pageLineCount || this.dualPageMode) {
             this.doStopScrolling();
             return;
         }
@@ -608,6 +683,7 @@ class TextPage extends Vue {
         if (!this.pageChangeAnimation)
             this.debouncedPrepareNextPage();
         this.debouncedDrawStatusBar();
+        this.debouncedDrawPageDividerAndOrnament();
 
         if (this.book && this.linesDown && this.linesDown.length < this.pageLineCount) {
             this.doEnd(true);
@@ -744,6 +820,25 @@ class TextPage extends Vue {
             }
         } else {
             this.statusBar = '';
+        }
+    }
+
+    drawPageDividerAndOrnament() {
+        if (this.dualPageMode) {
+            this.pageDivider = `<div class="layout" style="width: ${this.realWidth}px; height: ${this.scrollHeight}px; ` + 
+                `top: ${(this.showStatusBar && this.statusBarTop ? this.statusBarHeight + 1 : 0)}px; position: relative;">` +
+                `<div class="fit row justify-center items-center no-wrap">` +
+                    `<div style="height: ${Math.round(this.scrollHeight*this.dualDivHeight/100)}px; width: ${this.dualDivWidth}px; ` +
+                        `box-shadow: 0 0 ${this.dualDivShadowWidth}px ${this.dualDivRgbaColor}; ` + 
+                        `background-image: url(&quot;data:image/svg+xml;utf8,<svg width='100%' height='100%' xmlns='http://www.w3.org/2000/svg'>` +
+                            `<line x1='${this.dualDivWidth/2}' y1='0' x2='${this.dualDivWidth/2}' y2='100%' stroke='${this.dualDivRgbaColor}' ` +
+                                `stroke-width='${this.dualDivWidth}' stroke-dasharray='${this.dualDivStrokeFill} ${this.dualDivStrokeGap}'/>` +
+                        `</svg>&quot;);">` +
+                    `</div>` +
+                `</div>` +
+            `</div>`;
+        } else {
+            this.pageDivider = null;
         }
     }
 
@@ -1158,63 +1253,6 @@ class TextPage extends Vue {
 .events {
     z-index: 20;
     background-color: rgba(0,0,0,0);
-}
-
-</style>
-
-<style>
-.paper1 {
-    background: url("images/paper1.jpg") center;
-    background-size: cover;
-}
-
-.paper2 {
-    background: url("images/paper2.jpg") center;
-    background-size: cover;
-}
-
-.paper3 {
-    background: url("images/paper3.jpg") center;
-    background-size: cover;
-}
-
-.paper4 {
-    background: url("images/paper4.jpg") center;
-    background-size: cover;
-}
-
-.paper5 {
-    background: url("images/paper5.jpg") center;
-    background-size: cover;
-}
-
-.paper6 {
-    background: url("images/paper6.jpg") center;
-    background-size: cover;
-}
-
-.paper7 {
-    background: url("images/paper7.jpg") center;
-    background-size: cover;
-}
-
-.paper8 {
-    background: url("images/paper8.jpg") center;
-    background-size: cover;
-}
-
-.paper9 {
-    background: url("images/paper9.jpg");
-}
-
-@keyframes page1-animation-thaw {
-    0%   { opacity: 0; }
-    100% { opacity: 1; }
-}
-
-@keyframes page2-animation-thaw {
-    0%   { opacity: 1; }
-    100% { opacity: 0; }
 }
 
 </style>

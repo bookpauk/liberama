@@ -19,6 +19,109 @@ export default class DrawHelper {
         return this.context.measureText(text).width;
     }
 
+    drawLine(line, lineIndex, baseLineIndex, sel, imageDrawn) {
+        /* line:
+        {
+            begin: Number,
+            end: Number,
+            first: Boolean,
+            last: Boolean,
+            parts: array of {
+                style: {bold: Boolean, italic: Boolean, center: Boolean},
+                image: {local: Boolean, inline: Boolean, id: String, imageLine: Number, lineCount: Number, paraIndex: Number},
+                text: String,
+            }            
+        }*/
+
+        let out = '<div>';
+
+        let lineText = '';
+        let center = false;
+        let space = 0;
+        let j = 0;
+        //формируем строку
+        for (const part of line.parts) {
+            let tOpen = '';
+            tOpen += (part.style.bold ? '<b>' : '');
+            tOpen += (part.style.italic ? '<i>' : '');
+            tOpen += (part.style.sup ? '<span style="vertical-align: baseline; position: relative; line-height: 0; top: -0.3em">' : '');
+            tOpen += (part.style.sub ? '<span style="vertical-align: baseline; position: relative; line-height: 0; top: 0.3em">' : '');
+            let tClose = '';
+            tClose += (part.style.sub ? '</span>' : '');
+            tClose += (part.style.sup ? '</span>' : '');
+            tClose += (part.style.italic ? '</i>' : '');
+            tClose += (part.style.bold ? '</b>' : '');
+
+            let text = '';
+            if (lineIndex == 0 && this.searching) {
+                for (let k = 0; k < part.text.length; k++) {
+                    text += (sel.has(j) ? `<ins>${part.text[k]}</ins>` : part.text[k]);
+                    j++;
+                }
+            } else
+                text = part.text;
+
+            if (text && text.trim() == '')
+                text = `<span style="white-space: pre">${text}</span>`;
+
+            lineText += `${tOpen}${text}${tClose}`;
+
+            center = center || part.style.center;
+            space = (part.style.space > space ? part.style.space : space);
+
+            //избражения
+            //image: {local: Boolean, inline: Boolean, id: String, imageLine: Number, lineCount: Number, paraIndex: Number, w: Number, h: Number},
+            const img = part.image;
+            if (img && img.id && !img.inline && !imageDrawn.has(img.paraIndex)) {
+                const bin = this.parsed.binary[img.id];
+                if (bin) {
+                    let resize = '';                        
+                    if (bin.h > img.h) {
+                        resize = `height: ${img.h}px`;
+                    }
+
+                    const left = (this.w - img.w)/2;
+                    const top = ((img.lineCount*this.lineHeight - img.h)/2) + (lineIndex - baseLineIndex - img.imageLine)*this.lineHeight;
+                    if (img.local) {
+                        lineText += `<img src="data:${bin.type};base64,${bin.data}" style="position: absolute; left: ${left}px; top: ${top}px; ${resize}"/>`;
+                    } else {
+                        lineText += `<img src="${img.id}" style="position: absolute; left: ${left}px; top: ${top}px; ${resize}"/>`;
+                    }
+                }
+                imageDrawn.add(img.paraIndex);
+            }
+
+            if (img && img.id && img.inline) {
+                if (img.local) {
+                    const bin = this.parsed.binary[img.id];
+                    if (bin) {
+                        let resize = '';
+                        if (bin.h > this.fontSize) {
+                            resize = `height: ${this.fontSize - 3}px`;
+                        }
+                        lineText += `<img src="data:${bin.type};base64,${bin.data}" style="${resize}"/>`;
+                    }
+                } else {
+                    //
+                }
+            }
+        }
+
+        const centerStyle = (center ? `text-align: center; text-align-last: center; width: ${this.w}px` : '')
+        if ((line.first || space) && !center) {
+            let p = (line.first ? this.p : 0);
+            p = (space ? p + this.p*space : p);
+            lineText = `<span style="display: inline-block; margin-left: ${p}px"></span>${lineText}`;
+        }
+
+        if (line.last || center)
+            lineText = `<span style="display: inline-block; ${centerStyle}">${lineText}</span>`;
+
+        out += lineText + '</div>';
+
+        return out;
+    }
+
     drawPage(lines, isScrolling) {
         if (!this.lastBook || this.pageLineCount < 1 || !this.book || !lines || !this.parsed.textLength)
             return '';
@@ -26,134 +129,65 @@ export default class DrawHelper {
         const font = this.fontByStyle({});
         const justify = (this.textAlignJustify ? 'text-align: justify; text-align-last: justify;' : '');
 
-        let out = `<div style="width: ${this.w}px; height: ${this.h + (isScrolling ? this.lineHeight : 0)}px;` + 
+        const boxH = this.h + (isScrolling ? this.lineHeight : 0);
+        let out = `<div class="row no-wrap" style="width: ${this.boxW}px; height: ${boxH}px;` + 
             ` position: absolute; top: ${this.fontSize*this.textShift}px; color: ${this.textColor}; font: ${font}; ${justify}` +
             ` line-height: ${this.lineHeight}px; white-space: nowrap;">`;
 
-        let imageDrawn = new Set();
+        let imageDrawn1 = new Set();
+        let imageDrawn2 = new Set();
         let len = lines.length;
         const lineCount = this.pageLineCount + (isScrolling ? 1 : 0);
         len = (len > lineCount ? lineCount : len);
 
-        for (let i = 0; i < len; i++) {
-            const line = lines[i];
-            /* line:
-            {
-                begin: Number,
-                end: Number,
-                first: Boolean,
-                last: Boolean,
-                parts: array of {
-                    style: {bold: Boolean, italic: Boolean, center: Boolean},
-                    image: {local: Boolean, inline: Boolean, id: String, imageLine: Number, lineCount: Number, paraIndex: Number},
-                    text: String,
-                }
-            }*/
-            let sel = new Set();
-            //поиск
-            if (i == 0 && this.searching) {
-                let pureText = '';
-                for (const part of line.parts) {
-                    pureText += part.text;
-                }
-
-                pureText = pureText.toLowerCase();
-                let j = 0;
-                while (1) {// eslint-disable-line no-constant-condition
-                    j = pureText.indexOf(this.needle, j);
-                    if (j >= 0) {
-                        for (let k = 0; k < this.needle.length; k++) {
-                            sel.add(j + k);
-                        }
-                    } else
-                        break;
-                    j++;
-                }
+        //поиск
+        let sel = new Set();
+        if (len > 0 && this.searching) {
+            const line = lines[0];
+            let pureText = '';
+            for (const part of line.parts) {
+                pureText += part.text;
             }
 
-            let lineText = '';
-            let center = false;
-            let space = 0;
+            pureText = pureText.toLowerCase();
             let j = 0;
-            //формируем строку
-            for (const part of line.parts) {
-                let tOpen = '';
-                tOpen += (part.style.bold ? '<b>' : '');
-                tOpen += (part.style.italic ? '<i>' : '');
-                tOpen += (part.style.sup ? '<span style="vertical-align: baseline; position: relative; line-height: 0; top: -0.3em">' : '');
-                tOpen += (part.style.sub ? '<span style="vertical-align: baseline; position: relative; line-height: 0; top: 0.3em">' : '');
-                let tClose = '';
-                tClose += (part.style.sub ? '</span>' : '');
-                tClose += (part.style.sup ? '</span>' : '');
-                tClose += (part.style.italic ? '</i>' : '');
-                tClose += (part.style.bold ? '</b>' : '');
-
-                let text = '';
-                if (i == 0 && this.searching) {
-                    for (let k = 0; k < part.text.length; k++) {
-                        text += (sel.has(j) ? `<ins>${part.text[k]}</ins>` : part.text[k]);
-                        j++;
+            while (1) {// eslint-disable-line no-constant-condition
+                j = pureText.indexOf(this.needle, j);
+                if (j >= 0) {
+                    for (let k = 0; k < this.needle.length; k++) {
+                        sel.add(j + k);
                     }
                 } else
-                    text = part.text;
-
-                if (text && text.trim() == '')
-                    text = `<span style="white-space: pre">${text}</span>`;
-
-                lineText += `${tOpen}${text}${tClose}`;
-
-                center = center || part.style.center;
-                space = (part.style.space > space ? part.style.space : space);
-
-                //избражения
-                //image: {local: Boolean, inline: Boolean, id: String, imageLine: Number, lineCount: Number, paraIndex: Number, w: Number, h: Number},
-                const img = part.image;
-                if (img && img.id && !img.inline && !imageDrawn.has(img.paraIndex)) {
-                    const bin = this.parsed.binary[img.id];
-                    if (bin) {
-                        let resize = '';                        
-                        if (bin.h > img.h) {
-                            resize = `height: ${img.h}px`;
-                        }
-
-                        const left = (this.w - img.w)/2;
-                        const top = ((img.lineCount*this.lineHeight - img.h)/2) + (i - img.imageLine)*this.lineHeight;
-                        if (img.local) {
-                            lineText += `<img src="data:${bin.type};base64,${bin.data}" style="position: absolute; left: ${left}px; top: ${top}px; ${resize}"/>`;
-                        } else {
-                            lineText += `<img src="${img.id}" style="position: absolute; left: ${left}px; top: ${top}px; ${resize}"/>`;
-                        }
-                    }
-                    imageDrawn.add(img.paraIndex);
-                }
-
-                if (img && img.id && img.inline) {
-                    if (img.local) {
-                        const bin = this.parsed.binary[img.id];
-                        if (bin) {
-                            let resize = '';
-                            if (bin.h > this.fontSize) {
-                                resize = `height: ${this.fontSize - 3}px`;
-                            }
-                            lineText += `<img src="data:${bin.type};base64,${bin.data}" style="${resize}"/>`;
-                        }
-                    } else {
-                        //
-                    }
-                }
+                    break;
+                j++;
             }
+        }
 
-            const centerStyle = (center ? `text-align: center; text-align-last: center; width: ${this.w}px` : '')
-            if ((line.first || space) && !center) {
-                let p = (line.first ? this.p : 0);
-                p = (space ? p + this.p*space : p);
-                lineText = `<span style="display: inline-block; margin-left: ${p}px"></span>${lineText}`;
+        //отрисовка строк
+        if (!this.dualPageMode) {
+            out += `<div class="fit">`;
+            for (let i = 0; i < len; i++) {
+                out += this.drawLine(lines[i], i, 0, sel, imageDrawn1);
             }
+            out += `</div>`;
+        } else {
+            //левая страница
+            out += `<div style="width: ${this.w}px; margin-left: ${this.dualIndentLR}px; position: relative;">`;
+            const l2 = (this.pageRowsCount > len ? len : this.pageRowsCount);
+            for (let i = 0; i < l2; i++) {
+                out += this.drawLine(lines[i], i, 0, sel, imageDrawn1);
+            }
+            out += '</div>';
 
-            if (line.last || center)
-                lineText = `<span style="display: inline-block; ${centerStyle}">${lineText}</span>`;
+            //разделитель
+            out += `<div style="width: ${this.dualIndentLR*2}px;"></div>`;
 
-            out += (i > 0 ? '<br>' : '') + lineText;
+            //правая страница
+            out += `<div style="width: ${this.w}px; margin-right: ${this.dualIndentLR}px; position: relative;">`;
+            for (let i = l2; i < len; i++) {
+                out += this.drawLine(lines[i], i, l2, sel, imageDrawn2);
+            }
+            out += '</div>';
         }
 
         out += '</div>';
@@ -179,8 +213,8 @@ export default class DrawHelper {
         
         if (w1 + w2 + w3 <= w && w3 > (10 + fh2)) {
             const barWidth = w - w1 - w2 - fh2;
-            out += this.strokeRect(x + w1, y + pad, barWidth, fh - 2, this.statusBarColor);
-            out += this.fillRect(x + w1 + 2, y + pad + 2, (barWidth - 4)*read, fh - 6, this.statusBarColor);
+            out += this.strokeRect(x + w1, y + pad, barWidth, fh - 2, this.statusBarRgbaColor);
+            out += this.fillRect(x + w1 + 2, y + pad + 2, (barWidth - 4)*read, fh - 6, this.statusBarRgbaColor);
         }
 
         if (w1 <= w)
@@ -193,12 +227,12 @@ export default class DrawHelper {
 
         let out = `<div class="layout" style="` + 
             `width: ${this.realWidth}px; height: ${statusBarHeight}px; ` + 
-            `color: ${this.statusBarColor}">`;
+            `color: ${this.statusBarRgbaColor}">`;
 
         const fontSize = statusBarHeight*0.75;
         const font = 'bold ' + this.fontBySize(fontSize);
 
-        out += this.fillRect(0, (statusBarTop ? statusBarHeight : 0), this.realWidth, 1, this.statusBarColor);
+        out += this.fillRect(0, (statusBarTop ? statusBarHeight : 0), this.realWidth, 1, this.statusBarRgbaColor);
 
         const date = new Date();
         const time = `${date.getHours().toString().padStart(2, '0')}:${date.getMinutes().toString().padStart(2, '0')}`;
@@ -207,7 +241,7 @@ export default class DrawHelper {
 
         out += this.fillTextShift(this.fittingString(title, this.realWidth/2 - fontSize - 3, font), fontSize, 2, font, fontSize);
 
-        out += this.drawPercentBar(this.realWidth/2, 2, this.realWidth/2 - timeW - 2*fontSize, statusBarHeight, font, fontSize, bookPos, textLength, imageNum, imageLength);
+        out += this.drawPercentBar(this.realWidth/2 + fontSize, 2, this.realWidth/2 - timeW - 3*fontSize, statusBarHeight, font, fontSize, bookPos, textLength, imageNum, imageLength);
         
         out += '</div>';
         return out;
@@ -274,7 +308,7 @@ export default class DrawHelper {
     }
 
     async doPageAnimationRightShift(page1, page2, duration, isDown, animation1Finish) {
-        const s = this.w + this.fontSize;
+        const s = this.boxW + this.fontSize;
 
         if (isDown) {
             page1.style.transform = `translateX(${s}px)`;

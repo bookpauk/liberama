@@ -1,27 +1,32 @@
 const sqlite = require('sqlite');
 const SQL = require('sql-template-strings');
 
-const utils = require('../core/utils');
-
-const waitingDelay = 100; //ms
-
 class SqliteConnectionPool {
     constructor() {
         this.closed = true;
     }
 
-    async open(connCount, dbFileName) {
-        if (!Number.isInteger(connCount) || connCount <= 0)
-            return;
+    async open(poolConfig, dbFileName) {
+        const connCount = poolConfig.connCount || 1;
+        const busyTimeout = poolConfig.busyTimeout || 60*1000;
+        const cacheSize = poolConfig.cacheSize || 2000;
+
+        this.dbFileName = dbFileName;
         this.connections = [];
         this.freed = new Set();
+        this.waitingQueue = [];
 
         for (let i = 0; i < connCount; i++) {
             let client = await sqlite.open(dbFileName);
-            client.configure('busyTimeout', 10000); //ms
+
+            client.configure('busyTimeout', busyTimeout); //ms
+            await client.exec(`PRAGMA cache_size = ${cacheSize}`);
 
             client.ret = () => {
                 this.freed.add(i);
+                if (this.waitingQueue.length) {
+                    this.waitingQueue.shift().onFreed(i);
+                }
             };
 
             this.freed.add(i);
@@ -30,28 +35,25 @@ class SqliteConnectionPool {
         this.closed = false;
     }
 
-    _setImmediate() {
+    get() {
         return new Promise((resolve) => {
-            setImmediate(() => {
-                return resolve();
+            if (this.closed)
+                throw new Error('Connection pool closed');
+
+            const freeConnIndex = this.freed.values().next().value;
+            if (freeConnIndex !== undefined) {
+                this.freed.delete(freeConnIndex);
+                resolve(this.connections[freeConnIndex]);
+                return;
+            }
+
+            this.waitingQueue.push({
+                onFreed: (connIndex) => {
+                    this.freed.delete(connIndex);
+                    resolve(this.connections[connIndex]);
+                },
             });
         });
-    }
-
-    async get() {
-        if (this.closed)
-            return;
-
-        let freeConnIndex = this.freed.values().next().value;
-        if (freeConnIndex == null) {
-            if (waitingDelay)
-                await utils.sleep(waitingDelay);
-            return await this._setImmediate().then(() => this.get());
-        }
-
-        this.freed.delete(freeConnIndex);
-
-        return this.connections[freeConnIndex];
     }
 
     async run(query) {

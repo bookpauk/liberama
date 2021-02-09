@@ -13,8 +13,7 @@ class Misc {
         ]};
 
         try {
-            await wsc.open();
-            const config = await wsc.message(wsc.send(Object.assign({action: 'get-config'}, query)));
+            const config = await wsc.message(await wsc.send(Object.assign({action: 'get-config'}, query)));
             if (config.error)
                 throw new Error(config.error);
             return config;

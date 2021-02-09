@@ -19,8 +19,7 @@ class Reader {
 
         let response = {};
         try {
-            await wsc.open();
-            const requestId = wsc.send({action: 'worker-get-state-finish', workerId});
+            const requestId = await wsc.send({action: 'worker-get-state-finish', workerId});
 
             let prevResponse = false;
             while (1) {// eslint-disable-line no-constant-condition
@@ -124,8 +123,7 @@ class Reader {
             let response = null
             
             try {
-                await wsc.open();
-                response = await wsc.message(wsc.send({action: 'reader-restore-cached-file', path: url}));
+                response = await wsc.message(await wsc.send({action: 'reader-restore-cached-file', path: url}));
             } catch (e) {
                 console.error(e);
                 //если с WebSocket проблема, работаем по http
@@ -210,8 +208,7 @@ class Reader {
     async storage(request) {
         let response = null;
         try {
-            await wsc.open();
-            response = await wsc.message(wsc.send({action: 'reader-storage', body: request}));
+            response = await wsc.message(await wsc.send({action: 'reader-storage', body: request}));
         } catch (e) {
             console.error(e);
             //если с WebSocket проблема, работаем по http

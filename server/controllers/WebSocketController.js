@@ -50,8 +50,14 @@ class WebSocketController {
                 log(`WebSocket-IN:  ${message.substr(0, 4000)}`);
             }
 
-            ws.lastActivity = Date.now();
             req = JSON.parse(message);
+
+            ws.lastActivity = Date.now();
+            
+            //pong for WebSocketConnection
+            if (req._rpo === 1)
+                this.send({_rok: 1}, req, ws);
+
             switch (req.action) {
                 case 'test':
                     await this.test(req, ws); break;

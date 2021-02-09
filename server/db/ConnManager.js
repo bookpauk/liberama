@@ -4,8 +4,6 @@ const SqliteConnectionPool = require('./SqliteConnectionPool');
 const log = new (require('../core/AppLogger'))().log;//singleton
 
 const migrations = {
-    'app': require('./migrations/app'),
-    'readerStorage': require('./migrations/readerStorage'),
 };
 
 let instance = null;
@@ -32,11 +30,11 @@ class ConnManager {
             const dbFileName = this.config.dataDir + '/' + poolConfig.fileName;
 
             //бэкап
-            if (await fs.pathExists(dbFileName))
+            if (!poolConfig.noBak && await fs.pathExists(dbFileName))
                 await fs.copy(dbFileName, `${dbFileName}.bak`);
 
             const connPool = new SqliteConnectionPool();
-            await connPool.open(poolConfig.connCount, dbFileName);
+            await connPool.open(poolConfig, dbFileName);
 
             log(`Opened database "${poolConfig.poolName}"`);
             //миграции

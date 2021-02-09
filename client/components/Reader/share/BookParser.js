@@ -4,23 +4,55 @@ import * as utils from '../../../share/utils';
 
 const maxImageLineCount = 100;
 
+// defaults
+const defaultSettings = {
+    p: 30,  //px, отступ параграфа
+    w: 500, //px, ширина страницы
+
+    font: '', //css описание шрифта
+    fontSize: 20, //px, размер шрифта
+    wordWrap: false, //перенос по слогам
+    cutEmptyParagraphs: false, //убирать пустые параграфы
+    addEmptyParagraphs: 0, //добавлять n пустых параграфов перед непустым
+    maxWordLength: 500, //px, максимальная длина слова без пробелов
+    lineHeight: 26, //px, высота строки
+    showImages: true, //показыввать изображения
+    showInlineImagesInCenter: true, //выносить изображения в центр, работает на этапе первичного парсинга (parse)
+    imageHeightLines: 100, //кол-во строк, максимальная высота изображения
+    imageFitWidth: true, //ширина изображения не более ширины страницы
+    dualPageMode: false, //двухстраничный режим
+    compactTextPerc: 0, //проценты, степень компактности текста
+    testWidth: 0, //ширина тестовой строки, пересчитывается извне при изменении шрифта браузером
+    isTesting: false, //тестовый режим
+
+    //заглушка, измеритель ширины текста
+    measureText: (text, style) => {// eslint-disable-line no-unused-vars
+        return text.length*20;
+    },
+};
+
+//for splitToSlogi()
+const glas = new Set(['а', 'А', 'о', 'О', 'и', 'И', 'е', 'Е', 'ё', 'Ё', 'э', 'Э', 'ы', 'Ы', 'у', 'У', 'ю', 'Ю', 'я', 'Я']);
+const soglas = new Set([
+    'б', 'в', 'г', 'д', 'ж', 'з', 'й', 'к', 'л', 'м', 'н', 'п', 'р', 'с', 'т', 'ф', 'х', 'ц', 'ч', 'ш', 'щ',
+    'Б', 'В', 'Г', 'Д', 'Ж', 'З', 'Й', 'К', 'Л', 'М', 'Н', 'П', 'Р', 'С', 'Т', 'Ф', 'Х', 'Ч', 'Ц', 'Ш', 'Щ'
+]);
+const znak = new Set(['ь', 'Ь', 'ъ', 'Ъ', 'й', 'Й']);
+const alpha = new Set([...glas, ...soglas, ...znak]);
+
 export default class BookParser {
-    constructor(settings) {
-        if (settings) {
-            this.showInlineImagesInCenter = settings.showInlineImagesInCenter;
-        }
+    constructor(settings = {}) {
+        this.sets = {};
 
-        // defaults
-        this.p = 30;// px, отступ параграфа
-        this.w = 300;// px, ширина страницы
-        this.wordWrap = false;// перенос по слогам
-
-        //заглушка
-        this.measureText = (text, style) => {// eslint-disable-line no-unused-vars
-            return text.length*20;
-        };
+        this.setSettings(defaultSettings);
+        this.setSettings(settings);
     }
 
+    setSettings(settings = {}) {
+        this.sets = Object.assign({}, this.sets, settings);
+        this.measureText = this.sets.measureText;
+    }
+    
     async parse(data, callback) {
         if (!callback)
             callback = () => {};
@@ -76,6 +108,7 @@ export default class BookParser {
         */
         const getImageDimensions = (binaryId, binaryType, data) => {
             return new Promise ((resolve, reject) => { (async() => {
+                data = data.replace(/[\n\r\s]/g, '');
                 const i = new Image();
                 let resolved = false;
                 i.onload = () => {
@@ -120,14 +153,59 @@ export default class BookParser {
             })().catch(reject); });
         };
 
-        const newParagraph = (text, len, addIndex) => {
+        const correctCurrentPara = () => {
+            //коррекция текущего параграфа
+            if (paraIndex >= 0) {
+                const prevParaIndex = paraIndex;
+                let p = para[paraIndex];
+                paraOffset -= p.length;
+                //добавление пустых (addEmptyParagraphs) параграфов перед текущим непустым
+                if (p.text.trim() != '') {
+                    for (let i = 0; i < 2; i++) {
+                        para[paraIndex] = {
+                            index: paraIndex,
+                            offset: paraOffset,
+                            length: 1,
+                            text: ' ',
+                            addIndex: i + 1,
+                        };
+                        paraIndex++;
+                        paraOffset++;
+                    }
+
+                    if (curTitle.paraIndex == prevParaIndex)
+                        curTitle.paraIndex = paraIndex;
+                    if (curSubtitle.paraIndex == prevParaIndex)
+                        curSubtitle.paraIndex = paraIndex;
+                }
+
+                //уберем пробелы с концов параграфа, минимум 1 пробел должен быть у пустого параграфа
+                let newParaText = p.text.trim();
+                newParaText = (newParaText.length ? newParaText : ' ');
+                const ldiff = p.text.length - newParaText.length;
+                if (ldiff != 0) {
+                    p.text = newParaText;
+                    p.length -= ldiff;
+                }
+
+                p.index = paraIndex;
+                p.offset = paraOffset;
+                para[paraIndex] = p;
+                paraOffset += p.length;
+            }
+        };
+
+        const newParagraph = (text = '', len = 0) => {
+            correctCurrentPara();
+
+            //новый параграф
             paraIndex++;
             let p = {
                 index: paraIndex,
                 offset: paraOffset,
                 length: len,
                 text: text,
-                addIndex: (addIndex ? addIndex : 0),
+                addIndex: 0,
             };
 
             if (inSubtitle) {
@@ -137,53 +215,26 @@ export default class BookParser {
             }
 
             para[paraIndex] = p;
-            paraOffset += p.length;
+            paraOffset += len;
         };
 
         const growParagraph = (text, len) => {
             if (paraIndex < 0) {
-                newParagraph(' ', 1);
+                newParagraph();
                 growParagraph(text, len);
                 return;
             }
 
-            const prevParaIndex = paraIndex;
-            let p = para[paraIndex];
-            paraOffset -= p.length;
-            //добавление пустых (addEmptyParagraphs) параграфов перед текущим
-            if (p.length == 1 && p.text[0] == ' ' && len > 0) {
-                paraIndex--;
-                for (let i = 0; i < 2; i++) {
-                    newParagraph(' ', 1, i + 1);
-                }
-
-                paraIndex++;
-                p.index = paraIndex;
-                p.offset = paraOffset;
-                para[paraIndex] = p;
-
-                if (curTitle.paraIndex == prevParaIndex)
-                    curTitle.paraIndex = paraIndex;
-                if (curSubtitle.paraIndex == prevParaIndex)
-                    curSubtitle.paraIndex = paraIndex;
-
-                //уберем начальный пробел
-                p.length = 0;
-                p.text = p.text.substr(1);
-            }
-
-            p.length += len;
-            p.text += text;
-
-            
             if (inSubtitle) {
                 curSubtitle.title += text;
             } else if (inTitle) {
                 curTitle.title += text;
             }
 
-            para[paraIndex] = p;
-            paraOffset += p.length;
+            const p = para[paraIndex];
+            p.length += len;
+            p.text += text;
+            paraOffset += len;
         };
 
         const onStartNode = (elemName, tail) => {// eslint-disable-line no-unused-vars
@@ -196,8 +247,8 @@ export default class BookParser {
             if (tag == 'binary') {
                 let attrs = sax.getAttrsSync(tail);
                 binaryType = (attrs['content-type'] && attrs['content-type'].value ? attrs['content-type'].value : '');
-                binaryType = (binaryType == 'image/jpg' ? 'image/jpeg' : binaryType);
-                if (binaryType == 'image/jpeg' || binaryType == 'image/png' || binaryType == 'application/octet-stream')
+                binaryType = (binaryType == 'image/jpg' || binaryType == 'application/octet-stream' ? 'image/jpeg' : binaryType);
+                if (binaryType == 'image/jpeg' || binaryType == 'image/png')
                     binaryId = (attrs.id.value ? attrs.id.value : '');
             }
 
@@ -210,19 +261,23 @@ export default class BookParser {
                     if (href[0] == '#') {//local
                         imageNum++;
 
-                        if (inPara && !this.showInlineImagesInCenter && !center)
+                        if (inPara && !this.sets.showInlineImagesInCenter && !center)
                             growParagraph(`<image-inline href="${href}" num="${imageNum}"></image-inline>`, 0);
                         else
                             newParagraph(`<image href="${href}" num="${imageNum}">${' '.repeat(maxImageLineCount)}</image>`, maxImageLineCount);
 
                         this.images.push({paraIndex, num: imageNum, id, local, alt});
 
-                        if (inPara && this.showInlineImagesInCenter)
-                            newParagraph(' ', 1);
+                        if (inPara && this.sets.showInlineImagesInCenter)
+                            newParagraph();
                     } else {//external
                         imageNum++;
 
-                        dimPromises.push(getExternalImageDimensions(href));
+                        if (!this.sets.isTesting) {
+                            dimPromises.push(getExternalImageDimensions(href));
+                        } else {
+                            dimPromises.push(this.sets.getExternalImageDimensions(this, href));
+                        }
                         newParagraph(`<image href="${href}" num="${imageNum}">${' '.repeat(maxImageLineCount)}</image>`, maxImageLineCount);
 
                         this.images.push({paraIndex, num: imageNum, id, local, alt});
@@ -264,25 +319,25 @@ export default class BookParser {
                             newParagraph(`<emphasis><space w="1">${a}</space></emphasis>`, a.length);
                         });
                         if (ann.length)
-                            newParagraph(' ', 1);
+                            newParagraph();
                     }
 
                     if (isFirstBody && fb2.sequence && fb2.sequence.length) {
                         const bt = utils.getBookTitle(fb2);
                         if (bt.sequence) {
                             newParagraph(bt.sequence, bt.sequence.length);
-                            newParagraph(' ', 1);
+                            newParagraph();
                         }
                     }
 
                     if (!isFirstBody)
-                        newParagraph(' ', 1);
+                        newParagraph();
                     isFirstBody = false;
                     bodyIndex++;
                 }
 
                 if (tag == 'title') {
-                    newParagraph(' ', 1);
+                    newParagraph();
                     isFirstTitlePara = true;
                     bold = true;
                     center = true;
@@ -294,7 +349,7 @@ export default class BookParser {
 
                 if (tag == 'section') {
                     if (!isFirstSection)
-                        newParagraph(' ', 1);
+                        newParagraph();
                     isFirstSection = false;
                     sectionLevel++;
                 }
@@ -305,7 +360,7 @@ export default class BookParser {
 
                 if ((tag == 'p' || tag == 'empty-line' || tag == 'v')) {
                     if (!(tag == 'p' && isFirstTitlePara))
-                        newParagraph(' ', 1);
+                        newParagraph();
                     if (tag == 'p') {
                         inPara = true;
                         isFirstTitlePara = false;
@@ -313,7 +368,7 @@ export default class BookParser {
                 }
 
                 if (tag == 'subtitle') {
-                    newParagraph(' ', 1);
+                    newParagraph();
                     isFirstTitlePara = true;
                     bold = true;
                     center = true;
@@ -334,11 +389,12 @@ export default class BookParser {
                 }
 
                 if (tag == 'poem') {
-                    newParagraph(' ', 1);
+                    newParagraph();
                 }
 
                 if (tag == 'text-author') {
-                    newParagraph(' ', 1);
+                    newParagraph();
+                    bold = true;
                     space += 1;
                 }
             }
@@ -380,15 +436,15 @@ export default class BookParser {
                     if (tag == 'epigraph' || tag == 'annotation') {
                         italic = false;
                         space -= 1;
-                        if (tag == 'annotation')
-                            newParagraph(' ', 1);
+                        newParagraph();
                     }
 
                     if (tag == 'stanza') {
-                        newParagraph(' ', 1);
+                        newParagraph();
                     }
 
                     if (tag == 'text-author') {
+                        bold = false;
                         space -= 1;
                     }
                 }
@@ -405,16 +461,13 @@ export default class BookParser {
 
         const onTextNode = (text) => {// eslint-disable-line no-unused-vars
             text = he.decode(text);
-            text = text.replace(/>/g, '&gt;');
-            text = text.replace(/</g, '&lt;');
+            text = text.replace(/>/g, '&gt;').replace(/</g, '&lt;').replace(/[\t\n\r\xa0]/g, ' ');
 
             if (text && text.trim() == '')
-                text = (text.indexOf(' ') >= 0 ? ' ' : '');
+                text = ' ';
 
             if (!text)
                 return;
-
-            text = text.replace(/[\t\n\r\xa0]/g, ' ');
 
             const authorLength = (fb2.author && fb2.author.length ? fb2.author.length : 0);
             switch (path) {
@@ -453,24 +506,31 @@ export default class BookParser {
                     fb2.annotation += text;
             }
 
-            let tOpen = (center ? '<center>' : '');
-            tOpen += (bold ? '<strong>' : '');
-            tOpen += (italic ? '<emphasis>' : '');
-            tOpen += (space ? `<space w="${space}">` : '');
-            let tClose = (space ? '</space>' : '');
-            tClose += (italic ? '</emphasis>' : '');
-            tClose += (bold ? '</strong>' : '');
-            tClose += (center ? '</center>' : '');
+            if (binaryId) {
+                if (!this.sets.isTesting) {
+                    dimPromises.push(getImageDimensions(binaryId, binaryType, text));
+                } else {
+                    dimPromises.push(this.sets.getImageDimensions(this, binaryId, binaryType, text));
+                }
+            }
 
             if (path.indexOf('/fictionbook/body/title') == 0 ||
                 path.indexOf('/fictionbook/body/section') == 0 ||
                 path.indexOf('/fictionbook/body/epigraph') == 0
                 ) {
-                growParagraph(`${tOpen}${text}${tClose}`, text.length);
-            }
+                let tOpen = (center ? '<center>' : '');
+                tOpen += (bold ? '<strong>' : '');
+                tOpen += (italic ? '<emphasis>' : '');
+                tOpen += (space ? `<space w="${space}">` : '');
+                let tClose = (space ? '</space>' : '');
+                tClose += (italic ? '</emphasis>' : '');
+                tClose += (bold ? '</strong>' : '');
+                tClose += (center ? '</center>' : '');
 
-            if (binaryId) {
-                dimPromises.push(getImageDimensions(binaryId, binaryType, text));
+                if (text != ' ')
+                    growParagraph(`${tOpen}${text}${tClose}`, text.length);
+                else
+                    growParagraph(' ', 1);
             }
         };
 
@@ -482,6 +542,7 @@ export default class BookParser {
         await sax.parse(data, {
             onStartNode, onEndNode, onTextNode, onProgress
         });
+        correctCurrentPara();
 
         if (dimPromises.length) {
             try {
@@ -542,9 +603,19 @@ export default class BookParser {
         let style = {};
         let image = {};
 
+        //оптимизация по памяти
+        const copyStyle = (s) => {
+            const r = {};
+            for (const prop in s) {
+                if (s[prop])
+                    r[prop] = s[prop];
+            }
+            return r;
+        };
+
         const onTextNode = async(text) => {// eslint-disable-line no-unused-vars
             result.push({
-                style: Object.assign({}, style),
+                style: copyStyle(style),
                 image,
                 text
             });
@@ -589,7 +660,7 @@ export default class BookParser {
                         img.inline = true;
                         img.num = (attrs.num && attrs.num.value ? attrs.num.value : 0);
                         result.push({
-                            style: Object.assign({}, style),
+                            style: copyStyle(style),
                             image: img,
                             text: ''
                         });
@@ -632,7 +703,7 @@ export default class BookParser {
         });
 
         //длинные слова (или белиберду без пробелов) тоже разобьем
-        const maxWordLength = this.maxWordLength;
+        const maxWordLength = this.sets.maxWordLength;
         const parts = result;
         result = [];
         for (const part of parts) {
@@ -645,7 +716,7 @@ export default class BookParser {
                         spaceIndex = i;
 
                     if (i - spaceIndex >= maxWordLength && i < p.text.length - 1 && 
-                        this.measureText(p.text.substr(spaceIndex + 1, i - spaceIndex), p.style) >= this.w - this.p) {
+                        this.measureText(p.text.substr(spaceIndex + 1, i - spaceIndex), p.style) >= this.sets.w - this.sets.p) {
                         result.push({style: p.style, image: p.image, text: p.text.substr(0, i + 1)});
                         p = {style: p.style, image: p.image, text: p.text.substr(i + 1)};
                         spaceIndex = -1;
@@ -663,86 +734,87 @@ export default class BookParser {
     splitToSlogi(word) {
         let result = [];
 
-        const glas = new Set(['а', 'А', 'о', 'О', 'и', 'И', 'е', 'Е', 'ё', 'Ё', 'э', 'Э', 'ы', 'Ы', 'у', 'У', 'ю', 'Ю', 'я', 'Я']);
-        const soglas = new Set([
-            'б', 'в', 'г', 'д', 'ж', 'з', 'й', 'к', 'л', 'м', 'н', 'п', 'р', 'с', 'т', 'ф', 'х', 'ц', 'ч', 'ш', 'щ',
-            'Б', 'В', 'Г', 'Д', 'Ж', 'З', 'Й', 'К', 'Л', 'М', 'Н', 'П', 'Р', 'С', 'Т', 'Ф', 'Х', 'Ч', 'Ц', 'Ш', 'Щ'
-        ]);
-        const znak = new Set(['ь', 'Ь', 'ъ', 'Ъ', 'й', 'Й']);
-        const alpha = new Set([...glas, ...soglas, ...znak]);
-
-        let slog = '';
-        let slogLen = 0;
         const len = word.length;
-        word += '   ';
-        for (let i = 0; i < len; i++) {
-            slog += word[i];
-            if (alpha.has(word[i]))
-                slogLen++;
+        if (len > 3) {
+            let slog = '';
+            let slogLen = 0;
+            word += '   ';
+            for (let i = 0; i < len; i++) {
+                slog += word[i];
+                if (alpha.has(word[i]))
+                    slogLen++;
 
-            if (slogLen > 1 && i < len - 2 && (
-                    //гласная, а следом не 2 согласные буквы
-                    (glas.has(word[i]) && !(soglas.has(word[i + 1]) && 
-                        soglas.has(word[i + 2])) && alpha.has(word[i + 1]) && alpha.has(word[i + 2])
-                    ) ||
-                    //предыдущая не согласная буква, текущая согласная, а следом согласная и согласная|гласная буквы
-                    (alpha.has(word[i - 1]) && !soglas.has(word[i - 1]) && 
-                        soglas.has(word[i]) && soglas.has(word[i + 1]) && 
-                        (glas.has(word[i + 2]) || soglas.has(word[i + 2])) && 
-                        alpha.has(word[i + 1]) && alpha.has(word[i + 2])
-                    ) ||
-                    //мягкий или твердый знак или Й
-                    (znak.has(word[i]) && alpha.has(word[i + 1]) && alpha.has(word[i + 2])) ||
-                    (word[i] == '-')
-                ) &&
-                //нельзя оставлять окончания на ь, ъ, й
-                !(znak.has(word[i + 2]) && !alpha.has(word[i + 3]))
+                if (slogLen > 1 && i < len - 2 && (
+                        //гласная, а следом не 2 согласные буквы
+                        (glas.has(word[i]) && !( soglas.has(word[i + 1]) && soglas.has(word[i + 2]) ) &&
+                            alpha.has(word[i + 1]) && alpha.has(word[i + 2])
+                        ) ||
+                        //предыдущая не согласная буква, текущая согласная, а следом согласная и согласная|гласная буквы
+                        (alpha.has(word[i - 1]) && !soglas.has(word[i - 1]) && soglas.has(word[i]) && soglas.has(word[i + 1]) && 
+                            ( glas.has(word[i + 2]) || soglas.has(word[i + 2]) ) && 
+                            alpha.has(word[i + 1]) && alpha.has(word[i + 2])
+                        ) ||
+                        //мягкий или твердый знак или Й
+                        (znak.has(word[i]) && alpha.has(word[i + 1]) && alpha.has(word[i + 2])) ||
+                        (word[i] == '-')
+                    ) &&
+                    //нельзя оставлять окончания на ь, ъ, й
+                    !(znak.has(word[i + 2]) && !alpha.has(word[i + 3]))
 
-                ) {
-                result.push(slog);
-                slog = '';
-                slogLen = 0;
+                    ) {
+                    result.push(slog);
+                    slog = '';
+                    slogLen = 0;
+                }
             }
+            if (slog)
+                result.push(slog);
+        } else {
+            result.push(word);            
         }
-        if (slog)
-            result.push(slog);
 
         return result;
     }
 
     parsePara(paraIndex) {
         const para = this.para[paraIndex];
+        const s = this.sets;
 
+        //перераспарсиваем только при изменении одного из параметров
         if (!this.force &&
             para.parsed && 
-            para.parsed.testWidth === this.testWidth &&
-            para.parsed.w === this.w &&
-            para.parsed.p === this.p &&
-            para.parsed.wordWrap === this.wordWrap &&
-            para.parsed.maxWordLength === this.maxWordLength &&
-            para.parsed.font === this.font &&
-            para.parsed.cutEmptyParagraphs === this.cutEmptyParagraphs &&
-            para.parsed.addEmptyParagraphs === this.addEmptyParagraphs &&
-            para.parsed.showImages === this.showImages &&
-            para.parsed.imageHeightLines === this.imageHeightLines &&
-            para.parsed.imageFitWidth === this.imageFitWidth &&
-            para.parsed.compactTextPerc === this.compactTextPerc
+            para.parsed.p === s.p &&
+            para.parsed.w === s.w &&
+            para.parsed.font === s.font &&
+            para.parsed.fontSize === s.fontSize &&
+            para.parsed.wordWrap === s.wordWrap &&
+            para.parsed.cutEmptyParagraphs === s.cutEmptyParagraphs &&
+            para.parsed.addEmptyParagraphs === s.addEmptyParagraphs &&
+            para.parsed.maxWordLength === s.maxWordLength &&
+            para.parsed.lineHeight === s.lineHeight &&
+            para.parsed.showImages === s.showImages &&
+            para.parsed.imageHeightLines === s.imageHeightLines &&
+            para.parsed.imageFitWidth === (s.imageFitWidth || s.dualPageMode) &&
+            para.parsed.compactTextPerc === s.compactTextPerc &&
+            para.parsed.testWidth === s.testWidth
             )
             return para.parsed;
 
         const parsed = {
-            testWidth: this.testWidth,
-            w: this.w,
-            p: this.p,
-            wordWrap: this.wordWrap,
-            maxWordLength: this.maxWordLength,
-            font: this.font,
-            cutEmptyParagraphs: this.cutEmptyParagraphs,
-            addEmptyParagraphs: this.addEmptyParagraphs,
-            showImages: this.showImages,
-            imageHeightLines: this.imageHeightLines,
-            imageFitWidth: this.imageFitWidth,
-            compactTextPerc: this.compactTextPerc,
+            p: s.p,
+            w: s.w,
+            font: s.font,
+            fontSize: s.fontSize,
+            wordWrap: s.wordWrap,
+            cutEmptyParagraphs: s.cutEmptyParagraphs,
+            addEmptyParagraphs: s.addEmptyParagraphs,
+            maxWordLength: s.maxWordLength,
+            lineHeight: s.lineHeight,
+            showImages: s.showImages,
+            imageHeightLines: s.imageHeightLines,
+            imageFitWidth: (s.imageFitWidth || s.dualPageMode),
+            compactTextPerc: s.compactTextPerc,
+            testWidth: s.testWidth,
             visible: true, //вычисляется позже
         };
 
@@ -774,7 +846,7 @@ export default class BookParser {
         let ofs = 0;//смещение от начала параграфа para.offset
         let imgW = 0;
         let imageInPara = false;
-        const compactWidth = this.measureText('W', {})*this.compactTextPerc/100;
+        const compactWidth = this.measureText('W', {})*parsed.compactTextPerc/100;
         // тут начинается самый замес, перенос по слогам и стилизация, а также изображения
         for (const part of parts) {
             style = part.style;
@@ -787,14 +859,14 @@ export default class BookParser {
                 if (!bin)
                     bin = {h: 1, w: 1};
 
-                let lineCount = this.imageHeightLines;
-                let c = Math.ceil(bin.h/this.lineHeight);
+                let lineCount = parsed.imageHeightLines;
+                let c = Math.ceil(bin.h/parsed.lineHeight);
 
-                const maxH = lineCount*this.lineHeight;
+                const maxH = lineCount*parsed.lineHeight;
                 let maxH2 = maxH;
-                if (this.imageFitWidth && bin.w > this.w) {
-                    maxH2 = bin.h*this.w/bin.w;
-                    c = Math.ceil(maxH2/this.lineHeight);
+                if (parsed.imageFitWidth && bin.w > parsed.w) {
+                    maxH2 = bin.h*parsed.w/bin.w;
+                    c = Math.ceil(maxH2/parsed.lineHeight);
                 }
                 lineCount = (c < lineCount ? c : lineCount);
 
@@ -834,10 +906,10 @@ export default class BookParser {
                 continue;
             }
 
-            if (part.image.id && part.image.inline && this.showImages) {
+            if (part.image.id && part.image.inline && parsed.showImages) {
                 const bin = this.binary[part.image.id];
                 if (bin) {
-                    let imgH = (bin.h > this.fontSize ? this.fontSize : bin.h);
+                    let imgH = (bin.h > parsed.fontSize ? parsed.fontSize : bin.h);
                     imgW += bin.w*imgH/bin.h;
                     line.parts.push({style, text: '',
                         image: {local: part.image.local, inline: true, id: part.image.id, num: part.image.num}});
@@ -952,11 +1024,11 @@ export default class BookParser {
 
         //parsed.visible
         if (imageInPara) {
-            parsed.visible = this.showImages;
+            parsed.visible = parsed.showImages;
         } else {
             parsed.visible = !(
-                (para.addIndex > this.addEmptyParagraphs) ||
-                (para.addIndex == 0 && this.cutEmptyParagraphs && paragraphText.trim() == '')
+                (para.addIndex > parsed.addEmptyParagraphs) ||
+                (para.addIndex == 0 && parsed.cutEmptyParagraphs && paragraphText.trim() == '')
             );
         }
 
