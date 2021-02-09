@@ -130,6 +130,10 @@ export default @Component({
             if (newValue != '' && this.pageChangeAnimation == 'flip')
                 this.pageChangeAnimation = '';
         },
+        dualPageMode(newValue) {
+            if (newValue && this.pageChangeAnimation == 'flip' || this.pageChangeAnimation == 'rightShift')
+                this.pageChangeAnimation = '';
+        },
         textColor: function(newValue) {
             this.textColorFiltered = newValue;
         },
@@ -282,13 +286,15 @@ class SettingsPage extends Vue {
         let result = [
             {label: 'Нет', value: ''},
             {label: 'Вверх-вниз', value: 'downShift'},
-            {label: 'Вправо-влево', value: 'rightShift'},
+            (!this.dualPageMode ? {label: 'Вправо-влево', value: 'rightShift'} : null),
             {label: 'Протаивание', value: 'thaw'},
             {label: 'Мерцание', value: 'blink'},
             {label: 'Вращение', value: 'rotate'},
-        ];
-        if (this.wallpaper == '')
-            result.push({label: 'Листание', value: 'flip'});
+            (this.wallpaper == '' && !this.dualPageMode ? {label: 'Листание', value: 'flip'} : null),
+        ];        
+
+        result = result.filter(v => v);
+
         return result;
     }
 

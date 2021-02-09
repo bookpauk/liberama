@@ -180,16 +180,7 @@ export default class DrawHelper {
             out += '</div>';
 
             //разделитель
-            out += `<div style="width: ${this.dualIndentLR*2}px; top: ${-this.fontSize*this.textShift}px; position: relative">` +
-                `<div class="fit row justify-center items-center">` +
-                    `<div style="height: ${Math.round(boxH*this.dualDivHeight/100)}px; width: ${this.dualDivWidth}px; box-shadow: 0 0 ${this.dualDivShadowWidth}px ${this.dualDivColor}; ` + 
-                        `background-image: url(&quot;data:image/svg+xml;utf8,<svg width='100%' height='100%' xmlns='http://www.w3.org/2000/svg'>` +
-                            //`<rect width='100%' height='100%' style='fill: none; stroke: white; stroke-width: 4; stroke-dasharray: 5 20'/>` +
-                            `<line x1='0' y1='0' x2='0' y2='100%' stroke='${this.dualDivColor}' stroke-width='100%' stroke-dasharray='${this.dualDivStrokeFill} ${this.dualDivStrokeGap}'/>` +
-                        `</svg>&quot;);">` +
-                    `</div>` +
-                `</div>` +
-            `</div>`;
+            out += `<div style="width: ${this.dualIndentLR*2}px;"></div>`;
 
             //правая страница
             out += `<div style="width: ${this.w}px; margin-right: ${this.dualIndentLR}px; position: relative;">`;
@@ -250,7 +241,7 @@ export default class DrawHelper {
 
         out += this.fillTextShift(this.fittingString(title, this.realWidth/2 - fontSize - 3, font), fontSize, 2, font, fontSize);
 
-        out += this.drawPercentBar(this.realWidth/2, 2, this.realWidth/2 - timeW - 2*fontSize, statusBarHeight, font, fontSize, bookPos, textLength, imageNum, imageLength);
+        out += this.drawPercentBar(this.realWidth/2 + fontSize, 2, this.realWidth/2 - timeW - 3*fontSize, statusBarHeight, font, fontSize, bookPos, textLength, imageNum, imageLength);
         
         out += '</div>';
         return out;

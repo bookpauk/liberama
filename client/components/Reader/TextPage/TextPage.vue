@@ -1,8 +1,8 @@
 <template>
     <div ref="main" class="main">
         <div class="layout back" @wheel.prevent.stop="onMouseWheel">
-            <div v-html="background"></div>
-            <!-- img -->
+            <div class="absolute" v-html="background"></div>
+            <div class="absolute" v-html="pageDivider"></div>
         </div>
         <div ref="scrollBox1" class="layout over-hidden" @wheel.prevent.stop="onMouseWheel">
             <div ref="scrollingPage1" class="layout over-hidden" @transitionend="onPage1TransitionEnd" @animationend="onPage1AnimationEnd">
@@ -76,6 +76,7 @@ class TextPage extends Vue {
     clickControl = true;
 
     background = null;
+    pageDivider = null;
     page1 = null;
     page2 = null;
     statusBar = null;
@@ -112,7 +113,11 @@ class TextPage extends Vue {
 
         this.debouncedDrawStatusBar = _.throttle(() => {
             this.drawStatusBar();
-        }, 60);        
+        }, 60);
+
+        this.debouncedDrawPageDividerAndOrnament = _.throttle(() => {
+            this.drawPageDividerAndOrnament();
+        }, 65);
 
         this.debouncedLoadSettings = _.debounce(() => {
             this.loadSettings();
@@ -185,6 +190,7 @@ class TextPage extends Vue {
         this.$refs.statusBar.style.top = (this.statusBarTop ? 1 : this.realHeight - this.statusBarHeight) + 'px';
 
         this.statusBarColor = this.hex2rgba(this.textColor || '#000000', this.statusBarColorAlpha);
+        this.dualDivColor = this.hex2rgba(this.textColor || '#000000', this.dualDivColorAlpha);
 
         //drawHelper
         this.drawHelper.realWidth = this.realWidth;
@@ -197,12 +203,12 @@ class TextPage extends Vue {
 
         this.drawHelper.dualPageMode = this.dualPageMode;
         this.drawHelper.dualIndentLR = this.dualIndentLR;
-        this.drawHelper.dualDivWidth = this.dualDivWidth;
+        /*this.drawHelper.dualDivWidth = this.dualDivWidth;
         this.drawHelper.dualDivHeight = this.dualDivHeight;
-        this.drawHelper.dualDivColor = this.hex2rgba(this.textColor || '#000000', this.dualDivColorAlpha);
+        this.drawHelper.dualDivColor = this.dualDivColor;
         this.drawHelper.dualDivStrokeFill = this.dualDivStrokeFill;
         this.drawHelper.dualDivStrokeGap = this.dualDivStrokeGap;
-        this.drawHelper.dualDivShadowWidth = this.dualDivShadowWidth;
+        this.drawHelper.dualDivShadowWidth = this.dualDivShadowWidth;*/
 
         this.drawHelper.backgroundColor = this.backgroundColor;
         this.drawHelper.statusBarColor = this.statusBarColor;
@@ -640,6 +646,7 @@ class TextPage extends Vue {
         if (!this.pageChangeAnimation)
             this.debouncedPrepareNextPage();
         this.debouncedDrawStatusBar();
+        this.debouncedDrawPageDividerAndOrnament();
 
         if (this.book && this.linesDown && this.linesDown.length < this.pageLineCount) {
             this.doEnd(true);
@@ -776,6 +783,25 @@ class TextPage extends Vue {
             }
         } else {
             this.statusBar = '';
+        }
+    }
+
+    drawPageDividerAndOrnament() {
+        if (this.dualPageMode) {
+            this.pageDivider = `<div class="layout" style="width: ${this.realWidth}px; height: ${this.scrollHeight}px; ` + 
+                `top: ${(this.showStatusBar && this.statusBarTop ? this.statusBarHeight + 1 : 0)}px; position: relative;">` +
+                `<div class="fit row justify-center items-center">` +
+                    `<div style="height: ${Math.round(this.scrollHeight*this.dualDivHeight/100)}px; width: ${this.dualDivWidth}px; ` +
+                        `box-shadow: 0 0 ${this.dualDivShadowWidth}px ${this.dualDivColor}; ` + 
+                        `background-image: url(&quot;data:image/svg+xml;utf8,<svg width='100%' height='100%' xmlns='http://www.w3.org/2000/svg'>` +
+                            //`<rect width='100%' height='100%' style='fill: none; stroke: white; stroke-width: 4; stroke-dasharray: 5 20'/>` +
+                            `<line x1='0' y1='0' x2='0' y2='100%' stroke='${this.dualDivColor}' stroke-width='100%' stroke-dasharray='${this.dualDivStrokeFill} ${this.dualDivStrokeGap}'/>` +
+                        `</svg>&quot;);">` +
+                    `</div>` +
+                `</div>` +
+            `</div>`;
+        } else {
+            this.pageDivider = null;
         }
     }
 
