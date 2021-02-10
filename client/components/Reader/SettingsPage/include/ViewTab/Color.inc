@@ -58,7 +58,7 @@
         >
             <template v-slot:selected-item="scope">
                 <div >{{ scope.opt.label }}</div>
-                <div v-show="scope.opt.value" class="q-ml-sm" :class="scope.opt.value" style="width: 50px; height: 30px;"></div>
+                <div v-show="scope.opt.value" class="q-ml-sm" :class="scope.opt.value" style="width: 40px; height: 28px;"></div>
             </template>
 
             <template v-slot:option="scope">
@@ -66,10 +66,10 @@
                     v-bind="scope.itemProps"
                     v-on="scope.itemEvents"
                 >
-                    <q-item-section>
+                    <q-item-section style="min-width: 50px;">
                         <q-item-label v-html="scope.opt.label" />
                     </q-item-section>
-                    <q-item-section v-show="scope.opt.value" :class="scope.opt.value" style="min-width: 70px; min-height: 50px"/>
+                    <q-item-section v-show="scope.opt.value" :class="scope.opt.value" style="min-width: 70px; min-height: 50px;"/>
                 </q-item>
             </template>
         </q-select>

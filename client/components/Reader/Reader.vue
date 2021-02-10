@@ -277,6 +277,7 @@ class Reader extends Vue {
         this.updateHeaderMinWidth();
 
         (async() => {
+            await wallpaperStorage.init();
             await bookManager.init(this.settings);
             bookManager.addEventListener(this.bookManagerEvent);
 

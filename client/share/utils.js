@@ -13,6 +13,10 @@ export function sleep(ms) {
     return new Promise(resolve => setTimeout(resolve, ms));
 }
 
+export function toHex(buf) {
+    return Buffer.from(buf).toString('hex');
+}
+
 export function stringToHex(str) {
     return Buffer.from(str).toString('hex');
 }

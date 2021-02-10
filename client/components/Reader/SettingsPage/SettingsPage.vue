@@ -79,6 +79,7 @@ import Component from 'vue-class-component';
 import _ from 'lodash';
 
 import * as utils from '../../../share/utils';
+import * as cryptoUtils from '../../../share/cryptoUtils';
 import Window from '../../share/Window.vue';
 import NumInput from '../../share/NumInput.vue';
 import UserHotKeys from './UserHotKeys/UserHotKeys.vue';
@@ -279,8 +280,12 @@ class SettingsPage extends Vue {
     get wallpaperOptions() {
         let result = [{label: 'Нет', value: ''}];
 
-        for (const wp of this.userWallpapers) {
-            result.push({label: wp.label, value: wp.cssClass});
+        const userWallpapers = _.cloneDeep(this.userWallpapers);
+        userWallpapers.sort((a, b) => a.label.localeCompare(b.label));
+
+        for (const wp of userWallpapers) {
+            if (wallpaperStorage.keyExists(wp.cssClass))
+                result.push({label: wp.label, value: wp.cssClass});
         }
 
         for (let i = 1; i <= 17; i++) {
@@ -579,19 +584,19 @@ class SettingsPage extends Vue {
             const reader = new FileReader();
 
             reader.onload = (e) => {
-                const newUserWallpapers = _.cloneDeep(this.userWallpapers);
-                let n = 0;
-                for (const wp of newUserWallpapers) {
-                    const newN = parseInt(wp.label.replace(/\D/g, ''), 10);
-                    if (newN > n)
-                        n = newN;
-                }
-                n++;
-
-                const cssClass = `user-paper${n}`;
-                newUserWallpapers.push({label: `#${n}`, cssClass});
                 (async() => {
-                    await wallpaperStorage.setData(cssClass, e.target.result);
+                    const data = e.target.result;
+                    const key = utils.toHex(cryptoUtils.sha256(data));
+                    const label = `#${key.substring(0, 4)}`;
+                    const cssClass = `user-paper${key}`;
+
+                    const newUserWallpapers = _.cloneDeep(this.userWallpapers);
+                    const index = _.findIndex(newUserWallpapers, (item) => (item.cssClass == cssClass));
+
+                    if (index < 0)
+                        newUserWallpapers.push({label, cssClass});
+                    if (!wallpaperStorage.keyExists(cssClass))
+                        await wallpaperStorage.setData(cssClass, data);
 
                     this.userWallpapers = newUserWallpapers;
                     this.wallpaper = cssClass;

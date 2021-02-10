@@ -6,6 +6,13 @@ const wpStore = localForage.createInstance({
 });
 
 class WallpaperStorage {
+    constructor() {
+        this.cachedKeys = [];
+    }
+
+    async init() {
+        this.cachedKeys = await wpStore.keys();
+    }
 
     async getLength() {
         return await wpStore.length();
@@ -13,6 +20,7 @@ class WallpaperStorage {
 
     async setData(key, data) {
         await wpStore.setItem(key, data);
+        this.cachedKeys = await wpStore.keys();
     }
 
     async getData(key) {
@@ -21,6 +29,11 @@ class WallpaperStorage {
 
     async removeData(key) {
         await wpStore.removeItem(key);
+        this.cachedKeys = await wpStore.keys();
+    }
+
+    keyExists(key) {//не асинхронная
+        return this.cachedKeys.includes(key);
     }
 }
 
