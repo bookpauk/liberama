@@ -2,11 +2,11 @@ import {sleep} from '../../../share/utils';
 
 export default class DrawHelper {
     fontBySize(size) {
-        return `${size}px ${this.fontName}`;
+        return `${size}px '${this.fontName}'`;
     }
 
     fontByStyle(style) {
-        return `${style.italic ? 'italic' : this.fontStyle} ${style.bold ? 'bold' : this.fontWeight} ${this.fontSize}px ${this.fontName}`;
+        return `${style.italic ? 'italic' : this.fontStyle} ${style.bold ? 'bold' : this.fontWeight} ${this.fontSize}px '${this.fontName}'`;
     }
 
     measureText(text, style) {// eslint-disable-line no-unused-vars

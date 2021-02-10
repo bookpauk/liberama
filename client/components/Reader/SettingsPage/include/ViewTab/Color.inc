@@ -78,7 +78,7 @@
         <q-btn class="q-ml-sm" round dense color="blue" icon="la la-plus" @click.stop="loadWallpaperFileClick">
             <q-tooltip :delay="1500" anchor="bottom middle" content-style="font-size: 80%">Добавить файл обоев</q-tooltip>
         </q-btn>
-        <q-btn class="q-ml-sm" round dense color="blue" icon="la la-minus" @click.stop="delWallpaper" :disable="wallpaper.indexOf('user-paper') != 0">
+        <q-btn v-show="wallpaper.indexOf('user-paper') === 0" class="q-ml-sm" round dense color="blue" icon="la la-minus" @click.stop="delWallpaper">
             <q-tooltip :delay="1500" anchor="bottom middle" content-style="font-size: 80%">Удалить выбранные обои</q-tooltip>
         </q-btn>
     </div>
