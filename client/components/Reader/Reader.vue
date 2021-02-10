@@ -131,6 +131,9 @@ import ContentsPage from './ContentsPage/ContentsPage.vue';
 import ReaderDialogs from './ReaderDialogs/ReaderDialogs.vue';
 
 import bookManager from './share/bookManager';
+import wallpaperStorage from './share/wallpaperStorage';
+import dynamicCss from '../../share/dynamicCss';
+
 import rstore from '../../store/modules/reader';
 import readerApi from '../../api/reader';
 import miscApi from '../../api/misc';
@@ -327,6 +330,7 @@ class Reader extends Vue {
         this.pdfAsText = settings.pdfAsText;
         this.pdfQuality = settings.pdfQuality;
         this.dualPageMode = settings.dualPageMode;
+        this.userWallpapers = settings.userWallpapers;
 
         this.readerActionByKeyCode = utils.userHotKeysObjectSwap(settings.userHotKeys);
         this.$root.readerActionByKeyEvent = (event) => {
@@ -334,6 +338,30 @@ class Reader extends Vue {
         }
 
         this.updateHeaderMinWidth();
+        
+        this.loadWallpapers();//no await
+    }
+
+    //wallpaper css
+    async loadWallpapers() {
+        const wallpaperDataLength = await wallpaperStorage.getLength();
+        if (wallpaperDataLength !== this.wallpaperDataLength) {//оптимизация
+            this.wallpaperDataLength = wallpaperDataLength;
+
+            let newCss = '';
+            for (const wp of this.userWallpapers) {
+                const data = await wallpaperStorage.getData(wp.cssClass);
+
+                if (!data) {
+                    //здесь будем восстанавливать данные с сервера
+                }
+
+                if (data) {
+                    newCss += `.${wp.cssClass} {background: url(${data}) center; background-size: 100% 100%;}`;                
+                }
+            }
+            dynamicCss.replace('wallpapers', newCss);
+        }
     }
 
     async checkNewVersionAvailable() {
