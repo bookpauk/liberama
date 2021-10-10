@@ -4,6 +4,8 @@ const SqliteConnectionPool = require('./SqliteConnectionPool');
 const log = new (require('../core/AppLogger'))().log;//singleton
 
 const migrations = {
+    'app': require('./migrations/app'),
+    'readerStorage': require('./migrations/readerStorage'),
 };
 
 let instance = null;
