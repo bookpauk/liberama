@@ -1,4 +1,6 @@
+const sqlite3 = require('sqlite3');
 const sqlite = require('sqlite');
+
 const SQL = require('sql-template-strings');
 
 class SqliteConnectionPool {
@@ -17,7 +19,10 @@ class SqliteConnectionPool {
         this.waitingQueue = [];
 
         for (let i = 0; i < connCount; i++) {
-            let client = await sqlite.open(dbFileName);
+            let client = await sqlite.open({
+                filename: dbFileName,
+                driver: sqlite3.Database
+            });
 
             client.configure('busyTimeout', busyTimeout); //ms
             await client.exec(`PRAGMA cache_size = ${cacheSize}`);
