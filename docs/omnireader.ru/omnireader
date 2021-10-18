@@ -66,6 +66,6 @@ server {
   location ~ \.php$ { 
     try_files $uri =404; 
     include /etc/nginx/fastcgi.conf;
-    fastcgi_pass unix:/run/php/php7.2-fpm.sock;
+    fastcgi_pass unix:/run/php/php7.4-fpm.sock;
   }
 }
