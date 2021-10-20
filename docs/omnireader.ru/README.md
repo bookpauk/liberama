@@ -83,8 +83,8 @@ cd docs/omnireader.ru
 ./deploy.sh
 ./start_server.sh
 ```
-
 После первого запуска будет создан конфигурационный файл `/home/liberama/data/config.json`.
+
 Необходимо переключить приложение в режим `omnireader`, отредактировав опцию `servers`:
 ```
     "servers": [
@@ -96,4 +96,8 @@ cd docs/omnireader.ru
         }
     ]
 ```
-и перезапустить сервер
+Для использования установленных внешних конвертеров можно также поправить:
+```
+    "useExternalBookConverter": true,
+```
+и перезапустить сервер.
