@@ -159,7 +159,24 @@ export default class BookParser {
                 const prevParaIndex = paraIndex;
                 let p = para[paraIndex];
                 paraOffset -= p.length;
-                //добавление пустых (addEmptyParagraphs) параграфов перед текущим непустым
+
+                //уберем пробелы с концов параграфа, минимум 1 пробел должен быть у пустого параграфа
+                let newParaText = p.text.trim();
+                newParaText = (newParaText.length ? newParaText : ' ');
+                const ldiff = p.text.length - newParaText.length;
+                if (ldiff != 0) {
+                    p.text = newParaText;
+                    p.length -= ldiff;
+                }
+
+                //удаление параграфов, которые содержат только разметку, такого не должно быть
+                if (!p.length) {
+                    delete para[paraIndex];
+                    paraIndex--;
+                    return;
+                }
+
+                //добавление пустых (не)видимых (addEmptyParagraphs) параграфов перед текущим непустым
                 if (p.text.trim() != '') {
                     for (let i = 0; i < 2; i++) {
                         para[paraIndex] = {
@@ -179,15 +196,6 @@ export default class BookParser {
                         curSubtitle.paraIndex = paraIndex;
                 }
 
-                //уберем пробелы с концов параграфа, минимум 1 пробел должен быть у пустого параграфа
-                let newParaText = p.text.trim();
-                newParaText = (newParaText.length ? newParaText : ' ');
-                const ldiff = p.text.length - newParaText.length;
-                if (ldiff != 0) {
-                    p.text = newParaText;
-                    p.length -= ldiff;
-                }
-
                 p.index = paraIndex;
                 p.offset = paraOffset;
                 para[paraIndex] = p;
@@ -203,7 +211,7 @@ export default class BookParser {
             let p = {
                 index: paraIndex,
                 offset: paraOffset,
-                length: len,
+                length: len,//длина текста внутри параграфа без учета длины разметки
                 text: text,
                 addIndex: 0,
             };
