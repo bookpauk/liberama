@@ -210,11 +210,11 @@ class ConvertSamlib extends ConvertBase {
         };
 
         const onComment = (text) => {// eslint-disable-line no-unused-vars
-            if (text == '--------- Собственно произведение -------------') {
+            if (text.trim() == '--------- Собственно произведение -------------') {
                 inText = true;
                 textFound = true;
             }
-            if (text == '-----------------------------------------------')
+            if (text.trim() == '-----------------------------------------------')
                 inText = false;
         };
 
