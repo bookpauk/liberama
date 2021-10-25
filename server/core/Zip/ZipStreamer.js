@@ -1,7 +1,7 @@
-const fs = require('fs-extra');
+/*const fs = require('fs-extra');
 const path = require('path');
 
-const zipStream = require('zip-stream');
+const zipStream = require('zip-stream');*/
 const unzipStream = require('./node_stream_zip');
 
 class ZipStreamer {
@@ -10,6 +10,7 @@ class ZipStreamer {
 
     //TODO: сделать рекурсивный обход директорий, пока только файлы
     //files = ['filename', 'dirname/']
+    /* zip-stream 2.1.3 => 4.1.0 Актуализировать!
     pack(zipFile, files, options, entryCallback) {
         return new Promise((resolve, reject) => { (async() => {
             entryCallback = (entryCallback ? entryCallback : () => {});
@@ -51,6 +52,7 @@ class ZipStreamer {
             zip.finish();
         })().catch(reject); });
     }
+    */
 
     unpack(zipFile, outputDir, options, entryCallback) {
         return new Promise((resolve, reject) => {
