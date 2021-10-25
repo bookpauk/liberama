@@ -8,10 +8,10 @@ class FileDownloader {
     async load(url, callback, abort) {
         let errMes = '';
         const options = {
-            encoding: null,
             headers: {
                 'user-agent': 'Mozilla/5.0 (X11; HasCodingOs 1.0; Linux x64) AppleWebKit/637.36 (KHTML, like Gecko) Chrome/70.0.3112.101 Safari/637.36 HasBrowser/5.0'
-            }
+            },
+            responseType: 'buffer',
         };
 
         const response = await got(url, Object.assign({}, options, {method: 'HEAD'}));
