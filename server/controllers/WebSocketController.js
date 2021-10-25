@@ -23,7 +23,7 @@ class WebSocketController {
 
         wss.on('connection', (ws) => {
             ws.on('message', (message) => {
-                this.onMessage(ws, message);
+                this.onMessage(ws, message.toString());
             });
         });
 
