@@ -5,6 +5,12 @@ const VueLoaderPlugin = require('vue-loader/lib/plugin');
 const clientDir = path.resolve(__dirname, '../client');
 
 module.exports = {
+    resolve: {
+        fallback: {
+            "url": false,
+            "path": false,
+        } 
+    },    
     entry: [`${clientDir}/main.js`],
     output: {
         publicPath: '/app/',
@@ -25,14 +31,19 @@ module.exports = {
                 test: /\.js$/,
                 loader: 'babel-loader',
                 exclude: /node_modules/,
-                query: {
+                options: {
+                    presets: [['@babel/preset-env', { targets: { esmodules: true } }]],
+                    plugins: [
+                        ['@babel/plugin-proposal-decorators', { legacy: true }]
+                    ]
+                }
+                /*query: {
                     plugins: [
                         'syntax-dynamic-import',
                         'transform-decorators-legacy',
                         'transform-class-properties',
-//                        ["component", { "libraryName": "element-ui", "styleLibraryName": `~${clientDir}/theme` } ]
                     ]
-                }
+                }*/
             },
             {
                 test: /\.gif$/,

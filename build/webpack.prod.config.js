@@ -1,10 +1,10 @@
 const path = require('path');
 //const webpack = require('webpack');
 
-const merge = require('webpack-merge');
+const { merge } = require('webpack-merge');
 const baseWpConfig = require('./webpack.base.config');
 const TerserPlugin = require('terser-webpack-plugin');
-const OptimizeCSSAssetsPlugin = require('optimize-css-assets-webpack-plugin');
+const CssMinimizerWebpackPlugin = require('css-minimizer-webpack-plugin');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const CleanWebpackPlugin = require('clean-webpack-plugin');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
@@ -42,7 +42,7 @@ module.exports = merge(baseWpConfig, {
                     },
                 },
             }),
-            new OptimizeCSSAssetsPlugin()
+            new CssMinimizerWebpackPlugin()
         ]
     },
     plugins: [
@@ -54,7 +54,7 @@ module.exports = merge(baseWpConfig, {
             template: `${clientDir}/index.html.template`,
             filename: `${publicDir}/index.html`
         }),
-        new CopyWebpackPlugin([{from: `${clientDir}/assets/*`, to: `${publicDir}/`, flatten: true}]),
+        new CopyWebpackPlugin([{from: `${clientDir}/assets/*`, to: `${publicDir}/`}]),
         new GenerateSW({
             cacheId: 'liberama',
             swDest: `${publicDir}/service-worker.js`,

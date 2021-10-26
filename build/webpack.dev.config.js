@@ -1,7 +1,7 @@
 const path = require('path');
 const webpack = require('webpack');
 
-const merge = require('webpack-merge');
+const { merge } = require('webpack-merge');
 const baseWpConfig = require('./webpack.base.config');
 
 baseWpConfig.entry.unshift('webpack-hot-middleware/client');
@@ -13,7 +13,7 @@ const clientDir = path.resolve(__dirname, '../client');
 
 module.exports = merge(baseWpConfig, {
     mode: 'development',
-    devtool: "#inline-source-map",
+    devtool: 'inline-source-map',
     output: {
         path: `${publicDir}/app`,
         filename: 'bundle.js'
@@ -38,6 +38,6 @@ module.exports = merge(baseWpConfig, {
             template: `${clientDir}/index.html.template`,
             filename: `${publicDir}/index.html`
         }),
-        new CopyWebpackPlugin([{from: `${clientDir}/assets/*`, to: `${publicDir}/`, flatten: true}])
+        new CopyWebpackPlugin({patterns: [{from: `${clientDir}/assets/*`, to: `${publicDir}/`}]})
     ]
 });
