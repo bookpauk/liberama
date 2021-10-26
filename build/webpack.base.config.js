@@ -37,15 +37,27 @@ module.exports = {
                         ['@babel/plugin-proposal-decorators', { legacy: true }]
                     ]
                 }
-                /*query: {
-                    plugins: [
-                        'syntax-dynamic-import',
-                        'transform-decorators-legacy',
-                        'transform-class-properties',
-                    ]
-                }*/
             },
             {
+                test: /\.(gif|png)$/,
+                type: 'asset/inline',
+            },
+            {
+                test: /\.jpg$/,
+                type: 'asset/resource',
+                generator: {
+                    filename: 'images/[name]-[hash:6].[ext]'
+                },
+            },
+
+            {
+                test: /\.(ttf|eot|woff|woff2)$/,
+                type: 'asset/resource',
+                generator: {
+                    filename: 'fonts/[name]-[hash:6].[ext]'
+                },
+            },
+            /*{
                 test: /\.gif$/,
                 loader: "url-loader",
                 options: {
@@ -72,7 +84,7 @@ module.exports = {
                 options: {
                     name: "fonts/[name]-[hash:6].[ext]"
                 }
-            },
+            },*/
         ]
     },
 
