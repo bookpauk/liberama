@@ -1,6 +1,6 @@
 <template>
     <div class="column no-wrap">
-        <div ref="header" class="header" v-show="toolBarActive">
+        <div v-show="toolBarActive" ref="header" class="header">
             <div ref="buttons" class="row justify-between no-wrap">
                 <div>
                     <button ref="loader" class="tool-button" :class="buttonActiveClass('loader')" @click="buttonClick('loader')" v-ripple>
@@ -11,7 +11,7 @@
 
                 <div>
                     <button ref="undoAction" v-show="showToolButton['undoAction']" class="tool-button" :class="buttonActiveClass('undoAction')" @click="buttonClick('undoAction')" v-ripple>
-                        <q-icon name="la la-angle-left" size="32px"/>
+                        <q-icon name="la la-angle-left" size="32px" />
                         <q-tooltip :delay="1500" anchor="bottom middle" content-style="font-size: 80%">{{ rstore.readerActions['undoAction'] }}</q-tooltip>
                     </button>
                     <button ref="redoAction" v-show="showToolButton['redoAction']" class="tool-button" :class="buttonActiveClass('redoAction')" @click="buttonClick('redoAction')" v-ripple>
