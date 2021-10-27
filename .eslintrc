@@ -23,9 +23,11 @@
     "LM_TOTAL": false
   },
   "rules": {
-    "vue/html-indent": ["error", 4],
-    "vue/max-attributes-per-line": 0,
-    "vue/html-self-closing": 0,
+    "vue/html-indent": ["warn", 4, {
+      "alignAttributesVertically": false
+    }],
+    "vue/max-attributes-per-line": "off",
+    "vue/html-self-closing": "off",
 
     "strict": 0,
     "indent": [0, 4, {
