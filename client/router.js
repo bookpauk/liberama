@@ -1,5 +1,4 @@
-import Vue from 'vue';
-import VueRouter from 'vue-router';
+import { createRouter, createWebHashHistory } from 'vue-router';
 import _ from 'lodash';
 
 const CardIndex = () => import('./components/CardIndex/CardIndex.vue');
@@ -36,7 +35,7 @@ const myRoutes = [
     ['/settings', Settings],
     ['/help', Help],
     ['/404', NotFound404],
-    ['*', null, null, '/cardindex'],
+    ['/(.*)', null, null, '/cardindex'],
 ];
 
 let routes = {};
@@ -63,8 +62,7 @@ for (let route of myRoutes) {
 }
 routes = routes.children;
 
-Vue.use(VueRouter);
-
-export default new VueRouter({
+export default createRouter({
+    history: createWebHashHistory(),
     routes
 });

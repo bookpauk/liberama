@@ -1,18 +1,18 @@
-import Vue from 'vue';
+import { createApp } from 'vue';
 
-import router from './router';
+//import router from './router';
 import store from './store';
-import './quasar';
+import {Quasar, QuasarOptions} from './quasar';
+//import vueSanitize from 'vue-sanitize';
 
-import vueSanitize from 'vue-sanitize';
-Vue.use(vueSanitize);
+import App from './components/App1.vue';
 
-import App from './components/App.vue';
-//Vue.config.productionTip = false;
-Vue.prototype.$isMobileDevice = /Android|webOS|iPhone|iPad|iPod|BlackBerry/i.test(navigator.userAgent);
+//Vue.prototype.$isMobileDevice = /Android|webOS|iPhone|iPad|iPod|BlackBerry/i.test(navigator.userAgent);
 
-new Vue({
-    router,
-    store,
-    render: h => h(App),
-}).$mount('#app');
+const app = createApp(App);
+//app.use(router);
+app.use(store);
+app.use(Quasar, QuasarOptions);
+//app.use(vueSanitize);
+
+app.mount('#app');

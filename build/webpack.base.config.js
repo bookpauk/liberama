@@ -1,6 +1,6 @@
 const path = require('path');
-//const webpack = require('webpack');
-const VueLoaderPlugin = require('vue-loader/lib/plugin');
+const DefinePlugin = require('webpack').DefinePlugin;
+const { VueLoaderPlugin } = require('vue-loader');
 
 const clientDir = path.resolve(__dirname, '../client');
 
@@ -20,7 +20,14 @@ module.exports = {
         rules: [
             {
                 test: /\.vue$/,
-                loader: "vue-loader"
+                loader: "vue-loader",
+                    options: {
+                        compilerOptions: {
+                            compatConfig: {
+                                MODE: 2
+                            }
+                    }
+                }                
             },
             {
                 test: /\.includer$/,
@@ -89,6 +96,13 @@ module.exports = {
     },
 
     plugins: [
+        new DefinePlugin({
+            __VUE_OPTIONS_API__: true,
+            __VUE_PROD_DEVTOOLS__: false,
+            __QUASAR_SSR_SERVER__: false,
+            __QUASAR_SSR_CLIENT__: false,
+            __QUASAR_VERSION__: false,
+        }),
         new VueLoaderPlugin(),
     ]
 };

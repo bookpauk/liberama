@@ -1,8 +1,8 @@
-import Vue from 'vue';
-
 import 'quasar/dist/quasar.css';
-import Quasar from 'quasar/src/vue-plugin.js'
+//import Quasar from 'quasar/dist/quasar.umd.prod.js';
 
+import Quasar from 'quasar/src/vue-plugin.js';
+/*
 //config
 const config = {};
 
@@ -80,9 +80,6 @@ const plugins = {
     Notify,
 };
 
-//use
-Vue.use(Quasar, { config, components, directives, plugins });
-
 //icons
 //import '@quasar/extras/material-icons/material-icons.css';
 //import '@quasar/extras/material-icons-outlined/material-icons-outlined.css';
@@ -93,3 +90,9 @@ import '@quasar/extras/line-awesome/line-awesome.css';
 //import fontawesomeV5 from 'quasar/icon-set/fontawesome-v5.js'
 import lineAwesome from 'quasar/icon-set/line-awesome.js'
 Quasar.iconSet.set(lineAwesome);
+
+export default {quasar: Quasar, quasarOptions: { config, components, directives, plugins }};
+*/
+
+const QuasarOptions = {};
+export {Quasar, QuasarOptions};
