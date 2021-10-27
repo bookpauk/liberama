@@ -1,7 +1,7 @@
 <template>
     <div class="fit row">
-        <Notify ref="notify"/>
-        <StdDialog ref="stdDialog"/>
+        <Notify ref="notify" />
+        <StdDialog ref="stdDialog" />
         <keep-alive v-if="showPage">
             <router-view class="col"></router-view>
         </keep-alive>
