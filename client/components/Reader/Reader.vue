@@ -3,73 +3,103 @@
         <div v-show="toolBarActive" ref="header" class="header">
             <div ref="buttons" class="row justify-between no-wrap">
                 <div>
-                    <button ref="loader" class="tool-button" :class="buttonActiveClass('loader')" @click="buttonClick('loader')" v-ripple>
-                        <q-icon name="la la-arrow-left" size="32px"/>
-                        <q-tooltip :delay="1500" anchor="bottom right" content-style="font-size: 80%">{{ rstore.readerActions['loader'] }}</q-tooltip>
+                    <button ref="loader" v-ripple class="tool-button" :class="buttonActiveClass('loader')" @click="buttonClick('loader')">
+                        <q-icon name="la la-arrow-left" size="32px" />
+                        <q-tooltip :delay="1500" anchor="bottom right" content-style="font-size: 80%">
+                            {{ rstore.readerActions['loader'] }}
+                        </q-tooltip>
                     </button>
                 </div>
 
                 <div>
-                    <button ref="undoAction" v-show="showToolButton['undoAction']" class="tool-button" :class="buttonActiveClass('undoAction')" @click="buttonClick('undoAction')" v-ripple>
+                    <button v-show="showToolButton['undoAction']" ref="undoAction" v-ripple class="tool-button" :class="buttonActiveClass('undoAction')" @click="buttonClick('undoAction')">
                         <q-icon name="la la-angle-left" size="32px" />
-                        <q-tooltip :delay="1500" anchor="bottom middle" content-style="font-size: 80%">{{ rstore.readerActions['undoAction'] }}</q-tooltip>
+                        <q-tooltip :delay="1500" anchor="bottom middle" content-style="font-size: 80%">
+                            {{ rstore.readerActions['undoAction'] }}
+                        </q-tooltip>
                     </button>
-                    <button ref="redoAction" v-show="showToolButton['redoAction']" class="tool-button" :class="buttonActiveClass('redoAction')" @click="buttonClick('redoAction')" v-ripple>
-                        <q-icon name="la la-angle-right" size="32px"/>
-                        <q-tooltip :delay="1500" anchor="bottom middle" content-style="font-size: 80%">{{ rstore.readerActions['redoAction'] }}</q-tooltip>
-                    </button>
-                    <div class="space"></div>
-                    <button ref="fullScreen" v-show="showToolButton['fullScreen']" class="tool-button" :class="buttonActiveClass('fullScreen')" @click="buttonClick('fullScreen')" v-ripple>
-                        <q-icon :name="(fullScreenActive ? 'la la-compress-arrows-alt': 'la la-expand-arrows-alt')" size="32px"/>
-                        <q-tooltip :delay="1500" anchor="bottom middle" content-style="font-size: 80%">{{ rstore.readerActions['fullScreen'] }}</q-tooltip>
-                    </button>
-                    <button ref="scrolling" v-show="showToolButton['scrolling']" class="tool-button" :class="buttonActiveClass('scrolling')" @click="buttonClick('scrolling')" v-ripple>
-                        <q-icon name="la la-film" size="32px"/>
-                        <q-tooltip :delay="1500" anchor="bottom middle" content-style="font-size: 80%">{{ rstore.readerActions['scrolling'] }}</q-tooltip>
-                    </button>
-                    <button ref="setPosition" v-show="showToolButton['setPosition']" class="tool-button" :class="buttonActiveClass('setPosition')" @click="buttonClick('setPosition')" v-ripple>
-                        <q-icon name="la la-angle-double-right" size="32px"/>
-                        <q-tooltip :delay="1500" anchor="bottom middle" content-style="font-size: 80%">{{ rstore.readerActions['setPosition'] }}</q-tooltip>
-                    </button>
-                    <button ref="search" v-show="showToolButton['search']" class="tool-button" :class="buttonActiveClass('search')" @click="buttonClick('search')" v-ripple>
-                        <q-icon name="la la-search" size="32px"/>
-                        <q-tooltip :delay="1500" anchor="bottom middle" content-style="font-size: 80%">{{ rstore.readerActions['search'] }}</q-tooltip>
-                    </button>
-                    <button ref="copyText" v-show="showToolButton['copyText']" class="tool-button" :class="buttonActiveClass('copyText')" @click="buttonClick('copyText')" v-ripple>
-                        <q-icon name="la la-copy" size="32px"/>
-                        <q-tooltip :delay="1500" anchor="bottom middle" content-style="font-size: 80%">{{ rstore.readerActions['copyText'] }}</q-tooltip>
-                    </button>
-                    <button ref="convOptions" v-show="showToolButton['convOptions']" class="tool-button" :class="buttonActiveClass('convOptions')" @click="buttonClick('convOptions')" v-ripple>
-                        <q-icon name="la la-magic" size="32px"/>
-                        <q-tooltip :delay="1500" anchor="bottom middle" content-style="font-size: 80%">{{ rstore.readerActions['convOptions'] }}</q-tooltip>
-                    </button>
-                    <button ref="refresh" v-show="showToolButton['refresh']" class="tool-button" :class="buttonActiveClass('refresh')" @click="buttonClick('refresh')" v-ripple>
-                        <q-icon name="la la-sync" size="32px" :class="{clear: !showRefreshIcon}"/>
-                        <q-tooltip :delay="1500" anchor="bottom middle" content-style="font-size: 80%">{{ rstore.readerActions['refresh'] }}</q-tooltip>
+                    <button v-show="showToolButton['redoAction']" ref="redoAction" v-ripple class="tool-button" :class="buttonActiveClass('redoAction')" @click="buttonClick('redoAction')">
+                        <q-icon name="la la-angle-right" size="32px" />
+                        <q-tooltip :delay="1500" anchor="bottom middle" content-style="font-size: 80%">
+                            {{ rstore.readerActions['redoAction'] }}
+                        </q-tooltip>
                     </button>
                     <div class="space"></div>
-                    <button ref="contents" v-show="showToolButton['contents']" class="tool-button" :class="buttonActiveClass('contents')" @click="buttonClick('contents')" v-ripple>
-                        <q-icon name="la la-list" size="32px"/>
-                        <q-tooltip :delay="1500" anchor="bottom middle" content-style="font-size: 80%">{{ rstore.readerActions['contents'] }}</q-tooltip>
+                    <button v-show="showToolButton['fullScreen']" ref="fullScreen" v-ripple class="tool-button" :class="buttonActiveClass('fullScreen')" @click="buttonClick('fullScreen')">
+                        <q-icon :name="(fullScreenActive ? 'la la-compress-arrows-alt': 'la la-expand-arrows-alt')" size="32px" />
+                        <q-tooltip :delay="1500" anchor="bottom middle" content-style="font-size: 80%">
+                            {{ rstore.readerActions['fullScreen'] }}
+                        </q-tooltip>
                     </button>
-                    <button ref="libs" v-show="mode == 'liberama.top' && showToolButton['libs']" class="tool-button" :class="buttonActiveClass('libs')" @click="buttonClick('libs')" v-ripple>
-                        <q-icon name="la la-sitemap" size="32px"/>
-                        <q-tooltip :delay="1500" anchor="bottom middle" content-style="font-size: 80%">{{ rstore.readerActions['libs'] }}</q-tooltip>
+                    <button v-show="showToolButton['scrolling']" ref="scrolling" v-ripple class="tool-button" :class="buttonActiveClass('scrolling')" @click="buttonClick('scrolling')">
+                        <q-icon name="la la-film" size="32px" />
+                        <q-tooltip :delay="1500" anchor="bottom middle" content-style="font-size: 80%">
+                            {{ rstore.readerActions['scrolling'] }}
+                        </q-tooltip>
                     </button>
-                    <button ref="recentBooks" v-show="showToolButton['recentBooks']" class="tool-button" :class="buttonActiveClass('recentBooks')" @click="buttonClick('recentBooks')" v-ripple>
-                        <q-icon name="la la-book-open" size="32px"/>
-                        <q-tooltip :delay="1500" anchor="bottom middle" content-style="font-size: 80%">{{ rstore.readerActions['recentBooks'] }}</q-tooltip>
+                    <button v-show="showToolButton['setPosition']" ref="setPosition" v-ripple class="tool-button" :class="buttonActiveClass('setPosition')" @click="buttonClick('setPosition')">
+                        <q-icon name="la la-angle-double-right" size="32px" />
+                        <q-tooltip :delay="1500" anchor="bottom middle" content-style="font-size: 80%">
+                            {{ rstore.readerActions['setPosition'] }}
+                        </q-tooltip>
+                    </button>
+                    <button v-show="showToolButton['search']" ref="search" v-ripple class="tool-button" :class="buttonActiveClass('search')" @click="buttonClick('search')">
+                        <q-icon name="la la-search" size="32px" />
+                        <q-tooltip :delay="1500" anchor="bottom middle" content-style="font-size: 80%">
+                            {{ rstore.readerActions['search'] }}
+                        </q-tooltip>
+                    </button>
+                    <button v-show="showToolButton['copyText']" ref="copyText" v-ripple class="tool-button" :class="buttonActiveClass('copyText')" @click="buttonClick('copyText')">
+                        <q-icon name="la la-copy" size="32px" />
+                        <q-tooltip :delay="1500" anchor="bottom middle" content-style="font-size: 80%">
+                            {{ rstore.readerActions['copyText'] }}
+                        </q-tooltip>
+                    </button>
+                    <button v-show="showToolButton['convOptions']" ref="convOptions" v-ripple class="tool-button" :class="buttonActiveClass('convOptions')" @click="buttonClick('convOptions')">
+                        <q-icon name="la la-magic" size="32px" />
+                        <q-tooltip :delay="1500" anchor="bottom middle" content-style="font-size: 80%">
+                            {{ rstore.readerActions['convOptions'] }}
+                        </q-tooltip>
+                    </button>
+                    <button v-show="showToolButton['refresh']" ref="refresh" v-ripple class="tool-button" :class="buttonActiveClass('refresh')" @click="buttonClick('refresh')">
+                        <q-icon name="la la-sync" size="32px" :class="{clear: !showRefreshIcon}" />
+                        <q-tooltip :delay="1500" anchor="bottom middle" content-style="font-size: 80%">
+                            {{ rstore.readerActions['refresh'] }}
+                        </q-tooltip>
+                    </button>
+                    <div class="space"></div>
+                    <button v-show="showToolButton['contents']" ref="contents" v-ripple class="tool-button" :class="buttonActiveClass('contents')" @click="buttonClick('contents')">
+                        <q-icon name="la la-list" size="32px" />
+                        <q-tooltip :delay="1500" anchor="bottom middle" content-style="font-size: 80%">
+                            {{ rstore.readerActions['contents'] }}
+                        </q-tooltip>
+                    </button>
+                    <button v-show="mode == 'liberama.top' && showToolButton['libs']" ref="libs" v-ripple class="tool-button" :class="buttonActiveClass('libs')" @click="buttonClick('libs')">
+                        <q-icon name="la la-sitemap" size="32px" />
+                        <q-tooltip :delay="1500" anchor="bottom middle" content-style="font-size: 80%">
+                            {{ rstore.readerActions['libs'] }}
+                        </q-tooltip>
+                    </button>
+                    <button v-show="showToolButton['recentBooks']" ref="recentBooks" v-ripple class="tool-button" :class="buttonActiveClass('recentBooks')" @click="buttonClick('recentBooks')">
+                        <q-icon name="la la-book-open" size="32px" />
+                        <q-tooltip :delay="1500" anchor="bottom middle" content-style="font-size: 80%">
+                            {{ rstore.readerActions['recentBooks'] }}
+                        </q-tooltip>
                     </button>
                 </div>
 
                 <div>
-                    <button ref="offlineMode" v-show="showToolButton['offlineMode']" class="tool-button" :class="buttonActiveClass('offlineMode')" @click="buttonClick('offlineMode')" v-ripple>
-                        <q-icon name="la la-unlink" size="32px"/>
-                        <q-tooltip :delay="1500" anchor="bottom middle" content-style="font-size: 80%">{{ rstore.readerActions['offlineMode'] }}</q-tooltip>
+                    <button v-show="showToolButton['offlineMode']" ref="offlineMode" v-ripple class="tool-button" :class="buttonActiveClass('offlineMode')" @click="buttonClick('offlineMode')">
+                        <q-icon name="la la-unlink" size="32px" />
+                        <q-tooltip :delay="1500" anchor="bottom middle" content-style="font-size: 80%">
+                            {{ rstore.readerActions['offlineMode'] }}
+                        </q-tooltip>
                     </button>
-                    <button ref="settings" class="tool-button" :class="buttonActiveClass('settings')" @click="buttonClick('settings')" v-ripple>
-                        <q-icon name="la la-cog" size="32px"/>
-                        <q-tooltip :delay="1500" anchor="bottom left" content-style="font-size: 80%">{{ rstore.readerActions['settings'] }}</q-tooltip>
+                    <button ref="settings" v-ripple class="tool-button" :class="buttonActiveClass('settings')" @click="buttonClick('settings')">
+                        <q-icon name="la la-cog" size="32px" />
+                        <q-tooltip :delay="1500" anchor="bottom left" content-style="font-size: 80%">
+                            {{ rstore.readerActions['settings'] }}
+                        </q-tooltip>
                     </button>
                 </div>
             </div>
@@ -77,7 +107,7 @@
 
         <div class="main col row relative-position">
             <keep-alive>
-                <component ref="page" class="col" :is="activePage"
+                <component :is="activePage" ref="page" class="col"
                     @load-book="loadBook"
                     @load-file="loadFile"
                     @book-pos-changed="bookPosChanged"
@@ -90,8 +120,8 @@
                 @do-action="doAction"
                 @book-pos-changed="bookPosChanged"
                 @start-text-search="startTextSearch"
-                @stop-text-search="stopTextSearch">
-            </SearchPage>
+                @stop-text-search="stopTextSearch"
+            ></SearchPage>
             <CopyTextPage v-if="copyTextActive" ref="copyTextPage" @do-action="doAction"></CopyTextPage>
             <LibsPage v-show="hidden" ref="libsPage" @load-book="loadBook" @libs-close="libsClose" @do-action="doAction"></LibsPage>
             <RecentBooksPage v-show="recentBooksActive" ref="recentBooksPage" @load-book="loadBook" @recent-books-close="recentBooksClose"></RecentBooksPage>
