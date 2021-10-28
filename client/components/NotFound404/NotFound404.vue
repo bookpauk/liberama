@@ -6,15 +6,14 @@
 
 <script>
 //-----------------------------------------------------------------------------
-import Vue from 'vue';
-import Component from 'vue-class-component';
+import vueComponent from '../vueComponent.js';
 
-export default @Component({
-})
-class NotFound404 extends Vue {
+class NotFound404 {
     created() {
     }
 
 }
+
+export default vueComponent(NotFound404);
 //-----------------------------------------------------------------------------
 </script>

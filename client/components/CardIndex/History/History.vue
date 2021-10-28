@@ -6,15 +6,14 @@
 
 <script>
 //-----------------------------------------------------------------------------
-import Vue from 'vue';
-import Component from 'vue-class-component';
+import vueComponent from '../../vueComponent.js';
 
-export default @Component({
-})
-class History extends Vue {
+class History {
     created() {
     }
 
 }
+
+export default vueComponent(History);
 //-----------------------------------------------------------------------------
 </script>

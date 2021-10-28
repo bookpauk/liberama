@@ -17,6 +17,7 @@ import vueComponent from './vueComponent.js';
 
 import Notify from './share/Notify.vue';
 import StdDialog from './share/StdDialog.vue';
+import sanitizeHtml from 'sanitize-html';
 
 import miscApi from '../api/misc';
 import * as utils from '../share/utils';
@@ -78,6 +79,9 @@ class App {
 
         // setAppTitle
         this.$root.setAppTitle = this.setAppTitle;
+
+        //sanitize
+        this.$root.sanitize = sanitizeHtml;
 
         //global keyHooks
         this.keyHooks = [];

@@ -704,7 +704,7 @@ class ExternalLibs extends Vue {
                 this.commitLibs(libs);
             } else if (item.c != this.bookmarkDesc) {
                 if (await this.$root.stdDialog.confirm(`Такая закладка уже существует с другим описанием.<br>` +
-                    `Заменить '${this.$sanitize(item.c)}' на '${this.$sanitize(this.bookmarkDesc)}'?`, ' ')) {
+                    `Заменить '${this.$root.sanitize(item.c)}' на '${this.$root.sanitize(this.bookmarkDesc)}'?`, ' ')) {
                     item.c = this.bookmarkDesc;
                     this.commitLibs(libs);                    
                 } else 
