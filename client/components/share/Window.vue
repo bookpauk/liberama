@@ -2,11 +2,17 @@
     <div ref="main" class="main xyfit absolute" @click="close" @mouseup="onMouseUp" @mousemove="onMouseMove">
         <div ref="windowBox" class="xyfit absolute flex no-wrap" @click.stop>
             <div ref="window" class="window flexfit column no-wrap">
-                <div ref="header" class="header row justify-end" @mousedown.prevent.stop="onMouseDown"
-                    @touchstart.stop="onTouchStart" @touchend.stop="onTouchEnd" @touchmove.stop="onTouchMove">
+                <div 
+                    ref="header"
+                    class="header row justify-end"
+                    @mousedown.prevent.stop="onMouseDown"
+                    @touchstart.stop="onTouchStart"
+                    @touchend.stop="onTouchEnd"
+                    @touchmove.stop="onTouchMove"
+                >
                     <span class="header-text col"><slot name="header"></slot></span>
                     <slot name="buttons"></slot>
-                    <span class="close-button row justify-center items-center" @mousedown.stop @click="close"><q-icon name="la la-times" size="16px"/></span>
+                    <span class="close-button row justify-center items-center" @mousedown.stop @click="close"><q-icon name="la la-times" size="16px" /></span>
                 </div>
 
                 <slot></slot>
@@ -17,19 +23,17 @@
 
 <script>
 //-----------------------------------------------------------------------------
-import Vue from 'vue';
-import Component from 'vue-class-component';
+import vueComponent from '../vueComponent.js';
 
-export default @Component({
-    props: {
+class Window {
+    _props = {
         height: { type: String, default: '100%' },
         width: { type: String, default: '100%' },
         maxWidth: { type: String, default: '' },
         topShift: { type: Number, default: 0 },
         margin: '',
-    }
-})
-class Window extends Vue {
+    };
+
     init() {
         this.$nextTick(() => {
             this.$refs.main.style.top = 0;
@@ -51,7 +55,7 @@ class Window extends Vue {
     }
 
     onMouseDown(event) {
-        if (this.$isMobileDevice)
+        if (this.$root.isMobileDevice)
             return;
         if (event.button == 0) {
             this.$refs.header.style.cursor = 'move';
@@ -81,7 +85,7 @@ class Window extends Vue {
     }
 
     onTouchStart(event) {
-        if (!this.$isMobileDevice)
+        if (!this.$root.isMobileDevice)
             return;
         if (event.touches.length == 1) {
             const touch = event.touches[0];
@@ -93,7 +97,7 @@ class Window extends Vue {
     }
 
     onTouchMove(event) {
-        if (!this.$isMobileDevice)
+        if (!this.$root.isMobileDevice)
             return;
         if (event.touches.length == 1 && this.moving) {
             const touch = event.touches[0];
@@ -108,7 +112,7 @@ class Window extends Vue {
     }
 
     onTouchEnd() {
-        if (!this.$isMobileDevice)
+        if (!this.$root.isMobileDevice)
             return;
         this.$refs.header.style.cursor = 'default';
         this.moving = false;
@@ -120,6 +124,8 @@ class Window extends Vue {
             this.$emit('close');
     }
 }
+
+export default vueComponent(Window);
 //-----------------------------------------------------------------------------
 </script>
 

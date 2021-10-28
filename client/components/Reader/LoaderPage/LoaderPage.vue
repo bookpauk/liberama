@@ -1,7 +1,7 @@
 <template>
     <div ref="main" class="column no-wrap" style="min-height: 500px">
         <div v-if="mode != 'liberama.top'" class="relative-position">
-            <GithubCorner url="https://github.com/bookpauk/liberama" cornerColor="#1B695F" gitColor="#EBE2C9"></GithubCorner>
+            <GithubCorner url="https://github.com/bookpauk/liberama" corner-color="#1B695F" git-color="#EBE2C9"></GithubCorner>
         </div>
         <div class="col column justify-center items-center no-wrap overflow-hidden" style="min-height: 230px">
             <span class="greeting"><b>{{ title }}</b></span>
@@ -12,13 +12,13 @@
         </div>
 
         <div class="col-auto column justify-start items-center no-wrap overflow-hidden">
-            <q-input ref="input" class="full-width q-px-sm" style="max-width: 700px" outlined dense bg-color="white" v-model="bookUrl" placeholder="URL книги">
-                <template v-slot:append>
-                    <q-btn rounded flat style="width: 40px" icon="la la-check" @click="submitUrl"/>
+            <q-input ref="input" v-model="bookUrl" class="full-width q-px-sm" style="max-width: 700px" outlined dense bg-color="white" placeholder="URL книги">
+                <template #append>
+                    <q-btn rounded flat style="width: 40px" icon="la la-check" @click="submitUrl" />
                 </template>
             </q-input>
 
-            <input type="file" id="file" ref="file" @change="loadFile" style='display: none;'/>
+            <input id="file" ref="file" type="file" style="display: none;" @change="loadFile" />
 
             <div class="q-my-sm"></div>
             <q-btn no-caps dense class="q-px-sm" color="primary" size="13px" @click="loadFileClick">
@@ -58,20 +58,22 @@
 
 <script>
 //-----------------------------------------------------------------------------
-import Vue from 'vue';
-import Component from 'vue-class-component';
+import vueComponent from '../../vueComponent.js';
+
 import GithubCorner from './GithubCorner/GithubCorner.vue';
 
 import PasteTextPage from './PasteTextPage/PasteTextPage.vue';
 import {versionHistory} from '../versionHistory';
 
-export default @Component({
+const componentOptions = {
     components: {
         GithubCorner,
         PasteTextPage,
     },
-})
-class LoaderPage extends Vue {
+};
+class LoaderPage {
+    _options = componentOptions;
+
     bookUrl = null;
     loadPercent = 0;
     pasteTextActive = false;
@@ -190,6 +192,8 @@ class LoaderPage extends Vue {
         return false;
     }
 }
+
+export default vueComponent(LoaderPage);
 //-----------------------------------------------------------------------------
 </script>
 <style scoped>

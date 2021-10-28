@@ -6,6 +6,9 @@ const clientDir = path.resolve(__dirname, '../client');
 
 module.exports = {
     resolve: {
+        alias: {
+            vue: '@vue/compat'
+        },
         fallback: {
             "url": false,
             "path": false,

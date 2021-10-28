@@ -17,15 +17,22 @@
         <div v-show="showStatusBar" ref="statusBar" class="layout">
             <div v-html="statusBar"></div>
         </div>
-        <div v-show="clickControl" ref="layoutEvents" class="layout events" @mousedown.prevent.stop="onMouseDown" @mouseup.prevent.stop="onMouseUp"
+        <div v-show="clickControl" ref="layoutEvents" class="layout events" 
+            oncontextmenu="return false;"
+            @mousedown.prevent.stop="onMouseDown" @mouseup.prevent.stop="onMouseUp"
             @wheel.prevent.stop="onMouseWheel"
-            @touchstart.stop="onTouchStart" @touchend.stop="onTouchEnd" @touchmove.stop="onTouchMove" @touchcancel.prevent.stop="onTouchCancel"
-            oncontextmenu="return false;">
-            <div v-show="showStatusBar && statusBarClickOpen" v-html="statusBarClickable" @mousedown.prevent.stop @touchstart.stop
-                @click.prevent.stop="onStatusBarClick"></div>
+            @touchstart.stop="onTouchStart" @touchend.stop="onTouchEnd" @touchmove.stop="onTouchMove" @touchcancel.prevent.stop="onTouchCancel"            
+        >
+            <div v-show="showStatusBar && statusBarClickOpen" @mousedown.prevent.stop @touchstart.stop
+                @click.prevent.stop="onStatusBarClick"
+                v-html="statusBarClickable"
+            ></div>
         </div>
-        <div v-show="!clickControl && showStatusBar && statusBarClickOpen" class="layout" v-html="statusBarClickable" @mousedown.prevent.stop @touchstart.stop
-            @click.prevent.stop="onStatusBarClick">
+        <div v-show="!clickControl && showStatusBar && statusBarClickOpen" class="layout" 
+            @mousedown.prevent.stop @touchstart.stop
+            @click.prevent.stop="onStatusBarClick"
+            v-html="statusBarClickable"
+        >
         </div>
         <!-- невидимым делать нельзя (display: none), вовремя не подгружаютя шрифты -->
         <canvas ref="offscreenCanvas" class="layout" style="visibility: hidden"></canvas>
@@ -35,8 +42,8 @@
 
 <script>
 //-----------------------------------------------------------------------------
-import Vue from 'vue';
-import Component from 'vue-class-component';
+import vueComponent from '../../vueComponent.js';
+
 import {loadCSS} from 'fg-loadcss';
 import _ from 'lodash';
 
@@ -51,7 +58,7 @@ import {clickMap} from '../share/clickMap';
 
 const minLayoutWidth = 100;
 
-export default @Component({
+const componentOptions = {
     watch: {
         bookPos: function() {
             this.$emit('book-pos-changed', {bookPos: this.bookPos, bookPosSeen: this.bookPosSeen});
@@ -70,8 +77,10 @@ export default @Component({
             this.updateLayout();
         },
     },
-})
-class TextPage extends Vue {
+};
+class TextPage {
+    _options = componentOptions;
+
     toggleLayout = false;
     showStatusBar = false;
     clickControl = true;
@@ -1036,7 +1045,7 @@ class TextPage extends Vue {
     }
 
     onTouchStart(event) {
-        if (!this.$isMobileDevice)
+        if (!this.$root.isMobileDevice)
             return;
         this.endClickRepeat();
 
@@ -1064,7 +1073,7 @@ class TextPage extends Vue {
     }
 
     onTouchEnd(event) {
-        if (!this.$isMobileDevice)
+        if (!this.$root.isMobileDevice)
             return;
         this.endClickRepeat();
 
@@ -1100,13 +1109,13 @@ class TextPage extends Vue {
     }
 
     onTouchCancel() {
-        if (!this.$isMobileDevice)
+        if (!this.$root.isMobileDevice)
             return;
         this.endClickRepeat();
     }
 
     onMouseDown(event) {
-        if (this.$isMobileDevice)
+        if (this.$root.isMobileDevice)
             return;
         this.endClickRepeat();
         if (event.button == 0) {
@@ -1123,13 +1132,13 @@ class TextPage extends Vue {
     }
 
     onMouseUp() {
-        if (this.$isMobileDevice)
+        if (this.$root.isMobileDevice)
             return;
         this.endClickRepeat();
     }
 
     onMouseWheel(event) {
-        if (this.$isMobileDevice)
+        if (this.$root.isMobileDevice)
             return;
         if (event.deltaY > 0) {
             this.doDown();
@@ -1195,6 +1204,8 @@ class TextPage extends Vue {
    }
 
 }
+
+export default vueComponent(TextPage);
 //-----------------------------------------------------------------------------
 </script>
 <style scoped>

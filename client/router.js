@@ -9,7 +9,7 @@ const History = () => import('./components/CardIndex/History/History.vue');
 
 //немедленная загрузка
 //import Reader from './components/Reader/Reader.vue';
-const Reader = () => import('./components/Reader/Reader1.vue');
+const Reader = () => import('./components/Reader/Reader.vue');
 //const ExternalLibs = () => import('./components/ExternalLibs/ExternalLibs.vue');
 
 const Income = () => import('./components/Income/Income.vue');

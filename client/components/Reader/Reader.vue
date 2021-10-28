@@ -115,7 +115,7 @@
                 ></component>
             </keep-alive>
 
-            <SetPositionPage v-if="setPositionActive" ref="setPositionPage" @set-position-toggle="setPositionToggle" @book-pos-changed="bookPosChanged"></SetPositionPage>
+            <!--SetPositionPage v-if="setPositionActive" ref="setPositionPage" @set-position-toggle="setPositionToggle" @book-pos-changed="bookPosChanged"></SetPositionPage>
             <SearchPage v-show="searchActive" ref="searchPage" 
                 @do-action="doAction"
                 @book-pos-changed="bookPosChanged"
@@ -129,7 +129,7 @@
             <HelpPage v-if="helpActive" ref="helpPage" @do-action="doAction"></HelpPage>
             <ClickMapPage v-show="clickMapActive" ref="clickMapPage"></ClickMapPage>
             <ServerStorage v-show="hidden" ref="serverStorage"></ServerStorage>
-            <ContentsPage v-show="contentsActive" ref="contentsPage" :book-pos="bookPos" :is-visible="contentsActive" @do-action="doAction" @book-pos-changed="bookPosChanged"></ContentsPage>
+            <ContentsPage v-show="contentsActive" ref="contentsPage" :book-pos="bookPos" :is-visible="contentsActive" @do-action="doAction" @book-pos-changed="bookPosChanged"></ContentsPage-->
 
             <ReaderDialogs ref="dialogs" @donate-toggle="donateToggle" @version-history-toggle="versionHistoryToggle"></ReaderDialogs>
         </div>
@@ -138,8 +138,8 @@
 
 <script>
 //-----------------------------------------------------------------------------
-import Vue from 'vue';
-import Component from 'vue-class-component';
+import vueComponent from '../vueComponent.js';
+
 import _ from 'lodash';
 import {Buffer} from 'safe-buffer';
 
@@ -147,7 +147,7 @@ import LoaderPage from './LoaderPage/LoaderPage.vue';
 import TextPage from './TextPage/TextPage.vue';
 import ProgressPage from './ProgressPage/ProgressPage.vue';
 
-import SetPositionPage from './SetPositionPage/SetPositionPage.vue';
+/*import SetPositionPage from './SetPositionPage/SetPositionPage.vue';
 import SearchPage from './SearchPage/SearchPage.vue';
 import CopyTextPage from './CopyTextPage/CopyTextPage.vue';
 import LibsPage from './LibsPage/LibsPage.vue';
@@ -156,7 +156,7 @@ import SettingsPage from './SettingsPage/SettingsPage.vue';
 import HelpPage from './HelpPage/HelpPage.vue';
 import ClickMapPage from './ClickMapPage/ClickMapPage.vue';
 import ServerStorage from './ServerStorage/ServerStorage.vue';
-import ContentsPage from './ContentsPage/ContentsPage.vue';
+import ContentsPage from './ContentsPage/ContentsPage.vue';*/
 
 import ReaderDialogs from './ReaderDialogs/ReaderDialogs.vue';
 
@@ -171,13 +171,13 @@ import miscApi from '../../api/misc';
 import {versionHistory} from './versionHistory';
 import * as utils from '../../share/utils';
 
-export default @Component({
+const componentOptions = {
     components: {
         LoaderPage,
         TextPage,
         ProgressPage,
 
-        SetPositionPage,
+        /*SetPositionPage,
         SearchPage,
         CopyTextPage,
         LibsPage,
@@ -186,7 +186,7 @@ export default @Component({
         HelpPage,
         ClickMapPage,
         ServerStorage,
-        ContentsPage,
+        ContentsPage,*/
 
         ReaderDialogs,
     },
@@ -232,8 +232,10 @@ export default @Component({
                 this.stopScrolling();
         },
     },
-})
-class Reader extends Vue {
+};
+
+class Reader {
+    _options = componentOptions;
     rstore = {};
     loaderActive = false;
     offlineModeActive = false;
@@ -1308,6 +1310,8 @@ class Reader extends Vue {
         return result;
     }
 }
+
+export default vueComponent(Reader);
 //-----------------------------------------------------------------------------
 </script>
 

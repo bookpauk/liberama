@@ -35,7 +35,9 @@
                 Автор также обращается с просьбой о помощи в распространении 
                 <a href="https://omnireader.ru" target="_blank">ссылки</a>
                 <q-icon class="copy-icon" name="la la-copy" @click="copyLink('https://omnireader.ru')">
-                    <q-tooltip :delay="1000" anchor="top middle" self="center middle" content-style="font-size: 80%">Скопировать</q-tooltip>                    
+                    <q-tooltip :delay="1000" anchor="top middle" self="center middle" content-style="font-size: 80%">
+                        Скопировать
+                    </q-tooltip>                    
                 </q-icon>
                 на читалку через тематические форумы, соцсети, мессенджеры и пр.
                 Чем нас больше, тем легче оставаться на плаву и тем больше мотивации у разработчика, чтобы продолжать работать над проектом.
@@ -47,7 +49,9 @@
 
                 <br><br>
                 <div class="row justify-center">
-                    <q-btn class="q-px-sm" color="primary" dense no-caps rounded @click="openDonate">Помочь проекту</q-btn>
+                    <q-btn class="q-px-sm" color="primary" dense no-caps rounded @click="openDonate">
+                        Помочь проекту
+                    </q-btn>
                 </div>
             </div>
 
@@ -62,14 +66,13 @@
 
 <script>
 //-----------------------------------------------------------------------------
-import Vue from 'vue';
-import Component from 'vue-class-component';
+import vueComponent from '../../vueComponent.js';
 
 import Dialog from '../../share/Dialog.vue';
 import * as utils from '../../../share/utils';
 import {versionHistory} from '../versionHistory';
 
-export default @Component({
+const componentOptions = {
     components: {
         Dialog
     },
@@ -78,8 +81,10 @@ export default @Component({
             this.loadSettings();
         },
     },
-})
-class ReaderDialogs extends Vue {
+};
+class ReaderDialogs {
+    _options = componentOptions;
+
     whatsNewVisible = false;
     whatsNewContent = '';
     donationVisible = false;
@@ -181,6 +186,8 @@ class ReaderDialogs extends Vue {
         return false;
     }
 }
+
+export default vueComponent(ReaderDialogs);
 //-----------------------------------------------------------------------------
 </script>
 

@@ -72,7 +72,7 @@ import rstore from '../../../../store/modules/reader';
 
 const UserHotKeysProps = Vue.extend({
     props: {
-        value: Object,
+        modelValue: Object,
         readonly: Boolean,
     }
 });
@@ -82,7 +82,7 @@ export default @Component({
         search: function() {
             this.updateTableData();
         },
-        value: function() {
+        modelValue: function() {
             this.checkCollisions();
             this.updateTableData();
         }
@@ -113,7 +113,7 @@ class UserHotKeys extends UserHotKeysProps {
 
         const search = this.search.toLowerCase();
         const codesIncludeSearch = (action) => {
-            for (const code of this.value[action]) {
+            for (const code of this.modelValue[action]) {
                 if (code.toLowerCase().includes(search))
                     return true;
             }
@@ -131,7 +131,7 @@ class UserHotKeys extends UserHotKeysProps {
 
     checkCollisions() {
         const cols = {};
-        for (const [action, codes] of Object.entries(this.value)) {
+        for (const [action, codes] of Object.entries(this.modelValue)) {
             codes.forEach(code => {
                 if (!cols[code])
                     cols[code] = [];
@@ -158,26 +158,26 @@ class UserHotKeys extends UserHotKeysProps {
     }
 
     removeCode(action, code) {
-        let codes = Array.from(this.value[action]);
+        let codes = Array.from(this.modelValue[action]);
         const index = codes.indexOf(code);
         if (index >= 0) {
             codes.splice(index, 1);
-            const newValue = Object.assign({}, this.value, {[action]: codes});
-            this.$emit('input', newValue);
+            const newValue = Object.assign({}, this.modelValue, {[action]: codes});
+            this.$emit('update:modelValue', newValue);
         }
     }
 
     async addHotKey(action) {
-        if (this.value[action].length >= this.maxCodesLength)
+        if (this.modelValue[action].length >= this.maxCodesLength)
             return;
         try {
             const result = await this.$root.stdDialog.getHotKey(`Добавить сочетание для:<br><b>${rstore.readerActions[action]}</b>`, '');
             if (result) {
-                let codes = Array.from(this.value[action]);
+                let codes = Array.from(this.modelValue[action]);
                 if (codes.indexOf(result) < 0) {
                     codes.push(result);
-                    const newValue = Object.assign({}, this.value, {[action]: codes});
-                    this.$emit('input', newValue);
+                    const newValue = Object.assign({}, this.modelValue, {[action]: codes});
+                    this.$emit('update:modelValue', newValue);
                     this.$nextTick(() => {
                         this.collisionWarning(result);
                     });
@@ -192,8 +192,8 @@ class UserHotKeys extends UserHotKeysProps {
         try {
             if (await this.$root.stdDialog.confirm(`Подтвердите сброс сочетаний клавиш<br>в значения по умолчанию для команды:<br><b>${rstore.readerActions[action]}</b>`, ' ')) {
                 const codes = Array.from(rstore.settingDefaults.userHotKeys[action]);
-                const newValue = Object.assign({}, this.value, {[action]: codes});
-                this.$emit('input', newValue);
+                const newValue = Object.assign({}, this.modelValue, {[action]: codes});
+                this.$emit('update:modelValue', newValue);
             }
         } catch (e) {
             //
@@ -204,7 +204,7 @@ class UserHotKeys extends UserHotKeysProps {
         try {
             if (await this.$root.stdDialog.confirm('Подтвердите сброс сочетаний клавиш<br>для ВСЕХ команд в значения по умолчанию:', ' ')) {
                 const newValue = Object.assign({}, rstore.settingDefaults.userHotKeys);
-                this.$emit('input', newValue);
+                this.$emit('update:modelValue', newValue);
             }
         } catch (e) {
             //

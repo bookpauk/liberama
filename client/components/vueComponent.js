@@ -10,7 +10,7 @@ export default function(componentClass) {
         if (['_options', '_props'].includes(prop)) {//meta props
             if (prop === '_options') {
                 const options = obj[prop];
-                for (const optName of ['components', 'watch']) {
+                for (const optName of ['components', 'watch', 'emits']) {
                     if (options[optName]) {
                         comp[optName] = options[optName];
                     }

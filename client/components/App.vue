@@ -77,6 +77,8 @@ class App {
             }
         });
 
+        this.$root.isMobileDevice = /Android|webOS|iPhone|iPad|iPod|BlackBerry/i.test(navigator.userAgent);
+
         // setAppTitle
         this.$root.setAppTitle = this.setAppTitle;
 

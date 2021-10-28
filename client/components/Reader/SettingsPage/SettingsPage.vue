@@ -200,7 +200,7 @@ class SettingsPage extends Vue {
         this.$watch(
             '$refs.tabs.scrollable',
             (newValue) => {
-                this.tabsScrollable = newValue && !this.$isMobileDevice;
+                this.tabsScrollable = newValue && !this.$root.isMobileDevice;
             }
         );
     }

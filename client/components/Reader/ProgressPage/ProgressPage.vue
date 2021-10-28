@@ -17,7 +17,7 @@
 
             <div>
                 <span class="text-yellow">{{ text }}</span>
-                <q-icon :style="iconStyle" color="yellow" name="la la-slash" size="20px"/>
+                <q-icon :style="iconStyle" color="yellow" name="la la-slash" size="20px" />
             </div>
         </div>
     </div>
@@ -25,8 +25,8 @@
 
 <script>
 //-----------------------------------------------------------------------------
-import Vue from 'vue';
-import Component from 'vue-class-component';
+import vueComponent from '../../vueComponent.js';
+
 import * as utils from '../../../share/utils';
 
 const ruMessage = {
@@ -42,9 +42,7 @@ const ruMessage = {
     'upload': 'отправка',
 };
 
-export default @Component({
-})
-class ProgressPage extends Vue {
+class ProgressPage {
     text = '';
     totalSteps = 1;
     step = 1;
@@ -96,5 +94,7 @@ class ProgressPage extends Vue {
         return Math.round(((this.step - 1)/this.totalSteps + this.progress/(100*this.totalSteps))*100);
     }
 }
+
+export default vueComponent(ProgressPage);
 //-----------------------------------------------------------------------------
 </script>

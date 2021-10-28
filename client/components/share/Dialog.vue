@@ -25,26 +25,23 @@
 
 <script>
 //-----------------------------------------------------------------------------
-import Vue from 'vue';
-import Component from 'vue-class-component';
+import vueComponent from '../vueComponent.js';
 
-const DialogProps = Vue.extend({
-    props: {
-        value: Boolean,
-    }
-});
+class Dialog {
+    _props = {
+        modelValue: Boolean,
+    };
 
-export default @Component({
-})
-class Dialog extends DialogProps {
     get active() {
-        return this.value;
+        return this.modelValue;
     }
 
     set active(value) {
-        this.$emit('input', value);
+        this.$emit('update:modelValue', value);
     }
 }
+
+export default vueComponent(Dialog);
 //-----------------------------------------------------------------------------
 </script>
 

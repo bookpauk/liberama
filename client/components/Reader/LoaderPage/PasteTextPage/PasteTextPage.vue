@@ -8,27 +8,28 @@
             </span>
         </template>
 
-        <q-input class="q-px-sm" dense borderless v-model="bookTitle" placeholder="Введите название текста"/>
-        <hr/>
+        <q-input v-model="bookTitle" class="q-px-sm" dense borderless placeholder="Введите название текста" />
+        <hr />
         <textarea ref="textArea" class="text" @paste="calcTitle"></textarea>
     </Window>
 </template>
 
 <script>
 //-----------------------------------------------------------------------------
-import Vue from 'vue';
-import Component from 'vue-class-component';
+import vueComponent from '../../../vueComponent.js';
 
 import Window from '../../../share/Window.vue';
 import _ from 'lodash';
 import * as utils from '../../../../share/utils';
 
-export default @Component({
+const componentOptions = {
     components: {
         Window,
     },
-})
-class PasteTextPage extends Vue {
+};
+class PasteTextPage {
+    _options = componentOptions;
+
     bookTitle = '';
 
     created() {
@@ -90,6 +91,8 @@ class PasteTextPage extends Vue {
         return true;
     }
 }
+
+export default vueComponent(PasteTextPage);
 //-----------------------------------------------------------------------------
 </script>
 
