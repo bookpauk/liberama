@@ -99,6 +99,7 @@ module.exports = {
         new DefinePlugin({
             __VUE_OPTIONS_API__: true,
             __VUE_PROD_DEVTOOLS__: false,
+            __QUASAR_SSR__: false,
             __QUASAR_SSR_SERVER__: false,
             __QUASAR_SSR_CLIENT__: false,
             __QUASAR_VERSION__: false,

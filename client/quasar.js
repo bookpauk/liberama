@@ -2,7 +2,6 @@ import 'quasar/dist/quasar.css';
 //import Quasar from 'quasar/dist/quasar.umd.prod.js';
 
 import Quasar from 'quasar/src/vue-plugin.js';
-/*
 //config
 const config = {};
 
@@ -91,8 +90,5 @@ import '@quasar/extras/line-awesome/line-awesome.css';
 import lineAwesome from 'quasar/icon-set/line-awesome.js'
 Quasar.iconSet.set(lineAwesome);
 
-export default {quasar: Quasar, quasarOptions: { config, components, directives, plugins }};
-*/
-
-const QuasarOptions = {};
+const QuasarOptions = { config, components, directives, plugins };
 export {Quasar, QuasarOptions};

@@ -4,12 +4,9 @@
 
 <script>
 //-----------------------------------------------------------------------------
-import Vue from 'vue';
-import Component from 'vue-class-component';
+import vueComponent from '../vueComponent.js';
 
-export default @Component({
-})
-class Notify extends Vue {
+class Notify {
     notify(opts) {
         let {
             caption = null,
@@ -55,5 +52,7 @@ class Notify extends Vue {
         this.notify(Object.assign({color: 'info', icon: 'la la-bell', message, caption}, options));
     }
 }
+
+export default vueComponent(Notify);
 //-----------------------------------------------------------------------------
 </script>

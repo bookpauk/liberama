@@ -2,16 +2,18 @@
     <div class="fit row">
         <Notify ref="notify" />
         <StdDialog ref="stdDialog" />
-        <keep-alive v-if="showPage">
-            <router-view class="col"></router-view>
-        </keep-alive>
+
+        <router-view v-slot="{ Component }">
+            <keep-alive v-if="showPage">
+                <component :is="Component" class="col" />
+            </keep-alive>
+        </router-view>
     </div>
 </template>
 
 <script>
 //-----------------------------------------------------------------------------
-import Vue from 'vue';
-import Component from 'vue-class-component';
+import vueComponent from './vueComponent.js';
 
 import Notify from './share/Notify.vue';
 import StdDialog from './share/StdDialog.vue';
@@ -19,7 +21,7 @@ import StdDialog from './share/StdDialog.vue';
 import miscApi from '../api/misc';
 import * as utils from '../share/utils';
 
-export default @Component({
+const componentOptions = {
     components: {
         Notify,
         StdDialog,
@@ -31,8 +33,9 @@ export default @Component({
         }
     },
 
-})
-class App extends Vue {
+};
+class App {
+    _options = componentOptions;
     showPage = false;
 
     itemRuText = {
@@ -54,7 +57,7 @@ class App extends Vue {
         //root route
         let cachedRoute = '';
         let cachedPath = '';
-        this.$root.rootRoute = () => {
+        this.$root.getRootRoute = () => {
             if (this.$route.path != cachedPath) {
                 cachedPath = this.$route.path;
                 const m = cachedPath.match(/^(\/[^/]*).*$/i);
@@ -73,8 +76,8 @@ class App extends Vue {
             }
         });
 
-        // set-app-title
-        this.$root.$on('set-app-title', this.setAppTitle);
+        // setAppTitle
+        this.$root.setAppTitle = this.setAppTitle;
 
         //global keyHooks
         this.keyHooks = [];
@@ -108,14 +111,6 @@ class App extends Vue {
         });
     }
 
-    routerReady() {
-        return new Promise ((resolve) => {
-            this.$router.onReady(() => {
-                resolve();
-            });
-        });
-    }
-
     mounted() {
         this.$root.notify = this.$refs.notify;
         this.$root.stdDialog = this.$refs.stdDialog;
@@ -142,7 +137,7 @@ class App extends Vue {
             if (navigator.storage && navigator.storage.persist) {
                 navigator.storage.persist();
             }
-            await this.routerReady();
+            await this.$router.isReady();
             this.redirectIfNeeded();
         })();
     }
@@ -184,7 +179,7 @@ class App extends Vue {
     }
 
     get rootRoute() {
-        return this.$root.rootRoute();
+        return this.$root.getRootRoute();
     }
 
     setAppTitle(title) {
@@ -194,7 +189,7 @@ class App extends Vue {
             } else if (this.mode == 'omnireader') {
                 document.title = `Omni Reader - всегда с вами`;
             } else if (this.config && this.mode !== null) {
-                document.title = `${this.config.name} - ${this.itemRuText[this.$root.rootRoute]}`;
+                document.title = `${this.config.name} - ${this.itemRuText[this.rootRoute]}`;
             }
         } else {
             document.title = title;
@@ -239,6 +234,8 @@ class App extends Vue {
         }
     }
 }
+
+export default vueComponent(App);
 //-----------------------------------------------------------------------------
 </script>
 

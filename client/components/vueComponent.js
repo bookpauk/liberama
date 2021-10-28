@@ -35,13 +35,16 @@ export default function(componentClass) {
             computed[method] = {get: desc.get};
             if (desc.set)
                 computed[method].set = desc.set;
-        } else if (!['constructor', 'vueOptions'].includes(method)) {//usual
+        } else if (['beforeCreate', 'created', 'beforeMount', 'mounted', 'beforeUpdate', 'updated', 'activated',
+                    'deactivated', 'beforeUnmount', 'unmounted', 'errorCaptured', 'renderTracked', 'renderTriggered'].includes(method)) {//life cycle hooks
+            comp[method] = obj[method];
+        } else if (method !== 'constructor') {//usual
             methods[method] = obj[method];
         }
     }
     comp.methods = methods;
     comp.computed = computed;
 
-    console.log(comp);
+    //console.log(comp);
     return defineComponent(comp);
 }

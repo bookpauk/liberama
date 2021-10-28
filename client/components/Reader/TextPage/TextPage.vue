@@ -436,7 +436,7 @@ class TextPage extends Vue {
 
                     this.title = bt.fullTitle;
 
-                    this.$root.$emit('set-app-title', this.title);
+                    this.$root.setAppTitle(this.title);
 
                     this.parsed = this.book.parsed;
 

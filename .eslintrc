@@ -29,6 +29,7 @@
     }],
     "vue/max-attributes-per-line": "off",
     "vue/html-self-closing": "off",
+    "vue/no-v-html": "off",
 
     "strict": 0,
     "indent": [0, 4, {

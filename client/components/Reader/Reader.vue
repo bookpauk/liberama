@@ -311,7 +311,7 @@ class Reader extends Vue {
             await bookManager.init(this.settings);
             bookManager.addEventListener(this.bookManagerEvent);
 
-            if (this.$root.rootRoute() == '/reader') {
+            if (this.$root.getRootRoute() == '/reader') {
                 if (this.routeParamUrl) {
                     await this.loadBook({url: this.routeParamUrl, bookPos: this.routeParamPos, force: this.routeParamRefresh});
                 } else {
@@ -921,7 +921,7 @@ class Reader extends Vue {
         }
 
         if (result != 'TextPage') {
-            this.$root.$emit('set-app-title');
+            this.$root.setAppTitle();
         }
 
         // на LoaderPage всегда показываем toolBar
@@ -936,7 +936,7 @@ class Reader extends Vue {
                 const isParsed = await bookManager.hasBookParsed(last);
 
                 if (!isParsed) {
-                    this.$root.$emit('set-app-title');
+                    this.$root.setAppTitle();
                     return;
                 }
 
@@ -1262,7 +1262,7 @@ class Reader extends Vue {
 
     keyHook(event) {
         let result = false;
-        if (this.$root.rootRoute() == '/reader') {
+        if (this.$root.getRootRoute() == '/reader') {
             if (this.$root.stdDialog.active)
                 return result;
 

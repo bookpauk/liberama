@@ -1,15 +1,17 @@
 <template>
     <div>
-        <keep-alive>
-            <router-view></router-view>
-        </keep-alive>
+
+        <router-view v-slot="{ Component }">
+            <keep-alive>
+                <component :is="Component" />
+            </keep-alive>
+        </router-view>        
     </div>
 </template>
 
 <script>
 //-----------------------------------------------------------------------------
-import Vue from 'vue';
-import Component from 'vue-class-component';
+import vueComponent from '../vueComponent.js';
 import _ from 'lodash';
 
 const selfRoute = '/cardindex';
@@ -21,18 +23,19 @@ const tab2Route = [
 ];
 let lastActiveTab = null;
 
-export default @Component({
+const componentOptions = {
     watch: {
-        selectedTab: function(newValue, oldValue) {
+        selectedTab: function(newValue) {
             lastActiveTab = newValue;
             this.setRouteByTab(newValue);
         },
-        curRoute: function(newValue, oldValue) {
+        curRoute: function(newValue) {
             this.setTabByRoute(newValue);
         },
     },
-})
-class CardIndex extends Vue {
+};
+class CardIndex {
+    _options = componentOptions;
     selectedTab = null;
 
     mounted() {
@@ -58,11 +61,13 @@ class CardIndex extends Vue {
     }
 
     get curRoute() {
-        const m = this.$route.path.match(/^(\/[^\/]*\/[^\/]*).*$/i);
+        const m = this.$route.path.match(/^(\/[^/]*\/[^/]*).*$/i);
         return (m ? m[1] : this.$route.path);
     }
 
 }
+
+export default vueComponent(CardIndex);
 //-----------------------------------------------------------------------------
 </script>
 

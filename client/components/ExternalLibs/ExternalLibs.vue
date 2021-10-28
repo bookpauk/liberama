@@ -412,7 +412,7 @@ class ExternalLibs extends Vue {
         if (this.ready && this.selectedLink) {
             result += ` | ${(this.libs.comment ? this.libs.comment + ' ': '') + lu.removeProtocol(this.libs.startLink)}`;
         }
-        this.$root.$emit('set-app-title', result);
+        this.$root.setAppTitle(result);
         return result;
     }
 
@@ -810,7 +810,7 @@ class ExternalLibs extends Vue {
     }
 
     keyHook(event) {
-        if (this.$root.rootRoute() == '/external-libs') {
+        if (this.$root.getRootRoute() == '/external-libs') {
             if (this.$root.stdDialog.active)
                 return false;
 
