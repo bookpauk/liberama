@@ -98,7 +98,7 @@
 //-----------------------------------------------------------------------------
 import vueComponent from '../../vueComponent.js';
 
-import path from 'path';
+import path from 'path-browserify';
 //import _ from 'lodash';
 
 import * as utils from '../../../share/utils';

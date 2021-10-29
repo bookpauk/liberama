@@ -8,11 +8,7 @@ module.exports = {
     resolve: {
         alias: {
             vue: '@vue/compat'
-        },
-        fallback: {
-            "url": false,
-            "path": false,
-        } 
+        }
     },    
     entry: [`${clientDir}/main.js`],
     output: {
@@ -23,7 +19,7 @@ module.exports = {
         rules: [
             {
                 test: /\.vue$/,
-                loader: "vue-loader",
+                loader: 'vue-loader',
                     options: {
                         compilerOptions: {
                             compatConfig: {
@@ -33,7 +29,7 @@ module.exports = {
                 }                
             },
             {
-                test: /\.includer$/,
+                //test: /\.includer$/,
                 resourceQuery: /^\?vue/,
                 use: path.resolve('build/includer.js')
             },
