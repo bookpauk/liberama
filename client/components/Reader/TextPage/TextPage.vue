@@ -149,7 +149,7 @@ class TextPage {
             await this.doPageAnimation();
         }, 10);
 
-        this.$root.$on('resize', async() => {
+        this.$root.addEventHook('resize', async() => {
             this.$nextTick(this.onResize);
             await utils.sleep(500);
             this.$nextTick(this.onResize);

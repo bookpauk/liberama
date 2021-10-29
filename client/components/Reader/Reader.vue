@@ -279,7 +279,7 @@ class Reader {
         this.reader = this.$store.state.reader;
         this.config = this.$store.state.config;
 
-        this.$root.addKeyHook(this.keyHook);
+        this.$root.addEventHook('key', this.keyHook);
 
         this.lastActivePage = false;
 

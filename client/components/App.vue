@@ -85,36 +85,42 @@ class App {
         //sanitize
         this.$root.sanitize = sanitizeHtml;
 
-        //global keyHooks
-        this.keyHooks = [];
-        this.keyHook = (event) => {
-            for (const hook of this.keyHooks)
+        //global event hooks
+        this.eventHooks = {};
+        this.eventHook = (hookName, event) => {
+            if (!this.eventHooks[hookName])
+                return;
+            for (const hook of this.eventHooks[hookName])
                 hook(event);
         }
 
-        this.$root.addKeyHook = (hook) => {
-            if (this.keyHooks.indexOf(hook) < 0)
-                this.keyHooks.push(hook);
+        this.$root.addEventHook = (hookName, hook) => {
+            if (!this.eventHooks[hookName])
+                this.eventHooks[hookName] = [];
+            if (this.eventHooks[hookName].indexOf(hook) < 0)
+                this.eventHooks[hookName].push(hook);
         }
 
-        this.$root.removeKeyHook = (hook) => {
-            const i = this.keyHooks.indexOf(hook);
+        this.$root.removeEventHook = (hookName, hook) => {
+            if (!this.eventHooks[hookName])
+                return;
+            const i = this.eventHooks[hookName].indexOf(hook);
             if (i >= 0)
-                this.keyHooks.splice(i, 1);
+                this.eventHooks[hookName].splice(i, 1);
         }
 
         document.addEventListener('keyup', (event) => {
-            this.keyHook(event);
+            this.eventHook('key', event);
         });
         document.addEventListener('keypress', (event) => {
-            this.keyHook(event);
+            this.eventHook('key', event);
         });
         document.addEventListener('keydown', (event) => {
-            this.keyHook(event);
+            this.eventHook('key', event);
         });
 
-        window.addEventListener('resize', () => {
-            this.$root.$emit('resize');
+        window.addEventListener('resize', (event) => {
+            this.eventHook('resize', event);
         });
     }
 

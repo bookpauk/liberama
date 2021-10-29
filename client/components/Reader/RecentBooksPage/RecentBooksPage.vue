@@ -14,7 +14,7 @@
             :data="tableData"
             :columns="columns"
             row-key="key"
-            :pagination.sync="pagination"
+            v-model:pagination="pagination"
             separator="cell"
             hide-bottom
             virtual-scroll

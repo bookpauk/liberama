@@ -270,9 +270,9 @@ class ExternalLibs {
     created() {
         this.oldStartLink = '';
         this.justOpened = true;
-        this.$root.addKeyHook(this.keyHook);
+        this.$root.addEventHook('key', this.keyHook);
 
-        this.$root.$on('resize', async() => {
+        this.$root.addEventHook('resize', async() => {
             await utils.sleep(200);
             this.frameResize();
         });
