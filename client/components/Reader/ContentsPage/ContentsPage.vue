@@ -1,6 +1,6 @@
 <template>
     <Window ref="window" width="600px" @close="close">
-        <template slot="header">
+        <template #header>
             Оглавление/закладки
         </template>
 

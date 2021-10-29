@@ -1,6 +1,6 @@
 <template>
     <Window ref="window" height="125px" max-width="600px" :top-shift="-50" @close="close">
-        <template slot="header">
+        <template #header>
             {{ header }}
         </template>
 

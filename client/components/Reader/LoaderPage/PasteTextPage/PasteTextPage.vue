@@ -1,6 +1,6 @@
 <template>
     <Window @close="close">
-        <template slot="header">
+        <template #header>
             <span style="position: relative; top: -3px">
                 Вставьте текст и нажмите
                 <span class="clickable text-primary" style="font-size: 150%; position: relative; top: 1px" @click="loadBuffer">загрузить</span>

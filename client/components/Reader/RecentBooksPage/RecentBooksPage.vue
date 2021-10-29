@@ -1,6 +1,6 @@
 <template>
     <Window ref="window" width="600px" @close="close">
-        <template slot="header">
+        <template #header>
             <span v-show="!loading">{{ header }}</span>
             <span v-if="loading"><q-spinner class="q-mr-sm" color="lime-12" size="20px" :thickness="7" />
                 Список загружается

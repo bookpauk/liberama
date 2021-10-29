@@ -1,6 +1,6 @@
 <template>
     <Window @close="close">
-        <template slot="header">
+        <template #header>
             Скопировать текст
         </template>
 

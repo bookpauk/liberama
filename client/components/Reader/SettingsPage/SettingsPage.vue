@@ -1,6 +1,6 @@
-<template lang="includer">
+<template>
     <Window ref="window" height="95%" width="600px" @close="close">
-        <template slot="header">
+        <template #header>
             Настройки
         </template>
 
@@ -8,8 +8,9 @@
             <div class="full-height">
                 <q-tabs
                     ref="tabs"
-                    class="bg-grey-3 text-black"
                     v-model="selectedTab"
+                    class="bg-grey-3 text-black"
+                    
                     left-icon="la la-caret-up"
                     right-icon="la la-caret-down"
                     active-color="white"
@@ -20,7 +21,7 @@
                     stretch
                     inline-label
                 >
-                    <div v-show="tabsScrollable" class="q-pt-lg"/>
+                    <div v-show="tabsScrollable" class="q-pt-lg" />
                     <q-tab class="tab" name="profiles" icon="la la-users" label="Профили" />
                     <q-tab class="tab" name="view" icon="la la-eye" label="Вид" />
                     <q-tab class="tab" name="buttons" icon="la la-grip-horizontal" label="Кнопки" />
@@ -29,7 +30,7 @@
                     <q-tab class="tab" name="convert" icon="la la-magic" label="Конвертир." />
                     <q-tab class="tab" name="others" icon="la la-list-ul" label="Прочее" />
                     <q-tab class="tab" name="reset" icon="la la-broom" label="Сброс" />
-                    <div v-show="tabsScrollable" class="q-pt-lg"/>
+                    <div v-show="tabsScrollable" class="q-pt-lg" />
                 </q-tabs>
             </div>
 
@@ -67,7 +68,6 @@
                     @@include('./include/ResetTab.inc');
                 </div>
             </div>
-
         </div>
     </Window>
 </template>

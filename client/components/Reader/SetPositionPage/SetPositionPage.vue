@@ -1,6 +1,6 @@
 <template>
     <Window ref="window" height="140px" max-width="600px" :top-shift="-50" @close="close">
-        <template slot="header">
+        <template #header>
             Установить позицию
         </template>
 

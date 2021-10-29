@@ -1,7 +1,7 @@
 <template>
     <div>
         <Dialog ref="dialog1" v-model="whatsNewVisible">
-            <template slot="header">
+            <template #header>
                 Что нового:
             </template>
 
@@ -14,7 +14,7 @@
         </Dialog>
 
         <Dialog ref="dialog2" v-model="donationVisible">
-            <template slot="header">
+            <template #header>
                 Здравствуйте, уважаемые читатели!
             </template>
 

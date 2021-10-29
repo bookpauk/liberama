@@ -1,6 +1,6 @@
 <template>
     <Window ref="window" width="600px" height="95%" @close="close">
-        <template slot="header">
+        <template #header>
             Настроить закладки
         </template>
 

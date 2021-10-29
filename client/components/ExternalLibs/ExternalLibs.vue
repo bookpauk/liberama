@@ -1,10 +1,10 @@
 <template>
     <Window ref="window" margin="2px" @close="close">
-        <template slot="header">
+        <template #header>
             {{ header }}
         </template>
 
-        <template slot="buttons">
+        <template #buttons>
             <span class="full-screen-button row justify-center items-center" @mousedown.stop @click="fullScreenToggle">
                 <q-icon :name="(fullScreenActive ? 'la la-compress-arrows-alt': 'la la-expand-arrows-alt')" size="16px" />
                 <q-tooltip :delay="1500" anchor="bottom middle" content-style="font-size: 80%">На весь экран</q-tooltip>
@@ -103,7 +103,7 @@
             </div>
 
             <Dialog ref="dialogAddBookmark" v-model="addBookmarkVisible">
-                <template slot="header">
+                <template #header>
                     <div class="row items-center">
                         <q-icon class="q-mr-sm" name="la la-bookmark" size="28px"></q-icon>
                         <div v-if="addBookmarkMode == 'edit'">
@@ -139,7 +139,7 @@
                     </q-input>
                 </div>
 
-                <template slot="footer">
+                <template #footer>
                     <q-btn v-close-popup class="q-px-md q-ml-sm" dense no-caps>
                         Отмена
                     </q-btn>
@@ -150,7 +150,7 @@
             </Dialog>
 
             <Dialog ref="options" v-model="optionsVisible">
-                <template slot="header">
+                <template #header>
                     <div class="row items-center">
                         <q-icon class="q-mr-sm" name="la la-cog" size="28px"></q-icon>
                         Опции
@@ -163,7 +163,7 @@
                     <q-checkbox v-model="openInFrameOnAdd" size="36px" label="Активировать новую закладку после добавления" />
                 </div>
 
-                <template slot="footer">
+                <template #footer>
                     <q-btn class="q-px-md q-ml-sm" color="primary" dense no-caps @click="optionsVisible = false">
                         OK
                     </q-btn>

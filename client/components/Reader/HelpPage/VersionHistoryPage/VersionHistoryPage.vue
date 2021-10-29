@@ -20,7 +20,7 @@
 
 <script>
 //-----------------------------------------------------------------------------
-import vueComponent from '../../vueComponent.js';
+import vueComponent from '../../../vueComponent.js';
 
 import {versionHistory} from '../../versionHistory';
 
