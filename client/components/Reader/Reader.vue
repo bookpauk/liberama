@@ -912,7 +912,7 @@ class Reader {
     }
 
     get activePage() {
-        let result = '';
+        let result = undefined;
 
         if (this.progressActive)
             result = 'ProgressPage';

@@ -5,11 +5,11 @@ const { VueLoaderPlugin } = require('vue-loader');
 const clientDir = path.resolve(__dirname, '../client');
 
 module.exports = {
-    resolve: {
+    /*resolve: {
         alias: {
             vue: '@vue/compat'
         }
-    },    
+    },*/    
     entry: [`${clientDir}/main.js`],
     output: {
         publicPath: '/app/',
@@ -20,16 +20,15 @@ module.exports = {
             {
                 test: /\.vue$/,
                 loader: 'vue-loader',
-                    options: {
-                        compilerOptions: {
-                            compatConfig: {
-                                MODE: 2
-                            }
+                /*options: {
+                    compilerOptions: {
+                        compatConfig: {
+                            MODE: 2
+                        }
                     }
-                }                
+                }*/
             },
             {
-                //test: /\.includer$/,
                 resourceQuery: /^\?vue/,
                 use: path.resolve('build/includer.js')
             },
