@@ -122,7 +122,7 @@ const componentOptions = {
         Window,
     },
     watch: {
-        bookPos: function() {
+        bookPos() {
             this.updateBookPosSelection();
         }
     },
@@ -269,9 +269,9 @@ class ContentsPage {
                 const {id, local} = ims[i];
                 const bin = this.parsed.binary[id];
                 if (local)
-                    this.$set(this.imageSrc, id, (bin ? `data:${bin.type};base64,${bin.data}` : ''));
+                    this.imageSrc[id] = (bin ? `data:${bin.type};base64,${bin.data}` : '');
                 else
-                    this.$set(this.imageSrc, id, id);
+                    this.imageSrc[id] = id;
                 this.imageLoaded[id] = true;
                 await utils.sleep(5);
             }
@@ -295,17 +295,17 @@ class ContentsPage {
 
                 if (bp >= subitem.offset && bp < nextSubOffset) {
                     subitem.isBookPos = true;
-                    this.$set(this.contents, i, Object.assign(item, {list: item.list}));
+                    this.contents[i] = Object.assign(item, {list: item.list});
                 } else if (subitem.isBookPos) {
                     subitem.isBookPos = false;
-                    this.$set(this.contents, i, Object.assign(item, {list: item.list}));
+                    this.contents[i] = Object.assign(item, {list: item.list});
                 }
             }
 
             if (bp >= item.offset && bp < nextOffset) {
-                this.$set(this.contents, i, Object.assign(item, {isBookPos: true}));
+                this.contents[i] = Object.assign(item, {isBookPos: true});
             } else if (item.isBookPos) {
-                this.$set(this.contents, i, Object.assign(item, {isBookPos: false}));
+                this.contents[i] = Object.assign(item, {isBookPos: false});
             }
         }
 
@@ -314,9 +314,9 @@ class ContentsPage {
             const nextOffset = (i < this.images.length - 1 ? this.images[i + 1].offset : this.parsed.textLength);
 
             if (bp >= img.offset && bp < nextOffset) {
-                this.$set(this.images, i, Object.assign(img, {isBookPos: true}));
+                this.images[i] = Object.assign(img, {isBookPos: true});
             } else if (img.isBookPos) {
-                this.$set(this.images, i, Object.assign(img, {isBookPos: false}));
+                this.images[i] = Object.assign(img, {isBookPos: false});
             }
         }
     }
@@ -331,7 +331,7 @@ class ContentsPage {
             await utils.sleep(200);
         }
 
-        this.$set(this.contents, key, Object.assign({}, item, {expanded}));
+        this.contents[key] = Object.assign({}, item, {expanded});
 
         if (expanded) {
             await this.$nextTick();
