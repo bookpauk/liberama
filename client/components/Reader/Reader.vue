@@ -115,7 +115,7 @@
                 ></component>
             </keep-alive>
 
-            <!--SetPositionPage v-if="setPositionActive" ref="setPositionPage" @set-position-toggle="setPositionToggle" @book-pos-changed="bookPosChanged"></SetPositionPage>
+            <SetPositionPage v-if="setPositionActive" ref="setPositionPage" @set-position-toggle="setPositionToggle" @book-pos-changed="bookPosChanged"></SetPositionPage>
             <SearchPage v-show="searchActive" ref="searchPage" 
                 @do-action="doAction"
                 @book-pos-changed="bookPosChanged"
@@ -128,9 +128,9 @@
             <SettingsPage v-show="settingsActive" ref="settingsPage" @do-action="doAction"></SettingsPage>
             <HelpPage v-if="helpActive" ref="helpPage" @do-action="doAction"></HelpPage>
             <ClickMapPage v-show="clickMapActive" ref="clickMapPage"></ClickMapPage>
-            <ServerStorage v-show="hidden" ref="serverStorage"></ServerStorage>
-            <ContentsPage v-show="contentsActive" ref="contentsPage" :book-pos="bookPos" :is-visible="contentsActive" @do-action="doAction" @book-pos-changed="bookPosChanged"></ContentsPage-->
+            <ContentsPage v-show="contentsActive" ref="contentsPage" :book-pos="bookPos" :is-visible="contentsActive" @do-action="doAction" @book-pos-changed="bookPosChanged"></ContentsPage>
 
+            <ServerStorage v-show="hidden" ref="serverStorage"></ServerStorage>
             <ReaderDialogs ref="dialogs" @donate-toggle="donateToggle" @version-history-toggle="versionHistoryToggle"></ReaderDialogs>
         </div>
     </div>
@@ -147,7 +147,7 @@ import LoaderPage from './LoaderPage/LoaderPage.vue';
 import TextPage from './TextPage/TextPage.vue';
 import ProgressPage from './ProgressPage/ProgressPage.vue';
 
-/*import SetPositionPage from './SetPositionPage/SetPositionPage.vue';
+import SetPositionPage from './SetPositionPage/SetPositionPage.vue';
 import SearchPage from './SearchPage/SearchPage.vue';
 import CopyTextPage from './CopyTextPage/CopyTextPage.vue';
 import LibsPage from './LibsPage/LibsPage.vue';
@@ -155,9 +155,9 @@ import RecentBooksPage from './RecentBooksPage/RecentBooksPage.vue';
 import SettingsPage from './SettingsPage/SettingsPage.vue';
 import HelpPage from './HelpPage/HelpPage.vue';
 import ClickMapPage from './ClickMapPage/ClickMapPage.vue';
-import ServerStorage from './ServerStorage/ServerStorage.vue';
-import ContentsPage from './ContentsPage/ContentsPage.vue';*/
+import ContentsPage from './ContentsPage/ContentsPage.vue';
 
+import ServerStorage from './ServerStorage/ServerStorage.vue';
 import ReaderDialogs from './ReaderDialogs/ReaderDialogs.vue';
 
 import bookManager from './share/bookManager';
@@ -177,7 +177,7 @@ const componentOptions = {
         TextPage,
         ProgressPage,
 
-        /*SetPositionPage,
+        SetPositionPage,
         SearchPage,
         CopyTextPage,
         LibsPage,
@@ -185,9 +185,9 @@ const componentOptions = {
         SettingsPage,
         HelpPage,
         ClickMapPage,
-        ServerStorage,
-        ContentsPage,*/
+        ContentsPage,
 
+        ServerStorage,
         ReaderDialogs,
     },
     watch: {
@@ -236,22 +236,26 @@ const componentOptions = {
 
 class Reader {
     _options = componentOptions;
-    rstore = {};
-    loaderActive = false;
-    offlineModeActive = false;
-    progressActive = false;
-    fullScreenActive = false;
 
-    scrollingActive = false;
+    rstore = {};
+
+    loaderActive = false;
+    fullScreenActive = false;
     setPositionActive = false;
     searchActive = false;
     copyTextActive = false;
+    convOptionsActive = false;
+    refreshActive = false;
+    contentsActive = false;    
     libsActive = false;
     recentBooksActive = false;
+    offlineModeActive = false;
     settingsActive = false;
-    helpActive = false;
+
     clickMapActive = false;
-    contentsActive = false;
+    helpActive = false;
+    scrollingActive = false;
+    progressActive = false;
 
     bookPos = null;
     allowUrlParamBookPos = false;

@@ -14,8 +14,7 @@
             <div class="separator"></div>
 
             <keep-alive>
-                <component ref="page" class="col" :is="activePage"
-                ></component>
+                <component :is="activePage" ref="page" class="col"></component>
             </keep-alive>
         </div>
     </Window>
@@ -23,8 +22,7 @@
 
 <script>
 //-----------------------------------------------------------------------------
-import Vue from 'vue';
-import Component from 'vue-class-component';
+import vueComponent from '../../vueComponent.js';
 
 import Window from '../../share/Window.vue';
 import CommonHelpPage from './CommonHelpPage/CommonHelpPage.vue';
@@ -49,10 +47,12 @@ const tabs = [
     ['DonateHelpPage', 'Помочь проекту'],
 ];
 
-export default @Component({
+const componentOptions = {
     components: Object.assign({ Window }, pages),
-})
-class HelpPage extends Vue {
+};
+class HelpPage {
+    _options = componentOptions;
+
     selectedTab = 'CommonHelpPage';
 
     close() {
@@ -87,6 +87,8 @@ class HelpPage extends Vue {
         return true;
     }
 }
+
+export default vueComponent(HelpPage);
 //-----------------------------------------------------------------------------
 </script>
 

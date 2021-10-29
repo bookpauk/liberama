@@ -4,14 +4,13 @@
 
 <script>
 //-----------------------------------------------------------------------------
-import Vue from 'vue';
-import Component from 'vue-class-component';
+import vueComponent from '../../vueComponent.js';
 
 import Window from '../../share/Window.vue';
 import * as utils from '../../../share/utils';
 //import rstore from '../../../store/modules/reader';
 
-export default @Component({
+const componentOptions = {
     components: {
         Window
     },
@@ -20,8 +19,10 @@ export default @Component({
             this.sendLibs();
         },
     }    
-})
-class LibsPage extends Vue {
+};
+class LibsPage {
+    _options = componentOptions;
+
     created() {
         this.popupWindow = null;
         this.commit = this.$store.commit;
@@ -120,6 +121,8 @@ class LibsPage extends Vue {
         this.$emit('libs-close');
     }
 }
+
+export default vueComponent(LibsPage);
 //-----------------------------------------------------------------------------
 </script>
 

@@ -1,49 +1,68 @@
 <template>
     <div class="page">
         <div class="box">
-            <p class="p">Вы можете пожертвовать на развитие проекта любую сумму:</p>
+            <p class="p">
+                Вы можете пожертвовать на развитие проекта любую сумму:
+            </p>
             <div class="address">
                 <img class="logo" src="./assets/yoomoney.png">
-                <q-btn class="q-ml-sm q-px-sm" dense no-caps @click="donateYooMoney">Пожертвовать</q-btn><br>
-                <div class="para">{{ yooAddress }}
+                <q-btn class="q-ml-sm q-px-sm" dense no-caps @click="donateYooMoney">
+                    Пожертвовать
+                </q-btn><br>
+                <div class="para">
+                    {{ yooAddress }}
                     <q-icon class="copy-icon" name="la la-copy" @click="copyAddress(yooAddress, 'Кошелёк ЮMoney')">
-                        <q-tooltip :delay="1000" anchor="top middle" self="center middle" content-style="font-size: 80%">Скопировать</q-tooltip>                    
+                        <q-tooltip :delay="1000" anchor="top middle" self="center middle" content-style="font-size: 80%">
+                            Скопировать
+                        </q-tooltip>                    
                     </q-icon>
                 </div>
             </div>
 
             <div class="address">                
                 <img class="logo" src="./assets/paypal.png">
-                <div class="para">{{ paypalAddress }}
+                <div class="para">
+                    {{ paypalAddress }}
                     <q-icon class="copy-icon" name="la la-copy" @click="copyAddress(paypalAddress, 'Paypal-адрес')">
-                        <q-tooltip :delay="1000" anchor="top middle" self="center middle" content-style="font-size: 80%">Скопировать</q-tooltip>                    
+                        <q-tooltip :delay="1000" anchor="top middle" self="center middle" content-style="font-size: 80%">
+                            Скопировать
+                        </q-tooltip>                    
                     </q-icon>
                 </div>
             </div>
 
             <div class="address">                
                 <img class="logo" src="./assets/bitcoin.png">
-                <div class="para">{{ bitcoinAddress }}
+                <div class="para">
+                    {{ bitcoinAddress }}
                     <q-icon class="copy-icon" name="la la-copy" @click="copyAddress(bitcoinAddress, 'Bitcoin-адрес')">
-                        <q-tooltip :delay="1000" anchor="top middle" self="center middle" content-style="font-size: 80%">Скопировать</q-tooltip>                    
+                        <q-tooltip :delay="1000" anchor="top middle" self="center middle" content-style="font-size: 80%">
+                            Скопировать
+                        </q-tooltip>                    
                     </q-icon>
                 </div>
             </div>
 
             <div class="address">                
                 <img class="logo" src="./assets/litecoin.png">
-                <div class="para">{{ litecoinAddress }}
+                <div class="para">
+                    {{ litecoinAddress }}
                     <q-icon class="copy-icon" name="la la-copy" @click="copyAddress(litecoinAddress, 'Litecoin-адрес')">
-                        <q-tooltip :delay="1000" anchor="top middle" self="center middle" content-style="font-size: 80%">Скопировать</q-tooltip>                    
+                        <q-tooltip :delay="1000" anchor="top middle" self="center middle" content-style="font-size: 80%">
+                            Скопировать
+                        </q-tooltip>                    
                     </q-icon>
                 </div>
             </div>
 
             <div class="address">                
                 <img class="logo" src="./assets/monero.png">
-                <div class="para">{{ moneroAddress }}
+                <div class="para">
+                    {{ moneroAddress }}
                     <q-icon class="copy-icon" name="la la-copy" @click="copyAddress(moneroAddress, 'Monero-адрес')">
-                        <q-tooltip :delay="1000" anchor="top middle" self="center middle" content-style="font-size: 80%">Скопировать</q-tooltip>                    
+                        <q-tooltip :delay="1000" anchor="top middle" self="center middle" content-style="font-size: 80%">
+                            Скопировать
+                        </q-tooltip>                    
                     </q-icon>
                 </div>
             </div>
@@ -53,13 +72,11 @@
 
 <script>
 //-----------------------------------------------------------------------------
-import Vue from 'vue';
-import Component from 'vue-class-component';
+import vueComponent from '../../../vueComponent.js';
+
 import {copyTextToClipboard} from '../../../../share/utils';
 
-export default @Component({
-})
-class DonateHelpPage extends Vue {
+class DonateHelpPage {
     yooAddress = '410018702323056';
     paypalAddress = 'bookpauk@gmail.com';
     bitcoinAddress = '3EbgZ7MK1UVaN38Gty5DCBtS4PknM4Ut85';
@@ -81,6 +98,8 @@ class DonateHelpPage extends Vue {
             this.$root.notify.error('Копирование не удалось');
     }
 }
+
+export default vueComponent(DonateHelpPage);
 //-----------------------------------------------------------------------------
 </script>
 

@@ -6,15 +6,12 @@
 
 <script>
 //-----------------------------------------------------------------------------
-import Vue from 'vue';
-import Component from 'vue-class-component';
+import vueComponent from '../../vueComponent.js';
 
 import {sleep} from '../../../share/utils';
 import {clickMap, clickMapText} from '../share/clickMap';
 
-export default @Component({
-})
-class ClickMapPage extends Vue {
+class ClickMapPage {
     fontSize = '200%';
 
     created() {
@@ -53,6 +50,8 @@ class ClickMapPage extends Vue {
         await sleep(5000);
     }
 }
+
+export default vueComponent(ClickMapPage);
 //-----------------------------------------------------------------------------
 </script>
 

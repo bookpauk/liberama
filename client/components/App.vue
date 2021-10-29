@@ -112,6 +112,7 @@ class App {
         document.addEventListener('keydown', (event) => {
             this.keyHook(event);
         });
+
         window.addEventListener('resize', () => {
             this.$root.$emit('resize');
         });

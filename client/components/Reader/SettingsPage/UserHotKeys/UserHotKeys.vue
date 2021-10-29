@@ -2,14 +2,19 @@
     <div class="table col column no-wrap">
         <!-- header -->
         <div class="table-row row">
-            <div class="desc q-pa-sm bg-blue-2">Команда</div>
+            <div class="desc q-pa-sm bg-blue-2">
+                Команда
+            </div>
             <div class="hotKeys col q-pa-sm bg-blue-2 row no-wrap">
-                <div style="width: 80px">Сочетание клавиш</div>
-                <q-input ref="input" class="q-ml-sm col"
+                <div style="width: 80px">
+                    Сочетание клавиш
+                </div>
+                <q-input ref="input"
+                    v-model="search"
+                    class="q-ml-sm col"
                     outlined dense rounded
                     bg-color="grey-4"
-                    placeholder="Найти"
-                    v-model="search"
+                    placeholder="Найти"                    
                     @click.stop
                 />
                 <div v-show="!readonly" class="q-ml-sm column justify-center">
@@ -23,35 +28,38 @@
         </div>
 
         <!-- body -->
-        <div class="table-row row" v-for="(action, index) in tableData" :key="index">
-            <div class="desc q-pa-sm">{{ rstore.readerActions[action] }}</div>
+        <div v-for="(action, index) in tableData" :key="index" class="table-row row">
+            <div class="desc q-pa-sm">
+                {{ rstore.readerActions[action] }}
+            </div>
             <div class="hotKeys col q-pa-sm">
                 <q-chip
+                    v-for="(code, index2) in value[action]" :key="index2"
                     :color="collisions[code] ? 'red' : 'grey-7'"
                     :removable="!readonly" :clickable="collisions[code] ? true : false"
-                    text-color="white" v-for="(code, index) in value[action]" :key="index" @remove="removeCode(action, code)"
+                    text-color="white" @remove="removeCode(action, code)"
                     @click="collisionWarning(code)"
-                    >
+                >
                     {{ code }}
                 </q-chip>
             </div>
             <div v-show="!readonly" class="column q-pa-xs">
                 <q-icon
-                    name="la la-plus-circle"
-                    class="button bg-green-8 text-white"
-                    @click="addHotKey(action)"
                     v-ripple
                     :disabled="value[action].length >= maxCodesLength"
+                    name="la la-plus-circle"
+                    class="button bg-green-8 text-white"
+                    @click="addHotKey(action)"                    
                 >
                     <q-tooltip :delay="1000" anchor="top middle" self="bottom middle" content-style="font-size: 80%">
                         Добавить сочетание клавиш
                     </q-tooltip>
                 </q-icon>
                 <q-icon
+                    v-ripple
                     name="la la-broom"
                     class="button text-grey-5"
                     @click="defaultHotKey(action)"
-                    v-ripple
                 >
                     <q-tooltip :delay="1000" anchor="top middle" self="bottom middle" content-style="font-size: 80%">
                         По умолчанию
@@ -64,20 +72,12 @@
 
 <script>
 //-----------------------------------------------------------------------------
-import Vue from 'vue';
-import Component from 'vue-class-component';
+import vueComponent from '../../../vueComponent.js';
 
 import rstore from '../../../../store/modules/reader';
 //import * as utils from '../../share/utils';
 
-const UserHotKeysProps = Vue.extend({
-    props: {
-        modelValue: Object,
-        readonly: Boolean,
-    }
-});
-
-export default @Component({
+const componentOptions = {
     watch: {
         search: function() {
             this.updateTableData();
@@ -87,8 +87,14 @@ export default @Component({
             this.updateTableData();
         }
     },
-})
-class UserHotKeys extends UserHotKeysProps {
+};
+class UserHotKeys {
+    _options = componentOptions;
+    _props = {
+        modelValue: Object,
+        readonly: Boolean,
+    };
+
     search = '';
     rstore = {};
     tableData = [];
@@ -211,6 +217,8 @@ class UserHotKeys extends UserHotKeysProps {
         }
     }
 }
+
+export default vueComponent(UserHotKeys);
 //-----------------------------------------------------------------------------
 </script>
 

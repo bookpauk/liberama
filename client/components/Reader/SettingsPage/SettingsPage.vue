@@ -74,8 +74,8 @@
 
 <script>
 //-----------------------------------------------------------------------------
-import Vue from 'vue';
-import Component from 'vue-class-component';
+import vueComponent from '../../vueComponent.js';
+
 import _ from 'lodash';
 
 import * as utils from '../../../share/utils';
@@ -90,7 +90,7 @@ import defPalette from './defPalette';
 
 const hex = /^#[0-9a-fA-F]{3}([0-9a-fA-F]{3})?$/;
 
-export default @Component({
+const componentOptions = {
     components: {
         Window,
         NumInput,
@@ -165,8 +165,10 @@ export default @Component({
                 this.statusBarColor = newValue;
         },
     },
-})
-class SettingsPage extends Vue {
+};
+class SettingsPage {
+    _options = componentOptions;
+
     selectedTab = 'profiles';
     selectedViewTab = 'mode';
     selectedKeysTab = 'mouse';
@@ -550,7 +552,8 @@ class SettingsPage extends Vue {
             });
 
             if (result && result.value && result.value.toLowerCase() == 'да') {
-                this.$root.$emit('generateNewServerStorageKey');
+                if (this.$root.generateNewServerStorageKey)
+                    this.$root.generateNewServerStorageKey();
             }
         } catch (e) {
             //
@@ -630,6 +633,8 @@ class SettingsPage extends Vue {
         return true;
     }
 }
+
+export default vueComponent(SettingsPage);
 //-----------------------------------------------------------------------------
 </script>
 

@@ -11,15 +11,22 @@
                 <!--input ref="input"
                     placeholder="что ищем"
                     :value="needle" @input="needle = $event.target.value"/-->
-                <q-input ref="input" class="col" outlined dense
+                <q-input ref="input" v-model="needle"
+                    class="col" outlined dense
                     placeholder="что ищем"
-                    v-model="needle" @keydown="inputKeyDown"
+                    @keydown="inputKeyDown"         
                 />
-                <div style="position: absolute; right: 10px; margin-top: 10px; font-size: 16px;">{{ foundText }}</div>
+                <div style="position: absolute; right: 10px; margin-top: 10px; font-size: 16px;">
+                    {{ foundText }}
+                </div>
             </div>
             <q-btn-group v-show="!initStep" class="button-group row no-wrap">
-                <q-btn class="button" dense stretch @click="showNext"><q-icon style="top: -6px" name="la la-angle-down" dense size="22px"/></q-btn>
-                <q-btn class="button" dense stretch @click="showPrev"><q-icon style="top: -4px" class="icon" name="la la-angle-up" dense size="22px"/></q-btn>
+                <q-btn class="button" dense stretch @click="showNext">
+                    <q-icon style="top: -6px" name="la la-angle-down" dense size="22px" />
+                </q-btn>
+                <q-btn class="button" dense stretch @click="showPrev">
+                    <q-icon style="top: -4px" class="icon" name="la la-angle-up" dense size="22px" />
+                </q-btn>
             </q-btn-group>
         </div>
     </Window>
@@ -27,13 +34,12 @@
 
 <script>
 //-----------------------------------------------------------------------------
-import Vue from 'vue';
-import Component from 'vue-class-component';
+import vueComponent from '../../vueComponent.js';
 
 import Window from '../../share/Window.vue';
 import {sleep} from '../../../share/utils';
 
-export default @Component({
+const componentOptions = {
     components: {
         Window,
     },
@@ -49,8 +55,10 @@ export default @Component({
                 el.style.paddingRight = newValue.length*12 + 'px';
         },
     },
-})
-class SearchPage extends Vue {
+};
+class SearchPage {
+    _options = componentOptions;
+
     header = null;
     initStep = null;
     initPercentage = 0;
@@ -180,6 +188,8 @@ class SearchPage extends Vue {
         return true;
     }
 }
+
+export default vueComponent(SearchPage);
 //-----------------------------------------------------------------------------
 </script>
 

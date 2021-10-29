@@ -1,115 +1,123 @@
 <template>
-    <Window width="600px" ref="window" @close="close">
+    <Window ref="window" width="600px" @close="close">
         <template slot="header">
             Оглавление/закладки
         </template>
 
-    <div class="bg-grey-3 row">
-        <q-tabs
-            v-model="selectedTab"
-            active-color="black"
-            active-bg-color="white"
-            indicator-color="white"
-            dense
-            no-caps
-            inline-label
-            class="no-mp bg-grey-4 text-grey-7"
-        >
-            <q-tab name="contents" icon="la la-list" label="Оглавление" />
-            <q-tab name="images" icon="la la-image" label="Изображения" />
-            <q-tab name="bookmarks"  icon="la la-bookmark" label="Закладки" />
-        </q-tabs>
-    </div>
+        <div class="bg-grey-3 row">
+            <q-tabs
+                v-model="selectedTab"
+                active-color="black"
+                active-bg-color="white"
+                indicator-color="white"
+                dense
+                no-caps
+                inline-label
+                class="no-mp bg-grey-4 text-grey-7"
+            >
+                <q-tab name="contents" icon="la la-list" label="Оглавление" />
+                <q-tab name="images" icon="la la-image" label="Изображения" />
+                <q-tab name="bookmarks" icon="la la-bookmark" label="Закладки" />
+            </q-tabs>
+        </div>
 
-    <div class="q-mb-sm"/>
+        <div class="q-mb-sm" />
 
-    <div class="tab-panel" v-show="selectedTab == 'contents'">
-        <div>
-            <div v-for="item in contents" :key="item.key" class="column" style="width: 540px">
-                <div class="row q-px-sm no-wrap" :class="{'item': !item.isBookPos, 'item-book-pos': item.isBookPos}">
-                    <div v-if="item.list.length" class="row justify-center items-center expand-button clickable" @click="expandClick(item.key)">
-                        <q-icon name="la la-caret-right" class="icon" :class="{'expanded-icon': item.expanded}" color="green-8" size="20px"/>
+        <div v-show="selectedTab == 'contents'" class="tab-panel">
+            <div>
+                <div v-for="item in contents" :key="item.key" class="column" style="width: 540px">
+                    <div class="row q-px-sm no-wrap" :class="{'item': !item.isBookPos, 'item-book-pos': item.isBookPos}">
+                        <div v-if="item.list.length" class="row justify-center items-center expand-button clickable" @click="expandClick(item.key)">
+                            <q-icon name="la la-caret-right" class="icon" :class="{'expanded-icon': item.expanded}" color="green-8" size="20px" />
+                        </div>
+                        <div v-else class="no-expand-button clickable" @click="setBookPos(item.offset)">
+                            <q-icon name="la la-stop" class="icon" style="visibility: hidden" size="20px" />
+                        </div>
+                        <div class="col row clickable" @click="setBookPos(item.offset)">
+                            <div :style="item.indentStyle"></div>
+                            <div class="q-mr-sm col overflow-hidden column justify-center" :style="item.labelStyle" v-html="item.label"></div>
+                            <div class="column justify-center">
+                                {{ item.perc }}%
+                            </div>
+                        </div>
                     </div>
-                    <div v-else class="no-expand-button clickable" @click="setBookPos(item.offset)">
-                        <q-icon name="la la-stop" class="icon" style="visibility: hidden" size="20px"/>
-                    </div>
-                    <div class="col row clickable" @click="setBookPos(item.offset)">
-                        <div :style="item.indentStyle"></div>
-                        <div class="q-mr-sm col overflow-hidden column justify-center" :style="item.labelStyle" v-html="item.label"></div>
-                        <div class="column justify-center">{{ item.perc }}%</div>
-                    </div>
-                </div>
-                
-                <div v-if="item.expanded" :ref="`subitem${item.key}`" class="subitems-transition">
-                    <div v-for="subitem in item.list" :key="subitem.key" class="row q-px-sm no-wrap" :class="{'subitem': !subitem.isBookPos, 'subitem-book-pos': subitem.isBookPos}">
-                        <div class="col row clickable" @click="setBookPos(subitem.offset)">
-                            <div class="no-expand-button"></div>
-                            <div :style="subitem.indentStyle"></div>
-                            <div class="q-mr-sm col overflow-hidden column justify-center" :style="item.labelStyle" v-html="subitem.label"></div>
-                            <div class="column justify-center">{{ subitem.perc }}%</div>
+                    
+                    <div v-if="item.expanded" :ref="`subitem${item.key}`" class="subitems-transition">
+                        <div v-for="subitem in item.list" :key="subitem.key" class="row q-px-sm no-wrap" :class="{'subitem': !subitem.isBookPos, 'subitem-book-pos': subitem.isBookPos}">
+                            <div class="col row clickable" @click="setBookPos(subitem.offset)">
+                                <div class="no-expand-button"></div>
+                                <div :style="subitem.indentStyle"></div>
+                                <div class="q-mr-sm col overflow-hidden column justify-center" :style="item.labelStyle" v-html="subitem.label"></div>
+                                <div class="column justify-center">
+                                    {{ subitem.perc }}%
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
-            </div>
-            <div v-if="!contents.length" class="column justify-center items-center" style="height: 100px">
-                Оглавление отсутствует
-            </div>
-        </div>
-    </div>
-
-    <div class="tab-panel" v-show="selectedTab == 'images'">
-        <div>
-            <div v-for="item in images" :key="item.key" class="column" style="width: 540px">
-                <div class="row q-px-sm no-wrap" :class="{'item': !item.isBookPos, 'item-book-pos': item.isBookPos}">
-                    <div class="col row clickable" @click="setBookPos(item.offset)">
-                        <div class="image-thumb-box row justify-center items-center">
-                            <div v-show="!imageLoaded[item.id]" class="image-thumb column justify-center"><i class="loading-img-icon la la-images"></i></div>
-                            <img v-show="imageLoaded[item.id]" class="image-thumb" :src="imageSrc[item.id]"/>
-                        </div>
-                        <div class="no-expand-button column justify-center items-center">
-                            <div class="image-num">{{ item.num }}</div>
-                            <div v-show="item.type == 'image/jpeg'" class="image-type it-jpg-color row justify-center">JPG</div>
-                            <div v-show="item.type == 'image/png'" class="image-type it-png-color row justify-center">PNG</div>
-                            <div v-show="!item.local" class="image-type it-net-color row justify-center">INET</div>
-                        </div>
-                        <div :style="item.indentStyle"></div>
-                        <div class="q-mr-sm col overflow-hidden column justify-center" :style="item.labelStyle" v-html="item.label"></div>
-                        <div class="column justify-center">{{ item.perc }}%</div>
-                    </div>
+                <div v-if="!contents.length" class="column justify-center items-center" style="height: 100px">
+                    Оглавление отсутствует
                 </div>
             </div>
-            <div v-if="!images.length" class="column justify-center items-center" style="height: 100px">
-                Изображения отсутствуют
+        </div>
+
+        <div v-show="selectedTab == 'images'" class="tab-panel">
+            <div>
+                <div v-for="item in images" :key="item.key" class="column" style="width: 540px">
+                    <div class="row q-px-sm no-wrap" :class="{'item': !item.isBookPos, 'item-book-pos': item.isBookPos}">
+                        <div class="col row clickable" @click="setBookPos(item.offset)">
+                            <div class="image-thumb-box row justify-center items-center">
+                                <div v-show="!imageLoaded[item.id]" class="image-thumb column justify-center">
+                                    <i class="loading-img-icon la la-images"></i>
+                                </div>
+                                <img v-show="imageLoaded[item.id]" class="image-thumb" :src="imageSrc[item.id]" />
+                            </div>
+                            <div class="no-expand-button column justify-center items-center">
+                                <div class="image-num">
+                                    {{ item.num }}
+                                </div>
+                                <div v-show="item.type == 'image/jpeg'" class="image-type it-jpg-color row justify-center">
+                                    JPG
+                                </div>
+                                <div v-show="item.type == 'image/png'" class="image-type it-png-color row justify-center">
+                                    PNG
+                                </div>
+                                <div v-show="!item.local" class="image-type it-net-color row justify-center">
+                                    INET
+                                </div>
+                            </div>
+                            <div :style="item.indentStyle"></div>
+                            <div class="q-mr-sm col overflow-hidden column justify-center" :style="item.labelStyle" v-html="item.label"></div>
+                            <div class="column justify-center">
+                                {{ item.perc }}%
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div v-if="!images.length" class="column justify-center items-center" style="height: 100px">
+                    Изображения отсутствуют
+                </div>
             </div>
         </div>
-    </div>
 
-    <div class="tab-panel" v-show="selectedTab == 'bookmarks'">
-        <div class="column justify-center items-center" style="height: 100px">
-            Раздел находится в разработке
+        <div v-show="selectedTab == 'bookmarks'" class="tab-panel">
+            <div class="column justify-center items-center" style="height: 100px">
+                Раздел находится в разработке
+            </div>
         </div>
-    </div>
-
     </Window>
 </template>
 
 <script>
 //-----------------------------------------------------------------------------
-import Vue from 'vue';
-import Component from 'vue-class-component';
+import vueComponent from '../../vueComponent.js';
+
 //import _ from 'lodash';
 
 import Window from '../../share/Window.vue';
 import * as utils from '../../../share/utils';
 
-const ContentsPageProps = Vue.extend({
-    props: {
-        bookPos: Number,
-        isVisible: Boolean,
-    }
-});
-
-export default @Component({
+const componentOptions = {
     components: {
         Window,
     },
@@ -118,8 +126,14 @@ export default @Component({
             this.updateBookPosSelection();
         }
     },
-})
-class ContentsPage extends ContentsPageProps {
+};
+class ContentsPage {
+    _options = componentOptions;
+    _props = {
+        bookPos: Number,
+        isVisible: Boolean,
+    };
+
     selectedTab = 'contents';
     contents = [];
     images = [];
@@ -342,6 +356,8 @@ class ContentsPage extends ContentsPageProps {
         return true;
     }
 }
+
+export default vueComponent(ContentsPage);
 //-----------------------------------------------------------------------------
 </script>
 
