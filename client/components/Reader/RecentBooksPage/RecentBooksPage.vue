@@ -11,10 +11,10 @@
 
         <q-table
             class="recent-books-table col"
-            :data="tableData"
-            :columns="columns"
+            :rows="tableData"
             row-key="key"
-            v-model:pagination="pagination"
+            :columns="columns"
+            :pagination="pagination"
             separator="cell"
             hide-bottom
             virtual-scroll
@@ -181,13 +181,13 @@ class RecentBooksPage {
                 return;
             this.initing = true;
 
-
             if (this.firstInit) {//для отзывчивости
                 await this.updateTableData(20);
                 this.firstInit = false;
             }
             await utils.sleep(50);
             await this.updateTableData();
+
             this.initing = false;
         })();
     }

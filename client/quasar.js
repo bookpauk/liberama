@@ -80,15 +80,17 @@ const plugins = {
 };
 
 //icons
-//import '@quasar/extras/material-icons/material-icons.css';
-//import '@quasar/extras/material-icons-outlined/material-icons-outlined.css';
 //import '@quasar/extras/fontawesome-v5/fontawesome-v5.css';
+//import fontawesomeV5 from 'quasar/icon-set/fontawesome-v5.js'
 
 import '@quasar/extras/line-awesome/line-awesome.css';
-
-//import fontawesomeV5 from 'quasar/icon-set/fontawesome-v5.js'
 import lineAwesome from 'quasar/icon-set/line-awesome.js'
-Quasar.iconSet.set(lineAwesome);
 
-const QuasarOptions = { config, components, directives, plugins };
-export {Quasar, QuasarOptions};
+//const q: {Quasar, QuasarOptions: { config, components, directives, plugins }};
+export default {
+    quasar: Quasar,
+    options: { config, components, directives, plugins }, 
+    init: () => {
+        Quasar.iconSet.set(lineAwesome);
+}
+};
