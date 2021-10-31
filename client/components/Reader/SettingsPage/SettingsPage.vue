@@ -74,6 +74,7 @@
 
 <script>
 //-----------------------------------------------------------------------------
+import { ref, watch } from 'vue';
 import vueComponent from '../../vueComponent.js';
 
 import _ from 'lodash';
@@ -104,8 +105,9 @@ const componentOptions = {
             this.settingsChanged();
         },
         form: function(newValue) {
-            if (this.inited)
-                this.commit('reader/setSettings', newValue);
+            if (this.inited) {
+                this.commit('reader/setSettings', _.cloneDeep(newValue));
+            }
         },
         fontBold: function(newValue) {
             this.fontWeight = (newValue ? 'bold' : '');
@@ -172,7 +174,6 @@ class SettingsPage {
     selectedTab = 'profiles';
     selectedViewTab = 'mode';
     selectedKeysTab = 'mouse';
-    form = {};
     fontBold = false;
     fontItalic = false;
     vertShift = 0;
@@ -187,6 +188,19 @@ class SettingsPage {
     serverStorageKeyVisible = false;
     toolButtons = [];
     rstore = {};
+
+    setup() {
+        const settingsProps = { form: ref({}) };
+
+        for (let prop in rstore.settingDefaults) {
+            settingsProps[prop] = ref(_.cloneDeep(rstore.settingDefaults[prop]));
+            watch(settingsProps[prop], (newValue) => {
+                settingsProps.form.value = Object.assign({}, settingsProps.form.value, {[prop]: newValue});
+            }, {deep: true});
+        }
+
+        return settingsProps;
+    }
 
     created() {
         this.commit = this.$store.commit;
@@ -217,18 +231,8 @@ class SettingsPage {
             return;
 
         this.form = Object.assign({}, this.settings);
-        if (!this.unwatch)
-            this.unwatch = {};
-
-        for (let prop in rstore.settingDefaults) {
-            if (this.unwatch && this.unwatch[prop])
-                this.unwatch[prop]();
-
-            this[prop] = this.form[prop];
-
-            this.unwatch[prop] = this.$watch(prop, (newValue) => {
-                this.form = Object.assign({}, this.form, {[prop]: newValue});
-            });
+        for (const prop in rstore.settingDefaults) {
+            this[prop] = _.cloneDeep(this.form[prop]);
         }
 
         this.fontBold = (this.fontWeight == 'bold');
@@ -421,10 +425,6 @@ class SettingsPage {
         } catch (e) {
             //
         }
-    }
-
-    changeShowToolButton(buttonName) {
-        this.showToolButton = Object.assign({}, this.showToolButton, {[buttonName]: !this.showToolButton[buttonName]});
     }
 
     async addProfile() {

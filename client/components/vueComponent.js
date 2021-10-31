@@ -35,8 +35,9 @@ export default function(componentClass) {
             computed[method] = {get: desc.get};
             if (desc.set)
                 computed[method].set = desc.set;
-        } else if (['beforeCreate', 'created', 'beforeMount', 'mounted', 'beforeUpdate', 'updated', 'activated',
-                    'deactivated', 'beforeUnmount', 'unmounted', 'errorCaptured', 'renderTracked', 'renderTriggered'].includes(method)) {//life cycle hooks
+        } else if ( ['beforeCreate', 'created', 'beforeMount', 'mounted', 'beforeUpdate', 'updated', 'activated',//life cycle hooks
+                    'deactivated', 'beforeUnmount', 'unmounted', 'errorCaptured', 'renderTracked', 'renderTriggered',//life cycle hooks
+                    'setup'].includes(method) ) {
             comp[method] = obj[method];
         } else if (method !== 'constructor') {//usual
             methods[method] = obj[method];

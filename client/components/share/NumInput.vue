@@ -10,8 +10,8 @@
         <slot></slot>
         <template #prepend>
             <q-icon
-                v-ripple="validate(value - step)" 
-                :class="(validate(value - step) ? '' : 'disable')" 
+                v-ripple="validate(modelValue - step)" 
+                :class="(validate(modelValue - step) ? '' : 'disable')" 
                 name="la la-minus-circle" 
                 class="button" 
                 @click="minus"
@@ -25,8 +25,8 @@
         </template>
         <template #append>
             <q-icon
-                v-ripple="validate(value + step)"
-                :class="(validate(value + step) ? '' : 'disable')"
+                v-ripple="validate(modelValue + step)"
+                :class="(validate(modelValue + step) ? '' : 'disable')"
                 name="la la-plus-circle"
                 class="button"
                 @click="plus"
