@@ -1,6 +1,7 @@
 import { defineComponent } from 'vue';
+import _ from 'lodash';
 
-export default function(componentClass) {
+export default function(componentClass) {    
     const comp = {};
     const obj = new componentClass();
     
@@ -22,7 +23,7 @@ export default function(componentClass) {
             data[prop] = obj[prop];
         }
     }
-    comp.data = () => data;
+    comp.data = () => _.cloneDeep(data);
     
     //methods
     const classProto = Object.getPrototypeOf(obj);
