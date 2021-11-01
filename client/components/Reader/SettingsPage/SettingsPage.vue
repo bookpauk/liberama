@@ -37,35 +37,73 @@
             <div class="col fit">
                 <!-- Профили --------------------------------------------------------------------->
                 <div v-if="selectedTab == 'profiles'" class="fit tab-panel">
-                    @@include('./include/ProfilesTab.inc');
+                    @@include('./ProfilesTab.inc');
                 </div>
                 <!-- Вид ------------------------------------------------------------------------->                    
                 <div v-if="selectedTab == 'view'" class="fit column">
-                    @@include('./include/ViewTab.inc');
+                    <q-tabs
+                        v-model="selectedViewTab"
+                        active-color="black"
+                        active-bg-color="white"
+                        indicator-color="white"
+                        dense
+                        no-caps
+                        class="no-mp bg-grey-4 text-grey-7"
+                    >
+                        <q-tab name="mode" label="Режим" />
+                        <q-tab name="color" label="Цвет" />
+                        <q-tab name="font" label="Шрифт" />
+                        <q-tab name="text" label="Текст" />
+                        <q-tab name="status" label="Строка статуса" />
+                    </q-tabs>
+
+                    <div class="q-mb-sm" />
+
+                    <div class="col tab-panel">
+                        <div v-if="selectedViewTab == 'mode'">
+                            @@include('./ViewTab/Mode.inc');
+                        </div>
+
+                        <div v-if="selectedViewTab == 'color'">
+                            @@include('./ViewTab/Color.inc');
+                        </div>
+
+                        <div v-if="selectedViewTab == 'font'">
+                            @@include('./ViewTab/Font.inc');
+                        </div>
+
+                        <div v-if="selectedViewTab == 'text'">
+                            @@include('./ViewTab/Text.inc');
+                        </div>
+
+                        <div v-if="selectedViewTab == 'status'">
+                            @@include('./ViewTab/Status.inc');
+                        </div>
+                    </div>
                 </div>
                 <!-- Кнопки ---------------------------------------------------------------------->
                 <div v-if="selectedTab == 'buttons'" class="fit tab-panel">
-                    @@include('./include/ButtonsTab.inc');
+                    @@include('./ButtonsTab.inc');
                 </div>
                 <!-- Управление ------------------------------------------------------------------>
                 <div v-if="selectedTab == 'keys'" class="fit column">
-                    @@include('./include/KeysTab.inc');
+                    @@include('./KeysTab.inc');
                 </div>
                 <!-- Листание -------------------------------------------------------------------->
                 <div v-if="selectedTab == 'pagemove'" class="fit tab-panel">
-                    @@include('./include/PageMoveTab.inc');
+                    @@include('./PageMoveTab.inc');
                 </div>
                 <!-- Конвертирование ------------------------------------------------------------->
                 <div v-if="selectedTab == 'convert'" class="fit tab-panel">
-                    @@include('./include/ConvertTab.inc');
+                    @@include('./ConvertTab.inc');
                 </div>
                 <!-- Прочее ---------------------------------------------------------------------->
                 <div v-if="selectedTab == 'others'" class="fit tab-panel">
-                    @@include('./include/OthersTab.inc');
+                    @@include('./OthersTab.inc');
                 </div>
                 <!-- Сброс ----------------------------------------------------------------------->
                 <div v-if="selectedTab == 'reset'" class="fit tab-panel">
-                    @@include('./include/ResetTab.inc');
+                    @@include('./ResetTab.inc');
                 </div>
             </div>
         </div>
