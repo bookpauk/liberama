@@ -326,7 +326,7 @@ class ContentsPage {
         const expanded = !item.expanded;
 
         if (!expanded) {
-            const subitems = this.$refs[`subitem${key}`][0];
+            const subitems = this.$refs[`subitem${key}`];
             subitems.style.height = '0';
             await utils.sleep(200);
         }
@@ -335,7 +335,7 @@ class ContentsPage {
 
         if (expanded) {
             await this.$nextTick();
-            const subitems = this.$refs[`subitem${key}`][0];
+            const subitems = this.$refs[`subitem${key}`];
             subitems.style.height = subitems.scrollHeight + 'px';
         }
     }
