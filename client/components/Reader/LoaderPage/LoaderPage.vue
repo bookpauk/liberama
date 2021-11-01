@@ -12,7 +12,7 @@
         </div>
 
         <div class="col-auto column justify-start items-center no-wrap overflow-hidden">
-            <q-input ref="input" v-model="bookUrl" class="full-width q-px-sm" style="max-width: 700px" outlined dense bg-color="white" placeholder="URL книги">
+            <q-input ref="input" v-model="bookUrl" class="full-width q-px-sm" style="max-width: 700px" outlined dense bg-color="white" placeholder="URL книги" @keydown="onInputKeydown">
                 <template #append>
                     <q-btn rounded flat style="width: 40px" icon="la la-check" @click="submitUrl" />
                 </template>
@@ -168,18 +168,18 @@ class LoaderPage {
         window.open('http://old.omnireader.ru', '_blank');
     }
 
+    onInputKeydown(event) {
+        if (event.key == 'Enter') {
+            this.submitUrl();
+        }
+    }
+
     keyHook(event) {
         if (this.pasteTextActive) {
             return this.$refs.pasteTextPage.keyHook(event);
         }
 
-        //недостатки сторонних ui
-        const input = this.$refs.input.$refs.input;
-        if (document.activeElement === input && event.type == 'keydown' && event.key == 'Enter') {
-            this.submitUrl();
-            return true;
-        }
-
+        const input = this.$refs.input.getNativeElement();
         if (event.type == 'keydown' && document.activeElement !== input) {
             const action = this.$root.readerActionByKeyEvent(event);
             switch (action) {
