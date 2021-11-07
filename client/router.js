@@ -35,7 +35,7 @@ const myRoutes = [
     ['/settings', Settings],
     ['/help', Help],
     ['/404', NotFound404],
-    ['/(.*)', null, null, '/cardindex'],
+    ['/:pathMatch(.*)*', null, null, '/cardindex'],
 ];
 
 let routes = {};

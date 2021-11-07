@@ -288,6 +288,15 @@ class Reader {
 
         this.lastActivePage = false;
 
+        this.$watch(
+            () => this.$route.path,
+            (newValue) => {
+                if (newValue == '/reader') {
+                    this.updateRoute();
+                }
+            }
+        );
+
         this.debouncedSetRecentBook = _.debounce(async(newValue) => {
             const recent = this.mostRecentBook();
             if (recent && (recent.bookPos != newValue || recent.bookPosSeen !== this.bookPosSeen)) {
