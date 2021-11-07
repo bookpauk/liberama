@@ -107,7 +107,10 @@
 
         <div class="main col row relative-position">
             <keep-alive>
-                <component :is="activePage" ref="page" class="col"
+                <component 
+                    :is="activePage"
+                    ref="page"
+                    class="col"
                     @load-book="loadBook"
                     @load-file="loadFile"
                     @book-pos-changed="bookPosChanged"
@@ -116,7 +119,9 @@
             </keep-alive>
 
             <SetPositionPage v-if="setPositionActive" ref="setPositionPage" @set-position-toggle="setPositionToggle" @book-pos-changed="bookPosChanged"></SetPositionPage>
-            <SearchPage v-show="searchActive" ref="searchPage" 
+            <SearchPage 
+                v-show="searchActive"
+                ref="searchPage" 
                 @do-action="doAction"
                 @book-pos-changed="bookPosChanged"
                 @start-text-search="startTextSearch"
@@ -602,7 +607,7 @@ class Reader {
 
     toolBarToggle() {
         this.commit('reader/setToolBarActive', !this.toolBarActive);
-        this.$root.$emit('resize');
+        this.$root.eventHook('resize');
     }
 
     fullScreenToggle() {

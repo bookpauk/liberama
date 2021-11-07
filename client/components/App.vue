@@ -87,7 +87,7 @@ class App {
 
         //global event hooks
         this.eventHooks = {};
-        this.eventHook = (hookName, event) => {
+        this.$root.eventHook = (hookName, event) => {
             if (!this.eventHooks[hookName])
                 return;
             for (const hook of this.eventHooks[hookName])
@@ -110,17 +110,17 @@ class App {
         }
 
         document.addEventListener('keyup', (event) => {
-            this.eventHook('key', event);
+            this.$root.eventHook('key', event);
         });
         document.addEventListener('keypress', (event) => {
-            this.eventHook('key', event);
+            this.$root.eventHook('key', event);
         });
         document.addEventListener('keydown', (event) => {
-            this.eventHook('key', event);
+            this.$root.eventHook('key', event);
         });
 
         window.addEventListener('resize', (event) => {
-            this.eventHook('resize', event);
+            this.$root.eventHook('resize', event);
         });
     }
 
@@ -157,7 +157,7 @@ class App {
 
     toggleCollapse() {
         this.commit('uistate/setAsideBarCollapse', !this.uistate.asideBarCollapse);
-        this.$root.$emit('resize');
+        this.$root.eventHook('resize');
     }
 
     get isCollapse() {
