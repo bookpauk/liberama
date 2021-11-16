@@ -9,7 +9,8 @@
                 <div style="width: 80px">
                     Сочетание клавиш
                 </div>
-                <q-input ref="input"
+                <q-input
+                    ref="input"
                     v-model="search"
                     class="q-ml-sm col"
                     outlined dense rounded
@@ -34,7 +35,7 @@
             </div>
             <div class="hotKeys col q-pa-sm">
                 <q-chip
-                    v-for="(code, index2) in value[action]" :key="index2"
+                    v-for="(code, index2) in modelValue[action]" :key="index2"
                     :color="collisions[code] ? 'red' : 'grey-7'"
                     :removable="!readonly" :clickable="collisions[code] ? true : false"
                     text-color="white" @remove="removeCode(action, code)"
@@ -46,7 +47,7 @@
             <div v-show="!readonly" class="column q-pa-xs">
                 <q-icon
                     v-ripple
-                    :disabled="value[action].length >= maxCodesLength"
+                    :disabled="(modelValue[action].length >= maxCodesLength) || null"
                     name="la la-plus-circle"
                     class="button bg-green-8 text-white"
                     @click="addHotKey(action)"                    
