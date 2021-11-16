@@ -25,7 +25,11 @@
 
         <div v-show="ready" class="col column" style="min-width: 600px">
             <div class="row items-center q-px-sm" style="height: 50px">
-                <q-select ref="rootLink" v-model="rootLink" class="q-mr-sm" :options="rootLinkOptions"
+                <q-select
+                    ref="rootLink"
+                    v-model="rootLink"
+                    class="q-mr-sm"
+                    :options="rootLinkOptions"
                     style="width: 230px"
                     dropdown-icon="la la-angle-down la-sm"
                     rounded outlined dense emit-value map-options display-value-sanitize options-sanitize
@@ -51,7 +55,12 @@
                     </template>
                 </q-select>
 
-                <q-select ref="selectedLink" v-model="selectedLink" class="q-mr-sm" :options="selectedLinkOptions" style="width: 50px"
+                <q-select
+                    ref="selectedLink"
+                    v-model="selectedLink"
+                    class="q-mr-sm"
+                    :options="selectedLinkOptions"
+                    style="width: 50px"
                     dropdown-icon="la la-angle-down la-sm"
                     rounded outlined dense emit-value map-options hide-selected display-value-sanitize options-sanitize
                     @popup-show="onSelectPopupShow" @popup-hide="onSelectPopupHide"
@@ -62,7 +71,13 @@
                     </q-tooltip>
                 </q-select>
 
-                <q-input ref="input" v-model="bookUrl" class="col q-mr-sm" rounded outlined dense bg-color="white" placeholder="Скопируйте сюда URL книги"
+                <q-input
+                    ref="input"
+                    v-model="bookUrl"
+                    class="col q-mr-sm"
+                    rounded outlined dense
+                    bg-color="white"
+                    placeholder="Скопируйте сюда URL книги"
                     @focus="selectAllOnFocus" @keydown="bookUrlKeyDown"
                 >
                     <template #prepend>
@@ -116,12 +131,22 @@
                 </template>
 
                 <div class="q-mx-md row">
-                    <q-input ref="bookmarkLink" v-model="bookmarkLink" class="col q-mr-sm" outlined dense bg-color="white"
+                    <q-input
+                        ref="bookmarkLink"
+                        v-model="bookmarkLink"
+                        class="col q-mr-sm"
+                        outlined dense
+                        bg-color="white"
                         placeholder="Ссылка для закладки" maxlength="2000" @focus="selectAllOnFocus" @keydown="bookmarkLinkKeyDown"
                     >
                     </q-input>
 
-                    <q-select ref="defaultRootLink" v-model="defaultRootLink" class="q-mr-sm" :options="defaultRootLinkOptions" style="width: 50px"
+                    <q-select
+                        ref="defaultRootLink"
+                        v-model="defaultRootLink"
+                        class="q-mr-sm"
+                        :options="defaultRootLinkOptions"
+                        style="width: 50px"
                         dropdown-icon="la la-angle-down la-sm"
                         outlined dense emit-value map-options hide-selected display-value-sanitize options-sanitize
                         @input="defaultRootLinkInput"
@@ -133,7 +158,12 @@
                 </div>
 
                 <div class="q-mx-md q-mt-md">
-                    <q-input ref="bookmarkDesc" v-model="bookmarkDesc" class="col q-mr-sm" outlined dense bg-color="white"
+                    <q-input
+                        ref="bookmarkDesc"
+                        v-model="bookmarkDesc"
+                        class="col q-mr-sm"
+                        outlined dense
+                        bg-color="white"
                         placeholder="Описание" style="width: 400px" maxlength="100" @focus="selectAllOnFocus" @keydown="bookmarkDescKeyDown"
                     >
                     </q-input>
@@ -171,7 +201,11 @@
             </Dialog>
         </div>
 
-        <BookmarkSettings v-if="bookmarkSettingsActive" ref="bookmarkSettings" :libs="libs" :add-bookmark-visible="addBookmarkVisible"
+        <BookmarkSettings
+            v-if="bookmarkSettingsActive"
+            ref="bookmarkSettings"
+            :libs="libs"
+            :add-bookmark-visible="addBookmarkVisible"
             @do-action="doAction" @close="closeBookmarkSettings"
         >
         </BookmarkSettings>

@@ -9,6 +9,7 @@ import vueComponent from '../../vueComponent.js';
 import Window from '../../share/Window.vue';
 import * as utils from '../../../share/utils';
 //import rstore from '../../../store/modules/reader';
+import _ from 'lodash';
 
 const componentOptions = {
     components: {
@@ -114,7 +115,7 @@ class LibsPage {
     }
 
     sendLibs() {
-        this.sendMessage({type: 'libs', data: this.libs});
+        this.sendMessage({type: 'libs', data: _.cloneDeep(this.libs)});
     }
 
     close() {
