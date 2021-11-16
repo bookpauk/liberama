@@ -1,5 +1,5 @@
 <template>
-    <q-dialog v-model="active" no-route-dismiss>
+    <q-dialog v-model="active" no-route-dismiss @show="onShow" @hide="onHide">
         <div class="column bg-white no-wrap">
             <div class="header row">
                 <div class="caption col row items-center q-ml-md">
@@ -26,11 +26,14 @@
 <script>
 //-----------------------------------------------------------------------------
 import vueComponent from '../vueComponent.js';
+import * as utils from '../../share/utils';
 
 class Dialog {
     _props = {
         modelValue: Boolean,
     };
+
+    shown = false;
 
     get active() {
         return this.modelValue;
@@ -38,6 +41,22 @@ class Dialog {
 
     set active(value) {
         this.$emit('update:modelValue', value);
+    }
+
+    onShow() {
+        this.shown = true;
+    }
+
+    onHide() {
+        this.shown = false;
+    }
+
+    async waitShown() {
+        let i = 100;
+        while (!this.shown && i > 0) {
+            await utils.sleep(10);
+            i--;
+        }
     }
 }
 

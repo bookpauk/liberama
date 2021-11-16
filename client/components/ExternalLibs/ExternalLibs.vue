@@ -33,7 +33,6 @@
                     style="width: 230px"
                     dropdown-icon="la la-angle-down la-sm"
                     rounded outlined dense emit-value map-options display-value-sanitize options-sanitize
-                    @input="rootLinkInput"
                     @popup-show="onSelectPopupShow" @popup-hide="onSelectPopupHide"
                 >
                     <template #prepend>
@@ -64,7 +63,6 @@
                     dropdown-icon="la la-angle-down la-sm"
                     rounded outlined dense emit-value map-options hide-selected display-value-sanitize options-sanitize
                     @popup-show="onSelectPopupShow" @popup-hide="onSelectPopupHide"
-                    @input="selectedLinkInput"
                 >
                     <q-tooltip :delay="1500" anchor="bottom middle" content-style="font-size: 80%">
                         Закладки
@@ -149,7 +147,6 @@
                         style="width: 50px"
                         dropdown-icon="la la-angle-down la-sm"
                         outlined dense emit-value map-options hide-selected display-value-sanitize options-sanitize
-                        @input="defaultRootLinkInput"
                     >
                         <q-tooltip :delay="1500" anchor="bottom middle" content-style="font-size: 80%">
                             Предустановленные ссылки
@@ -238,13 +235,13 @@ const componentOptions = {
         BookmarkSettings
     },
     watch: {
-        libs: function() {
+        libs() {
             this.loadLibs();
         },
-        defaultRootLink: function() {
+        defaultRootLink() {
             this.updateBookmarkLink();
         },
-        bookUrl: function(newValue) {
+        bookUrl(newValue) {
             const value = lu.addProtocol(newValue);
             const subst = this.makeProxySubst(value, true);
             if (value != subst) {
@@ -253,7 +250,7 @@ const componentOptions = {
                 });
             }
         },
-        bookmarkLink: function(newValue) {
+        bookmarkLink(newValue) {
             const value = lu.addProtocol(newValue);
             const subst = this.makeProxySubst(value, true);
             if (value != subst) {
@@ -262,14 +259,20 @@ const componentOptions = {
                 });
             }
         },
-        closeAfterSubmit: function(newValue) {
+        closeAfterSubmit(newValue) {
             this.commitProp('closeAfterSubmit', newValue);
         },
-        openInFrameOnEnter: function(newValue) {
+        openInFrameOnEnter(newValue) {
             this.commitProp('openInFrameOnEnter', newValue);
         },
-        openInFrameOnAdd: function(newValue) {
+        openInFrameOnAdd(newValue) {
             this.commitProp('openInFrameOnAdd', newValue);
+        },
+        rootLink() {
+            this.rootLinkInput();
+        },
+        selectedLink() {
+            this.selectedLinkInput();
         },
     }    
 };
@@ -323,29 +326,6 @@ class ExternalLibs {
     }
 
     mounted() {
-        //Поправка метода toggleOption компонента select фреймворка quasar, необходимо другое поведение
-        //$emit('input'.. вызывается всегда
-        this.toggleOption = function(opt, keepOpen) {
-            if (this.editable !== true || opt === void 0 || this.isOptionDisabled(opt) === true) {
-                return;
-            }
-
-            const optValue = this.getOptionValue(opt);
-
-            if (this.multiple !== true) {
-                if (keepOpen !== true) {
-                    this.updateInputValue(this.fillInput === true ? this.getOptionLabel(opt) : '', true, true);
-                    this.hidePopup();
-                }
-
-                this.$refs.target !== void 0 && this.$refs.target.focus();
-                this.$emit('input', this.emitValue === true ? optValue : opt);
-            }
-        };
-
-        this.$refs.rootLink.toggleOption = this.toggleOption;
-        this.$refs.selectedLink.toggleOption = this.toggleOption;
-
         (async() => {
             //подождем this.mode
             let i = 0;
@@ -692,9 +672,9 @@ class ExternalLibs {
 
         this.addBookmarkMode = mode;
         this.addBookmarkVisible = true;
-        this.$nextTick(() => {
+        this.$nextTick(async() => {
+            await this.$refs.dialogAddBookmark.waitShown();
             this.$refs.bookmarkLink.focus();
-            this.$refs.defaultRootLink.toggleOption = this.toggleOption;
         });
     }
 
@@ -707,10 +687,6 @@ class ExternalLibs {
             this.bookmarkLink = '';
             this.bookmarkDesc = '';
         }
-    }
-
-    defaultRootLinkInput() {
-        this.updateBookmarkLink();
     }
 
     bookmarkLinkKeyDown(event) {
