@@ -54,7 +54,7 @@ module.exports = merge(baseWpConfig, {
             filename: `${publicDir}/index.html`
         }),
         new CopyWebpackPlugin({patterns: 
-            [{from: `${clientDir}/assets/*`, to: `${publicDir}/`}]
+            [{from: `${clientDir}/assets/*`, to: `${publicDir}/`, context: `${clientDir}/assets` }]
         }),
         new GenerateSW({
             cacheId: 'liberama',
