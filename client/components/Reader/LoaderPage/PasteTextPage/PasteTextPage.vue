@@ -1,6 +1,6 @@
 <template>
     <Window @close="close">
-        <template slot="header">
+        <template #header>
             <span style="position: relative; top: -3px">
                 Вставьте текст и нажмите
                 <span class="clickable text-primary" style="font-size: 150%; position: relative; top: 1px" @click="loadBuffer">загрузить</span>
@@ -8,27 +8,28 @@
             </span>
         </template>
 
-        <q-input class="q-px-sm" dense borderless v-model="bookTitle" placeholder="Введите название текста"/>
-        <hr/>
+        <q-input v-model="bookTitle" class="q-px-sm" dense borderless placeholder="Введите название текста" />
+        <hr />
         <textarea ref="textArea" class="text" @paste="calcTitle"></textarea>
     </Window>
 </template>
 
 <script>
 //-----------------------------------------------------------------------------
-import Vue from 'vue';
-import Component from 'vue-class-component';
+import vueComponent from '../../../vueComponent.js';
 
 import Window from '../../../share/Window.vue';
 import _ from 'lodash';
 import * as utils from '../../../../share/utils';
 
-export default @Component({
+const componentOptions = {
     components: {
         Window,
     },
-})
-class PasteTextPage extends Vue {
+};
+class PasteTextPage {
+    _options = componentOptions;
+
     bookTitle = '';
 
     created() {
@@ -59,15 +60,19 @@ class PasteTextPage extends Vue {
 
     calcTitle(event) {
         if (this.bookTitle == '') {
-            let text = event.clipboardData.getData('text');
-            this.bookTitle = `Из буфера обмена ${utils.formatDate(new Date(), 'noDate')}: ` + _.compact([
-                this.getNonEmptyLine3words(text, 1),
-                this.getNonEmptyLine3words(text, 2)
-            ]).join(' - ');
+            this.bookTitle = `Из буфера обмена ${utils.formatDate(new Date(), 'noDate')}`;
+            if (event) {
+                let text = event.clipboardData.getData('text');
+                this.bookTitle += ': ' + _.compact([
+                    this.getNonEmptyLine3words(text, 1),
+                    this.getNonEmptyLine3words(text, 2)
+                ]).join(' - ');
+            }
         }
     }
 
     loadBuffer() {
+        this.calcTitle();
         this.$emit('load-buffer', {buffer: `<buffer><fb2-title>${utils.escapeXml(this.bookTitle)}</fb2-title>${utils.escapeXml(this.$refs.textArea.value)}</buffer>`});
         this.close();
     }
@@ -90,6 +95,8 @@ class PasteTextPage extends Vue {
         return true;
     }
 }
+
+export default vueComponent(PasteTextPage);
 //-----------------------------------------------------------------------------
 </script>
 

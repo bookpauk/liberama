@@ -1,35 +1,41 @@
 <template>
-    <Window width="600px" ref="window" @close="close">
-        <template slot="header">
+    <Window ref="window" width="600px" @close="close">
+        <template #header>
             <span v-show="!loading">{{ header }}</span>
-            <span v-if="loading"><q-spinner class="q-mr-sm" color="lime-12" size="20px" :thickness="7"/>Список загружается</span>
+            <span v-if="loading"><q-spinner class="q-mr-sm" color="lime-12" size="20px" :thickness="7" />
+                Список загружается
+            </span>
         </template>
 
-        <a ref="download" style='display: none;' target="_blank"></a>
+        <a ref="download" style="display: none;" target="_blank"></a>
 
         <q-table
             class="recent-books-table col"
-            :data="tableData"
-            :columns="columns"
+            :rows="tableData"
             row-key="key"
-            :pagination.sync="pagination"
+            :columns="columns"
+            :pagination="pagination"
             separator="cell"
             hide-bottom
             virtual-scroll
             dense
         > 
-            <template v-slot:header="props">
+            <template #header="props">
                 <q-tr :props="props">
-                    <q-th class="td-mp" style="width: 25px" key="num" :props="props"><span v-html="props.cols[0].label"></span></q-th>
-                    <q-th class="td-mp break-word" style="width: 77px" key="date" :props="props"><span v-html="props.cols[1].label"></span></q-th>
-                    <q-th class="td-mp" style="width: 332px" key="desc" :props="props" colspan="4">
-                        <q-input ref="input" outlined dense rounded style="position: absolute; top: 6px; left: 90px; width: 380px" bg-color="white"
-                            placeholder="Найти"
-                            v-model="search"
+                    <q-th key="num" class="td-mp" style="width: 25px" :props="props">
+                        <span v-html="props.cols[0].label"></span>
+                    </q-th>
+                    <q-th key="date" class="td-mp break-word" style="width: 77px" :props="props">
+                        <span v-html="props.cols[1].label"></span>
+                    </q-th>
+                    <q-th key="desc" class="td-mp" style="width: 332px" :props="props" colspan="4">
+                        <q-input ref="input" v-model="search"
+                            outlined dense rounded style="position: absolute; top: 6px; left: 90px; width: 380px" bg-color="white"
+                            placeholder="Найти"                            
                             @click.stop
                         >
-                            <template v-slot:append>
-                                <q-icon v-if="search !== ''" name="la la-times" class="cursor-pointer" @click.stop="resetSearch"/>
+                            <template #append>
+                                <q-icon v-if="search !== ''" name="la la-times" class="cursor-pointer" @click.stop="resetSearch" />
                             </template>
                         </q-input>
                         <span v-html="props.cols[2].label"></span>
@@ -37,7 +43,7 @@
                 </q-tr>
             </template>
 
-            <template v-slot:body="props">
+            <template #body="props">
                 <q-tr :props="props">
                     <q-td key="num" :props="props" class="td-mp" auto-width>
                         <div class="break-word" style="width: 25px">
@@ -45,16 +51,18 @@
                         </div>
                     </q-td>
 
-                    <q-td key="date" :props="props" class="td-mp clickable" @click="loadBook(props.row.url)" auto-width>
+                    <q-td key="date" auto-width :props="props" class="td-mp clickable" @click="loadBook(props.row.url)">
                         <div class="break-word" style="width: 68px">
                             {{ props.row.touchDate }}<br>
                             {{ props.row.touchTime }}
                         </div>
                     </q-td>
 
-                    <q-td key="desc" :props="props" class="td-mp clickable" @click="loadBook(props.row.url)" auto-width>
+                    <q-td key="desc" auto-width :props="props" class="td-mp clickable" @click="loadBook(props.row.url)">
                         <div class="break-word" style="width: 332px; font-size: 90%">
-                            <div style="color: green">{{ props.row.desc.author }}</div>
+                            <div style="color: green">
+                                {{ props.row.desc.author }}
+                            </div>
                             <div>{{ props.row.desc.title }}</div>
                             <div class="read-bar" :style="`width: ${332*props.row.readPart}px`"></div>
                         </div>
@@ -72,8 +80,9 @@
                             <q-btn
                                 dense
                                 style="width: 30px; height: 30px; padding: 7px 0 7px 0; margin-left: 4px"
-                                @click="handleDel(props.row.key)">
-                                <q-icon class="la la-times" size="14px" style="top: -6px"/>
+                                @click="handleDel(props.row.key)"
+                            >
+                                <q-icon class="la la-times" size="14px" />
                             </q-btn>
                         </div>
                     </q-td>
@@ -82,15 +91,14 @@
                 </q-tr>
             </template>
         </q-table>
-
     </Window>
 </template>
 
 <script>
 //-----------------------------------------------------------------------------
-import Vue from 'vue';
-import Component from 'vue-class-component';
-import path from 'path';
+import vueComponent from '../../vueComponent.js';
+
+import path from 'path-browserify';
 //import _ from 'lodash';
 
 import * as utils from '../../../share/utils';
@@ -98,7 +106,7 @@ import Window from '../../share/Window.vue';
 import bookManager from '../share/bookManager';
 import readerApi from '../../../api/reader';
 
-export default @Component({
+const componentOptions = {
     components: {
         Window,
     },
@@ -107,8 +115,10 @@ export default @Component({
             this.updateTableData();
         }
     },
-})
-class RecentBooksPage extends Vue {
+};
+class RecentBooksPage {
+    _options = componentOptions;
+
     loading = false;
     search = '';
     tableData = [];
@@ -171,13 +181,13 @@ class RecentBooksPage extends Vue {
                 return;
             this.initing = true;
 
-
             if (this.firstInit) {//для отзывчивости
                 await this.updateTableData(20);
                 this.firstInit = false;
             }
             await utils.sleep(50);
             await this.updateTableData();
+
             this.initing = false;
         })();
     }
@@ -324,6 +334,8 @@ class RecentBooksPage extends Vue {
         return true;
     }
 }
+
+export default vueComponent(RecentBooksPage);
 //-----------------------------------------------------------------------------
 </script>
 

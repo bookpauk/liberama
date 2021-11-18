@@ -9,7 +9,8 @@ const cleanPeriod = 5*1000;//5 секунд
 class WebSocketConnection {
     //messageLifeTime в секундах (проверка каждый cleanPeriod интервал)
     constructor(url, openTimeoutSecs = 10, messageLifeTimeSecs = 30) {
-        this.WebSocket = (isBrowser ? WebSocket : require('ws'));
+        //const ws = 'ws';//for nodejs
+        this.WebSocket = (isBrowser ? WebSocket : null/*for nodejs require(ws)*/);
         this.url = url;
         this.ws = null;
         this.listeners = [];

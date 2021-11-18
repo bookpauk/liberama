@@ -1,63 +1,79 @@
 <template>
     <Window ref="window" width="600px" height="95%" @close="close">
-        <template slot="header">
+        <template #header>
             Настроить закладки
         </template>
 
         <div class="col column fit">
             <div class="row items-center top-panel bg-grey-3">
-                <q-btn class="q-mr-md" round dense color="blue" icon="la la-check" @click.stop="openSelected" size="16px" :disabled="!selected">
-                    <q-tooltip :delay="1500" anchor="bottom middle" content-style="font-size: 80%">Открыть выбранную закладку</q-tooltip>
+                <q-btn :disabled="!selected" class="q-mr-md" round dense color="blue" icon="la la-check" size="16px" @click.stop="openSelected">
+                    <q-tooltip :delay="1500" anchor="bottom middle" content-style="font-size: 80%">
+                        Открыть выбранную закладку
+                    </q-tooltip>
                 </q-btn>
-                <q-input class="col" ref="search" rounded outlined dense bg-color="white" placeholder="Найти" v-model="search">
-                    <template v-slot:append>
-                        <q-icon v-if="search !== ''" name="la la-times" class="cursor-pointer" @click="resetSearch"/>
+                <q-input ref="search" v-model="search" class="col" rounded outlined dense bg-color="white" placeholder="Найти">
+                    <template #append>
+                        <q-icon v-if="search !== ''" name="la la-times" class="cursor-pointer" @click="resetSearch" />
                     </template>
                 </q-input>
             </div>
 
             <div class="col row">
                 <div class="left-panel column items-center no-wrap bg-grey-3">
-                    <q-btn class="q-my-sm" round dense color="blue" icon="la la-plus" @click.stop="addBookmark" size="14px">
-                        <q-tooltip :delay="1500" anchor="bottom middle" content-style="font-size: 80%">Добавить закладку</q-tooltip>
+                    <q-btn class="q-my-sm" round dense color="blue" icon="la la-plus" size="14px" @click.stop="addBookmark">
+                        <q-tooltip :delay="1500" anchor="bottom middle" content-style="font-size: 80%">
+                            Добавить закладку
+                        </q-tooltip>
                     </q-btn>
-                    <q-btn class="q-mb-sm" round dense color="blue" icon="la la-minus" @click.stop="delBookmark" size="14px" :disabled="!ticked.length">
-                        <q-tooltip :delay="1500" anchor="bottom middle" content-style="font-size: 80%">Удалить отмеченные закладки</q-tooltip>
+                    <q-btn :disabled="!ticked.length" class="q-mb-sm" round dense color="blue" icon="la la-minus" size="14px" @click.stop="delBookmark">
+                        <q-tooltip :delay="1500" anchor="bottom middle" content-style="font-size: 80%">
+                            Удалить отмеченные закладки
+                        </q-tooltip>
                     </q-btn>
-                    <q-btn class="q-mb-sm" round dense color="blue" icon="la la-edit" @click.stop="editBookmark" size="14px" :disabled="!selected || selected.indexOf('r-') == 0">
-                        <q-tooltip :delay="1500" anchor="bottom middle" content-style="font-size: 80%">Редактировать закладку</q-tooltip>
+                    <q-btn :disabled="!selected || selected.indexOf('r-') == 0" class="q-mb-sm" round dense color="blue" icon="la la-edit" size="14px" @click.stop="editBookmark">
+                        <q-tooltip :delay="1500" anchor="bottom middle" content-style="font-size: 80%">
+                            Редактировать закладку
+                        </q-tooltip>
                     </q-btn>
-                    <q-btn class="q-mb-sm" round dense color="blue" icon="la la-arrow-up" @click.stop="moveBookmark(false)" size="14px" :disabled="!ticked.length">
-                        <q-tooltip :delay="1500" anchor="bottom middle" content-style="font-size: 80%">Переместить отмеченные вверх</q-tooltip>
+                    <q-btn :disabled="!ticked.length" class="q-mb-sm" round dense color="blue" icon="la la-arrow-up" size="14px" @click.stop="moveBookmark(false)">
+                        <q-tooltip :delay="1500" anchor="bottom middle" content-style="font-size: 80%">
+                            Переместить отмеченные вверх
+                        </q-tooltip>
                     </q-btn>
-                    <q-btn class="q-mb-sm" round dense color="blue" icon="la la-arrow-down" @click.stop="moveBookmark(true)" size="14px" :disabled="!ticked.length">
-                        <q-tooltip :delay="1500" anchor="bottom middle" content-style="font-size: 80%">Переместить отмеченные вниз</q-tooltip>
+                    <q-btn :disabled="!ticked.length" class="q-mb-sm" round dense color="blue" icon="la la-arrow-down" size="14px" @click.stop="moveBookmark(true)">
+                        <q-tooltip :delay="1500" anchor="bottom middle" content-style="font-size: 80%">
+                            Переместить отмеченные вниз
+                        </q-tooltip>
                     </q-btn>
-                    <q-btn class="q-mb-sm" round dense color="blue" icon="la la-broom" @click.stop="setDefaultBookmarks" size="14px">
-                        <q-tooltip :delay="1500" anchor="bottom middle" content-style="font-size: 80%">Установить по умолчанию</q-tooltip>
+                    <q-btn class="q-mb-sm" round dense color="blue" icon="la la-broom" size="14px" @click.stop="setDefaultBookmarks">
+                        <q-tooltip :delay="1500" anchor="bottom middle" content-style="font-size: 80%">
+                            Установить по умолчанию
+                        </q-tooltip>
                     </q-btn>
-                    <div class="space"/>
+                    <div class="space" />
                 </div>
 
                 <div class="col fit tree">
                     <div v-show="nodes.length" class="checkbox-tick-all">
-                        <q-checkbox v-model="tickAll" @input="makeTickAll" size="36px" label="Выбрать все" />
+                        <q-checkbox v-model="tickAll" size="36px" label="Выбрать все" @input="makeTickAll" />
                     </div>
                     <q-tree
                         class="q-my-xs"
                         :nodes="nodes"
                         node-key="key"
                         tick-strategy="leaf"
-                        :selected.sync="selected"
-                        :ticked.sync="ticked"
-                        :expanded.sync="expanded"
+                        v-model:selected="selected"
+                        v-model:ticked="ticked"
+                        v-model:expanded="expanded"
                         selected-color="black"
                         :filter="search"
                         no-nodes-label="Закладок пока нет"
                         no-results-label="Ничего не найдено"
                     >
-                        <template v-slot:default-header="p">
-                            <div class="q-px-xs" :class="{selected: selected == p.key}">{{ p.node.label }}</div>
+                        <template #default-header="p">
+                            <div class="q-px-xs" :class="{selected: selected == p.key}">
+                                {{ p.node.label }}
+                            </div>
                         </template>
                     </q-tree>
                 </div>
@@ -68,22 +84,15 @@
 
 <script>
 //-----------------------------------------------------------------------------
-import Vue from 'vue';
-import Component from 'vue-class-component';
+import vueComponent from '../../vueComponent.js';
+
 import _ from 'lodash';
 
 import Window from '../../share/Window.vue';
 import * as lu from '../linkUtils';
 import rstore from '../../../store/modules/reader';
 
-const BookmarkSettingsProps = Vue.extend({
-    props: {
-        libs: Object,
-        addBookmarkVisible: Boolean,
-    }
-});
-
-export default @Component({
+const componentOptions = {
     components: {
         Window,
     },
@@ -92,8 +101,14 @@ export default @Component({
             this.checkAllTicked();
         },
     }    
-})
-class BookmarkSettings extends BookmarkSettingsProps {
+};
+class BookmarkSettings {
+    _options = componentOptions;
+    _props = {
+        libs: Object,
+        addBookmarkVisible: Boolean,
+    };
+
     search = '';
     selected = '';
     ticked = [];
@@ -308,6 +323,8 @@ class BookmarkSettings extends BookmarkSettingsProps {
     }
 
 }
+
+export default vueComponent(BookmarkSettings);
 //-----------------------------------------------------------------------------
 </script>
 

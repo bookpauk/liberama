@@ -1,6 +1,6 @@
-<template lang="includer">
+<template>
     <Window ref="window" height="95%" width="600px" @close="close">
-        <template slot="header">
+        <template #header>
             Настройки
         </template>
 
@@ -8,8 +8,9 @@
             <div class="full-height">
                 <q-tabs
                     ref="tabs"
-                    class="bg-grey-3 text-black"
                     v-model="selectedTab"
+                    class="bg-grey-3 text-black"
+                    
                     left-icon="la la-caret-up"
                     right-icon="la la-caret-down"
                     active-color="white"
@@ -20,7 +21,7 @@
                     stretch
                     inline-label
                 >
-                    <div v-show="tabsScrollable" class="q-pt-lg"/>
+                    <div v-show="tabsScrollable" class="q-pt-lg" />
                     <q-tab class="tab" name="profiles" icon="la la-users" label="Профили" />
                     <q-tab class="tab" name="view" icon="la la-eye" label="Вид" />
                     <q-tab class="tab" name="buttons" icon="la la-grip-horizontal" label="Кнопки" />
@@ -29,53 +30,91 @@
                     <q-tab class="tab" name="convert" icon="la la-magic" label="Конвертир." />
                     <q-tab class="tab" name="others" icon="la la-list-ul" label="Прочее" />
                     <q-tab class="tab" name="reset" icon="la la-broom" label="Сброс" />
-                    <div v-show="tabsScrollable" class="q-pt-lg"/>
+                    <div v-show="tabsScrollable" class="q-pt-lg" />
                 </q-tabs>
             </div>
 
             <div class="col fit">
                 <!-- Профили --------------------------------------------------------------------->
                 <div v-if="selectedTab == 'profiles'" class="fit tab-panel">
-                    @@include('./include/ProfilesTab.inc');
+                    @@include('./ProfilesTab.inc');
                 </div>
                 <!-- Вид ------------------------------------------------------------------------->                    
                 <div v-if="selectedTab == 'view'" class="fit column">
-                    @@include('./include/ViewTab.inc');
+                    <q-tabs
+                        v-model="selectedViewTab"
+                        active-color="black"
+                        active-bg-color="white"
+                        indicator-color="white"
+                        dense
+                        no-caps
+                        class="no-mp bg-grey-4 text-grey-7"
+                    >
+                        <q-tab name="mode" label="Режим" />
+                        <q-tab name="color" label="Цвет" />
+                        <q-tab name="font" label="Шрифт" />
+                        <q-tab name="text" label="Текст" />
+                        <q-tab name="status" label="Строка статуса" />
+                    </q-tabs>
+
+                    <div class="q-mb-sm" />
+
+                    <div class="col tab-panel">
+                        <div v-if="selectedViewTab == 'mode'">
+                            @@include('./ViewTab/Mode.inc');
+                        </div>
+
+                        <div v-if="selectedViewTab == 'color'">
+                            @@include('./ViewTab/Color.inc');
+                        </div>
+
+                        <div v-if="selectedViewTab == 'font'">
+                            @@include('./ViewTab/Font.inc');
+                        </div>
+
+                        <div v-if="selectedViewTab == 'text'">
+                            @@include('./ViewTab/Text.inc');
+                        </div>
+
+                        <div v-if="selectedViewTab == 'status'">
+                            @@include('./ViewTab/Status.inc');
+                        </div>
+                    </div>
                 </div>
                 <!-- Кнопки ---------------------------------------------------------------------->
                 <div v-if="selectedTab == 'buttons'" class="fit tab-panel">
-                    @@include('./include/ButtonsTab.inc');
+                    @@include('./ButtonsTab.inc');
                 </div>
                 <!-- Управление ------------------------------------------------------------------>
                 <div v-if="selectedTab == 'keys'" class="fit column">
-                    @@include('./include/KeysTab.inc');
+                    @@include('./KeysTab.inc');
                 </div>
                 <!-- Листание -------------------------------------------------------------------->
                 <div v-if="selectedTab == 'pagemove'" class="fit tab-panel">
-                    @@include('./include/PageMoveTab.inc');
+                    @@include('./PageMoveTab.inc');
                 </div>
                 <!-- Конвертирование ------------------------------------------------------------->
                 <div v-if="selectedTab == 'convert'" class="fit tab-panel">
-                    @@include('./include/ConvertTab.inc');
+                    @@include('./ConvertTab.inc');
                 </div>
                 <!-- Прочее ---------------------------------------------------------------------->
                 <div v-if="selectedTab == 'others'" class="fit tab-panel">
-                    @@include('./include/OthersTab.inc');
+                    @@include('./OthersTab.inc');
                 </div>
                 <!-- Сброс ----------------------------------------------------------------------->
                 <div v-if="selectedTab == 'reset'" class="fit tab-panel">
-                    @@include('./include/ResetTab.inc');
+                    @@include('./ResetTab.inc');
                 </div>
             </div>
-
         </div>
     </Window>
 </template>
 
 <script>
 //-----------------------------------------------------------------------------
-import Vue from 'vue';
-import Component from 'vue-class-component';
+import { ref, watch } from 'vue';
+import vueComponent from '../../vueComponent.js';
+
 import _ from 'lodash';
 
 import * as utils from '../../../share/utils';
@@ -90,7 +129,7 @@ import defPalette from './defPalette';
 
 const hex = /^#[0-9a-fA-F]{3}([0-9a-fA-F]{3})?$/;
 
-export default @Component({
+const componentOptions = {
     components: {
         Window,
         NumInput,
@@ -104,8 +143,9 @@ export default @Component({
             this.settingsChanged();
         },
         form: function(newValue) {
-            if (this.inited)
-                this.commit('reader/setSettings', newValue);
+            if (this.inited) {
+                this.commit('reader/setSettings', _.cloneDeep(newValue));
+            }
         },
         fontBold: function(newValue) {
             this.fontWeight = (newValue ? 'bold' : '');
@@ -165,12 +205,13 @@ export default @Component({
                 this.statusBarColor = newValue;
         },
     },
-})
-class SettingsPage extends Vue {
+};
+class SettingsPage {
+    _options = componentOptions;
+
     selectedTab = 'profiles';
     selectedViewTab = 'mode';
     selectedKeysTab = 'mouse';
-    form = {};
     fontBold = false;
     fontItalic = false;
     vertShift = 0;
@@ -186,6 +227,19 @@ class SettingsPage extends Vue {
     toolButtons = [];
     rstore = {};
 
+    setup() {
+        const settingsProps = { form: ref({}) };
+
+        for (let prop in rstore.settingDefaults) {
+            settingsProps[prop] = ref(_.cloneDeep(rstore.settingDefaults[prop]));
+            watch(settingsProps[prop], (newValue) => {
+                settingsProps.form.value = Object.assign({}, settingsProps.form.value, {[prop]: newValue});
+            }, {deep: true});
+        }
+
+        return settingsProps;
+    }
+
     created() {
         this.commit = this.$store.commit;
         this.reader = this.$store.state.reader;
@@ -200,7 +254,7 @@ class SettingsPage extends Vue {
         this.$watch(
             '$refs.tabs.scrollable',
             (newValue) => {
-                this.tabsScrollable = newValue && !this.$isMobileDevice;
+                this.tabsScrollable = newValue && !this.$root.isMobileDevice;
             }
         );
     }
@@ -215,18 +269,8 @@ class SettingsPage extends Vue {
             return;
 
         this.form = Object.assign({}, this.settings);
-        if (!this.unwatch)
-            this.unwatch = {};
-
-        for (let prop in rstore.settingDefaults) {
-            if (this.unwatch && this.unwatch[prop])
-                this.unwatch[prop]();
-
-            this[prop] = this.form[prop];
-
-            this.unwatch[prop] = this.$watch(prop, (newValue) => {
-                this.form = Object.assign({}, this.form, {[prop]: newValue});
-            });
+        for (const prop in rstore.settingDefaults) {
+            this[prop] = _.cloneDeep(this.form[prop]);
         }
 
         this.fontBold = (this.fontWeight == 'bold');
@@ -421,10 +465,6 @@ class SettingsPage extends Vue {
         }
     }
 
-    changeShowToolButton(buttonName) {
-        this.showToolButton = Object.assign({}, this.showToolButton, {[buttonName]: !this.showToolButton[buttonName]});
-    }
-
     async addProfile() {
         try {
             if (Object.keys(this.profiles).length >= 100) {
@@ -457,7 +497,7 @@ class SettingsPage extends Vue {
             return;
 
         try {
-            const result = await this.$root.stdDialog.prompt(`<b>Предупреждение!</b> Удаление профиля '${this.$sanitize(this.currentProfile)}' необратимо.` +
+            const result = await this.$root.stdDialog.prompt(`<b>Предупреждение!</b> Удаление профиля '${this.$root.sanitize(this.currentProfile)}' необратимо.` +
                     `<br>Все настройки профиля будут потеряны, однако список читаемых книг сохранится.` +
                     `<br><br>Введите 'да' для подтверждения удаления:`, ' ', {
                 inputValidator: (str) => { if (str && str.toLowerCase() === 'да') return true; else return 'Удаление не подтверждено'; },
@@ -550,7 +590,8 @@ class SettingsPage extends Vue {
             });
 
             if (result && result.value && result.value.toLowerCase() == 'да') {
-                this.$root.$emit('generateNewServerStorageKey');
+                if (this.$root.generateNewServerStorageKey)
+                    this.$root.generateNewServerStorageKey();
             }
         } catch (e) {
             //
@@ -630,6 +671,8 @@ class SettingsPage extends Vue {
         return true;
     }
 }
+
+export default vueComponent(SettingsPage);
 //-----------------------------------------------------------------------------
 </script>
 

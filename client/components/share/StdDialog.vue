@@ -1,5 +1,5 @@
 <template>
-    <q-dialog ref="dialog" v-model="active" @show="onShow" @hide="onHide" no-route-dismiss>
+    <q-dialog ref="dialog" v-model="active" no-route-dismiss @show="onShow" @hide="onHide">
         <slot></slot>
 
         <!--------------------------------------------------->
@@ -10,7 +10,7 @@
                     <div v-html="caption"></div>
                 </div>
                 <div class="close-icon column justify-center items-center">
-                    <q-btn flat round dense v-close-popup>
+                    <q-btn v-close-popup flat round dense>
                         <q-icon name="la la-times" size="18px"></q-icon>
                     </q-btn>
                 </div>
@@ -21,7 +21,9 @@
             </div>
 
             <div class="buttons row justify-end q-pa-md">
-                <q-btn class="q-px-md" dense no-caps @click="okClick">OK</q-btn>
+                <q-btn class="q-px-md" dense no-caps @click="okClick">
+                    OK
+                </q-btn>
             </div>
         </div>
 
@@ -33,7 +35,7 @@
                     <div v-html="caption"></div>
                 </div>
                 <div class="close-icon column justify-center items-center">
-                    <q-btn flat round dense v-close-popup>
+                    <q-btn v-close-popup flat round dense>
                         <q-icon name="la la-times" size="18px"></q-icon>
                     </q-btn>
                 </div>
@@ -44,8 +46,12 @@
             </div>
 
             <div class="buttons row justify-end q-pa-md">
-                <q-btn class="q-px-md q-ml-sm" dense no-caps v-close-popup>Отмена</q-btn>
-                <q-btn class="q-px-md q-ml-sm" color="primary" dense no-caps @click="okClick">OK</q-btn>
+                <q-btn v-close-popup class="q-px-md q-ml-sm" dense no-caps>
+                    Отмена
+                </q-btn>
+                <q-btn class="q-px-md q-ml-sm" color="primary" dense no-caps @click="okClick">
+                    OK
+                </q-btn>
             </div>
         </div>
 
@@ -57,7 +63,7 @@
                     <div v-html="caption"></div>
                 </div>
                 <div class="close-icon column justify-center items-center">
-                    <q-btn flat round dense v-close-popup>
+                    <q-btn v-close-popup flat round dense>
                         <q-icon name="la la-times" size="18px"></q-icon>
                     </q-btn>
                 </div>
@@ -65,13 +71,19 @@
 
             <div class="q-mx-md">
                 <div v-html="message"></div>
-                <q-input ref="input" class="q-mt-xs" outlined dense v-model="inputValue"/>
-                <div class="error"><span v-show="error != ''">{{ error }}</span></div>
+                <q-input ref="input" v-model="inputValue" class="q-mt-xs" outlined dense />
+                <div class="error">
+                    <span v-show="error != ''">{{ error }}</span>
+                </div>
             </div>
 
             <div class="buttons row justify-end q-pa-md">
-                <q-btn class="q-px-md q-ml-sm" dense no-caps v-close-popup>Отмена</q-btn>
-                <q-btn class="q-px-md q-ml-sm" color="primary" dense no-caps @click="okClick">OK</q-btn>
+                <q-btn v-close-popup class="q-px-md q-ml-sm" dense no-caps>
+                    Отмена
+                </q-btn>
+                <q-btn class="q-px-md q-ml-sm" color="primary" dense no-caps @click="okClick">
+                    OK
+                </q-btn>
             </div>
         </div>
 
@@ -83,7 +95,7 @@
                     <div v-html="caption"></div>
                 </div>
                 <div class="close-icon column justify-center items-center">
-                    <q-btn flat round dense v-close-popup>
+                    <q-btn v-close-popup flat round dense>
                         <q-icon name="la la-times" size="18px"></q-icon>
                     </q-btn>
                 </div>
@@ -92,14 +104,20 @@
             <div class="q-mx-md">
                 <div v-html="message"></div>
                 <div class="q-my-md text-center">
-                    <div v-show="hotKeyCode == ''" class="text-grey-5">Нет</div>
+                    <div v-show="hotKeyCode == ''" class="text-grey-5">
+                        Нет
+                    </div>
                     <div>{{ hotKeyCode }}</div>
                 </div>
             </div>
 
             <div class="buttons row justify-end q-pa-md">
-                <q-btn class="q-px-md q-ml-sm" dense no-caps v-close-popup>Отмена</q-btn>
-                <q-btn class="q-px-md q-ml-sm" color="primary" dense no-caps @click="okClick" :disabled="hotKeyCode == ''">OK</q-btn>
+                <q-btn v-close-popup class="q-px-md q-ml-sm" dense no-caps>
+                    Отмена
+                </q-btn>
+                <q-btn class="q-px-md q-ml-sm" color="primary" dense no-caps :disabled="hotKeyCode == ''" @click="okClick">
+                    OK
+                </q-btn>
             </div>
         </div>
     </q-dialog>
@@ -107,19 +125,18 @@
 
 <script>
 //-----------------------------------------------------------------------------
-import Vue from 'vue';
-import Component from 'vue-class-component';
-
+import vueComponent from '../vueComponent.js';
 import * as utils from '../../share/utils';
 
-export default @Component({
+const componentOptions = {
     watch: {
         inputValue: function(newValue) {
             this.validate(newValue);
         },
     }
-})
-class StdDialog extends Vue {
+};
+class StdDialog {
+    _options = componentOptions;
     caption = '';
     message = '';
     active = false;
@@ -131,8 +148,8 @@ class StdDialog extends Vue {
     hotKeyCode = '';
 
     created() {
-        if (this.$root.addKeyHook) {
-            this.$root.addKeyHook(this.keyHook);
+        if (this.$root.addEventHook) {
+            this.$root.addEventHook('key', this.keyHook);
         }
     }
 
@@ -313,6 +330,8 @@ class StdDialog extends Vue {
         }
     }
 }
+
+export default vueComponent(StdDialog);
 //-----------------------------------------------------------------------------
 </script>
 

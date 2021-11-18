@@ -2,14 +2,20 @@
     <div class="table col column no-wrap">
         <!-- header -->
         <div class="table-row row">
-            <div class="desc q-pa-sm bg-blue-2">Команда</div>
+            <div class="desc q-pa-sm bg-blue-2">
+                Команда
+            </div>
             <div class="hotKeys col q-pa-sm bg-blue-2 row no-wrap">
-                <div style="width: 80px">Сочетание клавиш</div>
-                <q-input ref="input" class="q-ml-sm col"
+                <div style="width: 80px">
+                    Сочетание клавиш
+                </div>
+                <q-input
+                    ref="input"
+                    v-model="search"
+                    class="q-ml-sm col"
                     outlined dense rounded
                     bg-color="grey-4"
-                    placeholder="Найти"
-                    v-model="search"
+                    placeholder="Найти"                    
                     @click.stop
                 />
                 <div v-show="!readonly" class="q-ml-sm column justify-center">
@@ -23,35 +29,38 @@
         </div>
 
         <!-- body -->
-        <div class="table-row row" v-for="(action, index) in tableData" :key="index">
-            <div class="desc q-pa-sm">{{ rstore.readerActions[action] }}</div>
+        <div v-for="(action, index) in tableData" :key="index" class="table-row row">
+            <div class="desc q-pa-sm">
+                {{ rstore.readerActions[action] }}
+            </div>
             <div class="hotKeys col q-pa-sm">
                 <q-chip
+                    v-for="(code, index2) in modelValue[action]" :key="index2"
                     :color="collisions[code] ? 'red' : 'grey-7'"
                     :removable="!readonly" :clickable="collisions[code] ? true : false"
-                    text-color="white" v-for="(code, index) in value[action]" :key="index" @remove="removeCode(action, code)"
+                    text-color="white" @remove="removeCode(action, code)"
                     @click="collisionWarning(code)"
-                    >
+                >
                     {{ code }}
                 </q-chip>
             </div>
             <div v-show="!readonly" class="column q-pa-xs">
                 <q-icon
+                    v-ripple
+                    :disabled="(modelValue[action].length >= maxCodesLength) || null"
                     name="la la-plus-circle"
                     class="button bg-green-8 text-white"
-                    @click="addHotKey(action)"
-                    v-ripple
-                    :disabled="value[action].length >= maxCodesLength"
+                    @click="addHotKey(action)"                    
                 >
                     <q-tooltip :delay="1000" anchor="top middle" self="bottom middle" content-style="font-size: 80%">
                         Добавить сочетание клавиш
                     </q-tooltip>
                 </q-icon>
                 <q-icon
+                    v-ripple
                     name="la la-broom"
                     class="button text-grey-5"
                     @click="defaultHotKey(action)"
-                    v-ripple
                 >
                     <q-tooltip :delay="1000" anchor="top middle" self="bottom middle" content-style="font-size: 80%">
                         По умолчанию
@@ -64,31 +73,29 @@
 
 <script>
 //-----------------------------------------------------------------------------
-import Vue from 'vue';
-import Component from 'vue-class-component';
+import vueComponent from '../../../vueComponent.js';
 
 import rstore from '../../../../store/modules/reader';
 //import * as utils from '../../share/utils';
 
-const UserHotKeysProps = Vue.extend({
-    props: {
-        value: Object,
-        readonly: Boolean,
-    }
-});
-
-export default @Component({
+const componentOptions = {
     watch: {
         search: function() {
             this.updateTableData();
         },
-        value: function() {
+        modelValue: function() {
             this.checkCollisions();
             this.updateTableData();
         }
     },
-})
-class UserHotKeys extends UserHotKeysProps {
+};
+class UserHotKeys {
+    _options = componentOptions;
+    _props = {
+        modelValue: Object,
+        readonly: Boolean,
+    };
+
     search = '';
     rstore = {};
     tableData = [];
@@ -113,7 +120,7 @@ class UserHotKeys extends UserHotKeysProps {
 
         const search = this.search.toLowerCase();
         const codesIncludeSearch = (action) => {
-            for (const code of this.value[action]) {
+            for (const code of this.modelValue[action]) {
                 if (code.toLowerCase().includes(search))
                     return true;
             }
@@ -131,7 +138,7 @@ class UserHotKeys extends UserHotKeysProps {
 
     checkCollisions() {
         const cols = {};
-        for (const [action, codes] of Object.entries(this.value)) {
+        for (const [action, codes] of Object.entries(this.modelValue)) {
             codes.forEach(code => {
                 if (!cols[code])
                     cols[code] = [];
@@ -158,26 +165,26 @@ class UserHotKeys extends UserHotKeysProps {
     }
 
     removeCode(action, code) {
-        let codes = Array.from(this.value[action]);
+        let codes = Array.from(this.modelValue[action]);
         const index = codes.indexOf(code);
         if (index >= 0) {
             codes.splice(index, 1);
-            const newValue = Object.assign({}, this.value, {[action]: codes});
-            this.$emit('input', newValue);
+            const newValue = Object.assign({}, this.modelValue, {[action]: codes});
+            this.$emit('update:modelValue', newValue);
         }
     }
 
     async addHotKey(action) {
-        if (this.value[action].length >= this.maxCodesLength)
+        if (this.modelValue[action].length >= this.maxCodesLength)
             return;
         try {
             const result = await this.$root.stdDialog.getHotKey(`Добавить сочетание для:<br><b>${rstore.readerActions[action]}</b>`, '');
             if (result) {
-                let codes = Array.from(this.value[action]);
+                let codes = Array.from(this.modelValue[action]);
                 if (codes.indexOf(result) < 0) {
                     codes.push(result);
-                    const newValue = Object.assign({}, this.value, {[action]: codes});
-                    this.$emit('input', newValue);
+                    const newValue = Object.assign({}, this.modelValue, {[action]: codes});
+                    this.$emit('update:modelValue', newValue);
                     this.$nextTick(() => {
                         this.collisionWarning(result);
                     });
@@ -192,8 +199,8 @@ class UserHotKeys extends UserHotKeysProps {
         try {
             if (await this.$root.stdDialog.confirm(`Подтвердите сброс сочетаний клавиш<br>в значения по умолчанию для команды:<br><b>${rstore.readerActions[action]}</b>`, ' ')) {
                 const codes = Array.from(rstore.settingDefaults.userHotKeys[action]);
-                const newValue = Object.assign({}, this.value, {[action]: codes});
-                this.$emit('input', newValue);
+                const newValue = Object.assign({}, this.modelValue, {[action]: codes});
+                this.$emit('update:modelValue', newValue);
             }
         } catch (e) {
             //
@@ -204,13 +211,15 @@ class UserHotKeys extends UserHotKeysProps {
         try {
             if (await this.$root.stdDialog.confirm('Подтвердите сброс сочетаний клавиш<br>для ВСЕХ команд в значения по умолчанию:', ' ')) {
                 const newValue = Object.assign({}, rstore.settingDefaults.userHotKeys);
-                this.$emit('input', newValue);
+                this.$emit('update:modelValue', newValue);
             }
         } catch (e) {
             //
         }
     }
 }
+
+export default vueComponent(UserHotKeys);
 //-----------------------------------------------------------------------------
 </script>
 

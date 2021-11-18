@@ -6,15 +6,14 @@
 
 <script>
 //-----------------------------------------------------------------------------
-import Vue from 'vue';
-import Component from 'vue-class-component';
+import vueComponent from '../../vueComponent.js';
 
-export default @Component({
-})
-class Card extends Vue {
+class Card {
     created() {
     }
 
 }
+
+export default vueComponent(Card);
 //-----------------------------------------------------------------------------
 </script>

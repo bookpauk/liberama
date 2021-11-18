@@ -1,16 +1,17 @@
 <template>
     <Window ref="window" height="140px" max-width="600px" :top-shift="-50" @close="close">
-        <template slot="header">
+        <template #header>
             Установить позицию
         </template>
 
         <div id="set-position-slider" class="slider q-px-md">
             <q-slider
-                thumb-path="M 2, 10 a 8.5,8.5 0 1,0 17,0 a 8.5,8.5 0 1,0 -17,0"
                 v-model="sliderValue"
+                thumb-path="M 2, 10 a 8.5,8.5 0 1,0 17,0 a 8.5,8.5 0 1,0 -17,0"
+                
                 :max="sliderMax"
                 label
-                :label-value="(sliderMax ? (sliderValue/this.sliderMax*100).toFixed(2) + '%' : 0)"
+                :label-value="(sliderMax ? (sliderValue/sliderMax*100).toFixed(2) + '%' : 0)"
                 color="primary"
             />
         </div>
@@ -19,12 +20,11 @@
 
 <script>
 //-----------------------------------------------------------------------------
-import Vue from 'vue';
-import Component from 'vue-class-component';
+import vueComponent from '../../vueComponent.js';
 
 import Window from '../../share/Window.vue';
 
-export default @Component({
+const componentOptions = {
     components: {
         Window,
     },
@@ -34,8 +34,10 @@ export default @Component({
                 this.$emit('book-pos-changed', {bookPos: newValue});
         },
     },
-})
-class SetPositionPage extends Vue {
+};
+class SetPositionPage {
+    _options = componentOptions;
+
     sliderValue = null;
     sliderMax = null;
 
@@ -67,6 +69,8 @@ class SetPositionPage extends Vue {
         return true;
     }
 }
+
+export default vueComponent(SetPositionPage);
 //-----------------------------------------------------------------------------
 </script>
 

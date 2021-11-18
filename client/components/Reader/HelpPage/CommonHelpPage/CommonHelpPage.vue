@@ -18,15 +18,20 @@
             <li>поддерживаемые браузеры: Google Chrome, Mozilla Firefox последних версий</li>
         </ul>
 
-        <p>В качестве URL книги можно задавать html-страничку с книгой, либо прямую ссылку 
-        на файл из онлайн-библиотеки (например, скопировав адрес ссылки или кнопки "скачать fb2").</p>
+        <p>
+            В качестве URL книги можно задавать html-страничку с книгой, либо прямую ссылку 
+            на файл из онлайн-библиотеки (например, скопировав адрес ссылки или кнопки "скачать fb2").
+        </p>
         <p>Поддерживаемые форматы: <b>fb2, fb2.zip, html, txt</b> и другие.</p>
 
         <div v-show="mode == 'omnireader' || mode == 'liberama.top'">
-            <p>Вы можете добавить в свой браузер закладку, указав в ее свойствах вместо адреса следующий код:
+            <p>
+                Вы можете добавить в свой браузер закладку, указав в ее свойствах вместо адреса следующий код:
                 <br><strong>{{ bookmarkText }}</strong>
                 <q-icon class="copy-icon" name="la la-copy" @click="copyText(bookmarkText, 'Код для адреса закладки успешно скопирован в буфер обмена')">
-                    <q-tooltip :delay="1000" anchor="top middle" self="center middle" content-style="font-size: 80%">Скопировать</q-tooltip>                    
+                    <q-tooltip :delay="1000" anchor="top middle" self="center middle" content-style="font-size: 80%">
+                        Скопировать
+                    </q-tooltip>                    
                 </q-icon>
 
                 <br>или перетащив на панель закладок следующую ссылку:
@@ -41,14 +46,11 @@
 
 <script>
 //-----------------------------------------------------------------------------
-import Vue from 'vue';
-import Component from 'vue-class-component';
+import vueComponent from '../../../vueComponent.js';
 
 import {copyTextToClipboard} from '../../../../share/utils';
 
-export default @Component({
-})
-class CommonHelpPage extends Vue {
+class CommonHelpPage {
     created() {
     }
 
@@ -69,6 +71,8 @@ class CommonHelpPage extends Vue {
             this.$root.notify.error(msg);
     }
 }
+
+export default vueComponent(CommonHelpPage);
 //-----------------------------------------------------------------------------
 </script>
 

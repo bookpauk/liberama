@@ -3,9 +3,9 @@
         <span class="text-h6 text-bold">История версий:</span>
         <br><br>
 
-        <span class="clickable" v-for="(item, index) in versionHeader" :key="index" @click="showRelease(item)">
+        <span v-for="(item, index) in versionHeader" :key="index" class="clickable" @click="showRelease(item)">
             <p>
-            {{ item }}
+                {{ item }}
             </p>
         </span>
 
@@ -20,13 +20,11 @@
 
 <script>
 //-----------------------------------------------------------------------------
-import Vue from 'vue';
-import Component from 'vue-class-component';
+import vueComponent from '../../../vueComponent.js';
+
 import {versionHistory} from '../../versionHistory';
 
-export default @Component({
-})
-class VersionHistoryPage extends Vue {
+class VersionHistoryPage {
     versionHeader = [];
     versionContent = [];
 
@@ -54,6 +52,8 @@ class VersionHistoryPage extends Vue {
         }
     }
 }
+
+export default vueComponent(VersionHistoryPage);
 //-----------------------------------------------------------------------------
 </script>
 

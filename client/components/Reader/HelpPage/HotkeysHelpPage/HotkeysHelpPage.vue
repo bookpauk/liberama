@@ -1,29 +1,34 @@
 <template>
     <div class="page">
         <div style="font-size: 120%">
-            <div class="text-h6 text-bold">Доступны следующие клавиатурные команды:</div>
+            <div class="text-h6 text-bold">
+                Доступны следующие клавиатурные команды:
+            </div>
             <br>
         </div>
         <div class="q-mb-md" style="width: 550px">
-            <div class="text-right text-italic" style="font-size: 80%">* Изменить сочетания клавиш можно в настройках</div>
-            <UserHotKeys v-model="userHotKeys" readonly/>
+            <div class="text-right text-italic" style="font-size: 80%">
+                * Изменить сочетания клавиш можно в настройках
+            </div>
+            <UserHotKeys v-model="userHotKeys" readonly />
         </div>
     </div>
 </template>
 
 <script>
 //-----------------------------------------------------------------------------
-import Vue from 'vue';
-import Component from 'vue-class-component';
+import vueComponent from '../../../vueComponent.js';
 
 import UserHotKeys from '../../SettingsPage/UserHotKeys/UserHotKeys.vue';
 
-export default @Component({
+const componentOptions = {
     components: {
         UserHotKeys,
     },
-})
-class HotkeysHelpPage extends Vue {
+};
+class HotkeysHelpPage {
+    _options = componentOptions;
+
     created() {
     }
 
@@ -36,6 +41,8 @@ class HotkeysHelpPage extends Vue {
     }
 
 }
+
+export default vueComponent(HotkeysHelpPage);
 //-----------------------------------------------------------------------------
 </script>
 

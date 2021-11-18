@@ -6,15 +6,14 @@
 
 <script>
 //-----------------------------------------------------------------------------
-import Vue from 'vue';
-import Component from 'vue-class-component';
+import vueComponent from '../vueComponent.js';
 
-export default @Component({
-})
-class Income extends Vue {
+class Income {
     created() {
     }
 
 }
+
+export default vueComponent(Income);
 //-----------------------------------------------------------------------------
 </script>

@@ -4,8 +4,8 @@
 
 <script>
 //-----------------------------------------------------------------------------
-import Vue from 'vue';
-import Component from 'vue-class-component';
+import vueComponent from '../../vueComponent.js';
+
 import _ from 'lodash';
 
 import bookManager from '../share/bookManager';
@@ -18,7 +18,7 @@ const ssCacheStore = localForage.createInstance({
     name: 'ssCacheStore'
 });
 
-export default @Component({
+const componentOptions = {
     watch: {
         serverSyncEnabled: function() {
             this.serverSyncEnabledChanged();
@@ -39,14 +39,16 @@ export default @Component({
             this.debouncedSaveLibs();
         },
     },
-})
-class ServerStorage extends Vue {
+};
+class ServerStorage {
+    _options = componentOptions;
+
     created() {
         this.inited = false;
         this.keyInited = false;
         this.commit = this.$store.commit;
         this.prevServerStorageKey = null;
-        this.$root.$on('generateNewServerStorageKey', () => {this.generateNewServerStorageKey()});
+        this.$root.generateNewServerStorageKey = () => {this.generateNewServerStorageKey()};
 
         this.debouncedSaveSettings = _.debounce(() => {
             this.saveSettings();
@@ -734,5 +736,7 @@ class ServerStorage extends Vue {
         return result;
     }
 }
+
+export default vueComponent(ServerStorage);
 //-----------------------------------------------------------------------------
 </script>

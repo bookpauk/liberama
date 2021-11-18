@@ -1,25 +1,28 @@
 <template>
     <div class="fit row">
-        <Notify ref="notify"/>
-        <StdDialog ref="stdDialog"/>
-        <keep-alive v-if="showPage">
-            <router-view class="col"></router-view>
-        </keep-alive>
+        <Notify ref="notify" />
+        <StdDialog ref="stdDialog" />
+
+        <router-view v-slot="{ Component }">
+            <keep-alive v-if="showPage">
+                <component :is="Component" class="col" />
+            </keep-alive>
+        </router-view>
     </div>
 </template>
 
 <script>
 //-----------------------------------------------------------------------------
-import Vue from 'vue';
-import Component from 'vue-class-component';
+import vueComponent from './vueComponent.js';
 
 import Notify from './share/Notify.vue';
 import StdDialog from './share/StdDialog.vue';
+import sanitizeHtml from 'sanitize-html';
 
 import miscApi from '../api/misc';
 import * as utils from '../share/utils';
 
-export default @Component({
+const componentOptions = {
     components: {
         Notify,
         StdDialog,
@@ -31,8 +34,9 @@ export default @Component({
         }
     },
 
-})
-class App extends Vue {
+};
+class App {
+    _options = componentOptions;
     showPage = false;
 
     itemRuText = {
@@ -54,7 +58,7 @@ class App extends Vue {
         //root route
         let cachedRoute = '';
         let cachedPath = '';
-        this.$root.rootRoute = () => {
+        this.$root.getRootRoute = () => {
             if (this.$route.path != cachedPath) {
                 cachedPath = this.$route.path;
                 const m = cachedPath.match(/^(\/[^/]*).*$/i);
@@ -73,46 +77,50 @@ class App extends Vue {
             }
         });
 
-        // set-app-title
-        this.$root.$on('set-app-title', this.setAppTitle);
+        this.$root.isMobileDevice = /Android|webOS|iPhone|iPad|iPod|BlackBerry/i.test(navigator.userAgent);
 
-        //global keyHooks
-        this.keyHooks = [];
-        this.keyHook = (event) => {
-            for (const hook of this.keyHooks)
+        // setAppTitle
+        this.$root.setAppTitle = this.setAppTitle;
+
+        //sanitize
+        this.$root.sanitize = sanitizeHtml;
+
+        //global event hooks
+        this.eventHooks = {};
+        this.$root.eventHook = (hookName, event) => {
+            if (!this.eventHooks[hookName])
+                return;
+            for (const hook of this.eventHooks[hookName])
                 hook(event);
         }
 
-        this.$root.addKeyHook = (hook) => {
-            if (this.keyHooks.indexOf(hook) < 0)
-                this.keyHooks.push(hook);
+        this.$root.addEventHook = (hookName, hook) => {
+            if (!this.eventHooks[hookName])
+                this.eventHooks[hookName] = [];
+            if (this.eventHooks[hookName].indexOf(hook) < 0)
+                this.eventHooks[hookName].push(hook);
         }
 
-        this.$root.removeKeyHook = (hook) => {
-            const i = this.keyHooks.indexOf(hook);
+        this.$root.removeEventHook = (hookName, hook) => {
+            if (!this.eventHooks[hookName])
+                return;
+            const i = this.eventHooks[hookName].indexOf(hook);
             if (i >= 0)
-                this.keyHooks.splice(i, 1);
+                this.eventHooks[hookName].splice(i, 1);
         }
 
         document.addEventListener('keyup', (event) => {
-            this.keyHook(event);
+            this.$root.eventHook('key', event);
         });
         document.addEventListener('keypress', (event) => {
-            this.keyHook(event);
+            this.$root.eventHook('key', event);
         });
         document.addEventListener('keydown', (event) => {
-            this.keyHook(event);
+            this.$root.eventHook('key', event);
         });
-        window.addEventListener('resize', () => {
-            this.$root.$emit('resize');
-        });
-    }
 
-    routerReady() {
-        return new Promise ((resolve) => {
-            this.$router.onReady(() => {
-                resolve();
-            });
+        window.addEventListener('resize', (event) => {
+            this.$root.eventHook('resize', event);
         });
     }
 
@@ -142,14 +150,14 @@ class App extends Vue {
             if (navigator.storage && navigator.storage.persist) {
                 navigator.storage.persist();
             }
-            await this.routerReady();
+            await this.$router.isReady();
             this.redirectIfNeeded();
         })();
     }
 
     toggleCollapse() {
         this.commit('uistate/setAsideBarCollapse', !this.uistate.asideBarCollapse);
-        this.$root.$emit('resize');
+        this.$root.eventHook('resize');
     }
 
     get isCollapse() {
@@ -184,7 +192,7 @@ class App extends Vue {
     }
 
     get rootRoute() {
-        return this.$root.rootRoute();
+        return this.$root.getRootRoute();
     }
 
     setAppTitle(title) {
@@ -194,7 +202,7 @@ class App extends Vue {
             } else if (this.mode == 'omnireader') {
                 document.title = `Omni Reader - всегда с вами`;
             } else if (this.config && this.mode !== null) {
-                document.title = `${this.config.name} - ${this.itemRuText[this.$root.rootRoute]}`;
+                document.title = `${this.config.name} - ${this.itemRuText[this.rootRoute]}`;
             }
         } else {
             document.title = title;
@@ -239,6 +247,8 @@ class App extends Vue {
         }
     }
 }
+
+export default vueComponent(App);
 //-----------------------------------------------------------------------------
 </script>
 

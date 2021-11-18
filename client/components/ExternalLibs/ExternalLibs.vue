@@ -1,82 +1,114 @@
 <template>
-    <Window ref="window" @close="close" margin="2px">
-        <template slot="header">
+    <Window ref="window" margin="2px" @close="close">
+        <template #header>
             {{ header }}
         </template>
 
-        <template slot="buttons">
+        <template #buttons>
             <span class="full-screen-button row justify-center items-center" @mousedown.stop @click="fullScreenToggle">
-                <q-icon :name="(fullScreenActive ? 'la la-compress-arrows-alt': 'la la-expand-arrows-alt')" size="16px"/>
+                <q-icon :name="(fullScreenActive ? 'la la-compress-arrows-alt': 'la la-expand-arrows-alt')" size="16px" />
                 <q-tooltip :delay="1500" anchor="bottom middle" content-style="font-size: 80%">На весь экран</q-tooltip>
             </span>
             <span class="full-screen-button row justify-center items-center" @mousedown.stop @click="changeScale(0.1)">
-                <q-icon name="la la-plus" size="16px"/>
+                <q-icon name="la la-plus" size="16px" />
                 <q-tooltip :delay="1500" anchor="bottom middle" content-style="font-size: 80%">Увеличить масштаб</q-tooltip>
             </span>
             <span class="full-screen-button row justify-center items-center" @mousedown.stop @click="changeScale(-0.1)">
-                <q-icon name="la la-minus" size="16px"/>
+                <q-icon name="la la-minus" size="16px" />
                 <q-tooltip :delay="1500" anchor="bottom middle" content-style="font-size: 80%">Уменьшить масштаб</q-tooltip>
             </span>
             <span class="full-screen-button row justify-center items-center" @mousedown.stop @click="showHelp">
-                <q-icon name="la la-question-circle" size="16px"/>
+                <q-icon name="la la-question-circle" size="16px" />
                 <q-tooltip :delay="1500" anchor="bottom middle" content-style="font-size: 80%">Справка</q-tooltip>
             </span>
         </template>
 
         <div v-show="ready" class="col column" style="min-width: 600px">
             <div class="row items-center q-px-sm" style="height: 50px">
-                <q-select class="q-mr-sm" ref="rootLink" v-model="rootLink" :options="rootLinkOptions" @input="rootLinkInput"
-                    @popup-show="onSelectPopupShow" @popup-hide="onSelectPopupHide"
+                <q-select
+                    ref="rootLink"
+                    v-model="rootLink"
+                    class="q-mr-sm"
+                    :options="rootLinkOptions"
                     style="width: 230px"
                     dropdown-icon="la la-angle-down la-sm"
                     rounded outlined dense emit-value map-options display-value-sanitize options-sanitize
+                    @popup-show="onSelectPopupShow" @popup-hide="onSelectPopupHide"
                 >
-                    <template v-slot:prepend>
-                        <q-btn class="q-mr-xs" round dense color="blue" icon="la la-plus" @click.stop="addBookmark" size="12px">
-                            <q-tooltip :delay="1500" anchor="bottom middle" content-style="font-size: 80%">Добавить закладку</q-tooltip>
+                    <template #prepend>
+                        <q-btn class="q-mr-xs" round dense color="blue" icon="la la-plus" size="12px" @click.stop="addBookmark">
+                            <q-tooltip :delay="1500" anchor="bottom middle" content-style="font-size: 80%">
+                                Добавить закладку
+                            </q-tooltip>
                         </q-btn>
-                        <q-btn round dense color="blue" icon="la la-bars" @click.stop="bookmarkSettings" size="12px">
-                            <q-tooltip :delay="1500" anchor="bottom middle" content-style="font-size: 80%">Настроить закладки</q-tooltip>
+                        <q-btn round dense color="blue" icon="la la-bars" size="12px" @click.stop="bookmarkSettings">
+                            <q-tooltip :delay="1500" anchor="bottom middle" content-style="font-size: 80%">
+                                Настроить закладки
+                            </q-tooltip>
                         </q-btn>
                     </template>
-                    <template v-slot:selected>
-                        <div style="overflow: hidden; white-space: nowrap;">{{ rootLinkWithoutProtocol }}</div>
+                    <template #selected>
+                        <div style="overflow: hidden; white-space: nowrap;">
+                            {{ rootLinkWithoutProtocol }}
+                        </div>
                     </template>
                 </q-select>
 
-                <q-select class="q-mr-sm" ref="selectedLink" v-model="selectedLink" :options="selectedLinkOptions" @input="selectedLinkInput" style="width: 50px"
-                    @popup-show="onSelectPopupShow" @popup-hide="onSelectPopupHide"
+                <q-select
+                    ref="selectedLink"
+                    v-model="selectedLink"
+                    class="q-mr-sm"
+                    :options="selectedLinkOptions"
+                    style="width: 50px"
                     dropdown-icon="la la-angle-down la-sm"
                     rounded outlined dense emit-value map-options hide-selected display-value-sanitize options-sanitize
+                    @popup-show="onSelectPopupShow" @popup-hide="onSelectPopupHide"
                 >
-                    <q-tooltip :delay="1500" anchor="bottom middle" content-style="font-size: 80%">Закладки</q-tooltip>
+                    <q-tooltip :delay="1500" anchor="bottom middle" content-style="font-size: 80%">
+                        Закладки
+                    </q-tooltip>
                 </q-select>
 
-                <q-input class="col q-mr-sm" ref="input" rounded outlined dense bg-color="white" v-model="bookUrl" placeholder="Скопируйте сюда URL книги"
+                <q-input
+                    ref="input"
+                    v-model="bookUrl"
+                    class="col q-mr-sm"
+                    rounded outlined dense
+                    bg-color="white"
+                    placeholder="Скопируйте сюда URL книги"
                     @focus="selectAllOnFocus" @keydown="bookUrlKeyDown"
                 >
-                    <template v-slot:prepend>
-                        <q-btn class="q-mr-xs" round dense color="blue" icon="la la-home" @click="goToLink(selectedLink)" size="12px">
-                            <q-tooltip :delay="1500" anchor="bottom middle" content-style="font-size: 80%">Вернуться на стартовую страницу</q-tooltip>
+                    <template #prepend>
+                        <q-btn class="q-mr-xs" round dense color="blue" icon="la la-home" size="12px" @click="goToLink(selectedLink)">
+                            <q-tooltip :delay="1500" anchor="bottom middle" content-style="font-size: 80%">
+                                Вернуться на стартовую страницу
+                            </q-tooltip>
                         </q-btn>
-                        <q-btn round dense color="blue" icon="la la-angle-double-down" @click="openBookUrlInFrame" size="12px" :disabled="!bookUrl">
-                            <q-tooltip :delay="1500" anchor="bottom middle" content-style="font-size: 80%">Загрузить URL во фрейм</q-tooltip>
+                        <q-btn :disabled="!bookUrl" round dense color="blue" icon="la la-angle-double-down" size="12px" @click="openBookUrlInFrame">
+                            <q-tooltip :delay="1500" anchor="bottom middle" content-style="font-size: 80%">
+                                Загрузить URL во фрейм
+                            </q-tooltip>
                         </q-btn>
                     </template>
-                    <template v-slot:append>
-                        <q-btn round dense color="blue" icon="la la-cog" @click.stop="optionsVisible = true" size="12px">
-                            <q-tooltip :delay="1500" anchor="bottom middle" content-style="font-size: 80%">Опции</q-tooltip>
+                    <template #append>
+                        <q-btn round dense color="blue" icon="la la-cog" size="12px" @click.stop="optionsVisible = true">
+                            <q-tooltip :delay="1500" anchor="bottom middle" content-style="font-size: 80%">
+                                Опции
+                            </q-tooltip>
                         </q-btn>
                     </template>
                 </q-input>
 
-                <q-btn rounded color="green-7" no-caps size="14px" @click="submitUrl" :disabled="!bookUrl">Открыть
-                    <q-tooltip :delay="1500" anchor="bottom middle" content-style="font-size: 80%">Открыть в читалке</q-tooltip>
+                <q-btn :disabled="!bookUrl" rounded color="green-7" no-caps size="14px" @click="submitUrl">
+                    Открыть
+                    <q-tooltip :delay="1500" anchor="bottom middle" content-style="font-size: 80%">
+                        Открыть в читалке
+                    </q-tooltip>
                 </q-btn>
             </div>
             <div class="separator"></div>
 
-            <div class="col fit" ref="frameBox" style="position: relative;">
+            <div ref="frameBox" class="col fit" style="position: relative;">
                 <div ref="frameWrap" class="overflow-hidden">
                     <iframe v-if="frameVisible" ref="frame" :src="frameSrc" frameborder="0"></iframe>
                 </div>
@@ -84,41 +116,68 @@
             </div>
 
             <Dialog ref="dialogAddBookmark" v-model="addBookmarkVisible">
-                <template slot="header">
+                <template #header>
                     <div class="row items-center">
                         <q-icon class="q-mr-sm" name="la la-bookmark" size="28px"></q-icon>
-                        <div v-if="addBookmarkMode == 'edit'">Редактировать закладку</div>
-                        <div v-else>Добавить закладку</div>
+                        <div v-if="addBookmarkMode == 'edit'">
+                            Редактировать закладку
+                        </div>
+                        <div v-else>
+                            Добавить закладку
+                        </div>
                     </div>
                 </template>
 
                 <div class="q-mx-md row">
-                    <q-input ref="bookmarkLink" class="col q-mr-sm" outlined dense bg-color="white" v-model="bookmarkLink" @keydown="bookmarkLinkKeyDown"
-                        placeholder="Ссылка для закладки" maxlength="2000" @focus="selectAllOnFocus">
+                    <q-input
+                        ref="bookmarkLink"
+                        v-model="bookmarkLink"
+                        class="col q-mr-sm"
+                        outlined dense
+                        bg-color="white"
+                        placeholder="Ссылка для закладки" maxlength="2000" @focus="selectAllOnFocus" @keydown="bookmarkLinkKeyDown"
+                    >
                     </q-input>
 
-                    <q-select class="q-mr-sm" ref="defaultRootLink" v-model="defaultRootLink" :options="defaultRootLinkOptions" @input="defaultRootLinkInput" style="width: 50px"
+                    <q-select
+                        ref="defaultRootLink"
+                        v-model="defaultRootLink"
+                        class="q-mr-sm"
+                        :options="defaultRootLinkOptions"
+                        style="width: 50px"
                         dropdown-icon="la la-angle-down la-sm"
                         outlined dense emit-value map-options hide-selected display-value-sanitize options-sanitize
                     >
-                        <q-tooltip :delay="1500" anchor="bottom middle" content-style="font-size: 80%">Предустановленные ссылки</q-tooltip>
+                        <q-tooltip :delay="1500" anchor="bottom middle" content-style="font-size: 80%">
+                            Предустановленные ссылки
+                        </q-tooltip>
                     </q-select>
                 </div>
 
                 <div class="q-mx-md q-mt-md">
-                    <q-input class="col q-mr-sm" ref="bookmarkDesc" outlined dense bg-color="white" v-model="bookmarkDesc" @keydown="bookmarkDescKeyDown"
-                        placeholder="Описание" style="width: 400px" maxlength="100" @focus="selectAllOnFocus">
+                    <q-input
+                        ref="bookmarkDesc"
+                        v-model="bookmarkDesc"
+                        class="col q-mr-sm"
+                        outlined dense
+                        bg-color="white"
+                        placeholder="Описание" style="width: 400px" maxlength="100" @focus="selectAllOnFocus" @keydown="bookmarkDescKeyDown"
+                    >
                     </q-input>
                 </div>
 
-                <template slot="footer">
-                    <q-btn class="q-px-md q-ml-sm" dense no-caps v-close-popup>Отмена</q-btn>
-                    <q-btn class="q-px-md q-ml-sm" color="primary" dense no-caps @click="okAddBookmark" :disabled="!bookmarkLink">OK</q-btn>
+                <template #footer>
+                    <q-btn v-close-popup class="q-px-md q-ml-sm" dense no-caps>
+                        Отмена
+                    </q-btn>
+                    <q-btn :disabled="!bookmarkLink" class="q-px-md q-ml-sm" color="primary" dense no-caps @click="okAddBookmark">
+                        OK
+                    </q-btn>
                 </template>
             </Dialog>
 
             <Dialog ref="options" v-model="optionsVisible">
-                <template slot="header">
+                <template #header>
                     <div class="row items-center">
                         <q-icon class="q-mr-sm" name="la la-cog" size="28px"></q-icon>
                         Опции
@@ -131,22 +190,29 @@
                     <q-checkbox v-model="openInFrameOnAdd" size="36px" label="Активировать новую закладку после добавления" />
                 </div>
 
-                <template slot="footer">
-                    <q-btn class="q-px-md q-ml-sm" color="primary" dense no-caps @click="optionsVisible = false">OK</q-btn>
+                <template #footer>
+                    <q-btn class="q-px-md q-ml-sm" color="primary" dense no-caps @click="optionsVisible = false">
+                        OK
+                    </q-btn>
                 </template>
             </Dialog>
         </div>
 
-        <BookmarkSettings v-if="bookmarkSettingsActive" ref="bookmarkSettings" :libs="libs" :addBookmarkVisible="addBookmarkVisible"
-            @do-action="doAction" @close="closeBookmarkSettings">
+        <BookmarkSettings
+            v-if="bookmarkSettingsActive"
+            ref="bookmarkSettings"
+            :libs="libs"
+            :add-bookmark-visible="addBookmarkVisible"
+            @do-action="doAction" @close="closeBookmarkSettings"
+        >
         </BookmarkSettings>
     </Window>
 </template>
 
 <script>
 //-----------------------------------------------------------------------------
-import Vue from 'vue';
-import Component from 'vue-class-component';
+import vueComponent from '../vueComponent.js';
+
 import _ from 'lodash';
 
 import Window from '../share/Window.vue';
@@ -162,20 +228,20 @@ const proxySubst = {
     'http://fantasy-worlds.org': 'http://b.liberama.top:23580',
 };
 
-export default @Component({
+const componentOptions = {
     components: {
         Window,
         Dialog,
         BookmarkSettings
     },
     watch: {
-        libs: function() {
+        libs() {
             this.loadLibs();
         },
-        defaultRootLink: function() {
+        defaultRootLink() {
             this.updateBookmarkLink();
         },
-        bookUrl: function(newValue) {
+        bookUrl(newValue) {
             const value = lu.addProtocol(newValue);
             const subst = this.makeProxySubst(value, true);
             if (value != subst) {
@@ -184,7 +250,7 @@ export default @Component({
                 });
             }
         },
-        bookmarkLink: function(newValue) {
+        bookmarkLink(newValue) {
             const value = lu.addProtocol(newValue);
             const subst = this.makeProxySubst(value, true);
             if (value != subst) {
@@ -193,18 +259,26 @@ export default @Component({
                 });
             }
         },
-        closeAfterSubmit: function(newValue) {
+        closeAfterSubmit(newValue) {
             this.commitProp('closeAfterSubmit', newValue);
         },
-        openInFrameOnEnter: function(newValue) {
+        openInFrameOnEnter(newValue) {
             this.commitProp('openInFrameOnEnter', newValue);
         },
-        openInFrameOnAdd: function(newValue) {
+        openInFrameOnAdd(newValue) {
             this.commitProp('openInFrameOnAdd', newValue);
         },
+        rootLink() {
+            this.rootLinkInput();
+        },
+        selectedLink() {
+            this.selectedLinkInput();
+        },
     }    
-})
-class ExternalLibs extends Vue {
+};
+class ExternalLibs {
+    _options = componentOptions;
+
     ready = false;
     frameVisible = false;
     rootLink = '';
@@ -233,9 +307,9 @@ class ExternalLibs extends Vue {
     created() {
         this.oldStartLink = '';
         this.justOpened = true;
-        this.$root.addKeyHook(this.keyHook);
+        this.$root.addEventHook('key', this.keyHook);
 
-        this.$root.$on('resize', async() => {
+        this.$root.addEventHook('resize', async() => {
             await utils.sleep(200);
             this.frameResize();
         });
@@ -252,29 +326,6 @@ class ExternalLibs extends Vue {
     }
 
     mounted() {
-        //Поправка метода toggleOption компонента select фреймворка quasar, необходимо другое поведение
-        //$emit('input'.. вызывается всегда
-        this.toggleOption = function(opt, keepOpen) {
-            if (this.editable !== true || opt === void 0 || this.isOptionDisabled(opt) === true) {
-                return;
-            }
-
-            const optValue = this.getOptionValue(opt);
-
-            if (this.multiple !== true) {
-                if (keepOpen !== true) {
-                    this.updateInputValue(this.fillInput === true ? this.getOptionLabel(opt) : '', true, true);
-                    this.hidePopup();
-                }
-
-                this.$refs.target !== void 0 && this.$refs.target.focus();
-                this.$emit('input', this.emitValue === true ? optValue : opt);
-            }
-        };
-
-        this.$refs.rootLink.toggleOption = this.toggleOption;
-        this.$refs.selectedLink.toggleOption = this.toggleOption;
-
         (async() => {
             //подождем this.mode
             let i = 0;
@@ -412,7 +463,7 @@ class ExternalLibs extends Vue {
         if (this.ready && this.selectedLink) {
             result += ` | ${(this.libs.comment ? this.libs.comment + ' ': '') + lu.removeProtocol(this.libs.startLink)}`;
         }
-        this.$root.$emit('set-app-title', result);
+        this.$root.setAppTitle(result);
         return result;
     }
 
@@ -621,9 +672,9 @@ class ExternalLibs extends Vue {
 
         this.addBookmarkMode = mode;
         this.addBookmarkVisible = true;
-        this.$nextTick(() => {
+        this.$nextTick(async() => {
+            await this.$refs.dialogAddBookmark.waitShown();
             this.$refs.bookmarkLink.focus();
-            this.$refs.defaultRootLink.toggleOption = this.toggleOption;
         });
     }
 
@@ -636,10 +687,6 @@ class ExternalLibs extends Vue {
             this.bookmarkLink = '';
             this.bookmarkDesc = '';
         }
-    }
-
-    defaultRootLinkInput() {
-        this.updateBookmarkLink();
     }
 
     bookmarkLinkKeyDown(event) {
@@ -704,7 +751,7 @@ class ExternalLibs extends Vue {
                 this.commitLibs(libs);
             } else if (item.c != this.bookmarkDesc) {
                 if (await this.$root.stdDialog.confirm(`Такая закладка уже существует с другим описанием.<br>` +
-                    `Заменить '${this.$sanitize(item.c)}' на '${this.$sanitize(this.bookmarkDesc)}'?`, ' ')) {
+                    `Заменить '${this.$root.sanitize(item.c)}' на '${this.$root.sanitize(this.bookmarkDesc)}'?`, ' ')) {
                     item.c = this.bookmarkDesc;
                     this.commitLibs(libs);                    
                 } else 
@@ -810,7 +857,7 @@ class ExternalLibs extends Vue {
     }
 
     keyHook(event) {
-        if (this.$root.rootRoute() == '/external-libs') {
+        if (this.$root.getRootRoute() == '/external-libs') {
             if (this.$root.stdDialog.active)
                 return false;
 
@@ -836,6 +883,8 @@ class ExternalLibs extends Vue {
         return false;
     }
 }
+
+export default vueComponent(ExternalLibs);
 //-----------------------------------------------------------------------------
 </script>
 

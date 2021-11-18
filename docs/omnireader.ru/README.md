@@ -44,15 +44,15 @@ sudo apt install rar libreoffice poppler-utils djvulibre-bin libtiff-tools graph
 Сначала настроим для HTTP:
 ```
 sudo apt install nginx
-sudo cp docs/omnireader.ru/omnireader /etc/nginx/sites-available/omnireader
-sudo ln -s /etc/nginx/sites-available/omnireader_http /etc/nginx/sites-enabled/omnireader
+sudo cp docs/omnireader.ru/omnireader_http /etc/nginx/sites-available/omnireader
+sudo ln -s /etc/nginx/sites-available/omnireader /etc/nginx/sites-enabled/omnireader
 sudo rm /etc/nginx/sites-enabled/default
 sudo service nginx reload
 sudo chown -R www-data.www-data /var/www
 ```
 
 ### certbot
-#### Следовать инструкции установки certbot https://certbot.eff.org/lets-encrypt/ubuntufocal-nginx
+#### Следовать инструкции установки certbot https://certbot.eff.org/instructions?ws=nginx&os=ubuntu-20
 После установки сертификата, можно использовать конфиг для nginx c ssl:
 ```
 sudo cp docs/omnireader.ru/omnireader /etc/nginx/sites-available/omnireader

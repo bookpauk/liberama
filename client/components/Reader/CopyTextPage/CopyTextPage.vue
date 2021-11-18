@@ -1,6 +1,6 @@
 <template>
     <Window @close="close">
-        <template slot="header">
+        <template #header>
             Скопировать текст
         </template>
 
@@ -12,18 +12,19 @@
 
 <script>
 //-----------------------------------------------------------------------------
-import Vue from 'vue';
-import Component from 'vue-class-component';
+import vueComponent from '../../vueComponent.js';
 
 import Window from '../../share/Window.vue';
 import {sleep} from '../../../share/utils';
 
-export default @Component({
+const componentOptions = {
     components: {
         Window,
     },
-})
-class CopyTextPage extends Vue {
+};
+class CopyTextPage {
+    _options = componentOptions;
+
     text = null;
     initStep = null;
     initPercentage = 0;
@@ -101,6 +102,8 @@ class CopyTextPage extends Vue {
         return true;
     }
 }
+
+export default vueComponent(CopyTextPage);
 //-----------------------------------------------------------------------------
 </script>
 

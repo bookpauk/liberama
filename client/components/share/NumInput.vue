@@ -1,17 +1,19 @@
 <template>
-    <q-input outlined dense
+    <q-input
         v-model="filteredValue"
+        outlined dense
         input-style="text-align: center"
         class="no-mp"
         :class="(error ? 'error' : '')"
         :disable="disable"
     >
         <slot></slot>
-        <template v-slot:prepend>
-            <q-icon :class="(validate(value - step) ? '' : 'disable')" 
+        <template #prepend>
+            <q-icon
+                v-ripple="validate(modelValue - step)" 
+                :class="(validate(modelValue - step) ? '' : 'disable')" 
                 name="la la-minus-circle" 
                 class="button" 
-                v-ripple="validate(value - step)" 
                 @click="minus"
                 @mousedown.prevent.stop="onMouseDown($event, 'minus')"
                 @mouseup.prevent.stop="onMouseUp"
@@ -21,11 +23,12 @@
                 @touchcancel.prevent.stop="onTouchEnd"
             />
         </template>
-        <template v-slot:append>
-            <q-icon :class="(validate(value + step) ? '' : 'disable')"
+        <template #append>
+            <q-icon
+                v-ripple="validate(modelValue + step)"
+                :class="(validate(modelValue + step) ? '' : 'disable')"
                 name="la la-plus-circle"
                 class="button"
-                v-ripple="validate(value + step)"
                 @click="plus"
                 @mousedown.prevent.stop="onMouseDown($event, 'plus')"
                 @mouseup.prevent.stop="onMouseUp"
@@ -40,43 +43,41 @@
 
 <script>
 //-----------------------------------------------------------------------------
-import Vue from 'vue';
-import Component from 'vue-class-component';
+import vueComponent from '../vueComponent.js';
 
 import * as utils from '../../share/utils';
 
-const NumInputProps = Vue.extend({
-    props: {
-        value: Number,
+const componentOptions = {
+    watch: {
+        filteredValue: function(newValue) {
+            if (this.validate(newValue)) {
+                this.error = false;
+                this.$emit('update:modelValue', this.string2number(newValue));
+            } else {
+                this.error = true;
+            }
+        },
+        modelValue: function(newValue) {
+            this.filteredValue = newValue;
+        },
+    }
+};
+class NumInput {
+    _options = componentOptions;
+    _props = {
+        modelValue: Number,
         min: { type: Number, default: -Number.MAX_VALUE },
         max: { type: Number, default: Number.MAX_VALUE },
         step: { type: Number, default: 1 },
         digits: { type: Number, default: 0 },
         disable: Boolean
-    }
-});
+    };
 
-export default @Component({
-    watch: {
-        filteredValue: function(newValue) {
-            if (this.validate(newValue)) {
-                this.error = false;
-                this.$emit('input', this.string2number(newValue));
-            } else {
-                this.error = true;
-            }
-        },
-        value: function(newValue) {
-            this.filteredValue = newValue;
-        },
-    }
-})
-class NumInput extends NumInputProps {
     filteredValue = 0;
     error = false;
 
     created() {
-        this.filteredValue = this.value;
+        this.filteredValue = this.modelValue;
     }
 
     string2number(value) {
@@ -95,13 +96,13 @@ class NumInput extends NumInputProps {
     }
 
     plus() {
-        const newValue = this.value + this.step;
+        const newValue = this.modelValue + this.step;
         if (this.validate(newValue))
             this.filteredValue = newValue;
     }
 
     minus() {
-        const newValue = this.value - this.step;
+        const newValue = this.modelValue - this.step;
         if (this.validate(newValue))
             this.filteredValue = newValue;
     }
@@ -136,7 +137,7 @@ class NumInput extends NumInputProps {
     }
 
     onTouchStart(event, way) {
-        if (!this.$isMobileDevice)
+        if (!this.$root.isMobileDevice)
             return;
         if (event.touches.length == 1) {
             this.inTouch = true;
@@ -145,12 +146,14 @@ class NumInput extends NumInputProps {
     }
 
     onTouchEnd() {
-        if (!this.$isMobileDevice)
+        if (!this.$root.isMobileDevice)
             return;
         this.inTouch = false;
         this.onMouseUp();
     }
 }
+
+export default vueComponent(NumInput);
 //-----------------------------------------------------------------------------
 </script>
 

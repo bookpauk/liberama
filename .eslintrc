@@ -1,15 +1,15 @@
 {
+  "parser": "vue-eslint-parser",
   "parserOptions": {
-    "parser": "babel-eslint"
+    "parser": "@babel/eslint-parser",
+    "sourceType": "module"
   },
   "extends": [
     "eslint:recommended",
-    "plugin:vue/essential"
+    "plugin:vue/recommended"
   ],
   "plugins": [
-    "vue",
-    "html",
-    "node"
+    "@babel"
   ],
   "env": {
     "browser": true,
@@ -24,6 +24,13 @@
     "LM_TOTAL": false
   },
   "rules": {
+    "vue/html-indent": ["warn", 4, {
+      "alignAttributesVertically": false
+    }],
+    "vue/max-attributes-per-line": "off",
+    "vue/html-self-closing": "off",
+    "vue/no-v-html": "off",
+
     "strict": 0,
     "indent": [0, 4, {
       "SwitchCase": 1
