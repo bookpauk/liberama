@@ -52,7 +52,7 @@ sudo chown -R www-data.www-data /var/www
 ```
 
 ### certbot
-#### Следовать инструкции установки certbot https://certbot.eff.org/lets-encrypt/ubuntufocal-nginx
+#### Следовать инструкции установки certbot https://certbot.eff.org/instructions?ws=nginx&os=ubuntu-20
 После установки сертификата, можно использовать конфиг для nginx c ssl:
 ```
 sudo cp docs/omnireader.ru/omnireader /etc/nginx/sites-available/omnireader
