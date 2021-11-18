@@ -44,8 +44,8 @@ sudo apt install rar libreoffice poppler-utils djvulibre-bin libtiff-tools graph
 Сначала настроим для HTTP:
 ```
 sudo apt install nginx
-sudo cp docs/omnireader.ru/omnireader /etc/nginx/sites-available/omnireader
-sudo ln -s /etc/nginx/sites-available/omnireader_http /etc/nginx/sites-enabled/omnireader
+sudo cp docs/omnireader.ru/omnireader_http /etc/nginx/sites-available/omnireader
+sudo ln -s /etc/nginx/sites-available/omnireader /etc/nginx/sites-enabled/omnireader
 sudo rm /etc/nginx/sites-enabled/default
 sudo service nginx reload
 sudo chown -R www-data.www-data /var/www
