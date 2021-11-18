@@ -60,15 +60,19 @@ class PasteTextPage {
 
     calcTitle(event) {
         if (this.bookTitle == '') {
-            let text = event.clipboardData.getData('text');
-            this.bookTitle = `Из буфера обмена ${utils.formatDate(new Date(), 'noDate')}: ` + _.compact([
-                this.getNonEmptyLine3words(text, 1),
-                this.getNonEmptyLine3words(text, 2)
-            ]).join(' - ');
+            this.bookTitle = `Из буфера обмена ${utils.formatDate(new Date(), 'noDate')}`;
+            if (event) {
+                let text = event.clipboardData.getData('text');
+                this.bookTitle += ': ' + _.compact([
+                    this.getNonEmptyLine3words(text, 1),
+                    this.getNonEmptyLine3words(text, 2)
+                ]).join(' - ');
+            }
         }
     }
 
     loadBuffer() {
+        this.calcTitle();
         this.$emit('load-buffer', {buffer: `<buffer><fb2-title>${utils.escapeXml(this.bookTitle)}</fb2-title>${utils.escapeXml(this.$refs.textArea.value)}</buffer>`});
         this.close();
     }
