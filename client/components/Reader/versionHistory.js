@@ -1,5 +1,16 @@
 export const versionHistory = [
 {
+    showUntil: '2021-11-17',
+    header: '0.11.0 (2021-11-18)',
+    content:
+`
+<ul>
+    <li>переход на Vue 3</li>
+</ul>
+`
+},
+
+{
     showUntil: '2021-10-23',
     header: '0.10.3 (2021-10-24)',
     content:
