@@ -7,6 +7,7 @@ class RemoteWebDavStorage {
     constructor(config) {
         this.config = Object.assign({}, config);
         this.config.maxContentLength = this.config.maxContentLength || 10*1024*1024;
+        this.config.maxBodyLength = this.config.maxContentLength;
         this.wdc = createClient(config.url, this.config);
     }
 
@@ -30,7 +31,7 @@ class RemoteWebDavStorage {
     }
 
     async writeFile(filename, data) {
-        return await this.wdc.putFileContents(filename, data, { maxContentLength: this.config.maxContentLength })
+        return await this.wdc.putFileContents(filename, data)
     }
 
     async unlink(filename) {
@@ -38,7 +39,7 @@ class RemoteWebDavStorage {
     }
 
     async readFile(filename) {
-        return await this.wdc.getFileContents(filename, { maxContentLength: this.config.maxContentLength })
+        return await this.wdc.getFileContents(filename)
     }
 
     async mkdir(dirname) {
