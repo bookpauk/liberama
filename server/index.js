@@ -7,6 +7,11 @@ const compression = require('compression');
 const http = require('http');
 const WebSocket = require ('ws');
 
+const ayncExit = new (require('./core/AsyncExit'))();
+ayncExit.init();
+
+let log = null;
+
 async function init() {
     //config
     const configManager = new (require('./config'))();//singleton
@@ -18,7 +23,7 @@ async function init() {
     //logger
     const appLogger = new (require('./core/AppLogger'))();//singleton
     await appLogger.init(config);
-    const log = appLogger.log;
+    log = appLogger.log;
 
     //dirs
     log(`${config.name} v${config.version}, Node.js ${process.version}`);
@@ -96,13 +101,15 @@ async function main() {
     }
 }
 
-
 (async() => {
     try {
         await init();
         await main();
     } catch (e) {
-        console.error(e);
-        process.exit(1);
+        if (log)
+            log(LM_FATAL, e);
+        else
+            console.error(e);
+        ayncExit.exit(1);
     }
 })();

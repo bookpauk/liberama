@@ -7,10 +7,14 @@ let instance = null;
 class AppLogger {
     constructor() {
         if (!instance) {
+            this.inited = false;
+            this.logFileName = '';
+            this.errLogFileName = '';
+            this.fatalLogFileName = '';
+
             instance = this;
         }
 
-        this.inited = false;
         return instance;
     }
 
@@ -22,11 +26,16 @@ class AppLogger {
 
         if (config.loggingEnabled) {
             await fs.ensureDir(config.logDir);
+
+            this.logFileName = `${config.logDir}/${config.name}.log`;
+            this.errLogFileName = `${config.logDir}/${config.name}.err.log`;
+            this.fatalLogFileName = `${config.logDir}/${config.name}.fatal.log`;
+
             loggerParams = [
                 {log: 'ConsoleLog'},
-                {log: 'FileLog', fileName: `${config.logDir}/${config.name}.log`},
-                {log: 'FileLog', fileName: `${config.logDir}/${config.name}.err.log`, exclude: [LM_OK, LM_INFO, LM_TOTAL]},
-                {log: 'FileLog', fileName: `${config.logDir}/${config.name}.fatal.log`, exclude: [LM_OK, LM_INFO, LM_WARN, LM_ERR, LM_TOTAL]},//LM_FATAL only
+                {log: 'FileLog', fileName: this.logFileName},
+                {log: 'FileLog', fileName: this.errLogFileName, exclude: [LM_OK, LM_INFO, LM_TOTAL]},
+                {log: 'FileLog', fileName: this.fatalLogFileName, exclude: [LM_OK, LM_INFO, LM_WARN, LM_ERR, LM_TOTAL]},//LM_FATAL only
             ];
         }
 
