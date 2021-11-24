@@ -51,7 +51,11 @@ class JembaConnManager {
                     await dbConn.openAll();
                 } catch(e) {
                     if (dbConfig.autoRepair && 
-                        (e.message.indexOf('corrupted') >= 0 || e.message.indexOf('Unexpected token') >= 0)
+                        (
+                            e.message.indexOf('corrupted') >= 0 
+                            || e.message.indexOf('Unexpected token') >= 0
+                            || e.message.indexOf('invalid stored block lengths') >= 0
+                        )
                         ) {
                         log(LM_ERR, e);
                         log(`Open "${dbConfig.dbName}" with auto repair`);
