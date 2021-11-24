@@ -1,3 +1,4 @@
+//TODO: удалить модуль в 2023г
 const fs = require('fs-extra');
 
 const SqliteConnectionPool = require('./SqliteConnectionPool');
