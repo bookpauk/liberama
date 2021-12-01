@@ -1,8 +1,14 @@
 const fs = require('fs-extra');
+const _ = require('lodash');
 
 const ayncExit = new (require('../core/AsyncExit'))();//singleton
 const { JembaDb, JembaDbThread } = require('./JembaDb');
 const log = new (require('../core/AppLogger'))().log;//singleton
+
+const jembaMigrations = {
+    //'app': require('./jembaMigrations/app'),
+    'reader-storage': require('./jembaMigrations/reader-storage'),
+};
 
 let instance = null;
 
@@ -24,6 +30,8 @@ class JembaConnManager {
 
         this.config = config;
         this._db = {};
+
+        const force = null;//(config.branch == 'development' ? 'last' : null);
 
         for (const dbConfig of this.config.db) {
             const dbPath = `${this.config.dataDir}/db/${dbConfig.dbName}`;
@@ -69,16 +77,89 @@ class JembaConnManager {
             log(`Open "${dbConfig.dbName}" finish`);
 
             //миграции
-            /*const migs = migrations[dbConfig.poolName];
-            if (migs && migs.data.length) {
-                const applied = await connPool.migrate(migs.data, migs.table, force);
+            const mig = jembaMigrations[dbConfig.dbName];
+            if (mig && mig.data) {
+                const applied = await this.migrate(dbConn, mig.data, mig.table, force);
                 if (applied.length)
-                    log(`${applied.length} migrations applied to "${dbConfig.poolName}"`);
-            }*/
+                    log(`${applied.length} migrations applied to "${dbConfig.dbName}"`);
+            }
 
             this._db[dbConfig.dbName] = dbConn;
         }
         this.inited = true;
+    }
+
+    async migrate(db, migs, table, force) {
+        const migrations = _.cloneDeep(migs).sort((a, b) => a.id - b.id);
+
+        if (!migrations.length) {
+            throw new Error('No migration data');
+        }
+
+        migrations.map(migration => {
+            const data = migration.data;
+            if (!data.up || !data.down) {
+                throw new Error(`The ${migration.id}:${migration.name} does not contain 'up' or 'down' instructions`);
+            } else {
+                migration.up = data.up;
+                migration.down = data.down;
+            }
+            delete migration.data;
+        });
+
+        // Create a database table for migrations meta data if it doesn't exist
+        // id, name, up, down
+        await db.create({
+            table, 
+            quietIfExists: true,
+            hash: {field: 'id', type: 'number'}
+        });
+
+        // Get the list of already applied migrations
+        let dbMigrations = await db.select({
+            table,
+            sort: '(a, b) => a.id - b.id'
+        });
+
+        const execUpDown = async(items) => {
+            for (const item of items) {
+                const action = item[0];
+                await db[action](item[1]);
+            }
+        };
+
+        // Undo migrations that exist only in the database but not in migs,
+        // also undo the last migration if the `force` option was set to `last`.
+        const lastMigration = migrations[migrations.length - 1];
+        for (const migration of dbMigrations.slice().sort((a, b) => b.id - a.id)) {
+            if (!migrations.some(x => x.id === migration.id) ||
+                (force === 'last' && migration.id === lastMigration.id)) {
+                    await execUpDown(migration.down);
+                    await db.delete({
+                        table, 
+                        where: `@@hash('id', ${db.esc(migration.id)})`
+                    });
+                    dbMigrations = dbMigrations.filter(x => x.id !== migration.id);
+            } else {
+                break;
+            }
+        }
+
+        // Apply pending migrations
+        let applied = [];
+        const lastMigrationId = dbMigrations.length ? dbMigrations[dbMigrations.length - 1].id : 0;
+        for (const migration of migrations) {
+            if (migration.id > lastMigrationId) {
+                await execUpDown(migration.up);
+                await db.insert({
+                    table,
+                    rows: [migration],
+                });
+                applied.push(migration.id);
+            }
+        }
+
+        return applied;
     }
 
     get db() {
