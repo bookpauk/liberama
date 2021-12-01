@@ -111,14 +111,16 @@ class JembaDb {
 
         let table;
         if (query.table) {
-            if (!(await this.tableExists({table: query.table}))) {
+            if (await this.tableExists({table: query.table})) {
+                if (!query.quietIfExists)
+                    throw new Error(`Table '${query.table}' already exists`);
+
+                table = this.table.get(query.table);
+            } else {
                 table = new Table();
                 this.table.set(query.table, table);
 
                 await this.open(query);
-            } else {
-                if (!query.quietIfExists)
-                    throw new Error(`Table '${query.table}' already exists`);
             }
         } else {
             if (await this.tableExists({table: query.in})) {
