@@ -5,10 +5,7 @@ const ayncExit = new (require('../core/AsyncExit'))();//singleton
 const { JembaDb, JembaDbThread } = require('./JembaDb');
 const log = new (require('../core/AppLogger'))().log;//singleton
 
-const jembaMigrations = {
-    //'app': require('./jembaMigrations/app'),
-    'reader-storage': require('./jembaMigrations/reader-storage'),
-};
+const jembaMigrations = require('./jembaMigrations');
 
 let instance = null;
 
@@ -17,6 +14,7 @@ class JembaConnManager {
     constructor() {
         if (!instance) {
             this.inited = false;
+            this.closed = false;
 
             instance = this;
         }
@@ -24,7 +22,7 @@ class JembaConnManager {
         return instance;
     }
 
-    async init(config) {
+    async init(config, migs = jembaMigrations) {
         if (this.inited)
             throw new Error('JembaConnManager initialized already');
 
@@ -52,7 +50,6 @@ class JembaConnManager {
 
             log(`Open "${dbConfig.dbName}" start`);
             await dbConn.openDb({dbPath, cacheSize: dbConfig.cacheSize, compressed: dbConfig.compressed, forceFileClosing: true});
-            ayncExit.add(dbConn.closeDb.bind(dbConn));
 
             if (dbConfig.openAll) {
                 try {
@@ -77,7 +74,7 @@ class JembaConnManager {
             log(`Open "${dbConfig.dbName}" finish`);
 
             //миграции
-            const mig = jembaMigrations[dbConfig.dbName];
+            const mig = migs[dbConfig.dbName];
             if (mig && mig.data) {
                 const applied = await this.migrate(dbConn, mig.data, mig.table, force);
                 if (applied.length)
@@ -86,7 +83,25 @@ class JembaConnManager {
 
             this._db[dbConfig.dbName] = dbConn;
         }
+
+        ayncExit.add(this.close.bind(this));
+
         this.inited = true;
+    }
+
+    async close() {
+        if (!this.inited)
+            throw new Error('JembaConnManager not inited');
+
+        if (this.closed)
+            throw new Error('JembaConnManager closed');
+
+        for (const dbConfig of this.config.db) {
+            await this._db[dbConfig.dbName].closeDb();
+        }
+
+        this._db = {};
+        this.closed = true;
     }
 
     async migrate(db, migs, table, force) {
@@ -163,6 +178,12 @@ class JembaConnManager {
     }
 
     get db() {
+        if (!this.inited)
+            throw new Error('JembaConnManager not inited');
+
+        if (this.closed)
+            throw new Error('JembaConnManager closed');
+
         return this._db;
     }
 }
