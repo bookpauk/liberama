@@ -14,7 +14,6 @@ class JembaConnManager {
     constructor() {
         if (!instance) {
             this.inited = false;
-            this.closed = false;
 
             instance = this;
         }
@@ -22,14 +21,12 @@ class JembaConnManager {
         return instance;
     }
 
-    async init(config, migs = jembaMigrations) {
+    async init(config, migs = jembaMigrations, undoLastMigration = false) {
         if (this.inited)
             throw new Error('JembaConnManager initialized already');
 
         this.config = config;
         this._db = {};
-
-        const force = null;//(config.branch == 'development' ? 'last' : null);
 
         for (const dbConfig of this.config.db) {
             const dbPath = `${this.config.dataDir}/db/${dbConfig.dbName}`;
@@ -49,7 +46,7 @@ class JembaConnManager {
             }
 
             log(`Open "${dbConfig.dbName}" start`);
-            await dbConn.openDb({dbPath, cacheSize: dbConfig.cacheSize, compressed: dbConfig.compressed, forceFileClosing: true});
+            await dbConn.openDb({dbPath, cacheSize: dbConfig.cacheSize, compressed: dbConfig.compressed, forceFileClosing: dbConfig.forceFileClosing});
 
             if (dbConfig.openAll) {
                 try {
@@ -76,7 +73,7 @@ class JembaConnManager {
             //миграции
             const mig = migs[dbConfig.dbName];
             if (mig && mig.data) {
-                const applied = await this.migrate(dbConn, mig.data, mig.table, force);
+                const applied = await this.migrate(dbConn, mig.data, mig.table, undoLastMigration);
                 if (applied.length)
                     log(`${applied.length} migrations applied to "${dbConfig.dbName}"`);
             }
@@ -91,20 +88,17 @@ class JembaConnManager {
 
     async close() {
         if (!this.inited)
-            throw new Error('JembaConnManager not inited');
-
-        if (this.closed)
-            throw new Error('JembaConnManager closed');
+            return;
 
         for (const dbConfig of this.config.db) {
             await this._db[dbConfig.dbName].closeDb();
         }
 
         this._db = {};
-        this.closed = true;
+        this.inited = false;
     }
 
-    async migrate(db, migs, table, force) {
+    async migrate(db, migs, table, undoLastMigration) {
         const migrations = _.cloneDeep(migs).sort((a, b) => a.id - b.id);
 
         if (!migrations.length) {
@@ -144,11 +138,11 @@ class JembaConnManager {
         };
 
         // Undo migrations that exist only in the database but not in migs,
-        // also undo the last migration if the `force` option was set to `last`.
+        // also undo the last migration if the undoLastMigration
         const lastMigration = migrations[migrations.length - 1];
         for (const migration of dbMigrations.slice().sort((a, b) => b.id - a.id)) {
             if (!migrations.some(x => x.id === migration.id) ||
-                (force === 'last' && migration.id === lastMigration.id)) {
+                (undoLastMigration && migration.id === lastMigration.id)) {
                     await execUpDown(migration.down);
                     await db.delete({
                         table, 
@@ -180,9 +174,6 @@ class JembaConnManager {
     get db() {
         if (!this.inited)
             throw new Error('JembaConnManager not inited');
-
-        if (this.closed)
-            throw new Error('JembaConnManager closed');
 
         return this._db;
     }
