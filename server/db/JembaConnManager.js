@@ -45,7 +45,7 @@ class JembaConnManager {
                 dbConn = new JembaDb();
             }
 
-            log(`Open "${dbConfig.dbName}" start`);
+            log(`Open "${dbConfig.dbName}" begin`);
             await dbConn.openDb({dbPath, cacheSize: dbConfig.cacheSize, compressed: dbConfig.compressed, forceFileClosing: dbConfig.forceFileClosing});
 
             if (dbConfig.openAll) {
@@ -68,7 +68,7 @@ class JembaConnManager {
                 }
             }
 
-            log(`Open "${dbConfig.dbName}" finish`);
+            log(`Open "${dbConfig.dbName}" end`);
 
             //миграции
             const mig = migs[dbConfig.dbName];
@@ -121,7 +121,6 @@ class JembaConnManager {
         await db.create({
             table, 
             quietIfExists: true,
-            hash: {field: 'id', type: 'number'}
         });
 
         // Get the list of already applied migrations
@@ -146,7 +145,7 @@ class JembaConnManager {
                     await execUpDown(migration.down);
                     await db.delete({
                         table, 
-                        where: `@@hash('id', ${db.esc(migration.id)})`
+                        where: `@@id(${db.esc(migration.id)})`
                     });
                     dbMigrations = dbMigrations.filter(x => x.id !== migration.id);
             } else {
