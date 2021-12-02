@@ -28,7 +28,7 @@ class JembaConnManager {
         this.config = config;
         this._db = {};
 
-        for (const dbConfig of this.config.db) {
+        for (const dbConfig of this.config.jembaDb) {
             const dbPath = `${this.config.dataDir}/db/${dbConfig.dbName}`;
 
             //бэкап
@@ -90,7 +90,7 @@ class JembaConnManager {
         if (!this.inited)
             return;
 
-        for (const dbConfig of this.config.db) {
+        for (const dbConfig of this.config.jembaDb) {
             await this._db[dbConfig.dbName].closeDb();
         }
 

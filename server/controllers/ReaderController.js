@@ -1,12 +1,12 @@
 const BaseController = require('./BaseController');
 const ReaderWorker = require('../core/Reader/ReaderWorker');//singleton
-const ReaderStorage = require('../core/Reader/ReaderStorage');//singleton
+const JembaReaderStorage = require('../core/Reader/JembaReaderStorage');//singleton
 const WorkerState = require('../core/WorkerState');//singleton
 
 class ReaderController extends BaseController {
     constructor(config) {
         super(config);
-        this.readerStorage = new ReaderStorage();
+        this.readerStorage = new JembaReaderStorage();
         this.readerWorker = new ReaderWorker(config);
         this.workerState = new WorkerState();
     }
