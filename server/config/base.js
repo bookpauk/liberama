@@ -37,6 +37,14 @@ module.exports = {
         }
     ],
 
+    jembaDb: [
+        {
+            dbName: 'reader-storage',
+            thread: true,
+            openAll: true,
+        }
+    ],
+
     servers: [
         {
             serverName: '1',

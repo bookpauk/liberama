@@ -38,6 +38,10 @@ function sleep(ms) {
     return new Promise(resolve => setTimeout(resolve, ms));
 }
 
+function toUnixTime(time) {
+    return parseInt(time/1000);
+}
+
 function randomHexString(len) {
     return crypto.randomBytes(len).toString('hex')
 }
@@ -126,6 +130,7 @@ module.exports = {
     bufferRemoveZeroes,
     getFileHash,
     sleep,
+    toUnixTime,
     randomHexString,
     touchFile,
     spawnProcess,

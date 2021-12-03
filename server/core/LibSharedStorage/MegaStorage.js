@@ -25,7 +25,6 @@ class MegaStorage {
             this.debouncedSaveStats = _.debounce(() => {
                 this.saveStats().catch((e) => {
                     log(LM_ERR, `MegaStorage::saveStats ${e.message}`);
-                    //process.exit(1);
                 });
             }, 5000, {'maxWait':6000});
 

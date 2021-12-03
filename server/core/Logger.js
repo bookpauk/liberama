@@ -2,6 +2,9 @@
   Журналирование с буферизацией вывода
 */
 const fs = require('fs-extra');
+const ayncExit = new (require('./AsyncExit'))();
+
+const sleep = (ms) => { return new Promise(resolve => setTimeout(resolve, ms)) };
 
 global.LM_OK = 0;
 global.LM_INFO = 1;
@@ -46,12 +49,13 @@ class BaseLog {
         this.outputBuffer = [];
 
         await this.flushImpl(this.data)
-            .catch(e => { console.log(e); process.exit(1); } );
+            .catch(e => { console.log(e); ayncExit.exit(1); } );
         this.flushing = false;
     }
 
     log(msgType, message) {
-        if (this.closed) { console.log(`Logger fatal error: log was closed (message to log: ${message}})`); process.exit(1); }
+        if (this.closed)
+            return;
 
         if (!this.exclude.has(msgType)) {
             this.outputBuffer.push(message);
@@ -73,7 +77,7 @@ class BaseLog {
         }
     }
 
-    close() {
+    async close() {
         if (this.closed)
             return;
 
@@ -81,12 +85,13 @@ class BaseLog {
             clearInterval(this.iid);
 
         try {
-            if (this.flushing)
-                this.flushImplSync(this.data);
-            this.flushImplSync(this.outputBuffer);
+            while (this.outputBufferLength) {
+                await this.flush();
+                await sleep(1);
+            }
         } catch(e) {
             console.log(e);
-            process.exit(1);
+            ayncExit.exit(1);
         }
         this.outputBufferLength = 0;
         this.outputBuffer = [];
@@ -103,12 +108,14 @@ class FileLog extends BaseLog {
         this.rcid = 0;
     }
 
-    close() {
+    async close() {
         if (this.closed)
             return;
-        super.close();
-        if (this.fd)
-            fs.closeSync(this.fd);
+        await super.close();
+        if (this.fd) {
+            await fs.close(this.fd);
+            this.fd = null;
+        }
         if (this.rcid)
             clearTimeout(this.rcid);
     }
@@ -151,21 +158,13 @@ class FileLog extends BaseLog {
             }, LOG_ROTATE_FILE_CHECK_INTERVAL);
         }
 
-        await fs.write(this.fd, Buffer.from(data.join('')));
+        if (this.fd)
+            await fs.write(this.fd, Buffer.from(data.join('')));
     }
-
-    flushImplSync(data) {
-        fs.writeSync(this.fd, Buffer.from(data.join('')));
-    }
-
 }
 
 class ConsoleLog extends BaseLog {
     async flushImpl(data) {
-        process.stdout.write(data.join(''));
-    }
-
-    flushImplSync(data) {
         process.stdout.write(data.join(''));
     }
 }
@@ -178,7 +177,7 @@ const factory = {
 
 class Logger {
 
-    constructor(params = null, cleanupCallback = null) {        
+    constructor(params = null) {
         this.handlers = [];
         if (params) {
             params.forEach((logParams) => {
@@ -187,12 +186,22 @@ class Logger {
                 this.handlers.push(new loggerClass(logParams));
             });
         }
-        cleanupCallback = cleanupCallback || (() => {});
-        this.cleanup(cleanupCallback);
+
+        this.closed = false;
+        ayncExit.onSignal((signal) => {
+            this.log(LM_FATAL, `Signal ${signal} received, exiting...`);
+        });
+        ayncExit.addAfter(this.close.bind(this));
+    }
+
+    formatDate(date) {
+        return `${date.getFullYear()}-${(date.getMonth() + 1).toString().padStart(2, '0')}-${date.getDate().toString().padStart(2, '0')} ` +
+            `${date.getHours().toString().padStart(2, '0')}:${date.getMinutes().toString().padStart(2, '0')}:${date.getSeconds().toString().padStart(2, '0')}.` +
+            `${date.getMilliseconds().toString().padStart(3, '0')}`;
     }
 
     prepareMessage(msgType, message) {
-        return (new Date().toISOString()) + ` ${msgTypeToStr[msgType]}: ${message}\n`;
+        return this.formatDate(new Date()) + ` ${msgTypeToStr[msgType]}: ${message}\n`;
     }
 
     log(msgType, message) {
@@ -203,47 +212,18 @@ class Logger {
 
         const mes = this.prepareMessage(msgType, message);
 
-        for (let i = 0; i < this.handlers.length; i++)
-            this.handlers[i].log(msgType, mes);
+        if (!this.closed) {
+            for (let i = 0; i < this.handlers.length; i++)
+                this.handlers[i].log(msgType, mes);
+        } else {
+            console.log(mes);
+        }
     }
 
-    close() {
+    async close() {
         for (let i = 0; i < this.handlers.length; i++)
-            this.handlers[i].close();
-    }
-
-    cleanup(callback) {
-        // attach user callback to the process event emitter
-        // if no callback, it will still exit gracefully on Ctrl-C
-        callback = callback || (() => {});
-        process.on('cleanup', callback);
-
-        // do app specific cleaning before exiting
-        process.on('exit', () => {
-            this.close();
-            process.emit('cleanup');
-        });
-
-        // catch ctrl+c event and exit normally
-        process.on('SIGINT', () => {
-            this.log(LM_FATAL, 'Ctrl-C pressed, exiting...');
-            process.exit(2);
-        });
-
-        process.on('SIGTERM', () => {
-            this.log(LM_FATAL, 'Kill signal, exiting...');
-            process.exit(2);
-        });
-
-        //catch uncaught exceptions, trace, then exit normally
-        process.on('uncaughtException', e => {
-            try {
-                this.log(LM_FATAL, e.stack);
-            } catch (e) {
-                console.log(e.stack);
-            }
-            process.exit(99);
-        });
+            await this.handlers[i].close();
+        this.closed = true;
     }
 }
 

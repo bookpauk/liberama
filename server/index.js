@@ -7,6 +7,11 @@ const compression = require('compression');
 const http = require('http');
 const WebSocket = require ('ws');
 
+const ayncExit = new (require('./core/AsyncExit'))();
+ayncExit.init();
+
+let log = null;
+
 async function init() {
     //config
     const configManager = new (require('./config'))();//singleton
@@ -18,7 +23,7 @@ async function init() {
     //logger
     const appLogger = new (require('./core/AppLogger'))();//singleton
     await appLogger.init(config);
-    const log = appLogger.log;
+    log = appLogger.log;
 
     //dirs
     log(`${config.name} v${config.version}, Node.js ${process.version}`);
@@ -41,6 +46,13 @@ async function init() {
     //connections
     const connManager = new (require('./db/ConnManager'))();//singleton
     await connManager.init(config);
+
+    const jembaConnManager = new (require('./db/JembaConnManager'))();//singleton
+    await jembaConnManager.init(config, argv['auto-repair']);
+
+    //converter SQLITE => JembaDb
+    const converter = new  (require('./db/Converter'))();
+    await converter.run(config);
 }
 
 async function main() {
@@ -96,13 +108,15 @@ async function main() {
     }
 }
 
-
 (async() => {
     try {
         await init();
         await main();
     } catch (e) {
-        console.error(e);
-        process.exit(1);
+        if (log)
+            log(LM_FATAL, e.stack);
+        else
+            console.error(e.stack);
+        ayncExit.exit(1);
     }
 })();

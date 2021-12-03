@@ -1,3 +1,4 @@
+//TODO: удалить модуль в 2023г
 const sqlite3 = require('sqlite3');
 const sqlite = require('sqlite');
 
