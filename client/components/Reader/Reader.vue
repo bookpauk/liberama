@@ -310,7 +310,7 @@ class Reader {
                 await this.$nextTick();
                 this.paramPosIgnore = false;
             }
-        }, 500, {maxWait: 5000});
+        }, 250, {maxWait: 5000});
 
         this.scrollingSetRecentBook = _.debounce((newValue) => {
             this.debouncedSetRecentBook(newValue);
