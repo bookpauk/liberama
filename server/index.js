@@ -48,7 +48,7 @@ async function init() {
     await connManager.init(config);
 
     const jembaConnManager = new (require('./db/JembaConnManager'))();//singleton
-    await jembaConnManager.init(config);
+    await jembaConnManager.init(config, argv['auto-repair']);
 
     //converter SQLITE => JembaDb
     const converter = new  (require('./db/Converter'))();

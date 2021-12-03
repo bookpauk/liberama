@@ -21,7 +21,7 @@ class JembaConnManager {
         return instance;
     }
 
-    async init(config, migs = jembaMigrations, undoLastMigration = false) {
+    async init(config, forceAutoRepair = false, migs = jembaMigrations, undoLastMigration = false) {
         if (this.inited)
             throw new Error('JembaConnManager initialized already');
 
@@ -52,7 +52,7 @@ class JembaConnManager {
                 try {
                     await dbConn.openAll();
                 } catch(e) {
-                    if (dbConfig.autoRepair && 
+                    if ((forceAutoRepair || dbConfig.autoRepair) && 
                         (
                             e.message.indexOf('corrupted') >= 0 
                             || e.message.indexOf('Unexpected token') >= 0
