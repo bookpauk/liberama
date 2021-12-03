@@ -49,6 +49,10 @@ async function init() {
 
     const jembaConnManager = new (require('./db/JembaConnManager'))();//singleton
     await jembaConnManager.init(config);
+
+    //converter SQLITE => JembaDb
+    const converter = new  (require('./db/Converter'))();
+    await converter.run(config);
 }
 
 async function main() {
@@ -110,9 +114,9 @@ async function main() {
         await main();
     } catch (e) {
         if (log)
-            log(LM_FATAL, e);
+            log(LM_FATAL, e.stack);
         else
-            console.error(e);
+            console.error(e.stack);
         ayncExit.exit(1);
     }
 })();
