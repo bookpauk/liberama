@@ -21,7 +21,7 @@ class Converter {
 
             const rows = await db.select({table: 'storage', count: true});
             if (rows.length && rows[0].count != 0) {
-                log(LM_WARN, '  Destination table already exists, nothing to do');
+                log(LM_WARN, `  Destination table already exists (found ${rows[0].count} items), nothing to do`);
                 return;
             }
 
