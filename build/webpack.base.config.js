@@ -30,7 +30,7 @@ module.exports = {
             },
             {
                 resourceQuery: /^\?vue/,
-                use: path.resolve('build/includer.js')
+                use: path.resolve(__dirname, 'includer.js')
             },
             {
                 test: /\.js$/,
