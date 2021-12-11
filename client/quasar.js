@@ -86,7 +86,6 @@ const plugins = {
 import '@quasar/extras/line-awesome/line-awesome.css';
 import lineAwesome from 'quasar/icon-set/line-awesome.js'
 
-//const q: {Quasar, QuasarOptions: { config, components, directives, plugins }};
 export default {
     quasar: Quasar,
     options: { config, components, directives, plugins }, 
