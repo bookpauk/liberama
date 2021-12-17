@@ -2,7 +2,7 @@ const fs = require('fs-extra');
 const _ = require('lodash');
 
 const ayncExit = new (require('../core/AsyncExit'))();//singleton
-const { JembaDb, JembaDbThread } = require('./JembaDb');
+const { JembaDb, JembaDbThread } = require('jembadb');
 const log = new (require('../core/AppLogger'))().log;//singleton
 
 const jembaMigrations = require('./jembaMigrations');
