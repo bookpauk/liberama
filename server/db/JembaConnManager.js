@@ -46,7 +46,13 @@ class JembaConnManager {
             }
 
             log(`Open "${dbConfig.dbName}" begin`);
-            await dbConn.openDb({dbPath, cacheSize: dbConfig.cacheSize, compressed: dbConfig.compressed, forceFileClosing: dbConfig.forceFileClosing});
+            await dbConn.openDb({
+                dbPath,
+                create: true,
+                cacheSize: dbConfig.cacheSize,
+                compressed: dbConfig.compressed,
+                forceFileClosing: dbConfig.forceFileClosing
+            });
 
             if (dbConfig.openAll) {
                 try {
