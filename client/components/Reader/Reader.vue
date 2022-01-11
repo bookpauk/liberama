@@ -585,7 +585,20 @@ class Reader {
             //сохранение в serverStorage
             if (value) {
                 await utils.sleep(500);
-                await this.$refs.serverStorage.saveRecent(value);
+                
+                let timer = setTimeout(() => {
+                    if (!this.offlineModeActive)
+                        this.$root.notify.error('Таймаут соединения');
+                }, 10000);
+
+                try {
+                    await this.$refs.serverStorage.saveRecent(value);
+                } catch (e) {
+                    if (!this.offlineModeActive)
+                        this.$root.notify.error(e.message);
+                } finally {
+                    clearTimeout(timer);
+                }
             }
         }
     }

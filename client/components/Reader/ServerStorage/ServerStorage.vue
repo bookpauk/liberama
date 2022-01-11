@@ -576,7 +576,7 @@ class ServerStorage {
                 newRecentPatch.rev++;
                 newRecentPatch.data[itemKey] = _.cloneDeep(bm.recent[itemKey]);
 
-                let applyMod = this.cachedRecentMod.data;
+                const applyMod = this.cachedRecentMod.data;
                 if (applyMod && applyMod.key && newRecentPatch.data[applyMod.key])
                     newRecentPatch.data[applyMod.key] = utils.applyObjDiff(newRecentPatch.data[applyMod.key], applyMod.mod, {isAddChanged: true});
 
@@ -627,7 +627,7 @@ class ServerStorage {
                     this.warning(`Последние изменения отменены. Данные синхронизированы с сервером.`);
                 if (!recurse && itemKey) {
                     this.savingRecent = false;
-                    this.saveRecent(itemKey, true);
+                    await this.saveRecent(itemKey, true);
                     return;
                 }
             } else if (result.state == 'success') {

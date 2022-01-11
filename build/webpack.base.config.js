@@ -62,34 +62,6 @@ module.exports = {
                     filename: 'fonts/[name]-[hash:6][ext]'
                 },
             },
-            /*{
-                test: /\.gif$/,
-                loader: "url-loader",
-                options: {
-                    name: "images/[name]-[hash:6].[ext]"
-                }
-            },
-            {
-                test: /\.png$/,
-                loader: "url-loader",
-                options: {
-                    name: "images/[name]-[hash:6].[ext]"
-                }
-            },
-            {
-                test: /\.jpg$/,
-                loader: "file-loader",
-                options: {
-                    name: "images/[name]-[hash:6].[ext]"
-                }
-            },
-            {
-                test: /\.(ttf|eot|woff|woff2)$/,
-                loader: "file-loader",
-                options: {
-                    name: "fonts/[name]-[hash:6].[ext]"
-                }
-            },*/
         ]
     },
 
