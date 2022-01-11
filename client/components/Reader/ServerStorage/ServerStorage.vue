@@ -576,7 +576,7 @@ class ServerStorage {
                 newRecentPatch.rev++;
                 newRecentPatch.data[itemKey] = _.cloneDeep(bm.recent[itemKey]);
 
-                let applyMod = this.cachedRecentMod.data;
+                const applyMod = this.cachedRecentMod.data;
                 if (applyMod && applyMod.key && newRecentPatch.data[applyMod.key])
                     newRecentPatch.data[applyMod.key] = utils.applyObjDiff(newRecentPatch.data[applyMod.key], applyMod.mod, {isAddChanged: true});
 
