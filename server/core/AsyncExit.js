@@ -1,7 +1,7 @@
 let instance = null;
 
 const defaultTimeout = 15*1000;//15 sec
-const exitSignals = ['SIGINT', 'SIGTERM', 'SIGBREAK', 'SIGHUP', 'uncaughtException'];
+const exitSignals = ['SIGINT', 'SIGTERM', 'SIGBREAK', 'SIGHUP', 'uncaughtException', 'SIGUSR2'];
 
 //singleton
 class AsyncExit {
@@ -18,12 +18,9 @@ class AsyncExit {
         return instance;
     }
 
-    init(signals = null, codeOnSignal = 2) {
+    init(signals = exitSignals, codeOnSignal = 2) {
         if (this.inited)
             throw new Error('AsyncExit: initialized already');
-
-        if (!signals)
-            signals = exitSignals;
 
         const runSingalCallbacks = async(signal) => {
             for (const signalCallback of this.onSignalCallbacks.keys()) {
