@@ -585,7 +585,11 @@ class Reader {
             //сохранение в serverStorage
             if (value) {
                 await utils.sleep(500);
-                await this.$refs.serverStorage.saveRecent(value);
+                try {
+                    await this.$refs.serverStorage.saveRecent(value);
+                } catch (e) {
+                    this.$root.notify.error(e.message);
+                }
             }
         }
     }

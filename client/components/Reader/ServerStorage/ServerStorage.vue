@@ -627,7 +627,7 @@ class ServerStorage {
                     this.warning(`Последние изменения отменены. Данные синхронизированы с сервером.`);
                 if (!recurse && itemKey) {
                     this.savingRecent = false;
-                    this.saveRecent(itemKey, true);
+                    await this.saveRecent(itemKey, true);
                     return;
                 }
             } else if (result.state == 'success') {

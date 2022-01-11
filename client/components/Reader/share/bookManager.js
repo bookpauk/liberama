@@ -63,48 +63,6 @@ class BookManager {
             }
 
             await this.cleanRecentBooks();
-
-            //TODO: убрать после 06.2021, когда bmRecentStoreOld устареет
-            {
-                await this.convertFileToDiskPrefix();
-                if (this.recentRev > 10)
-                    await bmRecentStoreOld.clear();
-            }
-        } else {//TODO: убрать после 06.2021, когда bmRecentStoreOld устареет
-            this.recentLast = await bmRecentStoreOld.getItem('recent-last');
-            if (this.recentLast) {
-                this.recent[this.recentLast.key] = this.recentLast;
-                const meta = await bmMetaStore.getItem(`bmMeta-${this.recentLast.key}`);
-                if (_.isObject(meta)) {
-                    this.books[meta.key] = meta;
-                }
-            }
-
-            let key = null;
-            const len = await bmRecentStoreOld.length();
-            for (let i = len - 1; i >= 0; i--) {
-                key = await bmRecentStoreOld.key(i);
-                if (key) {
-                    let r = await bmRecentStoreOld.getItem(key);
-                    if (_.isObject(r) && r.key) {
-                        this.recent[r.key] = r;
-                    }
-                } else  {
-                    await bmRecentStoreOld.removeItem(key);
-                }
-            }
-
-            //размножение для дебага
-            /*if (key) {
-                for (let i = 0; i < 1000; i++) {
-                    const k = this.keyFromUrl(i.toString());
-                    this.recent[k] = Object.assign({}, _.cloneDeep(this.recent[key]), {key: k, touchTime: Date.now() - 1000000, url: utils.randomHexString(300)});
-                }
-            }*/
-
-            await bmRecentStoreNew.setItem('recent', this.recent);
-            this.recentRev = 1;
-            await bmRecentStoreNew.setItem('rev', this.recentRev);
         }
 
         this.recentChanged = true;
@@ -374,7 +332,7 @@ class BookManager {
     //-- recent --------------------------------------------------------------
     async recentSetItem(item = null, skipCheck = false) {
         const rev = await bmRecentStoreNew.getItem('rev');
-        if (rev != this.recentRev && !skipCheck) {
+        if (rev != this.recentRev && !skipCheck) {//если изменение произошло в другой вкладке барузера
             const newRecent = await bmRecentStoreNew.getItem('recent');
             Object.assign(this.recent, newRecent);
             this.recentItem = await bmRecentStoreNew.getItem('recent-item');
@@ -453,33 +411,6 @@ class BookManager {
         if (isDel)
             await this.recentSetItem();
         return isDel;
-    }
-
-    async convertFileToDiskPrefix() {
-        let isConverted = false;
-
-        const newRecent = {};
-        for (let key of Object.keys(this.recent)) {
-            let newKey = key;
-            let newUrl = this.recent[key].url;
-
-            if (newKey.indexOf('66696c65') == 0) {
-                newKey = newKey.replace(/^66696c65/, '6469736b');
-                if (newUrl)
-                    newUrl = newUrl.replace(/^file/, 'disk');
-                isConverted = true;
-            }
-
-            newRecent[newKey] = this.recent[key];
-            newRecent[newKey].key = newKey;
-            if (newUrl)
-                newRecent[newKey].url = newUrl;
-        }
-        if (isConverted) {
-            this.recent = newRecent;
-            await this.recentSetItem(null, true);
-        }
-        return isConverted;
     }
 
     mostRecentBook() {
