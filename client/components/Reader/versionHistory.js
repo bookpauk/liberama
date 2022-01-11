@@ -1,5 +1,16 @@
 export const versionHistory = [
 {
+    showUntil: '2022-01-10',
+    header: '0.11.2 (2022-01-11)',
+    content:
+`
+<ul>
+    <li>переход на JembaDb вместо SQLite</li>
+</ul>
+`
+},
+
+{
     showUntil: '2021-12-02',
     header: '0.11.1 (2021-12-03)',
     content:
