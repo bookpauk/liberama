@@ -46,12 +46,16 @@ class JembaConnManager {
             }
 
             log(`Open "${dbConfig.dbName}" begin`);
-            await dbConn.openDb({
+            await dbConn.lock({
                 dbPath,
                 create: true,
-                cacheSize: dbConfig.cacheSize,
-                compressed: dbConfig.compressed,
-                forceFileClosing: dbConfig.forceFileClosing
+                softLock: true,
+                
+                tableDefaults: {
+                    cacheSize: dbConfig.cacheSize,
+                    compressed: dbConfig.compressed,
+                    forceFileClosing: dbConfig.forceFileClosing
+                },
             });
 
             if (dbConfig.openAll) {
@@ -97,7 +101,7 @@ class JembaConnManager {
             return;
 
         for (const dbConfig of this.config.jembaDb) {
-            await this._db[dbConfig.dbName].closeDb();
+            await this._db[dbConfig.dbName].unlock();
         }
 
         this._db = {};
