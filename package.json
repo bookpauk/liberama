@@ -60,7 +60,7 @@
     "got": "^11.8.2",
     "he": "^1.2.0",
     "iconv-lite": "^0.6.3",
-    "jembadb": "^2.2.0",
+    "jembadb": "^2.3.0",
     "localforage": "^1.10.0",
     "lodash": "^4.17.21",
     "minimist": "^1.2.5",
