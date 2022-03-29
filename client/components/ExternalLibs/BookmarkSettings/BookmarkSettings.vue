@@ -55,16 +55,16 @@
 
                 <div class="col fit tree">
                     <div v-show="nodes.length" class="checkbox-tick-all">
-                        <q-checkbox v-model="tickAll" size="36px" label="Выбрать все" @input="makeTickAll" />
+                        <q-checkbox v-model="tickAll" size="36px" label="Выбрать все" @update:model-value="makeTickAll" />
                     </div>
                     <q-tree
+                        v-model:selected="selected"
+                        v-model:ticked="ticked"
+                        v-model:expanded="expanded"
                         class="q-my-xs"
                         :nodes="nodes"
                         node-key="key"
                         tick-strategy="leaf"
-                        v-model:selected="selected"
-                        v-model:ticked="ticked"
-                        v-model:expanded="expanded"
                         selected-color="black"
                         :filter="search"
                         no-nodes-label="Закладок пока нет"
@@ -97,7 +97,7 @@ const componentOptions = {
         Window,
     },
     watch: {
-        ticked: function() {
+        ticked() {
             this.checkAllTicked();
         },
     }    
