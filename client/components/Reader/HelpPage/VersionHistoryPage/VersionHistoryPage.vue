@@ -33,14 +33,15 @@ class VersionHistoryPage {
 
     mounted() {
         let vh = [];
-        for (const version of versionHistory) {
-            vh.push(version.header);
+        for (const v of versionHistory) {
+            vh.push(`${v.version} (${v.releaseDate})`);
         }
         this.versionHeader = vh;
 
         let vc = [];
-        for (const version of versionHistory) {
-            vc.push({key: version.header, content: 'Версия ' + version.header + version.content});
+        for (const v of versionHistory) {
+            let header = `${v.version} (${v.releaseDate})`;
+            vc.push({key: header, content: 'Версия ' + header + v.content});
         }
         this.versionContent = vc;
     }

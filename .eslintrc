@@ -31,6 +31,7 @@
     "vue/max-attributes-per-line": "off",
     "vue/html-self-closing": "off",
     "vue/no-v-html": "off",
+    "vue/no-v-model-argument": "off",
 
     "strict": 0,
     "indent": [0, 4, {

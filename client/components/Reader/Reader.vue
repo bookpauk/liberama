@@ -525,9 +525,7 @@ class Reader {
     }
 
     get clientVersion() {
-        let v = versionHistory[0].header;
-        v = v.split(' ')[0];
-        return v;
+        return versionHistory[0].version;
     }
 
     get routeParamUrl() {

@@ -55,8 +55,7 @@ class WebSocketController {
             ws.lastActivity = Date.now();
             
             //pong for WebSocketConnection
-            if (req._rpo === 1)
-                this.send({_rok: 1}, req, ws);
+            this.send({_rok: 1}, req, ws);
 
             switch (req.action) {
                 case 'test':

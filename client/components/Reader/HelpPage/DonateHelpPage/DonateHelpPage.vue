@@ -19,7 +19,7 @@
                 </div>
             </div>
 
-            <div class="address">                
+            <!--div class="address">                
                 <img class="logo" src="./assets/paypal.png">
                 <div class="para">
                     {{ paypalAddress }}
@@ -29,7 +29,7 @@
                         </q-tooltip>                    
                     </q-icon>
                 </div>
-            </div>
+            </div-->
 
             <div class="address">                
                 <img class="logo" src="./assets/bitcoin.png">

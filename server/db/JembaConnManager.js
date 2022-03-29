@@ -14,6 +14,7 @@ class JembaConnManager {
     constructor() {
         if (!instance) {
             this.inited = false;
+            this._db = {};
 
             instance = this;
         }
@@ -27,6 +28,8 @@ class JembaConnManager {
 
         this.config = config;
         this._db = {};
+
+        ayncExit.add(this.close.bind(this));
 
         for (const dbConfig of this.config.jembaDb) {
             const dbPath = `${this.config.dataDir}/db/${dbConfig.dbName}`;
@@ -44,17 +47,23 @@ class JembaConnManager {
             } else {
                 dbConn = new JembaDb();
             }
+            this._db[dbConfig.dbName] = dbConn;
 
             log(`Open "${dbConfig.dbName}" begin`);
-            await dbConn.openDb({
+            await dbConn.lock({
                 dbPath,
                 create: true,
-                cacheSize: dbConfig.cacheSize,
-                compressed: dbConfig.compressed,
-                forceFileClosing: dbConfig.forceFileClosing
+                softLock: true,
+
+                tableDefaults: {
+                    cacheSize: dbConfig.cacheSize,
+                    compressed: dbConfig.compressed,
+                    forceFileClosing: dbConfig.forceFileClosing,
+                    typeCompatMode: true,
+                },
             });
 
-            if (dbConfig.openAll) {
+            if (dbConfig.openAll || forceAutoRepair || dbConfig.autoRepair) {
                 try {
                     await dbConn.openAll();
                 } catch(e) {
@@ -83,21 +92,15 @@ class JembaConnManager {
                 if (applied.length)
                     log(`${applied.length} migrations applied to "${dbConfig.dbName}"`);
             }
-
-            this._db[dbConfig.dbName] = dbConn;
         }
-
-        ayncExit.add(this.close.bind(this));
 
         this.inited = true;
     }
 
     async close() {
-        if (!this.inited)
-            return;
-
         for (const dbConfig of this.config.jembaDb) {
-            await this._db[dbConfig.dbName].closeDb();
+            if (this._db[dbConfig.dbName])
+                await this._db[dbConfig.dbName].unlock();
         }
 
         this._db = {};

@@ -219,7 +219,7 @@ class Reader {
         const state = response.state;
         if (!state)
             throw new Error('Неверный ответ api');
-        if (response.state == 'error') {
+        if (state == 'error') {
             throw new Error(response.error);
         }
 

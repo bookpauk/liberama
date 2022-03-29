@@ -8,7 +8,6 @@ const http = require('http');
 const WebSocket = require ('ws');
 
 const ayncExit = new (require('./core/AsyncExit'))();
-ayncExit.init();
 
 let log = null;
 
