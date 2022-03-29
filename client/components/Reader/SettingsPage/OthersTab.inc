@@ -52,7 +52,7 @@
     </q-checkbox>
 </div>
 
-<div class="item row">
+<!--div class="item row">
     <div class="label-6">Уведомление</div>
     <q-checkbox size="xs" v-model="showDonationDialog2020">
         Показывать "Оплатим хостинг вместе"
@@ -60,7 +60,7 @@
             Показывать уведомление "Оплатим хостинг вместе"
         </q-tooltip>
     </q-checkbox>
-</div>
+</div-->
 
 <!---------------------------------------------->
 <div class="part-header">Другое</div>
