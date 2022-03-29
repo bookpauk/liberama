@@ -9,8 +9,7 @@ const cleanPeriod = 5*1000;//5 секунд
 class WebSocketConnection {
     //messageLifeTime в секундах (проверка каждый cleanPeriod интервал)
     constructor(url, openTimeoutSecs = 10, messageLifeTimeSecs = 30) {
-        //const ws = 'ws';//for nodejs
-        this.WebSocket = (isBrowser ? WebSocket : null/*for nodejs require(ws)*/);
+        this.WebSocket = (isBrowser ? WebSocket : require('ws'));
         this.url = url;
         this.ws = null;
         this.listeners = [];
@@ -166,7 +165,7 @@ class WebSocketConnection {
             this.requestId = (this.requestId < 1000000 ? this.requestId + 1 : 1);
             const requestId = this.requestId;//реентерабельность!!!
 
-            this.ws.send(JSON.stringify(Object.assign({requestId, _rpo: 1}, req)));//_rpo: 1 - ждем в ответ _rok: 1
+            this.ws.send(JSON.stringify(Object.assign({requestId}, req)));
 
             let resp = {};
             try {

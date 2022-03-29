@@ -5,11 +5,12 @@ const { VueLoaderPlugin } = require('vue-loader');
 const clientDir = path.resolve(__dirname, '../client');
 
 module.exports = {
-    /*resolve: {
+    resolve: {
         alias: {
-            vue: '@vue/compat'
+            ws: false,
+            //vue: '@vue/compat'
         }
-    },*/    
+    },
     entry: [`${clientDir}/main.js`],
     output: {
         publicPath: '/app/',
