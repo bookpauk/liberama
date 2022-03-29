@@ -5,12 +5,17 @@
                 Что нового:
             </template>
 
-            <div style="line-height: 20px" v-html="whatsNewContent"></div>
+            <div style="line-height: 20px; min-width: 300px">
+                <div v-html="whatsNewContent"></div>
+            </div>
 
-            <span class="clickable" @click="openVersionHistory">Посмотреть историю версий</span>
-            <span slot="footer">
-                <q-btn class="q-px-md" dense no-caps @click="whatsNewDisable">Больше не показывать</q-btn>
-            </span>
+            <span class="clickable" style="font-size: 13px" @click="openVersionHistory">Посмотреть историю версий</span>
+
+            <template #footer>
+                <q-btn class="q-px-md" dense no-caps @click="whatsNewDisable">
+                    Больше не показывать
+                </q-btn>
+            </template>
         </Dialog>
 
         <Dialog ref="dialog2" v-model="donationVisible">
@@ -55,11 +60,13 @@
                 </div>
             </div>
 
-            <span slot="footer">
+            <template #footer>
                 <span class="clickable row justify-end" style="font-size: 60%; color: grey" @click="donationDialogDisable">Больше не показывать</span>                        
                 <br>
-                <q-btn class="q-px-sm" dense no-caps @click="donationDialogRemind">Напомнить позже</q-btn>
-            </span>
+                <q-btn class="q-px-sm" dense no-caps @click="donationDialogRemind">
+                    Напомнить позже
+                </q-btn>
+            </template>
         </Dialog>
     </div>
 </template>
@@ -112,9 +119,9 @@ class ReaderDialogs {
         const whatsNew = versionHistory[0];
         if (this.showWhatsNewDialog &&
             whatsNew.showUntil >= utils.formatDate(new Date(), 'coDate') &&
-            whatsNew.header != this.whatsNewContentHash) {
+            this.whatsNewHeader != this.whatsNewContentHash) {
             await utils.sleep(2000);
-            this.whatsNewContent = 'Версия ' + whatsNew.header + whatsNew.content;
+            this.whatsNewContent = 'Версия ' + this.whatsNewHeader + whatsNew.content;
             this.whatsNewVisible = true;
         }
     }
@@ -160,8 +167,11 @@ class ReaderDialogs {
 
     whatsNewDisable() {
         this.whatsNewVisible = false;
-        const whatsNew = versionHistory[0];
-        this.commit('reader/setWhatsNewContentHash', whatsNew.header);
+        this.commit('reader/setWhatsNewContentHash', this.whatsNewHeader);
+    }
+
+    get whatsNewHeader() {
+        return `${versionHistory[0].version} (${versionHistory[0].releaseDate})`;
     }
 
     get mode() {
