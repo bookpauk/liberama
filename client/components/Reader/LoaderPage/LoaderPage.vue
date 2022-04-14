@@ -47,6 +47,7 @@
         </div>
 
         <div class="col column justify-end items-center no-wrap overflow-hidden">
+            <span v-if="mode == 'omnireader'" class="bottom-span clickable" @click="findBook">Найти книгу</span>
             <span class="bottom-span clickable" @click="openHelp">Справка</span>
             <!--span class="bottom-span clickable" @click="openDonate">Помочь проекту</span-->
 
@@ -55,6 +56,18 @@
         </div>
 
         <PasteTextPage v-if="pasteTextActive" ref="pasteTextPage" @paste-text-toggle="pasteTextToggle" @load-buffer="loadBuffer"></PasteTextPage>
+
+        <Dialog ref="dialog1" v-model="findBookVisible">
+            <template #header>
+                Подсказка ;-)
+            </template>
+
+            <div style="word-break: normal">
+                Если вы хотите найти определенную книгу, добро пожаловать в
+                раздел "Сетевая библиотека" (кнопка <q-icon name="la la-sitemap" size="32px" />) на сайте читалки
+                <a href="https://liberama.top" target="_blank">liberama.top</a>
+            </div>
+        </Dialog>
     </div>
 </template>
 
@@ -64,6 +77,7 @@ import vueComponent from '../../vueComponent.js';
 
 import GithubCorner from './GithubCorner/GithubCorner.vue';
 
+import Dialog from '../../share/Dialog.vue';
 import PasteTextPage from './PasteTextPage/PasteTextPage.vue';
 import {versionHistory} from '../versionHistory';
 import * as utils from '../../../share/utils';
@@ -71,6 +85,7 @@ import * as utils from '../../../share/utils';
 const componentOptions = {
     components: {
         GithubCorner,
+        Dialog,
         PasteTextPage,
     },
 };
@@ -80,6 +95,7 @@ class LoaderPage {
     bookUrl = null;
     loadPercent = 0;
     pasteTextActive = false;
+    findBookVisible = false;
 
     created() {
         this.commit = this.$store.commit;
@@ -165,6 +181,10 @@ class LoaderPage {
         this.$emit('do-action', {action: 'donate'});
     }
     
+    findBook() {
+        this.findBookVisible = true;
+    }
+
     openComments() {
         window.open('http://samlib.ru/comment/b/bookpauk/bookpauk_reader', '_blank');
     }
@@ -181,6 +201,9 @@ class LoaderPage {
     }
 
     keyHook(event) {
+        if (this.$refs.dialog1.active)
+            return true;
+
         if (this.pasteTextActive) {
             return this.$refs.pasteTextPage.keyHook(event);
         }
