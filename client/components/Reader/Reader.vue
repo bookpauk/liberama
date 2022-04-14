@@ -160,7 +160,7 @@
             <ContentsPage v-show="contentsActive" ref="contentsPage" :book-pos="bookPos" :is-visible="contentsActive" @do-action="doAction" @book-pos-changed="bookPosChanged"></ContentsPage>
 
             <ServerStorage v-show="hidden" ref="serverStorage"></ServerStorage>
-            <ReaderDialogs ref="dialogs" @donate-toggle="donateToggle" @version-history-toggle="versionHistoryToggle"></ReaderDialogs>
+            <ReaderDialogs ref="dialogs" @donate-toggle="donateToggle" @version-history-toggle="versionHistoryToggle" @load-buffer-toggle="loadBufferToggle"></ReaderDialogs>
         </div>
     </div>
 </template>
