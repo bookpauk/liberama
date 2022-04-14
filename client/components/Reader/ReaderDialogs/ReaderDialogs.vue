@@ -162,6 +162,7 @@ class ReaderDialogs {
     }
 
     loadBufferClick() {
+        this.$emit('load-buffer-toggle');
         this.urlHelpVisible = false;
     }
 
