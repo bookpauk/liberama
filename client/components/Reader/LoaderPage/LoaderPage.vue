@@ -22,6 +22,7 @@
 
             <div class="q-my-sm"></div>
             <q-btn no-caps dense class="q-px-sm" color="primary" size="13px" @click="loadFileClick">
+                <q-icon class="q-mr-xs" name="la la-caret-square-up" size="24px" />
                 Загрузить файл с диска
             </q-btn>
             

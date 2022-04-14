@@ -10,7 +10,14 @@
                         </q-tooltip>
                     </button>
 
-                    <button ref="help" v-ripple class="tool-button" :class="buttonActiveClass('help')" @click="buttonClick('help')">
+                    <button v-show="showToolButton['loadFile']" ref="loadFile" v-ripple class="tool-button" :class="buttonActiveClass('loadFile')" @click="buttonClick('loadFile')">
+                        <q-icon name="la la-caret-square-up" size="32px" />
+                        <q-tooltip :delay="1500" anchor="bottom right" content-style="font-size: 80%">
+                            {{ rstore.readerActions['loadFile'] }}
+                        </q-tooltip>
+                    </button>
+
+                    <button v-show="showToolButton['help']" ref="help" v-ripple class="tool-button" :class="buttonActiveClass('help')" @click="buttonClick('help')">
                         <q-icon name="la la-question" size="32px" />
                         <q-tooltip :delay="1500" anchor="bottom right" content-style="font-size: 80%">
                             {{ rstore.readerActions['help'] }}
@@ -252,6 +259,7 @@ class Reader {
     rstore = {};
 
     loaderActive = false;
+    loadFileActive = false;
     fullScreenActive = false;
     setPositionActive = false;
     searchActive = false;
@@ -679,6 +687,17 @@ class Reader {
         if (this.loaderActive) {
             this.closeAllWindows();
         }
+    }
+
+    loadFileToggle() {
+        if (!this.loaderActive)
+            this.loaderToggle();
+        this.$nextTick(() => {
+            const page = this.$refs.page;
+            if (this.activePage == 'LoaderPage' && page.loadFileClick) {
+                page.loadFileClick();
+            }
+        });        
     }
 
     setPositionToggle() {
@@ -1209,6 +1228,9 @@ class Reader {
         switch (action) {
             case 'loader':
                 this.loaderToggle();
+                break;
+            case 'loadFile':
+                this.loadFileToggle();
                 break;
             case 'help':
                 this.helpToggle();
