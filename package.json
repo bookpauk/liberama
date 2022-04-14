@@ -63,7 +63,7 @@
     "jembadb": "^2.3.0",
     "localforage": "^1.10.0",
     "lodash": "^4.17.21",
-    "minimist": "^1.2.5",
+    "minimist": "^1.2.6",
     "multer": "^1.4.3",
     "pako": "^2.0.4",
     "path-browserify": "^1.0.1",
