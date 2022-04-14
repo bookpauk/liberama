@@ -17,6 +17,7 @@ const readerActions = {
     'copyText': 'Скопировать текст со страницы',
     'convOptions': 'Настроить конвертирование',
     'refresh': 'Принудительно обновить книгу',
+    'clickControl': 'Управление кликом',
     'offlineMode': 'Автономный режим (без интернета)',
     'contents': 'Оглавление/закладки',
     'libs': 'Сетевая библиотека',
@@ -52,6 +53,7 @@ const toolButtons = [
     {name: 'contents',    show: true},
     {name: 'libs',        show: true},
     {name: 'recentBooks', show: true},
+    {name: 'clickControl', show: false},
     {name: 'offlineMode', show: false},
 ];
 
@@ -74,6 +76,7 @@ const hotKeys = [
     {name: 'contents', codes: ['C']},
     {name: 'libs', codes: ['L']},
     {name: 'recentBooks', codes: ['X']},
+    {name: 'clickControl', codes: ['Ctrl+B']},
     {name: 'offlineMode', codes: ['O']},
 
     {name: 'switchToolbar', codes: ['Tab', 'Q']},

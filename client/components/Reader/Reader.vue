@@ -9,21 +9,18 @@
                             {{ rstore.readerActions['loader'] }}
                         </q-tooltip>
                     </button>
-
                     <button v-show="showToolButton['loadFile']" ref="loadFile" v-ripple class="tool-button" :class="buttonActiveClass('loadFile')" @click="buttonClick('loadFile')">
                         <q-icon name="la la-caret-square-up" size="32px" />
                         <q-tooltip :delay="1500" anchor="bottom right" content-style="font-size: 80%">
                             {{ rstore.readerActions['loadFile'] }}
                         </q-tooltip>
                     </button>
-
                     <button v-show="showToolButton['loadBuffer']" ref="loadBuffer" v-ripple class="tool-button" :class="buttonActiveClass('loadBuffer')" @click="buttonClick('loadBuffer')">
                         <q-icon name="la la-comment" size="32px" />
                         <q-tooltip :delay="1500" anchor="bottom right" content-style="font-size: 80%">
                             {{ rstore.readerActions['loadBuffer'] }}
                         </q-tooltip>
                     </button>
-
                     <button v-show="showToolButton['help']" ref="help" v-ripple class="tool-button" :class="buttonActiveClass('help')" @click="buttonClick('help')">
                         <q-icon name="la la-question" size="32px" />
                         <q-tooltip :delay="1500" anchor="bottom right" content-style="font-size: 80%">
@@ -110,6 +107,12 @@
                 </div>
 
                 <div>
+                    <button v-show="showToolButton['clickControl']" ref="clickControl" v-ripple class="tool-button" :class="buttonActiveClass('clickControl')" @click="buttonClick('clickControl')">
+                        <q-icon name="la la-mouse" size="32px" />
+                        <q-tooltip :delay="1500" anchor="bottom middle" content-style="font-size: 80%">
+                            {{ rstore.readerActions['clickControl'] }}
+                        </q-tooltip>
+                    </button>
                     <button v-show="showToolButton['offlineMode']" ref="offlineMode" v-ripple class="tool-button" :class="buttonActiveClass('offlineMode')" @click="buttonClick('offlineMode')">
                         <q-icon name="la la-unlink" size="32px" />
                         <q-tooltip :delay="1500" anchor="bottom middle" content-style="font-size: 80%">
@@ -277,6 +280,7 @@ class Reader {
     contentsActive = false;    
     libsActive = false;
     recentBooksActive = false;
+    clickControlActive = false;
     offlineModeActive = false;
     settingsActive = false;
 
@@ -395,6 +399,7 @@ class Reader {
         this.copyFullText = settings.copyFullText;
         this.showClickMapPage = settings.showClickMapPage;
         this.clickControl = settings.clickControl;
+        this.clickControlActive = this.clickControl;
         this.blinkCachedLoad = settings.blinkCachedLoad;
         this.showToolButton = settings.showToolButton;
         this.enableSitesFilter = settings.enableSitesFilter;
@@ -846,6 +851,12 @@ class Reader {
         }
     }
 
+    clickControlToggle() {
+        const newSettings = _.cloneDeep(this.settings);
+        newSettings.clickControl = !this.clickControl;
+        this.commit('reader/setSettings', newSettings);
+    }
+
     offlineModeToggle() {
         this.offlineModeActive = !this.offlineModeActive;
         this.$refs.serverStorage.offlineModeActive = this.offlineModeActive;
@@ -946,6 +957,7 @@ class Reader {
             case 'contents':
             case 'libs':
             case 'recentBooks':
+            case 'clickControl':
             case 'offlineMode':
             case 'settings':
                 if (this.progressActive) {
@@ -1297,6 +1309,9 @@ class Reader {
                 break;
             case 'recentBooks':
                 this.recentBooksToggle();
+                break;
+            case 'clickControl':
+                this.clickControlToggle();
                 break;
             case 'offlineMode':
                 this.offlineModeToggle();
