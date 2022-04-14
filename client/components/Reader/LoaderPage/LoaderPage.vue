@@ -22,11 +22,13 @@
 
             <div class="q-my-sm"></div>
             <q-btn no-caps dense class="q-px-sm" color="primary" size="13px" @click="loadFileClick">
+                <q-icon class="q-mr-xs" name="la la-caret-square-up" size="24px" />
                 Загрузить файл с диска
             </q-btn>
             
             <div class="q-my-sm"></div>
             <q-btn no-caps dense class="q-px-sm" color="primary" size="13px" @click="loadBufferClick">
+                <q-icon class="q-mr-xs" name="la la-comment" size="24px" />
                 Из буфера обмена
             </q-btn>
 
@@ -46,7 +48,7 @@
 
         <div class="col column justify-end items-center no-wrap overflow-hidden">
             <span class="bottom-span clickable" @click="openHelp">Справка</span>
-            <span class="bottom-span clickable" @click="openDonate">Помочь проекту</span>
+            <!--span class="bottom-span clickable" @click="openDonate">Помочь проекту</span-->
 
             <span v-if="version == clientVersion" class="bottom-span">v{{ version }}</span>
             <span v-else class="bottom-span">Версия сервера {{ version }}, версия клиента {{ clientVersion }}, необходимо обновить страницу</span>
@@ -64,6 +66,7 @@ import GithubCorner from './GithubCorner/GithubCorner.vue';
 
 import PasteTextPage from './PasteTextPage/PasteTextPage.vue';
 import {versionHistory} from '../versionHistory';
+import * as utils from '../../../share/utils';
 
 const componentOptions = {
     components: {
@@ -136,7 +139,7 @@ class LoaderPage {
     }
 
     loadBufferClick() {
-        this.pasteTextToggle();
+        this.showPasteText();
     }
 
     loadBuffer(opts) {
@@ -144,6 +147,10 @@ class LoaderPage {
             const file = new File([opts.buffer], 'dummyName-PasteFromClipboard');
             this.$emit('load-file', {file});
         }
+    }
+
+    showPasteText() {
+        this.pasteTextActive = true;
     }
 
     pasteTextToggle() {
@@ -166,8 +173,9 @@ class LoaderPage {
         window.open('http://old.omnireader.ru', '_blank');
     }
 
-    onInputKeydown(event) {
+    async onInputKeydown(event) {
         if (event.key == 'Enter') {
+            await utils.sleep(100);
             this.submitUrl();
         }
     }
@@ -178,14 +186,8 @@ class LoaderPage {
         }
 
         const input = this.$refs.input.getNativeElement();
-        if (event.type == 'keydown' && document.activeElement !== input) {
-            const action = this.$root.readerActionByKeyEvent(event);
-            switch (action) {
-                case 'help':
-                    this.openHelp(event);
-                    return true;
-            }
-        }
+        if (event.type == 'keydown' && (document.activeElement === input || event.code == 'Enter') && event.code != 'Escape')
+            return true;
 
         return false;
     }

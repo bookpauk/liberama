@@ -2,8 +2,10 @@ import * as utils from '../../share/utils';
 import googleFonts from './fonts/fonts.json';
 
 const readerActions = {
-    'help': 'Вызвать cправку',
     'loader': 'На страницу загрузки',
+    'loadFile': 'Загрузить файл с диска',
+    'loadBuffer': 'Загрузить из буфера обмена',
+    'help': 'Вызвать cправку',    
     'settings': 'Настроить',
     'undoAction': 'Действие назад',
     'redoAction': 'Действие вперед',
@@ -15,6 +17,7 @@ const readerActions = {
     'copyText': 'Скопировать текст со страницы',
     'convOptions': 'Настроить конвертирование',
     'refresh': 'Принудительно обновить книгу',
+    'clickControl': 'Управление кликом',
     'offlineMode': 'Автономный режим (без интернета)',
     'contents': 'Оглавление/закладки',
     'libs': 'Сетевая библиотека',
@@ -35,6 +38,9 @@ const readerActions = {
 
 //readerActions[name]
 const toolButtons = [
+    {name: 'loadFile',    show: true},
+    {name: 'loadBuffer',  show: true},    
+    {name: 'help',        show: true},
     {name: 'undoAction',  show: true},
     {name: 'redoAction',  show: true},
     {name: 'fullScreen',  show: true},
@@ -47,13 +53,16 @@ const toolButtons = [
     {name: 'contents',    show: true},
     {name: 'libs',        show: true},
     {name: 'recentBooks', show: true},
+    {name: 'clickControl', show: false},
     {name: 'offlineMode', show: false},
 ];
 
 //readerActions[name]
 const hotKeys = [
-    {name: 'help', codes: ['F1', 'H']},
     {name: 'loader', codes: ['Escape']},
+    {name: 'loadFile', codes: ['F3']},
+    {name: 'loadBuffer', codes: ['F4']},
+    {name: 'help', codes: ['F1', 'H']},
     {name: 'settings', codes: ['S']},
     {name: 'undoAction', codes: ['Ctrl+BracketLeft']},
     {name: 'redoAction', codes: ['Ctrl+BracketRight']},
@@ -67,6 +76,7 @@ const hotKeys = [
     {name: 'contents', codes: ['C']},
     {name: 'libs', codes: ['L']},
     {name: 'recentBooks', codes: ['X']},
+    {name: 'clickControl', codes: ['Ctrl+B']},
     {name: 'offlineMode', codes: ['O']},
 
     {name: 'switchToolbar', codes: ['Tab', 'Q']},
