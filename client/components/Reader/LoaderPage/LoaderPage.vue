@@ -186,18 +186,8 @@ class LoaderPage {
         }
 
         const input = this.$refs.input.getNativeElement();
-        if (event.type == 'keydown' && document.activeElement === input)
+        if (event.type == 'keydown' && (document.activeElement === input || event.code == 'Enter') && event.code != 'Escape')
             return true;
-
-        /*const input = this.$refs.input.getNativeElement();
-        if (event.type == 'keydown' && document.activeElement !== input) {
-            const action = this.$root.readerActionByKeyEvent(event);
-            switch (action) {
-                case 'help':
-                    this.openHelp(event);
-                    return true;
-            }
-        }*/
 
         return false;
     }
