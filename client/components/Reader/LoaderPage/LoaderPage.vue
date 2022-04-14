@@ -46,7 +46,7 @@
 
         <div class="col column justify-end items-center no-wrap overflow-hidden">
             <span class="bottom-span clickable" @click="openHelp">Справка</span>
-            <span class="bottom-span clickable" @click="openDonate">Помочь проекту</span>
+            <!--span class="bottom-span clickable" @click="openDonate">Помочь проекту</span-->
 
             <span v-if="version == clientVersion" class="bottom-span">v{{ version }}</span>
             <span v-else class="bottom-span">Версия сервера {{ version }}, версия клиента {{ clientVersion }}, необходимо обновить страницу</span>
@@ -136,7 +136,7 @@ class LoaderPage {
     }
 
     loadBufferClick() {
-        this.pasteTextToggle();
+        this.showPasteText();
     }
 
     loadBuffer(opts) {
@@ -144,6 +144,10 @@ class LoaderPage {
             const file = new File([opts.buffer], 'dummyName-PasteFromClipboard');
             this.$emit('load-file', {file});
         }
+    }
+
+    showPasteText() {
+        this.pasteTextActive = true;
     }
 
     pasteTextToggle() {

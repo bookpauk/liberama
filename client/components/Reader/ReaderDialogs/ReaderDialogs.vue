@@ -54,9 +54,9 @@
 
                 <br><br>
                 <div class="row justify-center">
-                    <q-btn class="q-px-sm" color="primary" dense no-caps rounded @click="openDonate">
+                    <!--q-btn class="q-px-sm" color="primary" dense no-caps rounded @click="openDonate">
                         Помочь проекту
-                    </q-btn>
+                    </q-btn-->
                 </div>
             </div>
 

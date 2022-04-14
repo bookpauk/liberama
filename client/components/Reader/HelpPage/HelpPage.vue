@@ -29,14 +29,14 @@ import CommonHelpPage from './CommonHelpPage/CommonHelpPage.vue';
 import HotkeysHelpPage from './HotkeysHelpPage/HotkeysHelpPage.vue';
 import MouseHelpPage from './MouseHelpPage/MouseHelpPage.vue';
 import VersionHistoryPage from './VersionHistoryPage/VersionHistoryPage.vue';
-import DonateHelpPage from './DonateHelpPage/DonateHelpPage.vue';
+//import DonateHelpPage from './DonateHelpPage/DonateHelpPage.vue';
 
 const pages = {
     'CommonHelpPage': CommonHelpPage,
     'HotkeysHelpPage': HotkeysHelpPage,
     'MouseHelpPage': MouseHelpPage,
     'VersionHistoryPage': VersionHistoryPage,
-    'DonateHelpPage': DonateHelpPage,
+    //'DonateHelpPage': DonateHelpPage,
 };
 
 const tabs = [
@@ -44,7 +44,7 @@ const tabs = [
     ['MouseHelpPage', 'Мышь/тачскрин'],
     ['HotkeysHelpPage', 'Клавиатура'],
     ['VersionHistoryPage', 'История версий'],
-    ['DonateHelpPage', 'Помочь проекту'],
+    //['DonateHelpPage', 'Помочь проекту'],
 ];
 
 const componentOptions = {
@@ -73,7 +73,7 @@ class HelpPage {
     }
 
     activateDonateHelpPage() {
-        this.selectedTab = 'DonateHelpPage';
+        //this.selectedTab = 'DonateHelpPage';
     }
 
     activateVersionHistoryHelpPage() {

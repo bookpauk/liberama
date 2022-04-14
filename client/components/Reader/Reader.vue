@@ -9,6 +9,13 @@
                             {{ rstore.readerActions['loader'] }}
                         </q-tooltip>
                     </button>
+
+                    <button ref="help" v-ripple class="tool-button" :class="buttonActiveClass('help')" @click="buttonClick('help')">
+                        <q-icon name="la la-question" size="32px" />
+                        <q-tooltip :delay="1500" anchor="bottom right" content-style="font-size: 80%">
+                            {{ rstore.readerActions['help'] }}
+                        </q-tooltip>
+                    </button>
                 </div>
 
                 <div>
@@ -889,6 +896,7 @@ class Reader {
 
         switch (action) {
             case 'loader':
+            case 'help':
             case 'fullScreen':
             case 'setPosition':
             case 'search':

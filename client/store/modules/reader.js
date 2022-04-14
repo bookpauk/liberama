@@ -35,6 +35,7 @@ const readerActions = {
 
 //readerActions[name]
 const toolButtons = [
+    {name: 'help',        show: true},
     {name: 'undoAction',  show: true},
     {name: 'redoAction',  show: true},
     {name: 'fullScreen',  show: true},
