@@ -68,6 +68,26 @@
                 </q-btn>
             </template>
         </Dialog>
+
+        <Dialog ref="dialog3" v-model="urlHelpVisible">
+            <template #header>
+                Обнаружена невалидная ссылка в поле "URL книги".
+                <br>
+            </template>
+
+            <div style="word-break: normal">
+                Если вы хотите найти определенную книгу и открыть в читалке, добро пожаловать в
+                раздел "Сетевая библиотека" (кнопка <q-icon name="la la-sitemap" size="32px" />) на сайте
+                <a href="https://liberama.top" target="_blank">liberama.top</a>
+
+                <br><br>
+                Если же вы пытаетесь вставить текст в читалку из буфера обмена, пожалуйста воспользуйтесь кнопкой
+                <q-btn no-caps dense class="q-px-sm" color="primary" size="13px" @click="loadBufferClick">
+                    Из буфера обмена
+                </q-btn>
+                на странице загрузки.
+            </div>
+        </Dialog>
     </div>
 </template>
 
@@ -95,6 +115,7 @@ class ReaderDialogs {
     whatsNewVisible = false;
     whatsNewContent = '';
     donationVisible = false;
+    urlHelpVisible = false;
 
     created() {
         this.commit = this.$store.commit;
@@ -133,6 +154,14 @@ class ReaderDialogs {
             await utils.sleep(3000);
             this.donationVisible = true;
         }
+    }
+
+    async showUrlHelp() {
+        this.urlHelpVisible = true;
+    }
+
+    loadBufferClick() {
+        this.urlHelpVisible = false;
     }
 
     donationDialogDisable() {
@@ -191,7 +220,7 @@ class ReaderDialogs {
     }
 
     keyHook() {
-        if (this.$refs.dialog1.active || this.$refs.dialog2.active)
+        if (this.$refs.dialog1.active || this.$refs.dialog2.active || this.$refs.dialog3.active)
             return true;
         return false;
     }

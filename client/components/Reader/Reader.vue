@@ -393,6 +393,23 @@ class Reader {
         this.loadWallpapers();//no await
     }
 
+    showHelpOnErrorIfNeeded(errorMessage) {
+        //небольшая эвристика
+        let i = errorMessage.indexOf('http://');
+        if (i < 0)
+            i = errorMessage.indexOf('https://');
+
+        errorMessage = errorMessage.substring(i + 7);
+        const perCount = errorMessage.split('%').length - 1;
+
+        if (perCount > errorMessage.length/3.2) {
+            this.$refs.dialogs.showUrlHelp();
+            return true;
+        }
+
+        return false;
+    }
+
     //wallpaper css
     async loadWallpapers() {
         const wallpaperDataLength = await wallpaperStorage.getLength();
@@ -1117,7 +1134,9 @@ class Reader {
         } catch (e) {
             progress.hide(); this.progressActive = false;
             this.loaderActive = true;
-            this.$root.stdDialog.alert(e.message, 'Ошибка', {color: 'negative'});
+            if (!this.showHelpOnErrorIfNeeded(e.message)) {
+                this.$root.stdDialog.alert(e.message, 'Ошибка', {color: 'negative'});
+            }
         } finally {
             this.checkNewVersionAvailable();
         }
