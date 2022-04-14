@@ -83,6 +83,7 @@
                 <br><br>
                 Если же вы пытаетесь вставить текст в читалку из буфера обмена, пожалуйста воспользуйтесь кнопкой
                 <q-btn no-caps dense class="q-px-sm" color="primary" size="13px" @click="loadBufferClick">
+                    <q-icon class="q-mr-xs" name="la la-comment" size="24px" />
                     Из буфера обмена
                 </q-btn>
                 на странице загрузки.

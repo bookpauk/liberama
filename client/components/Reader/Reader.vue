@@ -17,6 +17,13 @@
                         </q-tooltip>
                     </button>
 
+                    <button v-show="showToolButton['loadBuffer']" ref="loadBuffer" v-ripple class="tool-button" :class="buttonActiveClass('loadBuffer')" @click="buttonClick('loadBuffer')">
+                        <q-icon name="la la-comment" size="32px" />
+                        <q-tooltip :delay="1500" anchor="bottom right" content-style="font-size: 80%">
+                            {{ rstore.readerActions['loadBuffer'] }}
+                        </q-tooltip>
+                    </button>
+
                     <button v-show="showToolButton['help']" ref="help" v-ripple class="tool-button" :class="buttonActiveClass('help')" @click="buttonClick('help')">
                         <q-icon name="la la-question" size="32px" />
                         <q-tooltip :delay="1500" anchor="bottom right" content-style="font-size: 80%">
@@ -260,6 +267,7 @@ class Reader {
 
     loaderActive = false;
     loadFileActive = false;
+    loadBufferActive = false;
     fullScreenActive = false;
     setPositionActive = false;
     searchActive = false;
@@ -700,6 +708,17 @@ class Reader {
         });        
     }
 
+    loadBufferToggle() {
+        if (!this.loaderActive)
+            this.loaderToggle();
+        this.$nextTick(() => {
+            const page = this.$refs.page;
+            if (this.activePage == 'LoaderPage' && page.showPasteText) {
+                page.showPasteText();
+            }
+        });        
+    }
+
     setPositionToggle() {
         this.setPositionActive = !this.setPositionActive;
         const page = this.$refs.page;
@@ -915,6 +934,8 @@ class Reader {
 
         switch (action) {
             case 'loader':
+            case 'loadFile':
+            case 'loadBuffer':
             case 'help':
             case 'fullScreen':
             case 'setPosition':
@@ -1232,6 +1253,9 @@ class Reader {
             case 'loadFile':
                 this.loadFileToggle();
                 break;
+            case 'loadBuffer':
+                this.loadBufferToggle();
+                break;
             case 'help':
                 this.helpToggle();
                 break;
@@ -1376,13 +1400,14 @@ class Reader {
             if (!result && event.type == 'keydown') {
                 const action = this.$root.readerActionByKeyEvent(event);
 
-                if (action == 'loader') {
+                /*if (action == 'loader') {
                     result = this.doAction({action, event});
                 }
 
                 if (!result && this.activePage == 'TextPage') {
                     result = this.doAction({action, event});
-                }
+                }*/
+                result = this.doAction({action, event});
             }
         }
         return result;

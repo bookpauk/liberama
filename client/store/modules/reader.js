@@ -4,6 +4,7 @@ import googleFonts from './fonts/fonts.json';
 const readerActions = {
     'loader': 'На страницу загрузки',
     'loadFile': 'Загрузить файл с диска',
+    'loadBuffer': 'Загрузить из буфера обмена',
     'help': 'Вызвать cправку',    
     'settings': 'Настроить',
     'undoAction': 'Действие назад',
@@ -37,6 +38,7 @@ const readerActions = {
 //readerActions[name]
 const toolButtons = [
     {name: 'loadFile',    show: true},
+    {name: 'loadBuffer',  show: true},    
     {name: 'help',        show: true},
     {name: 'undoAction',  show: true},
     {name: 'redoAction',  show: true},
@@ -57,6 +59,7 @@ const toolButtons = [
 const hotKeys = [
     {name: 'loader', codes: ['Escape']},
     {name: 'loadFile', codes: ['F3']},
+    {name: 'loadBuffer', codes: ['F4']},
     {name: 'help', codes: ['F1', 'H']},
     {name: 'settings', codes: ['S']},
     {name: 'undoAction', codes: ['Ctrl+BracketLeft']},

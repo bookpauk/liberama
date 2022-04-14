@@ -28,6 +28,7 @@
             
             <div class="q-my-sm"></div>
             <q-btn no-caps dense class="q-px-sm" color="primary" size="13px" @click="loadBufferClick">
+                <q-icon class="q-mr-xs" name="la la-comment" size="24px" />
                 Из буфера обмена
             </q-btn>
 
@@ -65,6 +66,7 @@ import GithubCorner from './GithubCorner/GithubCorner.vue';
 
 import PasteTextPage from './PasteTextPage/PasteTextPage.vue';
 import {versionHistory} from '../versionHistory';
+import * as utils from '../../../share/utils';
 
 const componentOptions = {
     components: {
@@ -171,8 +173,9 @@ class LoaderPage {
         window.open('http://old.omnireader.ru', '_blank');
     }
 
-    onInputKeydown(event) {
+    async onInputKeydown(event) {
         if (event.key == 'Enter') {
+            await utils.sleep(100);
             this.submitUrl();
         }
     }
@@ -183,6 +186,10 @@ class LoaderPage {
         }
 
         const input = this.$refs.input.getNativeElement();
+        if (event.type == 'keydown' && document.activeElement === input)
+            return true;
+
+        /*const input = this.$refs.input.getNativeElement();
         if (event.type == 'keydown' && document.activeElement !== input) {
             const action = this.$root.readerActionByKeyEvent(event);
             switch (action) {
@@ -190,7 +197,7 @@ class LoaderPage {
                     this.openHelp(event);
                     return true;
             }
-        }
+        }*/
 
         return false;
     }
