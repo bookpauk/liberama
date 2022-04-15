@@ -75,7 +75,7 @@
                     class="col q-mr-sm"
                     rounded outlined dense
                     bg-color="white"
-                    placeholder="Скопируйте сюда URL книги"
+                    placeholder="Скопируйте сюда ссылку на книгу и нажмите 'Открыть'"
                     @focus="selectAllOnFocus" @keydown="bookUrlKeyDown"
                 >
                     <template #prepend>
