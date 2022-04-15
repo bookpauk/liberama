@@ -1,7 +1,7 @@
 <template>
     <div class="column no-wrap">
         <div v-show="toolBarActive" ref="header" class="header">
-            <div ref="buttons" class="row justify-between no-wrap" style="overflow-x: auto; overflow-y: hidden">
+            <div ref="buttons" class="row justify-between no-wrap">
                 <div class="row no-wrap">
                     <button ref="loader" v-ripple class="tool-button" :class="buttonActiveClass('loader')" @click="buttonClick('loader')">
                         <q-icon name="la la-arrow-left" size="32px" />
@@ -30,6 +30,7 @@
                 </div>
 
                 <div class="row no-wrap">
+                    <div class="space"></div>
                     <button v-show="showToolButton['undoAction']" ref="undoAction" v-ripple class="tool-button" :class="buttonActiveClass('undoAction')" @click="buttonClick('undoAction')">
                         <q-icon name="la la-angle-left" size="32px" />
                         <q-tooltip :delay="1500" anchor="bottom middle" content-style="font-size: 80%">
@@ -104,6 +105,7 @@
                             {{ rstore.readerActions['recentBooks'] }}
                         </q-tooltip>
                     </button>
+                    <div class="space"></div>
                 </div>
 
                 <div class="row no-wrap">
@@ -1420,12 +1422,13 @@ export default vueComponent(Reader);
 
 <style scoped>
 .header {
+    height: 50px;
     padding-left: 5px;
     padding-right: 5px;
     background-color: #1B695F;
     color: #000;
-    overflow: hidden;
-    height: 50px;
+    overflow-x: auto;
+    overflow-y: hidden;
 }
 
 .main {
