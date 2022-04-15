@@ -12,7 +12,10 @@
         </div>
 
         <div class="col-auto column justify-start items-center no-wrap overflow-hidden">
-            <q-input ref="input" v-model="bookUrl" class="full-width q-px-sm" style="max-width: 700px" outlined dense bg-color="white" placeholder="URL книги" @keydown="onInputKeydown">
+            <q-input
+                ref="input" v-model="bookUrl" class="full-width q-px-sm" style="max-width: 700px" 
+                outlined dense bg-color="white" placeholder="Ссылка на книгу или веб-страницу" @keydown="onInputKeydown"
+            >
                 <template #append>
                     <q-btn rounded flat style="width: 40px" icon="la la-check" @click="submitUrl" />
                 </template>
