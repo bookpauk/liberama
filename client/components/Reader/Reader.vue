@@ -1,8 +1,8 @@
 <template>
     <div class="column no-wrap">
         <div v-show="toolBarActive" ref="header" class="header">
-            <div ref="buttons" class="row justify-between no-wrap">
-                <div>
+            <div ref="buttons" class="row justify-between no-wrap" style="overflow-x: auto; overflow-y: hidden">
+                <div class="row no-wrap">
                     <button ref="loader" v-ripple class="tool-button" :class="buttonActiveClass('loader')" @click="buttonClick('loader')">
                         <q-icon name="la la-arrow-left" size="32px" />
                         <q-tooltip :delay="1500" anchor="bottom right" content-style="font-size: 80%">
@@ -29,7 +29,7 @@
                     </button>
                 </div>
 
-                <div>
+                <div class="row no-wrap">
                     <button v-show="showToolButton['undoAction']" ref="undoAction" v-ripple class="tool-button" :class="buttonActiveClass('undoAction')" @click="buttonClick('undoAction')">
                         <q-icon name="la la-angle-left" size="32px" />
                         <q-tooltip :delay="1500" anchor="bottom middle" content-style="font-size: 80%">
@@ -106,7 +106,7 @@
                     </button>
                 </div>
 
-                <div>
+                <div class="row no-wrap">
                     <button v-show="showToolButton['clickControl']" ref="clickControl" v-ripple class="tool-button" :class="buttonActiveClass('clickControl')" @click="buttonClick('clickControl')">
                         <q-icon name="la la-mouse" size="32px" />
                         <q-tooltip :delay="1500" anchor="bottom middle" content-style="font-size: 80%">
@@ -351,8 +351,6 @@ class Reader {
     }
 
     mounted() {
-        this.updateHeaderMinWidth();
-
         (async() => {
             await wallpaperStorage.init();
             await bookManager.init(this.settings);
@@ -416,8 +414,6 @@ class Reader {
             return this.readerActionByKeyCode[utils.keyEventToCode(event)];
         }
 
-        this.updateHeaderMinWidth();
-        
         this.loadWallpapers();//no await
     }
 
@@ -482,17 +478,6 @@ class Reader {
             }        
             this.isFirstNeedUpdateNotify = false;
         }
-    }
-
-    updateHeaderMinWidth() {
-        const showButtonCount = Object.values(this.showToolButton).reduce((a, b) => a + (b ? 1 : 0), 0);
-        if (this.$refs.buttons)
-            this.$refs.buttons.style.minWidth = 65*showButtonCount + 'px';
-        (async() => {
-            await utils.sleep(1000);
-            if (this.$refs.header)
-                this.$refs.header.style.overflowX = 'auto';
-        })();
     }
 
     checkSetStorageAccessKey() {
