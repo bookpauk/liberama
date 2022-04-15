@@ -1429,6 +1429,26 @@ export default vueComponent(Reader);
     color: #000;
     overflow-x: auto;
     overflow-y: hidden;
+    scrollbar-color: #c49a60 #e4e4e4;
+}
+
+.header::-webkit-scrollbar {
+    height: 10px;
+}
+ 
+.header::-webkit-scrollbar-track {
+    background-color: #e4e4e4;
+    border-radius: 4px;
+}
+ 
+.header::-webkit-scrollbar-thumb {
+    background-color: #c49a60;
+    border-radius: 4px;
+    border: 2px solid #e4e4e4;
+}
+
+.header::-webkit-scrollbar-thumb:hover {
+    background-color: #b48a50;
 }
 
 .main {
