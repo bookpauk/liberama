@@ -74,7 +74,7 @@
     "sjcl": "^1.0.8",
     "sql-template-strings": "^2.2.2",
     "sqlite": "^4.0.23",
-    "sqlite3": "^5.0.2",
+    "sqlite3": "^5.0.3",
     "tar-fs": "^2.1.1",
     "unbzip2-stream": "^1.4.3",
     "vue": "^3.2.22",
