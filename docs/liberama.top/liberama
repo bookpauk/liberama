@@ -140,5 +140,6 @@ server {
 
   location / {
     proxy_pass http://fantasy-worlds.org;
+    proxy_hide_header x-frame-options;
   }
 }
