@@ -4,7 +4,7 @@ const util = require('util');
 const stream = require('stream');
 const pipeline = util.promisify(stream.pipeline);
 
-const got = require('got');
+const axios = require('axios');
 const FileDecompressor = require('../server/core/FileDecompressor');
 
 const distDir = path.resolve(__dirname, '../dist');
@@ -29,7 +29,8 @@ async function main() {
 
     if (!await fs.pathExists(sqliteDecompressedFilename)) {
         // Скачиваем node_sqlite3.node для винды, т.к. pkg не включает его в сборку
-        await pipeline(got.stream(sqliteRemoteUrl), fs.createWriteStream(`${tempDownloadDir}/sqlite.tar.gz`));
+        const res = await axios.get(sqliteRemoteUrl, {responseType: 'stream'})
+        await pipeline(res.data, fs.createWriteStream(`${tempDownloadDir}/sqlite.tar.gz`));
         console.log(`done downloading ${sqliteRemoteUrl}`);
 
         //распаковываем
@@ -46,7 +47,8 @@ async function main() {
         // Скачиваем ipfs
         const ipfsRemoteUrl = 'https://dist.ipfs.io/go-ipfs/v0.4.18/go-ipfs_v0.4.18_windows-amd64.zip';
 
-        await pipeline(got.stream(ipfsRemoteUrl), fs.createWriteStream(`${tempDownloadDir}/ipfs.zip`));
+        const res = await axios.get(ipfsRemoteUrl, {responseType: 'stream'})
+        await pipeline(res.data, fs.createWriteStream(`${tempDownloadDir}/ipfs.zip`));
         console.log(`done downloading ${ipfsRemoteUrl}`);
 
         //распаковываем
