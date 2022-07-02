@@ -90,7 +90,7 @@ export function toBase58(data) {
 }
 
 export function fromBase58(data) {
-    return bs58.decode(data);
+    return Buffer.from(bs58.decode(data));
 }
 
 //base-x слишком тормозит, используем sjcl
