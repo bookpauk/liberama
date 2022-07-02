@@ -21,10 +21,10 @@ class AsyncExit {
     }
 
     _init(signals, codeOnSignal) {
-        const runSingalCallbacks = async(signal) => {
+        const runSingalCallbacks = async(signal, err, origin) => {
             for (const signalCallback of this.onSignalCallbacks.keys()) {
                 try {
-                    await signalCallback(signal);
+                    await signalCallback(signal, err, origin);
                 } catch(e) {
                     console.error(e);
                 }
@@ -32,8 +32,8 @@ class AsyncExit {
         };
 
         for (const signal of signals) {
-            process.once(signal, async() => {
-                await runSingalCallbacks(signal);
+            process.once(signal, async(err, origin) => {
+                await runSingalCallbacks(signal, err, origin);
                 this.exit(codeOnSignal);
             });
         }

@@ -188,8 +188,8 @@ class Logger {
         }
 
         this.closed = false;
-        ayncExit.onSignal((signal) => {
-            this.log(LM_FATAL, `Signal ${signal} received, exiting...`);
+        ayncExit.onSignal((signal, err) => {
+            this.log(LM_FATAL, `Signal "${signal}" received, error: "${(err.stack ? err.stack : err)}", exiting...`);
         });
         ayncExit.addAfter(this.close.bind(this));
     }
