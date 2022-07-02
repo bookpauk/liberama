@@ -1,5 +1,19 @@
 export const versionHistory = [
 {
+    version: '0.11.6',
+    releaseDate: '2022-07-02',
+    showUntil: '2022-07-01',
+    content:
+`
+<ul>
+    <li>улучшено копирование текста прямо со страницы, для переводчиков</li>
+    <li>актуализация используемых пакетов</li>
+</ul>
+
+`
+},
+
+{
     version: '0.11.5',
     releaseDate: '2022-04-15',
     showUntil: '2022-04-14',
