@@ -21,7 +21,12 @@
                 </template>
             </q-input>
 
-            <input id="file" ref="file" type="file" style="display: none;" @change="loadFile" />
+            <input
+                id="file" ref="file" type="file" 
+                style="display: none;"
+                :accept="acceptFileExt"
+                @change="loadFile" 
+            />
 
             <div class="q-my-sm"></div>
             <q-btn no-caps dense class="q-px-sm" color="primary" size="13px" @click="loadFileClick">
@@ -129,6 +134,10 @@ class LoaderPage {
 
     get version() {
         return this.$store.state.config.version;
+    }
+
+    get acceptFileExt() {
+        return this.$store.state.config.acceptFileExt;
     }
 
     get isExternalConverter() {

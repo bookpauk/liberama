@@ -9,7 +9,7 @@ class Misc {
     async loadConfig() {
 
         const query = {params: [
-            'name', 'version', 'mode', 'maxUploadFileSize', 'useExternalBookConverter', 'branch',
+            'name', 'version', 'mode', 'maxUploadFileSize', 'useExternalBookConverter', 'acceptFileExt', 'branch',
         ]};
 
         try {
