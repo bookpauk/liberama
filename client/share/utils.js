@@ -90,7 +90,7 @@ export function toBase58(data) {
 }
 
 export function fromBase58(data) {
-    return bs58.decode(data);
+    return Buffer.from(bs58.decode(data));
 }
 
 //base-x слишком тормозит, используем sjcl
@@ -105,6 +105,10 @@ export function fromBase64(data) {
     return Buffer.from(sjclWrapper.codec.bytes.fromBits(
         sjclWrapper.codec.base64.toBits(data)
     ));
+}
+
+export function hasProp(obj, prop) {
+    return Object.prototype.hasOwnProperty.call(obj, prop);
 }
 
 export function getObjDiff(oldObj, newObj, opts = {}) {
@@ -126,7 +130,7 @@ export function getObjDiff(oldObj, newObj, opts = {}) {
         for (const key of Object.keys(oldObj)) {
             const kp = `${keyPath}${key}`;
 
-            if (newObj.hasOwnProperty(key)) {
+            if (Object.prototype.hasOwnProperty.call(newObj, key)) {
                 if (ex.has(kp))
                     continue;
 
@@ -149,7 +153,7 @@ export function getObjDiff(oldObj, newObj, opts = {}) {
             if (exAdd.has(kp))
                 continue;
 
-            if (!oldObj.hasOwnProperty(key)) {
+            if (!Object.prototype.hasOwnProperty.call(oldObj, key)) {
                 result.add[key] = _.cloneDeep(newObj[key]);
             }
         }
@@ -213,7 +217,7 @@ export function applyObjDiff(obj, diff, opts = {}) {
 
     const change = diff.change;
     for (const key of Object.keys(change)) {
-        if (result.hasOwnProperty(key)) {
+        if (Object.prototype.hasOwnProperty.call(result, key)) {
             if (_.isObject(change[key])) {
                 result[key] = applyObjDiff(result[key], change[key], opts);
             } else {

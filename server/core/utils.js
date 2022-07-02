@@ -13,7 +13,7 @@ function toBase36(data) {
 }
 
 function fromBase36(data) {
-    return bs36.decode(data);
+    return Buffer.from(bs36.decode(data));
 }
 
 function bufferRemoveZeroes(buf) {

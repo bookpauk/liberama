@@ -70,7 +70,7 @@ const hotKeys = [
     {name: 'scrolling', codes: ['Z']},
     {name: 'setPosition', codes: ['P']},
     {name: 'search', codes: ['Ctrl+F']},
-    {name: 'copyText', codes: ['Ctrl+C']},    
+    {name: 'copyText', codes: ['Ctrl+Space']},    
     {name: 'convOptions', codes: ['Ctrl+M']},
     {name: 'refresh', codes: ['R']},
     {name: 'contents', codes: ['C']},

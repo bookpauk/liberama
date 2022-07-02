@@ -6,29 +6,32 @@
         </div>
         <div ref="scrollBox1" class="layout over-hidden" @wheel.prevent.stop="onMouseWheel">
             <div ref="scrollingPage1" class="layout over-hidden" @transitionend="onPage1TransitionEnd" @animationend="onPage1AnimationEnd">
-                <div v-html="page1"></div>
+                <div @copy.prevent="copyText" v-html="page1"></div>
             </div>
         </div>
         <div ref="scrollBox2" class="layout over-hidden" @wheel.prevent.stop="onMouseWheel">
             <div ref="scrollingPage2" class="layout over-hidden" @transitionend="onPage2TransitionEnd" @animationend="onPage2AnimationEnd">
-                <div v-html="page2"></div>
+                <div @copy.prevent="copyText" v-html="page2"></div>
             </div>
         </div>
         <div v-show="showStatusBar" ref="statusBar" class="layout">
             <div v-html="statusBar"></div>
         </div>
-        <div v-show="clickControl" ref="layoutEvents" class="layout events" 
+        <div
+            v-show="clickControl" ref="layoutEvents" class="layout events" 
             oncontextmenu="return false;"
             @mousedown.prevent.stop="onMouseDown" @mouseup.prevent.stop="onMouseUp"
             @wheel.prevent.stop="onMouseWheel"
             @touchstart.stop="onTouchStart" @touchend.stop="onTouchEnd" @touchmove.stop="onTouchMove" @touchcancel.prevent.stop="onTouchCancel"            
         >
-            <div v-show="showStatusBar && statusBarClickOpen" @mousedown.prevent.stop @touchstart.stop
+            <div
+                v-show="showStatusBar && statusBarClickOpen" @mousedown.prevent.stop @touchstart.stop
                 @click.prevent.stop="onStatusBarClick"
                 v-html="statusBarClickable"
             ></div>
         </div>
-        <div v-show="!clickControl && showStatusBar && statusBarClickOpen" class="layout" 
+        <div
+            v-show="!clickControl && showStatusBar && statusBarClickOpen" class="layout" 
             @mousedown.prevent.stop @touchstart.stop
             @click.prevent.stop="onStatusBarClick"
             v-html="statusBarClickable"
@@ -46,6 +49,7 @@ import vueComponent from '../../vueComponent.js';
 
 import {loadCSS} from 'fg-loadcss';
 import _ from 'lodash';
+import he from 'he';
 
 import './TextPage.css';
 
@@ -1201,8 +1205,54 @@ class TextPage {
         }
 
         return action;
-   }
+    }
 
+    copyText(event) {
+        //все это для того, чтобы правильно расставить переносы \n при копировании текста
+        //прямо с текущей страницы
+
+        //подготовка, вытаскиваем весь текст страницы
+        const lines = this.getLines(this.bookPos);
+        const decodedLines = [];
+        for (const line of lines.linesDown) {
+            let lineText = '';
+            for (const part of line.parts) {
+                lineText += part.text;
+            }
+            decodedLines.push({text: he.decode(lineText), first: line.first});
+        }
+
+        let i = 0;
+        const findDecoded = (line) => {
+            for (let j = i; j < decodedLines.length; j++) {
+                const decoded = decodedLines[j];
+                if (decoded.text.indexOf(line) >= 0) {
+                    i = j;
+                    return decoded;
+                }
+            }
+            return;
+        }
+
+        const selection = document.getSelection();
+        const splitted = selection.toString().split(/[\n\r]/);
+        
+        let filtered = '';
+        //формируем filtered, учитывая переносы из decodedLines
+        for (const line of splitted) {
+            const found = findDecoded(line);
+            if (found && found.first) {
+                filtered += (filtered ? '\n' : '') + line;
+            } else {
+                filtered += (filtered ? '\r ' : '') + line;
+            }
+        }
+
+        //маленькие хитрости, убираем переносы по слогам
+        filtered = filtered.replace(/-\r /g, '').replace(/\r /g, ' ');
+
+        event.clipboardData.setData('text/plain', filtered);
+    }
 }
 
 export default vueComponent(TextPage);

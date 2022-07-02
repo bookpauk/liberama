@@ -728,10 +728,10 @@ class ServerStorage {
                 const ids = id.split('.');
                 if (!(ids.length == 2) || !(ids[0] == this.hashedStorageKey))
                     throw new Error(`decodeStorageItems: bad id - ${id}`);
-                items[utils.fromBase58(ids[1])] = decoded;
+                items[utils.fromBase58(ids[1]).toString()] = decoded;
             }
         }
-
+        
         result.items = items;
         return result;
     }

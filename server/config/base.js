@@ -22,7 +22,8 @@ module.exports = {
     maxUploadPublicDirSize: 200*1024*1024,//100Мб
 
     useExternalBookConverter: false,
-    webConfigParams: ['name', 'version', 'mode', 'maxUploadFileSize', 'useExternalBookConverter', 'branch'],
+    acceptFileExt: '.fb2, .fb3, .html, .txt, .zip, .bz2, .gz, .rar, .epub, .mobi, .rtf, .doc, .docx, .pdf, .djvu, .jpg, .jpeg, .png',
+    webConfigParams: ['name', 'version', 'mode', 'maxUploadFileSize', 'useExternalBookConverter', 'acceptFileExt', 'branch'],
 
     db: [
         {
@@ -48,7 +49,7 @@ module.exports = {
     servers: [
         {
             serverName: '1',
-            mode: 'normal', //'none', 'normal', 'site', 'reader', 'omnireader'
+            mode: 'normal', //'none', 'normal', 'site', 'reader', 'omnireader', 'liberama.top'
             ip: '0.0.0.0',
             port: '33080',
         },
