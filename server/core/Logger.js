@@ -49,7 +49,7 @@ class BaseLog {
         this.outputBuffer = [];
 
         await this.flushImpl(this.data)
-            .catch(e => { console.log(e); ayncExit.exit(1); } );
+            .catch(e => { console.error(`Logger error: ${e}`); ayncExit.exit(1); } );
         this.flushing = false;
     }
 
@@ -164,8 +164,19 @@ class FileLog extends BaseLog {
 }
 
 class ConsoleLog extends BaseLog {
+    constructor(params) {
+        super(params);
+
+        this.stdoutClosed = false;
+        process.stdout.on('close', () => {
+            this.stdoutClosed = true;
+        });
+    }
+
     async flushImpl(data) {
-        process.stdout.write(data.join(''));
+        if (!this.stdoutClosed) {
+            process.stdout.write(data.join(''));
+        }
     }
 }
 
@@ -218,6 +229,8 @@ class Logger {
         } else {
             console.log(mes);
         }
+
+        return mes;
     }
 
     async close() {
