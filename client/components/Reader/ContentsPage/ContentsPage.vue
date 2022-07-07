@@ -321,21 +321,25 @@ class ContentsPage {
         }
     }
 
+    getFirstElem(items) {
+        return (Array.isArray(items) ? items[0] : items);
+    }
+
     async expandClick(key) {
         const item = this.contents[key];
         const expanded = !item.expanded;
 
         if (!expanded) {
-            const subitems = this.$refs[`subitem${key}`];
+            let subitems = this.getFirstElem(this.$refs[`subitem${key}`]);
             subitems.style.height = '0';
             await utils.sleep(200);
         }
 
-        this.contents[key] = Object.assign({}, item, {expanded});
+        this.contents[key].expanded = expanded;
 
         if (expanded) {
             await this.$nextTick();
-            const subitems = this.$refs[`subitem${key}`];
+            let subitems = this.getFirstElem(this.$refs[`subitem${key}`]);
             subitems.style.height = subitems.scrollHeight + 'px';
         }
     }

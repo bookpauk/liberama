@@ -18,7 +18,7 @@ server {
 
   server_name liberama.top;
 
-  client_max_body_size 50m;
+  client_max_body_size 100m;
   proxy_read_timeout 1h;
 
   gzip on;
@@ -63,7 +63,7 @@ server {
   listen 80;
   server_name b.liberama.top;
 
-  client_max_body_size 50m;
+  client_max_body_size 100m;
   proxy_read_timeout 1h;
 
   gzip on;

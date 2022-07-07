@@ -49,7 +49,7 @@ class BaseLog {
         this.outputBuffer = [];
 
         await this.flushImpl(this.data)
-            .catch(e => { console.log(e); ayncExit.exit(1); } );
+            .catch(e => { console.error(`Logger error: ${e}`); ayncExit.exit(1); } );
         this.flushing = false;
     }
 
@@ -218,6 +218,8 @@ class Logger {
         } else {
             console.log(mes);
         }
+
+        return mes;
     }
 
     async close() {
