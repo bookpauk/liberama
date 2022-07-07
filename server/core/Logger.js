@@ -164,19 +164,8 @@ class FileLog extends BaseLog {
 }
 
 class ConsoleLog extends BaseLog {
-    constructor(params) {
-        super(params);
-
-        this.stdoutClosed = false;
-        process.stdout.on('close', () => {
-            this.stdoutClosed = true;
-        });
-    }
-
     async flushImpl(data) {
-        if (!this.stdoutClosed) {
-            process.stdout.write(data.join(''));
-        }
+        process.stdout.write(data.join(''));
     }
 }
 
