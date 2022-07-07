@@ -222,9 +222,6 @@ const libsDefaults = {
         {r: 'http://flibusta.is', s: 'http://flibusta.is', list: [
             {l: 'http://flibusta.is', c: 'Флибуста | Книжное братство'},
         ]},
-        {r: 'https://flibs.in', s: 'https://flibs.in', list: [
-            {l: 'https://flibs.in', c: 'Flibs'},
-        ]},
         {r: 'http://fantasy-worlds.org', s: 'http://fantasy-worlds.org', list: [
             {l: 'http://fantasy-worlds.org', c: 'Миры Фэнтези'},
         ]},
