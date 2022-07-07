@@ -2,6 +2,7 @@ const _ = require('lodash');
 
 const utils = require('../utils');
 const JembaConnManager = require('../../db/JembaConnManager');//singleton
+const log = new (require('../AppLogger'))().log;//singleton
 
 let instance = null;
 
@@ -20,25 +21,30 @@ class JembaReaderStorage {
     }
 
     async doAction(act) {
-        if (!_.isObject(act.items))
-            throw new Error('items is not an object');
+        try {
+            if (!_.isObject(act.items))
+                throw new Error('items is not an object');
 
-        let result = {};
-        switch (act.action) {
-            case 'check':
-                result = await this.checkItems(act.items);
-                break;
-            case 'get':
-                result = await this.getItems(act.items);
-                break;
-            case 'set':
-                result = await this.setItems(act.items, act.force);
-                break;
-            default:
-                throw new Error('Unknown action');
+            let result = {};
+            switch (act.action) {
+                case 'check':
+                    result = await this.checkItems(act.items);
+                    break;
+                case 'get':
+                    result = await this.getItems(act.items);
+                    break;
+                case 'set':
+                    result = await this.setItems(act.items, act.force);
+                    break;
+                default:
+                    throw new Error('Unknown action');
+            }
+
+            return result;
+        } catch (e) {
+            log(LM_ERR, `JembaReaderStorage: ${e.message}`);
+            throw e;
         }
-
-        return result;
     }
 
     async checkItems(items) {
