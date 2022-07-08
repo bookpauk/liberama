@@ -17,9 +17,6 @@ const bmDataStore = localForage.createInstance({
 });
 
 //список недавно открытых книг
-const bmRecentStoreOld = localForage.createInstance({
-    name: 'bmRecentStore'
-});
 const bmRecentStoreNew = localForage.createInstance({
     name: 'bmRecentStoreNew'
 });
