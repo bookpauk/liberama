@@ -23,7 +23,7 @@
 
         <div class="q-mb-sm" />
 
-        <div v-show="selectedTab == 'contents'" ref="tabPanel" class="tab-panel">
+        <div v-show="selectedTab == 'contents'" ref="tabPanelContents" class="tab-panel">
             <div>
                 <div v-for="item in contents" :key="item.key" class="column" style="width: 540px">
                     <div :ref="`mainitem${item.key}`" class="row q-px-sm no-wrap" :class="{'item': !item.isBookPos, 'item-book-pos': item.isBookPos}">
@@ -65,10 +65,10 @@
             </div>
         </div>
 
-        <div v-show="selectedTab == 'images'" class="tab-panel">
+        <div v-show="selectedTab == 'images'" ref="tabPanelImages" class="tab-panel">
             <div>
                 <div v-for="item in images" :key="item.key" class="column" style="width: 540px">
-                    <div class="row q-px-sm no-wrap" :class="{'item': !item.isBookPos, 'item-book-pos': item.isBookPos}">
+                    <div :ref="`image${item.key}`" class="row q-px-sm no-wrap" :class="{'item': !item.isBookPos, 'item-book-pos': item.isBookPos}">
                         <div class="col row clickable" @click="setBookPos(item.offset)">
                             <div class="image-thumb-box row justify-center items-center">
                                 <div v-show="!imageLoaded[item.id]" class="image-thumb column justify-center">
@@ -128,7 +128,10 @@ const componentOptions = {
     watch: {
         bookPos() {
             this.updateBookPosSelection();
-        }
+        },
+        selectedTab() {
+            this.updateBookPosSelection();
+        },
     },
 };
 class ContentsPage {
@@ -295,7 +298,7 @@ class ContentsPage {
 
             if (bp >= item.offset && bp < nextOffset) {
                 item.isBookPos = true;
-                this.updateBookPosScrollTop(item);
+                this.updateBookPosScrollTop('contents', item);
             } else if (item.isBookPos) {
                 item.isBookPos = false;
             }
@@ -306,7 +309,7 @@ class ContentsPage {
 
                 if (bp >= subitem.offset && bp < nextSubOffset) {
                     subitem.isBookPos = true;
-                    this.updateBookPosScrollTop(item, subitem, j);
+                    this.updateBookPosScrollTop('contents', item, subitem, j);
                 } else if (subitem.isBookPos) {
                     subitem.isBookPos = false;
                 }
@@ -319,28 +322,46 @@ class ContentsPage {
 
             if (bp >= img.offset && bp < nextOffset) {
                 this.images[i].isBookPos = true;
+                this.updateBookPosScrollTop('images', img);
             } else if (img.isBookPos) {
                 this.images[i].isBookPos = false;
             }
         }
     }
 
-    updateBookPosScrollTop(item, subitem, i) {
+    /*getOffsetTop(key) {
+        let el = this.getFirstElem(this.$refs[`mainitem${key}`]);
+        return (el ? el.offsetTop : 0);
+    }*/
+
+    updateBookPosScrollTop(tab, item, subitem, i) {
         try {
-            if (this.selectedTab == 'contents') {
+            if (tab == 'contents' && this.selectedTab == tab) {
                 let el = this.getFirstElem(this.$refs[`mainitem${item.key}`]);
                 let elShift = 0;
                 if (subitem && item.expanded) {
                     const subEl = this.getFirstElem(this.$refs[`subitem${subitem.key}`]);
-                    elShift = el.offsetHeight - (0.5 + subEl.offsetHeight)*(i + 1);
+                    elShift = el.offsetHeight - subEl.offsetHeight*(i + 1);
                 } else {
                     elShift = el.offsetHeight;
                 }
 
-                const halfH = this.$refs.tabPanel.clientHeight/2;
+                const tabPanel = this.$refs.tabPanelContents;
+                const halfH = tabPanel.clientHeight/2;
                 const newScrollTop = el.offsetTop - halfH - elShift;
-                if (newScrollTop < this.$refs.tabPanel.scrollTop - halfH || newScrollTop > this.$refs.tabPanel.scrollTop + halfH) 
-                    this.$refs.tabPanel.scrollTop = newScrollTop;
+                if (newScrollTop < 20 + tabPanel.scrollTop - halfH || newScrollTop > -20 + tabPanel.scrollTop + halfH) 
+                    tabPanel.scrollTop = newScrollTop;
+            }
+
+            if (tab == 'images' && this.selectedTab == tab) {
+                let el = this.getFirstElem(this.$refs[`image${item.key}`]);
+
+                const tabPanel = this.$refs.tabPanelImages;
+                const halfH = tabPanel.clientHeight/2;
+                const newScrollTop = el.offsetTop - halfH - el.offsetHeight/2;
+
+                if (newScrollTop < 20 + tabPanel.scrollTop - halfH || newScrollTop > -20 + tabPanel.scrollTop + halfH) 
+                    tabPanel.scrollTop = newScrollTop;
             }
         } catch (e) {
             console.error(e);
