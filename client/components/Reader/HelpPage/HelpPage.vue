@@ -5,13 +5,20 @@
         </template>
 
         <div class="col column" style="min-width: 600px">
-            <q-btn-toggle
-                v-model="selectedTab"
-                toggle-color="primary"
-                no-caps unelevated
-                :options="buttons"
-            />
-            <div class="separator"></div>
+            <div class="bg-grey-3 row">
+                <q-tabs
+                    v-model="selectedTab"
+                    active-color="black"
+                    active-bg-color="white"
+                    indicator-color="white"
+                    dense
+                    no-caps
+                    inline-label
+                    class="bg-grey-4 text-grey-7"
+                >
+                    <q-tab v-for="btn in buttons" :key="btn.value" :name="btn.value" :label="btn.label" />
+                </q-tabs>
+            </div>
 
             <keep-alive>
                 <component :is="activePage" ref="page" class="col"></component>
@@ -93,8 +100,4 @@ export default vueComponent(HelpPage);
 </script>
 
 <style scoped>
-.separator {
-    height: 1px;
-    background-color: #E0E0E0;
-}
 </style>
