@@ -127,9 +127,6 @@ class Window {
 
 export default vueComponent(Window);
 //-----------------------------------------------------------------------------
-//    background-color: #69C05F;
-//    text-shadow: 2px 1px 5px black, 2px 2px 5px black;
-
 </script>
 
 <style scoped>
@@ -164,7 +161,7 @@ export default vueComponent(Window);
 .header-text {
     margin-left: 10px;
     margin-right: 10px;
-    color: #50FFFF;
+    color: #70FFFF;
     text-shadow: 2px 2px 5px #005000, 2px 1px 7px #005000;
     overflow: hidden;
     white-space: nowrap;
