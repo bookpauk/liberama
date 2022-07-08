@@ -23,10 +23,10 @@
 
         <div class="q-mb-sm" />
 
-        <div v-show="selectedTab == 'contents'" class="tab-panel">
+        <div v-show="selectedTab == 'contents'" ref="tabPanel" class="tab-panel">
             <div>
                 <div v-for="item in contents" :key="item.key" class="column" style="width: 540px">
-                    <div class="row q-px-sm no-wrap" :class="{'item': !item.isBookPos, 'item-book-pos': item.isBookPos}">
+                    <div :ref="`mainitem${item.key}`" class="row q-px-sm no-wrap" :class="{'item': !item.isBookPos, 'item-book-pos': item.isBookPos}">
                         <div v-if="item.list.length" class="row justify-center items-center expand-button clickable" @click="expandClick(item.key)">
                             <q-icon name="la la-caret-right" class="icon" :class="{'expanded-icon': item.expanded}" color="green-8" size="20px" />
                         </div>
@@ -42,8 +42,12 @@
                         </div>
                     </div>
                     
-                    <div v-if="item.expanded" :ref="`subitem${item.key}`" class="subitems-transition">
-                        <div v-for="subitem in item.list" :key="subitem.key" class="row q-px-sm no-wrap" :class="{'subitem': !subitem.isBookPos, 'subitem-book-pos': subitem.isBookPos}">
+                    <div v-if="item.expanded" :ref="`subdiv${item.key}`" class="subitems-transition">
+                        <div 
+                            v-for="subitem in item.list" 
+                            :ref="`subitem${subitem.key}`" 
+                            :key="subitem.key" class="row q-px-sm no-wrap" :class="{'subitem': !subitem.isBookPos, 'subitem-book-pos': subitem.isBookPos}"
+                        >
                             <div class="col row clickable" @click="setBookPos(subitem.offset)">
                                 <div class="no-expand-button"></div>
                                 <div :style="subitem.indentStyle"></div>
@@ -289,23 +293,23 @@ class ContentsPage {
             const item = this.contents[i];
             const nextOffset = (i < this.contents.length - 1 ? this.contents[i + 1].offset : this.parsed.textLength);
 
+            if (bp >= item.offset && bp < nextOffset) {
+                item.isBookPos = true;
+                this.updateBookPosScrollTop(item);
+            } else if (item.isBookPos) {
+                item.isBookPos = false;
+            }
+
             for (let j = 0; j < item.list.length; j++) {
                 const subitem = item.list[j];
                 const nextSubOffset = (j < item.list.length - 1 ? item.list[j + 1].offset : nextOffset);
 
                 if (bp >= subitem.offset && bp < nextSubOffset) {
                     subitem.isBookPos = true;
-                    this.contents[i] = Object.assign(item, {list: item.list});
+                    this.updateBookPosScrollTop(item, subitem, j);
                 } else if (subitem.isBookPos) {
                     subitem.isBookPos = false;
-                    this.contents[i] = Object.assign(item, {list: item.list});
                 }
-            }
-
-            if (bp >= item.offset && bp < nextOffset) {
-                this.contents[i] = Object.assign(item, {isBookPos: true});
-            } else if (item.isBookPos) {
-                this.contents[i] = Object.assign(item, {isBookPos: false});
             }
         }
 
@@ -314,10 +318,32 @@ class ContentsPage {
             const nextOffset = (i < this.images.length - 1 ? this.images[i + 1].offset : this.parsed.textLength);
 
             if (bp >= img.offset && bp < nextOffset) {
-                this.images[i] = Object.assign(img, {isBookPos: true});
+                this.images[i].isBookPos = true;
             } else if (img.isBookPos) {
-                this.images[i] = Object.assign(img, {isBookPos: false});
+                this.images[i].isBookPos = false;
             }
+        }
+    }
+
+    updateBookPosScrollTop(item, subitem, i) {
+        try {
+            if (this.selectedTab == 'contents') {
+                let el = this.getFirstElem(this.$refs[`mainitem${item.key}`]);
+                let elShift = 0;
+                if (subitem && item.expanded) {
+                    const subEl = this.getFirstElem(this.$refs[`subitem${subitem.key}`]);
+                    elShift = el.offsetHeight - (0.5 + subEl.offsetHeight)*(i + 1);
+                } else {
+                    elShift = el.offsetHeight;
+                }
+
+                const halfH = this.$refs.tabPanel.clientHeight/2;
+                const newScrollTop = el.offsetTop - halfH - elShift;
+                if (newScrollTop < this.$refs.tabPanel.scrollTop - halfH || newScrollTop > this.$refs.tabPanel.scrollTop + halfH) 
+                    this.$refs.tabPanel.scrollTop = newScrollTop;
+            }
+        } catch (e) {
+            console.error(e);
         }
     }
 
@@ -330,8 +356,8 @@ class ContentsPage {
         const expanded = !item.expanded;
 
         if (!expanded) {
-            let subitems = this.getFirstElem(this.$refs[`subitem${key}`]);
-            subitems.style.height = '0';
+            let subdiv = this.getFirstElem(this.$refs[`subdiv${key}`]);
+            subdiv.style.height = '0';
             await utils.sleep(200);
         }
 
@@ -339,8 +365,8 @@ class ContentsPage {
 
         if (expanded) {
             await this.$nextTick();
-            let subitems = this.getFirstElem(this.$refs[`subitem${key}`]);
-            subitems.style.height = subitems.scrollHeight + 'px';
+            let subdiv = this.getFirstElem(this.$refs[`subdiv${key}`]);
+            subdiv.style.height = subdiv.scrollHeight + 'px';
         }
     }
 
