@@ -1,5 +1,5 @@
 <template>
-    <Window ref="window" height="95%" width="600px" @close="close">
+    <Window ref="window" width="600px" @close="close">
         <template #header>
             Настройки
         </template>

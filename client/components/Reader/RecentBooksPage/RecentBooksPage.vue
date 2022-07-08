@@ -28,9 +28,9 @@
                     <q-th key="date" class="td-mp break-word" style="width: 77px" :props="props">
                         <span v-html="props.cols[1].label"></span>
                     </q-th>
-                    <q-th key="desc" class="td-mp" style="width: 332px" :props="props" colspan="4">
+                    <q-th key="desc" class="td-mp" style="width: 300px" :props="props" colspan="4">
                         <q-input ref="input" v-model="search"
-                            outlined dense rounded style="position: absolute; top: 6px; left: 90px; width: 380px" bg-color="white"
+                            outlined dense rounded style="position: absolute; top: 6px; left: 90px; width: 350px" bg-color="white"
                             placeholder="Найти"                            
                             @click.stop
                         >
@@ -59,12 +59,12 @@
                     </q-td>
 
                     <q-td key="desc" auto-width :props="props" class="td-mp clickable" @click="loadBook(props.row.url)">
-                        <div class="break-word" style="width: 332px; font-size: 90%">
+                        <div class="break-word" style="width: 300px; font-size: 90%">
                             <div style="color: green">
                                 {{ props.row.desc.author }}
                             </div>
                             <div>{{ props.row.desc.title }}</div>
-                            <div class="read-bar" :style="`width: ${332*props.row.readPart}px`"></div>
+                            <div class="read-bar" :style="`width: ${300*props.row.readPart}px`"></div>
                         </div>
                     </q-td>
 
@@ -341,7 +341,7 @@ export default vueComponent(RecentBooksPage);
 
 <style scoped>
 .recent-books-table {
-    width: 600px;
+    width: 573px;
     overflow-y: auto;
     overflow-x: hidden;
 }
