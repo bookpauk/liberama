@@ -5,19 +5,19 @@
         </template>
 
         <template #buttons>
-            <span class="full-screen-button row justify-center items-center" @mousedown.stop @click="fullScreenToggle">
+            <span class="header-button row justify-center items-center" @mousedown.stop @click="fullScreenToggle">
                 <q-icon :name="(fullScreenActive ? 'la la-compress-arrows-alt': 'la la-expand-arrows-alt')" size="16px" />
                 <q-tooltip :delay="1500" anchor="bottom middle" content-style="font-size: 80%">На весь экран</q-tooltip>
             </span>
-            <span class="full-screen-button row justify-center items-center" @mousedown.stop @click="changeScale(0.1)">
+            <span class="header-button row justify-center items-center" @mousedown.stop @click="changeScale(0.1)">
                 <q-icon name="la la-plus" size="16px" />
                 <q-tooltip :delay="1500" anchor="bottom middle" content-style="font-size: 80%">Увеличить масштаб</q-tooltip>
             </span>
-            <span class="full-screen-button row justify-center items-center" @mousedown.stop @click="changeScale(-0.1)">
+            <span class="header-button row justify-center items-center" @mousedown.stop @click="changeScale(-0.1)">
                 <q-icon name="la la-minus" size="16px" />
                 <q-tooltip :delay="1500" anchor="bottom middle" content-style="font-size: 80%">Уменьшить масштаб</q-tooltip>
             </span>
-            <span class="full-screen-button row justify-center items-center" @mousedown.stop @click="showHelp">
+            <span class="header-button row justify-center items-center" @mousedown.stop @click="showHelp">
                 <q-icon name="la la-question-circle" size="16px" />
                 <q-tooltip :delay="1500" anchor="bottom middle" content-style="font-size: 80%">Справка</q-tooltip>
             </span>
@@ -894,14 +894,15 @@ export default vueComponent(ExternalLibs);
     background-color: #A0A0A0;
 }
 
-.full-screen-button {
+.header-button {
     width: 30px;
     height: 30px;
     cursor: pointer;
 }
 
-.full-screen-button:hover {
-    background-color: #69C05F;
+.header-button:hover {
+    color: white;
+    background-color: #39902F;
 }
 
 .transparent-layout {

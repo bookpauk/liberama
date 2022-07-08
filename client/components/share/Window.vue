@@ -127,6 +127,9 @@ class Window {
 
 export default vueComponent(Window);
 //-----------------------------------------------------------------------------
+//    background-color: #69C05F;
+//    text-shadow: 2px 1px 5px black, 2px 2px 5px black;
+
 </script>
 
 <style scoped>
@@ -153,7 +156,7 @@ export default vueComponent(Window);
 }
 
 .header {
-    background: linear-gradient(to bottom right, green, #59B04F);
+    background: linear-gradient(to bottom right, #007000, #59B04F);
     align-items: center;
     height: 30px;
 }
@@ -161,8 +164,8 @@ export default vueComponent(Window);
 .header-text {
     margin-left: 10px;
     margin-right: 10px;
-    color: yellow;
-    text-shadow: 2px 1px 5px black, 2px 2px 5px black;
+    color: #50FFFF;
+    text-shadow: 2px 2px 5px #005000, 2px 1px 7px #005000;
     overflow: hidden;
     white-space: nowrap;
 }
@@ -174,7 +177,8 @@ export default vueComponent(Window);
 }
 
 .close-button:hover {
-    background-color: #69C05F;
+    color: white;
+    background-color: #FF3030;
 }
 
 </style>
