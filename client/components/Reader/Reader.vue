@@ -201,6 +201,7 @@ import miscApi from '../../api/misc';
 
 import {versionHistory} from './versionHistory';
 import * as utils from '../../share/utils';
+import LockQueue from '../../share/LockQueue';
 
 const componentOptions = {
     components: {
@@ -312,6 +313,8 @@ class Reader {
         this.commit = this.$store.commit;
         this.reader = this.$store.state.reader;
         this.config = this.$store.state.config;
+
+        this.lock = new LockQueue(100);
 
         this.$root.addEventHook('key', this.keyHook);
 
@@ -1051,7 +1054,7 @@ class Reader {
         return result;
     }
 
-    async loadBook(opts) {
+    async _loadBook(opts) {
         if (!opts || !opts.url) {
             this.mostRecentBook();
             return;
@@ -1060,10 +1063,6 @@ class Reader {
         this.closeAllWindows();
 
         let url = encodeURI(decodeURI(opts.url));
-
-        //TODO: убрать конвертирование 'file://' после 06.2021
-        if (url.length == 71 && url.indexOf('file://') == 0)
-            url = url.replace(/^file/, 'disk');
 
         if ((url.indexOf('http://') != 0) && (url.indexOf('https://') != 0) &&
             (url.indexOf('disk://') != 0))
@@ -1189,7 +1188,16 @@ class Reader {
         }
     }
 
-    async loadFile(opts) {
+    async loadBook(opts) {
+        await this.lock.get();
+        try {
+            await this._loadBook(opts);
+        } finally {
+            this.lock.ret();
+        }
+    }
+
+    async _loadFile(opts) {
         this.progressActive = true;
 
         await this.$nextTick();
@@ -1210,6 +1218,15 @@ class Reader {
             progress.hide(); this.progressActive = false;
             this.loaderActive = true;
             this.$root.stdDialog.alert(e.message, 'Ошибка', {color: 'negative'});
+        }
+    }
+
+    async loadFile(opts) {
+        await this.lock.get();
+        try {
+            await this._loadFile(opts);
+        } finally {
+            this.lock.ret();
         }
     }
 
