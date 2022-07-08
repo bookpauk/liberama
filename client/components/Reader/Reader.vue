@@ -1180,7 +1180,7 @@ class Reader {
         } catch (e) {
             progress.hide(); this.progressActive = false;
             this.loaderActive = true;
-            if (!this.showHelpOnErrorIfNeeded(e.message)) {
+            if (!this.showHelpOnErrorIfNeeded(url)) {
                 this.$root.stdDialog.alert(e.message, 'Ошибка', {color: 'negative'});
             }
         } finally {
