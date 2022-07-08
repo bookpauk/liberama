@@ -1116,7 +1116,7 @@ class Reader {
                     this.blinkCachedLoadMessage();
 
                     this.checkBookPosPercent();
-                    await this.activateClickMapPage();
+                    this.activateClickMapPage();//no await
                     return;
                 }
 
@@ -1176,7 +1176,7 @@ class Reader {
                 this.stopBlink = true;
 
             this.checkBookPosPercent();
-            await this.activateClickMapPage();
+            this.activateClickMapPage();//no await
         } catch (e) {
             progress.hide(); this.progressActive = false;
             this.loaderActive = true;
