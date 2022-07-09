@@ -130,7 +130,7 @@ const componentOptions = {
             this.updateBookPosSelection();
         },
         selectedTab() {
-            this.updateBookPosSelection();
+            this.updateBookPosScrollTop();
         },
     },
 };
@@ -289,7 +289,7 @@ class ContentsPage {
         if (!this.isVisible)
             return;
 
-        await utils.sleep(50);
+        await this.$nextTick();
         const bp = this.bookPos;
         
         for (let i = 0; i < this.contents.length; i++) {
@@ -298,7 +298,6 @@ class ContentsPage {
 
             if (bp >= item.offset && bp < nextOffset) {
                 item.isBookPos = true;
-                this.updateBookPosScrollTop('contents', item);
             } else if (item.isBookPos) {
                 item.isBookPos = false;
             }
@@ -322,11 +321,12 @@ class ContentsPage {
 
             if (bp >= img.offset && bp < nextOffset) {
                 this.images[i].isBookPos = true;
-                this.updateBookPosScrollTop('images', img);
             } else if (img.isBookPos) {
                 this.images[i].isBookPos = false;
             }
         }
+
+        this.updateBookPosScrollTop();
     }
 
     /*getOffsetTop(key) {
@@ -334,9 +334,32 @@ class ContentsPage {
         return (el ? el.offsetTop : 0);
     }*/
 
-    updateBookPosScrollTop(tab, item, subitem, i) {
+    async updateBookPosScrollTop() {
         try {
-            if (tab == 'contents' && this.selectedTab == tab) {
+            await this.$nextTick();
+
+            if (this.selectedTab == 'contents') {
+                let item;
+                let subitem;
+                let i;
+
+                //ищем выделенные item
+                for(const _item of this.contents) {
+                    if (_item.isBookPos) {
+                        item = _item;
+                        for (let ii = 0; ii < item.list.length; ii++) {
+                            const _subitem = item.list[ii];
+                            if (_subitem.isBookPos) {
+                                subitem = _subitem;
+                                i = ii;
+                                break;
+                            }
+                        }
+                        break;
+                    }
+                }
+
+                //вычисляем и смещаем tabPanel.scrollTop
                 let el = this.getFirstElem(this.$refs[`mainitem${item.key}`]);
                 let elShift = 0;
                 if (subitem && item.expanded) {
@@ -353,7 +376,18 @@ class ContentsPage {
                     tabPanel.scrollTop = newScrollTop;
             }
 
-            if (tab == 'images' && this.selectedTab == tab) {
+            if (this.selectedTab == 'images') {
+                let item;
+
+                //ищем выделенные item
+                for(const _item of this.images) {
+                    if (_item.isBookPos) {
+                        item = _item;
+                        break;
+                    }
+                }
+
+                //вычисляем и смещаем tabPanel.scrollTop
                 let el = this.getFirstElem(this.$refs[`image${item.key}`]);
 
                 const tabPanel = this.$refs.tabPanelImages;
