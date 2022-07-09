@@ -161,8 +161,8 @@ export default vueComponent(Window);
 .header-text {
     margin-left: 10px;
     margin-right: 10px;
-    color: #80FFFF;
-    text-shadow: 2px 2px 5px #005000, 2px 1px 7px #005000;
+    color: #FFFFA0;
+    text-shadow: 2px 2px 5px #005000, 2px 1px 5px #005000;
     overflow: hidden;
     white-space: nowrap;
 }
