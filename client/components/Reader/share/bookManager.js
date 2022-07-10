@@ -89,6 +89,7 @@ class BookManager {
 
             if (!book.deleted && key !== newKey) {
                 this.recent[newKey] = _.cloneDeep(book);
+                this.recent[newKey].key = newKey;
                 book.deleted = 1;
             }
         }
