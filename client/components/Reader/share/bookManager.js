@@ -53,7 +53,8 @@ class BookManager {
             if (this.recentItem)
                 this.recent[this.recentItem.key] = this.recentItem;
 
-            this.convertRecent();
+            //конвертируем в новые ключи
+            await this.convertRecent();
 
             this.recentLastKey = await bmRecentStoreNew.getItem('recent-last-key');
             if (this.recentLastKey) {
@@ -72,12 +73,14 @@ class BookManager {
     }
 
     //TODO: убрать в 2025г
-    convertRecent() {
-        let converted = false;
+    async convertRecent() {
+        const converted = await bmRecentStoreNew.getItem('recent-converted');
+
+        if (converted)
+            return;
 
         for (const key in this.recent) {
             const book = this.recent[key];
-
             if (!book.path) {
                 continue;
             }
@@ -85,20 +88,18 @@ class BookManager {
             const newKey = this.keyFromPath(book.path);
 
             if (!book.deleted && key !== newKey) {
-                this.recent[newKey] = _.cloneDeep(this.recent[key]);
-                this.recent[key].deleted = 1;
-                converted = true; 
+                this.recent[newKey] = _.cloneDeep(book);
+                book.deleted = 1;
             }
         }
 
         //console.log(converted);
-        if (converted) {
-            (async() => {
-                await utils.sleep(5000);
-                this.saveRecent();
-                this.emit('recent-changed');
-            })();
-        }
+        (async() => {
+            await utils.sleep(3000);
+            this.saveRecent();
+            this.emit('recent-changed');
+            await bmRecentStoreNew.setItem('recent-converted', true);
+        })();
     }
 
     //Ленивая асинхронная загрузка bmMetaStore
@@ -486,12 +487,19 @@ class BookManager {
     }
 
     findRecentByUrlAndPath(url, bookPath) {
+        if (bookPath) {
+            const key = this.keyFromPath(bookPath);
+            const book = this.recent[key];
+            if (book && !book.deleted)
+                return book;
+        }
+
         let max = 0;
         let result = null;
 
         for (const key in this.recent) {
             const book = this.recent[key];
-            if (!book.deleted && book.url == url && book.addTime > max && (!bookPath || book.path == bookPath)) {
+            if (!book.deleted && book.url == url && book.addTime > max) {
                 max = book.addTime;
                 result = book;
             }

@@ -1092,24 +1092,28 @@ class Reader {
 
             // есть ли среди недавних
             let wasOpened = bookManager.findRecentByUrlAndPath(url, opts.path);
-            wasOpened = (wasOpened ? wasOpened : {});
-            const bookPos = (opts.bookPos !== undefined ? opts.bookPos : wasOpened.bookPos);
-            const bookPosSeen = (opts.bookPos !== undefined ? opts.bookPos : wasOpened.bookPosSeen);
-            const uploadFileName = (opts.uploadFileName ? opts.uploadFileName : '');
+            wasOpened = (wasOpened ? _.cloneDeep(wasOpened) : {});
+            
+            wasOpened = Object.assign(wasOpened, {
+                path: (opts.path !== undefined ? opts.path : wasOpened.path),
+                bookPos: (opts.bookPos !== undefined ? opts.bookPos : wasOpened.bookPos),
+                bookPosSeen: (opts.bookPos !== undefined ? opts.bookPos : wasOpened.bookPosSeen),
+                uploadFileName: (opts.uploadFileName ? opts.uploadFileName : wasOpened.uploadFileName),
+            });
 
             let book = null;
 
             if (!opts.force) {
                 // пытаемся загрузить и распарсить книгу в менеджере из локального кэша
-                const bookParsed = await bookManager.getBook({path: (opts.path ? opts.path : wasOpened.path)}, (prog) => {
+                const bookParsed = await bookManager.getBook(wasOpened, (prog) => {
                     progress.setState({progress: prog});
                 });
 
                 // если есть в локальном кэше
                 if (bookParsed) {
-                    await bookManager.setRecentBook(Object.assign({bookPos, bookPosSeen}, bookParsed));
+                    await bookManager.setRecentBook(Object.assign(wasOpened, bookParsed));
                     this.mostRecentBook();
-                    this.addAction(bookPos);
+                    this.addAction(wasOpened.bookPos);
                     this.loaderActive = false;
                     progress.hide(); this.progressActive = false;
                     this.blinkCachedLoadMessage();
@@ -1140,7 +1144,7 @@ class Reader {
             if (!book) {
                 book = await readerApi.loadBook({
                         url,
-                        uploadFileName,
+                        uploadFileName: wasOpened.uploadFileName,
                         enableSitesFilter: this.enableSitesFilter,
                         skipHtmlCheck: (this.splitToPara ? true : false),
                         isText: (this.splitToPara ? true : false),
@@ -1157,14 +1161,15 @@ class Reader {
 
             // добавляем в bookManager
             progress.setState({state: 'parse', step: 5});
+
             const addedBook = await bookManager.addBook(book, (prog) => {
                 progress.setState({progress: prog});
             });
 
             // добавляем в историю
-            await bookManager.setRecentBook(Object.assign({bookPos, bookPosSeen, uploadFileName}, addedBook));
+            await bookManager.setRecentBook(Object.assign(wasOpened, addedBook));
             this.mostRecentBook();
-            this.addAction(bookPos);
+            this.addAction(wasOpened.bookPos);
             this.updateRoute(true);
 
             this.loaderActive = false;
