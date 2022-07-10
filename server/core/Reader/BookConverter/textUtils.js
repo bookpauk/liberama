@@ -3,7 +3,7 @@ const chardet = require('chardet');
 function getEncoding(buf) {
     let selected = getEncodingLite(buf);
 
-    if (selected == 'ISO-8859-5') {
+    if (selected == 'ISO-8859-5' && buf.length > 10) {
         const charsetAll = chardet.analyse(buf.slice(0, 20000));
         for (const charset of charsetAll) {
             if (charset.name.indexOf('ISO-8859') < 0) {
