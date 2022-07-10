@@ -359,6 +359,9 @@ class ContentsPage {
                     }
                 }
 
+                if (!item)
+                    return;
+
                 //вычисляем и смещаем tabPanel.scrollTop
                 let el = this.getFirstElem(this.$refs[`mainitem${item.key}`]);
                 let elShift = 0;
@@ -386,6 +389,9 @@ class ContentsPage {
                         break;
                     }
                 }
+
+                if (!item)
+                    return;
 
                 //вычисляем и смещаем tabPanel.scrollTop
                 let el = this.getFirstElem(this.$refs[`image${item.key}`]);
