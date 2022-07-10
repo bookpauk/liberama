@@ -229,7 +229,7 @@ class RecentBooksPage {
 
             let title = bt.bookTitle;
             title = (title ? `"${title}"`: '');
-            const author = (bt.author ? bt.author : (bt.bookTitle ? bt.bookTitle : book.url));
+            const author = (bt.author ? bt.author : (bt.bookTitle ? bt.bookTitle : (book.uploadFileName ? book.uploadFileName : book.url)));
 
             result.push({
                 num,
