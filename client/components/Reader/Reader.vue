@@ -900,7 +900,7 @@ class Reader {
 
     refreshBook() {
         const mrb = this.mostRecentBook();
-        this.loadBook({url: mrb.url, uploadFileName: mrb.uploadFileName, force: true});
+        this.loadBook(Object.assign({}, mrb, {force: true}));
     }
 
     undoAction() {
@@ -1091,8 +1091,7 @@ class Reader {
             progress.setState({state: 'parse'});
 
             // есть ли среди недавних
-            const key = bookManager.keyFromUrl(url);
-            let wasOpened = await bookManager.getRecentBook({key});
+            let wasOpened = bookManager.findRecentByUrl(url);
             wasOpened = (wasOpened ? wasOpened : {});
             const bookPos = (opts.bookPos !== undefined ? opts.bookPos : wasOpened.bookPos);
             const bookPosSeen = (opts.bookPos !== undefined ? opts.bookPos : wasOpened.bookPosSeen);
@@ -1102,7 +1101,7 @@ class Reader {
 
             if (!opts.force) {
                 // пытаемся загрузить и распарсить книгу в менеджере из локального кэша
-                const bookParsed = await bookManager.getBook({url, path: opts.path}, (prog) => {
+                const bookParsed = await bookManager.getBook({path: (opts.path? opts.path : wasOpened.path)}, (prog) => {
                     progress.setState({progress: prog});
                 });
 
