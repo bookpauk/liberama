@@ -21,7 +21,7 @@ const readerActions = {
     'offlineMode': 'Автономный режим (без интернета)',
     'contents': 'Оглавление/закладки',
     'libs': 'Сетевая библиотека',
-    'recentBooks': 'Открыть недавние',
+    'recentBooks': 'Показать загруженные',
     'switchToolbar': 'Показать/скрыть панель управления',
     'donate': '',
     'bookBegin': 'В начало книги',
