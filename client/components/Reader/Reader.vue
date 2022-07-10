@@ -1091,7 +1091,7 @@ class Reader {
             progress.setState({state: 'parse'});
 
             // есть ли среди недавних
-            let wasOpened = bookManager.findRecentByUrl(url);
+            let wasOpened = bookManager.findRecentByUrlAndPath(url, opts.path);
             wasOpened = (wasOpened ? wasOpened : {});
             const bookPos = (opts.bookPos !== undefined ? opts.bookPos : wasOpened.bookPos);
             const bookPosSeen = (opts.bookPos !== undefined ? opts.bookPos : wasOpened.bookPosSeen);
@@ -1101,7 +1101,7 @@ class Reader {
 
             if (!opts.force) {
                 // пытаемся загрузить и распарсить книгу в менеджере из локального кэша
-                const bookParsed = await bookManager.getBook({path: (opts.path? opts.path : wasOpened.path)}, (prog) => {
+                const bookParsed = await bookManager.getBook({path: (opts.path ? opts.path : wasOpened.path)}, (prog) => {
                     progress.setState({progress: prog});
                 });
 

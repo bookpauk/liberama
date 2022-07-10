@@ -485,13 +485,13 @@ class BookManager {
         return result;
     }
 
-    findRecentByUrl(url) {
+    findRecentByUrlAndPath(url, bookPath) {
         let max = 0;
         let result = null;
 
         for (const key in this.recent) {
             const book = this.recent[key];
-            if (!book.deleted && book.url == url && book.addTime > max) {
+            if (!book.deleted && book.url == url && book.addTime > max && (!bookPath || book.path == bookPath)) {
                 max = book.addTime;
                 result = book;
             }

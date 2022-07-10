@@ -29,7 +29,8 @@
                         <span v-html="props.cols[1].label"></span>
                     </q-th>
                     <q-th key="desc" class="td-mp" style="width: 300px" :props="props" colspan="4">
-                        <q-input ref="input" v-model="search"
+                        <q-input 
+                            ref="input" v-model="search"
                             outlined dense rounded style="position: absolute; top: 6px; left: 90px; width: 350px" bg-color="white"
                             placeholder="Найти"                            
                             @click.stop
@@ -51,14 +52,14 @@
                         </div>
                     </q-td>
 
-                    <q-td key="date" auto-width :props="props" class="td-mp clickable" @click="loadBook(props.row.url)">
+                    <q-td key="date" auto-width :props="props" class="td-mp clickable" @click="loadBook(props.row)">
                         <div class="break-word" style="width: 68px">
                             {{ props.row.touchDate }}<br>
                             {{ props.row.touchTime }}
                         </div>
                     </q-td>
 
-                    <q-td key="desc" auto-width :props="props" class="td-mp clickable" @click="loadBook(props.row.url)">
+                    <q-td key="desc" auto-width :props="props" class="td-mp clickable" @click="loadBook(props.row)">
                         <div class="break-word" style="width: 300px; font-size: 90%">
                             <div style="color: green">
                                 {{ props.row.desc.author }}
@@ -311,8 +312,8 @@ class RecentBooksPage {
             this.close();
     }
 
-    loadBook(url) {
-        this.$emit('load-book', {url});
+    loadBook(row) {
+        this.$emit('load-book', {url: row.url, path: row.path});
         this.close();
     }
 
