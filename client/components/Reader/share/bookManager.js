@@ -499,8 +499,23 @@ class BookManager {
 
         for (const key in this.recent) {
             const book = this.recent[key];
-            if (!book.deleted && book.url == url && book.addTime > max) {
-                max = book.addTime;
+            if (!book.deleted && book.url == url && book.touchTime > max) {
+                max = book.touchTime;
+                result = book;
+            }
+        }
+
+        return result;
+    }
+
+    findRecentBySameBookKey(sameKey) {
+        let max = 0;
+        let result = null;
+
+        for (const key in this.recent) {
+            const book = this.recent[key];
+            if (!book.deleted && book.sameBookKey == sameKey && book.touchTime > max) {
+                max = book.touchTime;
                 result = book;
             }
         }

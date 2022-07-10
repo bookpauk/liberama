@@ -1090,10 +1090,10 @@ class Reader {
             progress.show();
             progress.setState({state: 'parse'});
 
-            // есть ли среди недавних
+            // есть ли среди загруженных
             let wasOpened = bookManager.findRecentByUrlAndPath(url, opts.path);
             wasOpened = (wasOpened ? _.cloneDeep(wasOpened) : {});
-            
+
             wasOpened = Object.assign(wasOpened, {
                 path: (opts.path !== undefined ? opts.path : wasOpened.path),
                 bookPos: (opts.bookPos !== undefined ? opts.bookPos : wasOpened.bookPos),
@@ -1166,6 +1166,31 @@ class Reader {
                 progress.setState({progress: prog});
             });
 
+            // sameBookKey
+            if (url.indexOf('disk://') == 0) {
+                //ищем такой файл в загруженных
+                let found = bookManager.findRecentBySameBookKey(wasOpened.uploadFileName);
+                found = (found ? _.cloneDeep(found) : found);
+
+                if (found) {
+                    //спрашиваем, надо ли объединить файлы
+                    const askResult = (wasOpened.path == found.path) || 
+                        await this.$root.stdDialog.askYesNo(`
+Файл с именем "${wasOpened.uploadFileName}" уже есть в загруженных.
+<br>Объединить позицию?`, 'Найдена похожая книга');
+
+                    if (askResult) {
+                        wasOpened.bookPos = found.bookPos;
+                        wasOpened.bookPosSeen = found.bookPosSeen;
+                        wasOpened.sameBookKey = found.sameBookKey;
+                    }
+                } else {
+                    wasOpened.sameBookKey = wasOpened.uploadFileName;
+                }
+            } else {
+                wasOpened.sameBookKey = addedBook.url;
+            }
+
             // добавляем в историю
             await bookManager.setRecentBook(Object.assign(wasOpened, addedBook));
             this.mostRecentBook();
@@ -1217,7 +1242,7 @@ class Reader {
 
             progress.hide(); this.progressActive = false;
 
-            await this.loadBook({url, uploadFileName: opts.file.name, force: true});
+            await this._loadBook({url, uploadFileName: opts.file.name, force: true});
         } catch (e) {
             progress.hide(); this.progressActive = false;
             this.loaderActive = true;
