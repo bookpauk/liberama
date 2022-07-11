@@ -13,7 +13,7 @@
             <div ref="header" class="scroll-header bg-blue-2">
                 <q-input 
                     ref="input" v-model="search"
-                    outlined rounded dense
+                    outlined dense
                     style="position: relative; top: 4px; left: 200px; width: 350px" bg-color="white"
                     placeholder="Найти"
                     @click.stop
@@ -86,7 +86,7 @@
                     <q-th key="desc" class="td-mp" style="width: 300px" :props="props" colspan="4">
                         <q-input 
                             ref="input" v-model="search"
-                            outlined dense rounded style="position: absolute; top: 6px; left: 90px; width: 350px" bg-color="white"
+                            outlined dense style="position: absolute; top: 6px; left: 90px; width: 350px" bg-color="white"
                             placeholder="Найти"                            
                             @click.stop
                         >

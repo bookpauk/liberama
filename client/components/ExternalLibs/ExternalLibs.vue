@@ -32,7 +32,7 @@
                     :options="rootLinkOptions"
                     style="width: 230px"
                     dropdown-icon="la la-angle-down la-sm"
-                    rounded outlined dense emit-value map-options display-value-sanitize options-sanitize
+                    outlined dense emit-value map-options display-value-sanitize options-sanitize
                     @popup-show="onSelectPopupShow" @popup-hide="onSelectPopupHide"
                 >
                     <template #prepend>
@@ -61,7 +61,7 @@
                     :options="selectedLinkOptions"
                     style="width: 50px"
                     dropdown-icon="la la-angle-down la-sm"
-                    rounded outlined dense emit-value map-options hide-selected display-value-sanitize options-sanitize
+                    outlined dense emit-value map-options hide-selected display-value-sanitize options-sanitize
                     @popup-show="onSelectPopupShow" @popup-hide="onSelectPopupHide"
                 >
                     <q-tooltip :delay="1500" anchor="bottom middle" content-style="font-size: 80%">
@@ -73,7 +73,7 @@
                     ref="input"
                     v-model="bookUrl"
                     class="col q-mr-sm"
-                    rounded outlined dense
+                    outlined dense
                     bg-color="white"
                     placeholder="Скопируйте сюда ссылку на книгу и нажмите 'Открыть'"
                     @focus="selectAllOnFocus" @keydown="bookUrlKeyDown"
@@ -99,7 +99,7 @@
                     </template>
                 </q-input>
 
-                <q-btn :disabled="!bookUrl" rounded color="green-7" no-caps size="14px" @click="submitUrl">
+                <q-btn :disabled="!bookUrl" color="green-7" no-caps size="14px" @click="submitUrl">
                     Открыть
                     <q-tooltip :delay="1500" anchor="bottom middle" content-style="font-size: 80%">
                         Открыть в читалке
