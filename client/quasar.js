@@ -32,6 +32,8 @@ import {QPopupProxy} from 'quasar/src/components/popup-proxy';
 import {QDialog} from 'quasar/src/components/dialog';
 import {QChip} from 'quasar/src/components/chip';
 import {QTree} from 'quasar/src/components/tree';
+import {QVirtualScroll} from 'quasar/src/components/virtual-scroll';
+
 //import {QExpansionItem} from 'quasar/src/components/expansion-item';
 
 const components = {
@@ -62,6 +64,7 @@ const components = {
     QChip,
     QTree,
     //QExpansionItem,
+    QVirtualScroll,
 };
 
 //directives 

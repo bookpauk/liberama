@@ -9,7 +9,62 @@
 
         <a ref="download" style="display: none;" target="_blank"></a>
 
-        <q-table
+        <div id="vs-container" ref="vsContainer" class="recent-books-scroll col">
+            <div ref="header" class="scroll-header bg-blue-2">
+                <q-input 
+                    ref="input" v-model="search"
+                    outlined rounded dense
+                    style="position: relative; top: 5px; left: 200px; width: 350px" bg-color="white"
+                    placeholder="Найти"
+                    @click.stop
+                >
+                    <template #append>
+                        <q-icon v-if="search !== ''" name="la la-times" class="cursor-pointer" @click.stop="resetSearch" />
+                    </template>
+                </q-input>
+            </div>
+
+            <q-virtual-scroll
+                v-slot="{ item, index }"
+                :items="tableData"
+                scroll-target="#vs-container"
+                virtual-scroll-item-size="80"
+                @virtual-scroll="onScroll"
+            >
+                <div class="table-row row" :class="{even: index % 2 > 0, 'active-book': item.active}">
+                    <div class="row-part row justify-center items-center" style="width: 80px">
+                        {{ index }}
+                    </div>
+
+                    <div class="row-part column items-stretch break-word clickable" style="width: 350px; font-size: 80%" @click="loadBook(item)">
+                        <div class="column col">
+                            <div style="color: green">
+                                {{ item.desc.author }}
+                            </div>
+                            <div>{{ item.desc.title }}</div>
+                        </div>
+                        <div class="read-bar" :style="`width: ${340*item.readPart}px`"></div>
+                    </div>
+
+                    <div class="row-part column justify-center" style="width: 80px; font-size: 80%">
+                        <a v-show="isUrl(item.url)" :href="item.url" target="_blank">Оригинал</a><br>
+                        <a :href="item.path" @click.prevent="downloadBook(item.path, item.fullTitle)">Скачать FB2</a>
+                    </div>
+
+                    <div class="row-part column justify-center">
+                        <q-btn
+                            dense
+                            style="width: 30px; height: 30px; padding: 7px 0 7px 0; margin-left: 4px"
+                            @click="handleDel(item.key)"
+                        >
+                            <q-icon class="la la-times" size="14px" />
+                        </q-btn>
+                    </div>
+                </div>
+            </q-virtual-scroll>
+        </div>
+
+        <!--q-table
             class="recent-books-table col"
             :rows="tableData"
             row-key="key"
@@ -91,7 +146,7 @@
                     </q-td>
                 </q-tr>
             </template>
-        </q-table>
+        </q-table-->
     </Window>
 </template>
 
@@ -103,6 +158,7 @@ import path from 'path-browserify';
 //import _ from 'lodash';
 
 import * as utils from '../../../share/utils';
+import LockQueue from '../../../share/LockQueue';
 import Window from '../../share/Window.vue';
 import bookManager from '../share/bookManager';
 import readerApi from '../../../api/reader';
@@ -127,10 +183,14 @@ class RecentBooksPage {
     pagination = {};
 
     created() {
-        this.firstInit = true;
-        this.pagination = {rowsPerPage: 0};
+        this.lastScrollTop1 = 0;
+        this.lastScrollTop2 = 0;
 
-        this.columns = [
+        this.lock = new LockQueue(100);
+
+        //this.pagination = {rowsPerPage: 0};
+
+        /*this.columns = [
             {
                 name: 'num',
                 label: '#',
@@ -168,7 +228,7 @@ class RecentBooksPage {
                 label: '',
                 align: 'left',
             },
-        ];
+        ];*/
     }
 
     init() {
@@ -177,28 +237,84 @@ class RecentBooksPage {
         this.$nextTick(() => {
             //this.$refs.input.focus();//плохо на планшетах
         });
-        (async() => {//подгрузка списка
-            if (this.initing)
-                return;
-            this.initing = true;
 
-            if (this.firstInit) {//для отзывчивости
-                await this.updateTableData(20);
-                this.firstInit = false;
-            }
-            await utils.sleep(50);
-            await this.updateTableData();
-
-            this.initing = false;
-        })();
+        this.updateTableData();//no await
     }
 
-    async updateTableData(limit) {
+    async updateTableData() {
+        await this.lock.get();
+        try {
+            let result = [];
+
+            const sorted = bookManager.getSortedRecent();
+            const activeBook = bookManager.mostRecentBook();
+
+            let num = 0;
+            for (const book of sorted) {
+                if (book.deleted)
+                    continue;
+
+                num++;
+
+                let d = new Date();
+                d.setTime(book.touchTime);
+                const touchTime = utils.formatDate(d);
+
+                let readPart = 0;
+                let perc = '';
+                let textLen = '';
+                const p = (book.bookPosSeen ? book.bookPosSeen : (book.bookPos ? book.bookPos : 0));
+                if (book.textLength) {
+                    readPart = p/book.textLength;
+                    perc = ` [${(readPart*100).toFixed(2)}%]`;
+                    textLen = ` ${Math.round(book.textLength/1000)}k`;
+                }
+
+                const bt = utils.getBookTitle(book.fb2);
+
+                let title = bt.bookTitle;
+                title = (title ? `"${title}"`: '');
+                const author = (bt.author ? bt.author : (bt.bookTitle ? bt.bookTitle : (book.uploadFileName ? book.uploadFileName : book.url)));
+
+                result.push({
+                    num,
+                    touchTime,
+                    desc: {
+                        author,
+                        title: `${title}${perc}${textLen}`,
+                    },
+                    readPart,
+                    url: book.url,
+                    path: book.path,
+                    fullTitle: bt.fullTitle,
+                    key: book.key,
+                    active: (activeBook.key == book.key),
+
+                    //для сортировки
+                    touchTimeRaw: book.touchTime,
+                    descString: `${author}${title}${perc}${textLen}`,
+                });
+            }
+
+            const search = this.search;
+            result = result.filter(item => {
+                return !search ||
+                    item.touchTime.includes(search) ||
+                    item.desc.title.toLowerCase().includes(search.toLowerCase()) ||
+                    item.desc.author.toLowerCase().includes(search.toLowerCase())
+            });
+
+            this.tableData = result;
+        } finally {
+            this.lock.ret();
+        }
+    }
+
+    /*async updateTableData(limit) {
         while (this.updating) await utils.sleep(100);
         this.updating = true;
         let result = [];
 
-        this.loading = !!limit;
         const sorted = bookManager.getSortedRecent();
 
         let num = 0;
@@ -260,7 +376,7 @@ class RecentBooksPage {
 
         this.tableData = result;
         this.updating = false;
-    }
+    }*/
 
     resetSearch() {
         this.search = '';
@@ -324,6 +440,24 @@ class RecentBooksPage {
             return false;
     }
 
+    onScroll() {
+        const curScrollTop = this.$refs.vsContainer.scrollTop;
+
+        if (curScrollTop - this.lastScrollTop1 > 150) {
+            this.$refs.header.style.top = `-${this.$refs.header.offsetHeight}px`;
+            this.$refs.header.style.transition = 'top 0.2s ease 0s';
+
+            this.lastScrollTop1 = curScrollTop;
+        } else if (curScrollTop - this.lastScrollTop2 < 0) {
+            this.$refs.header.style.position = 'sticky';
+            this.$refs.header.style.top = 0;
+
+            this.lastScrollTop1 = curScrollTop;
+        }
+
+        this.lastScrollTop2 = curScrollTop;
+    }
+
     close() {
         this.$emit('recent-books-close');
     }
@@ -341,31 +475,34 @@ export default vueComponent(RecentBooksPage);
 </script>
 
 <style scoped>
-.recent-books-table {
+.recent-books-scroll {
     width: 573px;
     overflow-y: auto;
     overflow-x: hidden;
+}
+
+.scroll-header {
+    height: 50px;
+    position: sticky;
+    z-index: 1;
+    top: 0;
+}
+
+.table-row {
+    min-height: 80px;
+    border-bottom: 1px solid #cccccc;
+}
+
+.row-part {
+    padding: 4px 4px 4px 4px;
 }
 
 .clickable {
     cursor: pointer;
 }
 
-.td-mp {
-    margin: 0 !important;
-    padding: 4px 4px 4px 4px !important;
-    border-bottom: 1px solid #ddd;
-}
-
-.no-mp {
-    margin: 0 !important;
-    padding: 0 !important;
-    border: 0;
-    border-left: 1px solid #ddd !important;
-}
-
 .break-word {
-    line-height: 180%;
+    line-height: 150%;
     overflow-wrap: break-word;
     word-wrap: break-word;
     white-space: normal;
@@ -375,21 +512,12 @@ export default vueComponent(RecentBooksPage);
     height: 3px;
     background-color: #aaaaaa;
 }
-</style>
 
-<style>
-.recent-books-table .q-table__middle {
-    height: 100%;
-    overflow-x: hidden;
+.even {
+    background-color: #f0f0f0;
 }
 
-.recent-books-table thead tr:first-child th {
-    position: sticky;
-    z-index: 1;
-    top: 0;
-    background-color: #c1f4cd;
-}
-.recent-books-table tr:nth-child(even) {
-    background-color: #f8f8f8;
+.active-book {
+    background-color: #b0f0b0 !important;
 }
 </style>
