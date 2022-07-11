@@ -14,7 +14,7 @@
                 <q-input 
                     ref="input" v-model="search"
                     outlined rounded dense
-                    style="position: relative; top: 5px; left: 200px; width: 350px" bg-color="white"
+                    style="position: relative; top: 4px; left: 200px; width: 350px" bg-color="white"
                     placeholder="Найти"
                     @click.stop
                 >
@@ -33,7 +33,7 @@
             >
                 <div class="table-row row" :class="{even: index % 2 > 0, 'active-book': item.active}">
                     <div class="row-part row justify-center items-center" style="width: 80px">
-                        {{ index }}
+                        {{ item.num }}
                     </div>
 
                     <div class="row-part column items-stretch break-word clickable" style="width: 350px; font-size: 80%" @click="loadBook(item)">
@@ -179,56 +179,13 @@ class RecentBooksPage {
     loading = false;
     search = '';
     tableData = [];
-    columns = [];
-    pagination = {};
+    sortMethod = '';
 
     created() {
         this.lastScrollTop1 = 0;
         this.lastScrollTop2 = 0;
 
         this.lock = new LockQueue(100);
-
-        //this.pagination = {rowsPerPage: 0};
-
-        /*this.columns = [
-            {
-                name: 'num',
-                label: '#',
-                align: 'center',
-                sortable: true,
-                field: 'num',
-            },
-            {
-                name: 'date',
-                label: 'Время<br>просм.',
-                align: 'left',
-                field: 'touchDateTime',
-                sortable: true,
-                sort: (a, b, rowA, rowB) => rowA.touchDateTime - rowB.touchDateTime,
-            },
-            {
-                name: 'desc',
-                label: 'Название',
-                align: 'left',
-                field: 'descString',
-                sortable: true,
-            },
-            {
-                name: 'links',
-                label: '',
-                align: 'left',
-            },
-            {
-                name: 'close',
-                label: '',
-                align: 'left',
-            },
-            {
-                name: 'last',
-                label: '',
-                align: 'left',
-            },
-        ];*/
     }
 
     init() {
@@ -249,12 +206,10 @@ class RecentBooksPage {
             const sorted = bookManager.getSortedRecent();
             const activeBook = bookManager.mostRecentBook();
 
-            let num = 0;
+            //подготовка полей
             for (const book of sorted) {
                 if (book.deleted)
                     continue;
-
-                num++;
 
                 let d = new Date();
                 d.setTime(book.touchTime);
@@ -277,7 +232,6 @@ class RecentBooksPage {
                 const author = (bt.author ? bt.author : (bt.bookTitle ? bt.bookTitle : (book.uploadFileName ? book.uploadFileName : book.url)));
 
                 result.push({
-                    num,
                     touchTime,
                     desc: {
                         author,
@@ -288,21 +242,72 @@ class RecentBooksPage {
                     path: book.path,
                     fullTitle: bt.fullTitle,
                     key: book.key,
+                    sameBookKey: book.sameBookKey,
                     active: (activeBook.key == book.key),
 
                     //для сортировки
+                    addTimeRaw: book.addTime,
                     touchTimeRaw: book.touchTime,
                     descString: `${author}${title}${perc}${textLen}`,
                 });
             }
 
+            //нумерация
+            let num = 0;
+
+            result.sort((a, b) => b.addTimeRaw - a.addTimeRaw);
+            for (const book of result) {
+                num++;
+                book.num = num;
+            }
+
+            //фильтрация
             const search = this.search;
-            result = result.filter(item => {
-                return !search ||
-                    item.touchTime.includes(search) ||
-                    item.desc.title.toLowerCase().includes(search.toLowerCase()) ||
-                    item.desc.author.toLowerCase().includes(search.toLowerCase())
-            });
+            if (search) {
+                result = result.filter(item => {
+                    return !search ||
+                        item.touchTime.includes(search) ||
+                        item.desc.title.toLowerCase().includes(search.toLowerCase()) ||
+                        item.desc.author.toLowerCase().includes(search.toLowerCase())
+                });
+            }
+
+            //сортировка
+            switch (this.sortMethod) {
+                case 'addTimeDesc':
+                    result.sort((a, b) => b.addTimeRaw - a.addTimeRaw);
+                    break;
+                case 'addTimeAsc':
+                    result.sort((a, b) => a.addTimeRaw - b.addTimeRaw);
+                    break;
+                case 'touchTimeDesc':
+                    result.sort((a, b) => b.touchTimeRaw - a.touchTimeRaw);
+                    break;
+                case 'touchTimeAsc':
+                    result.sort((a, b) => a.touchTimeRaw - b.touchTimeRaw);
+                    break;
+            }
+
+            //группировка
+            const groups = {};
+            const newResult = [];
+            for (const book of result) {
+                if (book.sameBookKey !== undefined) {
+                    if (!groups[book.sameBookKey]) {
+                        groups[book.sameBookKey] = [];
+                        book.group = groups[book.sameBookKey];
+                        newResult.push(book);
+                    } else {
+                        groups[book.sameBookKey].push(book);
+                    }
+                } else {
+                    newResult.push(book);
+                }
+            }
+            result = newResult;
+
+            //другие стадии
+            //.....
 
             this.tableData = result;
         } finally {
@@ -486,6 +491,7 @@ export default vueComponent(RecentBooksPage);
     position: sticky;
     z-index: 1;
     top: 0;
+    border-bottom: 2px solid #aaaaaa;
 }
 
 .table-row {
