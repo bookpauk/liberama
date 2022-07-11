@@ -81,13 +81,14 @@ class BookManager {
 
         for (const key in this.recent) {
             const book = this.recent[key];
+
             if (!book.path) {
                 continue;
             }
 
             const newKey = this.keyFromPath(book.path);
 
-            if (!book.deleted && key !== newKey) {
+            if (!book.deleted && key !== newKey || book.key !== newKey) {
                 this.recent[newKey] = _.cloneDeep(book);
                 this.recent[newKey].key = newKey;
                 book.deleted = 1;
