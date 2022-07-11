@@ -163,8 +163,7 @@ class TextPage {
         }, 10);
 
         this.$root.addEventHook('resize', async() => {
-            this.$nextTick(this.onResize);
-            await utils.sleep(500);
+            await utils.sleep(200);
             this.$nextTick(this.onResize);
         });
     }
@@ -508,12 +507,25 @@ class TextPage {
     }
 
     async onResize() {
+        if (this.resizing)
+            return;
+        
+        this.resizing = true;
         try {
+            const scrolled = this.doingScrolling;
+            if (scrolled)
+                await this.stopTextScrolling();
+
             this.calcDrawProps();
             this.setBackground();
             this.draw();
+
+            if (scrolled)
+                this.startTextScrolling();
         } catch (e) {
             //
+        } finally {
+            this.resizing = false;
         }
     }
 
