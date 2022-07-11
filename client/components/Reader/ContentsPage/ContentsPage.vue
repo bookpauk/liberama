@@ -28,10 +28,10 @@
                 <div v-for="item in contents" :key="item.key" class="column" style="width: 540px">
                     <div :ref="`mainitem${item.key}`" class="row q-px-sm no-wrap" :class="{'item': !item.isBookPos, 'item-book-pos': item.isBookPos}">
                         <div v-if="item.list.length" class="row justify-center items-center expand-button clickable" @click="expandClick(item.key)">
-                            <q-icon name="la la-caret-right" class="icon" :class="{'expanded-icon': item.expanded}" color="green-8" size="20px" />
+                            <q-icon name="la la-caret-right" class="icon" :class="{'expanded-icon': item.expanded}" color="green-8" size="24px" />
                         </div>
                         <div v-else class="no-expand-button clickable" @click="setBookPos(item.offset)">
-                            <q-icon name="la la-stop" class="icon" style="visibility: hidden" size="20px" />
+                            <q-icon name="la la-stop" class="icon" style="visibility: hidden" size="24px" />
                         </div>
                         <div class="col row clickable" @click="setBookPos(item.offset)">
                             <div :style="item.indentStyle"></div>
