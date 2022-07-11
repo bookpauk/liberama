@@ -188,6 +188,9 @@ const settingDefaults = {
     toolBarHideOnScroll: true,
     userHotKeys: {},
     userWallpapers: [],
+
+    recentShowSameBook: false,
+    recentSortMethod: '',
 };
 
 for (const font of fonts)

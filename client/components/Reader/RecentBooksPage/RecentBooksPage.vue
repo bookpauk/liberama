@@ -10,11 +10,15 @@
         <a ref="download" style="display: none;" target="_blank"></a>
 
         <div id="vs-container" ref="vsContainer" class="recent-books-scroll col">
-            <div ref="header" class="scroll-header bg-blue-2">
+            <div ref="header" class="scroll-header row bg-blue-2">
+                <q-btn class="bg-white" rounded style="width: 35px; height: 35px; margin: 6px 6px 0px 6px" @click="showSameBookClick">
+                    <q-icon name="la la-caret-right" class="icon" :class="{'expanded-icon': showSameBook}" color="green-8" size="24px" />
+                </q-btn>
+
                 <q-input 
                     ref="input" v-model="search"
                     outlined dense
-                    style="position: relative; top: 4px; left: 200px; width: 350px" bg-color="white"
+                    style="position: absolute; top: 4px; left: 200px; width: 350px" bg-color="white"
                     placeholder="Найти"
                     @click.stop
                 >
@@ -31,22 +35,47 @@
                 virtual-scroll-item-size="80"
                 @virtual-scroll="onScroll"
             >
-                <div class="table-row row" :class="{even: index % 2 > 0, 'active-book': item.active}">
-                    <div class="row-part row justify-center items-center" style="width: 80px">
-                        {{ item.num }}
+                <div class="table-row row" :class="{even: index % 2 > 0, 'active-book': item.active, 'active-parent-book': item.activeParent}">
+                    <div v-show="item.inGroup" class="row-part column justify-center items-center" style="width: 40px; border-right: 1px solid #cccccc">                        
+                        <q-icon name="la la-code-branch" size="24px" style="color: green" />
                     </div>
 
-                    <div class="row-part column items-stretch break-word clickable" style="width: 350px; font-size: 80%" @click="loadBook(item)">
-                        <div class="column col">
+                    <div class="row-part column justify-center items-stretch" style="width: 80px">
+                        <div class="col row justify-center items-center clickable" @click="loadBook(item)">
+                            <q-icon name="la la-book" size="40px" style="color: #dddddd" />
+                        </div>
+
+                        <div v-show="!showSameBook && item.group && item.group.length > 0" class="row justify-center" style="font-size: 70%">
+                            {{ (item.group ? item.group.length + 1 : 0) }} верси{{ wordEnding((item.group ? item.group.length : 0), 1) }}
+                        </div>
+                    </div>
+
+                    <div class="row-part column items-stretch clickable" :style="{ 'width': (350 - 40*(+item.inGroup)) + 'px' }" style="font-size: 75%" @click="loadBook(item)">
+                        <div class="row" style="font-size: 90%">
+                            <div class="row justify-center row-info-panel" style="width: 40px">
+                                {{ item.num }}
+                            </div>
+                            <div class="row justify-center row-info-panel" style="width: 130px">
+                                Чит: {{ item.touchTime }}
+                            </div>
+                            <div class="row justify-center row-info-panel" style="width: 130px">
+                                Загр: {{ item.addTime }}
+                            </div>
+                            <div class="row justify-center row-info-panel" style="width: 1px">
+                            </div>
+                        </div>
+
+                        <div class="column col q-mt-xs break-word">
                             <div style="color: green">
                                 {{ item.desc.author }}
                             </div>
                             <div>{{ item.desc.title }}</div>
                         </div>
-                        <div class="read-bar" :style="`width: ${340*item.readPart}px`"></div>
+
+                        <div class="read-bar" :style="`width: ${(340 - 40*(+item.inGroup))*item.readPart}px`"></div>
                     </div>
 
-                    <div class="row-part column justify-center" style="width: 80px; font-size: 80%">
+                    <div class="row-part column justify-center" style="width: 80px; font-size: 75%">
                         <a v-show="isUrl(item.url)" :href="item.url" target="_blank">Оригинал</a><br>
                         <a :href="item.path" @click.prevent="downloadBook(item.path, item.fullTitle)">Скачать FB2</a>
                     </div>
@@ -155,7 +184,7 @@
 import vueComponent from '../../vueComponent.js';
 
 import path from 'path-browserify';
-//import _ from 'lodash';
+import _ from 'lodash';
 
 import * as utils from '../../../share/utils';
 import LockQueue from '../../../share/LockQueue';
@@ -168,9 +197,12 @@ const componentOptions = {
         Window,
     },
     watch: {
-        search: function() {
+        search() {
             this.updateTableData();
-        }
+        },
+        settings() {
+            this.loadSettings();
+        },
     },
 };
 class RecentBooksPage {
@@ -180,12 +212,17 @@ class RecentBooksPage {
     search = '';
     tableData = [];
     sortMethod = '';
+    showSameBook = false;
 
     created() {
+        this.commit = this.$store.commit;
+
         this.lastScrollTop1 = 0;
         this.lastScrollTop2 = 0;
 
         this.lock = new LockQueue(100);
+
+        this.loadSettings();
     }
 
     init() {
@@ -196,6 +233,16 @@ class RecentBooksPage {
         });
 
         this.updateTableData();//no await
+    }
+
+    loadSettings() {
+        const settings = this.settings;
+        this.showSameBook = settings.recentShowSameBook;
+        this.sortMethod = settings.recentSortMethod || 'addTimeDesc';
+    }
+
+    get settings() {
+        return this.$store.state.reader.settings;
     }
 
     async updateTableData() {
@@ -214,6 +261,8 @@ class RecentBooksPage {
                 let d = new Date();
                 d.setTime(book.touchTime);
                 const touchTime = utils.formatDate(d);
+                d.setTime(book.addTime);
+                const addTime = utils.formatDate(d);
 
                 let readPart = 0;
                 let perc = '';
@@ -233,6 +282,7 @@ class RecentBooksPage {
 
                 result.push({
                     touchTime,
+                    addTime,
                     desc: {
                         author,
                         title: `${title}${perc}${textLen}`,
@@ -244,6 +294,8 @@ class RecentBooksPage {
                     key: book.key,
                     sameBookKey: book.sameBookKey,
                     active: (activeBook.key == book.key),
+                    activeParent: false,
+                    inGroup: false,
 
                     //для сортировки
                     addTimeRaw: book.addTime,
@@ -290,14 +342,21 @@ class RecentBooksPage {
 
             //группировка
             const groups = {};
-            const newResult = [];
+            const parents = {};
+            let newResult = [];
             for (const book of result) {
                 if (book.sameBookKey !== undefined) {
                     if (!groups[book.sameBookKey]) {
                         groups[book.sameBookKey] = [];
+                        parents[book.sameBookKey] = book;
+
                         book.group = groups[book.sameBookKey];
                         newResult.push(book);
                     } else {
+                        book.inGroup = true;
+                        if (book.active)
+                            parents[book.sameBookKey].activeParent = true;
+
                         groups[book.sameBookKey].push(book);
                     }
                 } else {
@@ -305,6 +364,21 @@ class RecentBooksPage {
                 }
             }
             result = newResult;
+
+            //showSameBook
+            if (this.showSameBook) {
+                newResult = [];
+                for (const book of result) {
+                    newResult.push(book);
+                    if (book.group) {
+                        for (const sameBook of book.group) {
+                            newResult.push(sameBook);
+                        }
+                    }
+                }
+
+                result = newResult;
+            }
 
             //другие стадии
             //.....
@@ -388,13 +462,16 @@ class RecentBooksPage {
         this.$refs.input.focus();
     }
 
-    wordEnding(num) {
-        const endings = ['ов', '', 'а', 'а', 'а', 'ов', 'ов', 'ов', 'ов', 'ов'];
+    wordEnding(num, type = 0) {
+        const endings = [
+            ['ов', '', 'а', 'а', 'а', 'ов', 'ов', 'ов', 'ов', 'ов'],
+            ['й', 'я', 'и', 'и', 'и', 'й', 'й', 'й', 'й', 'й']
+        ];
         const deci = num % 100;
         if (deci > 10 && deci < 20) {
-            return 'ов';
+            return endings[type][0];
         } else {
-            return endings[num % 10];
+            return endings[type][num % 10];
         }
     }
 
@@ -463,6 +540,16 @@ class RecentBooksPage {
         this.lastScrollTop2 = curScrollTop;
     }
 
+    showSameBookClick() {
+        this.showSameBook = !this.showSameBook;
+
+        const newSettings = _.cloneDeep(this.settings);
+        newSettings.recentShowSameBook = this.showSameBook;
+        this.commit('reader/setSettings', newSettings);
+
+        this.updateTableData();
+    }
+
     close() {
         this.$emit('recent-books-close');
     }
@@ -508,7 +595,7 @@ export default vueComponent(RecentBooksPage);
 }
 
 .break-word {
-    line-height: 150%;
+    line-height: 180%;
     overflow-wrap: break-word;
     word-wrap: break-word;
     white-space: normal;
@@ -517,13 +604,32 @@ export default vueComponent(RecentBooksPage);
 .read-bar {
     height: 3px;
     background-color: #aaaaaa;
+    margin-bottom: 2px;
 }
 
 .even {
-    background-color: #f0f0f0;
+    background-color: #f2f2f2;
 }
 
 .active-book {
     background-color: #b0f0b0 !important;
+}
+
+.active-parent-book {
+    background-color: #ffbbbb !important;
+}
+
+.icon {
+    transition: transform 0.2s;
+}
+
+.expanded-icon {
+    transform: rotate(90deg);
+}
+
+.row-info-panel {
+    line-height: 110%;
+    border-left: 1px solid #cccccc;
+    border-bottom: 1px solid #cccccc;
 }
 </style>
