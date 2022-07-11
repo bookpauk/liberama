@@ -163,6 +163,7 @@ class TextPage {
         }, 10);
 
         this.$root.addEventHook('resize', async() => {
+            this.$nextTick(this.onResize);
             await utils.sleep(200);
             this.$nextTick(this.onResize);
         });
