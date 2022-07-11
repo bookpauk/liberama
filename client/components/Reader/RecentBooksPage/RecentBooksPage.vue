@@ -389,10 +389,10 @@ class RecentBooksPage {
     }
 
     wordEnding(num) {
-        const endings = ['', 'а', 'и', 'и', 'и', '', '', '', '', ''];
+        const endings = ['ов', '', 'а', 'а', 'а', 'ов', 'ов', 'ов', 'ов', 'ов'];
         const deci = num % 100;
         if (deci > 10 && deci < 20) {
-            return '';
+            return 'ов';
         } else {
             return endings[num % 10];
         }
@@ -400,7 +400,7 @@ class RecentBooksPage {
 
     get header() {
         const len = (this.tableData ? this.tableData.length : 0);
-        return `${(this.search ? 'Найдено' : 'Всего')} ${len} книг${this.wordEnding(len)}`;
+        return `${(this.search ? 'Найдено' : 'Всего')} ${len} файл${this.wordEnding(len)}`;
     }
 
     async downloadBook(fb2path, fullTitle) {
