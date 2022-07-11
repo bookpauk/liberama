@@ -141,6 +141,7 @@
                     @load-file="loadFile"
                     @book-pos-changed="bookPosChanged"
                     @do-action="doAction"
+                    @hide-tool-bar="hideToolBar"
                 ></component>
             </keep-alive>
 
@@ -348,6 +349,13 @@ class Reader {
             this.debouncedSetRecentBook(newValue);
         }, 15000, {maxWait: 20000});
 
+        this.debouncedHideToolBar = _.debounce((event) => {
+            if (this.toolBarHideOnScroll && this.toolBarActive !== !!event.show) {
+                this.commit('reader/setToolBarActive', !!event.show);
+                this.$root.eventHook('resize');
+            }
+        }, 200);
+
         document.addEventListener('fullscreenchange', () => {
             this.fullScreenActive = (document.fullscreenElement !== null);
         });
@@ -405,6 +413,7 @@ class Reader {
         this.clickControlActive = this.clickControl;
         this.blinkCachedLoad = settings.blinkCachedLoad;
         this.showToolButton = settings.showToolButton;
+        this.toolBarHideOnScroll = settings.toolBarHideOnScroll;
         this.enableSitesFilter = settings.enableSitesFilter;
         this.showNeedUpdateNotify = settings.showNeedUpdateNotify;
         this.splitToPara = settings.splitToPara;
@@ -663,6 +672,10 @@ class Reader {
     toolBarToggle() {
         this.commit('reader/setToolBarActive', !this.toolBarActive);
         this.$root.eventHook('resize');
+    }
+
+    hideToolBar(event) {
+        this.debouncedHideToolBar(event);
     }
 
     fullScreenToggle() {

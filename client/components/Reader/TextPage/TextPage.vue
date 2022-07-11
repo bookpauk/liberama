@@ -66,7 +66,14 @@ const componentOptions = {
     watch: {
         bookPos: function() {
             this.$emit('book-pos-changed', {bookPos: this.bookPos, bookPosSeen: this.bookPosSeen});
+
             this.draw();
+
+            if (this.userBookPosChange) {
+                this.$emit('hide-tool-bar', {show: (this.bookPos == 0 || this.bookPos < this.prevBookPos)});
+                this.prevBookPos = this.bookPos;
+                this.userBookPosChange = false;
+            }
         },
         bookPosSeen: function() {
             this.$emit('book-pos-changed', {bookPos: this.bookPos, bookPosSeen: this.bookPosSeen});
@@ -99,6 +106,8 @@ class TextPage {
     lastBook = null;
     bookPos = 0;
     bookPosSeen = null;
+    prevBookPos = 0;
+    userBookPosChange = false;
 
     fontStyle = null;
     fontSize = null;
@@ -652,7 +661,7 @@ class TextPage {
         }
 
         if (this.book && this.bookPos > 0 && this.bookPos >= this.parsed.textLength) {
-            this.doEnd(true);
+            this.doEnd(true, false);
             return;
         }
 
@@ -675,7 +684,7 @@ class TextPage {
         this.debouncedDrawPageDividerAndOrnament();
 
         if (this.book && this.linesDown && this.linesDown.length < this.pageLineCount) {
-            this.doEnd(true);
+            this.doEnd(true, false);
             return;
         }
     }
@@ -911,12 +920,14 @@ class TextPage {
 
     doDown() {
         if (this.linesDown && this.linesDown.length > this.pageLineCount && this.pageLineCount > 0) {
+            this.userBookPosChange = true;
             this.bookPos = this.linesDown[1].begin;
         }
     }
 
     doUp() {
         if (this.linesUp && this.linesUp.length > 1 && this.pageLineCount > 0) {
+            this.userBookPosChange = true;
             this.bookPos = this.linesUp[1].begin;
         }
     }
@@ -929,6 +940,7 @@ class TextPage {
             if (i >= 0 && this.linesDown.length >= 2*i + (this.keepLastToFirst ? 1 : 0)) {
                 this.currentAnimation = this.pageChangeAnimation;
                 this.pageChangeDirectionDown = true;
+                this.userBookPosChange = true;
                 this.bookPos = this.linesDown[i].begin;
             } else 
                 this.doEnd();
@@ -944,6 +956,7 @@ class TextPage {
             if (i >= 0 && this.linesUp.length > i) {
                 this.currentAnimation = this.pageChangeAnimation;
                 this.pageChangeDirectionDown = false;
+                this.userBookPosChange = true;
                 this.bookPos = this.linesUp[i].begin;
             }
         }
@@ -952,10 +965,11 @@ class TextPage {
     doHome() {
         this.currentAnimation = this.pageChangeAnimation;
         this.pageChangeDirectionDown = false;
+        this.userBookPosChange = true;
         this.bookPos = 0;
     }
 
-    doEnd(noAni) {
+    doEnd(noAni, isUser = true) {
         if (this.parsed.para.length && this.pageLineCount > 0) {
             let i = this.parsed.para.length - 1;
             let lastPos = this.parsed.para[i].offset + this.parsed.para[i].length - 1;
@@ -966,6 +980,7 @@ class TextPage {
                 if (!noAni)
                     this.currentAnimation = this.pageChangeAnimation;
                 this.pageChangeDirectionDown = true;
+                this.userBookPosChange = isUser;
                 this.bookPos = lines[i].begin;
             }
         }

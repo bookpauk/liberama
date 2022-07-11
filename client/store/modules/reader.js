@@ -185,6 +185,7 @@ const settingDefaults = {
 
     fontShifts: {},
     showToolButton: {},
+    toolBarHideOnScroll: true,
     userHotKeys: {},
     userWallpapers: [],
 };

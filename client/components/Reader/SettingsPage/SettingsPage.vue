@@ -24,7 +24,7 @@
                     <div v-show="tabsScrollable" class="q-pt-lg" />
                     <q-tab class="tab" name="profiles" icon="la la-users" label="Профили" />
                     <q-tab class="tab" name="view" icon="la la-eye" label="Вид" />
-                    <q-tab class="tab" name="buttons" icon="la la-grip-horizontal" label="Кнопки" />
+                    <q-tab class="tab" name="toolbar" icon="la la-grip-horizontal" label="Панель" />
                     <q-tab class="tab" name="keys" icon="la la-gamepad" label="Управление" />
                     <q-tab class="tab" name="pagemove" icon="la la-school" label="Листание" />
                     <q-tab class="tab" name="convert" icon="la la-magic" label="Конвертир." />
@@ -82,8 +82,8 @@
                     </div>
                 </div>
                 <!-- Кнопки ---------------------------------------------------------------------->
-                <div v-if="selectedTab == 'buttons'" class="fit tab-panel">
-                    @@include('./ButtonsTab.inc');
+                <div v-if="selectedTab == 'toolbar'" class="fit tab-panel">
+                    @@include('./ToolBarTab.inc');
                 </div>
                 <!-- Управление ------------------------------------------------------------------>
                 <div v-if="selectedTab == 'keys'" class="fit column">
@@ -702,11 +702,11 @@ export default vueComponent(SettingsPage);
     margin-bottom: 5px;
 }
 
-.label-1, .label-7 {
+.label-1, .label-3, .label-7 {
     width: 75px;
 }
 
-.label-2, .label-3, .label-4, .label-5 {
+.label-2, .label-4, .label-5 {
     width: 110px;
 }
 
