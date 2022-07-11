@@ -79,8 +79,8 @@ class BookManager {
         if (converted)
             return;
 
-        for (const key in this.recent) {
-            const book = this.recent[key];
+        const newRecent = {};
+        for (const book of Object.values(this.recent)) {
 
             if (!book.path) {
                 continue;
@@ -88,18 +88,18 @@ class BookManager {
 
             const newKey = this.keyFromPath(book.path);
 
-            if (!book.deleted && key !== newKey || book.key !== newKey) {
-                this.recent[newKey] = _.cloneDeep(book);
-                this.recent[newKey].key = newKey;
-                book.deleted = 1;
-            }
+            newRecent[newKey] = _.cloneDeep(book);
+            newRecent[newKey].key = newKey;
         }
+
+        this.recent = newRecent;
 
         //console.log(converted);
         (async() => {
             await utils.sleep(3000);
             this.saveRecent();
             this.emit('recent-changed');
+            this.emit('set-recent');
             await bmRecentStoreNew.setItem('recent-converted', true);
         })();
     }
