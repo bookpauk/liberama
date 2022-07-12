@@ -1146,7 +1146,7 @@ class Reader {
                         });
                         book = Object.assign({}, wasOpened, {data: resp.data});
                     } catch (e) {
-                        this.$root.notify.error('Конвертированный файл не найден на сервере', 'Ошибка загрузки');
+                        this.$root.notify.error('Конвертированный файл не найден на сервере.<br>Пробуем загрузить оригинал.', 'Ошибка загрузки');
                     }
                 }
             }
