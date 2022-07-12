@@ -39,10 +39,25 @@
                     </q-tooltip>
                 </q-btn>
 
+                <q-input 
+                    ref="input"
+                    v-model="search"
+                    class="q-ml-sm q-mt-xs"
+                    outlined dense
+                    style="width: 185px"
+                    bg-color="white"
+                    placeholder="Найти"
+                    @click.stop
+                >
+                    <template #append>
+                        <q-icon v-if="search !== ''" name="la la-times" class="cursor-pointer" @click.stop="resetSearch" />
+                    </template>
+                </q-input>
+
                 <q-select
                     ref="sortMethod"
                     v-model="sortMethod"
-                    class="q-ml-md q-mt-xs"
+                    class="q-ml-sm q-mt-xs"
                     :options="sortMethodOptions"
                     style="width: 180px"
                     bg-color="white"
@@ -60,21 +75,6 @@
                         <div style="height: 28px; padding-top: 2px; overflow: hidden" v-html="scope.opt.label" />
                     </template>
                 </q-select>
-
-                <q-input 
-                    ref="input"
-                    v-model="search"
-                    class="q-ml-sm q-mt-xs"
-                    outlined dense
-                    style="width: 180px"
-                    bg-color="white"
-                    placeholder="Найти"
-                    @click.stop
-                >
-                    <template #append>
-                        <q-icon v-if="search !== ''" name="la la-times" class="cursor-pointer" @click.stop="resetSearch" />
-                    </template>
-                </q-input>
             </div>
 
             <q-virtual-scroll
@@ -299,12 +299,11 @@ class RecentBooksPage {
             }
 
             //нумерация
-            let num = 0;
-
             result.sort((a, b) => b.loadTimeRaw - a.loadTimeRaw);
-            for (const book of result) {
+            let num = 0;
+            for (let i = result.length - 1; i >= 0; i--) {
                 num++;
-                book.num = num;
+                result[i].num = num;
             }
 
             //фильтрация
