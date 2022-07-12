@@ -90,6 +90,8 @@ class BookManager {
 
             newRecent[newKey] = _.cloneDeep(book);
             newRecent[newKey].key = newKey;
+            if (!newRecent[newKey].loadTime)
+                newRecent[newKey].loadTime = newRecent[newKey].addTime;
         }
 
         this.recent = newRecent;
@@ -231,7 +233,7 @@ class BookManager {
     async addBook(newBook, callback) {        
         let meta = {url: newBook.url, path: newBook.path};
         meta.key = this.keyFromPath(meta.path);
-        meta.addTime = Date.now();
+        meta.addTime = Date.now();//время добавления в кеш
 
         const cb = (perc) => {
             const p = Math.round(30*perc/100);
@@ -405,7 +407,10 @@ class BookManager {
 
     async setRecentBook(value) {
         let result = this.metaOnly(value);
-        result.touchTime = Date.now();
+        result.touchTime = Date.now();//время последнего чтения
+        if (!result.loadTime)
+            result.loadTime = Date.now();//время загрузки файла
+
         result.deleted = 0;
 
         if (this.recent[result.key]) {

@@ -46,20 +46,20 @@
                         </div>
 
                         <div v-show="!showSameBook && item.group && item.group.length > 0" class="row justify-center" style="font-size: 70%">
-                            {{ (item.group ? item.group.length + 1 : 0) }} верси{{ wordEnding((item.group ? item.group.length : 0), 1) }}
+                            {{ (item.group ? item.group.length + 1 : 0) }} верси{{ wordEnding((item.group ? item.group.length + 1 : 0), 1) }}
                         </div>
                     </div>
 
                     <div class="row-part column items-stretch clickable" :style="{ 'width': (350 - 40*(+item.inGroup)) + 'px' }" style="font-size: 75%" @click="loadBook(item)">
-                        <div class="row" style="font-size: 90%">
+                        <div class="row" style="font-size: 80%">
                             <div class="row justify-center row-info-panel" style="width: 40px">
                                 {{ item.num }}
                             </div>
-                            <div class="row justify-center row-info-panel" style="width: 130px">
-                                Чит: {{ item.touchTime }}
+                            <div class="row justify-center row-info-panel" style="width: 140px">
+                                Читался: {{ item.touchTime }}
                             </div>
-                            <div class="row justify-center row-info-panel" style="width: 130px">
-                                Загр: {{ item.addTime }}
+                            <div class="row justify-center row-info-panel" style="width: 140px">
+                                Загружен: {{ item.loadTime }}
                             </div>
                             <div class="row justify-center row-info-panel" style="width: 1px">
                             </div>
@@ -238,7 +238,7 @@ class RecentBooksPage {
     loadSettings() {
         const settings = this.settings;
         this.showSameBook = settings.recentShowSameBook;
-        this.sortMethod = settings.recentSortMethod || 'addTimeDesc';
+        this.sortMethod = settings.recentSortMethod || 'loadTimeDesc';
     }
 
     get settings() {
@@ -261,8 +261,9 @@ class RecentBooksPage {
                 let d = new Date();
                 d.setTime(book.touchTime);
                 const touchTime = utils.formatDate(d);
-                d.setTime(book.addTime);
-                const addTime = utils.formatDate(d);
+                const loadTimeRaw = (book.loadTime ? book.loadTime : 0);//book.addTime);
+                d.setTime(loadTimeRaw);
+                const loadTime = utils.formatDate(d);
 
                 let readPart = 0;
                 let perc = '';
@@ -282,7 +283,7 @@ class RecentBooksPage {
 
                 result.push({
                     touchTime,
-                    addTime,
+                    loadTime,
                     desc: {
                         author,
                         title: `${title}${perc}${textLen}`,
@@ -298,7 +299,7 @@ class RecentBooksPage {
                     inGroup: false,
 
                     //для сортировки
-                    addTimeRaw: book.addTime,
+                    loadTimeRaw,
                     touchTimeRaw: book.touchTime,
                     descString: `${author}${title}${perc}${textLen}`,
                 });
@@ -307,7 +308,7 @@ class RecentBooksPage {
             //нумерация
             let num = 0;
 
-            result.sort((a, b) => b.addTimeRaw - a.addTimeRaw);
+            result.sort((a, b) => b.loadTimeRaw - a.loadTimeRaw);
             for (const book of result) {
                 num++;
                 book.num = num;
@@ -326,11 +327,11 @@ class RecentBooksPage {
 
             //сортировка
             switch (this.sortMethod) {
-                case 'addTimeDesc':
-                    result.sort((a, b) => b.addTimeRaw - a.addTimeRaw);
+                case 'loadTimeDesc':
+                    result.sort((a, b) => b.loadTimeRaw - a.loadTimeRaw);
                     break;
-                case 'addTimeAsc':
-                    result.sort((a, b) => a.addTimeRaw - b.addTimeRaw);
+                case 'loadTimeAsc':
+                    result.sort((a, b) => a.loadTimeRaw - b.loadTimeRaw);
                     break;
                 case 'touchTimeDesc':
                     result.sort((a, b) => b.touchTimeRaw - a.touchTimeRaw);
