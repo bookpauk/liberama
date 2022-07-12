@@ -52,13 +52,13 @@
 
                     <div class="row-part column items-stretch clickable" :style="{ 'width': (350 - 40*(+item.inGroup)) + 'px' }" style="font-size: 75%" @click="loadBook(item)">
                         <div class="row" style="font-size: 80%">
-                            <div class="row justify-center row-info-panel" style="width: 40px">
+                            <div class="row justify-center row-info-panel" style="width: 30px">
                                 {{ item.num }}
                             </div>
-                            <div class="row justify-center row-info-panel" style="width: 140px">
+                            <div class="row justify-center row-info-panel" style="width: 130px">
                                 Читался: {{ item.touchTime }}
                             </div>
-                            <div class="row justify-center row-info-panel" style="width: 140px">
+                            <div class="row justify-center row-info-panel" style="width: 138px">
                                 Загружен: {{ item.loadTime }}
                             </div>
                             <div class="row justify-center row-info-panel" style="width: 1px">
@@ -66,7 +66,7 @@
                         </div>
 
                         <div class="column col q-mt-xs break-word">
-                            <div style="color: green">
+                            <div class="text-green-10" style="font-size: 105%">
                                 {{ item.desc.author }}
                             </div>
                             <div>{{ item.desc.title }}</div>
@@ -76,8 +76,10 @@
                     </div>
 
                     <div class="row-part column justify-center" style="width: 80px; font-size: 75%">
-                        <a v-show="isUrl(item.url)" :href="item.url" target="_blank">Оригинал</a><br>
-                        <a :href="item.path" @click.prevent="downloadBook(item.path, item.fullTitle)">Скачать FB2</a>
+                        <div>
+                            <a v-show="isUrl(item.url)" :href="item.url" target="_blank">Оригинал</a><br><br>
+                            <a :href="item.path" @click.prevent="downloadBook(item.path, item.fullTitle)">Скачать FB2</a>
+                        </div>
                     </div>
 
                     <div class="row-part column justify-center">
