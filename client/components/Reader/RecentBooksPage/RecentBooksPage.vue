@@ -50,26 +50,37 @@
                         </div>
                     </div>
 
-                    <div class="row-part column items-stretch clickable" :style="{ 'width': (350 - 40*(+item.inGroup)) + 'px' }" style="font-size: 75%" @click="loadBook(item)">
+                    <div class="row-part column items-stretch clickable break-word" :style="{ 'width': (350 - 40*(+item.inGroup)) + 'px' }" style="font-size: 75%" @click="loadBook(item)">
                         <div class="row" style="font-size: 80%">
-                            <div class="row justify-center row-info-panel" style="width: 30px">
+                            <div class="row justify-center row-info-top" style="width: 30px">
                                 {{ item.num }}
                             </div>
-                            <div class="row justify-center row-info-panel" style="width: 130px">
+                            <div class="row justify-center row-info-top" style="width: 130px">
                                 Читался: {{ item.touchTime }}
                             </div>
-                            <div class="row justify-center row-info-panel" style="width: 138px">
+                            <div class="row justify-center row-info-top" style="width: 138px">
                                 Загружен: {{ item.loadTime }}
                             </div>
-                            <div class="row justify-center row-info-panel" style="width: 1px">
+                            <div class="row justify-center row-info-top" style="width: 1px">
                             </div>
                         </div>
 
-                        <div class="column col q-mt-xs break-word">
+                        <div class="col q-mt-xs" :style="{ 'width': (340 - 40*(+item.inGroup)) + 'px' }">
                             <div class="text-green-10" style="font-size: 105%">
                                 {{ item.desc.author }}
                             </div>
                             <div>{{ item.desc.title }}</div>
+                        </div>
+
+                        <div class="row q-mt-xs" style="font-size: 80%">
+                            <div class="row justify-center row-info-bottom" style="width: 50px">
+                                {{ item.desc.perc }}
+                            </div>
+                            <div class="row justify-center row-info-bottom" style="width: 50px">
+                                {{ item.desc.textLen }}
+                            </div>
+                            <div class="row justify-center row-info-bottom" style="width: 1px">
+                            </div>
                         </div>
 
                         <div class="read-bar" :style="`width: ${(340 - 40*(+item.inGroup))*item.readPart}px`"></div>
@@ -273,8 +284,8 @@ class RecentBooksPage {
                 const p = (book.bookPosSeen ? book.bookPosSeen : (book.bookPos ? book.bookPos : 0));
                 if (book.textLength) {
                     readPart = p/book.textLength;
-                    perc = ` [${(readPart*100).toFixed(2)}%]`;
-                    textLen = ` ${Math.round(book.textLength/1000)}k`;
+                    perc = `${(readPart*100).toFixed(2)}%`;
+                    textLen = `${Math.round(book.textLength/1000)}k`;
                 }
 
                 const bt = utils.getBookTitle(book.fb2);
@@ -288,7 +299,9 @@ class RecentBooksPage {
                     loadTime,
                     desc: {
                         author,
-                        title: `${title}${perc}${textLen}`,
+                        title,
+                        perc,
+                        textLen,
                     },
                     readPart,
                     url: book.url,
@@ -630,9 +643,15 @@ export default vueComponent(RecentBooksPage);
     transform: rotate(90deg);
 }
 
-.row-info-panel {
+.row-info-top {
     line-height: 110%;
     border-left: 1px solid #cccccc;
     border-bottom: 1px solid #cccccc;
+}
+
+.row-info-bottom {
+    line-height: 110%;
+    border: 1px solid #cccccc;
+    border-right: 0;
 }
 </style>
