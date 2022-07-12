@@ -15,6 +15,10 @@
                     <q-icon name="la la-caret-right" class="icon" :class="{'expanded-icon': showSameBook}" color="green-8" size="24px" />
                 </q-btn>
 
+                <q-btn class="bg-white" rounded style="width: 35px; height: 35px; margin: 6px 6px 0px 6px" @click="scrollToActiveBook">
+                    <q-icon name="la la-location-arrow" color="green-8" size="24px" />
+                </q-btn>
+
                 <q-input 
                     ref="input" v-model="search"
                     outlined dense
@@ -247,8 +251,11 @@ class RecentBooksPage {
             //this.$refs.input.focus();//плохо на планшетах
         });
 
-        this.updateTableData();//no await
-        this.scrollToActiveBook();//no await
+        (async() => {
+            this.showBar();
+            await this.updateTableData();
+            await this.scrollToActiveBook();
+        })();
     }
 
     loadSettings() {
@@ -474,10 +481,21 @@ class RecentBooksPage {
             return false;
     }
 
+    showBar() {
+        this.lastScrollTop1 = this.$refs.vsContainer.scrollTop;
+        this.$refs.header.style.position = 'sticky';
+        this.$refs.header.style.top = 0;
+    }
+
     onScroll() {
         const curScrollTop = this.$refs.vsContainer.scrollTop;
 
-        if (curScrollTop - this.lastScrollTop1 > 150) {
+        if (this.lockScroll) {
+            this.lastScrollTop1 = curScrollTop;
+            return;
+        }
+
+        if (curScrollTop - this.lastScrollTop1 > 100) {
             this.$refs.header.style.top = `-${this.$refs.header.offsetHeight}px`;
             this.$refs.header.style.transition = 'top 0.2s ease 0s';
 
@@ -503,24 +521,28 @@ class RecentBooksPage {
     }
 
     async scrollToActiveBook() {
-        await this.$nextTick();
-        
-        let activeIndex = -1;
-        let activeParentIndex = -1;
-        for (let i = 0; i < this.tableData.length; i++) {
-            const book = this.tableData[i];
-            if (book.active)
-                activeIndex = i;
-            if (book.activeParent)
-                activeParentIndex = i;
+        this.lockScroll = true;
+        try {
+            let activeIndex = -1;
+            let activeParentIndex = -1;
+            for (let i = 0; i < this.tableData.length; i++) {
+                const book = this.tableData[i];
+                if (book.active)
+                    activeIndex = i;
+                if (book.activeParent)
+                    activeParentIndex = i;
 
-            if (activeIndex >= 0 && activeParentIndex >= 0)
-                break;
-        }
+                if (activeIndex >= 0 && activeParentIndex >= 0)
+                    break;
+            }
 
-        const index = (activeIndex >= 0 ? activeIndex : activeParentIndex);
-        if (index >= 0) {
-            this.$refs.virtualScroll.scrollTo(index, 'center');
+            const index = (activeIndex >= 0 ? activeIndex : activeParentIndex);
+            if (index >= 0) {
+                this.$refs.virtualScroll.scrollTo(index, 'center');
+            }
+        } finally {
+            await utils.sleep(100);
+            this.lockScroll = false;
         }
     }
 
