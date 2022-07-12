@@ -29,6 +29,7 @@
             </div>
 
             <q-virtual-scroll
+                ref="virtualScroll"
                 v-slot="{ item, index }"
                 :items="tableData"
                 scroll-target="#vs-container"
@@ -247,6 +248,7 @@ class RecentBooksPage {
         });
 
         this.updateTableData();//no await
+        this.scrollToActiveBook();//no await
     }
 
     loadSettings() {
@@ -407,74 +409,6 @@ class RecentBooksPage {
         }
     }
 
-    /*async updateTableData(limit) {
-        while (this.updating) await utils.sleep(100);
-        this.updating = true;
-        let result = [];
-
-        const sorted = bookManager.getSortedRecent();
-
-        let num = 0;
-        for (let i = 0; i < sorted.length; i++) {
-            const book = sorted[i];
-            if (book.deleted)
-                continue;
-
-            num++;
-            if (limit && result.length >= limit)
-                break;
-
-            let d = new Date();
-            d.setTime(book.touchTime);
-            const t = utils.formatDate(d).split(' ');
-
-            let readPart = 0;
-            let perc = '';
-            let textLen = '';
-            const p = (book.bookPosSeen ? book.bookPosSeen : (book.bookPos ? book.bookPos : 0));
-            if (book.textLength) {
-                readPart = p/book.textLength;
-                perc = ` [${(readPart*100).toFixed(2)}%]`;
-                textLen = ` ${Math.round(book.textLength/1000)}k`;
-            }
-
-            const bt = utils.getBookTitle(book.fb2);
-
-            let title = bt.bookTitle;
-            title = (title ? `"${title}"`: '');
-            const author = (bt.author ? bt.author : (bt.bookTitle ? bt.bookTitle : (book.uploadFileName ? book.uploadFileName : book.url)));
-
-            result.push({
-                num,
-                touchDateTime: book.touchTime,
-                touchDate: t[0],
-                touchTime: t[1],
-                desc: {
-                    author,
-                    title: `${title}${perc}${textLen}`,
-                },
-                readPart,
-                descString: `${author}${title}${perc}${textLen}`,//для сортировки
-                url: book.url,
-                path: book.path,
-                fullTitle: bt.fullTitle,
-                key: book.key,
-            });
-        }
-
-        const search = this.search;
-        result = result.filter(item => {
-            return !search ||
-                item.touchTime.includes(search) ||
-                item.touchDate.includes(search) ||
-                item.desc.title.toLowerCase().includes(search.toLowerCase()) ||
-                item.desc.author.toLowerCase().includes(search.toLowerCase())
-        });
-
-        this.tableData = result;
-        this.updating = false;
-    }*/
-
     resetSearch() {
         this.search = '';
         this.$refs.input.focus();
@@ -566,6 +500,28 @@ class RecentBooksPage {
         this.commit('reader/setSettings', newSettings);
 
         this.updateTableData();
+    }
+
+    async scrollToActiveBook() {
+        await this.$nextTick();
+        
+        let activeIndex = -1;
+        let activeParentIndex = -1;
+        for (let i = 0; i < this.tableData.length; i++) {
+            const book = this.tableData[i];
+            if (book.active)
+                activeIndex = i;
+            if (book.activeParent)
+                activeParentIndex = i;
+
+            if (activeIndex >= 0 && activeParentIndex >= 0)
+                break;
+        }
+
+        const index = (activeIndex >= 0 ? activeIndex : activeParentIndex);
+        if (index >= 0) {
+            this.$refs.virtualScroll.scrollTo(index, 'center');
+        }
     }
 
     close() {
