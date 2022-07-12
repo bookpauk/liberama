@@ -1,10 +1,12 @@
 import localForage from 'localforage';
+import path from 'path-browserify';
 import _ from 'lodash';
 
 import * as utils from '../../../share/utils';
 import BookParser from './BookParser';
 
 const maxDataSize = 500*1024*1024;//compressed bytes
+const maxRecentLength = 5000;
 
 //локальный кэш метаданных книг, ограничение maxDataSize
 const bmMetaStore = localForage.createInstance({
@@ -17,9 +19,6 @@ const bmDataStore = localForage.createInstance({
 });
 
 //список недавно открытых книг
-const bmRecentStoreOld = localForage.createInstance({
-    name: 'bmRecentStore'
-});
 const bmRecentStoreNew = localForage.createInstance({
     name: 'bmRecentStoreNew'
 });
@@ -39,7 +38,7 @@ class BookManager {
 
         this.saveRecentItem = _.debounce(() => {
             bmRecentStoreNew.setItem('recent-item', this.recentItem);
-            this.recentRev = (this.recentRev < 1000 ? this.recentRev + 1 : 1);
+            this.recentRev = (this.recentRev < maxRecentLength ? this.recentRev + 1 : 1);
             bmRecentStoreNew.setItem('rev', this.recentRev);
         }, 200, {maxWait: 300});
 
@@ -53,6 +52,9 @@ class BookManager {
             this.recentItem = await bmRecentStoreNew.getItem('recent-item');
             if (this.recentItem)
                 this.recent[this.recentItem.key] = this.recentItem;
+
+            //конвертируем в новые ключи
+            await this.convertRecent();
 
             this.recentLastKey = await bmRecentStoreNew.getItem('recent-last-key');
             if (this.recentLastKey) {
@@ -68,6 +70,40 @@ class BookManager {
         this.recentChanged = true;
 
         this.loadStored();//no await
+    }
+
+    //TODO: убрать в 2025г
+    async convertRecent() {
+        const converted = await bmRecentStoreNew.getItem('recent-converted');
+
+        if (converted)
+            return;
+
+        const newRecent = {};
+        for (const book of Object.values(this.recent)) {
+
+            if (!book.path) {
+                continue;
+            }
+
+            const newKey = this.keyFromPath(book.path);
+
+            newRecent[newKey] = _.cloneDeep(book);
+            newRecent[newKey].key = newKey;
+            if (!newRecent[newKey].loadTime)
+                newRecent[newKey].loadTime = newRecent[newKey].addTime;
+        }
+
+        this.recent = newRecent;
+
+        //console.log(converted);
+        (async() => {
+            await utils.sleep(3000);
+            this.saveRecent();
+            this.emit('recent-changed');
+            this.emit('set-recent');
+            await bmRecentStoreNew.setItem('recent-converted', true);
+        })();
     }
 
     //Ленивая асинхронная загрузка bmMetaStore
@@ -196,8 +232,8 @@ class BookManager {
 
     async addBook(newBook, callback) {        
         let meta = {url: newBook.url, path: newBook.path};
-        meta.key = this.keyFromUrl(meta.url);
-        meta.addTime = Date.now();
+        meta.key = this.keyFromPath(meta.path);
+        meta.addTime = Date.now();//время добавления в кеш
 
         const cb = (perc) => {
             const p = Math.round(30*perc/100);
@@ -232,10 +268,10 @@ class BookManager {
     async hasBookParsed(meta) {
         if (!this.books) 
             return false;
-        if (!meta.url)
+        if (!meta.path)
             return false;
         if (!meta.key)
-            meta.key = this.keyFromUrl(meta.url);
+            meta.key = this.keyFromPath(meta.path);
 
         let book = this.books[meta.key];
 
@@ -250,8 +286,12 @@ class BookManager {
 
     async getBook(meta, callback) {
         let result = undefined;
+
+        if (!meta.path)
+            return;
+
         if (!meta.key)
-            meta.key = this.keyFromUrl(meta.url);
+            meta.key = this.keyFromPath(meta.path);
 
         result = this.books[meta.key];
 
@@ -259,11 +299,6 @@ class BookManager {
             result = await bmMetaStore.getItem(`bmMeta-${meta.key}`);
             if (result)
                 this.books[meta.key] = result;
-        }
-
-        //Если файл на сервере изменился, считаем, что в кеше его нету
-        if (meta.path && result && meta.path != result.path) {
-            return;
         }
 
         if (result && !result.parsed) {
@@ -325,10 +360,20 @@ class BookManager {
         return result;
     }
 
-    keyFromUrl(url) {
+    /*keyFromUrl(url) {
         return utils.stringToHex(url);
+    }*/
+
+    keyFromPath(bookPath) {
+        return path.basename(bookPath);
     }
 
+    keysEqual(bookPath1, bookPath2) {
+        if (bookPath1 === undefined || bookPath2 === undefined)
+            return false;
+        
+        return (this.keyFromPath(bookPath1) === this.keyFromPath(bookPath2));
+    }
     //-- recent --------------------------------------------------------------
     async recentSetItem(item = null, skipCheck = false) {
         const rev = await bmRecentStoreNew.getItem('rev');
@@ -369,7 +414,10 @@ class BookManager {
 
     async setRecentBook(value) {
         let result = this.metaOnly(value);
-        result.touchTime = Date.now();
+        result.touchTime = Date.now();//время последнего чтения
+        if (!result.loadTime)
+            result.loadTime = Date.now();//время загрузки файла
+
         result.deleted = 0;
 
         if (this.recent[result.key]) {
@@ -401,7 +449,7 @@ class BookManager {
         const sorted = this.getSortedRecent();
 
         let isDel = false;
-        for (let i = 1000; i < sorted.length; i++) {
+        for (let i = maxRecentLength; i < sorted.length; i++) {
             delete this.recent[sorted[i].key];
             isDel = true;
         }
@@ -421,7 +469,7 @@ class BookManager {
 
         let max = 0;
         let result = null;
-        for (let key in this.recent) {
+        for (const key in this.recent) {
             const book = this.recent[key];
             if (!book.deleted && book.touchTime > max) {
                 max = book.touchTime;
@@ -449,6 +497,43 @@ class BookManager {
 
         this.sortedRecentCached = result;
         this.recentChanged = false;
+        return result;
+    }
+
+    findRecentByUrlAndPath(url, bookPath) {
+        if (bookPath) {
+            const key = this.keyFromPath(bookPath);
+            const book = this.recent[key];
+            if (book && !book.deleted)
+                return book;
+        }
+
+        let max = 0;
+        let result = null;
+
+        for (const key in this.recent) {
+            const book = this.recent[key];
+            if (!book.deleted && book.url == url && book.loadTime > max) {
+                max = book.loadTime;
+                result = book;
+            }
+        }
+
+        return result;
+    }
+
+    findRecentBySameBookKey(sameKey) {
+        let max = 0;
+        let result = null;
+
+        for (const key in this.recent) {
+            const book = this.recent[key];
+            if (!book.deleted && book.sameBookKey == sameKey && book.loadTime > max) {
+                max = book.loadTime;
+                result = book;
+            }
+        }
+
         return result;
     }
 

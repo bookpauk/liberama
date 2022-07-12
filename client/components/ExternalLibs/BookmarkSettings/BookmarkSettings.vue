@@ -11,7 +11,7 @@
                         Открыть выбранную закладку
                     </q-tooltip>
                 </q-btn>
-                <q-input ref="search" v-model="search" class="col" rounded outlined dense bg-color="white" placeholder="Найти">
+                <q-input ref="search" v-model="search" class="col" outlined dense bg-color="white" placeholder="Найти">
                     <template #append>
                         <q-icon v-if="search !== ''" name="la la-times" class="cursor-pointer" @click="resetSearch" />
                     </template>

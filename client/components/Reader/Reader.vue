@@ -141,6 +141,7 @@
                     @load-file="loadFile"
                     @book-pos-changed="bookPosChanged"
                     @do-action="doAction"
+                    @hide-tool-bar="hideToolBar"
                 ></component>
             </keep-alive>
 
@@ -201,6 +202,7 @@ import miscApi from '../../api/misc';
 
 import {versionHistory} from './versionHistory';
 import * as utils from '../../share/utils';
+import LockQueue from '../../share/LockQueue';
 
 const componentOptions = {
     components: {
@@ -313,6 +315,8 @@ class Reader {
         this.reader = this.$store.state.reader;
         this.config = this.$store.state.config;
 
+        this.lock = new LockQueue(100);
+
         this.$root.addEventHook('key', this.keyHook);
 
         this.lastActivePage = false;
@@ -344,6 +348,13 @@ class Reader {
         this.scrollingSetRecentBook = _.debounce((newValue) => {
             this.debouncedSetRecentBook(newValue);
         }, 15000, {maxWait: 20000});
+
+        this.debouncedHideToolBar = _.debounce((event) => {
+            if (this.toolBarHideOnScroll && this.toolBarActive !== !!event.show) {
+                this.commit('reader/setToolBarActive', !!event.show);
+                this.$root.eventHook('resize');
+            }
+        }, 200);
 
         document.addEventListener('fullscreenchange', () => {
             this.fullScreenActive = (document.fullscreenElement !== null);
@@ -402,6 +413,7 @@ class Reader {
         this.clickControlActive = this.clickControl;
         this.blinkCachedLoad = settings.blinkCachedLoad;
         this.showToolButton = settings.showToolButton;
+        this.toolBarHideOnScroll = settings.toolBarHideOnScroll;
         this.enableSitesFilter = settings.enableSitesFilter;
         this.showNeedUpdateNotify = settings.showNeedUpdateNotify;
         this.splitToPara = settings.splitToPara;
@@ -662,6 +674,10 @@ class Reader {
         this.$root.eventHook('resize');
     }
 
+    hideToolBar(event) {
+        this.debouncedHideToolBar(event);
+    }
+
     fullScreenToggle() {
         this.fullScreenActive = !this.fullScreenActive;
         if (this.fullScreenActive) {
@@ -897,7 +913,7 @@ class Reader {
 
     refreshBook() {
         const mrb = this.mostRecentBook();
-        this.loadBook({url: mrb.url, uploadFileName: mrb.uploadFileName, force: true});
+        this.loadBook(Object.assign({}, mrb, {force: true}));
     }
 
     undoAction() {
@@ -1051,7 +1067,7 @@ class Reader {
         return result;
     }
 
-    async loadBook(opts) {
+    async _loadBook(opts) {
         if (!opts || !opts.url) {
             this.mostRecentBook();
             return;
@@ -1060,10 +1076,6 @@ class Reader {
         this.closeAllWindows();
 
         let url = encodeURI(decodeURI(opts.url));
-
-        //TODO: убрать конвертирование 'file://' после 06.2021
-        if (url.length == 71 && url.indexOf('file://') == 0)
-            url = url.replace(/^file/, 'disk');
 
         if ((url.indexOf('http://') != 0) && (url.indexOf('https://') != 0) &&
             (url.indexOf('disk://') != 0))
@@ -1091,33 +1103,36 @@ class Reader {
             progress.show();
             progress.setState({state: 'parse'});
 
-            // есть ли среди недавних
-            const key = bookManager.keyFromUrl(url);
-            let wasOpened = await bookManager.getRecentBook({key});
-            wasOpened = (wasOpened ? wasOpened : {});
-            const bookPos = (opts.bookPos !== undefined ? opts.bookPos : wasOpened.bookPos);
-            const bookPosSeen = (opts.bookPos !== undefined ? opts.bookPos : wasOpened.bookPosSeen);
-            const uploadFileName = (opts.uploadFileName ? opts.uploadFileName : '');
+            // есть ли среди загруженных
+            let wasOpened = bookManager.findRecentByUrlAndPath(url, opts.path);
+            wasOpened = (wasOpened ? _.cloneDeep(wasOpened) : {});
+
+            wasOpened = Object.assign(wasOpened, {
+                path: (opts.path !== undefined ? opts.path : wasOpened.path),
+                bookPos: (opts.bookPos !== undefined ? opts.bookPos : wasOpened.bookPos),
+                bookPosSeen: (opts.bookPos !== undefined ? opts.bookPos : wasOpened.bookPosSeen),
+                uploadFileName: (opts.uploadFileName ? opts.uploadFileName : wasOpened.uploadFileName),
+            });
 
             let book = null;
 
             if (!opts.force) {
                 // пытаемся загрузить и распарсить книгу в менеджере из локального кэша
-                const bookParsed = await bookManager.getBook({url, path: opts.path}, (prog) => {
+                const bookParsed = await bookManager.getBook(wasOpened, (prog) => {
                     progress.setState({progress: prog});
                 });
 
                 // если есть в локальном кэше
                 if (bookParsed) {
-                    await bookManager.setRecentBook(Object.assign({bookPos, bookPosSeen}, bookParsed));
+                    await bookManager.setRecentBook(Object.assign(wasOpened, bookParsed));
                     this.mostRecentBook();
-                    this.addAction(bookPos);
+                    this.addAction(wasOpened.bookPos);
                     this.loaderActive = false;
                     progress.hide(); this.progressActive = false;
                     this.blinkCachedLoadMessage();
 
                     this.checkBookPosPercent();
-                    await this.activateClickMapPage();
+                    this.activateClickMapPage();//no await
                     return;
                 }
 
@@ -1131,7 +1146,7 @@ class Reader {
                         });
                         book = Object.assign({}, wasOpened, {data: resp.data});
                     } catch (e) {
-                        //молчим
+                        this.$root.notify.error('Конвертированный файл не найден на сервере.<br>Пробуем загрузить оригинал.', 'Ошибка загрузки');
                     }
                 }
             }
@@ -1142,7 +1157,7 @@ class Reader {
             if (!book) {
                 book = await readerApi.loadBook({
                         url,
-                        uploadFileName,
+                        uploadFileName: wasOpened.uploadFileName,
                         enableSitesFilter: this.enableSitesFilter,
                         skipHtmlCheck: (this.splitToPara ? true : false),
                         isText: (this.splitToPara ? true : false),
@@ -1159,14 +1174,44 @@ class Reader {
 
             // добавляем в bookManager
             progress.setState({state: 'parse', step: 5});
+
             const addedBook = await bookManager.addBook(book, (prog) => {
                 progress.setState({progress: prog});
             });
 
+            // sameBookKey
+            if (url.indexOf('disk://') == 0) {
+                //ищем такой файл в загруженных
+                let found = bookManager.findRecentBySameBookKey(wasOpened.uploadFileName);
+                found = (found ? _.cloneDeep(found) : found);
+
+                if (found) {
+                    if (wasOpened.sameBookKey != found.sameBookKey) {
+                        //спрашиваем, надо ли объединить файлы
+                        const askResult = bookManager.keysEqual(found.path, addedBook.path) || 
+                            await this.$root.stdDialog.askYesNo(`
+    Файл с именем "${wasOpened.uploadFileName}" уже есть в загруженных.
+    <br>Объединить позицию?`, 'Найдена похожая книга');
+                        if (askResult) {
+                            wasOpened.bookPos = found.bookPos;
+                            wasOpened.bookPosSeen = found.bookPosSeen;
+                            wasOpened.sameBookKey = found.sameBookKey;
+                        }
+                    }
+                } else {
+                    wasOpened.sameBookKey = wasOpened.uploadFileName;
+                }
+            } else {
+                wasOpened.sameBookKey = addedBook.url;
+            }
+
+            if (!bookManager.keysEqual(wasOpened.path, addedBook.path))
+                delete wasOpened.loadTime;
+
             // добавляем в историю
-            await bookManager.setRecentBook(Object.assign({bookPos, bookPosSeen, uploadFileName}, addedBook));
+            await bookManager.setRecentBook(Object.assign(wasOpened, addedBook));
             this.mostRecentBook();
-            this.addAction(bookPos);
+            this.addAction(wasOpened.bookPos);
             this.updateRoute(true);
 
             this.loaderActive = false;
@@ -1177,11 +1222,11 @@ class Reader {
                 this.stopBlink = true;
 
             this.checkBookPosPercent();
-            await this.activateClickMapPage();
+            this.activateClickMapPage();//no await
         } catch (e) {
             progress.hide(); this.progressActive = false;
             this.loaderActive = true;
-            if (!this.showHelpOnErrorIfNeeded(e.message)) {
+            if (!this.showHelpOnErrorIfNeeded(url)) {
                 this.$root.stdDialog.alert(e.message, 'Ошибка', {color: 'negative'});
             }
         } finally {
@@ -1189,7 +1234,16 @@ class Reader {
         }
     }
 
-    async loadFile(opts) {
+    async loadBook(opts) {
+        await this.lock.get();
+        try {
+            await this._loadBook(opts);
+        } finally {
+            this.lock.ret();
+        }
+    }
+
+    async _loadFile(opts) {
         this.progressActive = true;
 
         await this.$nextTick();
@@ -1205,11 +1259,20 @@ class Reader {
 
             progress.hide(); this.progressActive = false;
 
-            await this.loadBook({url, uploadFileName: opts.file.name, force: true});
+            await this._loadBook({url, uploadFileName: opts.file.name, force: true});
         } catch (e) {
             progress.hide(); this.progressActive = false;
             this.loaderActive = true;
             this.$root.stdDialog.alert(e.message, 'Ошибка', {color: 'negative'});
+        }
+    }
+
+    async loadFile(opts) {
+        await this.lock.get();
+        try {
+            await this._loadFile(opts);
+        } finally {
+            this.lock.ret();
         }
     }
 

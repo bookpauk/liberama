@@ -8,12 +8,10 @@
             <span v-show="initStep">{{ initPercentage }}%</span>
 
             <div v-show="!initStep" class="input">
-                <!--input ref="input"
-                    placeholder="что ищем"
-                    :value="needle" @input="needle = $event.target.value"/-->
-                <q-input ref="input" v-model="needle"
+                <q-input
+                    ref="input" v-model="needle"
                     class="col" outlined dense
-                    placeholder="что ищем"
+                    placeholder="Найти"
                     @keydown="inputKeyDown"         
                 />
                 <div style="position: absolute; right: 10px; margin-top: 10px; font-size: 16px;">
@@ -108,7 +106,7 @@ class SearchPage {
             this.parsed = parsed;
         }
 
-        this.header = 'Найти';
+        this.header = 'Поиск в тексте';
         await this.$nextTick();
         this.$refs.input.focus();
         this.$refs.input.select();

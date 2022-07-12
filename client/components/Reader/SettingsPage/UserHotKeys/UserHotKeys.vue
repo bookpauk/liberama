@@ -13,7 +13,7 @@
                     ref="input"
                     v-model="search"
                     class="q-ml-sm col"
-                    outlined dense rounded
+                    outlined dense
                     bg-color="grey-4"
                     placeholder="Найти"                    
                     @click.stop

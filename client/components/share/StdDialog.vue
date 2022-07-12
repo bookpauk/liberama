@@ -56,6 +56,34 @@
         </div>
 
         <!--------------------------------------------------->
+        <div v-show="type == 'askYesNo'" class="bg-white no-wrap">
+            <div class="header row">
+                <div class="caption col row items-center q-ml-md">
+                    <q-icon v-show="caption" class="q-mr-sm" :class="iconColor" :name="iconName" size="28px"></q-icon>
+                    <div v-html="caption"></div>
+                </div>
+                <div class="close-icon column justify-center items-center">
+                    <q-btn v-close-popup flat round dense>
+                        <q-icon name="la la-times" size="18px"></q-icon>
+                    </q-btn>
+                </div>
+            </div>
+
+            <div class="q-mx-md">
+                <div v-html="message"></div>
+            </div>
+
+            <div class="buttons row justify-end q-pa-md">
+                <q-btn v-close-popup class="q-px-md q-ml-sm" dense no-caps>
+                    Нет
+                </q-btn>
+                <q-btn class="q-px-md q-ml-sm" color="primary" dense no-caps @click="okClick">
+                    Да
+                </q-btn>
+            </div>
+        </div>
+
+        <!--------------------------------------------------->
         <div v-show="type == 'prompt'" class="bg-white no-wrap">
             <div class="header row">
                 <div class="caption col row items-center q-ml-md">
@@ -258,6 +286,23 @@ class StdDialog {
             };
 
             this.type = 'confirm';
+            this.active = true;
+        });
+    }
+
+    askYesNo(message, caption, opts) {
+        return new Promise((resolve) => {
+            this.init(message, caption, opts);
+
+            this.hideTrigger = () => {
+                if (this.ok) {
+                    resolve(true);
+                } else {
+                    resolve(false);
+                }
+            };
+
+            this.type = 'askYesNo';
             this.active = true;
         });
     }

@@ -23,15 +23,15 @@
 
         <div class="q-mb-sm" />
 
-        <div v-show="selectedTab == 'contents'" class="tab-panel">
+        <div v-show="selectedTab == 'contents'" ref="tabPanelContents" class="tab-panel">
             <div>
                 <div v-for="item in contents" :key="item.key" class="column" style="width: 540px">
-                    <div class="row q-px-sm no-wrap" :class="{'item': !item.isBookPos, 'item-book-pos': item.isBookPos}">
+                    <div :ref="`mainitem${item.key}`" class="row q-px-sm no-wrap" :class="{'item': !item.isBookPos, 'item-book-pos': item.isBookPos}">
                         <div v-if="item.list.length" class="row justify-center items-center expand-button clickable" @click="expandClick(item.key)">
-                            <q-icon name="la la-caret-right" class="icon" :class="{'expanded-icon': item.expanded}" color="green-8" size="20px" />
+                            <q-icon name="la la-caret-right" class="icon" :class="{'expanded-icon': item.expanded}" color="green-8" size="24px" />
                         </div>
                         <div v-else class="no-expand-button clickable" @click="setBookPos(item.offset)">
-                            <q-icon name="la la-stop" class="icon" style="visibility: hidden" size="20px" />
+                            <q-icon name="la la-stop" class="icon" style="visibility: hidden" size="24px" />
                         </div>
                         <div class="col row clickable" @click="setBookPos(item.offset)">
                             <div :style="item.indentStyle"></div>
@@ -42,8 +42,12 @@
                         </div>
                     </div>
                     
-                    <div v-if="item.expanded" :ref="`subitem${item.key}`" class="subitems-transition">
-                        <div v-for="subitem in item.list" :key="subitem.key" class="row q-px-sm no-wrap" :class="{'subitem': !subitem.isBookPos, 'subitem-book-pos': subitem.isBookPos}">
+                    <div v-if="item.expanded" :ref="`subdiv${item.key}`" class="subitems-transition">
+                        <div 
+                            v-for="subitem in item.list" 
+                            :ref="`subitem${subitem.key}`" 
+                            :key="subitem.key" class="row q-px-sm no-wrap" :class="{'subitem': !subitem.isBookPos, 'subitem-book-pos': subitem.isBookPos}"
+                        >
                             <div class="col row clickable" @click="setBookPos(subitem.offset)">
                                 <div class="no-expand-button"></div>
                                 <div :style="subitem.indentStyle"></div>
@@ -61,10 +65,10 @@
             </div>
         </div>
 
-        <div v-show="selectedTab == 'images'" class="tab-panel">
+        <div v-show="selectedTab == 'images'" ref="tabPanelImages" class="tab-panel">
             <div>
                 <div v-for="item in images" :key="item.key" class="column" style="width: 540px">
-                    <div class="row q-px-sm no-wrap" :class="{'item': !item.isBookPos, 'item-book-pos': item.isBookPos}">
+                    <div :ref="`image${item.key}`" class="row q-px-sm no-wrap" :class="{'item': !item.isBookPos, 'item-book-pos': item.isBookPos}">
                         <div class="col row clickable" @click="setBookPos(item.offset)">
                             <div class="image-thumb-box row justify-center items-center">
                                 <div v-show="!imageLoaded[item.id]" class="image-thumb column justify-center">
@@ -124,7 +128,10 @@ const componentOptions = {
     watch: {
         bookPos() {
             this.updateBookPosSelection();
-        }
+        },
+        selectedTab() {
+            this.updateBookPosScrollTop();
+        },
     },
 };
 class ContentsPage {
@@ -282,12 +289,18 @@ class ContentsPage {
         if (!this.isVisible)
             return;
 
-        await utils.sleep(50);
+        await this.$nextTick();
         const bp = this.bookPos;
         
         for (let i = 0; i < this.contents.length; i++) {
             const item = this.contents[i];
             const nextOffset = (i < this.contents.length - 1 ? this.contents[i + 1].offset : this.parsed.textLength);
+
+            if (bp >= item.offset && bp < nextOffset) {
+                item.isBookPos = true;
+            } else if (item.isBookPos) {
+                item.isBookPos = false;
+            }
 
             for (let j = 0; j < item.list.length; j++) {
                 const subitem = item.list[j];
@@ -295,17 +308,10 @@ class ContentsPage {
 
                 if (bp >= subitem.offset && bp < nextSubOffset) {
                     subitem.isBookPos = true;
-                    this.contents[i] = Object.assign(item, {list: item.list});
+                    this.updateBookPosScrollTop('contents', item, subitem, j);
                 } else if (subitem.isBookPos) {
                     subitem.isBookPos = false;
-                    this.contents[i] = Object.assign(item, {list: item.list});
                 }
-            }
-
-            if (bp >= item.offset && bp < nextOffset) {
-                this.contents[i] = Object.assign(item, {isBookPos: true});
-            } else if (item.isBookPos) {
-                this.contents[i] = Object.assign(item, {isBookPos: false});
             }
         }
 
@@ -314,10 +320,91 @@ class ContentsPage {
             const nextOffset = (i < this.images.length - 1 ? this.images[i + 1].offset : this.parsed.textLength);
 
             if (bp >= img.offset && bp < nextOffset) {
-                this.images[i] = Object.assign(img, {isBookPos: true});
+                this.images[i].isBookPos = true;
             } else if (img.isBookPos) {
-                this.images[i] = Object.assign(img, {isBookPos: false});
+                this.images[i].isBookPos = false;
             }
+        }
+
+        this.updateBookPosScrollTop();
+    }
+
+    /*getOffsetTop(key) {
+        let el = this.getFirstElem(this.$refs[`mainitem${key}`]);
+        return (el ? el.offsetTop : 0);
+    }*/
+
+    async updateBookPosScrollTop() {
+        try {
+            await this.$nextTick();
+
+            if (this.selectedTab == 'contents') {
+                let item;
+                let subitem;
+                let i;
+
+                //ищем выделенные item
+                for(const _item of this.contents) {
+                    if (_item.isBookPos) {
+                        item = _item;
+                        for (let ii = 0; ii < item.list.length; ii++) {
+                            const _subitem = item.list[ii];
+                            if (_subitem.isBookPos) {
+                                subitem = _subitem;
+                                i = ii;
+                                break;
+                            }
+                        }
+                        break;
+                    }
+                }
+
+                if (!item)
+                    return;
+
+                //вычисляем и смещаем tabPanel.scrollTop
+                let el = this.getFirstElem(this.$refs[`mainitem${item.key}`]);
+                let elShift = 0;
+                if (subitem && item.expanded) {
+                    const subEl = this.getFirstElem(this.$refs[`subitem${subitem.key}`]);
+                    elShift = el.offsetHeight - subEl.offsetHeight*(i + 1);
+                } else {
+                    elShift = el.offsetHeight;
+                }
+
+                const tabPanel = this.$refs.tabPanelContents;
+                const halfH = tabPanel.clientHeight/2;
+                const newScrollTop = el.offsetTop - halfH - elShift;
+                if (newScrollTop < 20 + tabPanel.scrollTop - halfH || newScrollTop > -20 + tabPanel.scrollTop + halfH) 
+                    tabPanel.scrollTop = newScrollTop;
+            }
+
+            if (this.selectedTab == 'images') {
+                let item;
+
+                //ищем выделенные item
+                for(const _item of this.images) {
+                    if (_item.isBookPos) {
+                        item = _item;
+                        break;
+                    }
+                }
+
+                if (!item)
+                    return;
+
+                //вычисляем и смещаем tabPanel.scrollTop
+                let el = this.getFirstElem(this.$refs[`image${item.key}`]);
+
+                const tabPanel = this.$refs.tabPanelImages;
+                const halfH = tabPanel.clientHeight/2;
+                const newScrollTop = el.offsetTop - halfH - el.offsetHeight/2;
+
+                if (newScrollTop < 20 + tabPanel.scrollTop - halfH || newScrollTop > -20 + tabPanel.scrollTop + halfH) 
+                    tabPanel.scrollTop = newScrollTop;
+            }
+        } catch (e) {
+            console.error(e);
         }
     }
 
@@ -330,8 +417,8 @@ class ContentsPage {
         const expanded = !item.expanded;
 
         if (!expanded) {
-            let subitems = this.getFirstElem(this.$refs[`subitem${key}`]);
-            subitems.style.height = '0';
+            let subdiv = this.getFirstElem(this.$refs[`subdiv${key}`]);
+            subdiv.style.height = '0';
             await utils.sleep(200);
         }
 
@@ -339,8 +426,8 @@ class ContentsPage {
 
         if (expanded) {
             await this.$nextTick();
-            let subitems = this.getFirstElem(this.$refs[`subitem${key}`]);
-            subitems.style.height = subitems.scrollHeight + 'px';
+            let subdiv = this.getFirstElem(this.$refs[`subdiv${key}`]);
+            subdiv.style.height = subdiv.scrollHeight + 'px';
         }
     }
 
