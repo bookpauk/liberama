@@ -367,6 +367,13 @@ class BookManager {
     keyFromPath(bookPath) {
         return path.basename(bookPath);
     }
+
+    keysEqual(bookPath1, bookPath2) {
+        if (bookPath1 === undefined || bookPath2 === undefined)
+            return false;
+        
+        return (this.keyFromPath(bookPath1) === this.keyFromPath(bookPath2));
+    }
     //-- recent --------------------------------------------------------------
     async recentSetItem(item = null, skipCheck = false) {
         const rev = await bmRecentStoreNew.getItem('rev');
@@ -506,8 +513,8 @@ class BookManager {
 
         for (const key in this.recent) {
             const book = this.recent[key];
-            if (!book.deleted && book.url == url && book.touchTime > max) {
-                max = book.touchTime;
+            if (!book.deleted && book.url == url && book.loadTime > max) {
+                max = book.loadTime;
                 result = book;
             }
         }
@@ -521,8 +528,8 @@ class BookManager {
 
         for (const key in this.recent) {
             const book = this.recent[key];
-            if (!book.deleted && book.sameBookKey == sameKey && book.touchTime > max) {
-                max = book.touchTime;
+            if (!book.deleted && book.sameBookKey == sameKey && book.loadTime > max) {
+                max = book.loadTime;
                 result = book;
             }
         }

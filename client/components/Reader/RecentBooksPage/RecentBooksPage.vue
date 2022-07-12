@@ -70,14 +70,15 @@
                                 {{ item.desc.author }}
                             </div>
                             <div>{{ item.desc.title }}</div>
+                            <!--div>{{ item.path }}</div-->
                         </div>
 
                         <div class="row q-mt-xs" style="font-size: 80%">
-                            <div class="row justify-center row-info-bottom" style="width: 50px">
-                                {{ item.desc.perc }}
-                            </div>
-                            <div class="row justify-center row-info-bottom" style="width: 50px">
+                            <div class="row justify-center row-info-bottom" style="width: 60px">
                                 {{ item.desc.textLen }}
+                            </div>
+                            <div class="row justify-center row-info-bottom" style="width: 60px">
+                                {{ item.desc.perc }}
                             </div>
                             <div class="row justify-center row-info-bottom" style="width: 1px">
                             </div>
@@ -285,7 +286,7 @@ class RecentBooksPage {
                 if (book.textLength) {
                     readPart = p/book.textLength;
                     perc = `${(readPart*100).toFixed(2)}%`;
-                    textLen = `${Math.round(book.textLength/1000)}k`;
+                    textLen = `${Math.floor(readPart*book.textLength/1000)}/${Math.floor(book.textLength/1000)}`;
                 }
 
                 const bt = utils.getBookTitle(book.fb2);

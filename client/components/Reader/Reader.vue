@@ -1146,7 +1146,7 @@ class Reader {
                         });
                         book = Object.assign({}, wasOpened, {data: resp.data});
                     } catch (e) {
-                        //молчим
+                        this.$root.notify.error('Конвертированный файл не найден на сервере', 'Ошибка загрузки');
                     }
                 }
             }
@@ -1186,16 +1186,17 @@ class Reader {
                 found = (found ? _.cloneDeep(found) : found);
 
                 if (found) {
-                    //спрашиваем, надо ли объединить файлы
-                    const askResult = (wasOpened.path == found.path) || 
-                        await this.$root.stdDialog.askYesNo(`
-Файл с именем "${wasOpened.uploadFileName}" уже есть в загруженных.
-<br>Объединить позицию?`, 'Найдена похожая книга');
-
-                    if (askResult) {
-                        wasOpened.bookPos = found.bookPos;
-                        wasOpened.bookPosSeen = found.bookPosSeen;
-                        wasOpened.sameBookKey = found.sameBookKey;
+                    if (wasOpened.sameBookKey != found.sameBookKey) {
+                        //спрашиваем, надо ли объединить файлы
+                        const askResult = bookManager.keysEqual(found.path, addedBook.path) || 
+                            await this.$root.stdDialog.askYesNo(`
+    Файл с именем "${wasOpened.uploadFileName}" уже есть в загруженных.
+    <br>Объединить позицию?`, 'Найдена похожая книга');
+                        if (askResult) {
+                            wasOpened.bookPos = found.bookPos;
+                            wasOpened.bookPosSeen = found.bookPosSeen;
+                            wasOpened.sameBookKey = found.sameBookKey;
+                        }
                     }
                 } else {
                     wasOpened.sameBookKey = wasOpened.uploadFileName;
@@ -1203,6 +1204,9 @@ class Reader {
             } else {
                 wasOpened.sameBookKey = addedBook.url;
             }
+
+            if (!bookManager.keysEqual(wasOpened.path, addedBook.path))
+                delete wasOpened.loadTime;
 
             // добавляем в историю
             await bookManager.setRecentBook(Object.assign(wasOpened, addedBook));
