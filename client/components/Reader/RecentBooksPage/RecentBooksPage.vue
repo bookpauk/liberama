@@ -11,12 +11,32 @@
 
         <div id="vs-container" ref="vsContainer" class="recent-books-scroll col">
             <div ref="header" class="scroll-header row bg-blue-2">
-                <q-btn class="bg-white" rounded style="width: 35px; height: 35px; margin: 6px 6px 0px 6px" @click="showSameBookClick">
+                <q-btn class="tool-button" round @click="showSameBookClick">
                     <q-icon name="la la-caret-right" class="icon" :class="{'expanded-icon': showSameBook}" color="green-8" size="24px" />
+                    <q-tooltip :delay="1500" anchor="bottom middle" content-style="font-size: 80%">
+                        Показать/скрыть версии книг
+                    </q-tooltip>
                 </q-btn>
 
-                <q-btn class="bg-white" rounded style="width: 35px; height: 35px; margin: 6px 6px 0px 6px" @click="scrollToActiveBook">
+                <q-btn class="tool-button" round @click="scrollToBegin">
+                    <q-icon name="la la-arrow-up" color="green-8" size="24px" />
+                    <q-tooltip :delay="1500" anchor="bottom middle" content-style="font-size: 80%">
+                        В начало списка
+                    </q-tooltip>
+                </q-btn>
+
+                <q-btn class="tool-button" round @click="scrollToEnd">
+                    <q-icon name="la la-arrow-down" color="green-8" size="24px" />
+                    <q-tooltip :delay="1500" anchor="bottom middle" content-style="font-size: 80%">
+                        В конец списка
+                    </q-tooltip>
+                </q-btn>
+
+                <q-btn class="tool-button" round @click="scrollToActiveBook">
                     <q-icon name="la la-location-arrow" color="green-8" size="24px" />
+                    <q-tooltip :delay="1500" anchor="bottom middle" content-style="font-size: 80%">
+                        На текущую книгу
+                    </q-tooltip>
                 </q-btn>
 
                 <q-input 
@@ -546,6 +566,26 @@ class RecentBooksPage {
         }
     }
 
+    async scrollToBegin() {
+        this.lockScroll = true;
+        try {
+            this.$refs.virtualScroll.scrollTo(0, 'center');
+        } finally {
+            await utils.sleep(100);
+            this.lockScroll = false;
+        }
+    }
+
+    async scrollToEnd() {
+        this.lockScroll = true;
+        try {
+            this.$refs.virtualScroll.scrollTo(this.tableData.length, 'center');
+        } finally {
+            await utils.sleep(100);
+            this.lockScroll = false;
+        }
+    }
+
     close() {
         this.$emit('recent-books-close');
     }
@@ -575,6 +615,7 @@ export default vueComponent(RecentBooksPage);
     z-index: 1;
     top: 0;
     border-bottom: 2px solid #aaaaaa;
+    padding-left: 5px;
 }
 
 .table-row {
@@ -633,5 +674,14 @@ export default vueComponent(RecentBooksPage);
     line-height: 110%;
     border: 1px solid #cccccc;
     border-right: 0;
+}
+
+.tool-button {
+    min-width: 30px;
+    width: 30px;
+    min-height: 30px;
+    height: 30px;
+    margin: 10px 6px 0px 3px;
+    background-color: white;
 }
 </style>
