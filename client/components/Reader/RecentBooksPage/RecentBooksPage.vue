@@ -39,10 +39,35 @@
                     </q-tooltip>
                 </q-btn>
 
+                <q-select
+                    ref="sortMethod"
+                    v-model="sortMethod"
+                    class="q-ml-md q-mt-xs"
+                    :options="sortMethodOptions"
+                    style="width: 180px"
+                    bg-color="white"
+                    dropdown-icon="la la-angle-down la-sm"
+                    outlined dense emit-value map-options display-value-sanitize options-sanitize
+                    options-html display-value-html
+
+                    @update:model-value="sortMethodSelected"
+                >
+                    <q-tooltip :delay="1500" anchor="bottom middle" content-style="font-size: 80%">
+                        Метод сортировки
+                    </q-tooltip>
+
+                    <template #selected-item="scope">
+                        <div style="height: 28px; padding-top: 2px; overflow: hidden" v-html="scope.opt.label" />
+                    </template>
+                </q-select>
+
                 <q-input 
-                    ref="input" v-model="search"
+                    ref="input"
+                    v-model="search"
+                    class="q-ml-sm q-mt-xs"
                     outlined dense
-                    style="position: absolute; top: 4px; left: 200px; width: 350px" bg-color="white"
+                    style="width: 180px"
+                    bg-color="white"
                     placeholder="Найти"
                     @click.stop
                 >
@@ -131,90 +156,6 @@
                 </div>
             </q-virtual-scroll>
         </div>
-
-        <!--q-table
-            class="recent-books-table col"
-            :rows="tableData"
-            row-key="key"
-            :columns="columns"
-            :pagination="pagination"
-            separator="cell"
-            hide-bottom
-            virtual-scroll
-            dense
-        > 
-            <template #header="props">
-                <q-tr :props="props">
-                    <q-th key="num" class="td-mp" style="width: 25px" :props="props">
-                        <span v-html="props.cols[0].label"></span>
-                    </q-th>
-                    <q-th key="date" class="td-mp break-word" style="width: 77px" :props="props">
-                        <span v-html="props.cols[1].label"></span>
-                    </q-th>
-                    <q-th key="desc" class="td-mp" style="width: 300px" :props="props" colspan="4">
-                        <q-input 
-                            ref="input" v-model="search"
-                            outlined dense style="position: absolute; top: 6px; left: 90px; width: 350px" bg-color="white"
-                            placeholder="Найти"                            
-                            @click.stop
-                        >
-                            <template #append>
-                                <q-icon v-if="search !== ''" name="la la-times" class="cursor-pointer" @click.stop="resetSearch" />
-                            </template>
-                        </q-input>
-                        <span v-html="props.cols[2].label"></span>
-                    </q-th>
-                </q-tr>
-            </template>
-
-            <template #body="props">
-                <q-tr :props="props">
-                    <q-td key="num" :props="props" class="td-mp" auto-width>
-                        <div class="break-word" style="width: 25px">
-                            {{ props.row.num }}
-                        </div>
-                    </q-td>
-
-                    <q-td key="date" auto-width :props="props" class="td-mp clickable" @click="loadBook(props.row)">
-                        <div class="break-word" style="width: 68px">
-                            {{ props.row.touchDate }}<br>
-                            {{ props.row.touchTime }}
-                        </div>
-                    </q-td>
-
-                    <q-td key="desc" auto-width :props="props" class="td-mp clickable" @click="loadBook(props.row)">
-                        <div class="break-word" style="width: 300px; font-size: 90%">
-                            <div style="color: green">
-                                {{ props.row.desc.author }}
-                            </div>
-                            <div>{{ props.row.desc.title }}</div>
-                            <div class="read-bar" :style="`width: ${300*props.row.readPart}px`"></div>
-                        </div>
-                    </q-td>
-
-                    <q-td key="links" :props="props" class="td-mp" auto-width>
-                        <div class="break-word" style="width: 75px; font-size: 90%">
-                            <a v-show="isUrl(props.row.url)" :href="props.row.url" target="_blank">Оригинал</a><br>
-                            <a :href="props.row.path" @click.prevent="downloadBook(props.row.path, props.row.fullTitle)">Скачать FB2</a>
-                        </div>
-                    </q-td>
-
-                    <q-td key="close" :props="props" class="td-mp" auto-width>
-                        <div style="width: 38px">
-                            <q-btn
-                                dense
-                                style="width: 30px; height: 30px; padding: 7px 0 7px 0; margin-left: 4px"
-                                @click="handleDel(props.row.key)"
-                            >
-                                <q-icon class="la la-times" size="14px" />
-                            </q-btn>
-                        </div>
-                    </q-td>
-                    <q-td key="last" :props="props" class="no-mp">
-                    </q-td>
-                </q-tr>
-            </template>
-        </q-table-->
     </Window>
 </template>
 
@@ -237,6 +178,9 @@ const componentOptions = {
     },
     watch: {
         search() {
+            this.updateTableData();
+        },
+        sortMethod() {
             this.updateTableData();
         },
         settings() {
@@ -271,6 +215,8 @@ class RecentBooksPage {
             //this.$refs.input.focus();//плохо на планшетах
         });
 
+        this.inited = true;
+
         (async() => {
             this.showBar();
             await this.updateTableData();
@@ -289,6 +235,9 @@ class RecentBooksPage {
     }
 
     async updateTableData() {
+        if (!this.inited)
+            return;
+
         await this.lock.get();
         try {
             let result = [];
@@ -346,7 +295,6 @@ class RecentBooksPage {
                     //для сортировки
                     loadTimeRaw,
                     touchTimeRaw: book.touchTime,
-                    descString: `${author}${title}${perc}${textLen}`,
                 });
             }
 
@@ -384,6 +332,18 @@ class RecentBooksPage {
                     break;
                 case 'touchTimeAsc':
                     result.sort((a, b) => a.touchTimeRaw - b.touchTimeRaw);
+                    break;
+                case 'authorDesc':
+                    result.sort((a, b) => b.desc.author.localeCompare(a.desc.author));
+                    break;
+                case 'authorAsc':
+                    result.sort((a, b) => a.desc.author.localeCompare(b.desc.author));
+                    break;
+                case 'titleDesc':
+                    result.sort((a, b) => b.desc.title.localeCompare(a.desc.title));
+                    break;
+                case 'titleAsc':
+                    result.sort((a, b) => a.desc.title.localeCompare(b.desc.title));
                     break;
             }
 
@@ -540,6 +500,12 @@ class RecentBooksPage {
         this.updateTableData();
     }
 
+    sortMethodSelected() {
+        const newSettings = _.cloneDeep(this.settings);
+        newSettings.recentSortMethod = this.sortMethod;
+        this.commit('reader/setSettings', newSettings);
+    }
+
     async scrollToActiveBook() {
         this.lockScroll = true;
         try {
@@ -584,6 +550,20 @@ class RecentBooksPage {
             await utils.sleep(100);
             this.lockScroll = false;
         }
+    }
+
+
+    get sortMethodOptions() {
+        return [
+            {label: '<span style="font-size: 150%">&uarr;</span> Время загрузки', value: 'loadTimeDesc'},
+            {label: '<span style="font-size: 150%">&darr;</span> Время загрузки', value: 'loadTimeAsc'},
+            {label: '<span style="font-size: 150%">&uarr;</span> Время чтения', value: 'touchTimeDesc'},
+            {label: '<span style="font-size: 150%">&darr;</span> Время чтения', value: 'touchTimeAsc'},
+            {label: '<span style="font-size: 150%">&uarr;</span> Автор', value: 'authorDesc'},
+            {label: '<span style="font-size: 150%">&darr;</span> Автор', value: 'authorAsc'},
+            {label: '<span style="font-size: 150%">&uarr;</span> Название', value: 'titleDesc'},
+            {label: '<span style="font-size: 150%">&darr;</span> Название', value: 'titleAsc'},
+        ];
     }
 
     close() {
