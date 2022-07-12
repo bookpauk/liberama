@@ -336,6 +336,7 @@ class RecentBooksPage {
                 result = result.filter(item => {
                     return !search ||
                         item.touchTime.includes(search) ||
+                        item.loadTime.includes(search) ||
                         item.desc.title.toLowerCase().includes(search.toLowerCase()) ||
                         item.desc.author.toLowerCase().includes(search.toLowerCase())
                 });
