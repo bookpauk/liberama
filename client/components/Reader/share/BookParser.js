@@ -3,6 +3,7 @@ import sax from '../../../../server/core/sax';
 import * as utils from '../../../share/utils';
 
 const maxImageLineCount = 100;
+const maxParaTextLength = 10000;
 
 // defaults
 const defaultSettings = {
@@ -226,10 +227,22 @@ export default class BookParser {
             paraOffset += len;
         };
 
-        const growParagraph = (text, len) => {
+        const growParagraph = (text, len, textRaw) => {
             if (paraIndex < 0) {
                 newParagraph();
                 growParagraph(text, len);
+                return;
+            }
+
+            //ограничение на размер куска текста в параграфе
+            if (textRaw && textRaw.length > maxParaTextLength) {
+                while (textRaw.length > 0) {
+                    const textPart = textRaw.substring(0, maxParaTextLength);
+                    textRaw = textRaw.substring(maxParaTextLength);
+
+                    newParagraph();
+                    growParagraph(textPart, textPart.length);
+                }
                 return;
             }
 
@@ -536,7 +549,7 @@ export default class BookParser {
                 tClose += (center ? '</center>' : '');
 
                 if (text != ' ')
-                    growParagraph(`${tOpen}${text}${tClose}`, text.length);
+                    growParagraph(`${tOpen}${text}${tClose}`, text.length, text);
                 else
                     growParagraph(' ', 1);
             }
