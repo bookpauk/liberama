@@ -162,7 +162,6 @@
 
                         <div
                             class="del-button self-end row justify-center items-center clickable"
-                            style="position: absolute; border-left: 1px solid #cccccc; border-bottom: 1px solid #cccccc;"
                             @click="handleDel(item.key)"
                         >
                             <q-icon class="la la-times" size="12px" />
@@ -457,10 +456,6 @@ class RecentBooksPage {
 
     async handleDel(key) {
         await bookManager.delRecentBook({key});
-        //this.updateTableData();//обновление уже происходит Reader.bookManagerEvent
-
-        if (!bookManager.mostRecentBook())
-            this.close();
     }
 
     loadBook(row) {
@@ -683,8 +678,13 @@ export default vueComponent(RecentBooksPage);
 }
 
 .del-button {
-    width: 20px;
-    height: 20px
+    width: 25px;
+    height: 20px;
+    position: absolute;
+    border-left: 1px solid #cccccc;
+    border-bottom: 1px solid #cccccc;
+    border-radius: 0 0 0 10px;
+    margin: 1px;
 }
 
 .del-button:hover {
