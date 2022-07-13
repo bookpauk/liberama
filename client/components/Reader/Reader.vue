@@ -998,7 +998,6 @@ class Reader {
                     classResult = classDisabled;
                     break;
                 case 'refresh':
-                case 'recentBooks':
                     if (!this.mostRecentBookReactive)
                         classResult = classDisabled;
                     break;
