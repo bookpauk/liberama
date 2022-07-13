@@ -108,35 +108,35 @@
                             <div>{{ item.desc.title }}</div>
                         </div>
 
-                        <div class="row" style="font-size: 80%">
-                            <div class="row justify-center items-center row-info-bottom" style="width: 60px">
+                        <div class="row" style="font-size: 10px">
+                            <div class="row justify-center items-center row-info-top" style="width: 60px">
                                 {{ item.desc.textLen }}
                             </div>
 
-                            <div class="row items-center row-info-bottom" :style="`width: ${(220 - 40*(+item.inGroup))}px; padding: 1px`">
+                            <div class="row items-center row-info-top" :style="`width: ${(220 - 40*(+item.inGroup))}px; padding: 1px`">
                                 <div class="read-bar" :style="`width: ${100*item.readPart}%`"></div>
                             </div>
 
-                            <div class="row justify-center items-center row-info-bottom" style="width: 59px">
+                            <div class="row justify-center items-center row-info-top" style="width: 59px">
                                 {{ item.desc.perc }}
                             </div>
-                            <div class="row justify-center items-center row-info-bottom" style="width: 1px">
+                            <div class="row-info-top" style="width: 1px">
                             </div>
                         </div>
 
-                        <div class="row" style="font-size: 80%" :style="{ 'width': (340 - 40*(+item.inGroup)) + 'px' }">
-                            <div class="row justify-center items-center row-info-top" style="width: 30px">
+                        <div class="row" style="font-size: 10px" :style="{ 'width': (340 - 40*(+item.inGroup)) + 'px' }">
+                            <div class="row justify-center items-center row-info-bottom" style="width: 30px">
                                 {{ item.num }}
                             </div>
                             <div class="col row">
-                                <div class="row justify-center items-center row-info-top time-info" style="width: 50%">
+                                <div class="row justify-center items-center row-info-bottom time-info" style="width: 50%">
                                     Загружен: {{ item.loadTime }}
                                 </div>
-                                <div class="row justify-center items-center row-info-top time-info" style="width: 50%">
+                                <div class="row justify-center items-center row-info-bottom time-info" style="width: 50%">
                                     Читался: {{ item.touchTime }}
                                 </div>
                             </div>
-                            <div class="row-info-top" style="width: 1px">
+                            <div class="row-info-bottom" style="width: 1px">
                             </div>
                         </div>
                     </div>
@@ -650,26 +650,26 @@ export default vueComponent(RecentBooksPage);
     background-color: white;
 }
 
-.row-info-top {
+.row-info-bottom {
     line-height: 110%;
     border-left: 1px solid #cccccc;
     border-bottom: 1px solid #cccccc;
     height: 12px;
 }
 
-.row-info-bottom {
+.row-info-top {
     line-height: 110%;
     border: 1px solid #cccccc;
     border-right: 0;
     height: 12px;
 }
 
-.time-info, .row-info-bottom {
+.time-info, .row-info-top {
     color: #888888;
 }
 
 .read-bar {
-    height: 5px;
+    height: 6px;
     background-color: #bbbbbb;
     margin-bottom: 2px;
 }
