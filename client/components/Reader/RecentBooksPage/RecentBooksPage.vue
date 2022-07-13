@@ -668,7 +668,7 @@ export default vueComponent(RecentBooksPage);
 }
 
 .read-bar {
-    height: 6px;
+    height: 4px;
     background-color: #bbbbbb;
 }
 </style>
