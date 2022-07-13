@@ -7,6 +7,20 @@
             </span>
         </template>
 
+        <template #buttons>
+            <div
+                class="row justify-center items-center"
+                :class="{'header-button': !archive, 'header-button-pressed': archive}" 
+                @mousedown.stop @click="archiveToggle"
+            >
+                <q-icon class="q-mr-xs" name="la la-archive" size="20px" />
+                <span style="font-size: 90%">Архив</span>
+                <q-tooltip :delay="1500" anchor="bottom middle" content-style="font-size: 80%">
+                    {{ (archive ? 'Скрыть архивные' : 'Показать архивные') }}
+                </q-tooltip>
+            </div>
+        </template>
+
         <a ref="download" style="display: none;" target="_blank"></a>
 
         <div id="vs-container" ref="vsContainer" class="recent-books-scroll col">
@@ -166,6 +180,14 @@
                         >
                             <q-icon class="la la-times" size="12px" />
                         </div>
+
+                        <div
+                            v-show="archive"
+                            class="restore-button self-start row justify-center items-center clickable"
+                            @click="handleRestore(item.key)"
+                        >
+                            <q-icon class="la la-trash-restore" size="12px" />
+                        </div>
                     </div>
                 </div>
             </q-virtual-scroll>
@@ -210,6 +232,7 @@ class RecentBooksPage {
     tableData = [];
     sortMethod = '';
     showSameBook = false;
+    archive = false;
 
     created() {
         this.commit = this.$store.commit;
@@ -261,7 +284,7 @@ class RecentBooksPage {
 
             //подготовка полей
             for (const book of sorted) {
-                if (book.deleted)
+                if ((!this.archive && book.deleted) || (this.archive && book.deleted != 1))
                     continue;
 
                 let d = new Date();
@@ -429,7 +452,7 @@ class RecentBooksPage {
 
     get header() {
         const len = (this.tableData ? this.tableData.length : 0);
-        return `${(this.search ? 'Найдено' : 'Всего')} ${len} файл${this.wordEnding(len)}`;
+        return `${(this.search ? 'Найдено' : 'Всего')} ${len} файл${this.wordEnding(len)}${this.archive ? ' в архиве' : ''}`;
     }
 
     async downloadBook(fb2path, fullTitle) {
@@ -455,7 +478,20 @@ class RecentBooksPage {
     }
 
     async handleDel(key) {
+        if (!this.archive) {
+            await bookManager.delRecentBook({key});
+            this.$root.notify.info('Перенесено в архив');
+        } else {
+            if (await this.$root.stdDialog.confirm('Подтвердите удаление из архива:', ' ')) {
+                await bookManager.delRecentBook({key}, 2);
+                this.$root.notify.info('Удалено безвозвратно');
+            }
+        }
+    }
+
+    async handleRestore(key) {
         await bookManager.delRecentBook({key});
+        this.$root.notify.info('Перенесено в архив');
     }
 
     loadBook(row) {
@@ -575,6 +611,11 @@ class RecentBooksPage {
         ];
     }
 
+    archiveToggle() {
+        this.archive = !this.archive;
+        this.updateTableData();
+    }
+
     close() {
         this.$emit('recent-books-close');
     }
@@ -692,4 +733,24 @@ export default vueComponent(RecentBooksPage);
     background-color: #FF3030;
 }
 
+.header-button, .header-button-pressed {
+    width: 80px;
+    height: 30px;
+    cursor: pointer;
+    color: #555555;
+}
+
+.header-button:hover {
+    color: white;
+    background-color: #39902F;
+}
+
+.header-button-pressed {
+    color: black;
+    background-color: yellow;
+}
+
+.header-button-pressed:hover {
+    color: black;
+}
 </style>
