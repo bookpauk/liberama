@@ -101,40 +101,44 @@
                     </div>
 
                     <div class="row-part column items-stretch clickable break-word" :style="{ 'width': (350 - 40*(+item.inGroup)) + 'px' }" style="font-size: 75%" @click="loadBook(item)">
-                        <div class="row" style="font-size: 80%">
-                            <div class="row justify-center row-info-top" style="width: 30px">
-                                {{ item.num }}
-                            </div>
-                            <div class="row justify-center row-info-top" style="width: 130px">
-                                Читался: {{ item.touchTime }}
-                            </div>
-                            <div class="row justify-center row-info-top" style="width: 138px">
-                                Загружен: {{ item.loadTime }}
-                            </div>
-                            <div class="row justify-center row-info-top" style="width: 1px">
-                            </div>
-                        </div>
-
-                        <div class="col q-mt-xs" :style="{ 'width': (340 - 40*(+item.inGroup)) + 'px' }">
+                        <div class="col" style="border: 1px solid #cccccc; border-bottom: 0; padding: 4px" :style="{ 'width': (340 - 40*(+item.inGroup)) + 'px' }">
                             <div class="text-green-10" style="font-size: 105%">
                                 {{ item.desc.author }}
                             </div>
                             <div>{{ item.desc.title }}</div>
-                            <!--div>{{ item.path }}</div-->
                         </div>
 
-                        <div class="row q-mt-xs" style="font-size: 80%">
-                            <div class="row justify-center row-info-bottom" style="width: 60px">
+                        <div class="row" style="font-size: 10px">
+                            <div class="row justify-center items-center row-info-top" style="width: 60px">
                                 {{ item.desc.textLen }}
                             </div>
-                            <div class="row justify-center row-info-bottom" style="width: 60px">
+
+                            <div class="row items-center row-info-top" :style="`width: ${(220 - 40*(+item.inGroup))}px; padding: 1px`">
+                                <div class="read-bar" :style="`width: ${100*item.readPart}%`"></div>
+                            </div>
+
+                            <div class="row justify-center items-center row-info-top" style="width: 59px">
                                 {{ item.desc.perc }}
                             </div>
-                            <div class="row justify-center row-info-bottom" style="width: 1px">
+                            <div class="row-info-top" style="width: 1px">
                             </div>
                         </div>
 
-                        <div class="read-bar" :style="`width: ${(340 - 40*(+item.inGroup))*item.readPart}px`"></div>
+                        <div class="row" style="font-size: 10px" :style="{ 'width': (340 - 40*(+item.inGroup)) + 'px' }">
+                            <div class="row justify-center items-center row-info-bottom" style="width: 30px">
+                                {{ item.num }}
+                            </div>
+                            <div class="col row">
+                                <div class="row justify-center items-center row-info-bottom time-info" style="width: 50%">
+                                    Загружен: {{ item.loadTime }}
+                                </div>
+                                <div class="row justify-center items-center row-info-bottom time-info" style="width: 50%">
+                                    Читался: {{ item.touchTime }}
+                                </div>
+                            </div>
+                            <div class="row-info-bottom" style="width: 1px">
+                            </div>
+                        </div>
                     </div>
 
                     <div class="row-part column justify-center" style="width: 80px; font-size: 75%">
@@ -617,12 +621,6 @@ export default vueComponent(RecentBooksPage);
     white-space: normal;
 }
 
-.read-bar {
-    height: 3px;
-    background-color: #aaaaaa;
-    margin-bottom: 2px;
-}
-
 .even {
     background-color: #f2f2f2;
 }
@@ -643,18 +641,6 @@ export default vueComponent(RecentBooksPage);
     transform: rotate(90deg);
 }
 
-.row-info-top {
-    line-height: 110%;
-    border-left: 1px solid #cccccc;
-    border-bottom: 1px solid #cccccc;
-}
-
-.row-info-bottom {
-    line-height: 110%;
-    border: 1px solid #cccccc;
-    border-right: 0;
-}
-
 .tool-button {
     min-width: 30px;
     width: 30px;
@@ -662,5 +648,29 @@ export default vueComponent(RecentBooksPage);
     height: 30px;
     margin: 10px 6px 0px 3px;
     background-color: white;
+}
+
+.row-info-bottom {
+    line-height: 110%;
+    border-left: 1px solid #cccccc;
+    border-bottom: 1px solid #cccccc;
+    height: 12px;
+}
+
+.row-info-top {
+    line-height: 110%;
+    border: 1px solid #cccccc;
+    border-right: 0;
+    height: 12px;
+}
+
+.time-info, .row-info-top {
+    color: #888888;
+}
+
+.read-bar {
+    height: 6px;
+    background-color: #bbbbbb;
+    margin-bottom: 2px;
 }
 </style>
