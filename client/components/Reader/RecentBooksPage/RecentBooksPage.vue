@@ -506,6 +506,9 @@ class RecentBooksPage {
     }
 
     async loadBook(item) {
+        //чтобы не обновлять лишний раз updateTableData
+        this.inited = false;
+
         if (item.deleted)
             await this.handleRestore(item.key);
 
