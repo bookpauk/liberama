@@ -433,9 +433,9 @@ class BookManager {
         return this.recent[value.key];
     }
 
-    async delRecentBook(value) {
+    async delRecentBook(value, delFlag = 1) {
         const item = this.recent[value.key];
-        item.deleted = 1;
+        item.deleted = delFlag;
 
         if (this.recentLastKey == value.key) {
             await this.recentSetLastKey(null);
@@ -443,6 +443,13 @@ class BookManager {
 
         await this.recentSetItem(item);
         this.emit('recent-deleted', value.key);
+    }
+
+    async restoreRecentBook(value) {
+        const item = this.recent[value.key];
+        item.deleted = 0;
+
+        await this.recentSetItem(item);
     }
 
     async cleanRecentBooks() {

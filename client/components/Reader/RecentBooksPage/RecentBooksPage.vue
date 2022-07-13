@@ -7,6 +7,20 @@
             </span>
         </template>
 
+        <template #buttons>
+            <div
+                class="row justify-center items-center"
+                :class="{'header-button': !archive, 'header-button-pressed': archive}" 
+                @mousedown.stop @click="archiveToggle"
+            >
+                <q-icon class="q-mr-xs" name="la la-archive" size="20px" />
+                <span style="font-size: 90%">Архив</span>
+                <q-tooltip :delay="1500" anchor="bottom middle" content-style="font-size: 80%">
+                    {{ (archive ? 'Скрыть архивные' : 'Показать архивные') }}
+                </q-tooltip>
+            </div>
+        </template>
+
         <a ref="download" style="display: none;" target="_blank"></a>
 
         <div id="vs-container" ref="vsContainer" class="recent-books-scroll col">
@@ -100,12 +114,17 @@
                         </div>
                     </div>
 
-                    <div class="row-part column items-stretch clickable break-word" :style="{ 'width': (350 - 40*(+item.inGroup)) + 'px' }" style="font-size: 75%" @click="loadBook(item)">
-                        <div class="col" style="border: 1px solid #cccccc; border-bottom: 0; padding: 4px" :style="{ 'width': (340 - 40*(+item.inGroup)) + 'px' }">
-                            <div class="text-green-10" style="font-size: 105%">
+                    <div class="row-part column items-stretch clickable break-word" @click="loadBook(item)">
+                        <div 
+                            class="col" style="border: 1px solid #cccccc; border-bottom: 0; padding: 4px; line-height: 140%;"
+                            :style="{ 'width': (380 - 40*(+item.inGroup)) + 'px' }"
+                        >
+                            <div class="text-green-10" style="font-size: 80%">
                                 {{ item.desc.author }}
                             </div>
-                            <div>{{ item.desc.title }}</div>
+                            <div style="font-size: 75%">
+                                {{ item.desc.title }}
+                            </div>
                         </div>
 
                         <div class="row" style="font-size: 10px">
@@ -113,7 +132,7 @@
                                 {{ item.desc.textLen }}
                             </div>
 
-                            <div class="row items-center row-info-top" :style="`width: ${(220 - 40*(+item.inGroup))}px; padding: 1px`">
+                            <div class="row items-center row-info-top" :style="`width: ${(260 - 40*(+item.inGroup))}px; padding: 1px`">
                                 <div class="read-bar" :style="`width: ${100*item.readPart}%`"></div>
                             </div>
 
@@ -124,7 +143,7 @@
                             </div>
                         </div>
 
-                        <div class="row" style="font-size: 10px" :style="{ 'width': (340 - 40*(+item.inGroup)) + 'px' }">
+                        <div class="row" style="font-size: 10px" :style="{ 'width': (380 - 40*(+item.inGroup)) + 'px' }">
                             <div class="row justify-center items-center row-info-bottom" style="width: 30px">
                                 {{ item.num }}
                             </div>
@@ -141,21 +160,40 @@
                         </div>
                     </div>
 
-                    <div class="row-part column justify-center" style="width: 80px; font-size: 75%">
-                        <div>
-                            <a v-show="isUrl(item.url)" :href="item.url" target="_blank">Оригинал</a><br><br>
-                            <a :href="item.path" @click.prevent="downloadBook(item.path, item.fullTitle)">Скачать FB2</a>
+                    <div
+                        class="row-part column"
+                        style="width: 90px;"
+                    >
+                        <div
+                            class="col column justify-center" 
+                            style="font-size: 75%; padding-left: 6px; border: 1px solid #cccccc; border-left: 0;"
+                        >
+                            <div :style="`margin-top: ${(archive ? 20 : 0)}px`">
+                                <a v-show="isUrl(item.url)" :href="item.url" target="_blank">Оригинал</a><br><br>
+                                <a :href="item.path" @click.prevent="downloadBook(item.path, item.fullTitle)">Скачать FB2</a>
+                            </div>
                         </div>
-                    </div>
 
-                    <div class="row-part column justify-center">
-                        <q-btn
-                            dense
-                            style="width: 30px; height: 30px; padding: 7px 0 7px 0; margin-left: 4px"
+                        <div
+                            class="del-button self-end row justify-center items-center clickable"
                             @click="handleDel(item.key)"
                         >
-                            <q-icon class="la la-times" size="14px" />
-                        </q-btn>
+                            <q-icon class="la la-times" size="12px" />
+                            <q-tooltip :delay="1500" anchor="bottom middle" content-style="font-size: 80%">
+                                {{ (archive ? 'Удалить окончательно' : 'Перенести в архив') }}
+                            </q-tooltip>
+                        </div>
+
+                        <div
+                            v-show="archive"
+                            class="restore-button self-start row justify-center items-center clickable"
+                            @click="handleRestore(item.key)"
+                        >
+                            <q-icon class="la la-arrow-left" size="14px" />
+                            <q-tooltip :delay="1500" anchor="bottom middle" content-style="font-size: 80%">
+                                Восстановить из архива
+                            </q-tooltip>
+                        </div>
                     </div>
                 </div>
             </q-virtual-scroll>
@@ -200,6 +238,7 @@ class RecentBooksPage {
     tableData = [];
     sortMethod = '';
     showSameBook = false;
+    archive = false;
 
     created() {
         this.commit = this.$store.commit;
@@ -251,7 +290,7 @@ class RecentBooksPage {
 
             //подготовка полей
             for (const book of sorted) {
-                if (book.deleted)
+                if ((!this.archive && book.deleted) || (this.archive && book.deleted != 1))
                     continue;
 
                 let d = new Date();
@@ -407,7 +446,8 @@ class RecentBooksPage {
     wordEnding(num, type = 0) {
         const endings = [
             ['ов', '', 'а', 'а', 'а', 'ов', 'ов', 'ов', 'ов', 'ов'],
-            ['й', 'я', 'и', 'и', 'и', 'й', 'й', 'й', 'й', 'й']
+            ['й', 'я', 'и', 'и', 'и', 'й', 'й', 'й', 'й', 'й'],
+            ['о', '', 'о', 'о', 'о', 'о', 'о', 'о', 'о', 'о']
         ];
         const deci = num % 100;
         if (deci > 10 && deci < 20) {
@@ -419,7 +459,7 @@ class RecentBooksPage {
 
     get header() {
         const len = (this.tableData ? this.tableData.length : 0);
-        return `${(this.search ? 'Найдено' : 'Всего')} ${len} файл${this.wordEnding(len)}`;
+        return `${(this.search ? `Найден${this.wordEnding(len, 2)}` : 'Всего')} ${len} файл${this.wordEnding(len)}${this.archive ? ' в архиве' : ''}`;
     }
 
     async downloadBook(fb2path, fullTitle) {
@@ -445,11 +485,20 @@ class RecentBooksPage {
     }
 
     async handleDel(key) {
-        await bookManager.delRecentBook({key});
-        //this.updateTableData();//обновление уже происходит Reader.bookManagerEvent
+        if (!this.archive) {
+            await bookManager.delRecentBook({key});
+            this.$root.notify.info('Перенесено в архив');
+        } else {
+            if (await this.$root.stdDialog.confirm('Подтвердите удаление из архива:', ' ')) {
+                await bookManager.delRecentBook({key}, 2);
+                this.$root.notify.info('Удалено безвозвратно');
+            }
+        }
+    }
 
-        if (!bookManager.mostRecentBook())
-            this.close();
+    async handleRestore(key) {
+        await bookManager.restoreRecentBook({key});
+        this.$root.notify.info('Восстановлено из архива');
     }
 
     loadBook(row) {
@@ -569,6 +618,11 @@ class RecentBooksPage {
         ];
     }
 
+    archiveToggle() {
+        this.archive = !this.archive;
+        this.updateTableData();
+    }
+
     close() {
         this.$emit('recent-books-close');
     }
@@ -606,7 +660,7 @@ export default vueComponent(RecentBooksPage);
 }
 
 .row-part {
-    padding: 4px 4px 4px 4px;
+    padding: 4px 0px 4px 0px;
 }
 
 .clickable {
@@ -614,7 +668,6 @@ export default vueComponent(RecentBooksPage);
 }
 
 .break-word {
-    line-height: 180%;
     overflow-wrap: break-word;
     word-wrap: break-word;
     white-space: normal;
@@ -670,5 +723,56 @@ export default vueComponent(RecentBooksPage);
 .read-bar {
     height: 4px;
     background-color: #bbbbbb;
+}
+
+.del-button {
+    width: 25px;
+    height: 20px;
+    position: absolute;
+    border-left: 1px solid #cccccc;
+    border-bottom: 1px solid #cccccc;
+    border-radius: 0 0 0 10px;
+    margin: 1px;
+}
+
+.del-button:hover {
+    color: white;
+    background-color: #FF3030;
+}
+
+.restore-button {
+    width: 25px;
+    height: 20px;
+    position: absolute;
+    border-right: 1px solid #cccccc;
+    border-bottom: 1px solid #cccccc;
+    border-radius: 0 0 10px 0;
+    margin: 1px;
+}
+
+.restore-button:hover {
+    color: white;
+    background-color: #00bb00;
+}
+
+.header-button, .header-button-pressed {
+    width: 80px;
+    height: 30px;
+    cursor: pointer;
+    color: #555555;
+}
+
+.header-button:hover {
+    color: white;
+    background-color: #39902F;
+}
+
+.header-button-pressed {
+    color: black;
+    background-color: yellow;
+}
+
+.header-button-pressed:hover {
+    color: black;
 }
 </style>
