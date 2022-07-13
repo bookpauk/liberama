@@ -317,6 +317,11 @@ class RecentBooksPage {
                 const author = (bt.author ? bt.author : (bt.bookTitle ? bt.bookTitle : (book.uploadFileName ? book.uploadFileName : book.url)));
 
                 result.push({
+                    key: book.key,
+                    url: book.url,
+                    path: book.path,
+                    deleted: book.deleted,
+
                     touchTime,
                     loadTime,
                     desc: {
@@ -326,10 +331,7 @@ class RecentBooksPage {
                         textLen,
                     },
                     readPart,
-                    url: book.url,
-                    path: book.path,
                     fullTitle: bt.fullTitle,
-                    key: book.key,
                     sameBookKey: book.sameBookKey,
                     active: (activeBook.key == book.key),
                     activeParent: false,
@@ -433,6 +435,8 @@ class RecentBooksPage {
             //.....
 
             this.tableData = result;
+            
+            this.$refs.virtualScroll.refresh();
         } finally {
             this.lock.ret();
         }
@@ -501,8 +505,14 @@ class RecentBooksPage {
         this.$root.notify.info('Восстановлено из архива');
     }
 
-    loadBook(row) {
-        this.$emit('load-book', {url: row.url, path: row.path});
+    async loadBook(item) {
+        //чтобы не обновлять лишний раз updateTableData
+        this.inited = false;
+
+        if (item.deleted)
+            await this.handleRestore(item.key);
+
+        this.$emit('load-book', {url: item.url, path: item.path});
         this.close();
     }
 

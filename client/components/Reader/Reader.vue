@@ -1107,6 +1107,7 @@ class Reader {
             wasOpened = (wasOpened ? _.cloneDeep(wasOpened) : {});
 
             wasOpened = Object.assign(wasOpened, {
+                url: (opts.url !== undefined ? opts.url : wasOpened.url),
                 path: (opts.path !== undefined ? opts.path : wasOpened.path),
                 bookPos: (opts.bookPos !== undefined ? opts.bookPos : wasOpened.bookPos),
                 bookPosSeen: (opts.bookPos !== undefined ? opts.bookPos : wasOpened.bookPosSeen),
