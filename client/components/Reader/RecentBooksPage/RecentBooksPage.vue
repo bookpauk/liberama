@@ -189,7 +189,7 @@
                             class="restore-button self-start row justify-center items-center clickable"
                             @click="handleRestore(item.key)"
                         >
-                            <q-icon class="la la-arrow-left" size="14px" />                            
+                            <q-icon class="la la-arrow-left" size="14px" />
                             <q-tooltip :delay="1500" anchor="bottom middle" content-style="font-size: 80%">
                                 Восстановить из архива
                             </q-tooltip>
