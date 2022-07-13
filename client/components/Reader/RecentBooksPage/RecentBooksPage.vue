@@ -100,12 +100,17 @@
                         </div>
                     </div>
 
-                    <div class="row-part column items-stretch clickable break-word" :style="{ 'width': (350 - 40*(+item.inGroup)) + 'px' }" style="font-size: 75%" @click="loadBook(item)">
-                        <div class="col" style="border: 1px solid #cccccc; border-bottom: 0; padding: 4px" :style="{ 'width': (340 - 40*(+item.inGroup)) + 'px' }">
-                            <div class="text-green-10" style="font-size: 105%">
+                    <div class="row-part column items-stretch clickable break-word" @click="loadBook(item)">
+                        <div 
+                            class="col" style="border: 1px solid #cccccc; border-bottom: 0; padding: 4px; line-height: 140%;"
+                            :style="{ 'width': (380 - 40*(+item.inGroup)) + 'px' }"
+                        >
+                            <div class="text-green-10" style="font-size: 80%">
                                 {{ item.desc.author }}
                             </div>
-                            <div>{{ item.desc.title }}</div>
+                            <div style="font-size: 75%">
+                                {{ item.desc.title }}
+                            </div>
                         </div>
 
                         <div class="row" style="font-size: 10px">
@@ -113,7 +118,7 @@
                                 {{ item.desc.textLen }}
                             </div>
 
-                            <div class="row items-center row-info-top" :style="`width: ${(220 - 40*(+item.inGroup))}px; padding: 1px`">
+                            <div class="row items-center row-info-top" :style="`width: ${(260 - 40*(+item.inGroup))}px; padding: 1px`">
                                 <div class="read-bar" :style="`width: ${100*item.readPart}%`"></div>
                             </div>
 
@@ -124,7 +129,7 @@
                             </div>
                         </div>
 
-                        <div class="row" style="font-size: 10px" :style="{ 'width': (340 - 40*(+item.inGroup)) + 'px' }">
+                        <div class="row" style="font-size: 10px" :style="{ 'width': (380 - 40*(+item.inGroup)) + 'px' }">
                             <div class="row justify-center items-center row-info-bottom" style="width: 30px">
                                 {{ item.num }}
                             </div>
@@ -141,21 +146,27 @@
                         </div>
                     </div>
 
-                    <div class="row-part column justify-center" style="width: 80px; font-size: 75%">
-                        <div>
-                            <a v-show="isUrl(item.url)" :href="item.url" target="_blank">Оригинал</a><br><br>
-                            <a :href="item.path" @click.prevent="downloadBook(item.path, item.fullTitle)">Скачать FB2</a>
+                    <div
+                        class="row-part column"
+                        style="width: 90px;"
+                    >
+                        <div
+                            class="col column justify-center" 
+                            style="font-size: 75%; padding-left: 6px; border: 1px solid #cccccc; border-left: 0;"
+                        >
+                            <div>
+                                <a v-show="isUrl(item.url)" :href="item.url" target="_blank">Оригинал</a><br><br>
+                                <a :href="item.path" @click.prevent="downloadBook(item.path, item.fullTitle)">Скачать FB2</a>
+                            </div>
                         </div>
-                    </div>
 
-                    <div class="row-part column justify-center">
-                        <q-btn
-                            dense
-                            style="width: 30px; height: 30px; padding: 7px 0 7px 0; margin-left: 4px"
+                        <div
+                            class="del-button self-end row justify-center items-center clickable"
+                            style="position: absolute; border-left: 1px solid #cccccc; border-bottom: 1px solid #cccccc;"
                             @click="handleDel(item.key)"
                         >
-                            <q-icon class="la la-times" size="14px" />
-                        </q-btn>
+                            <q-icon class="la la-times" size="12px" />
+                        </div>
                     </div>
                 </div>
             </q-virtual-scroll>
@@ -606,7 +617,7 @@ export default vueComponent(RecentBooksPage);
 }
 
 .row-part {
-    padding: 4px 4px 4px 4px;
+    padding: 4px 0px 4px 0px;
 }
 
 .clickable {
@@ -614,7 +625,6 @@ export default vueComponent(RecentBooksPage);
 }
 
 .break-word {
-    line-height: 180%;
     overflow-wrap: break-word;
     word-wrap: break-word;
     white-space: normal;
@@ -671,4 +681,15 @@ export default vueComponent(RecentBooksPage);
     height: 4px;
     background-color: #bbbbbb;
 }
+
+.del-button {
+    width: 20px;
+    height: 20px
+}
+
+.del-button:hover {
+    color: white;
+    background-color: #FF3030;
+}
+
 </style>
