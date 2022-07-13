@@ -445,6 +445,13 @@ class BookManager {
         this.emit('recent-deleted', value.key);
     }
 
+    async restoreRecentBook(value) {
+        const item = this.recent[value.key];
+        item.deleted = 0;
+
+        await this.recentSetItem(item);
+    }
+
     async cleanRecentBooks() {
         const sorted = this.getSortedRecent();
 

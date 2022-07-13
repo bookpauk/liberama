@@ -168,7 +168,7 @@
                             class="col column justify-center" 
                             style="font-size: 75%; padding-left: 6px; border: 1px solid #cccccc; border-left: 0;"
                         >
-                            <div>
+                            <div :style="`margin-top: ${(archive ? 20 : 0)}px`">
                                 <a v-show="isUrl(item.url)" :href="item.url" target="_blank">Оригинал</a><br><br>
                                 <a :href="item.path" @click.prevent="downloadBook(item.path, item.fullTitle)">Скачать FB2</a>
                             </div>
@@ -179,6 +179,9 @@
                             @click="handleDel(item.key)"
                         >
                             <q-icon class="la la-times" size="12px" />
+                            <q-tooltip :delay="1500" anchor="bottom middle" content-style="font-size: 80%">
+                                {{ (archive ? 'Удалить окончательно' : 'Перенести в архив') }}
+                            </q-tooltip>
                         </div>
 
                         <div
@@ -186,7 +189,10 @@
                             class="restore-button self-start row justify-center items-center clickable"
                             @click="handleRestore(item.key)"
                         >
-                            <q-icon class="la la-trash-restore" size="12px" />
+                            <q-icon class="la la-arrow-left" size="14px" />                            
+                            <q-tooltip :delay="1500" anchor="bottom middle" content-style="font-size: 80%">
+                                Восстановить из архива
+                            </q-tooltip>
                         </div>
                     </div>
                 </div>
@@ -440,7 +446,8 @@ class RecentBooksPage {
     wordEnding(num, type = 0) {
         const endings = [
             ['ов', '', 'а', 'а', 'а', 'ов', 'ов', 'ов', 'ов', 'ов'],
-            ['й', 'я', 'и', 'и', 'и', 'й', 'й', 'й', 'й', 'й']
+            ['й', 'я', 'и', 'и', 'и', 'й', 'й', 'й', 'й', 'й'],
+            ['о', '', 'о', 'о', 'о', 'о', 'о', 'о', 'о', 'о']
         ];
         const deci = num % 100;
         if (deci > 10 && deci < 20) {
@@ -452,7 +459,7 @@ class RecentBooksPage {
 
     get header() {
         const len = (this.tableData ? this.tableData.length : 0);
-        return `${(this.search ? 'Найдено' : 'Всего')} ${len} файл${this.wordEnding(len)}${this.archive ? ' в архиве' : ''}`;
+        return `${(this.search ? `Найден${this.wordEnding(len, 2)}` : 'Всего')} ${len} файл${this.wordEnding(len)}${this.archive ? ' в архиве' : ''}`;
     }
 
     async downloadBook(fb2path, fullTitle) {
@@ -490,8 +497,8 @@ class RecentBooksPage {
     }
 
     async handleRestore(key) {
-        await bookManager.delRecentBook({key});
-        this.$root.notify.info('Перенесено в архив');
+        await bookManager.restoreRecentBook({key});
+        this.$root.notify.info('Восстановлено из архива');
     }
 
     loadBook(row) {
@@ -731,6 +738,21 @@ export default vueComponent(RecentBooksPage);
 .del-button:hover {
     color: white;
     background-color: #FF3030;
+}
+
+.restore-button {
+    width: 25px;
+    height: 20px;
+    position: absolute;
+    border-right: 1px solid #cccccc;
+    border-bottom: 1px solid #cccccc;
+    border-radius: 0 0 10px 0;
+    margin: 1px;
+}
+
+.restore-button:hover {
+    color: white;
+    background-color: #00bb00;
 }
 
 .header-button, .header-button-pressed {
