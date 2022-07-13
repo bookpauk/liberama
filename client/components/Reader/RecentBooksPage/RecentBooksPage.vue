@@ -86,7 +86,7 @@
                 @virtual-scroll="onScroll"
             >
                 <div class="table-row row" :class="{even: index % 2 > 0, 'active-book': item.active, 'active-parent-book': item.activeParent}">
-                    <div v-show="item.inGroup" class="row-part column justify-center items-center" style="width: 40px; border-right: 1px solid #cccccc">                        
+                    <div v-show="item.inGroup" class="row-part column justify-center items-center" style="width: 40px">
                         <q-icon name="la la-code-branch" size="24px" style="color: green" />
                     </div>
 
@@ -603,7 +603,6 @@ export default vueComponent(RecentBooksPage);
 
 .table-row {
     min-height: 80px;
-    border-bottom: 1px solid #cccccc;
 }
 
 .row-part {
@@ -671,6 +670,5 @@ export default vueComponent(RecentBooksPage);
 .read-bar {
     height: 6px;
     background-color: #bbbbbb;
-    margin-bottom: 2px;
 }
 </style>
