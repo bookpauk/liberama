@@ -769,14 +769,14 @@ export default vueComponent(RecentBooksPage);
     line-height: 110%;
     border-left: 1px solid #cccccc;
     border-bottom: 1px solid #cccccc;
-    height: 12px;
+    height: 14px;
 }
 
 .row-info-top {
     line-height: 110%;
     border: 1px solid #cccccc;
     border-right: 0;
-    height: 12px;
+    height: 14px;
 }
 
 .time-info, .row-info-top {
@@ -784,8 +784,8 @@ export default vueComponent(RecentBooksPage);
 }
 
 .read-bar {
-    height: 4px;
-    background-color: #bbbbbb;
+    height: 6px;
+    background-color: #b8b8b8;
 }
 
 .del-button {
