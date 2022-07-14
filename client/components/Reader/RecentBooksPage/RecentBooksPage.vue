@@ -264,6 +264,7 @@ class RecentBooksPage {
             this.showBar();
             await this.updateTableData();
             await this.scrollToActiveBook();
+            //await this.scrollRefresh();
         })();
     }
 
@@ -435,8 +436,6 @@ class RecentBooksPage {
             //.....
 
             this.tableData = result;
-            
-            this.$refs.virtualScroll.refresh();
         } finally {
             this.lock.ret();
         }
@@ -569,6 +568,8 @@ class RecentBooksPage {
     }
 
     async scrollToActiveBook() {
+        await this.$nextTick();
+
         this.lockScroll = true;
         try {
             let activeIndex = -1;
@@ -614,6 +615,16 @@ class RecentBooksPage {
         }
     }
 
+    async scrollRefresh() {
+        this.lockScroll = true;
+        await utils.sleep(100);
+        try {
+            this.$refs.virtualScroll.refresh();
+        } finally {
+            await utils.sleep(100);
+            this.lockScroll = false;
+        }
+    }
 
     get sortMethodOptions() {
         return [
