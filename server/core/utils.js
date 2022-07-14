@@ -34,6 +34,12 @@ function getFileHash(filename, hashName, enc) {
     });
 }
 
+function getBufHash(buf, hashName, enc) {
+    const hash = crypto.createHash(hashName);
+    hash.update(buf);
+    return hash.digest(enc);
+}
+
 function sleep(ms) {
     return new Promise(resolve => setTimeout(resolve, ms));
 }
@@ -129,6 +135,7 @@ module.exports = {
     fromBase36,
     bufferRemoveZeroes,
     getFileHash,
+    getBufHash,
     sleep,
     toUnixTime,
     randomHexString,

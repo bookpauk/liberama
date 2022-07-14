@@ -25,6 +25,10 @@ class WebSocketController {
             ws.on('message', (message) => {
                 this.onMessage(ws, message.toString());
             });
+
+            ws.on('error', (err) => {
+                log(LM_ERR, err);
+            });
         });
 
         setTimeout(() => { this.periodicClean(); }, cleanPeriod);
@@ -70,6 +74,8 @@ class WebSocketController {
                     await this.readerRestoreCachedFile(req, ws); break;
                 case 'reader-storage':
                     await this.readerStorageDo(req, ws); break;
+                case 'upload-file-buf':
+                    await this.uploadFileBuf(req, ws); break;
 
                 default:
                     throw new Error(`Action not found: ${req.action}`);
@@ -168,6 +174,15 @@ class WebSocketController {
 
         this.send(await this.readerStorage.doAction(req.body), req, ws);
     }
+
+    async uploadFileBuf(req, ws) {
+        if (!req.buf)
+            throw new Error(`key 'buf' is empty`);
+        
+        this.send({url: await this.readerWorker.saveFileBuf(req.buf)}, req, ws);
+    }
+
+
 }
 
 module.exports = WebSocketController;
