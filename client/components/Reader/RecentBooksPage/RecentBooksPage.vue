@@ -106,7 +106,8 @@
 
                     <div class="row-part column justify-center items-stretch" style="width: 80px">
                         <div class="col row justify-center items-center clickable" @click="loadBook(item)">
-                            <q-icon name="la la-book" size="40px" style="color: #dddddd" />
+                            <div v-show="isLoadedCover(item.coverPageUrl)" v-html="getCoverHtml(item.coverPageUrl)" />
+                            <q-icon v-show="!isLoadedCover(item.coverPageUrl)" name="la la-book" size="40px" style="color: #dddddd" />
                         </div>
 
                         <div v-show="!showSameBook && item.group && item.group.length > 0" class="row justify-center" style="font-size: 70%">
@@ -213,6 +214,7 @@ import LockQueue from '../../../share/LockQueue';
 import Window from '../../share/Window.vue';
 import bookManager from '../share/bookManager';
 import readerApi from '../../../api/reader';
+import coversStorage from '../share/coversStorage';
 
 const componentOptions = {
     components: {
@@ -239,6 +241,8 @@ class RecentBooksPage {
     sortMethod = '';
     showSameBook = false;
     archive = false;
+
+    covers = {};
 
     created() {
         this.commit = this.$store.commit;
@@ -337,6 +341,7 @@ class RecentBooksPage {
                     active: (activeBook.key == book.key),
                     activeParent: false,
                     inGroup: false,
+                    coverPageUrl: book.coverPageUrl,
 
                     //для сортировки
                     loadTimeRaw,
@@ -653,6 +658,43 @@ class RecentBooksPage {
             this.close();
         }
         return true;
+    }
+
+    makeCoverHtml(data) {
+        return `<img src="${data}" style="height: 100%; width: 100%; object-fit: contain" />`;
+    }
+
+    isLoadedCover(coverPageUrl) {
+        if (!coverPageUrl)
+            return false;
+
+        let loadedCover = this.covers[coverPageUrl];
+        if (!loadedCover) {
+            (async() => {
+                //сначала заглянем в storage
+                let data = await coversStorage.getData(coverPageUrl);
+                if (data) {
+                   this.covers[coverPageUrl] = this.makeCoverHtml(data);
+                } else {//иначе идем на сервер
+                    try {
+                        data = await readerApi.getUploadedFileBuf(coverPageUrl);
+                        await coversStorage.setData(coverPageUrl, data);
+                        this.covers[coverPageUrl] = this.makeCoverHtml(data);
+                    } catch (e) {
+                        console.error(e);
+                    }
+                }
+            })();
+        }
+
+        return (loadedCover != undefined);
+    }
+
+    getCoverHtml(coverPageUrl) {
+        if (coverPageUrl && this.covers[coverPageUrl])
+            return this.covers[coverPageUrl];
+        else
+            return '';
     }
 }
 

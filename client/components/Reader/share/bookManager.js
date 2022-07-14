@@ -2,8 +2,9 @@ import localForage from 'localforage';
 import path from 'path-browserify';
 import _ from 'lodash';
 
-import * as utils from '../../../share/utils';
 import BookParser from './BookParser';
+import readerApi from '../../../api/reader';
+import * as utils from '../../../share/utils';
 
 const maxDataSize = 500*1024*1024;//compressed bytes
 const maxRecentLength = 5000;
@@ -345,9 +346,27 @@ class BookManager {
         const parsed = new BookParser(this.settings);
 
         const parsedMeta = await parsed.parse(data, callback);
+
+        //cover page
+        let coverPageUrl = '';
+        if (parsed.coverPageId && parsed.binary[parsed.coverPageId]) {
+            const bin = parsed.binary[parsed.coverPageId];
+            const dataUrl = await utils.resizeImage(`data:${bin.type};base64,${bin.data}`);
+
+            //отправим dataUrl на сервер в /upload
+            try {
+                await readerApi.uploadFileBuf(dataUrl, (url) => {
+                    coverPageUrl = url;
+                });
+            } catch (e) {
+                console.error(e);
+            }
+        }
+
         const result = Object.assign({}, meta, parsedMeta, {
             length: data.length,
             textLength: parsed.textLength,
+            coverPageUrl,
             parsed
         });
 

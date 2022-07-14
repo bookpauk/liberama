@@ -1,5 +1,6 @@
 import axios from 'axios';
 import * as utils from '../share/utils';
+import * as cryptoUtils from '../share/cryptoUtils';
 import wsc from './webSocketConnection';
 
 const api = axios.create({
@@ -225,8 +226,20 @@ class Reader {
         return response;
     }
 
-    async uploadFileBuf(buf) {
-        const response = await wsc.message(await wsc.send({action: 'upload-file-buf', buf}));
+    async uploadFileBuf(buf, urlCallback) {
+        const key = utils.toHex(cryptoUtils.sha256(buf));
+        const url = `disk://${key}`;
+
+        if (urlCallback)
+            urlCallback(url);
+
+        let response;
+        try {
+            await axios.head(`/upload/${key}`, {headers: {'Cache-Control': 'no-cache'}});
+            response = await wsc.message(await wsc.send({action: 'upload-file-touch', url}));
+        } catch (e) {
+            response = await wsc.message(await wsc.send({action: 'upload-file-buf', buf}));
+        }
 
         if (response.error)
             throw new Error(response.error);

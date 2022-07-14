@@ -194,6 +194,7 @@ import ReaderDialogs from './ReaderDialogs/ReaderDialogs.vue';
 
 import bookManager from './share/bookManager';
 import wallpaperStorage from './share/wallpaperStorage';
+import coversStorage from './share/coversStorage';
 import dynamicCss from '../../share/dynamicCss';
 
 import rstore from '../../store/modules/reader';
@@ -366,6 +367,8 @@ class Reader {
     mounted() {
         (async() => {
             await wallpaperStorage.init();
+            await coversStorage.init();
+            
             await bookManager.init(this.settings);
             bookManager.addEventListener(this.bookManagerEvent);
 

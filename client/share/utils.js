@@ -364,3 +364,7 @@ export function getBookTitle(fb2) {
 
     return result;
 }
+
+export async function resizeImage(dataUrl) {
+    return dataUrl;
+}
