@@ -232,6 +232,14 @@ class ReaderWorker {
         return `disk://${hash}`;
     }
 
+    async uploadFileTouch(url) {
+        const outFilename = `${this.config.uploadDir}/${url.replace('disk://', '')}`;
+
+        await utils.touchFile(outFilename);
+
+        return url;
+    }
+
     async restoreRemoteFile(filename) {
         const basename = path.basename(filename);
         const targetName = `${this.config.tempPublicDir}/${basename}`;

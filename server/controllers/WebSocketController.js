@@ -76,6 +76,8 @@ class WebSocketController {
                     await this.readerStorageDo(req, ws); break;
                 case 'upload-file-buf':
                     await this.uploadFileBuf(req, ws); break;
+                case 'upload-file-touch':
+                    await this.uploadFileTouch(req, ws); break;
 
                 default:
                     throw new Error(`Action not found: ${req.action}`);
@@ -182,7 +184,12 @@ class WebSocketController {
         this.send({url: await this.readerWorker.saveFileBuf(req.buf)}, req, ws);
     }
 
-
+    async uploadFileTouch(req, ws) {
+        if (!req.url)
+            throw new Error(`key 'url' is empty`);
+        
+        this.send({url: await this.readerWorker.uploadFileTouch(req.url)}, req, ws);
+    }
 }
 
 module.exports = WebSocketController;
