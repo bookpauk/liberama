@@ -11,6 +11,8 @@ const ayncExit = new (require('./core/AsyncExit'))();
 
 let log = null;
 
+const maxPayloadSize = 50;//in MB
+
 async function init() {
     //config
     const configManager = new (require('./config'))();//singleton
@@ -63,7 +65,7 @@ async function main() {
         if (serverCfg.mode !== 'none') {
             const app = express();
             const server = http.createServer(app);
-            const wss = new WebSocket.Server({ server, maxPayload: 10*1024*1024 });
+            const wss = new WebSocket.Server({ server, maxPayload: maxPayloadSize*1024*1024 });
 
             const serverConfig = Object.assign({}, config, serverCfg);
 
@@ -75,7 +77,7 @@ async function main() {
             }
 
             app.use(compression({ level: 1 }));
-            app.use(express.json({limit: '10mb'}));
+            app.use(express.json({limit: `${maxPayloadSize}mb`}));
             if (devModule)
                 devModule.logQueries(app);
 
