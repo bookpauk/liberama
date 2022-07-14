@@ -1,5 +1,19 @@
 export const versionHistory = [
 {
+    version: '0.11.8',
+    releaseDate: '2022-07-14',
+    showUntil: '2022-07-13',
+    content:
+`
+<ul>
+    <li>добавлено отображение и синхронизация обложек в окне загруженных книг</li>
+    <li>добавлена синхронизация обоев</li>
+</ul>
+
+`
+},
+
+{
     version: '0.11.7',
     releaseDate: '2022-07-12',
     showUntil: '2022-07-19',
