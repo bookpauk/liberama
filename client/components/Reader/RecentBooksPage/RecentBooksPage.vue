@@ -105,8 +105,9 @@
                     </div>
 
                     <div class="row-part column justify-center items-stretch" style="width: 80px">
-                        <div class="col row justify-center items-center clickable" @click="loadBook(item)">
-                            <q-icon name="la la-book" size="40px" style="color: #dddddd" />
+                        <div class="col row justify-center items-center clickable" style="padding: 4px" @click="loadBook(item)">
+                            <div v-show="isLoadedCover(item.coverPageUrl)" style="height: 80px" v-html="getCoverHtml(item.coverPageUrl)" />
+                            <q-icon v-show="!isLoadedCover(item.coverPageUrl)" name="la la-book" size="40px" style="color: #dddddd" />
                         </div>
 
                         <div v-show="!showSameBook && item.group && item.group.length > 0" class="row justify-center" style="font-size: 70%">
@@ -213,6 +214,7 @@ import LockQueue from '../../../share/LockQueue';
 import Window from '../../share/Window.vue';
 import bookManager from '../share/bookManager';
 import readerApi from '../../../api/reader';
+import coversStorage from '../share/coversStorage';
 
 const componentOptions = {
     components: {
@@ -240,6 +242,8 @@ class RecentBooksPage {
     showSameBook = false;
     archive = false;
 
+    covers = {};
+
     created() {
         this.commit = this.$store.commit;
 
@@ -264,6 +268,7 @@ class RecentBooksPage {
             this.showBar();
             await this.updateTableData();
             await this.scrollToActiveBook();
+            //await this.scrollRefresh();
         })();
     }
 
@@ -336,6 +341,7 @@ class RecentBooksPage {
                     active: (activeBook.key == book.key),
                     activeParent: false,
                     inGroup: false,
+                    coverPageUrl: book.coverPageUrl,
 
                     //для сортировки
                     loadTimeRaw,
@@ -435,8 +441,6 @@ class RecentBooksPage {
             //.....
 
             this.tableData = result;
-            
-            this.$refs.virtualScroll.refresh();
         } finally {
             this.lock.ret();
         }
@@ -569,6 +573,8 @@ class RecentBooksPage {
     }
 
     async scrollToActiveBook() {
+        await this.$nextTick();
+
         this.lockScroll = true;
         try {
             let activeIndex = -1;
@@ -614,6 +620,16 @@ class RecentBooksPage {
         }
     }
 
+    async scrollRefresh() {
+        this.lockScroll = true;
+        await utils.sleep(100);
+        try {
+            this.$refs.virtualScroll.refresh();
+        } finally {
+            await utils.sleep(100);
+            this.lockScroll = false;
+        }
+    }
 
     get sortMethodOptions() {
         return [
@@ -642,6 +658,43 @@ class RecentBooksPage {
             this.close();
         }
         return true;
+    }
+
+    makeCoverHtml(data) {
+        return `<img src="${data}" style="height: 100%; width: 100%; object-fit: contain" />`;
+    }
+
+    isLoadedCover(coverPageUrl) {
+        if (!coverPageUrl)
+            return false;
+
+        let loadedCover = this.covers[coverPageUrl];
+        if (!loadedCover) {
+            (async() => {
+                //сначала заглянем в storage
+                let data = await coversStorage.getData(coverPageUrl);
+                if (data) {
+                   this.covers[coverPageUrl] = this.makeCoverHtml(data);
+                } else {//иначе идем на сервер
+                    try {
+                        data = await readerApi.getUploadedFileBuf(coverPageUrl);
+                        await coversStorage.setData(coverPageUrl, data);
+                        this.covers[coverPageUrl] = this.makeCoverHtml(data);
+                    } catch (e) {
+                        console.error(e);
+                    }
+                }
+            })();
+        }
+
+        return (loadedCover != undefined);
+    }
+
+    getCoverHtml(coverPageUrl) {
+        if (coverPageUrl && this.covers[coverPageUrl])
+            return this.covers[coverPageUrl];
+        else
+            return '';
     }
 }
 
@@ -716,14 +769,14 @@ export default vueComponent(RecentBooksPage);
     line-height: 110%;
     border-left: 1px solid #cccccc;
     border-bottom: 1px solid #cccccc;
-    height: 12px;
+    height: 14px;
 }
 
 .row-info-top {
     line-height: 110%;
     border: 1px solid #cccccc;
     border-right: 0;
-    height: 12px;
+    height: 14px;
 }
 
 .time-info, .row-info-top {
@@ -731,8 +784,8 @@ export default vueComponent(RecentBooksPage);
 }
 
 .read-bar {
-    height: 4px;
-    background-color: #bbbbbb;
+    height: 6px;
+    background-color: #b8b8b8;
 }
 
 .del-button {

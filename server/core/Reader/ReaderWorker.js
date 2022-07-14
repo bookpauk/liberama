@@ -219,6 +219,27 @@ class ReaderWorker {
         return `disk://${hash}`;
     }
 
+    async saveFileBuf(buf) {
+        const hash = await utils.getBufHash(buf, 'sha256', 'hex');
+        const outFilename = `${this.config.uploadDir}/${hash}`;
+
+        if (!await fs.pathExists(outFilename)) {
+            await fs.writeFile(outFilename, buf);
+        } else {
+            await utils.touchFile(outFilename);
+        }
+
+        return `disk://${hash}`;
+    }
+
+    async uploadFileTouch(url) {
+        const outFilename = `${this.config.uploadDir}/${url.replace('disk://', '')}`;
+
+        await utils.touchFile(outFilename);
+
+        return url;
+    }
+
     async restoreRemoteFile(filename) {
         const basename = path.basename(filename);
         const targetName = `${this.config.tempPublicDir}/${basename}`;

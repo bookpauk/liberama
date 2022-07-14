@@ -94,7 +94,7 @@ class WebSocketConnection {
                     this.ws = new this.WebSocket(this.url);
                 }
 
-                const onopen = (e) => {
+                const onopen = () => {
                     this.connecting = false;
                     resolve(this.ws);
                 };

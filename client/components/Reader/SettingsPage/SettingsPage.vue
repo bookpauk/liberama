@@ -124,6 +124,7 @@ import NumInput from '../../share/NumInput.vue';
 import UserHotKeys from './UserHotKeys/UserHotKeys.vue';
 import wallpaperStorage from '../share/wallpaperStorage';
 
+import readerApi from '../../../api/reader';
 import rstore from '../../../store/modules/reader';
 import defPalette from './defPalette';
 
@@ -636,8 +637,17 @@ class SettingsPage {
 
                     if (index < 0)
                         newUserWallpapers.push({label, cssClass});
-                    if (!wallpaperStorage.keyExists(cssClass))
+                    if (!wallpaperStorage.keyExists(cssClass)) {
                         await wallpaperStorage.setData(cssClass, data);
+                        //отправим data на сервер в файл `/upload/${key}`
+                        try {
+                            //const res = 
+                            await readerApi.uploadFileBuf(data);
+                            //console.log(res);
+                        } catch (e) {
+                            console.error(e);
+                        }
+                    }
 
                     this.userWallpapers = newUserWallpapers;
                     this.wallpaper = cssClass;

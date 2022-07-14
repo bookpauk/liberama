@@ -85,6 +85,7 @@ export default class BookParser {
         let binaryId = '';
         let binaryType = '';
         let dimPromises = [];
+        this.coverPageId = '';
 
         //оглавление
         this.contents = [];
@@ -289,7 +290,7 @@ export default class BookParser {
                     const href = attrs.href.value;
                     const alt = (attrs.alt && attrs.alt.value ? attrs.alt.value : '');
                     const {id, local} = this.imageHrefToId(href);
-                    if (href[0] == '#') {//local
+                    if (local) {//local
                         imageNum++;
 
                         if (inPara && !this.sets.showInlineImagesInCenter && !center)
@@ -301,6 +302,11 @@ export default class BookParser {
 
                         if (inPara && this.sets.showInlineImagesInCenter)
                             newParagraph();
+
+                        //coverpage
+                        if (path == '/fictionbook/description/title-info/coverpage/image') {
+                            this.coverPageId = id;
+                        }
                     } else {//external
                         imageNum++;
 

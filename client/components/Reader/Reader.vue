@@ -194,6 +194,7 @@ import ReaderDialogs from './ReaderDialogs/ReaderDialogs.vue';
 
 import bookManager from './share/bookManager';
 import wallpaperStorage from './share/wallpaperStorage';
+import coversStorage from './share/coversStorage';
 import dynamicCss from '../../share/dynamicCss';
 
 import rstore from '../../store/modules/reader';
@@ -366,6 +367,8 @@ class Reader {
     mounted() {
         (async() => {
             await wallpaperStorage.init();
+            await coversStorage.init();
+            
             await bookManager.init(this.settings);
             bookManager.addEventListener(this.bookManagerEvent);
 
@@ -450,22 +453,47 @@ class Reader {
 
     //wallpaper css
     async loadWallpapers() {
-        const wallpaperDataLength = await wallpaperStorage.getLength();
-        if (wallpaperDataLength !== this.wallpaperDataLength) {//оптимизация
-            this.wallpaperDataLength = wallpaperDataLength;
+        if (!_.isEqual(this.userWallpapers, this.prevUserWallpapers)) {//оптимизация
+            this.prevUserWallpapers = _.cloneDeep(this.userWallpapers);
 
             let newCss = '';
+            let updated = false;
+            const wallpaperExists = new Set();
             for (const wp of this.userWallpapers) {
-                const data = await wallpaperStorage.getData(wp.cssClass);
+                wallpaperExists.add(wp.cssClass);
 
+                let data = await wallpaperStorage.getData(wp.cssClass);
                 if (!data) {
                     //здесь будем восстанавливать данные с сервера
+                    const url = `disk://${wp.cssClass.replace('user-paper', '')}`;
+                    try {
+                        data = await readerApi.getUploadedFileBuf(url);
+                        await wallpaperStorage.setData(wp.cssClass, data);
+                        updated = true;
+                    } catch (e) {
+                        console.error(e);
+                    }
                 }
 
                 if (data) {
                     newCss += `.${wp.cssClass} {background: url(${data}) center; background-size: 100% 100%;}`;                
                 }
             }
+
+            //почистим wallpaperStorage
+            for (const key of await wallpaperStorage.getKeys()) {
+                if (!wallpaperExists.has(key)) {
+                    await wallpaperStorage.removeData(key);
+                }
+            }
+
+            //обновим settings, если загружали обои из /upload/
+            if (updated) {
+                const newSettings = _.cloneDeep(this.settings);
+                newSettings.needUpdateSettingsView = (newSettings.needUpdateSettingsView < 10 ? newSettings.needUpdateSettingsView + 1 : 0);
+                this.commit('reader/setSettings', newSettings);
+            }
+
             dynamicCss.replace('wallpapers', newCss);
         }
     }

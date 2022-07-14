@@ -364,3 +364,49 @@ export function getBookTitle(fb2) {
 
     return result;
 }
+
+export function resizeImage(dataUrl, toWidth, toHeight, quality = 0.9) {
+    return new Promise ((resolve, reject) => { (async() => {
+        const img = new Image();
+
+        let resolved = false;
+        img.onload = () => {
+            try {
+                let width = img.width;
+                let height = img.height;
+
+                if (width > height) {
+                    if (width > toWidth) {
+                        height = height * (toWidth / width);
+                        width = toWidth;
+                    }
+                } else {
+                    if (height > toHeight) {
+                        width = width * (toHeight / height);
+                        height = toHeight;
+                    }
+                }
+
+                const canvas = document.createElement('canvas');
+                canvas.width = width;
+                canvas.height = height;
+                const ctx = canvas.getContext('2d');
+                ctx.drawImage(img, 0, 0, width, height);
+                const result = canvas.toDataURL('image/jpeg', quality);
+                resolved = true;
+                resolve(result);
+            } catch (e) {
+                reject(e);
+                return;
+            }
+        };
+
+        img.onerror = reject;
+
+        img.src = dataUrl;
+
+        await sleep(1000);
+        if (!resolved)
+            reject('Не удалось изменить размер');
+    })().catch(reject); });
+}

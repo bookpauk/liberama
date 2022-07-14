@@ -1,5 +1,6 @@
 import axios from 'axios';
 import * as utils from '../share/utils';
+import * as cryptoUtils from '../share/cryptoUtils';
 import wsc from './webSocketConnection';
 
 const api = axios.create({
@@ -174,11 +175,10 @@ class Reader {
         return await axios.get(url, options);
     }
 
-    async uploadFile(file, maxUploadFileSize, callback) {
-        if (!maxUploadFileSize)
-            maxUploadFileSize = 10*1024*1024;
+    async uploadFile(file, maxUploadFileSize = 10*1024*1024, callback) {
         if (file.size > maxUploadFileSize)
             throw new Error(`Размер файла превышает ${maxUploadFileSize} байт`);
+
         let formData = new FormData();
         formData.append('file', file, file.name);
 
@@ -225,6 +225,33 @@ class Reader {
 
         return response;
     }
+
+    async uploadFileBuf(buf, urlCallback) {
+        const key = utils.toHex(cryptoUtils.sha256(buf));
+        const url = `disk://${key}`;
+
+        if (urlCallback)
+            urlCallback(url);
+
+        let response;
+        try {
+            await axios.head(`/upload/${key}`, {headers: {'Cache-Control': 'no-cache'}});
+            response = await wsc.message(await wsc.send({action: 'upload-file-touch', url}));
+        } catch (e) {
+            response = await wsc.message(await wsc.send({action: 'upload-file-buf', buf}));
+        }
+
+        if (response.error)
+            throw new Error(response.error);
+
+        return response;
+    }
+
+    async getUploadedFileBuf(url) {
+        url = url.replace('disk://', '/upload/');
+        return (await axios.get(url)).data;
+    }
+
 }
 
 export default new Reader();

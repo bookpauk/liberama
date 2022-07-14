@@ -32,6 +32,10 @@ class WallpaperStorage {
         this.cachedKeys = await wpStore.keys();
     }
 
+    async getKeys() {
+        return await wpStore.keys();
+    }
+
     keyExists(key) {//не асинхронная
         return this.cachedKeys.includes(key);
     }

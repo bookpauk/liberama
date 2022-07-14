@@ -191,6 +191,8 @@ const settingDefaults = {
 
     recentShowSameBook: false,
     recentSortMethod: '',
+
+    needUpdateSettingsView: 0,
 };
 
 for (const font of fonts)
