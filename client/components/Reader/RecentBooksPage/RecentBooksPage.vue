@@ -105,8 +105,8 @@
                     </div>
 
                     <div class="row-part column justify-center items-stretch" style="width: 80px">
-                        <div class="col row justify-center items-center clickable" @click="loadBook(item)">
-                            <div v-show="isLoadedCover(item.coverPageUrl)" v-html="getCoverHtml(item.coverPageUrl)" />
+                        <div class="col row justify-center items-center clickable" style="padding: 4px" @click="loadBook(item)">
+                            <div v-show="isLoadedCover(item.coverPageUrl)" style="height: 80px" v-html="getCoverHtml(item.coverPageUrl)" />
                             <q-icon v-show="!isLoadedCover(item.coverPageUrl)" name="la la-book" size="40px" style="color: #dddddd" />
                         </div>
 

@@ -4,6 +4,7 @@ import _ from 'lodash';
 
 import BookParser from './BookParser';
 import readerApi from '../../../api/reader';
+import coversStorage from './coversStorage';
 import * as utils from '../../../share/utils';
 
 const maxDataSize = 500*1024*1024;//compressed bytes
@@ -351,7 +352,12 @@ class BookManager {
         let coverPageUrl = '';
         if (parsed.coverPageId && parsed.binary[parsed.coverPageId]) {
             const bin = parsed.binary[parsed.coverPageId];
-            const dataUrl = await utils.resizeImage(`data:${bin.type};base64,${bin.data}`);
+            let dataUrl = `data:${bin.type};base64,${bin.data}`;
+            try {
+                dataUrl = await utils.resizeImage(dataUrl, 160, 160, 0.94);
+            } catch (e) {
+                console.error(e);
+            }
 
             //отправим dataUrl на сервер в /upload
             try {
@@ -361,6 +367,10 @@ class BookManager {
             } catch (e) {
                 console.error(e);
             }
+
+            //сохраним в storage
+            if (coverPageUrl)
+                await coversStorage.setData(coverPageUrl, dataUrl);
         }
 
         const result = Object.assign({}, meta, parsedMeta, {
