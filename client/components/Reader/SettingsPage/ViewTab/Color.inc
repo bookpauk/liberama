@@ -102,6 +102,11 @@
                                             Удалить выбранные обои
                                         </q-tooltip>
                                     </q-btn>
+                                    <q-btn v-show="wallpaper.indexOf('user-paper') === 0" class="q-ml-sm" round dense color="blue" icon="la la-file-download" @click.stop="downloadWallpaper">
+                                        <q-tooltip :delay="1500" anchor="bottom middle" content-style="font-size: 80%">
+                                            Скачать выбранные обои
+                                        </q-tooltip>
+                                    </q-btn>
                                 </div>
                             </div>
 
