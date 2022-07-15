@@ -351,6 +351,8 @@ class BookManager {
         //cover page
         let coverPageUrl = '';
         if (parsed.coverPageId && parsed.binary[parsed.coverPageId]) {
+            if (callback) callback(90);
+
             const bin = parsed.binary[parsed.coverPageId];
             let dataUrl = `data:${bin.type};base64,${bin.data}`;
             try {
@@ -359,18 +361,22 @@ class BookManager {
                 console.error(e);
             }
 
-            //отправим dataUrl на сервер в /upload
-            try {
-                await readerApi.uploadFileBuf(dataUrl, (url) => {
-                    coverPageUrl = url;
-                });
-            } catch (e) {
-                console.error(e);
-            }
+            coverPageUrl = readerApi.makeUrlFromBuf(dataUrl);
 
-            //сохраним в storage
-            if (coverPageUrl)
+            if (callback) callback(100);
+
+            //далее асинхронно 
+            (async() => {
+                //отправим dataUrl на сервер в /upload
+                try {
+                    await readerApi.uploadFileBuf(dataUrl, coverPageUrl);
+                } catch (e) {
+                    console.error(e);
+                }
+
+                //сохраним в storage
                 await coversStorage.setData(coverPageUrl, dataUrl);
+            })();
         }
 
         const result = Object.assign({}, meta, parsedMeta, {

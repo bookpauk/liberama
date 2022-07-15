@@ -226,16 +226,18 @@ class Reader {
         return response;
     }
 
-    async uploadFileBuf(buf, urlCallback) {
+    makeUrlFromBuf(buf) {
         const key = utils.toHex(cryptoUtils.sha256(buf));
-        const url = `disk://${key}`;
+        return `disk://${key}`;
+    }
 
-        if (urlCallback)
-            urlCallback(url);
+    async uploadFileBuf(buf, url) {
+        if (!url)
+            url = this.makeUrlFromBuf(buf);
 
         let response;
         try {
-            await axios.head(`/upload/${key}`, {headers: {'Cache-Control': 'no-cache'}});
+            await axios.head(url.replace('disk://', '/upload/'), {headers: {'Cache-Control': 'no-cache'}});
             response = await wsc.message(await wsc.send({action: 'upload-file-touch', url}));
         } catch (e) {
             response = await wsc.message(await wsc.send({action: 'upload-file-buf', buf}));
