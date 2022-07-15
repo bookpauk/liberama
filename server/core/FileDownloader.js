@@ -23,7 +23,7 @@ class FileDownloader {
                 estSize = res.headers['content-length'];
             }
 
-            if (estSize > this.limitDownloadSize) {
+            if (this.limitDownloadSize && estSize > this.limitDownloadSize) {
                 throw new Error('Файл слишком большой');
             }
 
