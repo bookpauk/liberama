@@ -1,10 +1,10 @@
 <template>
-    <Window ref="window" height="140px" max-width="600px" :top-shift="-50" @close="close">
+    <Window ref="window" height="130px" max-width="600px" :top-shift="-50" @close="close">
         <template #header>
             Установить позицию
         </template>
 
-        <div id="set-position-slider" class="slider q-px-md">
+        <div id="set-position-slider" class="slider q-px-md column justify-center">
             <q-slider
                 v-model="sliderValue"
                 thumb-path="M 2, 10 a 8.5,8.5 0 1,0 17,0 a 8.5,8.5 0 1,0 -17,0"
@@ -77,6 +77,7 @@ export default vueComponent(SetPositionPage);
 <style scoped>
 .slider {
     margin: 20px;
+    height: 40px;
     background-color: #efefef;
     border-radius: 15px;
 }
