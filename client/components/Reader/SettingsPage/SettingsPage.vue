@@ -5,6 +5,8 @@
         </template>
 
         <div class="col row">
+            <a ref="download" style="display: none;" target="_blank"></a>
+
             <div class="full-height">
                 <q-tabs
                     ref="tabs"
@@ -671,6 +673,27 @@ class SettingsPage {
 
             this.userWallpapers = newUserWallpapers;
             this.wallpaper = '';
+        }
+    }
+
+    async downloadWallpaper() {
+        if (this.wallpaper.indexOf('user-paper') != 0)
+            return;
+
+        try {
+            const d = this.$refs.download;
+
+            const dataUrl = await wallpaperStorage.getData(this.wallpaper);
+
+            if (!dataUrl)
+                throw new Error('Файл обоев не найден');
+
+            d.href = dataUrl;
+            d.download = `wallpaper-#${this.wallpaper.replace('user-paper', '').substring(0, 4)}`;
+
+            d.click();
+        } catch (e) {
+            this.$root.stdDialog.alert(e.message, 'Ошибка', {color: 'negative'});
         }
     }
 

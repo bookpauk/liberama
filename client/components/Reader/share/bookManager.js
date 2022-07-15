@@ -359,18 +359,20 @@ class BookManager {
                 console.error(e);
             }
 
-            //отправим dataUrl на сервер в /upload
-            try {
-                await readerApi.uploadFileBuf(dataUrl, (url) => {
-                    coverPageUrl = url;
-                });
-            } catch (e) {
-                console.error(e);
-            }
+            coverPageUrl = readerApi.makeUrlFromBuf(dataUrl);
 
-            //сохраним в storage
-            if (coverPageUrl)
+            //далее асинхронно 
+            (async() => {
+                //отправим dataUrl на сервер в /upload
+                try {
+                    await readerApi.uploadFileBuf(dataUrl, coverPageUrl);
+                } catch (e) {
+                    console.error(e);
+                }
+
+                //сохраним в storage
                 await coversStorage.setData(coverPageUrl, dataUrl);
+            })();
         }
 
         const result = Object.assign({}, meta, parsedMeta, {

@@ -105,7 +105,7 @@
                     </div>
 
                     <div class="row-part column justify-center items-stretch" style="width: 80px">
-                        <div class="col row justify-center items-center clickable" style="padding: 4px" @click="loadBook(item)">
+                        <div class="col row justify-center items-center clickable" style="padding: 0 2px 0 2px" @click="loadBook(item)">
                             <div v-show="isLoadedCover(item.coverPageUrl)" style="height: 80px" v-html="getCoverHtml(item.coverPageUrl)" />
                             <q-icon v-show="!isLoadedCover(item.coverPageUrl)" name="la la-book" size="40px" style="color: #dddddd" />
                         </div>
@@ -243,6 +243,7 @@ class RecentBooksPage {
     archive = false;
 
     covers = {};
+    coversLoadFunc = {};
 
     created() {
         this.commit = this.$store.commit;
@@ -669,20 +670,36 @@ class RecentBooksPage {
             return false;
 
         let loadedCover = this.covers[coverPageUrl];
+
+        if (loadedCover == 'error')
+            return false;
+
         if (!loadedCover) {
             (async() => {
-                //сначала заглянем в storage
-                let data = await coversStorage.getData(coverPageUrl);
-                if (data) {
-                   this.covers[coverPageUrl] = this.makeCoverHtml(data);
-                } else {//иначе идем на сервер
-                    try {
-                        data = await readerApi.getUploadedFileBuf(coverPageUrl);
-                        await coversStorage.setData(coverPageUrl, data);
-                        this.covers[coverPageUrl] = this.makeCoverHtml(data);
-                    } catch (e) {
-                        console.error(e);
+                if (this.coversLoadFunc[coverPageUrl])
+                    return;
+
+                this.coversLoadFunc[coverPageUrl] = (async() => {
+                    //сначала заглянем в storage
+                    let data = await coversStorage.getData(coverPageUrl);
+                    if (data) {
+                       this.covers[coverPageUrl] = this.makeCoverHtml(data);
+                    } else {//иначе идем на сервер
+                        try {
+                            data = await readerApi.getUploadedFileBuf(coverPageUrl);
+                            await coversStorage.setData(coverPageUrl, data);
+                            this.covers[coverPageUrl] = this.makeCoverHtml(data);
+                        } catch (e) {
+                            console.error(e);
+                            this.covers[coverPageUrl] = 'error';
+                        }
                     }
+                });
+
+                try {
+                    await this.coversLoadFunc[coverPageUrl]();
+                } finally {
+                    this.coversLoadFunc[coverPageUrl] = null;
                 }
             })();
         }
