@@ -356,12 +356,16 @@ class BookManager {
             const bin = parsed.binary[parsed.coverPageId];
             let dataUrl = `data:${bin.type};base64,${bin.data}`;
             try {
+console.time('resizeImage');
                 dataUrl = await utils.resizeImage(dataUrl, 160, 160, 0.94);
+console.timeEnd('resizeImage');
             } catch (e) {
                 console.error(e);
             }
 
+console.time('makeUrlFromBuf');
             coverPageUrl = readerApi.makeUrlFromBuf(dataUrl);
+console.timeEnd('makeUrlFromBuf');
 
             if (callback) callback(100);
 
