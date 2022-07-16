@@ -107,17 +107,11 @@ function initStatic(app, config) {
 
         //восстановим
         if (!await fs.pathExists(filePath)) {
-            /*const zlib = require('zlib');
-            const gzipBuffer = async(buf) => {
-                return new Promise((resolve, reject) => {
-                    zlib.gzip(buf, {level: 1}, (err, result) => {
-                        if (err) reject(err);
-                        resolve(result);
-                    });
-                });
-            };
-
-            await fs.writeFile(filePath, await gzipBuffer(`<filepath>${filePath}</filepath>`));*/
+            if (req.path.indexOf('/tmp/') === 0) {
+                await readerWorker.restoreRemoteFile(req.path, '/tmp');
+            } else if (req.path.indexOf('/upload/') === 0) {
+                await readerWorker.restoreRemoteFile(req.path, '/upload');
+            }
         }
 
         return next();
