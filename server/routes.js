@@ -9,50 +9,6 @@ const ReaderWorker = require('./core/Reader/ReaderWorker');//singleton
 const c = require('./controllers');
 const utils = require('./core/utils');
 
-function initStatic(app, config) {
-    const readerWorker = new ReaderWorker(config);
-
-    //восстановление файлов в /tmp и /upload из webdav-storage, при необходимости
-    app.use(async(req, res, next) => {
-        if ((req.method !== 'GET' && req.method !== 'HEAD') ||
-            !(req.path.indexOf('/tmp/') === 0 || req.path.indexOf('/upload/') === 0)
-            ) {
-            return next();
-        }
-
-        const filePath = `${config.publicDir}${req.path}`;
-
-        //восстановим
-        if (!await fs.pathExists(filePath)) {
-            /*const zlib = require('zlib');
-            const gzipBuffer = async(buf) => {
-                return new Promise((resolve, reject) => {
-                    zlib.gzip(buf, {level: 1}, (err, result) => {
-                        if (err) reject(err);
-                        resolve(result);
-                    });
-                });
-            };
-
-            await fs.writeFile(filePath, await gzipBuffer(`<filepath>${filePath}</filepath>`));*/
-        }
-
-        return next();
-    });
-
-    const tmpDir = `${config.publicDir}/tmp`;
-    app.use(express.static(config.publicDir, {
-        maxAge: '30d',
-
-        setHeaders: (res, filePath) => {
-            if (path.dirname(filePath) == tmpDir) {
-                res.set('Content-Type', 'application/xml');
-                res.set('Content-Encoding', 'gzip');
-            }
-        },
-    }));
-}
-
 function initRoutes(app, wss, config) {
     //эксклюзив для update_checker
     if (config.mode === 'book_update_checker') {
@@ -134,6 +90,50 @@ function initRoutes(app, wss, config) {
                 throw new Error(`initRoutes error: unknown httpMethod: ${httpMethod}`);
         }
     }
+}
+
+function initStatic(app, config) {
+    const readerWorker = new ReaderWorker(config);
+
+    //восстановление файлов в /tmp и /upload из webdav-storage, при необходимости
+    app.use(async(req, res, next) => {
+        if ((req.method !== 'GET' && req.method !== 'HEAD') ||
+            !(req.path.indexOf('/tmp/') === 0 || req.path.indexOf('/upload/') === 0)
+            ) {
+            return next();
+        }
+
+        const filePath = `${config.publicDir}${req.path}`;
+
+        //восстановим
+        if (!await fs.pathExists(filePath)) {
+            /*const zlib = require('zlib');
+            const gzipBuffer = async(buf) => {
+                return new Promise((resolve, reject) => {
+                    zlib.gzip(buf, {level: 1}, (err, result) => {
+                        if (err) reject(err);
+                        resolve(result);
+                    });
+                });
+            };
+
+            await fs.writeFile(filePath, await gzipBuffer(`<filepath>${filePath}</filepath>`));*/
+        }
+
+        return next();
+    });
+
+    const tmpDir = `${config.publicDir}/tmp`;
+    app.use(express.static(config.publicDir, {
+        maxAge: '30d',
+
+        setHeaders: (res, filePath) => {
+            if (path.dirname(filePath) == tmpDir) {
+                res.set('Content-Type', 'application/xml');
+                res.set('Content-Encoding', 'gzip');
+            }
+        },
+    }));
 }
 
 module.exports = {
