@@ -11,7 +11,7 @@ const RemoteWebDavStorage = require('../RemoteWebDavStorage');
 const utils = require('../utils');
 const log = new (require('../AppLogger'))().log;//singleton
 
-const cleanDirPeriod = 60*60*1000;//1 раз в час
+const cleanDirPeriod = 30*60*1000;//раз в полчаса
 const queue = new LimitedQueue(5, 100, 2*60*1000 + 15000);//2 минуты ожидание подвижек
 
 let instance = null;
@@ -40,8 +40,20 @@ class ReaderWorker {
                 );
             }
 
-            this.periodicCleanDir(this.config.tempPublicDir, this.config.maxTempPublicDirSize, cleanDirPeriod);
-            this.periodicCleanDir(this.config.uploadDir, this.config.maxUploadPublicDirSize, cleanDirPeriod);
+            this.remoteConfig = {
+                '/tmp': {
+                    dir: this.config.tempPublicDir,
+                    maxSize: this.config.maxTempPublicDirSize,
+                    moveToRemote: true,
+                },
+                '/upload': {
+                    dir: this.config.uploadDir,
+                    maxSize: this.config.maxUploadPublicDirSize,
+                    moveToRemote: true,
+                }
+            };
+
+            this.periodicCleanDir(this.remoteConfig);//no await
             
             instance = this;
         }
@@ -54,7 +66,6 @@ class ReaderWorker {
         let decompDir = '';
         let downloadedFilename = '';
         let isUploaded = false;
-        let isRestored = false;
         let convertFilename = '';
 
         const overLoadMes = 'Слишком большая очередь загрузки. Пожалуйста, попробуйте позже.';
@@ -94,8 +105,7 @@ class ReaderWorker {
                 if (!await fs.pathExists(downloadedFilename)) {
                     //если удалено из upload, попробуем восстановить из удаленного хранилища
                     try {
-                        downloadedFilename = await this.restoreRemoteFile(fileHash);
-                        isRestored = true;
+                        await this.restoreRemoteFile(fileHash, '/upload');
                     } catch(e) {
                         throw new Error('Файл не найден на сервере (возможно был удален как устаревший). Пожалуйста, загрузите файл с диска на сервер заново.');
                     }
@@ -143,33 +153,6 @@ class ReaderWorker {
             //finish
             const finishFilename = path.basename(compFilename);
             wState.finish({path: `/tmp/${finishFilename}`, size: stat.size});
-
-            //лениво сохраним compFilename в удаленном хранилище
-            if (this.remoteWebDavStorage) {
-                (async() => {
-                    await utils.sleep(20*1000);
-                    try {
-                        //log(`remoteWebDavStorage.putFile ${path.basename(compFilename)}`);
-                        await this.remoteWebDavStorage.putFile(compFilename);
-                    } catch (e) {
-                        log(LM_ERR, e.stack);
-                    }
-                })();
-            }
-
-            //лениво сохраним downloadedFilename в tmp и в удаленном хранилище в случае isUploaded
-            if (this.remoteWebDavStorage && isUploaded && !isRestored) {
-                (async() => {
-                    await utils.sleep(30*1000);
-                    try {
-                        //сжимаем файл в tmp, если там уже нет с тем же именем-sha256
-                        const compDownloadedFilename = await this.decomp.gzipFileIfNotExists(downloadedFilename, this.config.tempPublicDir, true);
-                        await this.remoteWebDavStorage.putFile(compDownloadedFilename);
-                    } catch (e) {
-                        log(LM_ERR, e.stack);
-                    }
-                })();
-            }
 
         } catch (e) {
             log(LM_ERR, e.stack);
@@ -240,14 +223,20 @@ class ReaderWorker {
         return url;
     }
 
-    async restoreRemoteFile(filename) {
+    async restoreRemoteFile(filename, remoteDir) {
+        let targetDir = '';
+        if (this.remoteConfig[remoteDir])
+            targetDir = this.remoteConfig[remoteDir].dir;
+        else
+            throw new Error(`restoreRemoteFile: unknown remoteDir value (${remoteDir})`);
+
         const basename = path.basename(filename);
-        const targetName = `${this.config.tempPublicDir}/${basename}`;
+        const targetName = `${targetDir}/${basename}`;
 
         if (!await fs.pathExists(targetName)) {
             let found = false;
             if (this.remoteWebDavStorage) {
-                found = await this.remoteWebDavStorage.getFileSuccess(targetName);
+                found = await this.remoteWebDavStorage.getFileSuccess(targetName, remoteDir);
             }
 
             if (!found) {
@@ -282,59 +271,78 @@ class ReaderWorker {
         return workerId;
     }
 
-    async periodicCleanDir(dir, maxSize, timeout) {
-        try {
-            const list = await fs.readdir(dir);
+    async cleanDir(dir, remoteDir, maxSize, moveToRemote) {
+        if (!this.remoteSent)
+            this.remoteSent = {};
+        if (!this.remoteSent[remoteDir])
+            this.remoteSent[remoteDir] = {};
 
-            let size = 0;
-            let files = [];
-            for (const name of list) {
-                const stat = await fs.stat(`${dir}/${name}`);
-                if (!stat.isDirectory()) {
-                    size += stat.size;
-                    files.push({name, stat});
+        const sent = this.remoteSent[remoteDir];
+
+        const list = await fs.readdir(dir);
+
+        let size = 0;
+        let files = [];
+        for (const filename of list) {
+            const filePath = `${dir}/${filename}`;
+            const stat = await fs.stat(filePath);
+            if (!stat.isDirectory()) {
+                size += stat.size;
+                files.push({name: filePath, stat});
+            }
+        }
+        log(`clean dir ${dir}, maxSize=${maxSize}, found ${files.length} files, total size=${size}`);
+
+        files.sort((a, b) => a.stat.mtimeMs - b.stat.mtimeMs);
+
+        if (moveToRemote && this.remoteWebDavStorage) {
+            for (const file of files) {
+                if (sent[file.name])
+                    continue;
+
+                //отправляем в remoteWebDavStorage
+                try {
+                    log(`remoteWebDavStorage.putFile ${remoteDir}/${path.basename(file.name)}`);
+                    await this.remoteWebDavStorage.putFile(file.name, remoteDir);
+                    sent[file.name] = true;
+                } catch (e) {
+                    log(LM_ERR, e.stack);
                 }
             }
-            log(`clean dir ${dir}, maxSize=${maxSize}, found ${files.length} files, total size=${size}`);
+        }
 
-            files.sort((a, b) => a.stat.mtimeMs - b.stat.mtimeMs);
+        let i = 0;
+        let j = 0;
+        while (i < files.length && size > maxSize) {
+            const file = files[i];
+            const oldFile = file.name;
 
-            let i = 0;
-            let j = 0;
-            while (i < files.length && size > maxSize) {
-                const file = files[i];
-                const oldFile = `${dir}/${file.name}`;
-
-                let remoteSuccess = true;
-                //отправляем только this.config.tempPublicDir
-                if (this.remoteWebDavStorage && dir === this.config.tempPublicDir) {
-                    remoteSuccess = false;
-                    try {
-                        //log(`remoteWebDavStorage.putFile ${path.basename(oldFile)}`);
-                        await this.remoteWebDavStorage.putFile(oldFile);
-                        remoteSuccess = true;
-                    } catch (e) {
-                        log(LM_ERR, e.stack);
-                    }
-                }
-                //реально удаляем только если сохранили в хранилище
-                if (remoteSuccess || size > maxSize*1.2) {
-                    await fs.remove(oldFile);
-                    j++;
-                }
-                
-                size -= file.stat.size;
-                i++;
+            //реально удаляем только если сохранили в хранилище или размер dir увеличен в 1.5 раза
+            if ((moveToRemote && this.remoteWebDavStorage && sent[oldFile]) || size > maxSize*1.5) {
+                await fs.remove(oldFile);
+                j++;
             }
-            log(`removed ${j} files`);
-        } catch(e) {
-            log(LM_ERR, e.stack);
-        } finally {
-            setTimeout(() => {
-                this.periodicCleanDir(dir, maxSize, timeout);
-            }, timeout);
+            
+            size -= file.stat.size;
+            i++;
+        }
+        log(`removed ${j} files`);
+    }
+
+    async periodicCleanDir(cleanConfig) {
+        while (1) {// eslint-disable-line no-constant-condition
+            for (const [remoteDir, config] of Object.entries(cleanConfig)) {
+                try {
+                    await this.cleanDir(config.dir, remoteDir, config.maxSize, config.moveToRemote);
+                } catch(e) {
+                    log(LM_ERR, e.stack);
+                }
+            }
+
+            await utils.sleep(cleanDirPeriod);
         }
     }
+
 }
 
 module.exports = ReaderWorker;
