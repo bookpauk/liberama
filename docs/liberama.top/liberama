@@ -17,6 +17,7 @@ server {
   ssl_dhparam /etc/letsencrypt/ssl-dhparams.pem; # managed by Certbot
 
   server_name liberama.top;
+  set $liberama http://127.0.0.1:55081;
 
   client_max_body_size 100m;
   proxy_read_timeout 1h;
@@ -26,12 +27,16 @@ server {
   gzip_proxied expired no-cache no-store private auth;
   gzip_types *;
 
+  location @liberama {
+    proxy_pass $liberama;
+  }
+
   location /api {
-    proxy_pass http://127.0.0.1:55081;
+    proxy_pass $liberama;
   }
 
   location /ws {
-    proxy_pass http://127.0.0.1:55081;
+    proxy_pass $liberama;
     proxy_http_version 1.1;
     proxy_set_header Upgrade $http_upgrade;
     proxy_set_header Connection "upgrade";
@@ -44,6 +49,11 @@ server {
     location /tmp {
       types { } default_type "application/xml; charset=utf-8";
       add_header Content-Encoding gzip;
+      try_files $uri @liberama;
+    }
+
+    location /upload {
+      try_files $uri @liberama;
     }
 
     location ~* \.(?:manifest|appcache|html)$ {
@@ -62,6 +72,7 @@ server {
 server {
   listen 80;
   server_name b.liberama.top;
+  set $liberama http://127.0.0.1:55081;
 
   client_max_body_size 100m;
   proxy_read_timeout 1h;
@@ -71,15 +82,20 @@ server {
   gzip_proxied expired no-cache no-store private auth;
   gzip_types *;
 
+  location @liberama {
+    proxy_pass $liberama;
+  }
+
   location /api {
-    proxy_pass http://127.0.0.1:55081;
+    proxy_pass $liberama;
   }
 
   location /ws {
-    proxy_pass http://127.0.0.1:55081;
+    proxy_pass $liberama;
     proxy_http_version 1.1;
     proxy_set_header Upgrade $http_upgrade;
     proxy_set_header Connection "upgrade";
+    proxy_read_timeout 600s;
   }
 
   location / {
@@ -88,6 +104,11 @@ server {
     location /tmp {
       types { } default_type "application/xml; charset=utf-8";
       add_header Content-Encoding gzip;
+      try_files $uri @liberama;
+    }
+
+    location /upload {
+      try_files $uri @liberama;
     }
 
     location ~* \.(?:manifest|appcache|html)$ {
