@@ -70,8 +70,6 @@ class WebSocketController {
                     await this.workerGetState(req, ws); break;
                 case 'worker-get-state-finish':
                     await this.workerGetStateFinish(req, ws); break;
-                case 'reader-restore-cached-file':
-                    await this.readerRestoreCachedFile(req, ws); break;
                 case 'reader-storage':
                     await this.readerStorageDo(req, ws); break;
                 case 'upload-file-buf':
@@ -155,15 +153,6 @@ class WebSocketController {
             }
             i = (prevProgress != state.progress || prevState != state.state ? 1 : i);
         }        
-    }
-
-    async readerRestoreCachedFile(req, ws) {
-        if (!req.path)
-            throw new Error(`key 'path' is empty`);
-
-        const workerId = this.readerWorker.restoreCachedFile(req.path);
-        const state = this.workerState.getState(workerId);
-        this.send((state ? state : {}), req, ws);
     }
 
     async readerStorageDo(req, ws) {

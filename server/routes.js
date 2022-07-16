@@ -5,7 +5,7 @@ const express = require('express');
 const multer = require('multer');
 
 const ReaderWorker = require('./core/Reader/ReaderWorker');//singleton
-const log = new (require('../AppLogger'))().log;//singleton
+const log = new (require('./core/AppLogger'))().log;//singleton
 
 const c = require('./controllers');
 const utils = require('./core/utils');
@@ -45,7 +45,6 @@ function initRoutes(app, wss, config) {
         ['POST', '/api/reader/load-book', reader.loadBook.bind(reader), [aAll], {}],
         ['POST', '/api/reader/storage', reader.storage.bind(reader), [aAll], {}],
         ['POST', '/api/reader/upload-file', [upload.single('file'), reader.uploadFile.bind(reader)], [aAll], {}],
-        ['POST', '/api/reader/restore-cached-file', reader.restoreCachedFile.bind(reader), [aAll], {}],        
         ['POST', '/api/worker/get-state', worker.getState.bind(worker), [aAll], {}],
     ];
 

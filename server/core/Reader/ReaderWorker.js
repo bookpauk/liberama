@@ -247,30 +247,6 @@ class ReaderWorker {
         return targetName;
     }
 
-    restoreCachedFile(filename) {
-        const workerId = this.workerState.generateWorkerId();
-        const wState = this.workerState.getControl(workerId);
-        wState.set({state: 'start'});
-
-        (async() => {
-            try {
-                wState.set({state: 'download', step: 1, totalSteps: 1, path: filename, progress: 0});
-
-                const targetName = await this.restoreRemoteFile(filename);
-                const stat = await fs.stat(targetName);
-
-                const basename = path.basename(filename);
-                wState.finish({path: `/tmp/${basename}`, size: stat.size, progress: 100});
-            } catch (e) {
-                if (e.message.indexOf('404') < 0)
-                    log(LM_ERR, e.stack);
-                wState.set({state: 'error', error: e.message});
-            }
-        })();
-
-        return workerId;
-    }
-
     async cleanDir(dir, remoteDir, maxSize, moveToRemote) {
         if (!this.remoteSent)
             this.remoteSent = {};
