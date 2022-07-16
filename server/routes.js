@@ -5,6 +5,7 @@ const express = require('express');
 const multer = require('multer');
 
 const ReaderWorker = require('./core/Reader/ReaderWorker');//singleton
+const log = new (require('../AppLogger'))().log;//singleton
 
 const c = require('./controllers');
 const utils = require('./core/utils');
@@ -106,12 +107,16 @@ function initStatic(app, config) {
         const filePath = `${config.publicDir}${req.path}`;
 
         //восстановим
-        if (!await fs.pathExists(filePath)) {
-            if (req.path.indexOf('/tmp/') === 0) {
-                await readerWorker.restoreRemoteFile(req.path, '/tmp');
-            } else if (req.path.indexOf('/upload/') === 0) {
-                await readerWorker.restoreRemoteFile(req.path, '/upload');
+        try {
+            if (!await fs.pathExists(filePath)) {
+                if (req.path.indexOf('/tmp/') === 0) {
+                    await readerWorker.restoreRemoteFile(req.path, '/tmp');
+                } else if (req.path.indexOf('/upload/') === 0) {
+                    await readerWorker.restoreRemoteFile(req.path, '/upload');
+                }
             }
+        } catch(e) {
+            log(LM_ERR, `Static.restoreRemoteFile: ${e.message}`);
         }
 
         return next();
