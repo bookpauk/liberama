@@ -49,7 +49,7 @@ module.exports = {
     servers: [
         {
             serverName: '1',
-            mode: 'normal', //'none', 'normal', 'site', 'reader', 'omnireader', 'liberama.top'
+            mode: 'normal', //'none', 'normal', 'site', 'reader', 'omnireader', 'liberama.top', 'book_update_checker'
             ip: '0.0.0.0',
             port: '33080',
         },

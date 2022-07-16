@@ -1,8 +1,24 @@
-const c = require('./controllers');
-const utils = require('./core/utils');
+const fs = require('fs-extra');
+const path = require('path');
+
+const express = require('express');
 const multer = require('multer');
 
+const ReaderWorker = require('./core/Reader/ReaderWorker');//singleton
+const log = new (require('./core/AppLogger'))().log;//singleton
+
+const c = require('./controllers');
+const utils = require('./core/utils');
+
 function initRoutes(app, wss, config) {
+    //эксклюзив для update_checker
+    if (config.mode === 'book_update_checker') {
+        new c.BookUpdateCheckerController(wss, config);
+        return;
+    }
+
+    initStatic(app, config);
+        
     const misc = new c.MiscController(config);
     const reader = new c.ReaderController(config);
     const worker = new c.WorkerController(config);
@@ -29,7 +45,6 @@ function initRoutes(app, wss, config) {
         ['POST', '/api/reader/load-book', reader.loadBook.bind(reader), [aAll], {}],
         ['POST', '/api/reader/storage', reader.storage.bind(reader), [aAll], {}],
         ['POST', '/api/reader/upload-file', [upload.single('file'), reader.uploadFile.bind(reader)], [aAll], {}],
-        ['POST', '/api/reader/restore-cached-file', reader.restoreCachedFile.bind(reader), [aAll], {}],        
         ['POST', '/api/worker/get-state', worker.getState.bind(worker), [aAll], {}],
     ];
 
@@ -75,6 +90,48 @@ function initRoutes(app, wss, config) {
                 throw new Error(`initRoutes error: unknown httpMethod: ${httpMethod}`);
         }
     }
+}
+
+function initStatic(app, config) {
+    const readerWorker = new ReaderWorker(config);
+
+    //восстановление файлов в /tmp и /upload из webdav-storage, при необходимости
+    app.use(async(req, res, next) => {
+        if ((req.method !== 'GET' && req.method !== 'HEAD') ||
+            !(req.path.indexOf('/tmp/') === 0 || req.path.indexOf('/upload/') === 0)
+            ) {
+            return next();
+        }
+
+        const filePath = `${config.publicDir}${req.path}`;
+
+        //восстановим
+        try {
+            if (!await fs.pathExists(filePath)) {
+                if (req.path.indexOf('/tmp/') === 0) {
+                    await readerWorker.restoreRemoteFile(req.path, '/tmp');
+                } else if (req.path.indexOf('/upload/') === 0) {
+                    await readerWorker.restoreRemoteFile(req.path, '/upload');
+                }
+            }
+        } catch(e) {
+            log(LM_ERR, `Static.restoreRemoteFile: ${e.message}`);
+        }
+
+        return next();
+    });
+
+    const tmpDir = `${config.publicDir}/tmp`;
+    app.use(express.static(config.publicDir, {
+        maxAge: '30d',
+
+        setHeaders: (res, filePath) => {
+            if (path.dirname(filePath) == tmpDir) {
+                res.set('Content-Type', 'application/xml');
+                res.set('Content-Encoding', 'gzip');
+            }
+        },
+    }));
 }
 
 module.exports = {

@@ -46,16 +46,16 @@ class RemoteWebDavStorage {
         return await this.wdc.createDirectory(dirname);
     }
 
-    async putFile(filename) {
+    async putFile(filename, dir = '') {
         if (!await fs.pathExists(filename)) {
             throw new Error(`File not found: ${filename}`);
         }
 
         const base = path.basename(filename);
-        let remoteFilename = `/${base}`;
+        let remoteFilename = `${dir}/${base}`;
         
         if (base.length > 3) {
-            const remoteDir = `/${base.substr(0, 3)}`;
+            const remoteDir = `${dir}/${base.substr(0, 3)}`;
             try {
                 await this.mkdir(remoteDir);
             } catch (e) {
@@ -79,24 +79,24 @@ class RemoteWebDavStorage {
         await this.writeFile(remoteFilename, data);
     }
 
-    async getFile(filename) {
+    async getFile(filename, dir = '') {
         if (await fs.pathExists(filename)) {
             return;
         }
 
         const base = path.basename(filename);
-        let remoteFilename = `/${base}`;        
+        let remoteFilename = `${dir}/${base}`;
         if (base.length > 3) {
-            remoteFilename = `/${base.substr(0, 3)}/${base}`;
+            remoteFilename = `${dir}/${base.substr(0, 3)}/${base}`;
         }
 
         const data = await this.readFile(remoteFilename);
         await fs.writeFile(filename, data);
     }
 
-    async getFileSuccess(filename) {
+    async getFileSuccess(filename, dir = '') {
         try {
-            await this.getFile(filename);
+            await this.getFile(filename, dir);
             return true;
         } catch (e) {
             //

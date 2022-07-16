@@ -120,32 +120,7 @@ class Reader {
                 estSize = response.headers['content-length'];
             }
         } catch (e) {
-            //восстановим при необходимости файл на сервере из удаленного облака
-            let response = null
-            
-            try {
-                response = await wsc.message(await wsc.send({action: 'reader-restore-cached-file', path: url}));
-            } catch (e) {
-                console.error(e);
-                //если с WebSocket проблема, работаем по http
-                response = await api.post('/restore-cached-file', {path: url});
-                response = response.data;
-            }
-            if (response.state == 'error') {
-                throw new Error(response.error);
-            }
-
-            const workerId = response.workerId;
-            if (!workerId)
-                throw new Error('Неверный ответ api');
-
-            response = await this.getWorkerStateFinish(workerId);
-            if (response.state == 'error') {
-                throw new Error(response.error);
-            }
-            if (response.size && estSize < 0) {
-                estSize = response.size;
-            }
+            //
         }
 
         return estSize;

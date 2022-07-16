@@ -1,6 +1,7 @@
 require('tls').DEFAULT_MIN_VERSION = 'TLSv1';
+process.env['NODE_TLS_REJECT_UNAUTHORIZED'] = 0;
+
 const fs = require('fs-extra');
-const path = require('path');
 const argv = require('minimist')(process.argv.slice(2));
 const express = require('express');
 const compression = require('compression');
@@ -80,16 +81,6 @@ async function main() {
             app.use(express.json({limit: `${maxPayloadSize}mb`}));
             if (devModule)
                 devModule.logQueries(app);
-
-            app.use(express.static(serverConfig.publicDir, {
-                maxAge: '30d',
-                setHeaders: (res, filePath) => {
-                    if (path.basename(path.dirname(filePath)) == 'tmp') {
-                        res.set('Content-Type', 'application/xml');
-                        res.set('Content-Encoding', 'gzip');
-                    }
-                }               
-            }));
 
             require('./routes').initRoutes(app, wss, serverConfig);
 
