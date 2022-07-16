@@ -3,6 +3,12 @@ const utils = require('./core/utils');
 const multer = require('multer');
 
 function initRoutes(app, wss, config) {
+    //эксклюзив для update_checker
+    if (config.mode === 'book_update_checker') {
+        new c.BookUpdateCheckerController(wss, config);
+        return;
+    }
+        
     const misc = new c.MiscController(config);
     const reader = new c.ReaderController(config);
     const worker = new c.WorkerController(config);

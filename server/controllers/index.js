@@ -3,4 +3,5 @@ module.exports = {
     ReaderController: require('./ReaderController'),
     WorkerController: require('./WorkerController'),
     WebSocketController: require('./WebSocketController'),
+    BookUpdateCheckerController: require('./BookUpdateCheckerController'),
 }
