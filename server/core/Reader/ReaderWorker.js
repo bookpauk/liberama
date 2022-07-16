@@ -296,6 +296,7 @@ class ReaderWorker {
             //реально удаляем только если сохранили в хранилище или размер dir увеличен в 1.5 раза
             if ((moveToRemote && this.remoteWebDavStorage && sent[oldFile]) || size > maxSize*1.5) {
                 await fs.remove(oldFile);
+                delete sent[oldFile];
                 j++;
             }
             
