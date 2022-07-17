@@ -7,6 +7,8 @@ const FileDownloader = require('../FileDownloader');
 const FileDecompressor = require('../FileDecompressor');
 const BookConverter = require('./BookConverter');
 const RemoteStorage = require('../RemoteStorage');
+const JembaConnManager = require('../../db/JembaConnManager');//singleton
+const ayncExit = new (require('../AsyncExit'))();
 
 const utils = require('../utils');
 const log = new (require('../AppLogger'))().log;//singleton
@@ -32,6 +34,9 @@ class ReaderWorker {
             this.down = new FileDownloader(config.maxUploadFileSize);
             this.decomp = new FileDecompressor(3*config.maxUploadFileSize);
             this.bookConverter = new BookConverter(this.config);
+
+            this.connManager = new JembaConnManager();
+            this.appDb = this.connManager.db['app'];
 
             this.remoteStorage = false;
             if (config.remoteStorage) {
@@ -248,12 +253,7 @@ class ReaderWorker {
     }
 
     async cleanDir(dir, remoteDir, maxSize, moveToRemote) {
-        if (!this.remoteSent)
-            this.remoteSent = {};
-        if (!this.remoteSent[remoteDir])
-            this.remoteSent[remoteDir] = {};
-
-        const sent = this.remoteSent[remoteDir];
+        const sent = this.remoteSent;
 
         const list = await fs.readdir(dir);
 
@@ -267,12 +267,17 @@ class ReaderWorker {
                 files.push({name: filePath, stat});
             }
         }
+
         log(`clean dir ${dir}, maxSize=${maxSize}, found ${files.length} files, total size=${size}`);
 
         files.sort((a, b) => a.stat.mtimeMs - b.stat.mtimeMs);
 
+        //удаленное хранилище
         if (moveToRemote && this.remoteStorage) {
+            const foundFiles = new Set();
             for (const file of files) {
+                foundFiles.add(file.name);
+
                 if (sent[file.name])
                     continue;
 
@@ -280,9 +285,21 @@ class ReaderWorker {
                 try {
                     log(`remoteStorage.putFile ${remoteDir}/${path.basename(file.name)}`);
                     await this.remoteStorage.putFile(file.name, remoteDir);
+                    
                     sent[file.name] = true;
+                    await this.appDb.insert({table: 'remote_sent', ignore: true, rows: [{id: file.name, remoteDir}]});
                 } catch (e) {
                     log(LM_ERR, e.stack);
+                }
+            }
+
+            //почистим remoteSent и БД
+            //несколько неоптимально, таскает все записи из БД
+            const rows = await this.appDb.select({table: 'remote_sent'});
+            for (const row of rows) {
+                if (row.remoteDir === remoteDir && !foundFiles.has(row.id)) {
+                    delete sent[row.id];
+                    await this.appDb.delete({table: 'remote_sent', where: `@@id(${this.appDb.esc(row.id)})`});
                 }
             }
         }
@@ -298,27 +315,44 @@ class ReaderWorker {
                 || (moveToRemote && this.remoteStorage && sent[oldFile])
                 || size > maxSize*1.5) {
                 await fs.remove(oldFile);
-                delete sent[oldFile];
                 j++;
             }
             
             size -= file.stat.size;
             i++;
         }
+
         log(`removed ${j} files`);
     }
 
     async periodicCleanDir(cleanConfig) {
-        while (1) {// eslint-disable-line no-constant-condition
-            for (const [remoteDir, config] of Object.entries(cleanConfig)) {
-                try {
-                    await this.cleanDir(config.dir, remoteDir, config.maxSize, config.moveToRemote);
-                } catch(e) {
-                    log(LM_ERR, e.stack);
+        try {
+            if (!this.remoteSent)
+                this.remoteSent = {};
+
+            //инициализация this.remoteSent
+            if (this.remoteStorage) {
+                const rows = await this.appDb.select({table: 'remote_sent'});
+                for (const row of rows) {
+                    this.remoteSent[row.id] = true;
                 }
             }
 
-            await utils.sleep(cleanDirPeriod);
+            while (1) {// eslint-disable-line no-constant-condition
+
+                for (const [remoteDir, config] of Object.entries(cleanConfig)) {
+                    try {
+                        await this.cleanDir(config.dir, remoteDir, config.maxSize, config.moveToRemote);
+                    } catch(e) {
+                        log(LM_ERR, e.stack);
+                    }
+                }
+
+                await utils.sleep(cleanDirPeriod);
+            }
+        } catch (e) {
+            log(LM_FATAL, e.message);
+            ayncExit.exit(1);
         }
     }
 
