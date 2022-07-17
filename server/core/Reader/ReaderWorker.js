@@ -6,7 +6,7 @@ const WorkerState = require('../WorkerState');//singleton
 const FileDownloader = require('../FileDownloader');
 const FileDecompressor = require('../FileDecompressor');
 const BookConverter = require('./BookConverter');
-const RemoteWebDavStorage = require('../RemoteWebDavStorage');
+const RemoteStorage = require('../RemoteStorage');
 
 const utils = require('../utils');
 const log = new (require('../AppLogger'))().log;//singleton
@@ -33,10 +33,10 @@ class ReaderWorker {
             this.decomp = new FileDecompressor(3*config.maxUploadFileSize);
             this.bookConverter = new BookConverter(this.config);
 
-            this.remoteWebDavStorage = false;
-            if (config.remoteWebDavStorage) {
-                this.remoteWebDavStorage = new RemoteWebDavStorage(
-                    Object.assign({maxContentLength: 3*config.maxUploadFileSize}, config.remoteWebDavStorage)
+            this.remoteStorage = false;
+            if (config.remoteStorage) {
+                this.remoteStorage = new RemoteStorage(
+                    Object.assign({maxContentLength: 3*config.maxUploadFileSize}, config.remoteStorage)
                 );
             }
 
@@ -235,8 +235,8 @@ class ReaderWorker {
 
         if (!await fs.pathExists(targetName)) {
             let found = false;
-            if (this.remoteWebDavStorage) {
-                found = await this.remoteWebDavStorage.getFileSuccess(targetName, remoteDir);
+            if (this.remoteStorage) {
+                found = await this.remoteStorage.getFileSuccess(targetName, remoteDir);
             }
 
             if (!found) {
@@ -271,15 +271,15 @@ class ReaderWorker {
 
         files.sort((a, b) => a.stat.mtimeMs - b.stat.mtimeMs);
 
-        if (moveToRemote && this.remoteWebDavStorage) {
+        if (moveToRemote && this.remoteStorage) {
             for (const file of files) {
                 if (sent[file.name])
                     continue;
 
-                //отправляем в remoteWebDavStorage
+                //отправляем в remoteStorage
                 try {
-                    log(`remoteWebDavStorage.putFile ${remoteDir}/${path.basename(file.name)}`);
-                    await this.remoteWebDavStorage.putFile(file.name, remoteDir);
+                    log(`remoteStorage.putFile ${remoteDir}/${path.basename(file.name)}`);
+                    await this.remoteStorage.putFile(file.name, remoteDir);
                     sent[file.name] = true;
                 } catch (e) {
                     log(LM_ERR, e.stack);
@@ -294,7 +294,9 @@ class ReaderWorker {
             const oldFile = file.name;
 
             //реально удаляем только если сохранили в хранилище или размер dir увеличен в 1.5 раза
-            if ((moveToRemote && this.remoteWebDavStorage && sent[oldFile]) || size > maxSize*1.5) {
+            if (!(moveToRemote && this.remoteStorage)
+                || (moveToRemote && this.remoteStorage && sent[oldFile])
+                || size > maxSize*1.5) {
                 await fs.remove(oldFile);
                 delete sent[oldFile];
                 j++;
