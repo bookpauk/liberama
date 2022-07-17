@@ -40,6 +40,11 @@ module.exports = {
 
     jembaDb: [
         {
+            dbName: 'app',
+            thread: true,
+            openAll: true,
+        },
+        {
             dbName: 'reader-storage',
             thread: true,
             openAll: true,

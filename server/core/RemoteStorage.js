@@ -13,10 +13,10 @@ class RemoteStorage {
         this.wsc = new WebSocketConnection(config.url);
     }
 
-    async wsQuery(query) {
+    async wsRequest(query) {
         const response = await this.wsc.message(
-            await this.wsc.send(Object.assign({accessToken: this.accessToken}, query), 30),
-            300
+            await this.wsc.send(Object.assign({accessToken: this.accessToken}, query), 600),
+            600
         );
         if (response.error)
             throw new Error(response.error);
@@ -24,19 +24,19 @@ class RemoteStorage {
     }
 
     async wsStat(fileName) {
-        return await this.wsQuery({action: 'get-stat', fileName});
+        return await this.wsRequest({action: 'get-stat', fileName});
     }
 
     async wsGetFile(fileName) {
-        return this.wsQuery({action: 'get-file', fileName});
+        return this.wsRequest({action: 'get-file', fileName});
     }
 
     async wsPutFile(fileName, data) {//data base64 encoded string
-        return this.wsQuery({action: 'put-file', fileName, data});
+        return this.wsRequest({action: 'put-file', fileName, data});
     }
 
     async wsDelFile(fileName) {
-        return this.wsQuery({action: 'del-file', fileName});
+        return this.wsRequest({action: 'del-file', fileName});
     }
 
     makeRemoteFileName(fileName, dir = '') {
