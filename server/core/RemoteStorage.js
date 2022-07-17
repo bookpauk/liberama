@@ -15,7 +15,8 @@ class RemoteStorage {
 
     async wsQuery(query) {
         const response = await this.wsc.message(
-            await this.wsc.send(Object.assign({accessToken: this.accessToken}, query))
+            await this.wsc.send(Object.assign({accessToken: this.accessToken}, query), 30),
+            300
         );
         if (response.error)
             throw new Error(response.error);
