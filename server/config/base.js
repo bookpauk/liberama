@@ -55,8 +55,8 @@ module.exports = {
         },
     ],
 
-    remoteWebDavStorage: false,
     /*
+    remoteWebDavStorage: false,
     remoteWebDavStorage: {
         url: '127.0.0.1:1900',
         username: '',
@@ -64,5 +64,12 @@ module.exports = {
     },
     */
 
+    remoteStorage: false,
+    /*
+    remoteStorage: {
+        url: 'https://127.0.0.1:11900',
+        accessToken: '',
+    },
+    */
 };
 
