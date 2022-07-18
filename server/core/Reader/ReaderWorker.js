@@ -13,7 +13,7 @@ const ayncExit = new (require('../AsyncExit'))();
 const utils = require('../utils');
 const log = new (require('../AppLogger'))().log;//singleton
 
-const cleanDirPeriod = 30*60*1000;//раз в полчаса
+const cleanDirPeriod = 60*60*1000;//каждый час
 const remoteSendPeriod = 119*1000;//примерно раз 2 минуты
 
 const queue = new LimitedQueue(5, 100, 2*60*1000 + 15000);//2 минуты ожидание подвижек
@@ -285,7 +285,7 @@ class ReaderWorker {
         if (!fileName || sent[fileName])
             return;
 
-        log(`remoteStorage.putFile ${remoteDir}/${path.basename(fileName)}`);
+        log(`remoteSendFile ${remoteDir}/${path.basename(fileName)}`);
 
         //отправляем в remoteStorage
         await this.remoteStorage.putFile(fileName, remoteDir);
@@ -335,7 +335,7 @@ class ReaderWorker {
             }
         }
 
-        log(`clean dir ${dir}, maxSize=${maxSize}, found ${files.length} files, total size=${size}`);
+        log(LM_WARN, `clean dir ${dir}, maxSize=${maxSize}, found ${files.length} files, total size=${size}`);
 
         files.sort((a, b) => a.stat.mtimeMs - b.stat.mtimeMs);
 
@@ -383,7 +383,7 @@ class ReaderWorker {
             i++;
         }
 
-        log(`removed ${j} files`);
+        log(LM_WARN, `removed ${j} files`);
     }
 
     async periodicCleanDir() {
