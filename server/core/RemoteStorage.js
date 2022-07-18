@@ -10,7 +10,7 @@ class RemoteStorage {
 
         this.accessToken = this.config.accessToken;
 
-        this.wsc = new WebSocketConnection(config.url);
+        this.wsc = new WebSocketConnection(config.url, 10, 30, {rejectUnauthorized: false});
     }
 
     async wsRequest(query) {
