@@ -115,7 +115,7 @@ function initStatic(app, config) {
                 }
             }
         } catch(e) {
-            log(LM_ERR, `Static.restoreRemoteFile: ${e.message}`);
+            log(LM_ERR, `static::restoreRemoteFile ${req.path} > ${e.message}`);
         }
 
         return next();

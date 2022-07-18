@@ -8,10 +8,13 @@ const cleanPeriod = 5*1000;//5 секунд
 
 class WebSocketConnection {
     //messageLifeTime в секундах (проверка каждый cleanPeriod интервал)
-    constructor(url, openTimeoutSecs = 10, messageLifeTimeSecs = 30) {
+    constructor(url, openTimeoutSecs = 10, messageLifeTimeSecs = 30, webSocketOptions = {}) {
         this.WebSocket = (isBrowser ? WebSocket : require('ws'));
         this.url = url;
+        this.webSocketOptions = webSocketOptions;
+
         this.ws = null;
+
         this.listeners = [];
         this.messageQueue = [];
         this.messageLifeTime = messageLifeTimeSecs*1000;
@@ -89,9 +92,9 @@ class WebSocketConnection {
                 if (isBrowser) {
                     const protocol = (window.location.protocol == 'https:' ? 'wss:' : 'ws:');
                     const url = this.url || `${protocol}//${window.location.host}/ws`;
-                    this.ws = new this.WebSocket(url);
+                    this.ws = new this.WebSocket(url, this.webSocketOptions);
                 } else {
-                    this.ws = new this.WebSocket(this.url);
+                    this.ws = new this.WebSocket(this.url, this.webSocketOptions);
                 }
 
                 const onopen = () => {
