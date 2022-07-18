@@ -92,7 +92,7 @@ class WebSocketConnection {
                 if (isBrowser) {
                     const protocol = (window.location.protocol == 'https:' ? 'wss:' : 'ws:');
                     const url = this.url || `${protocol}//${window.location.host}/ws`;
-                    this.ws = new this.WebSocket(url, this.webSocketOptions);
+                    this.ws = new this.WebSocket(url);
                 } else {
                     this.ws = new this.WebSocket(this.url, this.webSocketOptions);
                 }
