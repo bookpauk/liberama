@@ -168,7 +168,12 @@ class ReaderWorker {
             const finishFilename = path.basename(compFilename);
             wState.finish({path: `/tmp/${finishFilename}`, size: stat.size});
 
-            this.pushRemoteSend(compFilename, '/tmp');
+            //асинхронно через 30 сек добавим в очередь на отправку
+            //т.к. gzipFileIfNotExists может переупаковать файл
+            (async() => {
+                await utils.sleep(30*1000);
+                this.pushRemoteSend(compFilename, '/tmp');
+            })();
 
         } catch (e) {
             log(LM_ERR, e.stack);
@@ -340,7 +345,7 @@ class ReaderWorker {
             for (const file of files) {
                 foundFiles.add(file.name);
 
-                //отсылаем на всякий случай перед удалением, если вдруг remoteSend не справился
+                //отсылаем на всякий случай перед удалением, если вдруг remoteSendAll не справился
                 try {
                     await this.remoteSendFile({fileName: file.name, remoteDir});
                 } catch (e) {
