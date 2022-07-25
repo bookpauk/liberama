@@ -66,9 +66,16 @@ module.exports = {
     remoteStorage: false,
     /*
     remoteStorage: {
-        url: 'https://127.0.0.1:11900',
+        url: 'wss://127.0.0.1:11900',
         accessToken: '',
     },
+    */
+    bucEnabled: false,
+    bucServer: false,
+    /*
+    bucServer: {
+        url: 'wss://127.0.0.1:33443',
+    }
     */
 };
 

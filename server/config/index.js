@@ -10,7 +10,9 @@ const propsToSave = [
     'useExternalBookConverter',
     
     'servers',
-    'remoteWebDavStorage',
+    'remoteStorage',
+    'bucEnabled',
+    'bucServer',
 ];
 
 let instance = null;

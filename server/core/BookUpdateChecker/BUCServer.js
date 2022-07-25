@@ -58,6 +58,48 @@ class BUCServer {
         return instance;
     }
 
+    async getBuc(fromCheckTime, callback) {
+        const db = this.db;
+
+        while (1) {//eslint-disable-line
+            const rows = await db.select({
+                table: 'buc',
+                where: `
+                    let iter = @getItem('getBuc');
+                    if (!iter) {
+                        iter = @dirtyIndexLR('checkTime', ${db.esc(fromCheckTime)});
+                        @setItem('getBuc', iter);
+                    }
+
+                    const ids = new Set();
+                    let id = iter.next();
+                    while (!id.done && ids.size < 100) {
+                        ids.add(id.value);
+                        id = iter.next();
+                    }
+
+                    return ids;
+                `
+            });
+
+            if (rows.length)
+                callback(rows);
+            else
+                break;
+        }
+    }
+
+    async updateBuc(bookUrls) {
+        const db = this.db;
+        const now = Date.now();
+
+        await db.update({
+            table: 'buc',
+            mod: `(r) => r.queryTime = ${db.esc(now)}`,
+            where: `@@id(${db.esc(bookUrls)})`
+        });
+    }
+
     async fillCheckQueue() {
         const db = this.db;
 

@@ -13,7 +13,6 @@ class BookUpdateCheckerController {
         this.config = config;
         this.isDevelopment = (config.branch == 'development');
 
-        //this.readerStorage = new JembaReaderStorage();
         this.bucServer = new BUCServer(config);
         this.bucServer.main(); //no await
 
@@ -62,6 +61,10 @@ class BookUpdateCheckerController {
             switch (req.action) {
                 case 'test':
                     await this.test(req, ws); break;
+                case 'get-buc':
+                    await this.getBuc(req, ws); break;
+                case 'update-buc':
+                    await this.updateBuc(req, ws); break;
 
                 default:
                     throw new Error(`Action not found: ${req.action}`);
@@ -93,6 +96,28 @@ class BookUpdateCheckerController {
         this.send({message: 'Liberama project is awesome'}, req, ws);
     }
 
+    async getBuc(req, ws) {
+        if (!req.fromCheckTime)
+            throw new Error(`key 'fromCheckTime' is empty`);
+
+        await this.bucServer.getBuc(req.fromCheckTime, (rows) => {
+            this.send({state: 'get', rows}, req, ws);
+        });
+
+        this.send({state: 'finish'}, req, ws);
+    }
+
+    async updateBuc(req, ws) {
+        if (!req.bookUrls)
+            throw new Error(`key 'bookUrls' is empty`);
+
+        if (!Array.isArray(req.bookUrls))
+            throw new Error(`key 'bookUrls' must be array`);
+
+        await this.bucServer.updateBuc(req.bookUrls);
+
+        this.send({state: 'success'}, req, ws);
+    }
 }
 
 module.exports = BookUpdateCheckerController;
