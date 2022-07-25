@@ -45,15 +45,8 @@ async function init() {
     }
 
     //connections
-    const connManager = new (require('./db/ConnManager'))();//singleton
-    await connManager.init(config);
-
     const jembaConnManager = new (require('./db/JembaConnManager'))();//singleton
     await jembaConnManager.init(config, argv['auto-repair']);
-
-    //converter SQLITE => JembaDb
-    const converter = new  (require('./db/Converter'))();
-    await converter.run(config);
 }
 
 async function main() {

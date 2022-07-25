@@ -25,19 +25,6 @@ module.exports = {
     acceptFileExt: '.fb2, .fb3, .html, .txt, .zip, .bz2, .gz, .rar, .epub, .mobi, .rtf, .doc, .docx, .pdf, .djvu, .jpg, .jpeg, .png',
     webConfigParams: ['name', 'version', 'mode', 'maxUploadFileSize', 'useExternalBookConverter', 'acceptFileExt', 'branch'],
 
-    db: [
-        {
-            poolName: 'app',
-            connCount: 20,
-            fileName: 'app.sqlite',
-        },
-        {
-            poolName: 'readerStorage',
-            connCount: 20,
-            fileName: 'reader-storage.sqlite',            
-        }
-    ],
-
     jembaDb: [
         {
             dbName: 'app',
@@ -59,15 +46,6 @@ module.exports = {
             port: '33080',
         },
     ],
-
-    /*
-    remoteWebDavStorage: false,
-    remoteWebDavStorage: {
-        url: '127.0.0.1:1900',
-        username: '',
-        password: '',
-    },
-    */
 
     remoteStorage: false,
     /*
