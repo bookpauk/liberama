@@ -31,14 +31,28 @@ class JembaConnManager {
 
         ayncExit.add(this.close.bind(this));
 
-        const serverNames = new Set();
+        const serverModes = new Set();
         for (const serverCfg of this.config.servers) {
-            serverNames.add(serverCfg.serverName);
+            serverModes.add(serverCfg.mode);
         }
 
         for (const dbConfig of this.config.jembaDb) {
-            if (dbConfig.serverName && !serverNames.has(dbConfig.serverName))
-                continue;
+            //проверка, надо ли открывать базу, зависит от serverMode
+            if (dbConfig.serverMode) {
+                let serverMode = dbConfig.serverMode;
+                if (!Array.isArray(dbConfig.serverMode))
+                    serverMode = [dbConfig.serverMode];
+
+                let modePresent = false;
+                for (const mode of serverMode) {
+                    modePresent = serverModes.has(mode);
+                    if (modePresent)
+                        break;
+                }
+
+                if (!modePresent)
+                    continue;
+            }
 
             const dbPath = `${this.config.dataDir}/db/${dbConfig.dbName}`;
 
