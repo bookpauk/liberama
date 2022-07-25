@@ -4,6 +4,7 @@ const _ = require('lodash');
 const ReaderWorker = require('../core/Reader/ReaderWorker');//singleton
 const JembaReaderStorage = require('../core/Reader/JembaReaderStorage');//singleton
 const WorkerState = require('../core/WorkerState');//singleton
+const BUCClient = require('../core/BookUpdateChecker/BUCClient');//singleton
 const log = new (require('../core/AppLogger'))().log;//singleton
 const utils = require('../core/utils');
 
@@ -18,6 +19,10 @@ class WebSocketController {
         this.readerStorage = new JembaReaderStorage();
         this.readerWorker = new ReaderWorker(config);
         this.workerState = new WorkerState();
+
+        if (config.bucEnabled) {
+            this.bucClient = new BUCClient(config);
+        }
 
         this.wss = wss;
 
@@ -76,6 +81,8 @@ class WebSocketController {
                     await this.uploadFileBuf(req, ws); break;
                 case 'upload-file-touch':
                     await this.uploadFileTouch(req, ws); break;
+                case 'check-buc':
+                    await this.checkBuc(req, ws); break;
 
                 default:
                     throw new Error(`Action not found: ${req.action}`);
@@ -178,6 +185,21 @@ class WebSocketController {
             throw new Error(`key 'url' is empty`);
         
         this.send({url: await this.readerWorker.uploadFileTouch(req.url)}, req, ws);
+    }
+
+    async checkBuc(req, ws) {
+        if (!this.config.bucEnabled)
+            throw new Error('BookUpdateChecker disabled');
+
+        if (!req.bookUrls)
+            throw new Error(`key 'bookUrls' is empty`);
+
+        if (!Array.isArray(req.bookUrls))
+            throw new Error(`key 'bookUrls' must be array`);
+
+        const data = await this.bucClient.checkBuc(req.bookUrls);
+
+        this.send({state: 'success', data}, req, ws);
     }
 }
 

@@ -14,7 +14,6 @@ class BookUpdateCheckerController {
         this.isDevelopment = (config.branch == 'development');
 
         this.bucServer = new BUCServer(config);
-        this.bucServer.main(); //no await
 
         this.wss = wss;
 

@@ -17,7 +17,7 @@ let instance = null;
 class BUCServer {
     constructor(config) {
         if (!instance) {
-            this.config = Object.assign({}, config);
+            this.config = config;
 
             //константы
             if (this.config.branch !== 'development') {
@@ -51,6 +51,8 @@ class BUCServer {
             
             this.checkQueue = [];
             this.hostChecking = {};
+
+            this.main(); //no await
 
             instance = this;
         }
@@ -260,9 +262,9 @@ await this.db.insert({
             for (let i = 0; i < 10; i++)
                 this.periodicCheck();//no await
 
-            log(`---------------------------`);
-            log(`Book Update checker started`);
-            log(`---------------------------`);
+            log(`------------------`);
+            log(`BUC Server started`);
+            log(`------------------`);
         } catch (e) {
             log(LM_FATAL, e.stack);
             ayncExit.exit(1);
