@@ -1,7 +1,7 @@
 module.exports = {
     up: [
         ['create', {
-            table: 'checked',
+            table: 'buc',
             index: [
                 {field: 'queryTime', type: 'number'},
                 {field: 'checkTime', type: 'number'},
@@ -10,7 +10,7 @@ module.exports = {
     ],    
     down: [
         ['drop', {
-            table: 'checked'
+            table: 'buc'
         }],
     ]
 };

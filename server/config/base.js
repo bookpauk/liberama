@@ -35,7 +35,13 @@ module.exports = {
             dbName: 'reader-storage',
             thread: true,
             openAll: true,
-        }
+        },
+        {
+            serverName: 'buc',
+            dbName: 'book-update-server',
+            thread: true,
+            openAll: true,            
+        },
     ],
 
     servers: [
@@ -45,6 +51,14 @@ module.exports = {
             ip: '0.0.0.0',
             port: '33080',
         },
+        /*{
+            serverName: 'buc',
+            mode: 'book_update_checker', //'none', 'normal', 'site', 'reader', 'omnireader', 'liberama.top', 'book_update_checker'
+            isHttps: true,
+            keysFile: 'server',
+            ip: '0.0.0.0',
+            port: '33443',
+        }*/
     ],
 
     remoteStorage: false,

@@ -1,6 +1,7 @@
-const WebSocket = require ('ws');
+const WebSocket = require('ws');
 //const _ = require('lodash');
 
+const BUCServer = require('../core/BookUpdateChecker/BUCServer');
 const log = new (require('../core/AppLogger'))().log;//singleton
 //const utils = require('../core/utils');
 
@@ -13,6 +14,8 @@ class BookUpdateCheckerController {
         this.isDevelopment = (config.branch == 'development');
 
         //this.readerStorage = new JembaReaderStorage();
+        this.bucServer = new BUCServer(config);
+        this.bucServer.main(); //no await
 
         this.wss = wss;
 

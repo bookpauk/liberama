@@ -31,7 +31,15 @@ class JembaConnManager {
 
         ayncExit.add(this.close.bind(this));
 
+        const serverNames = new Set();
+        for (const serverCfg of this.config.servers) {
+            serverNames.add(serverCfg.serverName);
+        }
+
         for (const dbConfig of this.config.jembaDb) {
+            if (dbConfig.serverName && !serverNames.has(dbConfig.serverName))
+                continue;
+
             const dbPath = `${this.config.dataDir}/db/${dbConfig.dbName}`;
 
             //бэкап
