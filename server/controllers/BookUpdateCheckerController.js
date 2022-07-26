@@ -13,6 +13,7 @@ class BookUpdateCheckerController {
         this.config = config;
         this.isDevelopment = (config.branch == 'development');
 
+        this.accessToken = config.accessToken;
         this.bucServer = new BUCServer(config);
 
         this.wss = wss;
@@ -56,6 +57,9 @@ class BookUpdateCheckerController {
             
             //pong for WebSocketConnection
             this.send({_rok: 1}, req, ws);
+
+            if (req.accessToken !== this.accessToken)
+                throw new Error('Access denied');
 
             switch (req.action) {
                 case 'test':

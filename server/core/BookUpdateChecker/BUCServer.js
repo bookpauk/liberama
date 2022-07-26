@@ -95,11 +95,58 @@ class BUCServer {
         const db = this.db;
         const now = Date.now();
 
-        await db.update({
+        const rows = await db.select({
             table: 'buc',
-            mod: `(r) => r.queryTime = ${db.esc(now)}`,
+            map: `(r) => ({id: r.id})`,
             where: `@@id(${db.esc(bookUrls)})`
         });
+
+        const exists = new Set();
+        for (const row of rows) {
+            exists.add(row.id);
+        }
+
+        const toUpdateIds = [];
+        const toInsertRows = [];
+        for (let id of bookUrls) {
+            if (!id)
+                continue;
+            
+            if (id.length > 1000) {
+                id = id.substring(0, 1000);
+            }
+
+            if (exists.has(id)) {
+                toUpdateIds.push(id);
+            } else {
+                toInsertRows.push({
+                    id,
+                    queryTime: now,
+                    checkTime: 0, // 0 - never checked
+                    modTime: '',
+                    size: 0,
+                    checkSum: '', //sha256
+                    state: 0, // 0 - not processing, 1 - processing
+                    error: '',
+                });
+            }
+        }
+
+        if (toUpdateIds.length) {
+            await db.update({
+                table: 'buc',
+                mod: `(r) => r.queryTime = ${db.esc(now)}`,
+                where: `@@id(${db.esc(toUpdateIds)})`
+            });
+        }
+
+        if (toInsertRows.length) {
+            await db.insert({
+                table: 'buc',
+                ignore: true,
+                rows: toInsertRows,
+            });
+        }
     }
 
     async fillCheckQueue() {
@@ -147,11 +194,10 @@ console.log(rows);
                 if (rows.length) {
                     const ids = [];
 
-                    for (let i = 0; i < rows.length; i++) {
+                    for (const row of rows) {
                         if (this.checkQueue.length >= this.maxCheckQueueLength)
                             break;
 
-                        const row = rows[i];
                         ids.push(row.id);
                         this.checkQueue.push(row);
                     }

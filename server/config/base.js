@@ -60,6 +60,7 @@ module.exports = {
             keysFile: 'server',
             ip: '0.0.0.0',
             port: '33443',
+            accessToken: '',
         }*/
     ],
 
@@ -75,6 +76,7 @@ module.exports = {
     /*
     bucServer: {
         url: 'wss://127.0.0.1:33443',
+        accessToken: '',
     }
     */
 };
