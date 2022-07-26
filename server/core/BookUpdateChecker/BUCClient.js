@@ -51,7 +51,7 @@ class BUCClient {
 
         try {
             this.fromCheckTime = await this.findMaxCheckTime();
-            this.periodicSync();//no await
+            //this.periodicSync();//no await
 
             log(`BUC Client started`);
         } catch (e) {
