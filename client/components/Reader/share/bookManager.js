@@ -234,6 +234,10 @@ class BookManager {
 
     async addBook(newBook, callback) {        
         let meta = {url: newBook.url, path: newBook.path};
+
+        if (newBook.downloadSize !== undefined && newBook.downloadSize >= 0)
+            meta.downloadSize = newBook.downloadSize;
+        
         meta.key = this.keyFromPath(meta.path);
         meta.addTime = Date.now();//время добавления в кеш
 

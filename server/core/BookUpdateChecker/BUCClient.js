@@ -28,7 +28,7 @@ class BUCClient {
                 this.cleanQueryInterval = 300*dayMs;//интервал очистки устаревших
                 this.syncPeriod = 1*hourMs;//период синхронизации с сервером BUC
             } else {
-                this.cleanQueryInterval = 300*minuteMs;//300*dayMs;//интервал очистки устаревших
+                this.cleanQueryInterval = 300*dayMs;//интервал очистки устаревших
                 this.syncPeriod = 1*minuteMs;//период синхронизации с сервером BUC
             }
 

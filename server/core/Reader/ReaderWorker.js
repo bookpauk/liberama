@@ -105,6 +105,7 @@ class ReaderWorker {
             const tempFilename2 = utils.randomHexString(30);
             const decompDirname = utils.randomHexString(30);
 
+            let downloadSize = -1;
             //download or use uploaded
             if (url.indexOf('disk://') != 0) {//download
                 const downdata = await this.down.load(url, (progress) => {
@@ -112,6 +113,8 @@ class ReaderWorker {
                 }, q.abort);
 
                 downloadedFilename = `${this.config.tempDownloadDir}/${tempFilename}`;
+
+                downloadSize = downdata.length;
                 await fs.writeFile(downloadedFilename, downdata);
             } else {//uploaded file
                 const fileHash = url.substr(7);
@@ -166,7 +169,12 @@ class ReaderWorker {
 
             //finish
             const finishFilename = path.basename(compFilename);
-            wState.finish({path: `/tmp/${finishFilename}`, size: stat.size});
+
+            const result = {path: `/tmp/${finishFilename}`, size: stat.size};
+            if (downloadSize >= 0)
+                result.downloadSize = downloadSize;
+
+            wState.finish(result);
 
             //асинхронно через 30 сек добавим в очередь на отправку
             //т.к. gzipFileIfNotExists может переупаковать файл

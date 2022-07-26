@@ -229,6 +229,17 @@ class Reader {
         return (await axios.get(url)).data;
     }
 
+    async checkBuc(bookUrls) {
+        const response = await wsc.message(await wsc.send({action: 'check-buc', bookUrls}));
+
+        if (response.error)
+            throw new Error(response.error);
+
+        if (!response.data)
+            throw new Error(`response.data is empty`);
+
+        return response.data;
+    }
 }
 
 export default new Reader();
