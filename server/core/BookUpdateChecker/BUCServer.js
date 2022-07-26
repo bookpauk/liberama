@@ -35,7 +35,7 @@ class BUCServer {
                 this.periodicCheckWait = 500;//пауза, если нечего делать
 
                 this.cleanQueryInterval = 300*dayMs;//интервал очистки устаревших
-                this.oldQueryInterval = 5*minuteMs;//интервал устаревания запроса на обновление
+                this.oldQueryInterval = 30*dayMs;//интервал устаревания запроса на обновление
                 this.checkingInterval = 30*1000;//интервал проверки обновления одного и того же файла
                 this.sameHostCheckInterval = 1000;//интервал проверки файла на том же сайте, не менее
             }
@@ -63,14 +63,17 @@ class BUCServer {
     async getBuc(fromCheckTime, callback) {
         const db = this.db;
 
+        const iterName = utils.randomHexString(30);
+
         while (1) {//eslint-disable-line
             const rows = await db.select({
                 table: 'buc',
                 where: `
-                    let iter = @getItem('getBuc');
+                    let iter = @getItem(${db.esc(iterName)});
                     if (!iter) {
                         iter = @dirtyIndexLR('checkTime', ${db.esc(fromCheckTime)});
-                        @setItem('getBuc', iter);
+                        iter = iter.values();
+                        @setItem(${db.esc(iterName)}, iter);
                     }
 
                     const ids = new Set();
@@ -89,6 +92,14 @@ class BUCServer {
             else
                 break;
         }
+
+        await db.select({
+            table: 'buc',
+            where: `
+                @delItem(${db.esc(iterName)});
+                return new Set();
+            `
+        });
     }
 
     async updateBuc(bookUrls) {
@@ -111,7 +122,7 @@ class BUCServer {
         for (let id of bookUrls) {
             if (!id)
                 continue;
-            
+
             if (id.length > 1000) {
                 id = id.substring(0, 1000);
             }
@@ -174,10 +185,7 @@ class BUCServer {
 
                 rows = await db.select({table: 'buc', count: true});
                 log(LM_WARN, `'buc' table length: ${rows[0].count}`);
-/*
-rows = await db.select({table: 'buc'});
-console.log(rows);
-*/
+
                 now = Date.now();
                 //выборка кандидатов
                 rows = await db.select({
@@ -190,6 +198,8 @@ console.log(rows);
                         );
                     `
                 });
+
+//console.log(rows);
 
                 if (rows.length) {
                     const ids = [];

@@ -48,7 +48,7 @@ class BookUpdateCheckerController {
         let req = {};
         try {
             if (this.isDevelopment) {
-                log(`WebSocket-IN:  ${message.substr(0, 4000)}`);
+                log(`BUC-WebSocket-IN:  ${message.substr(0, 4000)}`);
             }
 
             req = JSON.parse(message);
@@ -88,7 +88,7 @@ class BookUpdateCheckerController {
             ws.send(message);
 
             if (this.isDevelopment) {
-                log(`WebSocket-OUT: ${message.substr(0, 4000)}`);
+                log(`BUC-WebSocket-OUT: ${message.substr(0, 4000)}`);
             }
 
         }
