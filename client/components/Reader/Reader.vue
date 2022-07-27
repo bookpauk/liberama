@@ -309,6 +309,8 @@ class Reader {
     donationVisible = false;
     dualPageMode = false;
 
+    bucEnabled = false;
+
     created() {
         this.rstore = rstore;
         this.loading = true;
@@ -416,14 +418,26 @@ class Reader {
             await this.$refs.dialogs.init();
         })();
 
+        //проверки обновлений читалки
         (async() => {
             this.isFirstNeedUpdateNotify = true;
             //вечный цикл, запрашиваем периодически конфиг для проверки выхода новой версии читалки
-            while (true) {// eslint-disable-line no-constant-condition
+            while (1) {// eslint-disable-line no-constant-condition
                 await this.checkNewVersionAvailable();
                 await utils.sleep(3600*1000); //каждый час
             }
-            //дальше кода нет
+            //дальше хода нет
+        })();
+
+        //проверки обновлений книг
+        (async() => {
+            await utils.sleep(1*1000); //подождем неск. секунд перед первым запросом
+            //вечный цикл, запрашиваем периодически обновления
+            while (1) {// eslint-disable-line no-constant-condition
+                await this.checkBuc();
+                await utils.sleep(70*60*1000); //каждые 70 минут
+            }
+            //дальше хода нет
         })();
     }
 
@@ -445,6 +459,7 @@ class Reader {
         this.pdfQuality = settings.pdfQuality;
         this.dualPageMode = settings.dualPageMode;
         this.userWallpapers = settings.userWallpapers;
+        this.bucEnabled = settings.bucEnabled;
 
         this.readerActionByKeyCode = utils.userHotKeysObjectSwap(settings.userHotKeys);
         this.$root.readerActionByKeyEvent = (event) => {
@@ -542,6 +557,36 @@ class Reader {
         }
     }
 
+    async checkBuc() {
+        if (!this.bothBucEnabled)
+            return;
+
+        try {
+            const sorted = bookManager.getSortedRecent();
+
+            //выберем все кандидиаты на обновление
+            const updateUrls = new Set();
+            for (const book of sorted) {
+                if (!book.deleted && book.checkBuc && book.url && book.url.indexOf('disk://') !== 0)
+                    updateUrls.add(book.url);
+            }
+
+            //теперь по кусочкам запросим сервер
+            const arr = Array.from(updateUrls);
+            const chunkSize = 100;
+            for (let i = 0; i < arr.length; i += chunkSize) {
+                const chunk = arr.slice(i, i + chunkSize);
+
+                const data = await readerApi.checkBuc(chunk);
+console.log(data);
+                await utils.sleep(1000);//чтобы не ддосить сервер
+            }
+console.log('checkBuc finished', arr);            
+        } catch (e) {
+            console.error(e);
+        }
+    }
+
     checkSetStorageAccessKey() {
         const q = this.$route.query;
 
@@ -618,6 +663,10 @@ class Reader {
 
     get clientVersion() {
         return versionHistory[0].version;
+    }
+
+    get bothBucEnabled() {
+        return this.$store.state.config.bucEnabled && this.bucEnabled;
     }
 
     get routeParamUrl() {

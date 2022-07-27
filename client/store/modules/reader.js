@@ -192,7 +192,14 @@ const settingDefaults = {
     recentShowSameBook: false,
     recentSortMethod: '',
 
+    //Book Update Checker
+    bucEnabled: true, // общее включение/выключение проверки обновлений
+    bucSizeDiff: 1000, // разница в размерах файла, при которой показывать наличие обновления
+    bucSetOnNew: true, // автоматически включать проверку обновлений для вновь загружаемых файлов
+
+    //для SettingsPage
     needUpdateSettingsView: 0,
+
 };
 
 for (const font of fonts)
