@@ -105,9 +105,13 @@
                     </div>
 
                     <div class="row-part column justify-center items-stretch" style="width: 80px">
-                        <div class="col row justify-center items-center clickable" style="padding: 0 2px 0 2px" @click="loadBook(item)">
+                        <div class="col row justify-center items-center clickable" style="padding: 0 2px 0 2px" @click="loadBook(item, bothBucEnabled && item.needBookUpdate)">
                             <div v-show="isLoadedCover(item.coverPageUrl)" style="height: 80px" v-html="getCoverHtml(item.coverPageUrl)" />
                             <q-icon v-show="!isLoadedCover(item.coverPageUrl)" name="la la-book" size="40px" style="color: #dddddd" />
+                        
+                            <div v-show="bothBucEnabled && item.needBookUpdate" style="position: absolute; z-index: 10;">
+                                <q-icon name="la la-sync" size="60px" style="color: blue" />
+                            </div>
                         </div>
 
                         <div v-show="!showSameBook && item.group && item.group.length > 0" class="row justify-center" style="font-size: 70%">
@@ -127,7 +131,7 @@
                                 {{ item.desc.title }}
                             </div>
                             <div v-show="bothBucEnabled && item.needBookUpdate" style="font-size: 75%; color: blue">
-                                Старый размер: {{ item.bucSize }}, новый: {{ item.downloadSize }}
+                                Размер: {{ item.downloadSize }} &rarr; {{ item.bucSize }}, +{{ item.bucSize - item.downloadSize }}
                             </div>
                         </div>
 
@@ -172,7 +176,7 @@
                             class="col column justify-center" 
                             style="font-size: 75%; padding-left: 6px; border: 1px solid #cccccc; border-left: 0;"
                         >
-                            <div style="margin: 20px 0 0 5px">
+                            <div style="margin: 25px 0 0 5px">
                                 <a v-show="isUrl(item.url)" :href="item.url" target="_blank">Оригинал</a><br><br>
                                 <a :href="item.path" @click.prevent="downloadBook(item.path, item.fullTitle)">Скачать FB2</a>
                             </div>
@@ -206,7 +210,7 @@
                             <q-checkbox
                                 v-model="item.checkBuc"
                                 size="xs"
-                                style="position: relative; top: -5px; left: -5px;"
+                                style="position: relative; top: -3px; left: -3px;"
                                 @update:model-value="checkBucChange(item)"
                             >
                                 <q-tooltip :delay="1500" anchor="bottom middle" content-style="font-size: 80%">
@@ -350,7 +354,7 @@ class RecentBooksPage {
 
                 let title = bt.bookTitle;
                 title = (title ? `"${title}"`: '');
-                const author = (bt.author ? bt.author : (bt.bookTitle ? bt.bookTitle : (book.uploadFileName ? book.uploadFileName : book.url)));
+                const author = (bt.author ? bt.author : (bt.bookTitle ? bt.bookTitle : (book.uploadFileName ? book.uploadFileName : book.url))) || '';
 
                 result.push({
                     key: book.key,
@@ -397,12 +401,14 @@ class RecentBooksPage {
             //фильтрация
             const search = this.search;
             if (search) {
+                const lowerSearch = search.toLowerCase();
+
                 result = result.filter(item => {
                     return !search ||
                         item.touchTime.includes(search) ||
                         item.loadTime.includes(search) ||
-                        item.desc.title.toLowerCase().includes(search.toLowerCase()) ||
-                        item.desc.author.toLowerCase().includes(search.toLowerCase())
+                        item.desc.title.toLowerCase().includes(lowerSearch) ||
+                        item.desc.author.toLowerCase().includes(lowerSearch)
                 });
             }
 
@@ -450,6 +456,9 @@ class RecentBooksPage {
                         book.inGroup = true;
                         if (book.active)
                             parents[book.sameBookKey].activeParent = true;
+
+                        book.showCheckBuc = false;
+                        book.needBookUpdate = false;
 
                         groups[book.sameBookKey].push(book);
                     }
@@ -546,14 +555,14 @@ class RecentBooksPage {
         this.$root.notify.info('Восстановлено из архива');
     }
 
-    async loadBook(item) {
+    async loadBook(item, force = false) {
         //чтобы не обновлять лишний раз updateTableData
         this.inited = false;
 
         if (item.deleted)
             await this.handleRestore(item.key);
 
-        this.$emit('load-book', {url: item.url, path: item.path});
+        this.$emit('load-book', {url: item.url, path: item.path, force});
         this.close();
     }
 
@@ -753,8 +762,7 @@ class RecentBooksPage {
     async checkBucChange(item) {
         const book = await bookManager.getRecentBook(item);
         if (book) {
-            book.checkBuc = item.checkBuc;
-            await bookManager.recentSetItem(book);
+            await bookManager.setCheckBuc(book, item.checkBuc);
         }
     }
 }

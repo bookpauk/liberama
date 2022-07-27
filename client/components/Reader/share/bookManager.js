@@ -487,6 +487,28 @@ class BookManager {
         await this.recentSetItem(item);
     }
 
+    async setCheckBuc(value, checkBuc = true) {
+        const item = this.recent[value.key];
+
+        const updateItems = [];
+        if (item) {
+            if (item.sameBookKey !== undefined) {
+                const sorted = this.getSortedRecent();
+                for (const book of sorted) {
+                    if (book.sameBookKey === item.sameBookKey)
+                        updateItems.push(book);
+                }
+            } else {
+                updateItems.push(item);
+            }
+        }
+
+        for (const book of updateItems) {
+            book.checkBuc = checkBuc;
+            await this.recentSetItem(book);
+        }
+    }
+
     async cleanRecentBooks() {
         const sorted = this.getSortedRecent();
 

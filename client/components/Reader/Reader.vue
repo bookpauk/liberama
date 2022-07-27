@@ -310,6 +310,7 @@ class Reader {
     dualPageMode = false;
 
     bucEnabled = false;
+    bucSetOnNew = false;
 
     created() {
         this.rstore = rstore;
@@ -359,8 +360,14 @@ class Reader {
             }
         }, 200);
 
+        this.debouncedRecentBooksPageUpdate = _.debounce(async() => {
+            if (this.recentBooksActive) {
+                await this.$refs.recentBooksPage.updateTableData();
+            }
+        }, 100);
+
         this.recentItemKeys = [];
-        this.saveRecentChanges = _.debounce(async() => {
+        this.debouncedSaveRecent = _.debounce(async() => {
             let timer = setTimeout(() => {
                 if (!this.offlineModeActive)
                     this.$root.notify.error('Таймаут соединения');
@@ -435,7 +442,7 @@ class Reader {
             //вечный цикл, запрашиваем периодически обновления
             while (1) {// eslint-disable-line no-constant-condition
                 await this.checkBuc();
-                await utils.sleep(70*60*1000); //каждые 70 минут
+                await utils.sleep(/*70*60*1000*/10*1000); //каждые 70 минут
             }
             //дальше хода нет
         })();
@@ -460,6 +467,7 @@ class Reader {
         this.dualPageMode = settings.dualPageMode;
         this.userWallpapers = settings.userWallpapers;
         this.bucEnabled = settings.bucEnabled;
+        this.bucSetOnNew = settings.bucSetOnNew;
 
         this.readerActionByKeyCode = utils.userHotKeysObjectSwap(settings.userHotKeys);
         this.$root.readerActionByKeyEvent = (event) => {
@@ -595,7 +603,6 @@ class Reader {
                     await bookManager.recentSetItem(book);
                 }
             }
-console.log('checkBuc finished', arr);            
         } catch (e) {
             console.error(e);
         }
@@ -731,14 +738,12 @@ console.log('checkBuc finished', arr);
         }
 
         if (eventName == 'recent-changed') {
-            if (this.recentBooksActive) {
-                await this.$refs.recentBooksPage.updateTableData();
-            }
+            this.debouncedRecentBooksPageUpdate();
 
             //сохранение в serverStorage
             if (value && this.recentItemKeys.indexOf(value) < 0) {
                 this.recentItemKeys.push(value);
-                this.saveRecentChanges();
+                this.debouncedSaveRecent();
             }
         }
     }
@@ -1307,9 +1312,13 @@ console.log('checkBuc finished', arr);
                 delete wasOpened.loadTime;
 
             // добавляем в историю
-            await bookManager.setRecentBook(Object.assign(wasOpened, addedBook));
+            const recentBook = await bookManager.setRecentBook(Object.assign(wasOpened, addedBook));
+            if (this.bucSetOnNew) {
+                await bookManager.setCheckBuc(recentBook, true);
+            }
+
             this.mostRecentBook();
-            this.addAction(wasOpened.bookPos);
+            this.addAction(recentBook.bookPos);
             this.updateRoute(true);
 
             this.loaderActive = false;
