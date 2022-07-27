@@ -26,10 +26,12 @@ class BUCClient {
             //константы
             if (this.config.branch !== 'development') {
                 this.cleanQueryInterval = 300*dayMs;//интервал очистки устаревших
-                this.syncPeriod = 1*minuteMs;//1*hourMs;//период синхронизации с сервером BUC
+                this.syncPeriod = 1*hourMs;//период синхронизации с сервером BUC
+                this.sendBookUrlsPeriod = 1*minuteMs;//период отправки BookUrls на сервер BUC
             } else {
                 this.cleanQueryInterval = 300*dayMs;//интервал очистки устаревших
                 this.syncPeriod = 1*minuteMs;//период синхронизации с сервером BUC
+                this.sendBookUrlsPeriod = 1*1000;//период отправки BookUrls на сервер BUC
             }
 
             this.fromCheckTime = 1;
@@ -118,35 +120,47 @@ class BUCClient {
         return result;
     }
 
+    async periodicSendBookUrls() {
+        while (1) {//eslint-disable-line
+            try {
+                //отправим this.bookUrls
+                if (this.bookUrls.size) {
+                    log(`client: remote update buc begin`);
+
+                    const arr = Array.from(this.bookUrls);
+                    this.bookUrls = new Set();
+
+                    const chunkSize = 100;
+                    let updated = 0;
+                    for (let i = 0; i < arr.length; i += chunkSize) {
+                        const chunk = arr.slice(i, i + chunkSize);
+                        
+                        const res = await this.wsUpdateBuc(chunk);
+                        if (!res.error && res.state == 'success') {
+                            //update success
+                            updated += chunk.length;
+                        } else {
+                            for (const url of chunk) {
+                                this.bookUrls.add(url);
+                            }
+                            log(LM_ERR, `update-buc error: ${(res.error ? res.error : `wrong state "${res.state}"`)}`);
+                        }
+                    }
+                    log(`client: remote update buc end, updated ${updated} urls`);
+                }
+            } catch (e) {
+                log(LM_ERR, e.stack);
+            }
+
+            await utils.sleep(this.sendBookUrlsPeriod);
+        }
+    }
+
     async periodicSync() {
         const db = this.appDb;
 
         while (1) {//eslint-disable-line
             try {
-                //сначала отправим this.bookUrls
-                log(`client: remote update buc begin`);
-
-                const arr = Array.from(this.bookUrls);
-                this.bookUrls = new Set();
-
-                const chunkSize = 100;
-                let updated = 0;
-                for (let i = 0; i < arr.length; i += chunkSize) {
-                    const chunk = arr.slice(i, i + chunkSize);
-                    
-                    const res = await this.wsUpdateBuc(chunk);
-                    if (!res.error && res.state == 'success') {
-                        //update success
-                        updated += chunk.length;
-                    } else {
-                        for (const url of chunk) {
-                            this.bookUrls.add(url);
-                        }
-                        log(LM_ERR, `update-buc error: ${(res.error ? res.error : `wrong state "${res.state}"`)}`);
-                    }
-                }
-                log(`client: remote update buc end, updated ${updated} urls`);
-
                 //почистим нашу таблицу 'buc'
                 log(`client: clean 'buc' table begin`);
                 const cleanTime = Date.now() - this.cleanQueryInterval;
@@ -232,6 +246,7 @@ class BUCClient {
 
             this.fromCheckTime = await this.findMaxCheckTime();
             
+            this.periodicSendBookUrls();//no await
             this.periodicSync();//no await
 
             log(`BUC Client started`);
