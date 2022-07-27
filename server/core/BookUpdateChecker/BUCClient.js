@@ -26,7 +26,7 @@ class BUCClient {
             //константы
             if (this.config.branch !== 'development') {
                 this.cleanQueryInterval = 300*dayMs;//интервал очистки устаревших
-                this.syncPeriod = 1*hourMs;//период синхронизации с сервером BUC
+                this.syncPeriod = 1*minuteMs;//1*hourMs;//период синхронизации с сервером BUC
             } else {
                 this.cleanQueryInterval = 300*dayMs;//интервал очистки устаревших
                 this.syncPeriod = 1*minuteMs;//период синхронизации с сервером BUC
