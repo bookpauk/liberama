@@ -357,6 +357,26 @@ class Reader {
             }
         }, 200);
 
+        this.recentItemKeys = [];
+        this.saveRecentChanges = _.debounce(async() => {
+            let timer = setTimeout(() => {
+                if (!this.offlineModeActive)
+                    this.$root.notify.error('Таймаут соединения');
+            }, 10000);
+
+            try {
+                const itemKeys = this.recentItemKeys;
+                this.recentItemKeys = [];
+                //сохранение в удаленном хранилище
+                await this.$refs.serverStorage.saveRecent(itemKeys);
+            } catch (e) {
+                if (!this.offlineModeActive)
+                    this.$root.notify.error(e.message);
+            } finally {
+                clearTimeout(timer);
+            }
+        }, 500, {maxWait: 1000});
+
         document.addEventListener('fullscreenchange', () => {
             this.fullScreenActive = (document.fullscreenElement !== null);
         });
@@ -653,22 +673,9 @@ class Reader {
             }
 
             //сохранение в serverStorage
-            if (value) {
-                await utils.sleep(500);
-                
-                let timer = setTimeout(() => {
-                    if (!this.offlineModeActive)
-                        this.$root.notify.error('Таймаут соединения');
-                }, 10000);
-
-                try {
-                    await this.$refs.serverStorage.saveRecent(value);
-                } catch (e) {
-                    if (!this.offlineModeActive)
-                        this.$root.notify.error(e.message);
-                } finally {
-                    clearTimeout(timer);
-                }
+            if (value && this.recentItemKeys.indexOf(value) < 0) {
+                this.recentItemKeys.push(value);
+                this.saveRecentChanges();
             }
         }
     }

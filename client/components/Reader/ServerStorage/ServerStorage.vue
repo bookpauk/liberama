@@ -12,6 +12,7 @@ import bookManager from '../share/bookManager';
 import readerApi from '../../../api/reader';
 import * as utils from '../../../share/utils';
 import * as cryptoUtils from '../../../share/cryptoUtils';
+import LockQueue from '../../../share/LockQueue';
 
 import localForage from 'localforage';
 const ssCacheStore = localForage.createInstance({
@@ -48,6 +49,8 @@ class ServerStorage {
         this.keyInited = false;
         this.commit = this.$store.commit;
         this.prevServerStorageKey = null;
+        this.lock = new LockQueue(100);
+
         this.$root.generateNewServerStorageKey = () => {this.generateNewServerStorageKey()};
 
         this.debouncedSaveSettings = _.debounce(() => {
@@ -542,14 +545,16 @@ class ServerStorage {
         return true;
     }
 
-    async saveRecent(itemKey, recurse) {
-        while (!this.inited || this.savingRecent)
+    async saveRecent(itemKeys, recurse) {
+        while (!this.inited)
             await utils.sleep(100);
 
-        if (!this.keyInited || !this.serverSyncEnabled || this.savingRecent)
+        if (!this.keyInited || !this.serverSyncEnabled)
             return;
 
-        this.savingRecent = true;
+        let needRecurseCall = false;
+
+        await this.lock.get();
         try {        
             const bm = bookManager;
 
@@ -559,22 +564,29 @@ class ServerStorage {
 
             //newRecentMod
             let newRecentMod = {};
-            if (itemKey && this.cachedRecentPatch.data[itemKey] && this.prevItemKey == itemKey) {
+            let oneItemKey = null;
+            if (itemKeys.length == 1)
+                oneItemKey = itemKeys[0];
+
+            if (oneItemKey && this.cachedRecentPatch.data[oneItemKey] && this.prevItemKey == oneItemKey) {
                 newRecentMod = _.cloneDeep(this.cachedRecentMod);
                 newRecentMod.rev++;
 
-                newRecentMod.data.key = itemKey;
-                newRecentMod.data.mod = utils.getObjDiff(this.cachedRecentPatch.data[itemKey], bm.recent[itemKey]);
+                newRecentMod.data.key = oneItemKey;
+                newRecentMod.data.mod = utils.getObjDiff(this.cachedRecentPatch.data[oneItemKey], bm.recent[oneItemKey]);
                 needSaveRecentMod = true;
             }
-            this.prevItemKey = itemKey;
+            this.prevItemKey = oneItemKey;
 
             //newRecentPatch
             let newRecentPatch = {};
-            if (itemKey && !needSaveRecentMod) {
+            if (itemKeys && !needSaveRecentMod) {
                 newRecentPatch = _.cloneDeep(this.cachedRecentPatch);
                 newRecentPatch.rev++;
-                newRecentPatch.data[itemKey] = _.cloneDeep(bm.recent[itemKey]);
+                
+                for (const key of itemKeys) {
+                    newRecentPatch.data[key] = _.cloneDeep(bm.recent[key]);
+                }
 
                 const applyMod = this.cachedRecentMod.data;
                 if (applyMod && applyMod.key && newRecentPatch.data[applyMod.key])
@@ -587,11 +599,7 @@ class ServerStorage {
 
             //newRecent
             let newRecent = {};
-            if (!itemKey || (needSaveRecentPatch && Object.keys(newRecentPatch.data).length > 10)) {
-                //ждем весь bm.recent
-                /*while (!bookManager.loaded)
-                    await utils.sleep(100);*/
-
+            if (!itemKeys || (needSaveRecentPatch && Object.keys(newRecentPatch.data).length > 10)) {
                 newRecent = {rev: this.cachedRecent.rev + 1, data: _.cloneDeep(bm.recent)};
                 newRecentPatch = {rev: this.cachedRecentPatch.rev + 1, data: {}};
                 newRecentMod = {rev: this.cachedRecentMod.rev + 1, data: {}};
@@ -625,10 +633,8 @@ class ServerStorage {
 
                 if (res)
                     this.warning(`Последние изменения отменены. Данные синхронизированы с сервером.`);
-                if (!recurse && itemKey) {
-                    this.savingRecent = false;
-                    await this.saveRecent(itemKey, true);
-                    return;
+                if (!recurse && itemKeys) {
+                    needRecurseCall = true;
                 }
             } else if (result.state == 'success') {
                 if (needSaveRecent && newRecent.rev)
@@ -639,8 +645,11 @@ class ServerStorage {
                     await this.setCachedRecentMod(newRecentMod);
             }
         } finally {
-            this.savingRecent = false;
+            this.lock.ret();
         }
+
+        if (needRecurseCall)
+            await this.saveRecent(itemKeys, true);
     }
 
     async storageCheck(items) {
