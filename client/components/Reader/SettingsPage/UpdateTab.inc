@@ -20,7 +20,7 @@
     </q-checkbox>
 </div>
 
-<div class="item row">
+<div v-show="bucEnabled" class="item row">
     <div class="label-6"></div>
     <q-checkbox size="xs" v-model="bucSetOnNew">
         Автопроверка для вновь загружаемых

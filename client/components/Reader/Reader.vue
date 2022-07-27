@@ -100,7 +100,7 @@
                         </q-tooltip>
                     </button>
                     <button v-show="showToolButton['recentBooks']" ref="recentBooks" v-ripple class="tool-button" :class="buttonActiveClass('recentBooks')" @click="buttonClick('recentBooks')">
-                        <div v-show="needBookUpdateCount > 0" style="position: absolute">
+                        <div v-show="bothBucEnabled && needBookUpdateCount > 0" style="position: absolute">
                             <div class="need-book-update-count">
                                 {{ needBookUpdateCount }}
                             </div>
@@ -440,18 +440,18 @@ class Reader {
             //вечный цикл, запрашиваем периодически конфиг для проверки выхода новой версии читалки
             while (1) {// eslint-disable-line no-constant-condition
                 await this.checkNewVersionAvailable();
-                await utils.sleep(3600*1000); //каждый час
+                await utils.sleep(60*60*1000); //каждый час
             }
             //дальше хода нет
         })();
 
         //проверки обновлений книг
         (async() => {
-            await utils.sleep(1*1000); //подождем неск. секунд перед первым запросом
+            await utils.sleep(15*1000); //подождем неск. секунд перед первым запросом
             //вечный цикл, запрашиваем периодически обновления
             while (1) {// eslint-disable-line no-constant-condition
                 await this.checkBuc();
-                await utils.sleep(/*70*60*1000*/10*1000); //каждые 70 минут
+                await utils.sleep(70*60*1000); //каждые 70 минут
             }
             //дальше хода нет
         })();
@@ -1345,6 +1345,7 @@ class Reader {
 
             this.checkBookPosPercent();
             this.activateClickMapPage();//no await
+            this.$refs.recentBooksPage.updateTableData();//no await
         } catch (e) {
             progress.hide(); this.progressActive = false;
             this.loaderActive = true;
