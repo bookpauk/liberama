@@ -565,7 +565,7 @@ class ServerStorage {
             //newRecentMod
             let newRecentMod = {};
             let oneItemKey = null;
-            if (itemKeys.length == 1)
+            if (itemKeys && itemKeys.length == 1)
                 oneItemKey = itemKeys[0];
 
             if (oneItemKey && this.cachedRecentPatch.data[oneItemKey] && this.prevItemKey == oneItemKey) {
@@ -583,7 +583,7 @@ class ServerStorage {
             if (itemKeys && !needSaveRecentMod) {
                 newRecentPatch = _.cloneDeep(this.cachedRecentPatch);
                 newRecentPatch.rev++;
-                
+
                 for (const key of itemKeys) {
                     newRecentPatch.data[key] = _.cloneDeep(bm.recent[key]);
                 }
