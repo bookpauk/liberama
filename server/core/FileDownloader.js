@@ -1,5 +1,7 @@
 const axios = require('axios');
 
+const userAgent = 'Mozilla/5.0 (X11; HasCodingOs 1.0; Linux x64) AppleWebKit/637.36 (KHTML, like Gecko) Chrome/70.0.3112.101 Safari/637.36 HasBrowser/5.0';
+
 class FileDownloader {
     constructor(limitDownloadSize = 0) {
         this.limitDownloadSize = limitDownloadSize;
@@ -10,7 +12,7 @@ class FileDownloader {
 
         const options = {
             headers: {
-                'user-agent': 'Mozilla/5.0 (X11; HasCodingOs 1.0; Linux x64) AppleWebKit/637.36 (KHTML, like Gecko) Chrome/70.0.3112.101 Safari/637.36 HasBrowser/5.0'
+                'user-agent': userAgent
             },
             responseType: 'stream',
         };
@@ -60,6 +62,17 @@ class FileDownloader {
             errMes = (errMes ? errMes : error.message);
             throw new Error(errMes);
         }
+    }
+
+    async head(url) {
+        const options = {
+            headers: {
+                'user-agent': userAgent
+            },
+        };
+
+        const res = await axios.head(url, options);
+        return res.headers;
     }
 
     streamToBuffer(stream, progress) {

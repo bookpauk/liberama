@@ -234,6 +234,10 @@ class BookManager {
 
     async addBook(newBook, callback) {        
         let meta = {url: newBook.url, path: newBook.path};
+
+        if (newBook.downloadSize !== undefined && newBook.downloadSize >= 0)
+            meta.downloadSize = newBook.downloadSize;
+
         meta.key = this.keyFromPath(meta.path);
         meta.addTime = Date.now();//время добавления в кеш
 
@@ -481,6 +485,28 @@ class BookManager {
         item.deleted = 0;
 
         await this.recentSetItem(item);
+    }
+
+    async setCheckBuc(value, checkBuc = true) {
+        const item = this.recent[value.key];
+
+        const updateItems = [];
+        if (item) {
+            if (item.sameBookKey !== undefined) {
+                const sorted = this.getSortedRecent();
+                for (const book of sorted) {
+                    if (book.sameBookKey === item.sameBookKey)
+                        updateItems.push(book);
+                }
+            } else {
+                updateItems.push(item);
+            }
+        }
+
+        for (const book of updateItems) {
+            book.checkBuc = checkBuc;
+            await this.recentSetItem(book);
+        }
     }
 
     async cleanRecentBooks() {

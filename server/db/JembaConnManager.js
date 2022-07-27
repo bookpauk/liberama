@@ -31,7 +31,29 @@ class JembaConnManager {
 
         ayncExit.add(this.close.bind(this));
 
+        const serverModes = new Set();
+        for (const serverCfg of this.config.servers) {
+            serverModes.add(serverCfg.mode);
+        }
+
         for (const dbConfig of this.config.jembaDb) {
+            //проверка, надо ли открывать базу, зависит от serverMode
+            if (dbConfig.serverMode) {
+                let serverMode = dbConfig.serverMode;
+                if (!Array.isArray(dbConfig.serverMode))
+                    serverMode = [dbConfig.serverMode];
+
+                let modePresent = false;
+                for (const mode of serverMode) {
+                    modePresent = serverModes.has(mode);
+                    if (modePresent)
+                        break;
+                }
+
+                if (!modePresent)
+                    continue;
+            }
+
             const dbPath = `${this.config.dataDir}/db/${dbConfig.dbName}`;
 
             //бэкап

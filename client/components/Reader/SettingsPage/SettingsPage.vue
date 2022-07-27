@@ -30,6 +30,7 @@
                     <q-tab class="tab" name="keys" icon="la la-gamepad" label="Управление" />
                     <q-tab class="tab" name="pagemove" icon="la la-school" label="Листание" />
                     <q-tab class="tab" name="convert" icon="la la-magic" label="Конвертир." />
+                    <q-tab class="tab" name="update" icon="la la-sync" label="Обновление" />
                     <q-tab class="tab" name="others" icon="la la-list-ul" label="Прочее" />
                     <q-tab class="tab" name="reset" icon="la la-broom" label="Сброс" />
                     <div v-show="tabsScrollable" class="q-pt-lg" />
@@ -98,6 +99,10 @@
                 <!-- Конвертирование ------------------------------------------------------------->
                 <div v-if="selectedTab == 'convert'" class="fit tab-panel">
                     @@include('./ConvertTab.inc');
+                </div>
+                <!-- Обновление ------------------------------------------------------------------>
+                <div v-if="selectedTab == 'update'" class="fit tab-panel">
+                    @@include('./UpdateTab.inc');
                 </div>
                 <!-- Прочее ---------------------------------------------------------------------->
                 <div v-if="selectedTab == 'others'" class="fit tab-panel">
@@ -311,6 +316,10 @@ class SettingsPage {
 
     get profiles() {
         return this.$store.state.reader.profiles;
+    }
+
+    get configBucEnabled() {
+        return this.$store.state.config.bucEnabled;
     }
 
     get currentProfileOptions() {

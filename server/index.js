@@ -5,6 +5,7 @@ const argv = require('minimist')(process.argv.slice(2));
 const express = require('express');
 const compression = require('compression');
 const http = require('http');
+const https = require('https');
 const WebSocket = require ('ws');
 
 const ayncExit = new (require('./core/AsyncExit'))();
@@ -45,15 +46,8 @@ async function init() {
     }
 
     //connections
-    const connManager = new (require('./db/ConnManager'))();//singleton
-    await connManager.init(config);
-
     const jembaConnManager = new (require('./db/JembaConnManager'))();//singleton
     await jembaConnManager.init(config, argv['auto-repair']);
-
-    //converter SQLITE => JembaDb
-    const converter = new  (require('./db/Converter'))();
-    await converter.run(config);
 }
 
 async function main() {
@@ -64,7 +58,15 @@ async function main() {
     for (let serverCfg of config.servers) {
         if (serverCfg.mode !== 'none') {
             const app = express();
-            const server = http.createServer(app);
+            let server;
+            if (serverCfg.isHttps) {
+                const key = fs.readFileSync(`${config.dataDir}/${serverCfg.keysFile}.key`);
+                const cert = fs.readFileSync(`${config.dataDir}/${serverCfg.keysFile}.crt`);
+
+                server = https.createServer({key, cert}, app);
+            } else {
+                server = http.createServer(app);
+            }
             const wss = new WebSocket.Server({ server, maxPayload: maxPayloadSize*1024*1024 });
 
             const serverConfig = Object.assign({}, config, serverCfg);
@@ -93,7 +95,7 @@ async function main() {
             }
 
             server.listen(serverConfig.port, serverConfig.ip, function() {
-                log(`Server-${serverConfig.serverName} is ready on ${serverConfig.ip}:${serverConfig.port}, mode: ${serverConfig.mode}`);
+                log(`Server "${serverConfig.serverName}" is ready on ${(serverConfig.isHttps ? 'https://' : 'http://')}${serverConfig.ip}:${serverConfig.port}, mode: ${serverConfig.mode}`);
             });
         }
     }

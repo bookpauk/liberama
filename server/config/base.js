@@ -23,32 +23,27 @@ module.exports = {
 
     useExternalBookConverter: false,
     acceptFileExt: '.fb2, .fb3, .html, .txt, .zip, .bz2, .gz, .rar, .epub, .mobi, .rtf, .doc, .docx, .pdf, .djvu, .jpg, .jpeg, .png',
-    webConfigParams: ['name', 'version', 'mode', 'maxUploadFileSize', 'useExternalBookConverter', 'acceptFileExt', 'branch'],
-
-    db: [
-        {
-            poolName: 'app',
-            connCount: 20,
-            fileName: 'app.sqlite',
-        },
-        {
-            poolName: 'readerStorage',
-            connCount: 20,
-            fileName: 'reader-storage.sqlite',            
-        }
-    ],
+    webConfigParams: ['name', 'version', 'mode', 'maxUploadFileSize', 'useExternalBookConverter', 'acceptFileExt', 'bucEnabled', 'branch'],
 
     jembaDb: [
         {
+            serverMode: ['reader', 'omnireader', 'liberama.top'],
             dbName: 'app',
             thread: true,
             openAll: true,
         },
         {
+            serverMode: ['reader', 'omnireader', 'liberama.top'],
             dbName: 'reader-storage',
             thread: true,
             openAll: true,
-        }
+        },
+        {
+            serverMode: 'book_update_checker',
+            dbName: 'book-update-server',
+            thread: true,
+            openAll: true,            
+        },
     ],
 
     servers: [
@@ -58,23 +53,31 @@ module.exports = {
             ip: '0.0.0.0',
             port: '33080',
         },
+        /*{
+            serverName: '2',
+            mode: 'book_update_checker', //'none', 'normal', 'site', 'reader', 'omnireader', 'liberama.top', 'book_update_checker'
+            isHttps: true,
+            keysFile: 'server',
+            ip: '0.0.0.0',
+            port: '33443',
+            accessToken: '',
+        }*/
     ],
-
-    /*
-    remoteWebDavStorage: false,
-    remoteWebDavStorage: {
-        url: '127.0.0.1:1900',
-        username: '',
-        password: '',
-    },
-    */
 
     remoteStorage: false,
     /*
     remoteStorage: {
-        url: 'https://127.0.0.1:11900',
+        url: 'wss://127.0.0.1:11900',
         accessToken: '',
     },
+    */
+    bucEnabled: false,
+    bucServer: false,
+    /*
+    bucServer: {
+        url: 'wss://127.0.0.1:33443',
+        accessToken: '',
+    }
     */
 };
 

@@ -1,6 +1,7 @@
-const WebSocket = require ('ws');
+const WebSocket = require('ws');
 //const _ = require('lodash');
 
+const BUCServer = require('../core/BookUpdateChecker/BUCServer');
 const log = new (require('../core/AppLogger'))().log;//singleton
 //const utils = require('../core/utils');
 
@@ -12,7 +13,8 @@ class BookUpdateCheckerController {
         this.config = config;
         this.isDevelopment = (config.branch == 'development');
 
-        //this.readerStorage = new JembaReaderStorage();
+        this.accessToken = config.accessToken;
+        this.bucServer = new BUCServer(config);
 
         this.wss = wss;
 
@@ -46,7 +48,7 @@ class BookUpdateCheckerController {
         let req = {};
         try {
             if (this.isDevelopment) {
-                log(`WebSocket-IN:  ${message.substr(0, 4000)}`);
+                log(`BUC-WebSocket-IN:  ${message.substr(0, 4000)}`);
             }
 
             req = JSON.parse(message);
@@ -56,9 +58,16 @@ class BookUpdateCheckerController {
             //pong for WebSocketConnection
             this.send({_rok: 1}, req, ws);
 
+            if (req.accessToken !== this.accessToken)
+                throw new Error('Access denied');
+
             switch (req.action) {
                 case 'test':
                     await this.test(req, ws); break;
+                case 'get-buc':
+                    await this.getBuc(req, ws); break;
+                case 'update-buc':
+                    await this.updateBuc(req, ws); break;
 
                 default:
                     throw new Error(`Action not found: ${req.action}`);
@@ -79,7 +88,7 @@ class BookUpdateCheckerController {
             ws.send(message);
 
             if (this.isDevelopment) {
-                log(`WebSocket-OUT: ${message.substr(0, 4000)}`);
+                log(`BUC-WebSocket-OUT: ${message.substr(0, 4000)}`);
             }
 
         }
@@ -90,6 +99,28 @@ class BookUpdateCheckerController {
         this.send({message: 'Liberama project is awesome'}, req, ws);
     }
 
+    async getBuc(req, ws) {
+        if (!req.fromCheckTime)
+            throw new Error(`key 'fromCheckTime' is empty`);
+
+        await this.bucServer.getBuc(req.fromCheckTime, (rows) => {
+            this.send({state: 'get', rows}, req, ws);
+        });
+
+        this.send({state: 'finish'}, req, ws);
+    }
+
+    async updateBuc(req, ws) {
+        if (!req.bookUrls)
+            throw new Error(`key 'bookUrls' is empty`);
+
+        if (!Array.isArray(req.bookUrls))
+            throw new Error(`key 'bookUrls' must be array`);
+
+        await this.bucServer.updateBuc(req.bookUrls);
+
+        this.send({state: 'success'}, req, ws);
+    }
 }
 
 module.exports = BookUpdateCheckerController;

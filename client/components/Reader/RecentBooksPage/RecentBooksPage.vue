@@ -9,14 +9,26 @@
 
         <template #buttons>
             <div
+                v-show="needBookUpdateCount > 0"
                 class="row justify-center items-center"
-                :class="{'header-button': !archive, 'header-button-pressed': archive}" 
-                @mousedown.stop @click="archiveToggle"
+                :class="{'header-button-update': !showNeedBookUpdateOnly, 'header-button-update-pressed': showNeedBookUpdateOnly}" 
+                @mousedown.stop @click="showNeedBookUpdateOnlyToggle"
+            >
+                <span style="font-size: 90%">{{ needBookUpdateCount }} обновлен{{ wordEnding(needBookUpdateCount, 3) }}</span>
+                <q-tooltip :delay="1500" anchor="bottom middle" content-style="font-size: 80%">
+                    {{ (needBookUpdateCount ? 'Скрыть обновления' : 'Показать обновления') }}
+                </q-tooltip>
+            </div>
+
+            <div
+                class="row justify-center items-center"
+                :class="{'header-button': !showArchive, 'header-button-pressed': showArchive}" 
+                @mousedown.stop @click="showArchiveToggle"
             >
                 <q-icon class="q-mr-xs" name="la la-archive" size="20px" />
                 <span style="font-size: 90%">Архив</span>
                 <q-tooltip :delay="1500" anchor="bottom middle" content-style="font-size: 80%">
-                    {{ (archive ? 'Скрыть архивные' : 'Показать архивные') }}
+                    {{ (showArchive ? 'Скрыть архивные' : 'Показать архивные') }}
                 </q-tooltip>
             </div>
         </template>
@@ -105,9 +117,17 @@
                     </div>
 
                     <div class="row-part column justify-center items-stretch" style="width: 80px">
-                        <div class="col row justify-center items-center clickable" style="padding: 0 2px 0 2px" @click="loadBook(item)">
+                        <div class="col row justify-center items-center clickable" style="padding: 0 2px 0 2px" @click="loadBook(item, bothBucEnabled && item.needBookUpdate)">
                             <div v-show="isLoadedCover(item.coverPageUrl)" style="height: 80px" v-html="getCoverHtml(item.coverPageUrl)" />
                             <q-icon v-show="!isLoadedCover(item.coverPageUrl)" name="la la-book" size="40px" style="color: #dddddd" />
+                        
+                            <div
+                                v-show="bothBucEnabled && item.needBookUpdate"
+                                class="column justify-center"
+                                style="position: absolute; background-color: rgba(255, 255, 255, 0.5); border-radius: 40px;"
+                            >
+                                <q-icon name="la la-sync" size="60px" style="color: blue" />
+                            </div>
                         </div>
 
                         <div v-show="!showSameBook && item.group && item.group.length > 0" class="row justify-center" style="font-size: 70%">
@@ -125,6 +145,10 @@
                             </div>
                             <div style="font-size: 75%">
                                 {{ item.desc.title }}
+                            </div>
+                            <div v-show="bothBucEnabled && item.needBookUpdate" style="font-size: 75%; color: blue;">
+                                Размер: {{ item.downloadSize }} &rarr; {{ item.bucSize }},
+                                {{ item.bucSize - item.downloadSize > 0 ? '+' : '' }}{{ item.bucSize - item.downloadSize }}
                             </div>
                         </div>
 
@@ -169,7 +193,7 @@
                             class="col column justify-center" 
                             style="font-size: 75%; padding-left: 6px; border: 1px solid #cccccc; border-left: 0;"
                         >
-                            <div :style="`margin-top: ${(archive ? 20 : 0)}px`">
+                            <div style="margin: 25px 0 0 5px">
                                 <a v-show="isUrl(item.url)" :href="item.url" target="_blank">Оригинал</a><br><br>
                                 <a :href="item.path" @click.prevent="downloadBook(item.path, item.fullTitle)">Скачать FB2</a>
                             </div>
@@ -181,12 +205,12 @@
                         >
                             <q-icon class="la la-times" size="12px" />
                             <q-tooltip :delay="1500" anchor="bottom middle" content-style="font-size: 80%">
-                                {{ (archive ? 'Удалить окончательно' : 'Перенести в архив') }}
+                                {{ (showArchive ? 'Удалить окончательно' : 'Перенести в архив') }}
                             </q-tooltip>
                         </div>
 
                         <div
-                            v-show="archive"
+                            v-show="showArchive"
                             class="restore-button self-start row justify-center items-center clickable"
                             @click="handleRestore(item.key)"
                         >
@@ -194,6 +218,22 @@
                             <q-tooltip :delay="1500" anchor="bottom middle" content-style="font-size: 80%">
                                 Восстановить из архива
                             </q-tooltip>
+                        </div>
+
+                        <div
+                            v-show="bothBucEnabled && item.showCheckBuc"
+                            class="buc-checkbox self-start"
+                        >
+                            <q-checkbox
+                                v-model="item.checkBuc"
+                                size="xs"
+                                style="position: relative; top: -3px; left: -3px;"
+                                @update:model-value="checkBucChange(item)"
+                            >
+                                <q-tooltip :delay="1500" anchor="bottom middle" content-style="font-size: 80%">
+                                    Проверять обновления
+                                </q-tooltip>
+                            </q-checkbox>
                         </div>
                     </div>
                 </div>
@@ -230,6 +270,12 @@ const componentOptions = {
         settings() {
             this.loadSettings();
         },
+        needBookUpdateCount() {
+            if (this.needBookUpdateCount == 0)
+                this.showNeedBookUpdateOnly = false;
+
+            this.$emit('update-count-changed', {needBookUpdateCount: this.needBookUpdateCount});
+        }
     },
 };
 class RecentBooksPage {
@@ -240,7 +286,13 @@ class RecentBooksPage {
     tableData = [];
     sortMethod = '';
     showSameBook = false;
-    archive = false;
+    bucEnabled = false;
+    bucSizeDiff = 0;
+    bucSetOnNew = false;
+    needBookUpdateCount = 0;
+
+    showArchive = false;
+    showNeedBookUpdateOnly = false;
 
     covers = {};
     coversLoadFunc = {};
@@ -277,10 +329,17 @@ class RecentBooksPage {
         const settings = this.settings;
         this.showSameBook = settings.recentShowSameBook;
         this.sortMethod = settings.recentSortMethod || 'loadTimeDesc';
+        this.bucEnabled = settings.bucEnabled;
+        this.bucSizeDiff = settings.bucSizeDiff;
+        this.bucSetOnNew = settings.bucSetOnNew;
     }
 
     get settings() {
         return this.$store.state.reader.settings;
+    }
+
+    get bothBucEnabled() {
+        return this.$store.state.config.bucEnabled && this.bucEnabled;
     }
 
     async updateTableData() {
@@ -296,7 +355,7 @@ class RecentBooksPage {
 
             //подготовка полей
             for (const book of sorted) {
-                if ((!this.archive && book.deleted) || (this.archive && book.deleted != 1))
+                if ((!this.showArchive && book.deleted) || (this.showArchive && book.deleted != 1))
                     continue;
 
                 let d = new Date();
@@ -320,7 +379,7 @@ class RecentBooksPage {
 
                 let title = bt.bookTitle;
                 title = (title ? `"${title}"`: '');
-                const author = (bt.author ? bt.author : (bt.bookTitle ? bt.bookTitle : (book.uploadFileName ? book.uploadFileName : book.url)));
+                const author = (bt.author ? bt.author : (bt.bookTitle ? bt.bookTitle : (book.uploadFileName ? book.uploadFileName : book.url))) || '';
 
                 result.push({
                     key: book.key,
@@ -344,6 +403,19 @@ class RecentBooksPage {
                     inGroup: false,
                     coverPageUrl: book.coverPageUrl,
 
+                    showCheckBuc: !this.showArchive && utils.hasProp(book, 'downloadSize'),
+                    checkBuc: !!book.checkBuc,
+                    needBookUpdate: (
+                        !this.showArchive
+                        && book.checkBuc
+                        && book.bucSize
+                        && utils.hasProp(book, 'downloadSize')
+                        && book.bucSize !== book.downloadSize
+                        && (book.bucSize - book.downloadSize >= this.bucSizeDiff)
+                    ),
+                    bucSize: book.bucSize,
+                    downloadSize: book.downloadSize,
+
                     //для сортировки
                     loadTimeRaw,
                     touchTimeRaw: book.touchTime,
@@ -361,12 +433,15 @@ class RecentBooksPage {
             //фильтрация
             const search = this.search;
             if (search) {
+                const lowerSearch = search.toLowerCase();
+
                 result = result.filter(item => {
-                    return !search ||
-                        item.touchTime.includes(search) ||
-                        item.loadTime.includes(search) ||
-                        item.desc.title.toLowerCase().includes(search.toLowerCase()) ||
-                        item.desc.author.toLowerCase().includes(search.toLowerCase())
+                    return !search
+                        || item.touchTime.includes(search)
+                        || item.loadTime.includes(search)
+                        || item.desc.title.toLowerCase().includes(lowerSearch)
+                        || item.desc.author.toLowerCase().includes(lowerSearch)
+                    ;
                 });
             }
 
@@ -399,6 +474,7 @@ class RecentBooksPage {
             }
 
             //группировка
+            let nbuCount = 0;
             const groups = {};
             const parents = {};
             let newResult = [];
@@ -415,13 +491,20 @@ class RecentBooksPage {
                         if (book.active)
                             parents[book.sameBookKey].activeParent = true;
 
+                        book.showCheckBuc = false;
+                        book.needBookUpdate = false;
+
                         groups[book.sameBookKey].push(book);
                     }
                 } else {
                     newResult.push(book);
                 }
+
+                if (book.needBookUpdate)
+                    nbuCount++;
             }
             result = newResult;
+            this.needBookUpdateCount = nbuCount;
 
             //showSameBook
             if (this.showSameBook) {
@@ -436,6 +519,11 @@ class RecentBooksPage {
                 }
 
                 result = newResult;
+            }
+
+            //showNeedBookUpdateOnly
+            if (this.showNeedBookUpdateOnly) {
+                result = result.filter(item => item.needBookUpdate);
             }
 
             //другие стадии
@@ -456,7 +544,8 @@ class RecentBooksPage {
         const endings = [
             ['ов', '', 'а', 'а', 'а', 'ов', 'ов', 'ов', 'ов', 'ов'],
             ['й', 'я', 'и', 'и', 'и', 'й', 'й', 'й', 'й', 'й'],
-            ['о', '', 'о', 'о', 'о', 'о', 'о', 'о', 'о', 'о']
+            ['о', '', 'о', 'о', 'о', 'о', 'о', 'о', 'о', 'о'],
+            ['ий', 'ие', 'ия', 'ия', 'ия', 'ий', 'ий', 'ий', 'ий', 'ий']
         ];
         const deci = num % 100;
         if (deci > 10 && deci < 20) {
@@ -468,7 +557,7 @@ class RecentBooksPage {
 
     get header() {
         const len = (this.tableData ? this.tableData.length : 0);
-        return `${(this.search ? `Найден${this.wordEnding(len, 2)}` : 'Всего')} ${len} файл${this.wordEnding(len)}${this.archive ? ' в архиве' : ''}`;
+        return `${(this.search || this.showNeedBookUpdateOnly ? `Найден${this.wordEnding(len, 2)}` : 'Всего')} ${len} файл${this.wordEnding(len)}${this.showArchive ? ' в архиве' : ''}`;
     }
 
     async downloadBook(fb2path, fullTitle) {
@@ -494,7 +583,7 @@ class RecentBooksPage {
     }
 
     async handleDel(key) {
-        if (!this.archive) {
+        if (!this.showArchive) {
             await bookManager.delRecentBook({key});
             this.$root.notify.info('Перенесено в архив');
         } else {
@@ -510,14 +599,11 @@ class RecentBooksPage {
         this.$root.notify.info('Восстановлено из архива');
     }
 
-    async loadBook(item) {
-        //чтобы не обновлять лишний раз updateTableData
-        this.inited = false;
-
+    async loadBook(item, force = false) {
         if (item.deleted)
             await this.handleRestore(item.key);
 
-        this.$emit('load-book', {url: item.url, path: item.path});
+        this.$emit('load-book', {url: item.url, path: item.path, force});
         this.close();
     }
 
@@ -645,8 +731,10 @@ class RecentBooksPage {
         ];
     }
 
-    archiveToggle() {
-        this.archive = !this.archive;
+    showArchiveToggle() {
+        this.showArchive = !this.showArchive;
+        this.showNeedBookUpdateOnly = false;
+
         this.updateTableData();
     }
 
@@ -713,6 +801,21 @@ class RecentBooksPage {
         else
             return '';
     }
+
+    async checkBucChange(item) {
+        const book = await bookManager.getRecentBook(item);
+        if (book) {
+            await bookManager.setCheckBuc(book, item.checkBuc);
+        }
+    }
+
+    showNeedBookUpdateOnlyToggle() {
+        this.showNeedBookUpdateOnly = !this.showNeedBookUpdateOnly;
+        this.showArchive = false;
+
+        this.updateTableData();
+    }
+
 }
 
 export default vueComponent(RecentBooksPage);
@@ -842,17 +945,24 @@ export default vueComponent(RecentBooksPage);
     color: #555555;
 }
 
-.header-button:hover {
+.header-button-update, .header-button-update-pressed {
+    width: 120px;
+    height: 30px;
+    cursor: pointer;
+    color: white;
+}
+
+.header-button:hover, .header-button-update:hover {
     color: white;
     background-color: #39902F;
 }
 
-.header-button-pressed {
+.header-button-pressed, .header-button-update-pressed {
     color: black;
     background-color: yellow;
 }
 
-.header-button-pressed:hover {
-    color: black;
+.buc-checkbox {
+    position: absolute;
 }
 </style>

@@ -11,14 +11,7 @@ module.exports = {
                 state: Number, // 0 - not processing, 1 - processing
                 error: String,
             }*/
-            table: 'buc',
-            flag: [
-                {name: 'notProcessing', check: `(r) => r.state === 0`},
-            ],
-            index: [
-                {field: 'queryTime', type: 'number'},
-                {field: 'checkTime', type: 'number'},
-            ]
+            table: 'buc'
         }],
     ],    
     down: [
