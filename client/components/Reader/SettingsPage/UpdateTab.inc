@@ -13,14 +13,19 @@
 
 <!---------------------------------------------->
 <div class="part-header">Обновление книг</div>
-<div class="item row">
+<div v-show="!configBucEnabled" class="item row">
+    <div class="label-6"></div>
+    <div>Сервер обновлений временно не работает</div>
+</div>
+
+<div v-show="configBucEnabled" class="item row">
     <div class="label-6"></div>
     <q-checkbox size="xs" v-model="bucEnabled">
         Проверять обновления книг
     </q-checkbox>
 </div>
 
-<div v-show="bucEnabled" class="item row">
+<div v-show="configBucEnabled && bucEnabled" class="item row">
     <div class="label-6"></div>
     <q-checkbox size="xs" v-model="bucSetOnNew">
         Автопроверка для вновь загружаемых
@@ -31,7 +36,7 @@
     </q-checkbox>
 </div>
 
-<div v-show="bucEnabled" class="item row">
+<div v-show="configBucEnabled && bucEnabled" class="item row">
     <div class="label-6">Разница размеров</div>
     <div class="col row">
         <NumInput class="col-left" v-model="bucSizeDiff" />
@@ -42,4 +47,3 @@
         </q-tooltip>
     </div>
 </div>
-

@@ -318,6 +318,10 @@ class SettingsPage {
         return this.$store.state.reader.profiles;
     }
 
+    get configBucEnabled() {
+        return this.$store.state.config.bucEnabled;
+    }
+
     get currentProfileOptions() {
         const profNames = Object.keys(this.profiles)
         profNames.sort();
