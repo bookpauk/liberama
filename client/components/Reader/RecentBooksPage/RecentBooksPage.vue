@@ -16,7 +16,7 @@
             >
                 <span style="font-size: 90%">{{ needBookUpdateCount }} обновлен{{ wordEnding(needBookUpdateCount, 3) }}</span>
                 <q-tooltip :delay="1500" anchor="bottom middle" content-style="font-size: 80%">
-                    {{ (showArchive ? 'Скрыть обновления' : 'Показать обновления') }}
+                    {{ (needBookUpdateCount ? 'Скрыть обновления' : 'Показать обновления') }}
                 </q-tooltip>
             </div>
 
@@ -270,6 +270,12 @@ const componentOptions = {
         settings() {
             this.loadSettings();
         },
+        needBookUpdateCount() {
+            if (this.needBookUpdateCount == 0)
+                this.showNeedBookUpdateOnly = false;
+
+            this.$emit('update-count-changed', {needBookUpdateCount: this.needBookUpdateCount});
+        }
     },
 };
 class RecentBooksPage {
@@ -551,7 +557,7 @@ class RecentBooksPage {
 
     get header() {
         const len = (this.tableData ? this.tableData.length : 0);
-        return `${(this.search ? `Найден${this.wordEnding(len, 2)}` : 'Всего')} ${len} файл${this.wordEnding(len)}${this.showArchive ? ' в архиве' : ''}`;
+        return `${(this.search || this.showNeedBookUpdateOnly ? `Найден${this.wordEnding(len, 2)}` : 'Всего')} ${len} файл${this.wordEnding(len)}${this.showArchive ? ' в архиве' : ''}`;
     }
 
     async downloadBook(fb2path, fullTitle) {

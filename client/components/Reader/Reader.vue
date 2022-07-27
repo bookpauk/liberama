@@ -100,6 +100,12 @@
                         </q-tooltip>
                     </button>
                     <button v-show="showToolButton['recentBooks']" ref="recentBooks" v-ripple class="tool-button" :class="buttonActiveClass('recentBooks')" @click="buttonClick('recentBooks')">
+                        <div v-show="needBookUpdateCount > 0" style="position: absolute">
+                            <div class="need-book-update-count">
+                                {{ needBookUpdateCount }}
+                            </div>
+                        </div>
+
                         <q-icon name="la la-book-open" size="32px" />
                         <q-tooltip :delay="1500" anchor="bottom middle" content-style="font-size: 80%">
                             {{ rstore.readerActions['recentBooks'] }}
@@ -156,7 +162,7 @@
             ></SearchPage>
             <CopyTextPage v-if="copyTextActive" ref="copyTextPage" @do-action="doAction"></CopyTextPage>
             <LibsPage v-show="hidden" ref="libsPage" @load-book="loadBook" @libs-close="libsClose" @do-action="doAction"></LibsPage>
-            <RecentBooksPage v-show="recentBooksActive" ref="recentBooksPage" @load-book="loadBook" @recent-books-close="recentBooksClose"></RecentBooksPage>
+            <RecentBooksPage v-show="recentBooksActive" ref="recentBooksPage" @load-book="loadBook" @recent-books-close="recentBooksClose" @update-count-changed="updateCountChanged"></RecentBooksPage>
             <SettingsPage v-show="settingsActive" ref="settingsPage" @do-action="doAction"></SettingsPage>
             <HelpPage v-if="helpActive" ref="helpPage" @do-action="doAction"></HelpPage>
             <ClickMapPage v-show="clickMapActive" ref="clickMapPage"></ClickMapPage>
@@ -311,6 +317,7 @@ class Reader {
 
     bucEnabled = false;
     bucSetOnNew = false;
+    needBookUpdateCount = 0;
 
     created() {
         this.rstore = rstore;
@@ -423,6 +430,8 @@ class Reader {
             this.updateRoute();
 
             await this.$refs.dialogs.init();
+
+            this.$refs.recentBooksPage.init();
         })();
 
         //проверки обновлений читалки
@@ -603,9 +612,15 @@ class Reader {
                     await bookManager.recentSetItem(book);
                 }
             }
+
+            await this.$refs.recentBooksPage.updateTableData();
         } catch (e) {
             console.error(e);
         }
+    }
+
+    updateCountChanged(event) {
+        this.needBookUpdateCount = event.needBookUpdateCount;
     }
 
     checkSetStorageAccessKey() {
@@ -1679,5 +1694,17 @@ export default vueComponent(Reader);
 
 .clear {
     color: rgba(0,0,0,0);
+}
+
+.need-book-update-count {
+    position: relative;
+    padding: 2px 6px 2px 6px;
+    left: 27px;
+    top: 22px;
+    background-color: blue;
+    border-radius: 10px;
+    color: white;
+    z-index: 10;
+    font-size: 80%;
 }
 </style>
