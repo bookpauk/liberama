@@ -237,7 +237,7 @@ class BookManager {
 
         if (newBook.downloadSize !== undefined && newBook.downloadSize >= 0)
             meta.downloadSize = newBook.downloadSize;
-        
+
         meta.key = this.keyFromPath(meta.path);
         meta.addTime = Date.now();//время добавления в кеш
 

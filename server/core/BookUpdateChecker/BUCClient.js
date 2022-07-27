@@ -78,7 +78,8 @@ class BUCClient {
 
         const rows = await db.select({
             table: 'buc',
-            where: `@@id(${db.esc(bookUrls)})`
+            map: `(r) => ({id: r.id, size: r.size})`,
+            where: `@@id(${db.esc(bookUrls)})`,
         });
 
         return rows;

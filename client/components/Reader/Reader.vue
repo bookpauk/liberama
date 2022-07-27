@@ -573,13 +573,27 @@ class Reader {
 
             //теперь по кусочкам запросим сервер
             const arr = Array.from(updateUrls);
+            const bucSize = {};
             const chunkSize = 100;
             for (let i = 0; i < arr.length; i += chunkSize) {
                 const chunk = arr.slice(i, i + chunkSize);
 
                 const data = await readerApi.checkBuc(chunk);
-console.log(data);
+
+                for (const item of data) {
+                    bucSize[item.id] = item.size;
+                }
+
                 await utils.sleep(1000);//чтобы не ддосить сервер
+            }
+
+            //проставим новые размеры у книг
+            for (const book of sorted) {
+                //размер 0 считаем отсутствующим
+                if (book.url && bucSize[book.url] && bucSize[book.url] !== book.bucSize) {
+                    book.bucSize = bucSize[book.url];
+                    await bookManager.recentSetItem(book);
+                }
             }
 console.log('checkBuc finished', arr);            
         } catch (e) {

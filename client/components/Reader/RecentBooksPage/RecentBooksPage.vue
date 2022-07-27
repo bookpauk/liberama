@@ -126,6 +126,9 @@
                             <div style="font-size: 75%">
                                 {{ item.desc.title }}
                             </div>
+                            <div v-show="bothBucEnabled && item.needBookUpdate" style="font-size: 75%; color: blue">
+                                Старый размер: {{ item.bucSize }}, новый: {{ item.downloadSize }}
+                            </div>
                         </div>
 
                         <div class="row" style="font-size: 10px">
@@ -169,7 +172,7 @@
                             class="col column justify-center" 
                             style="font-size: 75%; padding-left: 6px; border: 1px solid #cccccc; border-left: 0;"
                         >
-                            <div :style="`margin-top: ${(archive ? 20 : 0)}px`">
+                            <div style="margin: 20px 0 0 5px">
                                 <a v-show="isUrl(item.url)" :href="item.url" target="_blank">Оригинал</a><br><br>
                                 <a :href="item.path" @click.prevent="downloadBook(item.path, item.fullTitle)">Скачать FB2</a>
                             </div>
@@ -194,6 +197,22 @@
                             <q-tooltip :delay="1500" anchor="bottom middle" content-style="font-size: 80%">
                                 Восстановить из архива
                             </q-tooltip>
+                        </div>
+
+                        <div
+                            v-show="bothBucEnabled && item.showCheckBuc"
+                            class="buc-checkbox self-start"
+                        >
+                            <q-checkbox
+                                v-model="item.checkBuc"
+                                size="xs"
+                                style="position: relative; top: -5px; left: -5px;"
+                                @update:model-value="checkBucChange(item)"
+                            >
+                                <q-tooltip :delay="1500" anchor="bottom middle" content-style="font-size: 80%">
+                                    Проверять обновления
+                                </q-tooltip>
+                            </q-checkbox>
                         </div>
                     </div>
                 </div>
@@ -240,6 +259,10 @@ class RecentBooksPage {
     tableData = [];
     sortMethod = '';
     showSameBook = false;
+    bucEnabled = false;
+    bucSizeDiff = 0;
+    bucSetOnNew = false;
+
     archive = false;
 
     covers = {};
@@ -277,10 +300,17 @@ class RecentBooksPage {
         const settings = this.settings;
         this.showSameBook = settings.recentShowSameBook;
         this.sortMethod = settings.recentSortMethod || 'loadTimeDesc';
+        this.bucEnabled = settings.bucEnabled;
+        this.bucSizeDiff = settings.bucSizeDiff;
+        this.bucSetOnNew = settings.bucSetOnNew;
     }
 
     get settings() {
         return this.$store.state.reader.settings;
+    }
+
+    get bothBucEnabled() {
+        return this.$store.state.config.bucEnabled && this.bucEnabled;
     }
 
     async updateTableData() {
@@ -343,6 +373,12 @@ class RecentBooksPage {
                     activeParent: false,
                     inGroup: false,
                     coverPageUrl: book.coverPageUrl,
+
+                    showCheckBuc: !this.archive && utils.hasProp(book, 'downloadSize'),
+                    checkBuc: !!book.checkBuc,
+                    needBookUpdate: (!this.archive && book.checkBuc && book.bucSize && utils.hasProp(book, 'downloadSize') && (book.bucSize - book.downloadSize >= this.bucSizeDiff)),
+                    bucSize: book.bucSize,
+                    downloadSize: book.downloadSize,
 
                     //для сортировки
                     loadTimeRaw,
@@ -713,6 +749,14 @@ class RecentBooksPage {
         else
             return '';
     }
+
+    async checkBucChange(item) {
+        const book = await bookManager.getRecentBook(item);
+        if (book) {
+            book.checkBuc = item.checkBuc;
+            await bookManager.recentSetItem(book);
+        }
+    }
 }
 
 export default vueComponent(RecentBooksPage);
@@ -854,5 +898,9 @@ export default vueComponent(RecentBooksPage);
 
 .header-button-pressed:hover {
     color: black;
+}
+
+.buc-checkbox {
+    position: absolute;
 }
 </style>
