@@ -253,7 +253,7 @@ class BUCServer {
                         let hash = '';
 
                         const headers = await this.down.head(row.id);
-                        const modTime = headers['last-modified']
+                        const modTime = headers['last-modified'] || '';
 
                         if (!modTime || !row.modTime || (modTime !== row.modTime)) {
                             const downdata = await this.down.load(row.id);
@@ -291,6 +291,8 @@ class BUCServer {
                             }`,
                             where: `@@id(${db.esc(row.id)})`
                         });
+
+                        log(LM_ERR, `error ${row.id} > ${e.stack}`);
                     } finally {
                         (async() => {
                             await utils.sleep(this.sameHostCheckInterval);
