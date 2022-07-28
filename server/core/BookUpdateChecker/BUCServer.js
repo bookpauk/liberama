@@ -184,8 +184,8 @@ class BUCServer {
                     log(LM_WARN, `clean 'buc' table: deleted ${res.deleted}`);
                 }
 
-                //rows = await db.select({table: 'buc', count: true});
-                //log(LM_WARN, `'buc' table length: ${rows[0].count}`);
+                rows = await db.select({table: 'buc', count: true});
+                log(LM_WARN, `'buc' table size: ${rows[0].count}`);
 
                 now = Date.now();
                 //выборка кандидатов
@@ -200,24 +200,30 @@ class BUCServer {
                     `
                 });
 
-//console.log(rows);
-
+                //формирование checkQueue
                 if (rows.length) {
                     const ids = [];
+                    const rowsToPush = [];
 
+                    //сначала выберем сколько надо
                     for (const row of rows) {
-                        if (this.checkQueue.length >= this.maxCheckQueueLength)
+                        if (this.checkQueue.length + rowsToPush.length >= this.maxCheckQueueLength)
                             break;
 
+                        rowsToPush.push(row);
                         ids.push(row.id);
-                        this.checkQueue.push(row);
                     }
 
+                    //установим у них флаг "в обработке"
                     await db.update({
                         table: 'buc',
                         mod: `(r) => r.state = 1`,
                         where: `@@id(${db.esc(ids)})`
                     });
+
+                    //пушим в очередь, после этого их обработает periodicCheck
+                    for (const row of rowsToPush)
+                        this.checkQueue.push(row);
                     
                     log(LM_WARN, `checkQueue: added ${ids.length} recs, total ${this.checkQueue.length}`);
                 }
