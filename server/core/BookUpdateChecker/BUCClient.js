@@ -249,7 +249,7 @@ class BUCClient {
             this.periodicSendBookUrls();//no await
             this.periodicSync();//no await
 
-            log(`BUC Client started`);
+            log(`BUC Client Worker started`);
         } catch (e) {
             log(LM_FATAL, e.stack);
             ayncExit.exit(1);

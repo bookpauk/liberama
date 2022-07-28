@@ -260,7 +260,7 @@ class BUCServer {
 
                         //log(row.id);
                         //log(`etag: ${etag}, modTime: ${modTime}, size: ${size}`)
-                        
+
                         if ((!etag || !row.etag || (etag !== row.etag))
                             && (!modTime || !row.modTime || (modTime !== row.modTime))
                             && (!size || !row.size || (size !== row.size))
@@ -331,9 +331,9 @@ class BUCServer {
             for (let i = 0; i < 10; i++)
                 this.periodicCheck();//no await
 
-            log(`------------------`);
-            log(`BUC Server started`);
-            log(`------------------`);
+            log(`-------------------------`);
+            log(`BUC Server Worker started`);
+            log(`-------------------------`);
         } catch (e) {
             log(LM_FATAL, e.stack);
             ayncExit.exit(1);
