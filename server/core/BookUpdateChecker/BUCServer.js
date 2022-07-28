@@ -26,8 +26,8 @@ class BUCServer {
                 this.periodicCheckWait = 500;//пауза, если нечего делать
 
                 this.cleanQueryInterval = 300*dayMs;//интервал очистки устаревших
-                this.oldQueryInterval = 30*dayMs;//интервал устаревания запроса на обновление
-                this.checkingInterval = 3*hourMs;//интервал проверки обновления одного и того же файла
+                this.oldQueryInterval = 14*dayMs;//интервал устаревания запроса на обновление
+                this.checkingInterval = 5*hourMs;//интервал проверки обновления одного и того же файла
                 this.sameHostCheckInterval = 1000;//интервал проверки файла на том же сайте, не менее
             } else {
                 this.maxCheckQueueLength = 10;//максимальная длина checkQueue
@@ -184,8 +184,8 @@ class BUCServer {
                     log(LM_WARN, `clean 'buc' table: deleted ${res.deleted}`);
                 }
 
-                rows = await db.select({table: 'buc', count: true});
-                log(LM_WARN, `'buc' table length: ${rows[0].count}`);
+                //rows = await db.select({table: 'buc', count: true});
+                //log(LM_WARN, `'buc' table length: ${rows[0].count}`);
 
                 now = Date.now();
                 //выборка кандидатов
@@ -250,16 +250,20 @@ class BUCServer {
 
                     try {
                         let unchanged = true;
-                        let size = 0;
                         let hash = '';
 
                         const headers = await this.down.head(row.id);
 
                         const etag = headers['etag'] || '';
                         const modTime = headers['last-modified'] || '';
+                        let size = parseInt(headers['content-length'], 10) || 0;
 
+                        //log(row.id);
+                        //log(`etag: ${etag}, modTime: ${modTime}, size: ${size}`)
+                        
                         if ((!etag || !row.etag || (etag !== row.etag))
                             && (!modTime || !row.modTime || (modTime !== row.modTime))
+                            && (!size || !row.size || (size !== row.size))
                             ) {
                             const downdata = await this.down.load(row.id);
 
