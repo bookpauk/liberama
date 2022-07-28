@@ -134,6 +134,7 @@ class BUCServer {
                     id,
                     queryTime: now,
                     checkTime: 0, // 0 - never checked
+                    etag: '',
                     modTime: '',
                     size: 0,
                     checkSum: '', //sha256
@@ -253,9 +254,13 @@ class BUCServer {
                         let hash = '';
 
                         const headers = await this.down.head(row.id);
+
+                        const etag = headers['etag'] || '';
                         const modTime = headers['last-modified'] || '';
 
-                        if (!modTime || !row.modTime || (modTime !== row.modTime)) {
+                        if ((!etag || !row.etag || (etag !== row.etag))
+                            && (!modTime || !row.modTime || (modTime !== row.modTime))
+                            ) {
                             const downdata = await this.down.load(row.id);
 
                             size = downdata.length;
@@ -267,6 +272,7 @@ class BUCServer {
                             table: 'buc',
                             mod: `(r) => {
                                 r.checkTime = ${db.esc(Date.now())};
+                                r.etag = ${(unchanged ? 'r.etag' : db.esc(etag))};
                                 r.modTime = ${(unchanged ? 'r.modTime' : db.esc(modTime))};
                                 r.size = ${(unchanged ? 'r.size' : db.esc(size))};
                                 r.checkSum = ${(unchanged ? 'r.checkSum' : db.esc(hash))};
