@@ -308,7 +308,7 @@ class BUCServer {
                             where: `@@id(${db.esc(row.id)})`
                         });
 
-                        log(LM_ERR, `error ${row.id} > ${e.stack}`);
+                        log(LM_ERR, `error ${row.id} > ${e.stack ? e.stack : e.message}`);
                     } finally {
                         (async() => {
                             await utils.sleep(this.sameHostCheckInterval);
