@@ -476,7 +476,10 @@ class Reader {
         this.dualPageMode = settings.dualPageMode;
         this.userWallpapers = settings.userWallpapers;
         this.bucEnabled = settings.bucEnabled;
+        this.bucSizeDiff = settings.bucSizeDiff;
         this.bucSetOnNew = settings.bucSetOnNew;
+        this.bucCancelEnabled = settings.bucCancelEnabled;
+        this.bucCancelDays = settings.bucCancelDays;
 
         this.readerActionByKeyCode = utils.userHotKeysObjectSwap(settings.userHotKeys);
         this.$root.readerActionByKeyEvent = (event) => {
@@ -604,12 +607,49 @@ class Reader {
                 await utils.sleep(1000);//чтобы не ддосить сервер
             }
 
+            const checkSetTime = {};
             //проставим новые размеры у книг
             for (const book of sorted) {
+                if (book.deleted)
+                    continue;
+                
                 //размер 0 считаем отсутствующим
                 if (book.url && bucSize[book.url] && bucSize[book.url] !== book.bucSize) {
                     book.bucSize = bucSize[book.url];
                     await bookManager.recentSetItem(book);
+                }
+
+                //подготовка к следующему шагу, ищем книгу по url с максимальной датой установки checkBucTime/loadTime
+                //от этой даты будем потом отсчитывать bucCancelDays
+                if (updateUrls.has(book.url)) {
+                    let rec = checkSetTime[book.url] || {time: 0, loadTime: 0};
+
+                    const time = (book.checkBucTime ? book.checkBucTime : (rec.loadTime || 0));
+                    if (time > rec.time || (time == rec.time && (book.loadTime > rec.loadTime)))
+                        rec = {time, loadTime: book.loadTime, key: book.key};
+
+                    checkSetTime[book.url] = rec;
+                }
+            }
+
+            //bucCancelEnabled и bucCancelDays
+            //снимем флаг checkBuc у необновлявшихся bucCancelDays
+            if (this.bucCancelEnabled) {
+                for (const rec of Object.values(checkSetTime)) {
+                    if (rec.time && Date.now() - rec.time > this.bucCancelDays*24*3600*1000) {
+                        const book = await bookManager.getRecentBook({key: rec.key});
+                        const needBookUpdate = 
+                            book.checkBuc
+                            && book.bucSize
+                            && utils.hasProp(book, 'downloadSize')
+                            && book.bucSize !== book.downloadSize
+                            && (book.bucSize - book.downloadSize >= this.bucSizeDiff)
+                        ;
+
+                        if (book && !needBookUpdate) {
+                            await bookManager.setCheckBuc(book, undefined);//!!!
+                        }
+                    }
                 }
             }
 
@@ -1251,6 +1291,7 @@ class Reader {
 
                     this.checkBookPosPercent();
                     this.activateClickMapPage();//no await
+                    this.$refs.recentBooksPage.updateTableData();//no await
                     return;
                 }
 

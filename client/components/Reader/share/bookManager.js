@@ -487,7 +487,7 @@ class BookManager {
         await this.recentSetItem(item);
     }
 
-    async setCheckBuc(value, checkBuc = true) {
+    async setCheckBuc(value, checkBuc) {
         const item = this.recent[value.key];
 
         const updateItems = [];
@@ -495,7 +495,7 @@ class BookManager {
             if (item.sameBookKey !== undefined) {
                 const sorted = this.getSortedRecent();
                 for (const book of sorted) {
-                    if (book.sameBookKey === item.sameBookKey)
+                    if (!book.deleted && book.sameBookKey === item.sameBookKey)
                         updateItems.push(book);
                 }
             } else {
@@ -503,8 +503,11 @@ class BookManager {
             }
         }
 
+        const now = Date.now();
         for (const book of updateItems) {
             book.checkBuc = checkBuc;
+            if (checkBuc)
+                book.checkBucTime = now;
             await this.recentSetItem(book);
         }
     }

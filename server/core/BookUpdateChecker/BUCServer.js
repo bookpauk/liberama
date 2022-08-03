@@ -26,8 +26,8 @@ class BUCServer {
                 this.periodicCheckWait = 500;//пауза, если нечего делать
 
                 this.cleanQueryInterval = 300*dayMs;//интервал очистки устаревших
-                this.oldQueryInterval = 30*dayMs;//интервал устаревания запроса на обновление
-                this.checkingInterval = 3*hourMs;//интервал проверки обновления одного и того же файла
+                this.oldQueryInterval = 14*dayMs;//интервал устаревания запроса на обновление
+                this.checkingInterval = 5*hourMs;//интервал проверки обновления одного и того же файла
                 this.sameHostCheckInterval = 1000;//интервал проверки файла на том же сайте, не менее
             } else {
                 this.maxCheckQueueLength = 10;//максимальная длина checkQueue
@@ -134,6 +134,7 @@ class BUCServer {
                     id,
                     queryTime: now,
                     checkTime: 0, // 0 - never checked
+                    etag: '',
                     modTime: '',
                     size: 0,
                     checkSum: '', //sha256
@@ -184,7 +185,7 @@ class BUCServer {
                 }
 
                 rows = await db.select({table: 'buc', count: true});
-                log(LM_WARN, `'buc' table length: ${rows[0].count}`);
+                log(LM_WARN, `'buc' table size: ${rows[0].count}`);
 
                 now = Date.now();
                 //выборка кандидатов
@@ -199,24 +200,30 @@ class BUCServer {
                     `
                 });
 
-//console.log(rows);
-
+                //формирование checkQueue
                 if (rows.length) {
                     const ids = [];
+                    const rowsToPush = [];
 
+                    //сначала выберем сколько надо
                     for (const row of rows) {
-                        if (this.checkQueue.length >= this.maxCheckQueueLength)
+                        if (this.checkQueue.length + rowsToPush.length >= this.maxCheckQueueLength)
                             break;
 
+                        rowsToPush.push(row);
                         ids.push(row.id);
-                        this.checkQueue.push(row);
                     }
 
+                    //установим у них флаг "в обработке"
                     await db.update({
                         table: 'buc',
                         mod: `(r) => r.state = 1`,
                         where: `@@id(${db.esc(ids)})`
                     });
+
+                    //пушим в очередь, после этого их обработает periodicCheck
+                    for (const row of rowsToPush)
+                        this.checkQueue.push(row);
                     
                     log(LM_WARN, `checkQueue: added ${ids.length} recs, total ${this.checkQueue.length}`);
                 }
@@ -249,13 +256,21 @@ class BUCServer {
 
                     try {
                         let unchanged = true;
-                        let size = 0;
                         let hash = '';
 
                         const headers = await this.down.head(row.id);
-                        const modTime = headers['last-modified']
 
-                        if (!modTime || !row.modTime || (modTime !== row.modTime)) {
+                        const etag = headers['etag'] || '';
+                        const modTime = headers['last-modified'] || '';
+                        let size = parseInt(headers['content-length'], 10) || 0;
+
+                        //log(row.id);
+                        //log(`etag: ${etag}, modTime: ${modTime}, size: ${size}`)
+
+                        if ((!etag || !row.etag || (etag !== row.etag))
+                            && (!modTime || !row.modTime || (modTime !== row.modTime))
+                            && (!size || !row.size || (size !== row.size))
+                            ) {
                             const downdata = await this.down.load(row.id);
 
                             size = downdata.length;
@@ -267,6 +282,7 @@ class BUCServer {
                             table: 'buc',
                             mod: `(r) => {
                                 r.checkTime = ${db.esc(Date.now())};
+                                r.etag = ${(unchanged ? 'r.etag' : db.esc(etag))};
                                 r.modTime = ${(unchanged ? 'r.modTime' : db.esc(modTime))};
                                 r.size = ${(unchanged ? 'r.size' : db.esc(size))};
                                 r.checkSum = ${(unchanged ? 'r.checkSum' : db.esc(hash))};
@@ -291,6 +307,8 @@ class BUCServer {
                             }`,
                             where: `@@id(${db.esc(row.id)})`
                         });
+
+                        log(LM_ERR, `error ${row.id} > ${e.stack ? e.stack : e.message}`);
                     } finally {
                         (async() => {
                             await utils.sleep(this.sameHostCheckInterval);
@@ -319,9 +337,9 @@ class BUCServer {
             for (let i = 0; i < 10; i++)
                 this.periodicCheck();//no await
 
-            log(`------------------`);
-            log(`BUC Server started`);
-            log(`------------------`);
+            log(`-------------------------`);
+            log(`BUC Server Worker started`);
+            log(`-------------------------`);
         } catch (e) {
             log(LM_FATAL, e.stack);
             ayncExit.exit(1);

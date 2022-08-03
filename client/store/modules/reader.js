@@ -185,7 +185,7 @@ const settingDefaults = {
 
     fontShifts: {},
     showToolButton: {},
-    toolBarHideOnScroll: true,
+    toolBarHideOnScroll: false,
     userHotKeys: {},
     userWallpapers: [],
 
@@ -196,6 +196,8 @@ const settingDefaults = {
     bucEnabled: true, // общее включение/выключение проверки обновлений
     bucSizeDiff: 1, // разница в размерах файла, при которой показывать наличие обновления
     bucSetOnNew: true, // автоматически включать проверку обновлений для вновь загружаемых файлов
+    bucCancelEnabled: true, // вкл/выкл отмену проверки книг через bucCancelDays
+    bucCancelDays: 90, // количество дней, через которое отменяется проверка книги, при условии отсутствия обновлений за это время
 
     //для SettingsPage
     needUpdateSettingsView: 0,
