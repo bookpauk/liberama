@@ -147,8 +147,8 @@
                                 {{ item.desc.title }}
                             </div>
                             <div v-show="bothBucEnabled && item.needBookUpdate" style="font-size: 75%; color: blue;">
-                                Размер: {{ item.downloadSize }} &rarr; {{ item.bucSize }},
-                                {{ item.bucSize - item.downloadSize > 0 ? '+' : '' }}{{ item.bucSize - item.downloadSize }}
+                                Размер: {{ item.bucSize - item.downloadSize > 0 ? '+' : '' }}{{ item.bucSize - item.downloadSize }}
+                                ({{ item.downloadSize }} &rarr; {{ item.bucSize }})
                             </div>
                         </div>
 
@@ -231,7 +231,12 @@
                                 @update:model-value="checkBucChange(item)"
                             >
                                 <q-tooltip :delay="1500" anchor="bottom middle" content-style="font-size: 80%">
-                                    Проверять обновления
+                                    <div v-if="item.checkBuc === undefined">
+                                        Проверка обновлений отключена автоматически<br>т.к. книга не обновлялась {{ bucCancelDays }} дней
+                                    </div>
+                                    <div v-else>
+                                        {{ (item.checkBuc ? 'Проверка обновлений книги включена' : 'Проверка обновлений книги отключена') }}
+                                    </div>
                                 </q-tooltip>
                             </q-checkbox>
                         </div>
@@ -289,6 +294,7 @@ class RecentBooksPage {
     bucEnabled = false;
     bucSizeDiff = 0;
     bucSetOnNew = false;
+    bucCancelDays = 0;
     needBookUpdateCount = 0;
 
     showArchive = false;
@@ -332,6 +338,7 @@ class RecentBooksPage {
         this.bucEnabled = settings.bucEnabled;
         this.bucSizeDiff = settings.bucSizeDiff;
         this.bucSetOnNew = settings.bucSetOnNew;
+        this.bucCancelDays = settings.bucCancelDays;
     }
 
     get settings() {
@@ -403,8 +410,8 @@ class RecentBooksPage {
                     inGroup: false,
                     coverPageUrl: book.coverPageUrl,
 
-                    showCheckBuc: !this.showArchive && utils.hasProp(book, 'downloadSize'),
-                    checkBuc: !!book.checkBuc,
+                    showCheckBuc: !this.showArchive && utils.hasProp(book, 'downloadSize') && book.url.indexOf('disk://') !== 0,
+                    checkBuc: book.checkBuc,
                     needBookUpdate: (
                         !this.showArchive
                         && book.checkBuc
