@@ -476,7 +476,10 @@ class Reader {
         this.dualPageMode = settings.dualPageMode;
         this.userWallpapers = settings.userWallpapers;
         this.bucEnabled = settings.bucEnabled;
+        this.bucSizeDiff = settings.bucSizeDiff;
         this.bucSetOnNew = settings.bucSetOnNew;
+        this.bucCancelEnabled = settings.bucCancelEnabled;
+        this.bucCancelDays = settings.bucCancelDays;
 
         this.readerActionByKeyCode = utils.userHotKeysObjectSwap(settings.userHotKeys);
         this.$root.readerActionByKeyEvent = (event) => {
@@ -604,12 +607,47 @@ class Reader {
                 await utils.sleep(1000);//чтобы не ддосить сервер
             }
 
+            const checkSetTime = {};
             //проставим новые размеры у книг
             for (const book of sorted) {
                 //размер 0 считаем отсутствующим
                 if (book.url && bucSize[book.url] && bucSize[book.url] !== book.bucSize) {
                     book.bucSize = bucSize[book.url];
                     await bookManager.recentSetItem(book);
+                }
+
+                //подготовка к следующему шагу
+                if (updateUrls.has(book.url)) {
+                    let time = checkSetTime[book.key] || 0;
+                    if (book.checkBucTime && book.checkBucTime > time) {
+                        time = book.checkBucTime;
+                    } else if (book.loadTime && book.loadTime > time) {
+                        time = book.loadTime;
+                    }
+
+                    checkSetTime[book.key] = time;
+                }
+            }
+
+            //bucCancelEnabled и bucCancelDays
+            //снимем флаг checkBuc у необновлявшихся bucCancelDays
+            if (this.bucCancelEnabled) {
+                for (const [key, time] of Object.entries(checkSetTime)) {
+                    if (time && Date.now() - time > this.bucCancelDays*24*3600*1000) {
+                        const book = await bookManager.getRecentBook({key});
+                        const needBookUpdate = 
+                            book.checkBuc
+                            && book.bucSize
+                            && utils.hasProp(book, 'downloadSize')
+                            && book.bucSize !== book.downloadSize
+                            && (book.bucSize - book.downloadSize >= this.bucSizeDiff)
+                        ;
+
+                        if (book && !needBookUpdate) {
+                            book.checkBuc = undefined;//!!!
+                            await bookManager.recentSetItem(book);
+                        }
+                    }
                 }
             }
 

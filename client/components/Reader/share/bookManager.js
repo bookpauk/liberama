@@ -505,6 +505,8 @@ class BookManager {
 
         for (const book of updateItems) {
             book.checkBuc = checkBuc;
+            if (checkBuc)
+                book.checkBucTime = Date.now();
             await this.recentSetItem(book);
         }
     }
