@@ -495,7 +495,7 @@ class BookManager {
             if (item.sameBookKey !== undefined) {
                 const sorted = this.getSortedRecent();
                 for (const book of sorted) {
-                    if (book.sameBookKey === item.sameBookKey)
+                    if (!book.deleted && book.sameBookKey === item.sameBookKey)
                         updateItems.push(book);
                 }
             } else {

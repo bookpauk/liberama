@@ -610,6 +610,9 @@ class Reader {
             const checkSetTime = {};
             //проставим новые размеры у книг
             for (const book of sorted) {
+                if (book.deleted)
+                    continue;
+                
                 //размер 0 считаем отсутствующим
                 if (book.url && bucSize[book.url] && bucSize[book.url] !== book.bucSize) {
                     book.bucSize = bucSize[book.url];
