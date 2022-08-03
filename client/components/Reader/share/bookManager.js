@@ -487,7 +487,7 @@ class BookManager {
         await this.recentSetItem(item);
     }
 
-    async setCheckBuc(value, checkBuc = true) {
+    async setCheckBuc(value, checkBuc) {
         const item = this.recent[value.key];
 
         const updateItems = [];
@@ -503,10 +503,11 @@ class BookManager {
             }
         }
 
+        const now = Date.now();
         for (const book of updateItems) {
             book.checkBuc = checkBuc;
             if (checkBuc)
-                book.checkBucTime = Date.now();
+                book.checkBucTime = now;
             await this.recentSetItem(book);
         }
     }

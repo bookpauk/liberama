@@ -616,25 +616,25 @@ class Reader {
                     await bookManager.recentSetItem(book);
                 }
 
-                //подготовка к следующему шагу
+                //подготовка к следующему шагу, ищем книгу по url с максимальной датой установки checkBucTime/loadTime
+                //от этой даты будем потом отсчитывать bucCancelDays
                 if (updateUrls.has(book.url)) {
-                    let time = checkSetTime[book.key] || 0;
-                    if (book.checkBucTime && book.checkBucTime > time) {
-                        time = book.checkBucTime;
-                    } else if (book.loadTime && book.loadTime > time) {
-                        time = book.loadTime;
-                    }
+                    let rec = checkSetTime[book.url] || {time: 0, loadTime: 0};
 
-                    checkSetTime[book.key] = time;
+                    const time = (book.checkBucTime ? book.checkBucTime : (rec.loadTime || 0));
+                    if (time > rec.time || (time == rec.time && (book.loadTime > rec.loadTime)))
+                        rec = {time, loadTime: book.loadTime, key: book.key};
+
+                    checkSetTime[book.url] = rec;
                 }
             }
 
             //bucCancelEnabled и bucCancelDays
             //снимем флаг checkBuc у необновлявшихся bucCancelDays
             if (this.bucCancelEnabled) {
-                for (const [key, time] of Object.entries(checkSetTime)) {
-                    if (time && Date.now() - time > this.bucCancelDays*24*3600*1000) {
-                        const book = await bookManager.getRecentBook({key});
+                for (const rec of Object.values(checkSetTime)) {
+                    if (rec.time && Date.now() - rec.time > this.bucCancelDays*24*3600*1000) {
+                        const book = await bookManager.getRecentBook({key: rec.key});
                         const needBookUpdate = 
                             book.checkBuc
                             && book.bucSize
@@ -644,8 +644,7 @@ class Reader {
                         ;
 
                         if (book && !needBookUpdate) {
-                            book.checkBuc = undefined;//!!!
-                            await bookManager.recentSetItem(book);
+                            await bookManager.setCheckBuc(book, undefined);//!!!
                         }
                     }
                 }
@@ -1289,6 +1288,7 @@ class Reader {
 
                     this.checkBookPosPercent();
                     this.activateClickMapPage();//no await
+                    this.$refs.recentBooksPage.updateTableData();//no await
                     return;
                 }
 
