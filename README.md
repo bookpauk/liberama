@@ -38,6 +38,6 @@ $ npm run dev
 
 ## Помочь проекту
 
-* bitcoin: 3EbgZ7MK1UVaN38Gty5DCBtS4PknM4Ut85
+* bitcoin: bc1q3tyumaj648pp2e69jalsez2lnt462ttc33nup9
 * litecoin: MP39Riec4oSNB3XMjiquKoLWxbufRYNXxZ
 * monero: 8BQPnvHcPSHM5gMQsmuypDgx9NNsYqwXKfDDuswEyF2Q2ewQSfd2pkK6ydH2wmMyq2JViZvy9DQ35hLMx7g72mFWNJTPtnz
