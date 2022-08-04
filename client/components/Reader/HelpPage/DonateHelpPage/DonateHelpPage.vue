@@ -4,32 +4,6 @@
             <p class="p">
                 Вы можете пожертвовать на развитие проекта любую сумму:
             </p>
-            <div class="address">
-                <img class="logo" src="./assets/yoomoney.png">
-                <q-btn class="q-ml-sm q-px-sm" dense no-caps @click="donateYooMoney">
-                    Пожертвовать
-                </q-btn><br>
-                <div class="para">
-                    {{ yooAddress }}
-                    <q-icon class="copy-icon" name="la la-copy" @click="copyAddress(yooAddress, 'Кошелёк ЮMoney')">
-                        <q-tooltip :delay="1000" anchor="top middle" self="center middle" content-style="font-size: 80%">
-                            Скопировать
-                        </q-tooltip>                    
-                    </q-icon>
-                </div>
-            </div>
-
-            <!--div class="address">                
-                <img class="logo" src="./assets/paypal.png">
-                <div class="para">
-                    {{ paypalAddress }}
-                    <q-icon class="copy-icon" name="la la-copy" @click="copyAddress(paypalAddress, 'Paypal-адрес')">
-                        <q-tooltip :delay="1000" anchor="top middle" self="center middle" content-style="font-size: 80%">
-                            Скопировать
-                        </q-tooltip>                    
-                    </q-icon>
-                </div>
-            </div-->
 
             <div class="address">                
                 <img class="logo" src="./assets/bitcoin.png">
@@ -77,17 +51,11 @@ import vueComponent from '../../../vueComponent.js';
 import {copyTextToClipboard} from '../../../../share/utils';
 
 class DonateHelpPage {
-    yooAddress = '410018702323056';
-    paypalAddress = 'bookpauk@gmail.com';
-    bitcoinAddress = '3EbgZ7MK1UVaN38Gty5DCBtS4PknM4Ut85';
+    bitcoinAddress = 'bc1q3tyumaj648pp2e69jalsez2lnt462ttc33nup9';
     litecoinAddress = 'MP39Riec4oSNB3XMjiquKoLWxbufRYNXxZ';
     moneroAddress = '8BQPnvHcPSHM5gMQsmuypDgx9NNsYqwXKfDDuswEyF2Q2ewQSfd2pkK6ydH2wmMyq2JViZvy9DQ35hLMx7g72mFWNJTPtnz';
 
     created() {
-    }
-
-    donateYooMoney() {
-        window.open(`https://yoomoney.ru/to/${this.yooAddress}`, '_blank');
     }
 
     async copyAddress(address, prefix) {
@@ -133,8 +101,6 @@ export default vueComponent(DonateHelpPage);
 
 .logo {
     width: 130px;
-    position: relative;
-    top: 10px;
 }
 
 .copy-icon {
