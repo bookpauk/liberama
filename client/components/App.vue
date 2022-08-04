@@ -238,7 +238,7 @@ class App {
                 const url = s[1] || '';
                 const q = utils.parseQuery(s[0] || '');
                 if (url) {
-                    q.url = decodeURIComponent(url);
+                    q.url = url;
                 }
 
                 window.history.replaceState({}, '', '/');
