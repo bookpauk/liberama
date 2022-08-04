@@ -1,4 +1,5 @@
 const axios = require('axios');
+const utils = require('./utils');
 
 const userAgent = 'Mozilla/5.0 (X11; HasCodingOs 1.0; Linux x64) AppleWebKit/637.36 (KHTML, like Gecko) Chrome/70.0.3112.101 Safari/637.36 HasBrowser/5.0';
 
@@ -77,25 +78,42 @@ class FileDownloader {
         return res.headers;
     }
 
-    streamToBuffer(stream, progress) {
+    streamToBuffer(stream, progress, timeout = 30*1000) {
         return new Promise((resolve, reject) => {
             
             if (!progress)
                 progress = () => {};
 
             const _buf = [];
+            let resolved = false;
+            let timer = 0;
 
             stream.on('data', (chunk) => {
+                timer = 0;
                 _buf.push(chunk);
                 progress(chunk);
             });
-            stream.on('end', () => resolve(Buffer.concat(_buf)));
+            stream.on('end', () => {
+                resolved = true;
+                timer = timeout;
+                resolve(Buffer.concat(_buf));
+            });
             stream.on('error', (err) => {
                 reject(err);
             });
             stream.on('aborted', () => {
                 reject(new Error('aborted'));
             });
+
+            //бодяга с timer и timeout, чтобы гарантировать отсутствие зависания по каким-либо причинам
+            (async() => {
+                while (timer < timeout) {
+                    await utils.sleep(1000);
+                    timer += 1000;
+                }
+                if (!resolved)
+                    reject(new Error('FileDownloader: timed out'))
+            })();
         });
     }
 }
