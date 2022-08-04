@@ -721,7 +721,7 @@ class Reader {
             return;
         const recent = this.mostRecentBook();
         const pos = (recent && recent.bookPos && this.allowUrlParamBookPos ? `__p=${recent.bookPos}&` : '');
-        const url = (recent ? `url=${recent.url}` : '');
+        const url = (recent ? `url=${encodeURIComponent(recent.url)}` : '');
         if (isNewRoute)
             this.$router.push(`/reader?${pos}${url}`).catch(() => {});
         else
