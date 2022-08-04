@@ -12,7 +12,8 @@ class FileDownloader {
 
         const options = {
             headers: {
-                'user-agent': userAgent
+                'user-agent': userAgent,
+                timeout: 300*1000,
             },
             responseType: 'stream',
         };
@@ -67,7 +68,8 @@ class FileDownloader {
     async head(url) {
         const options = {
             headers: {
-                'user-agent': userAgent
+                'user-agent': userAgent,
+                timeout: 10*1000,
             },
         };
 
