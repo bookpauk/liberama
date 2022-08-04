@@ -259,8 +259,9 @@ class BUCServer {
                     try {
                         let unchanged = true;
                         let hash = '';
-
+log(`head ${row.id}`)
                         const headers = await this.down.head(row.id);
+log(`headers ${row.id}: ${JSON.stringify(headers)}`)
 
                         const etag = headers['etag'] || '';
                         const modTime = headers['last-modified'] || '';
@@ -273,7 +274,9 @@ class BUCServer {
                             && (!modTime || !row.modTime || (modTime !== row.modTime))
                             && (!size || !row.size || (size !== row.size))
                             ) {
+log(`down ${row.id}`)
                             const downdata = await this.down.load(row.id);
+log(`loaded ${row.id}`)
 
                             size = downdata.length;
                             hash = await utils.getBufHash(downdata, 'sha256', 'hex');
