@@ -25,7 +25,7 @@ class WorkerState {
         return {
             set: state => this.setState(workerId, state),
             finish: state => this.finishState(workerId, state),
-            get: workerId => this.getState(workerId),
+            get: () => this.getState(workerId),
         };
     }
 
