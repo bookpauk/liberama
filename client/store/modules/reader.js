@@ -180,7 +180,7 @@ const settingDefaults = {
 
     showServerStorageMessages: true,
     showWhatsNewDialog: true,
-    showDonationDialog2020: true,
+    showDonationDialog: true,
     showNeedUpdateNotify: true,
 
     fontShifts: {},

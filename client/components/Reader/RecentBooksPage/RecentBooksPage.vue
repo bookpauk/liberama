@@ -813,6 +813,12 @@ class RecentBooksPage {
         const book = await bookManager.getRecentBook(item);
         if (book) {
             await bookManager.setCheckBuc(book, item.checkBuc);
+            
+            this.$root.notify.info(item.checkBuc
+                ? 'Проверка обновлений книги включена'
+                : 'Проверка обновлений книги отключена'
+            );
+            
         }
     }
 

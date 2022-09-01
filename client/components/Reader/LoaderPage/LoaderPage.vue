@@ -57,7 +57,7 @@
         <div class="col column justify-end items-center no-wrap overflow-hidden">
             <span v-if="mode == 'omnireader'" class="bottom-span clickable" @click="findBook">Найти книгу</span>
             <span class="bottom-span clickable" @click="openHelp">Справка</span>
-            <!--span class="bottom-span clickable" @click="openDonate">Помочь проекту</span-->
+            <span class="bottom-span clickable" @click="openDonate">Помочь проекту</span>
 
             <span v-if="version == clientVersion" class="bottom-span">v{{ version }}</span>
             <span v-else class="bottom-span">Версия сервера {{ version }}, версия клиента {{ clientVersion }}, необходимо обновить страницу</span>

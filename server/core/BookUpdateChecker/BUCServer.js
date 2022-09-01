@@ -78,8 +78,10 @@ class BUCServer {
 
                     const ids = new Set();
                     let id = iter.next();
-                    while (!id.done && ids.size < 100) {
+                    while (!id.done) {
                         ids.add(id.value);
+                        if (ids.size >= 100)
+                            break;
                         id = iter.next();
                     }
 
@@ -222,8 +224,10 @@ class BUCServer {
                     });
 
                     //пушим в очередь, после этого их обработает periodicCheck
-                    for (const row of rowsToPush)
+                    for (const row of rowsToPush) {
                         this.checkQueue.push(row);
+                        log(LM_INFO, `    add ${row.id}`);
+                    }
                     
                     log(LM_WARN, `checkQueue: added ${ids.length} recs, total ${this.checkQueue.length}`);
                 }
@@ -271,6 +275,7 @@ class BUCServer {
                             && (!modTime || !row.modTime || (modTime !== row.modTime))
                             && (!size || !row.size || (size !== row.size))
                             ) {
+
                             const downdata = await this.down.load(row.id);
 
                             size = downdata.length;
