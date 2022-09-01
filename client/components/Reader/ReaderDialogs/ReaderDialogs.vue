@@ -18,56 +18,51 @@
             </template>
         </Dialog>
 
-        <Dialog ref="dialog2" v-model="donationVisible">
-            <template #header>
-                Здравствуйте, уважаемые читатели!
-            </template>
+        <q-dialog ref="dialog2" v-model="donationVisible" style="z-index: 100" no-route-dismiss no-esc-dismiss no-backdrop-dismiss>
+            <div class="column bg-white no-wrap q-pa-md">
+                <div class="row justify-center q-mb-md" style="font-size: 110%">
+                    Здравствуйте, дорогие читатели!
+                </div>
 
-            <div style="word-break: normal">
-                Стартовала ежегодная акция "Оплатим хостинг вместе".<br><br>
+                <div class="q-mx-md column" style="word-break: normal">
+                    <div>
+                        Вот уже много лет мы все вместе пользуемся нашей любимой читалкой.<br><br>
 
-                Для оплаты годового хостинга читалки, необходимо собрать около 2000 рублей.
-                В настоящий момент у автора эта сумма есть в наличии. Однако будет справедливо, если каждый
-                сможет проголосовать рублем за то, чтобы читалка так и оставалась:
+                        Напоминаем вам, что проект является некоммерческим и обладает такими
+                        достоинствами, как:
 
-                <ul>
-                    <li>непрерывно улучшаемой</li>
-                    <li>без рекламы</li>
-                    <li>без регистрации</li>
-                    <li>Open Source</li>
-                </ul>
+                        <ul>
+                            <li>все функции читалки открыты и доступны совершенно бесплатно</li>
+                            <li>в проекте отсутствует какая-либо реклама или баннеры</li>
+                            <li>нет никакой регистрации и монетизации</li>
+                            <li>нет сбора персональных данных</li>
+                            <li>открытый исходный код</li>
+                            <li>проект постепенно улучшается, по мере возможности</li>
+                        </ul>
 
-                Автор также обращается с просьбой о помощи в распространении 
-                <a href="https://omnireader.ru" target="_blank">ссылки</a>
-                <q-icon class="copy-icon" name="la la-copy" @click="copyLink('https://omnireader.ru')">
-                    <q-tooltip :delay="1000" anchor="top middle" self="center middle" content-style="font-size: 80%">
-                        Скопировать
-                    </q-tooltip>                    
-                </q-icon>
-                на читалку через тематические форумы, соцсети, мессенджеры и пр.
-                Чем нас больше, тем легче оставаться на плаву и тем больше мотивации у разработчика, чтобы продолжать работать над проектом.
+                        Однако на оплату хостинга читалки и сервера обновлений автор тратит свои 
+                        собственные средства, а также тратит свое время и силы на улучшение проекта.
+                        <br><br>
+                        Поддержим же материально наш ресурс, чтобы и дальше спокойно существовать и развиваться:
+                    </div>
 
-                <br><br>
-                Если соберется бóльшая сумма, то разработка децентрализованной библиотеки для свободного обмена книгами будет по возможности ускорена.
-                <br><br>
-                P.S. При необходимости можно воспользоваться подходящим обменником на <a href="https://www.bestchange.ru" target="_blank">bestchange.ru</a>
+                    <q-btn style="margin: 10px 50px 10px 50px" color="green-8" size="14px" no-caps @click="makeDonation">
+                        <q-icon class="q-mr-xs" name="la la-donate" size="24px" />
+                        Поддержать проект
+                    </q-btn>
 
-                <br><br>
-                <div class="row justify-center">
-                    <!--q-btn class="q-px-sm" color="primary" dense no-caps @click="openDonate">
-                        Помочь проекту
-                    </q-btn-->
+                    <q-btn style="margin: 0 50px 20px 50px" size="14px" no-caps @click="donationDialogRemind">
+                        Напомнить в следующем месяце
+                    </q-btn>
+
+                    <div class="row justify-center">
+                        <div class="q-px-sm clickable" style="font-size: 80%" @click="openDonate">
+                            Помочь проекту можно в любое время
+                        </div>
+                    </div>
                 </div>
             </div>
-
-            <template #footer>
-                <span class="clickable row justify-end" style="font-size: 60%; color: grey" @click="donationDialogDisable">Больше не показывать</span>                        
-                <br>
-                <q-btn class="q-px-sm" dense no-caps @click="donationDialogRemind">
-                    Напомнить позже
-                </q-btn>
-            </template>
-        </Dialog>
+        </q-dialog>
 
         <Dialog ref="dialog3" v-model="urlHelpVisible">
             <template #header>
@@ -134,7 +129,7 @@ class ReaderDialogs {
     loadSettings() {
         const settings = this.settings;
         this.showWhatsNewDialog = settings.showWhatsNewDialog;
-        this.showDonationDialog2020 = settings.showDonationDialog2020;
+        this.showDonationDialog = settings.showDonationDialog;
     }
 
     async showWhatsNew() {
@@ -149,9 +144,9 @@ class ReaderDialogs {
     }
 
     async showDonation() {
-        const today = utils.formatDate(new Date(), 'coDate');
+        const today = utils.formatDate(new Date(), 'coMonth');
 
-        if ((this.mode == 'omnireader' || this.mode == 'liberama.top') && today < '2020-03-01' && this.showDonationDialog2020 && this.donationRemindDate != today) {
+        if ((this.mode == 'omnireader' || this.mode == 'liberama.top') && this.showDonationDialog && this.donationRemindDate != today) {
             await utils.sleep(3000);
             this.donationVisible = true;
         }
@@ -166,20 +161,17 @@ class ReaderDialogs {
         this.urlHelpVisible = false;
     }
 
-    donationDialogDisable() {
-        this.donationVisible = false;
-        if (this.showDonationDialog2020) {
-            this.commit('reader/setSettings', { showDonationDialog2020: false });
-        }
-    }
-
     donationDialogRemind() {
         this.donationVisible = false;
-        this.commit('reader/setDonationRemindDate', utils.formatDate(new Date(), 'coDate'));
+        this.commit('reader/setDonationRemindDate', utils.formatDate(new Date(), 'coMonth'));
+    }
+
+    makeDonation() {
+        utils.makeDonation();
+        this.donationDialogRemind();
     }
 
     openDonate() {
-        this.donationVisible = false;
         this.$emit('donate-toggle');
     }
 

@@ -1,5 +1,5 @@
 <template>
-    <Window @close="close">
+    <Window @close="close" style="z-index: 200">
         <template #header>
             Справка
         </template>

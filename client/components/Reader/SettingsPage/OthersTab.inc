@@ -41,15 +41,15 @@
     </q-checkbox>
 </div>
 
-<!--div class="item row">
+<div class="item row">
     <div class="label-6">Уведомление</div>
-    <q-checkbox size="xs" v-model="showDonationDialog2020">
-        Показывать "Оплатим хостинг вместе"
+    <q-checkbox size="xs" v-model="showDonationDialog">
+        Показывать форму доната
         <q-tooltip :delay="1000" anchor="top middle" self="bottom middle" content-style="font-size: 80%">
-            Показывать уведомление "Оплатим хостинг вместе"
+            Показывать диалог для сбора пожертвований
         </q-tooltip>
     </q-checkbox>
-</div-->
+</div>
 
 <!---------------------------------------------->
 <div class="part-header">Другое</div>
