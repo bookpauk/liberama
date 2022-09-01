@@ -10,7 +10,7 @@ git clone https://github.com/bookpauk/liberama
 ### node.js
 ```
 sudo apt install -y curl
-curl -sL https://deb.nodesource.com/setup_14.x | sudo -E bash -
+curl -sL https://deb.nodesource.com/setup_16.x | sudo -E bash -
 sudo apt install -y nodejs
 ```
 
