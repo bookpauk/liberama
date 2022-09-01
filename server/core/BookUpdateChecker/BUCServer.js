@@ -78,8 +78,10 @@ class BUCServer {
 
                     const ids = new Set();
                     let id = iter.next();
-                    while (!id.done && ids.size < 100) {
+                    while (!id.done) {
                         ids.add(id.value);
+                        if (ids.size >= 100)
+                            break;
                         id = iter.next();
                     }
 

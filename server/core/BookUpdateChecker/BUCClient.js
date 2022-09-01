@@ -177,8 +177,10 @@ class BUCClient {
 
                             const ids = new Set();
                             let id = iter.next();
-                            while (!id.done && ids.size < 1000) {
+                            while (!id.done) {
                                 ids.add(id.value);
+                                if (ids.size >= 1000)
+                                    break;
                                 id = iter.next();
                             }
 
