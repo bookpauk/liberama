@@ -271,6 +271,10 @@ body, html, #app {
     font: normal 12pt ReaderDefault;
 }
 
+.notify-margin {
+    margin-top: 55px;
+}
+
 .dborder {
     border: 2px solid magenta !important;
 }
