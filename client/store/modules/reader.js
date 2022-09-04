@@ -255,6 +255,7 @@ const libsDefaults = {
 // initial state
 const state = {
     toolBarActive: true,
+    offlineModeActive: false,
     serverSyncEnabled: false,
     serverStorageKey: '',
     profiles: {},
@@ -279,6 +280,9 @@ const actions = {};
 const mutations = {
     setToolBarActive(state, value) {
         state.toolBarActive = value;
+    },
+    setOfflineModeActive(state, value) {
+        state.offlineModeActive = value;
     },
     setServerSyncEnabled(state, value) {
         state.serverSyncEnabled = value;
