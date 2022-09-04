@@ -292,7 +292,6 @@ class Reader {
     libsActive = false;
     recentBooksActive = false;
     clickControlActive = false;
-    offlineModeActive = false;
     settingsActive = false;
 
     clickMapActive = false;
@@ -807,6 +806,10 @@ class Reader {
         return this.reader.toolBarActive;
     }
 
+    get offlineModeActive() {
+        return this.reader.offlineModeActive;        
+    }
+
     mostRecentBook() {
         const result = bookManager.mostRecentBook();
         this.mostRecentBookReactive = result;
@@ -1019,7 +1022,7 @@ class Reader {
     }
 
     offlineModeToggle() {
-        this.offlineModeActive = !this.offlineModeActive;
+        this.commit('reader/setOfflineModeActive', !this.offlineModeActive);
         this.$refs.serverStorage.offlineModeActive = this.offlineModeActive;
     }
 
