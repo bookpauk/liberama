@@ -27,9 +27,10 @@ class Notify {
             icon,
             actions: [{icon: 'la la-times notify-button-icon', color: 'black'}],
             html: true,
+            classes: 'notify-margin',
 
             message: 
-                `<div style="max-width: 350px;">
+                `<div style="max-width: 350px">
                     ${caption}
                     <div style="color: ${messageColor}; overflow-wrap: break-word; word-wrap: break-word;">${message}</div>
                 </div>`
