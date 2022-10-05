@@ -1,3 +1,4 @@
+const https = require('https');
 const axios = require('axios');
 const utils = require('./utils');
 
@@ -16,6 +17,9 @@ class FileDownloader {
                 'user-agent': userAgent,
                 timeout: 300*1000,
             },
+            httpsAgent: new https.Agent({
+                rejectUnauthorized: false // решение проблемы 'unable to verify the first certificate' для некоторых сайтов с валидным сертификатом
+            }),
             responseType: 'stream',
         };
 
