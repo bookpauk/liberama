@@ -185,11 +185,11 @@ class ReaderWorker {
             })();
 
         } catch (e) {
+            log(LM_ERR, `url: ${url}, downloadedFilename: ${downloadedFilename}`);
             log(LM_ERR, e.stack);
             let mes = e.message.split('|FORLOG|');
             if (mes[1])
                 log(LM_ERR, mes[0] + mes[1]);
-            log(LM_ERR, `downloadedFilename: ${downloadedFilename}`);
 
             mes = mes[0];
             if (mes == 'abort')
