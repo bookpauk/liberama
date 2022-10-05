@@ -83,6 +83,7 @@ class ReaderWorker {
         let convertFilename = '';
 
         const overLoadMes = 'Слишком большая очередь загрузки. Пожалуйста, попробуйте позже.';
+        const fileNotFoundMes = 'Файл не найден';
         const overLoadErr = new Error(overLoadMes);
 
         let q = null;
@@ -184,26 +185,33 @@ class ReaderWorker {
             })();
 
         } catch (e) {
+            log(LM_ERR, `url: ${url}, downloadedFilename: ${downloadedFilename}`);
             log(LM_ERR, e.stack);
             let mes = e.message.split('|FORLOG|');
             if (mes[1])
                 log(LM_ERR, mes[0] + mes[1]);
-            log(LM_ERR, `downloadedFilename: ${downloadedFilename}`);
 
             mes = mes[0];
             if (mes == 'abort')
                 mes = overLoadMes;
+            if (mes.indexOf('ENOTDIR') >= 0)
+                mes = fileNotFoundMes;
+
             wState.set({state: 'error', error: mes});
         } finally {
             //clean
-            if (q)
-                q.ret();
-            if (decompDir)
-                await fs.remove(decompDir);
-            if (downloadedFilename && !isUploaded)
-                await fs.remove(downloadedFilename);
-            if (convertFilename)
-                await fs.remove(convertFilename);
+            try {
+                if (q)
+                    q.ret();
+                if (decompDir)
+                    await fs.remove(decompDir);
+                if (downloadedFilename && !isUploaded)
+                    await fs.remove(downloadedFilename);
+                if (convertFilename)
+                    await fs.remove(convertFilename);
+            } catch (e) {
+                log(LM_ERR, `Remove error: ${e.stack}`);
+            }
         }
     }
 

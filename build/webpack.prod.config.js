@@ -18,7 +18,8 @@ module.exports = merge(baseWpConfig, {
     mode: 'production',
     output: {
         path: `${publicDir}/app_new`,
-        filename: 'bundle.[contenthash].js'
+        filename: 'bundle.[contenthash].js',
+        clean: true        
     },
     module: {
         rules: [
@@ -54,7 +55,7 @@ module.exports = merge(baseWpConfig, {
             filename: `${publicDir}/index.html`
         }),
         new CopyWebpackPlugin({patterns: 
-            [{from: `${clientDir}/assets/*`, to: `${publicDir}/`, context: `${clientDir}/assets` }]
+            [{context: `${clientDir}/assets`, from: `${clientDir}/assets/*`, to: `${publicDir}/` }]
         }),
         new GenerateSW({
             cacheId: 'liberama',
