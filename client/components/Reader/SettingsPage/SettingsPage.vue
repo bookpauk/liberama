@@ -30,7 +30,7 @@
                     <q-tab class="tab" name="keys" icon="la la-gamepad" label="Управление" />
                     <q-tab class="tab" name="pagemove" icon="la la-school" label="Листание" />
                     <q-tab class="tab" name="convert" icon="la la-magic" label="Конвертир." />
-                    <q-tab class="tab" name="update" icon="la la-sync" label="Обновление" />
+                    <q-tab class="tab" name="update" icon="la la-retweet" label="Обновление" />
                     <q-tab class="tab" name="others" icon="la la-list-ul" label="Прочее" />
                     <q-tab class="tab" name="reset" icon="la la-broom" label="Сброс" />
                     <div v-show="tabsScrollable" class="q-pt-lg" />
@@ -91,9 +91,7 @@
                 <!-- Конвертирование ------------------------------------------------------------->
                 <ConvertTab v-if="selectedTab == 'convert'" :form="form" />
                 <!-- Обновление ------------------------------------------------------------------>
-                <!--div v-if="selectedTab == 'update'" class="fit tab-panel">
-                    @@include('./UpdateTab.inc');
-                </div-->
+                <UpdateTab v-if="selectedTab == 'update'" :form="form" />
                 <!-- Прочее ---------------------------------------------------------------------->
                 <!--div v-if="selectedTab == 'others'" class="fit tab-panel">
                     @@include('./OthersTab.inc');
@@ -129,6 +127,7 @@ import ToolBarTab from './ToolBarTab/ToolBarTab.vue';
 import KeysTab from './KeysTab/KeysTab.vue';
 import PageMoveTab from './PageMoveTab/PageMoveTab.vue';
 import ConvertTab from './ConvertTab/ConvertTab.vue';
+import UpdateTab from './UpdateTab/UpdateTab.vue';
 
 const hex = /^#[0-9a-fA-F]{3}([0-9a-fA-F]{3})?$/;
 
@@ -141,6 +140,7 @@ const componentOptions = {
         KeysTab,
         PageMoveTab,
         ConvertTab,
+        UpdateTab,
     },
     watch: {
         settings: function() {
@@ -290,10 +290,6 @@ class SettingsPage {
 
     get settings() {
         return this.$store.state.reader.settings;
-    }
-
-    get configBucEnabled() {
-        return this.$store.state.config.bucEnabled;
     }
 
     get wallpaperOptions() {
