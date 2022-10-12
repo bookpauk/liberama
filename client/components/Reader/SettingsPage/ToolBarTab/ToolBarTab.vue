@@ -52,7 +52,7 @@ class ToolBarTab {
 
     get mode() {
         return this.$store.state.config.mode;
-    }    
+    }
 }
 
 export default vueComponent(ToolBarTab);

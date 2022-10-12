@@ -39,9 +39,9 @@
 
             <div class="col fit">
                 <!-- Профили --------------------------------------------------------------------->
-                <!--div v-if="selectedTab == 'profiles'" class="fit tab-panel">
-                    @@include('./ProfilesTab.inc');
-                </div-->
+                <div v-if="selectedTab == 'profiles'" class="fit tab-panel">
+                    <ProfilesTab :form="form" />
+                </div>
                 <!-- Вид ------------------------------------------------------------------------->                    
                 <!--div v-if="selectedTab == 'view'" class="fit column">
                     <q-tabs
@@ -136,6 +136,7 @@ import rstore from '../../../store/modules/reader';
 import defPalette from './defPalette';
 
 //pages
+import ProfilesTab from './ProfilesTab/ProfilesTab.vue';
 import ToolBarTab from './ToolBarTab/ToolBarTab.vue';
 
 const hex = /^#[0-9a-fA-F]{3}([0-9a-fA-F]{3})?$/;
@@ -146,16 +147,16 @@ const componentOptions = {
         NumInput,
         UserHotKeys,
         //pages
+        ProfilesTab,
         ToolBarTab,
     },
     watch: {
         settings: function() {
-            this.settingsChanged();
+            this.settingsChanged();//no await
         },
         form: {
             handler(newValue) {
-                if (this.inited) {
-console.log('save settings');                    
+                if (this.inited && !this.setsChanged) {
                     this.commit('reader/setSettings', _.cloneDeep(newValue));
                 }
             },
@@ -238,15 +239,15 @@ class SettingsPage {
     statusBarColorFiltered = '';
 
     webFonts = [];
-    fonts = [];
+    fonts = [];    
 
-    serverStorageKeyVisible = false;
+    setsChanged = false;
 
     created() {
         this.commit = this.$store.commit;
         this.reader = this.$store.state.reader;
 
-        this.settingsChanged();
+        this.settingsChanged();//no await
     }
 
     mounted() {
@@ -263,24 +264,30 @@ class SettingsPage {
         this.inited = true;
     }
 
-    settingsChanged() {
+    async settingsChanged() {
         if (_.isEqual(this.form, this.settings))
             return;
 
-        this.form = _.cloneDeep(this.settings);
-        const form = this.form;
+        this.setsChanged = true;
+        try {
+            this.form = _.cloneDeep(this.settings);
+            const form = this.form;
 
-        this.fontBold = (form.fontWeight == 'bold');
-        this.fontItalic = (form.fontStyle == 'italic');
+            this.fontBold = (form.fontWeight == 'bold');
+            this.fontItalic = (form.fontStyle == 'italic');
 
-        this.fonts = rstore.fonts;
-        this.webFonts = rstore.webFonts;
-        const font = (form.webFontName ? form.webFontName : form.fontName);
-        this.vertShift = form.fontShifts[font] || 0;
-        this.textColorFiltered = form.textColor;
-        this.bgColorFiltered = form.backgroundColor;
-        this.dualDivColorFiltered = form.dualDivColor;
-        this.statusBarColorFiltered = form.statusBarColor;
+            this.fonts = rstore.fonts;
+            this.webFonts = rstore.webFonts;
+            const font = (form.webFontName ? form.webFontName : form.fontName);
+            this.vertShift = form.fontShifts[font] || 0;
+            this.textColorFiltered = form.textColor;
+            this.bgColorFiltered = form.backgroundColor;
+            this.dualDivColorFiltered = form.dualDivColor;
+            this.statusBarColorFiltered = form.statusBarColor;
+        } finally {
+            await this.$nextTick();
+            this.setsChanged = false;
+        }
     }
 
     get mode() {
@@ -295,31 +302,8 @@ class SettingsPage {
         return this.$store.state.reader.settings;
     }
 
-    get serverSyncEnabled() {
-        return this.$store.state.reader.serverSyncEnabled;
-    }
-
-    set serverSyncEnabled(newValue) {
-        this.commit('reader/setServerSyncEnabled', newValue);
-    }
-
-    get profiles() {
-        return this.$store.state.reader.profiles;
-    }
-
     get configBucEnabled() {
         return this.$store.state.config.bucEnabled;
-    }
-
-    get currentProfileOptions() {
-        const profNames = Object.keys(this.profiles)
-        profNames.sort();
-
-        let result = [{label: 'Нет', value: ''}];
-        profNames.forEach(name => {
-            result.push({label: name, value: name});
-        });
-        return result;
     }
 
     get wallpaperOptions() {
@@ -370,26 +354,6 @@ class SettingsPage {
         result = result.filter(v => v);
 
         return result;
-    }
-
-    get currentProfile() {
-        return this.$store.state.reader.currentProfile;
-    }
-
-    set currentProfile(newValue) {
-        this.commit('reader/setCurrentProfile', newValue);
-    }
-
-    get partialStorageKey() {
-        return this.serverStorageKey.substr(0, 7) + '***';
-    }
-
-    get serverStorageKey() {
-        return this.$store.state.reader.serverStorageKey;
-    }
-
-    get setStorageKeyLink() {
-        return `https://${window.location.host}/#/reader?setStorageAccessKey=${utils.toBase58(this.serverStorageKey)}`;
     }
 
     get predefineTextColors() {
@@ -464,140 +428,6 @@ class SettingsPage {
         } catch (e) {
             //
         }
-    }
-
-    async addProfile() {
-        try {
-            if (Object.keys(this.profiles).length >= 100) {
-                this.$root.stdDialog.alert('Достигнут предел количества профилей', 'Ошибка');
-                return;
-            }
-            const result = await this.$root.stdDialog.prompt('Введите произвольное название для профиля устройства:', ' ', {
-                inputValidator: (str) => { if (!str) return 'Название не должно быть пустым'; else if (str.length > 50) return 'Слишком длинное название'; else return true; },
-            });
-            if (result && result.value) {
-                if (this.profiles[result.value]) {
-                    this.$root.stdDialog.alert('Такой профиль уже существует', 'Ошибка');
-                } else {
-                    const newProfiles = Object.assign({}, this.profiles, {[result.value]: 1});
-                    this.commit('reader/setAllowProfilesSave', true);
-                    await this.$nextTick();//ждем обработчики watch
-                    this.commit('reader/setProfiles', newProfiles);
-                    await this.$nextTick();//ждем обработчики watch
-                    this.commit('reader/setAllowProfilesSave', false);
-                    this.currentProfile = result.value;
-                }
-            }
-        } catch (e) {
-            //
-        }
-    }
-
-    async delProfile() {
-        if (!this.currentProfile)
-            return;
-
-        try {
-            const result = await this.$root.stdDialog.prompt(`<b>Предупреждение!</b> Удаление профиля '${this.$root.sanitize(this.currentProfile)}' необратимо.` +
-                    `<br>Все настройки профиля будут потеряны, однако список читаемых книг сохранится.` +
-                    `<br><br>Введите 'да' для подтверждения удаления:`, ' ', {
-                inputValidator: (str) => { if (str && str.toLowerCase() === 'да') return true; else return 'Удаление не подтверждено'; },
-            });
-
-            if (result && result.value && result.value.toLowerCase() == 'да') {
-                if (this.profiles[this.currentProfile]) {
-                    const newProfiles = Object.assign({}, this.profiles);
-                    delete newProfiles[this.currentProfile];
-                    this.commit('reader/setAllowProfilesSave', true);
-                    await this.$nextTick();//ждем обработчики watch
-                    this.commit('reader/setProfiles', newProfiles);
-                    await this.$nextTick();//ждем обработчики watch
-                    this.commit('reader/setAllowProfilesSave', false);
-                    this.currentProfile = '';
-                }
-            }
-        } catch (e) {
-            //
-        }
-    }
-
-    async delAllProfiles() {
-        if (!Object.keys(this.profiles).length)
-            return;
-
-        try {
-            const result = await this.$root.stdDialog.prompt(`<b>Предупреждение!</b> Удаление ВСЕХ профилей с настройками необратимо.` +
-                    `<br><br>Введите 'да' для подтверждения удаления:`, ' ', {
-                inputValidator: (str) => { if (str && str.toLowerCase() === 'да') return true; else return 'Удаление не подтверждено'; },
-            });
-
-            if (result && result.value && result.value.toLowerCase() == 'да') {
-                this.commit('reader/setAllowProfilesSave', true);
-                await this.$nextTick();//ждем обработчики watch
-                this.commit('reader/setProfiles', {});
-                await this.$nextTick();//ждем обработчики watch
-                this.commit('reader/setAllowProfilesSave', false);
-                this.currentProfile = '';
-            }
-        } catch (e) {
-            //
-        }
-    }
-
-    async copyToClip(text, prefix) {
-        const result = await utils.copyTextToClipboard(text);
-        const suf = (prefix.substr(-1) == 'а' ? 'а' : '');
-        const msg = (result ? `${prefix} успешно скопирован${suf} в буфер обмена` : 'Копирование не удалось');
-        if (result)
-            this.$root.notify.success(msg);
-        else
-            this.$root.notify.error(msg);
-    }
-
-    async showServerStorageKey() {
-        this.serverStorageKeyVisible = !this.serverStorageKeyVisible;
-    }
-
-    async enterServerStorageKey(key) {
-        try {
-            const result = await this.$root.stdDialog.prompt(`<b>Предупреждение!</b> Изменение ключа доступа приведет к замене всех профилей и читаемых книг в читалке.` +
-                    `<br><br>Введите новый ключ доступа:`, ' ', {
-                inputValidator: (str) => {
-                    try {
-                        if (str && utils.fromBase58(str).length == 32) {
-                            return true;
-                        }
-                    } catch (e) {
-                        //
-                    }
-                    return 'Неверный формат ключа'; 
-                },
-                inputValue: (key && _.isString(key) ? key : null),
-            });
-
-            if (result && result.value && utils.fromBase58(result.value).length == 32) {
-                this.commit('reader/setServerStorageKey', result.value);
-            }
-        } catch (e) {
-            //
-        }
-    }
-
-    async generateServerStorageKey() {
-        try {
-            const result = await this.$root.stdDialog.prompt(`<b>Предупреждение!</b> Генерация нового ключа доступа приведет к удалению всех профилей и читаемых книг в читалке.` +
-                    `<br><br>Введите 'да' для подтверждения генерации нового ключа:`, ' ', {
-                inputValidator: (str) => { if (str && str.toLowerCase() === 'да') return true; else return 'Генерация не подтверждена'; },
-            });
-
-            if (result && result.value && result.value.toLowerCase() == 'да') {
-                if (this.$root.generateNewServerStorageKey)
-                    this.$root.generateNewServerStorageKey();
-            }
-        } catch (e) {
-            //
-        }
-
     }
 
     loadWallpaperFileClick() {
@@ -719,7 +549,7 @@ export default vueComponent(SettingsPage);
     padding: 0 10px 15px 10px;
 }
 
-.label-1, .label-3, .label-7 {
+.label-7 {
     width: 75px;
 }
 
@@ -729,23 +559,6 @@ export default vueComponent(SettingsPage);
 
 .label-6 {
     width: 100px;
-}
-
-.text {
-    font-size: 90%;
-    line-height: 130%;
-}
-
-.button {
-    margin: 3px 15px 3px 0;
-    padding: 0 5px 0 5px;
-}
-
-.copy-icon {
-    margin-left: 5px;
-    cursor: pointer;
-    font-size: 120%;
-    color: blue;
 }
 
 .input {
@@ -786,4 +599,8 @@ export default vueComponent(SettingsPage);
     margin-bottom: 5px;
 }
 
+.sets-button {
+    margin: 3px 15px 3px 0;
+    padding: 0 5px 0 5px;
+}
 </style>
