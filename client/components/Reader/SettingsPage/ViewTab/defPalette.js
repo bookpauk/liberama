@@ -14,4 +14,32 @@ const defPalette = [
     'rgb(255,255,255)', 'rgb(205,205,205)', 'rgb(178,178,178)', 'rgb(153,153,153)', 'rgb(127,127,127)', 'rgb(102,102,102)', 'rgb(76,76,76)', 'rgb(51,51,51)', 'rgb(25,25,25)', 'rgb(0,0,0)'
 ];
 
-export default defPalette;
+export default {
+    predefinePalette: defPalette,
+
+    predefineTextColors: defPalette.concat([
+        '#ffffff',
+        '#000000',
+        '#202020',
+        '#323232',
+        '#aaaaaa',
+        '#00c0c0',
+        '#ebe2c9',
+        '#cfdc99',
+        '#478355',
+        '#909080',
+    ]),
+
+    predefineBackgroundColors: defPalette.concat([
+        '#ffffff',
+        '#000000',
+        '#202020',
+        '#ebe2c9',
+        '#cfdc99',
+        '#478355',
+        '#a6caf0',
+        '#909080',
+        '#808080',
+        '#c8c8c8',
+    ]),
+};

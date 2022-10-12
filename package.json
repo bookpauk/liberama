@@ -67,7 +67,7 @@
     "pako": "^2.0.4",
     "path-browserify": "^1.0.1",
     "pidusage": "^3.0.0",
-    "quasar": "^2.7.7",
+    "quasar": "^2.9.2",
     "safe-buffer": "^5.2.1",
     "sanitize-html": "^2.7.1",
     "sjcl": "^1.0.8",

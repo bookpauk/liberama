@@ -23,7 +23,6 @@
                     stretch
                     inline-label
                 >
-                    <div v-show="tabsScrollable" class="q-pt-lg" />
                     <q-tab class="tab" name="profiles" icon="la la-users" label="Профили" />
                     <q-tab class="tab" name="view" icon="la la-eye" label="Вид" />
                     <q-tab class="tab" name="toolbar" icon="la la-grip-horizontal" label="Панель" />
@@ -33,7 +32,6 @@
                     <q-tab class="tab" name="update" icon="la la-retweet" label="Обновление" />
                     <q-tab class="tab" name="others" icon="la la-list-ul" label="Прочее" />
                     <q-tab class="tab" name="reset" icon="la la-broom" label="Сброс" />
-                    <div v-show="tabsScrollable" class="q-pt-lg" />
                 </q-tabs>
             </div>
 
@@ -41,47 +39,7 @@
                 <!-- Профили --------------------------------------------------------------------->
                 <ProfilesTab v-if="selectedTab == 'profiles'" :form="form" />
                 <!-- Вид ------------------------------------------------------------------------->                    
-                <!--div v-if="selectedTab == 'view'" class="fit column">
-                    <q-tabs
-                        v-model="selectedViewTab"
-                        active-color="black"
-                        active-bg-color="white"
-                        indicator-color="white"
-                        dense
-                        no-caps
-                        class="no-mp bg-grey-4 text-grey-7"
-                    >
-                        <q-tab name="mode" label="Режим" />
-                        <q-tab name="color" label="Цвет" />
-                        <q-tab name="font" label="Шрифт" />
-                        <q-tab name="text" label="Текст" />
-                        <q-tab name="status" label="Строка статуса" />
-                    </q-tabs>
-
-                    <div class="q-mb-sm" />
-
-                    <div class="col tab-panel">
-                        <div v-if="selectedViewTab == 'mode'">
-                            @@include('./ViewTab/Mode.inc');
-                        </div>
-
-                        <div v-if="selectedViewTab == 'color'">
-                            @@include('./ViewTab/Color.inc');
-                        </div>
-
-                        <div v-if="selectedViewTab == 'font'">
-                            @@include('./ViewTab/Font.inc');
-                        </div>
-
-                        <div v-if="selectedViewTab == 'text'">
-                            @@include('./ViewTab/Text.inc');
-                        </div>
-
-                        <div v-if="selectedViewTab == 'status'">
-                            @@include('./ViewTab/Status.inc');
-                        </div>
-                    </div>
-                </div-->
+                <ViewTab v-if="selectedTab == 'view'" :form="form" />
                 <!-- Кнопки ---------------------------------------------------------------------->
                 <ToolBarTab v-if="selectedTab == 'toolbar'" :form="form" />
                 <!-- Управление ------------------------------------------------------------------>
@@ -115,10 +73,10 @@ import wallpaperStorage from '../share/wallpaperStorage';
 
 import readerApi from '../../../api/reader';
 import rstore from '../../../store/modules/reader';
-import defPalette from './defPalette';
 
 //pages
 import ProfilesTab from './ProfilesTab/ProfilesTab.vue';
+import ViewTab from './ViewTab/ViewTab.vue';
 import ToolBarTab from './ToolBarTab/ToolBarTab.vue';
 import KeysTab from './KeysTab/KeysTab.vue';
 import PageMoveTab from './PageMoveTab/PageMoveTab.vue';
@@ -134,6 +92,7 @@ const componentOptions = {
         Window,
         //pages
         ProfilesTab,
+        ViewTab,
         ToolBarTab,
         KeysTab,
         PageMoveTab,
@@ -200,13 +159,6 @@ const componentOptions = {
             if (hex.test(newValue))
                 this.backgroundColor = newValue;
         },
-        dualDivColor(newValue) {
-            this.dualDivColorFiltered = newValue;
-        },
-        dualDivColorFiltered(newValue) {
-            if (hex.test(newValue))
-                this.dualDivColor = newValue;
-        },
         statusBarColor(newValue) {
             this.statusBarColorFiltered = newValue;
         },
@@ -222,39 +174,29 @@ class SettingsPage {
     form = {};
 
     selectedTab = 'profiles';
-    selectedViewTab = 'mode';
-    fontBold = false;
-    fontItalic = false;
-    vertShift = 0;
-    tabsScrollable = false;
-    textColorFiltered = '';
-    bgColorFiltered = '';
-    dualDivColorFiltered = '';
-    statusBarColorFiltered = '';
-
-    webFonts = [];
-    fonts = [];    
 
     setsChanged = false;
 
+    fontBold = false;
+    fontItalic = false;
+    vertShift = 0;
+    textColorFiltered = '';
+    bgColorFiltered = '';
+    statusBarColorFiltered = '';
+    webFonts = [];
+    fonts = [];    
+
     created() {
         this.commit = this.$store.commit;
-        this.reader = this.$store.state.reader;
 
         this.debouncedCommitSettings = _.debounce(() => {
             this.commit('reader/setSettings', _.cloneDeep(this.form));
-        }, 100);
+        }, 50);
 
         this.settingsChanged();//no await
     }
 
     mounted() {
-        this.$watch(
-            '$refs.tabs.scrollable',
-            (newValue) => {
-                this.tabsScrollable = newValue && !this.$root.isMobileDevice;
-            }
-        );
     }
 
     init() {
@@ -263,9 +205,6 @@ class SettingsPage {
     }
 
     async settingsChanged() {
-        if (_.isEqual(this.form, this.settings))
-            return;
-
         this.setsChanged = true;
         try {
             this.form = _.cloneDeep(this.settings);
@@ -323,55 +262,6 @@ class SettingsPage {
         this.webFonts.forEach(font => {
             result.push({label: font.name, value: font.name});
         });
-        return result;
-    }
-
-    get predefineTextColors() {
-        return defPalette.concat([
-          '#ffffff',
-          '#000000',
-          '#202020',
-          '#323232',
-          '#aaaaaa',
-          '#00c0c0',
-          '#ebe2c9',
-          '#cfdc99',
-          '#478355',
-          '#909080',
-        ]);
-    }
-
-    get predefineBackgroundColors() {
-        return defPalette.concat([
-          '#ffffff',
-          '#000000',
-          '#202020',
-          '#ebe2c9',
-          '#cfdc99',
-          '#478355',
-          '#a6caf0',
-          '#909080',
-          '#808080',
-          '#c8c8c8',
-        ]);
-    }
-
-    colorPanStyle(type) {
-        let result = 'width: 30px; height: 30px; border: 1px solid black; border-radius: 4px;';
-        switch (type) {
-            case 'text':
-                result += `background-color: ${this.textColor};`
-                break;
-            case 'bg':
-                result += `background-color: ${this.backgroundColor};`
-                break;
-            case 'div':
-                result += `background-color: ${this.dualDivColor};`
-                break;
-            case 'statusbar':
-                result += `background-color: ${this.statusBarColor};`
-                break;
-        }
         return result;
     }
 
@@ -517,20 +407,6 @@ export default vueComponent(SettingsPage);
 .tab {
     justify-content: initial;
 }
-
-.label-2 {
-    width: 110px;
-}
-
-.input {
-    max-width: 150px;
-}
-
-.no-mp {
-    margin: 0;
-    padding: 0;
-}
-
 </style>
 
 <style>

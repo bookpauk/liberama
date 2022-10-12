@@ -543,9 +543,7 @@ class Reader {
 
             //обновим settings, если загружали обои из /upload/
             if (updated) {
-                const newSettings = _.cloneDeep(this.settings);
-                newSettings.needUpdateSettingsView = (newSettings.needUpdateSettingsView < 10 ? newSettings.needUpdateSettingsView + 1 : 0);
-                this.commit('reader/setSettings', newSettings);
+                this.commit('reader/setSettings', {});
             }
 
             dynamicCss.replace('wallpapers', newCss);
