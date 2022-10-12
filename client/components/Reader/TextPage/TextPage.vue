@@ -174,7 +174,12 @@ class TextPage {
     }
 
     hex2rgba(hex, alpha = 1) {
-        const [r, g, b] = hex.match(/\w\w/g).map(x => parseInt(x, 16));
+        let [r, g, b] = [0, 0, 0];
+        if (hex.length <= 4) {
+            [r, g, b] = hex.match(/\w/g).map(x => parseInt(x + x, 16));
+        } else {
+            [r, g, b] = hex.match(/\w\w/g).map(x => parseInt(x, 16));
+        }
         return `rgba(${r},${g},${b},${alpha})`;
     }
 
