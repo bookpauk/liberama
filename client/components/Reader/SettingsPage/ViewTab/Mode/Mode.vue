@@ -163,10 +163,10 @@ const componentOptions = {
     },
     watch: {
         form() {
-            this.formChanged();
+            this.formChanged();//no await
         },
         dualDivColorFiltered(newValue) {
-            if (this.helper.isHexColor(newValue))
+            if (!this.isFormChanged && this.helper.isHexColor(newValue))
                 this.form.dualDivColor = newValue;
         },
     }
@@ -180,17 +180,29 @@ class Mode {
     helper = helper;
     defPalette = defPalette;
 
+    isFormChanged = false;
     dualDivColorFiltered = '';
 
     created() {
-        this.formChanged();
+        this.formChanged();//no await
     }
 
     mounted() {
     }
 
-    formChanged() {
-        this.dualDivColorFiltered = this.form.dualDivColor;
+    async formChanged() {
+        this.isFormChanged = true;
+        try {
+            this.dualDivColorFiltered = this.form.dualDivColor;
+
+            if (this.form.dualPageMode 
+                && (this.form.pageChangeAnimation == 'flip' || this.form.pageChangeAnimation == 'rightShift')
+                )
+                this.form.pageChangeAnimation = '';
+        } finally {
+            await this.$nextTick();
+            this.isFormChanged = false;
+        }
     }
 }
 

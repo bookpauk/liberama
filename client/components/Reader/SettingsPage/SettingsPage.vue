@@ -5,8 +5,6 @@
         </template>
 
         <div class="col row">
-            <a ref="download" style="display: none;" target="_blank"></a>
-
             <div class="full-height">
                 <q-tabs
                     ref="tabs"
@@ -62,16 +60,13 @@
 <script>
 //-----------------------------------------------------------------------------
 import vueComponent from '../../vueComponent.js';
+import { reactive } from 'vue';
 
 import _ from 'lodash';
 
 //stuff
-import * as utils from '../../../share/utils';
-import * as cryptoUtils from '../../../share/cryptoUtils';
 import Window from '../../share/Window.vue';
-import wallpaperStorage from '../share/wallpaperStorage';
 
-import readerApi from '../../../api/reader';
 import rstore from '../../../store/modules/reader';
 
 //pages
@@ -107,7 +102,7 @@ const componentOptions = {
         },
         form: {
             handler() {
-                if (this.inited && !this.setsChanged) {
+                if (this.inited && !this.isSetsChanged) {
                     this.debouncedCommitSettings();
                 }
             },
@@ -134,30 +129,8 @@ const componentOptions = {
             const font = (newValue ? newValue : this.fontName);
             this.vertShift = this.fontShifts[font] || 0;
         },
-        wallpaper: function(newValue) {
-            if (newValue != '' && this.pageChangeAnimation == 'flip')
-                this.pageChangeAnimation = '';
-        },
-        /*this.$watch('form.dualPageMode', (newValue) => {
-            console.log(newValue);
-        })*/        
-        dualPageMode(newValue) {
-            if (newValue && this.pageChangeAnimation == 'flip' || this.pageChangeAnimation == 'rightShift')
-                this.pageChangeAnimation = '';
-        },
         textColor: function(newValue) {
             this.textColorFiltered = newValue;
-        },
-        textColorFiltered: function(newValue) {
-            if (hex.test(newValue))
-                this.textColor = newValue;
-        },
-        backgroundColor: function(newValue) {
-            this.bgColorFiltered = newValue;
-        },
-        bgColorFiltered: function(newValue) {
-            if (hex.test(newValue))
-                this.backgroundColor = newValue;
         },
         statusBarColor(newValue) {
             this.statusBarColorFiltered = newValue;
@@ -175,13 +148,11 @@ class SettingsPage {
 
     selectedTab = 'profiles';
 
-    setsChanged = false;
+    isSetsChanged = false;
 
     fontBold = false;
     fontItalic = false;
     vertShift = 0;
-    textColorFiltered = '';
-    bgColorFiltered = '';
     statusBarColorFiltered = '';
     webFonts = [];
     fonts = [];    
@@ -205,9 +176,9 @@ class SettingsPage {
     }
 
     async settingsChanged() {
-        this.setsChanged = true;
+        this.isSetsChanged = true;
         try {
-            this.form = _.cloneDeep(this.settings);
+            this.form = reactive(_.cloneDeep(this.settings));
             const form = this.form;
 
             this.fontBold = (form.fontWeight == 'bold');
@@ -217,36 +188,16 @@ class SettingsPage {
             this.webFonts = rstore.webFonts;
             const font = (form.webFontName ? form.webFontName : form.fontName);
             this.vertShift = form.fontShifts[font] || 0;
-            this.textColorFiltered = form.textColor;
-            this.bgColorFiltered = form.backgroundColor;
             this.dualDivColorFiltered = form.dualDivColor;
             this.statusBarColorFiltered = form.statusBarColor;
         } finally {
             await this.$nextTick();
-            this.setsChanged = false;
+            this.isSetsChanged = false;
         }
     }
 
     get settings() {
         return this.$store.state.reader.settings;
-    }
-
-    get wallpaperOptions() {
-        let result = [{label: 'Нет', value: ''}];
-
-        const userWallpapers = _.cloneDeep(this.userWallpapers);
-        userWallpapers.sort((a, b) => a.label.localeCompare(b.label));
-
-        for (const wp of userWallpapers) {
-            if (wallpaperStorage.keyExists(wp.cssClass))
-                result.push({label: wp.label, value: wp.cssClass});
-        }
-
-        for (let i = 1; i <= 17; i++) {
-            result.push({label: i, value: `paper${i}`});
-        }
-
-        return result;
     }
 
     get fontsOptions() {
@@ -293,101 +244,6 @@ class SettingsPage {
 
         switch (event.action) {
             case 'set-defaults': this.setDefaults(); break;
-        }
-    }
-
-    loadWallpaperFileClick() {
-        this.$refs.file.click();
-    }
-
-    loadWallpaperFile() {
-        const file = this.$refs.file.files[0];        
-        if (file.size > 10*1024*1024) {
-            this.$root.stdDialog.alert('Файл обоев не должен превышать в размере 10Mb', 'Ошибка');
-            return;
-        }
-
-        if (file.type != 'image/png' && file.type != 'image/jpeg') {
-            this.$root.stdDialog.alert('Файл обоев должен иметь тип PNG или JPEG', 'Ошибка');
-            return;
-        }
-
-        if (this.userWallpapers.length >= 100) {
-            this.$root.stdDialog.alert('Превышено максимальное количество пользовательских обоев.', 'Ошибка');
-            return;
-        }
-
-        this.$refs.file.value = '';
-        if (file) {
-            const reader = new FileReader();
-
-            reader.onload = (e) => {
-                (async() => {
-                    const data = e.target.result;
-                    const key = utils.toHex(cryptoUtils.sha256(data));
-                    const label = `#${key.substring(0, 4)}`;
-                    const cssClass = `user-paper${key}`;
-
-                    const newUserWallpapers = _.cloneDeep(this.userWallpapers);
-                    const index = _.findIndex(newUserWallpapers, (item) => (item.cssClass == cssClass));
-
-                    if (index < 0)
-                        newUserWallpapers.push({label, cssClass});
-                    if (!wallpaperStorage.keyExists(cssClass)) {
-                        await wallpaperStorage.setData(cssClass, data);
-                        //отправим data на сервер в файл `/upload/${key}`
-                        try {
-                            //const res = 
-                            await readerApi.uploadFileBuf(data);
-                            //console.log(res);
-                        } catch (e) {
-                            console.error(e);
-                        }
-                    }
-
-                    this.userWallpapers = newUserWallpapers;
-                    this.wallpaper = cssClass;
-                })();
-            }
-
-            reader.readAsDataURL(file);
-        }
-    }
-
-    async delWallpaper() {
-        if (this.wallpaper.indexOf('user-paper') == 0) {
-            const newUserWallpapers = [];
-            for (const wp of this.userWallpapers) {
-                if (wp.cssClass != this.wallpaper) {
-                    newUserWallpapers.push(wp);
-                }
-            }
-
-            await wallpaperStorage.removeData(this.wallpaper);
-
-            this.userWallpapers = newUserWallpapers;
-            this.wallpaper = '';
-        }
-    }
-
-    async downloadWallpaper() {
-        if (this.wallpaper.indexOf('user-paper') != 0)
-            return;
-
-        try {
-            const d = this.$refs.download;
-
-            const dataUrl = await wallpaperStorage.getData(this.wallpaper);
-
-            if (!dataUrl)
-                throw new Error('Файл обоев не найден');
-
-            d.href = dataUrl;
-            d.download = `wallpaper-#${this.wallpaper.replace('user-paper', '').substring(0, 4)}`;
-
-            d.click();
-        } catch (e) {
-            this.$root.stdDialog.alert(e.message, 'Ошибка', {color: 'negative'});
         }
     }
 

@@ -20,6 +20,7 @@
 
         <div class="col sets-tab-panel">
             <Mode v-if="selectedTab == 'mode'" :form="form" />
+            <Color v-if="selectedTab == 'color'" :form="form" />
 
             <!--div v-if="selectedViewTab == 'color'">
                 @@include('./ViewTab/Color.inc');
@@ -45,10 +46,12 @@
 import vueComponent from '../../../vueComponent.js';
 
 import Mode from './Mode/Mode.vue';
+import Color from './Color/Color.vue';
 
 const componentOptions = {
     components: {
         Mode,
+        Color,
     },
 };
 class ViewTab {
