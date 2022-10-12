@@ -94,10 +94,8 @@
                 <UpdateTab v-if="selectedTab == 'update'" :form="form" />
                 <!-- Прочее ---------------------------------------------------------------------->
                 <OthersTab v-if="selectedTab == 'others'" :form="form" />
-                <!-- Сброс ----------------------------------------------------------------------->
-                <!--div v-if="selectedTab == 'reset'" class="fit tab-panel">
-                    @@include('./ResetTab.inc');
-                </div-->
+                <!-- Сброс ----------------------------------------------------------------------->                
+                <ResetTab v-if="selectedTab == 'reset'" :form="form" @tab-event="tabEvent" />
             </div>
         </div>
     </Window>
@@ -127,6 +125,7 @@ import PageMoveTab from './PageMoveTab/PageMoveTab.vue';
 import ConvertTab from './ConvertTab/ConvertTab.vue';
 import UpdateTab from './UpdateTab/UpdateTab.vue';
 import OthersTab from './OthersTab/OthersTab.vue';
+import ResetTab from './ResetTab/ResetTab.vue';
 
 const hex = /^#[0-9a-fA-F]{3}([0-9a-fA-F]{3})?$/;
 
@@ -141,6 +140,7 @@ const componentOptions = {
         ConvertTab,
         UpdateTab,
         OthersTab,
+        ResetTab,
     },
     watch: {
         settings: function() {
@@ -390,13 +390,19 @@ class SettingsPage {
     async setDefaults() {
         try {
             if (await this.$root.stdDialog.confirm('Подтвердите установку настроек по умолчанию:', ' ')) {
-                this.form = Object.assign({}, rstore.settingDefaults);
-                for (let prop in rstore.settingDefaults) {
-                    this[prop] = this.form[prop];
-                }
+                this.form = _.cloneDeep(rstore.settingDefaults);
             }
         } catch (e) {
             //
+        }
+    }
+
+    tabEvent(event) {
+        if (!event || !event.action)
+            return;
+
+        switch (event.action) {
+            case 'set-defaults': this.setDefaults(); break;
         }
     }
 
