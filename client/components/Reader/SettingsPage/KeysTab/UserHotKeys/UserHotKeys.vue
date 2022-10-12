@@ -73,10 +73,9 @@
 
 <script>
 //-----------------------------------------------------------------------------
-import vueComponent from '../../../vueComponent.js';
+import vueComponent from '../../../../vueComponent.js';
 
-import rstore from '../../../../store/modules/reader';
-//import * as utils from '../../share/utils';
+import rstore from '../../../../../store/modules/reader';
 
 const componentOptions = {
     watch: {

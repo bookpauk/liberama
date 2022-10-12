@@ -164,6 +164,7 @@
             <LibsPage v-show="hidden" ref="libsPage" @load-book="loadBook" @libs-close="libsClose" @do-action="doAction"></LibsPage>
             <RecentBooksPage v-show="recentBooksActive" ref="recentBooksPage" @load-book="loadBook" @recent-books-close="recentBooksClose" @update-count-changed="updateCountChanged"></RecentBooksPage>
             <SettingsPage v-show="settingsActive" ref="settingsPage" @do-action="doAction"></SettingsPage>
+            <!-- HelpPage после SettingsPage для использования UserHotKeys -->
             <HelpPage v-if="helpActive" ref="helpPage" @do-action="doAction"></HelpPage>
             <ClickMapPage v-show="clickMapActive" ref="clickMapPage"></ClickMapPage>
             <ContentsPage v-show="contentsActive" ref="contentsPage" :book-pos="bookPos" :is-visible="contentsActive" @do-action="doAction" @book-pos-changed="bookPosChanged"></ContentsPage>

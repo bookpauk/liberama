@@ -1,5 +1,5 @@
 <template>
-    <div>
+    <div class="fit sets-tab-panel">
         <div class="sets-part-header">
             Отображение
         </div>

@@ -19,11 +19,8 @@
 //-----------------------------------------------------------------------------
 import vueComponent from '../../../vueComponent.js';
 
-import UserHotKeys from '../../SettingsPage/UserHotKeys/UserHotKeys.vue';
-
 const componentOptions = {
     components: {
-        UserHotKeys,
     },
 };
 class HotkeysHelpPage {

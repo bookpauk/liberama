@@ -39,9 +39,7 @@
 
             <div class="col fit">
                 <!-- Профили --------------------------------------------------------------------->
-                <div v-if="selectedTab == 'profiles'" class="fit tab-panel">
-                    <ProfilesTab :form="form" />
-                </div>
+                <ProfilesTab v-if="selectedTab == 'profiles'" :form="form" />
                 <!-- Вид ------------------------------------------------------------------------->                    
                 <!--div v-if="selectedTab == 'view'" class="fit column">
                     <q-tabs
@@ -85,13 +83,9 @@
                     </div>
                 </div-->
                 <!-- Кнопки ---------------------------------------------------------------------->
-                <div v-if="selectedTab == 'toolbar'" class="fit tab-panel">
-                    <ToolBarTab :form="form" />
-                </div>
+                <ToolBarTab v-if="selectedTab == 'toolbar'" :form="form" />
                 <!-- Управление ------------------------------------------------------------------>
-                <!--div v-if="selectedTab == 'keys'" class="fit column">
-                    @@include('./KeysTab.inc');
-                </div-->
+                <KeysTab v-if="selectedTab == 'keys'" :form="form" />
                 <!-- Листание -------------------------------------------------------------------->
                 <!--div v-if="selectedTab == 'pagemove'" class="fit tab-panel">
                     @@include('./PageMoveTab.inc');
@@ -128,7 +122,6 @@ import * as utils from '../../../share/utils';
 import * as cryptoUtils from '../../../share/cryptoUtils';
 import Window from '../../share/Window.vue';
 import NumInput from '../../share/NumInput.vue';
-import UserHotKeys from './UserHotKeys/UserHotKeys.vue';
 import wallpaperStorage from '../share/wallpaperStorage';
 
 import readerApi from '../../../api/reader';
@@ -138,6 +131,7 @@ import defPalette from './defPalette';
 //pages
 import ProfilesTab from './ProfilesTab/ProfilesTab.vue';
 import ToolBarTab from './ToolBarTab/ToolBarTab.vue';
+import KeysTab from './KeysTab/KeysTab.vue';
 
 const hex = /^#[0-9a-fA-F]{3}([0-9a-fA-F]{3})?$/;
 
@@ -145,10 +139,10 @@ const componentOptions = {
     components: {
         Window,
         NumInput,
-        UserHotKeys,
         //pages
         ProfilesTab,
         ToolBarTab,
+        KeysTab,
     },
     watch: {
         settings: function() {
@@ -228,7 +222,6 @@ class SettingsPage {
 
     selectedTab = 'profiles';
     selectedViewTab = 'mode';
-    selectedKeysTab = 'mouse';
     fontBold = false;
     fontItalic = false;
     vertShift = 0;
@@ -542,18 +535,11 @@ export default vueComponent(SettingsPage);
     justify-content: initial;
 }
 
-.tab-panel {
-    overflow-x: hidden;
-    overflow-y: auto;
-    font-size: 90%;
-    padding: 0 10px 15px 10px;
-}
-
 .label-7 {
     width: 75px;
 }
 
-.label-2, .label-4, .label-5 {
+.label-2, .label-5 {
     width: 110px;
 }
 
@@ -576,6 +562,13 @@ export default vueComponent(SettingsPage);
 </style>
 
 <style>
+.sets-tab-panel {
+    overflow-x: hidden;
+    overflow-y: auto;
+    font-size: 90%;
+    padding: 0 10px 15px 10px;
+}
+
 .sets-part-header {
     border-top: 2px solid #bbbbbb;
     font-weight: bold;
