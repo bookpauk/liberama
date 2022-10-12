@@ -93,9 +93,7 @@
                 <!-- Обновление ------------------------------------------------------------------>
                 <UpdateTab v-if="selectedTab == 'update'" :form="form" />
                 <!-- Прочее ---------------------------------------------------------------------->
-                <!--div v-if="selectedTab == 'others'" class="fit tab-panel">
-                    @@include('./OthersTab.inc');
-                </div-->
+                <OthersTab v-if="selectedTab == 'others'" :form="form" />
                 <!-- Сброс ----------------------------------------------------------------------->
                 <!--div v-if="selectedTab == 'reset'" class="fit tab-panel">
                     @@include('./ResetTab.inc');
@@ -128,6 +126,7 @@ import KeysTab from './KeysTab/KeysTab.vue';
 import PageMoveTab from './PageMoveTab/PageMoveTab.vue';
 import ConvertTab from './ConvertTab/ConvertTab.vue';
 import UpdateTab from './UpdateTab/UpdateTab.vue';
+import OthersTab from './OthersTab/OthersTab.vue';
 
 const hex = /^#[0-9a-fA-F]{3}([0-9a-fA-F]{3})?$/;
 
@@ -141,6 +140,7 @@ const componentOptions = {
         PageMoveTab,
         ConvertTab,
         UpdateTab,
+        OthersTab,
     },
     watch: {
         settings: function() {
@@ -514,10 +514,6 @@ export default vueComponent(SettingsPage);
 
 .label-2 {
     width: 110px;
-}
-
-.label-6 {
-    width: 100px;
 }
 
 .input {

@@ -8,7 +8,7 @@
                 indicator-color="white"
                 dense
                 no-caps
-                class="no-mp bg-grey-4 text-grey-7"
+                class="bg-grey-4 text-grey-7"
             >
                 <q-tab name="mouse" label="Мышь/тачскрин" />
                 <q-tab name="keyboard" label="Клавиатура" />

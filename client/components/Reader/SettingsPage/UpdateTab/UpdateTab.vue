@@ -94,7 +94,7 @@ const componentOptions = {
         NumInput
     },
 };
-class PageMoveTab {
+class UpdateTab {
     _options = componentOptions;
     _props = {
         form: Object,
@@ -111,7 +111,7 @@ class PageMoveTab {
     }
 }
 
-export default vueComponent(PageMoveTab);
+export default vueComponent(UpdateTab);
 //-----------------------------------------------------------------------------
 </script>
 
