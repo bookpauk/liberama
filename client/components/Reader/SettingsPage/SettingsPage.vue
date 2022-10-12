@@ -39,11 +39,11 @@
 
             <div class="col fit">
                 <!-- Профили --------------------------------------------------------------------->
-                <div v-if="selectedTab == 'profiles'" class="fit tab-panel">
+                <!--div v-if="selectedTab == 'profiles'" class="fit tab-panel">
                     @@include('./ProfilesTab.inc');
-                </div>
+                </div-->
                 <!-- Вид ------------------------------------------------------------------------->                    
-                <div v-if="selectedTab == 'view'" class="fit column">
+                <!--div v-if="selectedTab == 'view'" class="fit column">
                     <q-tabs
                         v-model="selectedViewTab"
                         active-color="black"
@@ -83,35 +83,35 @@
                             @@include('./ViewTab/Status.inc');
                         </div>
                     </div>
-                </div>
+                </div-->
                 <!-- Кнопки ---------------------------------------------------------------------->
                 <div v-if="selectedTab == 'toolbar'" class="fit tab-panel">
-                    @@include('./ToolBarTab.inc');
+                    <ToolBarTab :form="form" />
                 </div>
                 <!-- Управление ------------------------------------------------------------------>
-                <div v-if="selectedTab == 'keys'" class="fit column">
+                <!--div v-if="selectedTab == 'keys'" class="fit column">
                     @@include('./KeysTab.inc');
-                </div>
+                </div-->
                 <!-- Листание -------------------------------------------------------------------->
-                <div v-if="selectedTab == 'pagemove'" class="fit tab-panel">
+                <!--div v-if="selectedTab == 'pagemove'" class="fit tab-panel">
                     @@include('./PageMoveTab.inc');
-                </div>
+                </div-->
                 <!-- Конвертирование ------------------------------------------------------------->
-                <div v-if="selectedTab == 'convert'" class="fit tab-panel">
+                <!--div v-if="selectedTab == 'convert'" class="fit tab-panel">
                     @@include('./ConvertTab.inc');
-                </div>
+                </div-->
                 <!-- Обновление ------------------------------------------------------------------>
-                <div v-if="selectedTab == 'update'" class="fit tab-panel">
+                <!--div v-if="selectedTab == 'update'" class="fit tab-panel">
                     @@include('./UpdateTab.inc');
-                </div>
+                </div-->
                 <!-- Прочее ---------------------------------------------------------------------->
-                <div v-if="selectedTab == 'others'" class="fit tab-panel">
+                <!--div v-if="selectedTab == 'others'" class="fit tab-panel">
                     @@include('./OthersTab.inc');
-                </div>
+                </div-->
                 <!-- Сброс ----------------------------------------------------------------------->
-                <div v-if="selectedTab == 'reset'" class="fit tab-panel">
+                <!--div v-if="selectedTab == 'reset'" class="fit tab-panel">
                     @@include('./ResetTab.inc');
-                </div>
+                </div-->
             </div>
         </div>
     </Window>
@@ -119,11 +119,11 @@
 
 <script>
 //-----------------------------------------------------------------------------
-import { ref, watch } from 'vue';
 import vueComponent from '../../vueComponent.js';
 
 import _ from 'lodash';
 
+//stuff
 import * as utils from '../../../share/utils';
 import * as cryptoUtils from '../../../share/cryptoUtils';
 import Window from '../../share/Window.vue';
@@ -135,6 +135,9 @@ import readerApi from '../../../api/reader';
 import rstore from '../../../store/modules/reader';
 import defPalette from './defPalette';
 
+//pages
+import ToolBarTab from './ToolBarTab/ToolBarTab.vue';
+
 const hex = /^#[0-9a-fA-F]{3}([0-9a-fA-F]{3})?$/;
 
 const componentOptions = {
@@ -142,18 +145,21 @@ const componentOptions = {
         Window,
         NumInput,
         UserHotKeys,
-    },
-    data: function() {
-        return Object.assign({}, rstore.settingDefaults);
+        //pages
+        ToolBarTab,
     },
     watch: {
         settings: function() {
             this.settingsChanged();
         },
-        form: function(newValue) {
-            if (this.inited) {
-                this.commit('reader/setSettings', _.cloneDeep(newValue));
-            }
+        form: {
+            handler(newValue) {
+                if (this.inited) {
+console.log('save settings');                    
+                    this.commit('reader/setSettings', _.cloneDeep(newValue));
+                }
+            },
+            deep: true,
         },
         fontBold: function(newValue) {
             this.fontWeight = (newValue ? 'bold' : '');
@@ -217,6 +223,8 @@ const componentOptions = {
 class SettingsPage {
     _options = componentOptions;
 
+    form = {};
+
     selectedTab = 'profiles';
     selectedViewTab = 'mode';
     selectedKeysTab = 'mouse';
@@ -227,34 +235,17 @@ class SettingsPage {
     textColorFiltered = '';
     bgColorFiltered = '';
     dualDivColorFiltered = '';
+    statusBarColorFiltered = '';
 
     webFonts = [];
     fonts = [];
 
     serverStorageKeyVisible = false;
-    toolButtons = [];
-    rstore = {};
-
-    setup() {
-        const settingsProps = { form: ref({}) };
-
-        for (let prop in rstore.settingDefaults) {
-            settingsProps[prop] = ref(_.cloneDeep(rstore.settingDefaults[prop]));
-            watch(settingsProps[prop], (newValue) => {
-                settingsProps.form.value = Object.assign({}, settingsProps.form.value, {[prop]: newValue});
-            }, {deep: true});
-        }
-
-        return settingsProps;
-    }
 
     created() {
         this.commit = this.$store.commit;
         this.reader = this.$store.state.reader;
 
-        this.form = {};
-        this.rstore = rstore;
-        this.toolButtons = rstore.toolButtons;
         this.settingsChanged();
     }
 
@@ -276,22 +267,20 @@ class SettingsPage {
         if (_.isEqual(this.form, this.settings))
             return;
 
-        this.form = Object.assign({}, this.settings);
-        for (const prop in rstore.settingDefaults) {
-            this[prop] = _.cloneDeep(this.form[prop]);
-        }
+        this.form = _.cloneDeep(this.settings);
+        const form = this.form;
 
-        this.fontBold = (this.fontWeight == 'bold');
-        this.fontItalic = (this.fontStyle == 'italic');
+        this.fontBold = (form.fontWeight == 'bold');
+        this.fontItalic = (form.fontStyle == 'italic');
 
         this.fonts = rstore.fonts;
         this.webFonts = rstore.webFonts;
-        const font = (this.webFontName ? this.webFontName : this.fontName);
-        this.vertShift = this.fontShifts[font] || 0;
-        this.textColorFiltered = this.textColor;
-        this.bgColorFiltered = this.backgroundColor;
-        this.dualDivColorFiltered = this.dualDivColor;
-        this.statusBarColorFiltered = this.statusBarColor;
+        const font = (form.webFontName ? form.webFontName : form.fontName);
+        this.vertShift = form.fontShifts[font] || 0;
+        this.textColorFiltered = form.textColor;
+        this.bgColorFiltered = form.backgroundColor;
+        this.dualDivColorFiltered = form.dualDivColor;
+        this.statusBarColorFiltered = form.statusBarColor;
     }
 
     get mode() {
@@ -730,20 +719,6 @@ export default vueComponent(SettingsPage);
     padding: 0 10px 15px 10px;
 }
 
-.part-header {
-    border-top: 2px solid #bbbbbb;
-    font-weight: bold;
-    font-size: 110%;
-    margin-top: 15px;
-    margin-bottom: 5px;
-}
-
-.item {
-    width: 100%;
-    margin-top: 5px;
-    margin-bottom: 5px;
-}
-
 .label-1, .label-3, .label-7 {
     width: 75px;
 }
@@ -754,15 +729,6 @@ export default vueComponent(SettingsPage);
 
 .label-6 {
     width: 100px;
-}
-
-.label-1, .label-2, .label-3, .label-4, .label-5, .label-6, .label-7 {
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    text-align: right;
-    margin-right: 10px;
-    overflow: hidden;
 }
 
 .text {
@@ -794,4 +760,30 @@ export default vueComponent(SettingsPage);
 .col-left {
     width: 150px;
 }
+</style>
+
+<style>
+.sets-part-header {
+    border-top: 2px solid #bbbbbb;
+    font-weight: bold;
+    font-size: 110%;
+    margin-top: 15px;
+    margin-bottom: 5px;
+}
+
+.sets-label {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    text-align: right;
+    margin-right: 10px;
+    overflow: hidden;
+}
+
+.sets-item {
+    width: 100%;
+    margin-top: 5px;
+    margin-bottom: 5px;
+}
+
 </style>
