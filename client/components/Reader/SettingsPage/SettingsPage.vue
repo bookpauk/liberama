@@ -87,9 +87,7 @@
                 <!-- Управление ------------------------------------------------------------------>
                 <KeysTab v-if="selectedTab == 'keys'" :form="form" />
                 <!-- Листание -------------------------------------------------------------------->
-                <!--div v-if="selectedTab == 'pagemove'" class="fit tab-panel">
-                    @@include('./PageMoveTab.inc');
-                </div-->
+                <PageMoveTab v-if="selectedTab == 'pagemove'" :form="form" />
                 <!-- Конвертирование ------------------------------------------------------------->
                 <!--div v-if="selectedTab == 'convert'" class="fit tab-panel">
                     @@include('./ConvertTab.inc');
@@ -121,7 +119,6 @@ import _ from 'lodash';
 import * as utils from '../../../share/utils';
 import * as cryptoUtils from '../../../share/cryptoUtils';
 import Window from '../../share/Window.vue';
-import NumInput from '../../share/NumInput.vue';
 import wallpaperStorage from '../share/wallpaperStorage';
 
 import readerApi from '../../../api/reader';
@@ -132,26 +129,27 @@ import defPalette from './defPalette';
 import ProfilesTab from './ProfilesTab/ProfilesTab.vue';
 import ToolBarTab from './ToolBarTab/ToolBarTab.vue';
 import KeysTab from './KeysTab/KeysTab.vue';
+import PageMoveTab from './PageMoveTab/PageMoveTab.vue';
 
 const hex = /^#[0-9a-fA-F]{3}([0-9a-fA-F]{3})?$/;
 
 const componentOptions = {
     components: {
         Window,
-        NumInput,
         //pages
         ProfilesTab,
         ToolBarTab,
         KeysTab,
+        PageMoveTab,
     },
     watch: {
         settings: function() {
             this.settingsChanged();//no await
         },
         form: {
-            handler(newValue) {
+            handler() {
                 if (this.inited && !this.setsChanged) {
-                    this.commit('reader/setSettings', _.cloneDeep(newValue));
+                    this.debouncedCommitSettings();
                 }
             },
             deep: true,
@@ -181,6 +179,9 @@ const componentOptions = {
             if (newValue != '' && this.pageChangeAnimation == 'flip')
                 this.pageChangeAnimation = '';
         },
+        /*this.$watch('form.dualPageMode', (newValue) => {
+            console.log(newValue);
+        })*/        
         dualPageMode(newValue) {
             if (newValue && this.pageChangeAnimation == 'flip' || this.pageChangeAnimation == 'rightShift')
                 this.pageChangeAnimation = '';
@@ -239,6 +240,10 @@ class SettingsPage {
     created() {
         this.commit = this.$store.commit;
         this.reader = this.$store.state.reader;
+
+        this.debouncedCommitSettings = _.debounce(() => {
+            this.commit('reader/setSettings', _.cloneDeep(this.form));
+        }, 100);
 
         this.settingsChanged();//no await
     }
@@ -330,22 +335,6 @@ class SettingsPage {
         this.webFonts.forEach(font => {
             result.push({label: font.name, value: font.name});
         });
-        return result;
-    }
-
-    get pageChangeAnimationOptions() {
-        let result = [
-            {label: 'Нет', value: ''},
-            {label: 'Вверх-вниз', value: 'downShift'},
-            (!this.dualPageMode ? {label: 'Вправо-влево', value: 'rightShift'} : null),
-            {label: 'Протаивание', value: 'thaw'},
-            {label: 'Мерцание', value: 'blink'},
-            {label: 'Вращение', value: 'rotate'},
-            (this.wallpaper == '' && !this.dualPageMode ? {label: 'Листание', value: 'flip'} : null),
-        ];        
-
-        result = result.filter(v => v);
-
         return result;
     }
 
@@ -539,7 +528,7 @@ export default vueComponent(SettingsPage);
     width: 75px;
 }
 
-.label-2, .label-5 {
+.label-2 {
     width: 110px;
 }
 
@@ -556,9 +545,6 @@ export default vueComponent(SettingsPage);
     padding: 0;
 }
 
-.col-left {
-    width: 150px;
-}
 </style>
 
 <style>
