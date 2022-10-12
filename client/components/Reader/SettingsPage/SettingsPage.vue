@@ -89,9 +89,7 @@
                 <!-- Листание -------------------------------------------------------------------->
                 <PageMoveTab v-if="selectedTab == 'pagemove'" :form="form" />
                 <!-- Конвертирование ------------------------------------------------------------->
-                <!--div v-if="selectedTab == 'convert'" class="fit tab-panel">
-                    @@include('./ConvertTab.inc');
-                </div-->
+                <ConvertTab v-if="selectedTab == 'convert'" :form="form" />
                 <!-- Обновление ------------------------------------------------------------------>
                 <!--div v-if="selectedTab == 'update'" class="fit tab-panel">
                     @@include('./UpdateTab.inc');
@@ -130,6 +128,7 @@ import ProfilesTab from './ProfilesTab/ProfilesTab.vue';
 import ToolBarTab from './ToolBarTab/ToolBarTab.vue';
 import KeysTab from './KeysTab/KeysTab.vue';
 import PageMoveTab from './PageMoveTab/PageMoveTab.vue';
+import ConvertTab from './ConvertTab/ConvertTab.vue';
 
 const hex = /^#[0-9a-fA-F]{3}([0-9a-fA-F]{3})?$/;
 
@@ -141,6 +140,7 @@ const componentOptions = {
         ToolBarTab,
         KeysTab,
         PageMoveTab,
+        ConvertTab,
     },
     watch: {
         settings: function() {
@@ -286,14 +286,6 @@ class SettingsPage {
             await this.$nextTick();
             this.setsChanged = false;
         }
-    }
-
-    get mode() {
-        return this.$store.state.config.mode;
-    }
-
-    get isExternalConverter() {
-        return this.$store.state.config.useExternalBookConverter;
     }
 
     get settings() {
@@ -522,10 +514,6 @@ export default vueComponent(SettingsPage);
 <style scoped>
 .tab {
     justify-content: initial;
-}
-
-.label-7 {
-    width: 75px;
 }
 
 .label-2 {
