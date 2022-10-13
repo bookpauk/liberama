@@ -106,13 +106,6 @@ const componentOptions = {
             },
             deep: true,
         },
-        statusBarColor(newValue) {
-            this.statusBarColorFiltered = newValue;
-        },
-        statusBarColorFiltered(newValue) {
-            if (hex.test(newValue))
-                this.statusBarColor = newValue;
-        },
     },
 };
 class SettingsPage {
@@ -134,8 +127,6 @@ class SettingsPage {
     selectedTab = 'profiles';
 
     isSetsChanged = false;
-
-    statusBarColorFiltered = '';
 
     created() {
         this.commit = this.$store.commit;
@@ -159,9 +150,6 @@ class SettingsPage {
         this.isSetsChanged = true;
         try {
             this.form = reactive(_.cloneDeep(this.settings));
-            const form = this.form;
-
-            this.statusBarColorFiltered = form.statusBarColor;
         } finally {
             await this.$nextTick();
             this.isSetsChanged = false;
@@ -170,10 +158,6 @@ class SettingsPage {
 
     get settings() {
         return this.$store.state.reader.settings;
-    }
-
-    needReload() {
-        this.$root.notify.warning('Необходимо обновить страницу (F5), чтобы изменения возымели эффект');
     }
 
     close() {

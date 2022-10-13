@@ -1,5 +1,5 @@
 <template>
-    <div class="fit sets-tab-panel">
+    <div>
         <!---------------------------------------------->
         <div class="hidden sets-part-header">
             Режим
@@ -219,7 +219,7 @@ export default vueComponent(Mode);
 }
 
 .col-left {
-    width: 150px;
+    width: 145px;
 }
 
 .no-mp {

@@ -1,5 +1,5 @@
 <template>
-    <div class="fit sets-tab-panel">
+    <div>
         <!---------------------------------------------->
         <div class="hidden sets-part-header">
             Цвет
@@ -319,7 +319,7 @@ export default vueComponent(Color);
 }
 
 .col-left {
-    width: 150px;
+    width: 145px;
 }
 
 .no-mp {

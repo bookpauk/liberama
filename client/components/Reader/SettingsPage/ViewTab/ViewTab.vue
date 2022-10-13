@@ -22,14 +22,8 @@
             <Mode v-if="selectedTab == 'mode'" :form="form" />
             <Color v-if="selectedTab == 'color'" :form="form" />
             <Font v-if="selectedTab == 'font'" :form="form" />
-
-            <!--div v-if="selectedViewTab == 'text'">
-                @@include('./ViewTab/Text.inc');
-            </div-->
-
-            <!--div v-if="selectedViewTab == 'status'">
-                @@include('./ViewTab/Status.inc');
-            </div-->
+            <Text v-if="selectedTab == 'text'" :form="form" />
+            <Status v-if="selectedTab == 'status'" :form="form" />
         </div>
     </div>
 </template>
@@ -41,12 +35,16 @@ import vueComponent from '../../../vueComponent.js';
 import Mode from './Mode/Mode.vue';
 import Color from './Color/Color.vue';
 import Font from './Font/Font.vue';
+import Text from './Text/Text.vue';
+import Status from './Status/Status.vue';
 
 const componentOptions = {
     components: {
         Mode,
         Color,
         Font,
+        Text,
+        Status,
     },
 };
 class ViewTab {

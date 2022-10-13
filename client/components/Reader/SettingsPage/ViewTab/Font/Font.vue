@@ -1,5 +1,5 @@
 <template>
-    <div class="fit sets-tab-panel">
+    <div>
         <!---------------------------------------------->
         <div class="hidden sets-part-header">
             Шрифт
@@ -171,6 +171,6 @@ export default vueComponent(Font);
 }
 
 .col-left {
-    width: 150px;
+    width: 145px;
 }
 </style>
