@@ -78,8 +78,6 @@ import UpdateTab from './UpdateTab/UpdateTab.vue';
 import OthersTab from './OthersTab/OthersTab.vue';
 import ResetTab from './ResetTab/ResetTab.vue';
 
-const hex = /^#[0-9a-fA-F]{3}([0-9a-fA-F]{3})?$/;
-
 const componentOptions = {
     components: {
         Window,
