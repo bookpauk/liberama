@@ -21,14 +21,7 @@
         <div class="col sets-tab-panel">
             <Mode v-if="selectedTab == 'mode'" :form="form" />
             <Color v-if="selectedTab == 'color'" :form="form" />
-
-            <!--div v-if="selectedViewTab == 'color'">
-                @@include('./ViewTab/Color.inc');
-            </div-->
-
-            <!--div v-if="selectedViewTab == 'font'">
-                @@include('./ViewTab/Font.inc');
-            </div-->
+            <Font v-if="selectedTab == 'font'" :form="form" />
 
             <!--div v-if="selectedViewTab == 'text'">
                 @@include('./ViewTab/Text.inc');
@@ -47,11 +40,13 @@ import vueComponent from '../../../vueComponent.js';
 
 import Mode from './Mode/Mode.vue';
 import Color from './Color/Color.vue';
+import Font from './Font/Font.vue';
 
 const componentOptions = {
     components: {
         Mode,
         Color,
+        Font,
     },
 };
 class ViewTab {

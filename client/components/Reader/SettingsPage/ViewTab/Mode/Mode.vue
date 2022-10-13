@@ -162,8 +162,11 @@ const componentOptions = {
         NumInput
     },
     watch: {
-        form() {
-            this.formChanged();//no await
+        form: {
+            handler() {
+                this.formChanged();//no await
+            },
+            deep: true,
         },
         dualDivColorFiltered(newValue) {
             if (!this.isFormChanged && this.helper.isHexColor(newValue))

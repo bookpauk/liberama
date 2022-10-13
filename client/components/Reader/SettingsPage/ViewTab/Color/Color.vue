@@ -145,8 +145,11 @@ const componentOptions = {
     components: {
     },
     watch: {
-        form() {
-            this.formChanged();//no await
+        form: {
+            handler() {
+                this.formChanged();//no await
+            },
+            deep: true,
         },
         textColorFiltered(newValue) {
             if (!this.isFormChanged && this.helper.isHexColor(newValue))

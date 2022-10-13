@@ -9,7 +9,8 @@
                 <q-tabs
                     ref="tabs"
                     v-model="selectedTab"
-                    class="bg-grey-3 text-black"
+                    class="bg-grey-3 text-grey-9"
+                    style="max-width: 130px"
                     
                     left-icon="la la-caret-up"
                     right-icon="la la-caret-down"
@@ -21,15 +22,12 @@
                     stretch
                     inline-label
                 >
-                    <q-tab class="tab" name="profiles" icon="la la-users" label="Профили" />
-                    <q-tab class="tab" name="view" icon="la la-eye" label="Вид" />
-                    <q-tab class="tab" name="toolbar" icon="la la-grip-horizontal" label="Панель" />
-                    <q-tab class="tab" name="keys" icon="la la-gamepad" label="Управление" />
-                    <q-tab class="tab" name="pagemove" icon="la la-school" label="Листание" />
-                    <q-tab class="tab" name="convert" icon="la la-magic" label="Конвертир." />
-                    <q-tab class="tab" name="update" icon="la la-retweet" label="Обновление" />
-                    <q-tab class="tab" name="others" icon="la la-list-ul" label="Прочее" />
-                    <q-tab class="tab" name="reset" icon="la la-broom" label="Сброс" />
+                    <q-tab v-for="item in tabs" :key="item.name" class="tab row items-center" :name="item.name">
+                        <q-icon :name="item.icon" :color="selectedTab == item.name ? 'yellow' : 'teal-7'" size="24px" />
+                        <div class="q-ml-xs" style="font-size: 90%">
+                            {{ item.label }}
+                        </div>
+                    </q-tab>
                 </q-tabs>
             </div>
 
@@ -108,30 +106,6 @@ const componentOptions = {
             },
             deep: true,
         },
-        fontBold: function(newValue) {
-            this.fontWeight = (newValue ? 'bold' : '');
-        },
-        fontItalic: function(newValue) {
-            this.fontStyle = (newValue ? 'italic' : '');
-        },
-        vertShift: function(newValue) {
-            const font = (this.webFontName ? this.webFontName : this.fontName);
-            if (this.fontShifts[font] != newValue || this.fontVertShift != newValue) {
-                this.fontShifts = Object.assign({}, this.fontShifts, {[font]: newValue});
-                this.fontVertShift = newValue;
-            }
-        },
-        fontName: function(newValue) {
-            const font = (this.webFontName ? this.webFontName : newValue);
-            this.vertShift = this.fontShifts[font] || 0;
-        },
-        webFontName: function(newValue) {
-            const font = (newValue ? newValue : this.fontName);
-            this.vertShift = this.fontShifts[font] || 0;
-        },
-        textColor: function(newValue) {
-            this.textColorFiltered = newValue;
-        },
         statusBarColor(newValue) {
             this.statusBarColorFiltered = newValue;
         },
@@ -146,21 +120,27 @@ class SettingsPage {
 
     form = {};
 
+    tabs = [
+        { name: 'profiles', icon: 'la la-users', label: 'Профили' },
+        { name: 'view', icon: 'la la-eye', label: 'Вид'},
+        { name: 'toolbar', icon: 'la la-grip-horizontal', label: 'Панель'},
+        { name: 'keys', icon: 'la la-gamepad', label: 'Управление'},
+        { name: 'pagemove', icon: 'la la-school', label: 'Листание'},
+        { name: 'convert', icon: 'la la-magic', label: 'Конвертир.'},
+        { name: 'update', icon: 'la la-retweet', label: 'Обновление'},
+        { name: 'others', icon: 'la la-list-ul', label: 'Прочее'},
+        { name: 'reset', icon: 'la la-broom', label: 'Сброс'},
+    ];
     selectedTab = 'profiles';
 
     isSetsChanged = false;
 
-    fontBold = false;
-    fontItalic = false;
-    vertShift = 0;
     statusBarColorFiltered = '';
-    webFonts = [];
-    fonts = [];    
 
     created() {
         this.commit = this.$store.commit;
 
-        this.debouncedCommitSettings = _.debounce(() => {
+        this.debouncedCommitSettings = _.debounce(() => {            
             this.commit('reader/setSettings', _.cloneDeep(this.form));
         }, 50);
 
@@ -181,14 +161,6 @@ class SettingsPage {
             this.form = reactive(_.cloneDeep(this.settings));
             const form = this.form;
 
-            this.fontBold = (form.fontWeight == 'bold');
-            this.fontItalic = (form.fontStyle == 'italic');
-
-            this.fonts = rstore.fonts;
-            this.webFonts = rstore.webFonts;
-            const font = (form.webFontName ? form.webFontName : form.fontName);
-            this.vertShift = form.fontShifts[font] || 0;
-            this.dualDivColorFiltered = form.dualDivColor;
             this.statusBarColorFiltered = form.statusBarColor;
         } finally {
             await this.$nextTick();
@@ -200,28 +172,8 @@ class SettingsPage {
         return this.$store.state.reader.settings;
     }
 
-    get fontsOptions() {
-        let result = [];
-        this.fonts.forEach(font => {
-            result.push({label: (font.label ? font.label : font.name), value: font.name});
-        });
-        return result;
-    }
-
-    get webFontsOptions() {
-        let result = [{label: 'Нет', value: ''}];
-        this.webFonts.forEach(font => {
-            result.push({label: font.name, value: font.name});
-        });
-        return result;
-    }
-
     needReload() {
         this.$root.notify.warning('Необходимо обновить страницу (F5), чтобы изменения возымели эффект');
-    }
-
-    needTextReload() {
-        this.$root.notify.warning('Необходимо обновить книгу в обход кэша, чтобы изменения возымели эффект');
     }
 
     close() {
