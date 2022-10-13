@@ -6,15 +6,26 @@
         class="no-mp"
         :class="(error ? 'error' : '')"
         :disable="disable"
+        :mask="mask"
     >
         <slot></slot>
         <template #prepend>
             <q-icon
+                v-show="mmButtons"
+                v-ripple="modelValue != min" 
+                style="font-size: 100%"
+                :class="(modelValue != min ? '' : 'disable')" 
+                name="la la-angle-double-left" 
+                class="button" 
+                @click="toMin"
+            />
+
+            <q-icon
                 v-ripple="validate(modelValue - step)" 
                 :class="(validate(modelValue - step) ? '' : 'disable')" 
-                name="la la-minus-circle" 
+                :name="minusIcon" 
                 class="button" 
-                @click="minus"
+                @click="onClick('minus')"
                 @mousedown.prevent.stop="onMouseDown($event, 'minus')"
                 @mouseup.prevent.stop="onMouseUp"
                 @mouseout.prevent.stop="onMouseUp"
@@ -27,15 +38,25 @@
             <q-icon
                 v-ripple="validate(modelValue + step)"
                 :class="(validate(modelValue + step) ? '' : 'disable')"
-                name="la la-plus-circle"
+                :name="plusIcon"
                 class="button"
-                @click="plus"
+                @click="onClick('plus')"
                 @mousedown.prevent.stop="onMouseDown($event, 'plus')"
                 @mouseup.prevent.stop="onMouseUp"
                 @mouseout.prevent.stop="onMouseUp"
                 @touchstart.stop="onTouchStart($event, 'plus')"
                 @touchend.stop="onTouchEnd"
                 @touchcancel.prevent.stop="onTouchEnd"
+            />
+
+            <q-icon
+                v-show="mmButtons"
+                v-ripple="modelValue != max" 
+                style="font-size: 100%"
+                :class="(modelValue != max ? '' : 'disable')" 
+                name="la la-angle-double-right" 
+                class="button" 
+                @click="toMax"
             />
         </template>
     </q-input>
@@ -49,17 +70,18 @@ import * as utils from '../../share/utils';
 
 const componentOptions = {
     watch: {
-        filteredValue: function(newValue) {
-            if (this.validate(newValue)) {
-                this.error = false;
-                this.$emit('update:modelValue', this.string2number(newValue));
-            } else {
-                this.error = true;
-            }
+        filteredValue() {
+            this.checkErrorAndEmit(true);
         },
-        modelValue: function(newValue) {
+        modelValue(newValue) {
             this.filteredValue = newValue;
         },
+        min() {
+            this.checkErrorAndEmit();
+        },
+        max() {
+            this.checkErrorAndEmit();
+        }
     }
 };
 class NumInput {
@@ -70,7 +92,11 @@ class NumInput {
         max: { type: Number, default: Number.MAX_VALUE },
         step: { type: Number, default: 1 },
         digits: { type: Number, default: 0 },
-        disable: Boolean
+        disable: Boolean,
+        minusIcon: {type: String, default: 'la la-minus-circle'},
+        plusIcon: {type: String, default: 'la la-plus-circle'},
+        mmButtons: Boolean,
+        mask: String,
     };
 
     filteredValue = 0;
@@ -95,6 +121,16 @@ class NumInput {
         return true;
     }
 
+    checkErrorAndEmit(emit = false) {
+        if (this.validate(this.filteredValue)) {
+            this.error = false;
+            if (emit)
+                this.$emit('update:modelValue', this.string2number(this.filteredValue));
+        } else {
+            this.error = true;
+        }
+    }
+
     plus() {
         const newValue = this.modelValue + this.step;
         if (this.validate(newValue))
@@ -107,23 +143,42 @@ class NumInput {
             this.filteredValue = newValue;
     }
 
+    onClick(way) {
+        if (this.clickRepeat)
+            return;
+
+        if (way == 'plus') {
+            this.plus();
+        } else {
+            this.minus();
+        }
+    }
+
     onMouseDown(event, way) {
         this.startClickRepeat = true;
         this.clickRepeat = false;
 
         if (event.button == 0) {
             (async() => {
-                await utils.sleep(300);
-                if (this.startClickRepeat) {
-                    this.clickRepeat = true;
-                    while (this.clickRepeat) {
-                        if (way == 'plus') {
-                            this.plus();
-                        } else {
-                            this.minus();
+                if (this.inRepeatFunc)
+                    return;
+
+                this.inRepeatFunc = true;
+                try {
+                    await utils.sleep(300);
+                    if (this.startClickRepeat) {
+                        this.clickRepeat = true;
+                        while (this.clickRepeat) {
+                            if (way == 'plus') {
+                                this.plus();
+                            } else {
+                                this.minus();
+                            }
+                            await utils.sleep(100);
                         }
-                        await utils.sleep(50);
                     }
+                } finally {
+                    this.inRepeatFunc = false;
                 }
             })();
         }
@@ -133,7 +188,12 @@ class NumInput {
         if (this.inTouch)
             return;
         this.startClickRepeat = false;
-        this.clickRepeat = false;
+        if (this.clickRepeat) {
+            (async() => {
+                await utils.sleep(50);
+                this.clickRepeat = false;
+            })();
+        }
     }
 
     onTouchStart(event, way) {
@@ -151,6 +211,14 @@ class NumInput {
         this.inTouch = false;
         this.onMouseUp();
     }
+
+    toMin() {
+        this.filteredValue = this.min;
+    }
+
+    toMax() {
+        this.filteredValue = this.max;
+    }
 }
 
 export default vueComponent(NumInput);
@@ -165,7 +233,9 @@ export default vueComponent(NumInput);
 
 .button {
     font-size: 130%;
-    border-radius: 20px;
+    border-radius: 15px;
+    width: 30px;
+    height: 30px;
     color: #bbb;
     cursor: pointer;
 }
