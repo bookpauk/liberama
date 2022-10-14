@@ -576,6 +576,7 @@ class ExternalLibs {
             this.frameVisible = true;
             this.$nextTick(() => {
                 if (this.$refs.frame) {
+                    this.$refs.frame.contentWindow.location.reload(true);
                     this.$refs.frame.contentWindow.focus();
                     this.frameResize();
                 }
