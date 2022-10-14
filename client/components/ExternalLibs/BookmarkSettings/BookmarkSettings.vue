@@ -347,6 +347,7 @@ export default vueComponent(BookmarkSettings);
     padding: 0px 10px 10px 10px;
     overflow-x: auto;
     overflow-y: auto;
+    max-width: 520px;
 }
 
 .selected {

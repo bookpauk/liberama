@@ -110,7 +110,7 @@
 
             <div ref="frameBox" class="col fit" style="position: relative;">
                 <div ref="frameWrap" class="overflow-hidden">
-                    <iframe v-if="frameVisible" ref="frame" :src="frameSrc" frameborder="0"></iframe>
+                    <iframe v-if="frameVisible" ref="frame" :src="frameSrc" frameborder="0" allow="clipboard-read; clipboard-write"></iframe>
                 </div>
                 <div v-show="transparentLayoutVisible" ref="transparentLayout" class="fit transparent-layout" @click="transparentLayoutClick"></div>
             </div>
@@ -304,6 +304,10 @@ class ExternalLibs {
     openInFrameOnAdd = false;
     frameScale = 1;
 
+    inpxReady = false;
+    inpxTitle = '';
+    inpxUrl = '';
+
     created() {
         this.oldStartLink = '';
         this.justOpened = true;
@@ -348,17 +352,28 @@ class ExternalLibs {
             const openerOrigin2 = `https://${openerHost}`;
 
             window.addEventListener('message', (event) => {
+                //from inpx-web
+                if (_.isObject(event.data) && event.data.from === 'inpx-web') {
+                    //console.log(event);
+
+                    this.inpxOrigin = event.origin;
+
+                    this.recvInpxMessage(event.data);
+                    return;
+                }
+
+                //from parent
                 if (event.origin !== openerOrigin1 && event.origin !== openerOrigin2)
                     return;
+
                 if (!_.isObject(event.data) || event.data.from != 'LibsPage')
                     return;
                 if (event.origin == openerOrigin1)
                     this.opener = window.opener;
                 else
                     this.opener = event.source;
-                this.openerOrigin = event.origin;
 
-                //console.log(event);
+                this.openerOrigin = event.origin;
 
                 this.recvMessage(event.data);
             });
@@ -401,6 +416,30 @@ class ExternalLibs {
             if (this.opener && this.openerOrigin)
                 this.opener.postMessage(Object.assign({}, {from: 'ExternalLibs'}, d), this.openerOrigin);
         })();
+    }
+
+    recvInpxMessage(d) {
+        if (d.type == 'mes') {
+            switch(d.data) {
+                case 'hello-from-inpx-web':
+                    this.sendInpxMessage({type: 'mes', data: 'ready'});
+                    break;
+                case 'ready':
+                    this.inpxReady = true;
+                    break;
+            }
+        } else if (d.type == 'submitUrl') {
+            this.submitUrl(d.data);
+        } else if (d.type == 'titleChange') {
+            this.inpxTitle = d.data;
+        } else if (d.type == 'urlChange') {
+            this.inpxUrl = d.data;
+        }
+    }
+
+    sendInpxMessage(d) {
+        if (this.$refs.frame && this.inpxOrigin)
+            this.$refs.frame.contentWindow.postMessage(Object.assign({}, {from: 'ExternalLibs'}, d), this.inpxOrigin);
     }
 
     async checkOpener() {
@@ -461,7 +500,10 @@ class ExternalLibs {
     get header() {
         let result = (this.ready ? 'Сетевая библиотека' : 'Загрузка...');
         if (this.ready && this.selectedLink) {
-            result += ` | ${(this.libs.comment ? this.libs.comment + ' ': '') + lu.removeProtocol(this.libs.startLink)}`;
+            let title = `${(this.libs.comment ? this.libs.comment + ' ': '') + lu.removeProtocol(this.libs.startLink)}`;
+            if (this.inpxReady && this.inpxTitle)
+                title = this.inpxTitle;
+            result += ` | ${title}`;
         }
         this.$root.setAppTitle(result);
         return result;
@@ -561,6 +603,9 @@ class ExternalLibs {
     }
 
     goToLink(link) {
+        this.inpxReady = false;
+        this.inpxOrigin = false;
+
         if (!this.ready || !link)
             return;
 
@@ -649,13 +694,17 @@ class ExternalLibs {
         this.updateStartLink(true);
     }
 
-    submitUrl() {
-        if (this.bookUrl) {
+    submitUrl(url) {
+        if (!url) {
+            url = this.bookUrl;
+            this.bookUrl = '';
+        }
+
+        if (url) {
             this.sendMessage({type: 'submitUrl', data: {
-                url: this.bookUrl,
+                url,
                 force: true
             }});
-            this.bookUrl = '';
             if (this.closeAfterSubmit)
                 this.close();
         }
@@ -668,6 +717,9 @@ class ExternalLibs {
             this.editBookmarkDesc = this.bookmarkDesc = desc;
         } else {
             this.bookmarkLink = this.bookUrl;
+            if (!this.bookmarkLink && this.inpxReady && this.inpxUrl)
+                this.bookmarkLink = this.inpxUrl;
+
             this.bookmarkDesc = '';
         }
 
