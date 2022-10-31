@@ -717,10 +717,13 @@ class ExternalLibs {
             this.editBookmarkDesc = this.bookmarkDesc = desc;
         } else {
             this.bookmarkLink = this.bookUrl;
-            if (!this.bookmarkLink && this.inpxReady && this.inpxUrl)
-                this.bookmarkLink = this.inpxUrl;
-
             this.bookmarkDesc = '';
+
+            if (!this.bookmarkLink && this.inpxReady && this.inpxUrl) {
+                this.bookmarkLink = this.inpxUrl;
+                if (this.inpxTitle)
+                    this.bookmarkDesc = this.inpxTitle;
+            }
         }
 
         this.addBookmarkMode = mode;
