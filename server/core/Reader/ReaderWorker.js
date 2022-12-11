@@ -109,7 +109,7 @@ class ReaderWorker {
             let downloadSize = -1;
             //download or use uploaded
             if (url.indexOf('disk://') != 0) {//download
-                const downdata = await this.down.load(url, (progress) => {
+                const downdata = await this.down.load(url, {}, (progress) => {
                     wState.set({progress});
                 }, q.abort);
 
