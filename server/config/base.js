@@ -2,18 +2,14 @@ const path = require('path');
 const pckg = require('../../package.json');
 
 const execDir = path.resolve(__dirname, '..');
-const dataDir = `${execDir}/data`;
 
 module.exports = {
     branch: 'unknown',
     version: pckg.version,
     name: pckg.name,
 
-    dataDir: dataDir,
-    tempDir: `${dataDir}/tmp`,
-    logDir: `${dataDir}/log`,
-    publicDir: `${execDir}/public`,
-    uploadDir: `${execDir}/public/upload`,
+    execDir,
+
     loggingEnabled: true,
 
     maxUploadFileSize: 50*1024*1024,//50Мб
@@ -48,13 +44,13 @@ module.exports = {
     servers: [
         {
             serverName: '1',
-            mode: 'normal', //'none', 'normal', 'site', 'reader', 'omnireader', 'liberama.top', 'book_update_checker'
+            mode: 'reader', //'reader', 'omnireader', 'liberama.top', 'book_update_checker'
             ip: '0.0.0.0',
             port: '33080',
         },
         /*{
             serverName: '2',
-            mode: 'book_update_checker', //'none', 'normal', 'site', 'reader', 'omnireader', 'liberama.top', 'book_update_checker'
+            mode: 'book_update_checker',
             isHttps: true,
             keysFile: 'server',
             ip: '0.0.0.0',

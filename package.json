@@ -1,5 +1,5 @@
 {
-  "name": "Liberama",
+  "name": "liberama",
   "version": "0.12.2",
   "author": "Book Pauk <bookpauk@gmail.com>",
   "license": "CC0-1.0",
@@ -8,7 +8,7 @@
     "node": ">=16.16.0"
   },
   "scripts": {
-    "dev": "nodemon --inspect --ignore server/public --ignore server/data --ignore client --exec 'node server'",
+    "dev": "nodemon --inspect --ignore server/.liberama --ignore client --exec 'node server'",
     "build:client": "webpack --config build/webpack.prod.config.js",
     "build:linux": "npm run build:client && node build/linux && pkg -t node16-linux-x64 -C GZip -o dist/linux/liberama .",
     "build:win": "npm run build:client && node build/win && pkg -t node16-win-x64 -C GZip -o dist/win/liberama .",

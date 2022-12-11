@@ -1,5 +1,4 @@
 const fs = require('fs-extra');
-const path = require('path');
 
 const express = require('express');
 const multer = require('multer');
@@ -19,14 +18,8 @@ function initRoutes(app, wss, config) {
 
     initStatic(app, config);
         
-    const misc = new c.MiscController(config);
     const reader = new c.ReaderController(config);
-    const worker = new c.WorkerController(config);
     new c.WebSocketController(wss, config);
-
-    //access
-    const [aAll, aNormal, aSite, aReader, aOmnireader] = // eslint-disable-line no-unused-vars
-        [config.mode, 'normal', 'site', 'reader', 'omnireader'];
 
     //multer
     const storage = multer.diskStorage({
@@ -41,42 +34,29 @@ function initRoutes(app, wss, config) {
 
     //routes
     const routes = [
-        ['POST', '/api/config', misc.getConfig.bind(misc), [aAll], {}],
-        ['POST', '/api/reader/load-book', reader.loadBook.bind(reader), [aAll], {}],
-        ['POST', '/api/reader/storage', reader.storage.bind(reader), [aAll], {}],
-        ['POST', '/api/reader/upload-file', [upload.single('file'), reader.uploadFile.bind(reader)], [aAll], {}],
-        ['POST', '/api/worker/get-state', worker.getState.bind(worker), [aAll], {}],
+        ['POST', '/api/reader/upload-file', [upload.single('file'), reader.uploadFile.bind(reader)]],
     ];
 
     //to app
     for (let route of routes) {
         let callbacks = [];
-        let [httpMethod, path, controllers, access, options] = route;
+        let [httpMethod, path, controllers] = route;
         let controller = controllers;
         if (Array.isArray(controllers)) {
             controller = controllers[controllers.length - 1];
             callbacks = controllers.slice(0, -1);
         }
 
-        access = new Set(access);
+        const callback = async function(req, res) {
+            try {
+                const result = await controller(req, res);
 
-        let callback = () => {};
-        if (access.has(config.mode)) {//allowed
-            callback = async function(req, res) {
-                try {
-                    const result = await controller(req, res, options);
-
-                    if (result !== false)
-                        res.send(result);
-                } catch (e) {
-                    res.status(500).send({error: e.message});
-                }
-            };
-        } else {//forbidden
-            callback = async function(req, res) {
-                res.status(403);
-            };
-        }
+                if (result !== false)
+                    res.send(result);
+            } catch (e) {
+                res.status(500).send({error: e.message});
+            }
+        };
         callbacks.push(callback);
 
         switch (httpMethod) {
@@ -96,42 +76,54 @@ function initStatic(app, config) {
     const readerWorker = new ReaderWorker(config);
 
     //восстановление файлов в /tmp и /upload из webdav-storage, при необходимости
-    app.use(async(req, res, next) => {
-        if ((req.method !== 'GET' && req.method !== 'HEAD') ||
-            !(req.path.indexOf('/tmp/') === 0 || req.path.indexOf('/upload/') === 0)
-            ) {
-            return next();
-        }
-
-        const filePath = `${config.publicDir}${req.path}`;
-
-        //восстановим
-        try {
-            if (!await fs.pathExists(filePath)) {
-                if (req.path.indexOf('/tmp/') === 0) {
-                    await readerWorker.restoreRemoteFile(req.path, '/tmp');
-                } else if (req.path.indexOf('/upload/') === 0) {
-                    await readerWorker.restoreRemoteFile(req.path, '/upload');
-                }
+    app.use('/tmp',
+        async(req, res, next) => {
+            if (req.method !== 'GET' && req.method !== 'HEAD') {
+                return next();
             }
-        } catch(e) {
-            log(LM_ERR, `static::restoreRemoteFile ${req.path} > ${e.message}`);
-        }
 
-        return next();
-    });
+            const filePath = `${config.tempPublicDir}${req.path}`;
 
-    const tmpDir = `${config.publicDir}/tmp`;
-    app.use(express.static(config.publicDir, {
-        maxAge: '30d',
+            //восстановим
+            try {
+                if (!await fs.pathExists(filePath))
+                    await readerWorker.restoreRemoteFile(req.path, '/tmp');
+            } catch(e) {
+                log(LM_ERR, `static::restoreRemoteFile ${filePath} > ${e.message}`);
+            }
 
-        setHeaders: (res, filePath) => {
-            if (path.dirname(filePath) == tmpDir) {
+            return next();
+        },
+        express.static(config.tempPublicDir, {
+            setHeaders: (res) => {
                 res.set('Content-Type', 'application/xml');
                 res.set('Content-Encoding', 'gzip');
+            },
+        })
+    );
+
+    app.use('/upload',
+        async(req, res, next) => {
+            if (req.method !== 'GET' && req.method !== 'HEAD') {
+                return next();
             }
+
+            const filePath = `${config.uploadPublicDir}${req.path}`;
+
+            //восстановим
+            try {
+                if (!await fs.pathExists(filePath))
+                    await readerWorker.restoreRemoteFile(req.path, '/upload');
+            } catch(e) {
+                log(LM_ERR, `static::restoreRemoteFile ${filePath} > ${e.message}`);
+            }
+
+            return next();
         },
-    }));
+        express.static(config.uploadPublicDir)
+    );
+
+    app.use(express.static(config.publicDir));
 }
 
 module.exports = {

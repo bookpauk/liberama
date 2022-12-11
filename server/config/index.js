@@ -1,4 +1,5 @@
 const _ = require('lodash');
+const path = require('path');
 const fs = require('fs-extra');
 
 const branchFilename = __dirname + '/application_env';
@@ -29,7 +30,7 @@ class ConfigManager {
         return instance;
     }
 
-    async init() {
+    async init(dataDir) {
         if (this.inited)
             throw new Error('already inited');
 
@@ -44,10 +45,17 @@ class ConfigManager {
         process.env.NODE_ENV = this.branch;
 
         this.branchConfigFile = __dirname + `/${this.branch}.js`;
-        this._config = require(this.branchConfigFile);
+        const config = require(this.branchConfigFile);
 
-        await fs.ensureDir(this._config.dataDir);
-        this._userConfigFile = `${this._config.dataDir}/config.json`;
+        if (dataDir) {
+            config.dataDir = path.resolve(dataDir);
+        } else {
+            config.dataDir = `${config.execDir}/.${config.name}`;
+        }
+
+        await fs.ensureDir(config.dataDir);
+        this._userConfigFile = `${config.dataDir}/config.json`;
+        this._config = config;
 
         this.inited = true;
     }
@@ -72,15 +80,28 @@ class ConfigManager {
     }
 
     async load() {
-        if (!this.inited)
-            throw new Error('not inited');
-        if (!await fs.pathExists(this.userConfigFile)) {
-            await this.save();
-            return;
-        }
+        try {
+            if (!this.inited)
+                throw new Error('not inited');
 
-        const data = await fs.readFile(this.userConfigFile, 'utf8');
-        this.config = JSON.parse(data);
+            if (await fs.pathExists(this.userConfigFile)) {
+                const data = JSON.parse(await fs.readFile(this.userConfigFile, 'utf8'));
+                const config = _.pick(data, propsToSave);
+
+                this.config = config;
+
+                //сохраним конфиг, если не все атрибуты присутствуют в файле конфига
+                for (const prop of propsToSave)
+                    if (!Object.prototype.hasOwnProperty.call(config, prop)) {
+                        await this.save();
+                        break;
+                    }
+            } else {
+                await this.save();
+            }
+        } catch(e) {
+            throw new Error(`Error while loading "${this.userConfigFile}": ${e.message}`);
+        }
     }
 
     async save() {

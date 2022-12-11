@@ -1,7 +1,6 @@
 require('tls').DEFAULT_MIN_VERSION = 'TLSv1';
 
 const fs = require('fs-extra');
-const argv = require('minimist')(process.argv.slice(2));
 const express = require('express');
 const compression = require('compression');
 const http = require('http');
@@ -11,42 +10,84 @@ const WebSocket = require ('ws');
 const ayncExit = new (require('./core/AsyncExit'))();
 
 let log = null;
+let config;
+let argv;
+let branch = '';
+const argvStrings = ['host', 'port', 'app-dir', 'lib-dir', 'inpx'];
 
 const maxPayloadSize = 50;//in MB
 
+function versionText(config) {
+    return `${config.name} v${config.version}, Node.js ${process.version}`;
+}
+
+function showHelp(defaultConfig) {
+    console.log(versionText(defaultConfig));
+    console.log(
+`Usage: ${defaultConfig.name} [options]
+
+Options:
+  --help              Print ${defaultConfig.name} command line options
+  --app-dir=<dirpath> Set application working directory, default: <execDir>/.${defaultConfig.name}
+  --auto-repair       Force auto repairing of corrupted database on start
+`
+    );
+}
+
 async function init() {
+    argv = require('minimist')(process.argv.slice(2), {string: argvStrings});
+    const dataDir = argv['app-dir'];
+
     //config
     const configManager = new (require('./config'))();//singleton
-    await configManager.init();
-    configManager.userConfigFile = argv.config;
+    await configManager.init(dataDir);
+    const defaultConfig = configManager.config;
+
     await configManager.load();
-    const config = configManager.config;
+    config = configManager.config;
+    branch = config.branch;
+
+    //dirs
+    config.tempDir = `${config.dataDir}/tmp`;
+    config.logDir = `${config.dataDir}/log`;
+    config.publicDir = `${config.dataDir}/public`;
+    config.publicFilesDir = `${config.dataDir}/public-files`;
+    config.tempPublicDir = `${config.publicFilesDir}/tmp`;
+    config.uploadPublicDir = `${config.publicFilesDir}/upload`;
+
+    configManager.config = config;///!!!
+
+    await fs.ensureDir(config.dataDir);
+    await fs.ensureDir(config.publicDir);
+    await fs.ensureDir(config.tempPublicDir);
+    await fs.ensureDir(config.uploadPublicDir);
+
+    await fs.ensureDir(config.tempDir);
+    await fs.emptyDir(config.tempDir);
 
     //logger
     const appLogger = new (require('./core/AppLogger'))();//singleton
     await appLogger.init(config);
     log = appLogger.log;
 
-    //dirs
-    log(`${config.name} v${config.version}, Node.js ${process.version}`);
-    log('Initializing');
-
-    await fs.ensureDir(config.dataDir);
-    await fs.ensureDir(config.uploadDir);
-
-    await fs.ensureDir(config.tempDir);
-    await fs.emptyDir(config.tempDir);
-
-    const appDir = `${config.publicDir}/app`;
-    const appNewDir = `${config.publicDir}/app_new`;
-    if (await fs.pathExists(appNewDir)) {
-        await fs.remove(appDir);
-        await fs.move(appNewDir, appDir);
+    //cli
+    if (argv.help) {
+        showHelp(defaultConfig);
+        ayncExit.exit(0);
+    } else {
+        log(versionText(config));
+        log('Initializing');
     }
 
     //connections
     const jembaConnManager = new (require('./db/JembaConnManager'))();//singleton
     await jembaConnManager.init(config, argv['auto-repair']);
+
+    //web app
+    if (branch !== 'development') {
+        //const createWebApp = require('./createWebApp');
+        //await createWebApp(config);
+    }
 }
 
 async function main() {
