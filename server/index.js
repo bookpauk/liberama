@@ -33,7 +33,6 @@ async function init() {
 
     await fs.ensureDir(config.dataDir);
     await fs.ensureDir(config.uploadDir);
-    await fs.ensureDir(config.sharedDir);
 
     await fs.ensureDir(config.tempDir);
     await fs.emptyDir(config.tempDir);

@@ -11,7 +11,6 @@ module.exports = Object.assign({}, base, {
     logDir: `${dataDir}/log`,
     publicDir: `${execDir}/public`,
     uploadDir: `${execDir}/public/upload`,
-    sharedDir: `${execDir}/public/shared`,
 
     servers: [
         {
