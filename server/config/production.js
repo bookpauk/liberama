@@ -11,7 +11,7 @@ module.exports = Object.assign({}, base, {
     servers: [
         {
             serverName: '1',
-            mode: 'normal', //'none', 'normal', 'site', 'reader', 'omnireader'
+            mode: 'reader',
             ip: '0.0.0.0',
             port: '44080',
         },
