@@ -71,6 +71,8 @@ class WebSocketController {
                     await this.test(req, ws); break;
                 case 'get-config':
                     await this.getConfig(req, ws); break;
+                case 'load-book':
+                    await this.loadBook(req, ws); break;
                 case 'worker-get-state':
                     await this.workerGetState(req, ws); break;
                 case 'worker-get-state-finish':
@@ -122,6 +124,22 @@ class WebSocketController {
         } else {
             throw new Error('params is not an array');
         }
+    }
+
+    async loadBook(req, ws) {
+        const workerId = this.readerWorker.loadBookUrl({
+            url: req.url, 
+            enableSitesFilter: (_.has(req, 'enableSitesFilter') ? req.enableSitesFilter : true),
+            skipHtmlCheck: (_.has(req, 'skipHtmlCheck') ? req.skipHtmlCheck : false),
+            isText: (_.has(req, 'isText') ? req.isText : false),
+            uploadFileName: (_.has(req, 'uploadFileName') ? req.uploadFileName : false),
+            djvuQuality: (_.has(req, 'djvuQuality') ? req.djvuQuality : false),
+            pdfAsText: (_.has(req, 'pdfAsText') ? req.pdfAsText : false),
+            pdfQuality: (_.has(req, 'pdfQuality') ? req.pdfQuality : false),
+        });
+        const state = this.workerState.getState(workerId);
+
+        this.send((state ? state : {}), req, ws);
     }
 
     async workerGetState(req, ws) {

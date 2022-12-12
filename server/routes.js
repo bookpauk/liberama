@@ -6,25 +6,30 @@ const multer = require('multer');
 const ReaderWorker = require('./core/Reader/ReaderWorker');//singleton
 const log = new (require('./core/AppLogger'))().log;//singleton
 
-const c = require('./controllers');
+const {
+    ReaderController,
+    WebSocketController,
+    BookUpdateCheckerController,
+} = require('./controllers');
+
 const utils = require('./core/utils');
 
 function initRoutes(app, wss, config) {
     //эксклюзив для update_checker
     if (config.mode === 'book_update_checker') {
-        new c.BookUpdateCheckerController(wss, config);
+        new BookUpdateCheckerController(wss, config);
         return;
     }
 
     initStatic(app, config);
         
-    const reader = new c.ReaderController(config);
-    new c.WebSocketController(wss, config);
+    const reader = new ReaderController(config);
+    new WebSocketController(wss, config);
 
     //multer
     const storage = multer.diskStorage({
         destination: (req, file, cb) => {
-            cb(null, config.uploadDir);
+            cb(null, config.uploadPublicDir);
         },
         filename: (req, file, cb) => {
             cb(null, utils.randomHexString(30));
@@ -40,7 +45,7 @@ function initRoutes(app, wss, config) {
     //to app
     for (let route of routes) {
         let callbacks = [];
-        let [httpMethod, path, controllers] = route;
+        let [httpMethod, actionPath, controllers] = route;
         let controller = controllers;
         if (Array.isArray(controllers)) {
             controller = controllers[controllers.length - 1];
@@ -61,10 +66,10 @@ function initRoutes(app, wss, config) {
 
         switch (httpMethod) {
             case 'GET' :
-                app.get(path, ...callbacks);
+                app.get(actionPath, ...callbacks);
                 break;
             case 'POST':
-                app.post(path, ...callbacks);
+                app.post(actionPath, ...callbacks);
                 break;
             default: 
                 throw new Error(`initRoutes error: unknown httpMethod: ${httpMethod}`);

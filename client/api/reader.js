@@ -7,9 +7,9 @@ const api = axios.create({
     baseURL: '/api/reader'
 });
 
-const workerApi = axios.create({
+/*const workerApi = axios.create({
     baseURL: '/api/worker'
-});
+});*/
 
 class Reader {
     constructor() {
@@ -19,58 +19,24 @@ class Reader {
         if (!callback) callback = () => {};
 
         let response = {};
-        try {
-            const requestId = await wsc.send({action: 'worker-get-state-finish', workerId});
+        const requestId = await wsc.send({action: 'worker-get-state-finish', workerId});
 
-            let prevResponse = false;
-            while (1) {// eslint-disable-line no-constant-condition
-                response = await wsc.message(requestId);
-
-                if (!response.state && prevResponse !== false) {//экономия траффика
-                    callback(prevResponse);
-                } else {//были изменения worker state
-                    if (!response.state)
-                        throw new Error('Неверный ответ api');
-                    callback(response);
-                    prevResponse = response;
-                }
-
-                if (response.state == 'finish' || response.state == 'error') {
-                    break;
-                }
-            }
-            return response;
-        } catch (e) {
-            console.error(e);
-        }
-
-        //если с WebSocket проблема, работаем по http
-        const refreshPause = 500;
-        let i = 0;
-        response = {};
+        let prevResponse = false;
         while (1) {// eslint-disable-line no-constant-condition
-            const prevProgress = response.progress || 0;
-            const prevState = response.state || 0;
-            response = await workerApi.post('/get-state', {workerId});
-            response = response.data;
-            callback(response);
+            response = await wsc.message(requestId);
 
-            if (!response.state)
-                throw new Error('Неверный ответ api');
+            if (!response.state && prevResponse !== false) {//экономия траффика
+                callback(prevResponse);
+            } else {//были изменения worker state
+                if (!response.state)
+                    throw new Error('Неверный ответ api');
+                callback(response);
+                prevResponse = response;
+            }
 
             if (response.state == 'finish' || response.state == 'error') {
                 break;
             }
-
-            if (i > 0)
-                await utils.sleep(refreshPause);
-
-            i++;
-            if (i > 180*1000/refreshPause) {//3 мин ждем телодвижений воркера
-                throw new Error('Слишком долгое время ожидания');
-            }
-            //проверка воркера
-            i = (prevProgress != response.progress || prevState != response.state ? 1 : i);
         }
 
         return response;
@@ -79,14 +45,13 @@ class Reader {
     async loadBook(opts, callback) {
         if (!callback) callback = () => {};
 
-        let response = await api.post('/load-book', opts);
-
-        const workerId = response.data.workerId;
+        let response = await wsc.message(await wsc.send(Object.assign({action: 'load-book'}, opts)));
+        const workerId = response.workerId;
         if (!workerId)
             throw new Error('Неверный ответ api');
 
         callback({totalSteps: 4});
-        callback(response.data);
+        callback(response);
 
         response = await this.getWorkerStateFinish(workerId, callback);
 
@@ -181,22 +146,13 @@ class Reader {
     }
 
     async storage(request) {
-        let response = null;
-        try {
-            response = await wsc.message(await wsc.send({action: 'reader-storage', body: request}));
-        } catch (e) {
-            console.error(e);
-            //если с WebSocket проблема, работаем по http
-            response = await api.post('/storage', request);
-            response = response.data;
-        }
+        const response = await wsc.message(await wsc.send({action: 'reader-storage', body: request}));
 
-        const state = response.state;
-        if (!state)
-            throw new Error('Неверный ответ api');
-        if (state == 'error') {
+        if (response.error)
             throw new Error(response.error);
-        }
+
+        if (!response.state)
+            throw new Error('Неверный ответ api');
 
         return response;
     }
