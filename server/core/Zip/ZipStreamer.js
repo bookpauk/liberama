@@ -2,7 +2,7 @@
 const path = require('path');
 
 const zipStream = require('zip-stream');*/
-const unzipStream = require('./node_stream_zip');
+const StreamUnzip = require('./node_stream_zip_changed');
 
 class ZipStreamer {
     constructor() {
@@ -63,7 +63,7 @@ class ZipStreamer {
                 decodeEntryNameCallback = false,
             } = options;
 
-            const unzip = new unzipStream({file: zipFile});
+            const unzip = new StreamUnzip({file: zipFile, skipEntryNameValidation: true});
 
             unzip.on('error', reject);
 

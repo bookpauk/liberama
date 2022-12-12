@@ -880,6 +880,7 @@ class ZipEntry {
 
     read(data, offset, textDecoder) {
         const nameData = data.slice(offset, (offset += this.fnameLen));
+        this.nameRaw = Buffer.from(nameData);
         this.name = textDecoder
             ? textDecoder.decode(new Uint8Array(nameData))
             : nameData.toString('utf8');
