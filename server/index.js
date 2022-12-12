@@ -55,6 +55,8 @@ async function init() {
     config.tempPublicDir = `${config.publicFilesDir}/tmp`;
     config.uploadPublicDir = `${config.publicFilesDir}/upload`;
 
+    config.rootPathStatic = '';
+
     configManager.config = config;///!!!
 
     await fs.ensureDir(config.dataDir);
@@ -85,8 +87,8 @@ async function init() {
 
     //web app
     if (branch !== 'development') {
-        //const createWebApp = require('./createWebApp');
-        //await createWebApp(config);
+        const createWebApp = require('./createWebApp');
+        await createWebApp(config);
     }
 }
 
