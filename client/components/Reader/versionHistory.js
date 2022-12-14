@@ -1,5 +1,18 @@
 export const versionHistory = [
 {
+    version: '1.0.0',
+    releaseDate: '2022-12-??',
+    showUntil: '2022-12-??',
+    content:
+`
+<ul>
+    <li>добавлена сборка релизов читалки: <a href="https://github.com/bookpauk/liberama/releases" target="_blank">https://github.com/bookpauk/liberama/releases</a></li>
+</ul>
+
+`
+},
+
+{
     version: '0.12.2',
     releaseDate: '2022-09-04',
     showUntil: '2022-09-11',
