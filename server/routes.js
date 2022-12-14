@@ -21,6 +21,9 @@ function initRoutes(app, wss, config) {
         return;
     }
 
+    if (config.mode !== 'omnireader' && config.mode !== 'liberama.top')
+        throw new Error(`Unknown server mode: ${config.mode}`);
+
     initStatic(app, config);
         
     const reader = new ReaderController(config);
