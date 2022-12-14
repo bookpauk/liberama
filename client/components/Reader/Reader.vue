@@ -93,7 +93,7 @@
                             {{ rstore.readerActions['contents'] }}
                         </q-tooltip>
                     </button>
-                    <button v-show="mode == 'liberama.top' && showToolButton['libs']" ref="libs" v-ripple class="tool-button" :class="buttonActiveClass('libs')" @click="buttonClick('libs')">
+                    <button v-show="showToolButton['libs']" ref="libs" v-ripple class="tool-button" :class="buttonActiveClass('libs')" @click="buttonClick('libs')">
                         <q-icon name="la la-sitemap" size="32px" />
                         <q-tooltip :delay="1500" anchor="bottom middle" content-style="font-size: 80%">
                             {{ rstore.readerActions['libs'] }}

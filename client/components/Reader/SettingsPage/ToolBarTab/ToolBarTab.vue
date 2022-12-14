@@ -18,7 +18,7 @@
         </div>
 
         <div v-for="item in rstore.toolButtons" :key="item.name">
-            <div v-show="item.name != 'libs' || mode == 'liberama.top'" class="sets-item row no-wrap">
+            <div class="sets-item row no-wrap">
                 <div class="sets-label label"></div>
                 <q-checkbox v-model="form.showToolButton[item.name]" size="xs" :label="rstore.readerActions[item.name]" />
             </div>

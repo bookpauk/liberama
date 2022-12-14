@@ -115,7 +115,7 @@ class UserHotKeys {
     }
 
     updateTableData() {
-        let result = rstore.hotKeys.map(hk => hk.name).filter(name => (this.mode == 'liberama.top' || name != 'libs'));
+        let result = rstore.hotKeys.map(hk => hk.name);
 
         const search = this.search.toLowerCase();
         const codesIncludeSearch = (action) => {

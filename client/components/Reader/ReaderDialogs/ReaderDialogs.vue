@@ -71,12 +71,7 @@
             </template>
 
             <div style="word-break: normal">
-                Если вы хотите найти определенную книгу и открыть в читалке, добро пожаловать в
-                раздел "Сетевая библиотека" (кнопка <q-icon name="la la-sitemap" size="32px" />) на сайте
-                <a href="https://liberama.top" target="_blank">liberama.top</a>
-
-                <br><br>
-                Если же вы пытаетесь вставить текст в читалку из буфера обмена, пожалуйста воспользуйтесь кнопкой
+                Если вы пытаетесь вставить текст в читалку из буфера обмена, пожалуйста воспользуйтесь кнопкой
                 <q-btn no-caps dense class="q-px-sm" color="primary" size="13px" @click="loadBufferClick">
                     <q-icon class="q-mr-xs" name="la la-comment" size="24px" />
                     Из буфера обмена
