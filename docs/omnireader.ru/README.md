@@ -18,6 +18,7 @@ sudo apt install -y nodejs
 ```
 cd liberama
 npm i
+cd docs/omnireader.ru
 ```
 
 ### create public dir
@@ -30,8 +31,8 @@ sudo chown www-data.www-data /home/liberama
 #### download from https://download.calibre-ebook.com/
 ```
 wget "https://download.calibre-ebook.com/5.29.0/calibre-5.29.0-x86_64.txz"
-sudo -u www-data mkdir -p /home/liberama/data/calibre
-sudo -u www-data tar xvf calibre-5.29.0-x86_64.txz -C /home/liberama/data/calibre
+sudo -u www-data mkdir -p /home/liberama/.liberama/calibre
+sudo -u www-data tar xvf calibre-5.29.0-x86_64.txz -C /home/liberama/.liberama/calibre
 ```
 
 ### external converters
@@ -44,7 +45,7 @@ sudo apt install rar libreoffice poppler-utils djvulibre-bin libtiff-tools graph
 Сначала настроим для HTTP:
 ```
 sudo apt install nginx
-sudo cp docs/omnireader.ru/omnireader_http /etc/nginx/sites-available/omnireader
+sudo cp ./omnireader_http /etc/nginx/sites-available/omnireader
 sudo ln -s /etc/nginx/sites-available/omnireader /etc/nginx/sites-enabled/omnireader
 sudo rm /etc/nginx/sites-enabled/default
 sudo service nginx reload
@@ -55,7 +56,7 @@ sudo chown -R www-data.www-data /var/www
 #### Следовать инструкции установки certbot https://certbot.eff.org/instructions?ws=nginx&os=ubuntu-20
 После установки сертификата, можно использовать конфиг для nginx c ssl:
 ```
-sudo cp docs/omnireader.ru/omnireader /etc/nginx/sites-available/omnireader
+sudo cp ./omnireader /etc/nginx/sites-available/omnireader
 sudo service nginx reload
 
 ```
@@ -68,7 +69,7 @@ sudo service php7.4-fpm restart
 
 sudo mkdir /home/oldreader
 sudo chown www-data.www-data /home/oldreader
-sudo -u www-data cp -r docs/omnireader.ru/old/* /home/oldreader
+sudo -u www-data cp -r ./old/* /home/oldreader
 ```
 
 ## Запуск по крону
@@ -78,7 +79,6 @@ sudo -u www-data cp -r docs/omnireader.ru/old/* /home/oldreader
 
 ## Деплой и запуск
 ```
-cd docs/omnireader.ru
 ./stop_server.sh
 ./deploy.sh
 ./start_server.sh
