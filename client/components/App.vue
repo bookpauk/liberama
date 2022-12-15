@@ -197,7 +197,7 @@ class App {
 
     setAppTitle(title) {
         if (!title) {
-            if (this.mode == 'liberama.top') {
+            if (this.mode == 'liberama') {
                 document.title = `Liberama Reader - всегда с вами`;
             } else if (this.mode == 'omnireader') {
                 document.title = `Omni Reader - всегда с вами`;
@@ -217,19 +217,12 @@ class App {
         return this.$store.state.config.mode;
     }
 
-    get showAsideBar() {
-        return (this.mode !== null && this.mode != 'reader' && this.mode != 'omnireader' && this.mode != 'liberama.top');
-    }
-
-    set showAsideBar(value) {
-    }
-
     get isReaderActive() {
         return (this.rootRoute == '/reader' || this.rootRoute == '/external-libs');
     }
 
     redirectIfNeeded() {
-        if ((this.mode == 'reader' || this.mode == 'omnireader' || this.mode == 'liberama.top')) {
+        if ((this.mode == 'reader' || this.mode == 'omnireader' || this.mode == 'liberama')) {
             const search = window.location.search.substr(1);
 
             //распознавание параметра url вида "?url=<link>" и редирект при необходимости

@@ -1,6 +1,6 @@
 <template>
     <div ref="main" class="column no-wrap" style="min-height: 500px">
-        <div v-if="mode != 'liberama.top'" class="relative-position">
+        <div v-if="mode != 'liberama'" class="relative-position">
             <GithubCorner url="https://github.com/bookpauk/liberama" corner-color="#1B695F" git-color="#EBE2C9"></GithubCorner>
         </div>
         <div class="col column justify-center items-center no-wrap overflow-hidden" style="min-height: 230px">
@@ -108,7 +108,7 @@ class LoaderPage {
     get title() {
         if (this.mode == 'omnireader')
             return 'Omni Reader - браузерная онлайн-читалка.';
-        if (this.mode == 'liberama.top')
+        if (this.mode == 'liberama')
             return 'Liberama Reader - браузерная онлайн-читалка.';
         return 'Универсальная читалка книг и ресурсов интернета.';
 

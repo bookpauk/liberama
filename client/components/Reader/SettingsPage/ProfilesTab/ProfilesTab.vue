@@ -87,7 +87,7 @@
                             </q-tooltip>                    
                         </q-icon>            
                     </div>
-                    <div v-if="mode == 'omnireader' || mode == 'liberama.top'">
+                    <div v-if="mode == 'omnireader' || mode == 'liberama'">
                         <br>Переход по ссылке позволит автоматически ввести ключ доступа:
                         <br><div class="text-center" style="margin-top: 5px">
                             <a :href="setStorageKeyLink" target="_blank">Ссылка для ввода ключа</a>

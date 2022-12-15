@@ -223,30 +223,51 @@ function addDefaultsToSettings(settings) {
     return false;
 }
 
-const libsDefaults = {
-    startLink: 'http://flibusta.is',
-    comment: 'Флибуста | Книжное братство',
-    closeAfterSubmit: false,
-    openInFrameOnEnter: false,
-    openInFrameOnAdd: false,
-    groups: [
-        {r: 'http://flibusta.is', s: 'http://flibusta.is', list: [
-            {l: 'http://flibusta.is', c: 'Флибуста | Книжное братство'},
-        ]},
-        {r: 'http://fantasy-worlds.org', s: 'http://fantasy-worlds.org', list: [
-            {l: 'http://fantasy-worlds.org', c: 'Миры Фэнтези'},
-        ]},
-        {r: 'http://samlib.ru', s: 'http://samlib.ru', list: [
-            {l: 'http://samlib.ru', c: 'Журнал "Самиздат"'},
-        ]},
-        {r: 'http://lib.ru', s: 'http://lib.ru', list: [
-            {l: 'http://lib.ru', c: 'Библиотека Максима Мошкова'},
-        ]},
-        {r: 'https://aldebaran.ru', s: 'https://aldebaran.ru', list: [
-            {l: 'https://aldebaran.ru', c: 'АЛЬДЕБАРАН | Электронная библиотека книг'},
-        ]},
-    ]
-};
+function getLibsDefaults(mode = 'reader') {
+    const result = {
+        startLink: '',
+        comment: '',
+        closeAfterSubmit: false,
+        openInFrameOnEnter: false,
+        openInFrameOnAdd: false,
+        helpShowed: false,
+        groups: [
+            {r: 'http://samlib.ru', s: 'http://samlib.ru', list: [
+                {l: 'http://samlib.ru', c: 'Журнал "Самиздат"'},
+            ]},
+            {r: 'http://lib.ru', s: 'http://lib.ru', list: [
+                {l: 'http://lib.ru', c: 'Библиотека Максима Мошкова'},
+            ]},
+            {r: 'https://aldebaran.ru', s: 'https://aldebaran.ru', list: [
+                {l: 'https://aldebaran.ru', c: 'АЛЬДЕБАРАН | Электронная библиотека книг'},
+            ]},
+        ],
+    };
+
+    if (mode === 'liberama') {
+        result.groups.unshift(
+            {r: 'http://fantasy-worlds.org', s: 'http://fantasy-worlds.org', list: [
+                {l: 'http://fantasy-worlds.org', c: 'Миры Фэнтези'},
+            ]}
+        );
+        result.groups.unshift(
+            {r: 'http://flibusta.is', s: 'http://flibusta.is', list: [
+                {l: 'http://flibusta.is', c: 'Флибуста | Книжное братство'},
+            ]}
+        );
+    } else if (mode === 'omnireader') {
+        result.groups.unshift(
+            {r: 'https://lib.omnireader.ru', s: 'https://lib.omnireader.ru', list: [
+                {l: 'https://lib.omnireader.ru', c: 'Общественное достояние'},
+            ]}
+        );
+    }
+
+    result.startLink = result.groups[0].r;
+    result.comment = result.groups[0].c;
+
+    return result;
+}
 
 // initial state
 const state = {
@@ -262,7 +283,7 @@ const state = {
     currentProfile: '',
     settings: Object.assign({}, settingDefaults),
     settingsRev: {},
-    libs: Object.assign({}, libsDefaults),
+    libs: false,
     libsRev: 0,
 };
 
@@ -332,7 +353,7 @@ export default {
     webFonts,
     settingDefaults,
     addDefaultsToSettings,
-    libsDefaults,
+    getLibsDefaults,
 
     namespaced: true,
     state,

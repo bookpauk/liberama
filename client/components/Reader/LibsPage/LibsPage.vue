@@ -8,7 +8,7 @@ import vueComponent from '../../vueComponent.js';
 
 import Window from '../../share/Window.vue';
 import * as utils from '../../../share/utils';
-//import rstore from '../../../store/modules/reader';
+import rstore from '../../../store/modules/reader';
 import _ from 'lodash';
 
 const componentOptions = {
@@ -28,10 +28,21 @@ class LibsPage {
         this.popupWindow = null;
         this.commit = this.$store.commit;
         this.messageListener = null;
-        //this.commit('reader/setLibs', rstore.libsDefaults);
     }
 
-    init() {
+    async init() {
+        //подождем this.mode
+        let i = 0;
+        while(!this.mode && i < 100) {
+            await utils.sleep(100);
+            i++;
+        }
+
+        if (!this.libs) {
+            const defaults = rstore.getLibsDefaults(this.mode);
+            this.commit('reader/setLibs', defaults);
+        }
+
         this.childReady = false;
         const subdomain = (window.location.protocol != 'http:' ? 'b.' : '');
         this.origin = `http://${subdomain}${window.location.host}`;

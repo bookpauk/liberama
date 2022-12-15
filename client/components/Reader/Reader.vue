@@ -1007,7 +1007,7 @@ class Reader {
     libsToogle() {
         this.libsActive = !this.libsActive;
         if (this.libsActive) {
-            this.$refs.libsPage.init();
+            this.$refs.libsPage.init();//no await
         } else {
             this.$refs.libsPage.done();
         }

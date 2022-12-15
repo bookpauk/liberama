@@ -325,8 +325,6 @@ class ExternalLibs {
         this.debouncedGoToLink = _.debounce((link) => {
             this.goToLink(link);
         }, 100, {'maxWait':200});
-        //this.commit = this.$store.commit;
-        //this.commit('reader/setLibs', rstore.libsDefaults);
     }
 
     mounted() {
@@ -338,10 +336,7 @@ class ExternalLibs {
                 i++;
             }
 
-            if (this.mode != 'liberama.top') {
-                this.$router.replace('/404');
-                return;
-            }
+            this.libsDefaults = rstore.getLibsDefaults(this.mode);
 
             this.$refs.window.init();
 
@@ -404,7 +399,8 @@ class ExternalLibs {
             }
         } else if (d.type == 'libs') {
             this.ready = true;
-            this.libs = _.cloneDeep(d.data);
+            if (d.data)
+                this.libs = _.cloneDeep(d.data);
         } else if (d.type == 'notify') {
             this.$root.notify.success(d.data, '', {position: 'bottom-right'});
         }
@@ -502,7 +498,7 @@ class ExternalLibs {
         if (this.ready && this.selectedLink) {
             let title = `${(this.libs.comment ? this.libs.comment + ' ': '') + lu.removeProtocol(this.libs.startLink)}`;
             if (this.inpxReady && this.inpxTitle)
-                title = this.inpxTitle;
+                title = `${this.inpxTitle} ${lu.removeProtocol(this.inpxUrl)}`;
             result += ` | ${title}`;
         }
         this.$root.setAppTitle(result);
@@ -574,7 +570,7 @@ class ExternalLibs {
     get defaultRootLinkOptions() {
         let result = [];
 
-        rstore.libsDefaults.groups.forEach(group => {
+        this.libsDefaults.groups.forEach(group => {
             result.push({label: lu.removeProtocol(group.r), value: group.r});
         });
 
@@ -604,6 +600,8 @@ class ExternalLibs {
 
     goToLink(link) {
         this.inpxReady = false;
+        this.inpxTitle = '';
+        this.inpxUrl = '';
         this.inpxOrigin = false;
 
         if (!this.ready || !link)
@@ -735,10 +733,10 @@ class ExternalLibs {
     }
 
     updateBookmarkLink() {
-        const index = lu.getSafeRootIndexByUrl(rstore.libsDefaults.groups, this.defaultRootLink);
+        const index = lu.getSafeRootIndexByUrl(this.libsDefaults.groups, this.defaultRootLink);
         if (index >= 0) {
-            this.bookmarkLink = rstore.libsDefaults.groups[index].s;
-            this.bookmarkDesc = this.getCommentByLink(rstore.libsDefaults.groups[index].list, this.bookmarkLink);
+            this.bookmarkLink = this.libsDefaults.groups[index].s;
+            this.bookmarkDesc = this.getCommentByLink(this.libsDefaults.groups[index].list, this.bookmarkLink);
         } else {
             this.bookmarkLink = '';
             this.bookmarkDesc = '';
@@ -893,20 +891,22 @@ class ExternalLibs {
 <p>Окно 'Сетевая библиотека' позволяет открывать ссылки в читалке без переключения между окнами,
 что особенно актуально для мобильных устройств. Имеется возможность управлять закладками
 на понравившиеся ресурсы, книги или страницы авторов. Открытие ссылок и навигация происходят во фрейме, но,
-к сожалению, в нем открываются не все страницы.</p>
+к сожалению, в нем открываются не все страницы.</p>` + 
 
-<p>Доступ к сайтам <span style="color: blue">http://flibusta.is</span> и <span style="color: blue">http://fantasy-worlds.org</span> работает через прокси.
+(this.mode === 'liberama' ?
+`<p>Доступ к сайтам <span style="color: blue">http://flibusta.is</span> и <span style="color: blue">http://fantasy-worlds.org</span> работает через прокси.
 
 <br><span style="color: red"><b>ПРЕДУПРЕЖДЕНИЕ!</b></span>
 Доступ предназначен только для просмотра и скачивания книг. Авторизоваться на этих сайтах
 из фрейма категорически не рекомендуется, т.к. ваше подключение не защищено и данные могут попасть 
 к третьим лицам.
 </p>
+`
+: '') + 
 
-<p>Из-за проблем с безопасностью, навигация 'вперед-назад' во фрейме осуществляется с помощью контекстного меню правой кнопкой мыши.
+`<p>Из-за проблем с безопасностью, навигация 'вперед-назад' во фрейме осуществляется с помощью контекстного меню правой кнопкой мыши.
 На мобильных устройствах для этого служит системная клавиша 'Назад (стрелка влево)' и опция 'Вперед (стрелка вправо)' в меню браузера. 
 </p>
-
 <p>Приятного пользования ;-)
 </p>
             `, 'Справка', {iconName: 'la la-info-circle'});

@@ -80,7 +80,7 @@ class CardIndex {
     }
 
     get isReader() {
-        return (this.mode !== null && (this.mode == 'reader' || this.mode == 'omnireader' || this.mode == 'liberama.top'));
+        return (this.mode !== null && (this.mode == 'reader' || this.mode == 'omnireader' || this.mode == 'liberama'));
     }
 
 }
