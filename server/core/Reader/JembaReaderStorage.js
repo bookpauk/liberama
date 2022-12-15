@@ -12,12 +12,29 @@ class JembaReaderStorage {
         if (!instance) {
             this.connManager = new JembaConnManager();
             this.db = this.connManager.db['reader-storage'];
+
+            this.cacheMap = new Map();
             this.periodicCleanCache(3*3600*1000);//1 раз в 3 часа
 
             instance = this;
         }
 
         return instance;
+    }
+
+    getCache(id) {
+        const obj = this.cacheMap.get(id);
+        if (obj)
+            obj.time = Date.now();
+        return obj;
+    }
+
+    setCache(id, newObj) {
+        let obj = this.cacheMap.get(id);
+        if (!obj)
+            obj = {};
+        Object.assign(obj, newObj, {time: Date.now()});
+        this.cacheMap.set(id, obj);
     }
 
     async doAction(act) {
@@ -34,7 +51,7 @@ class JembaReaderStorage {
                     result = await this.getItems(act.items);
                     break;
                 case 'set':
-                    result = await this.setItems(act.items, act.force);
+                    result = await this.setItems(act.items, act.identity, act.force);
                     break;
                 default:
                     throw new Error('Unknown action');
@@ -53,8 +70,9 @@ class JembaReaderStorage {
         const db = this.db;
 
         for (const id of Object.keys(items)) {
-            if (this.cache[id]) {
-                result.items[id] = this.cache[id];
+            const obj = this.getCache(id);
+            if (obj && obj.items) {
+                result.items[id] = obj.items;
             } else {
                 const rows = await db.select({//SQL`SELECT rev FROM storage WHERE id = ${id}`
                     table: 'storage',
@@ -63,7 +81,8 @@ class JembaReaderStorage {
                 });
                 const rev = (rows.length && rows[0].rev ? rows[0].rev : 0);
                 result.items[id] = {rev};
-                this.cache[id] = result.items[id];
+
+                this.setCache(id, {items: result.items[id]});
             }
         }
 
@@ -88,7 +107,7 @@ class JembaReaderStorage {
         return result;
     }
 
-    async setItems(items, force) {
+    async setItems(items, identity, force) {
         let check = await this.checkItems(items);
 
         //сначала проверим совпадение ревизий
@@ -96,32 +115,54 @@ class JembaReaderStorage {
             if (!_.isString(items[id].data))
                 throw new Error('items.data is not a string');
 
-            if (!force && check.items[id].rev + 1 !== items[id].rev)
+            //identity необходимо для работы при нестабильной связи,
+            //одному и тому же клиенту разрешается перезаписывать данные при расхождении на 0 или 1 ревизию
+            const obj = this.getCache(id) || {};
+            const sameClient = (identity && obj.identity === identity);
+            if (identity && obj.identity !== identity) {
+                obj.identity = identity;
+                this.setCache(id, obj);
+            }
+
+            const revDiff = items[id].rev - check.items[id].rev;
+            const allowUpdate = force || revDiff === 1 || (sameClient && (revDiff === 0 || revDiff === 1));
+            if (!allowUpdate)
                 return {state: 'reject', items: check.items};
         }
 
         const db = this.db;
-        const newRev = {};
         for (const id of Object.keys(items)) {
             await db.insert({//SQL`INSERT OR REPLACE INTO storage (id, rev, time, data) VALUES (${id}, ${items[id].rev}, strftime('%s','now'), ${items[id].data})`);
                 table: 'storage',
                 replace: true,
                 rows: [{id, rev: items[id].rev, time: utils.toUnixTime(Date.now()), data: items[id].data}],
             });
-            newRev[id] = {rev: items[id].rev};
+            this.setCache(id, {items: {rev: items[id].rev}});
         }
         
-        Object.assign(this.cache, newRev);
-
         return {state: 'success'};
     }
 
     periodicCleanCache(timeout) {
-        this.cache = {};
+        try {
+            const sorted = [];
+            for (const [id, obj] of this.cacheMap)
+                sorted.push(Object.assign({id}, obj));
 
-        setTimeout(() => {
-            this.periodicCleanCache(timeout);
-        }, timeout);
+            sorted.sort((a, b) => b.time - a.time);
+
+            for (const obj of sorted) {
+                //оставляем только 1000 недавних
+                if (this.cacheMap.size <= 1000)
+                    break;
+
+                this.cacheMap.delete(obj.id);
+            }
+        } finally {
+            setTimeout(() => {
+                this.periodicCleanCache(timeout);
+            }, timeout);
+        }
     }
 }
 
