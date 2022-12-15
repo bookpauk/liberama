@@ -39,16 +39,6 @@ class App {
     _options = componentOptions;
     showPage = false;
 
-    itemRuText = {
-        '/cardindex': 'Картотека',
-        '/reader': 'Читалка',
-        '/forum': 'Форум-чат',
-        '/income': 'Поступления',
-        '/sources': 'Источники',
-        '/settings': 'Параметры',
-        '/help': 'Справка',
-    };
-
     created() {
         this.commit = this.$store.commit;
         this.state = this.$store.state;
@@ -202,7 +192,7 @@ class App {
             } else if (this.mode == 'omnireader') {
                 document.title = `Omni Reader - всегда с вами`;
             } else if (this.config && this.mode !== null) {
-                document.title = `${this.config.name} - ${this.itemRuText[this.rootRoute]}`;
+                document.title = `Универсальная читалка книг и ресурсов интернета`;
             }
         } else {
             document.title = title;
