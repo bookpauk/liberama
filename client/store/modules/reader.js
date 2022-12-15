@@ -44,17 +44,17 @@ const toolButtons = [
     {name: 'undoAction',  show: true},
     {name: 'redoAction',  show: true},
     {name: 'fullScreen',  show: true},
-    {name: 'scrolling',   show: false},
+    {name: 'scrolling',   show: true},
     {name: 'setPosition', show: true},
     {name: 'search',      show: true},
-    {name: 'copyText',    show: false},
+    {name: 'copyText',    show: true},
     {name: 'convOptions', show: true},
     {name: 'refresh',     show: true},
     {name: 'contents',    show: true},
     {name: 'libs',        show: true},
     {name: 'recentBooks', show: true},
-    {name: 'clickControl', show: false},
-    {name: 'offlineMode', show: false},
+    {name: 'clickControl', show: true},
+    {name: 'offlineMode', show: true},
 ];
 
 //readerActions[name]
