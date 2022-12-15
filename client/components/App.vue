@@ -120,7 +120,7 @@ class App {
 
         this.setAppTitle();
         (async() => {
-            //загрузим конфиг сревера
+            //загрузим конфиг сервера
             try {
                 const config = await miscApi.loadConfig();
                 this.commit('config/setConfig', config);
