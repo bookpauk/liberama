@@ -204,6 +204,10 @@ class ServerStorage {
         return this.$store.state.reader.libsRev;
     }
 
+    get offlineModeActive() {
+        return this.$store.state.reader.offlineModeActive;
+    }
+
     checkCurrentProfile() {
         if (!this.profiles[this.currentProfile]) {
             this.commit('reader/setCurrentProfile', '');

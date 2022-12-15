@@ -805,7 +805,7 @@ class Reader {
     }
 
     get offlineModeActive() {
-        return this.reader.offlineModeActive;        
+        return this.reader.offlineModeActive;
     }
 
     mostRecentBook() {
@@ -1021,7 +1021,6 @@ class Reader {
 
     offlineModeToggle() {
         this.commit('reader/setOfflineModeActive', !this.offlineModeActive);
-        this.$refs.serverStorage.offlineModeActive = this.offlineModeActive;
     }
 
     settingsToggle() {
