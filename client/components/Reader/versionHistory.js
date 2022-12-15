@@ -6,6 +6,7 @@ export const versionHistory = [
     content:
 `
 <ul>
+    <li>добавлено окно "Сетевая библиотека" для omnireader.ru</li>
     <li>добавлена сборка релизов читалки: <a href="https://github.com/bookpauk/liberama/releases" target="_blank">https://github.com/bookpauk/liberama/releases</a></li>
 </ul>
 
