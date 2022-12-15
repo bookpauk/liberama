@@ -86,6 +86,13 @@
                             {{ rstore.readerActions['refresh'] }}
                         </q-tooltip>
                     </button>
+                    <div v-show="showToolButton['libs']" class="space"></div>
+                    <button v-show="showToolButton['libs']" ref="libs" v-ripple class="tool-button" :class="buttonActiveClass('libs')" @click="buttonClick('libs')">
+                        <q-icon name="la la-sitemap" size="32px" />
+                        <q-tooltip :delay="1500" anchor="bottom middle" content-style="font-size: 80%">
+                            {{ rstore.readerActions['libs'] }}
+                        </q-tooltip>
+                    </button>
                     <div class="space"></div>
                     <button v-show="showToolButton['contents']" ref="contents" v-ripple class="tool-button" :class="buttonActiveClass('contents')" @click="buttonClick('contents')">
                         <q-icon name="la la-list" size="32px" />
@@ -103,13 +110,6 @@
                         <q-icon name="la la-book-open" size="32px" />
                         <q-tooltip :delay="1500" anchor="bottom middle" content-style="font-size: 80%">
                             {{ rstore.readerActions['recentBooks'] }}
-                        </q-tooltip>
-                    </button>
-                    <div class="space"></div>
-                    <button v-show="showToolButton['libs']" ref="libs" v-ripple class="tool-button" :class="buttonActiveClass('libs')" @click="buttonClick('libs')">
-                        <q-icon name="la la-sitemap" size="32px" />
-                        <q-tooltip :delay="1500" anchor="bottom middle" content-style="font-size: 80%">
-                            {{ rstore.readerActions['libs'] }}
                         </q-tooltip>
                     </button>
                     <div class="space"></div>
