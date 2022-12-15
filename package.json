@@ -59,6 +59,7 @@
     "base-x": "^4.0.0",
     "chardet": "^1.5.0",
     "compression": "^1.7.4",
+    "dayjs": "^1.11.7",
     "express": "^4.18.2",
     "fg-loadcss": "^3.1.0",
     "fs-extra": "^10.1.0",
