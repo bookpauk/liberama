@@ -140,7 +140,6 @@ class ReaderDialogs {
 
     async showDonation() {
         const today = utils.dateFormat(new Date(), 'MM');
-console.log(today);
         if ((this.mode == 'omnireader' || this.mode == 'liberama') && this.showDonationDialog && this.donationRemindDate != today) {
             await utils.sleep(3000);
             this.donationVisible = true;
