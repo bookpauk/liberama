@@ -97,7 +97,7 @@ Options:
             // Режим работы сервера:
             //  "reader" - обычная читалка
             //  "omnireader" - модификации для сайта omnireader.ru
-            //  "liberama.top" - модификации для сайта liberama.top
+            //  "liberama" - модификации для сайта liberama.top
             //  "book_update_checker" - сервер обновлений
             "mode": "reader",
 

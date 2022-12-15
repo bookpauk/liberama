@@ -22,13 +22,13 @@ module.exports = {
 
     jembaDb: [
         {
-            serverMode: ['reader', 'omnireader', 'liberama.top'],
+            serverMode: ['reader', 'omnireader', 'liberama'],
             dbName: 'app',
             thread: true,
             openAll: true,
         },
         {
-            serverMode: ['reader', 'omnireader', 'liberama.top'],
+            serverMode: ['reader', 'omnireader', 'liberama'],
             dbName: 'reader-storage',
             thread: true,
             openAll: true,
@@ -44,7 +44,7 @@ module.exports = {
     servers: [
         {
             serverName: '1',
-            mode: 'reader', //'reader', 'omnireader', 'liberama.top', 'book_update_checker'
+            mode: 'reader', //'reader', 'omnireader', 'liberama', 'book_update_checker'
             ip: '0.0.0.0',
             port: '33080',
         },
