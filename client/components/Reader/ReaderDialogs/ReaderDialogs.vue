@@ -130,7 +130,7 @@ class ReaderDialogs {
     async showWhatsNew() {
         const whatsNew = versionHistory[0];
         if (this.showWhatsNewDialog &&
-            whatsNew.showUntil >= utils.formatDate(new Date(), 'coDate') &&
+            whatsNew.showUntil >= utils.dateFormat(new Date(), 'YYYY-MM-DD') &&
             this.whatsNewHeader != this.whatsNewContentHash) {
             await utils.sleep(2000);
             this.whatsNewContent = 'Версия ' + this.whatsNewHeader + whatsNew.content;
@@ -139,8 +139,8 @@ class ReaderDialogs {
     }
 
     async showDonation() {
-        const today = utils.formatDate(new Date(), 'coMonth');
-
+        const today = utils.dateFormat(new Date(), 'MM');
+console.log(today);
         if ((this.mode == 'omnireader' || this.mode == 'liberama') && this.showDonationDialog && this.donationRemindDate != today) {
             await utils.sleep(3000);
             this.donationVisible = true;
@@ -158,7 +158,7 @@ class ReaderDialogs {
 
     donationDialogRemind() {
         this.donationVisible = false;
-        this.commit('reader/setDonationRemindDate', utils.formatDate(new Date(), 'coMonth'));
+        this.commit('reader/setDonationRemindDate', utils.dateFormat(new Date(), 'MM'));
     }
 
     makeDonation() {

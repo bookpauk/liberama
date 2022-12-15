@@ -1,4 +1,5 @@
 import _ from 'lodash';
+import dayjs from 'dayjs';
 import baseX from 'base-x';
 import PAKO from 'pako';
 import {Buffer} from 'safe-buffer';
@@ -33,24 +34,6 @@ export function randomArray(len) {
 
 export function randomHexString(len) {
     return Buffer.from(randomArray(len)).toString('hex');
-}
-
-export function formatDate(d, format) {
-    if (!format)
-        format = 'normal';
-
-    switch (format) {
-        case 'normal':
-            return `${d.getDate().toString().padStart(2, '0')}.${(d.getMonth() + 1).toString().padStart(2, '0')}.${d.getFullYear()} ` + 
-                `${d.getHours().toString().padStart(2, '0')}:${d.getMinutes().toString().padStart(2, '0')}`;
-        case 'coDate':
-            return `${d.getFullYear()}-${(d.getMonth() + 1).toString().padStart(2, '0')}-${d.getDate().toString().padStart(2, '0')}`;
-        case 'coMonth':
-            return `${(d.getMonth() + 1).toString().padStart(2, '0')}`;
-        case 'noDate':
-            return `${d.getDate().toString().padStart(2, '0')}.${(d.getMonth() + 1).toString().padStart(2, '0')}.${d.getFullYear()}`;
-    }
-    
 }
 
 export function fallbackCopyTextToClipboard(text) {
@@ -415,4 +398,8 @@ export function resizeImage(dataUrl, toWidth, toHeight, quality = 0.9) {
 
 export function makeDonation() {
     window.open('https://donatty.com/liberama', '_blank');
+}
+
+export function dateFormat(date, format = 'DD.MM.YYYY') {
+    return dayjs(date).format(format);
 }

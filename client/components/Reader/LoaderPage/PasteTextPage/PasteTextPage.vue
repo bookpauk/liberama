@@ -60,7 +60,7 @@ class PasteTextPage {
 
     calcTitle(event) {
         if (this.bookTitle == '') {
-            this.bookTitle = `Из буфера обмена ${utils.formatDate(new Date(), 'noDate')}`;
+            this.bookTitle = `Из буфера обмена ${utils.dateFormat(new Date())}`;
             if (event) {
                 let text = event.clipboardData.getData('text');
                 this.bookTitle += ': ' + _.compact([
