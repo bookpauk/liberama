@@ -839,8 +839,7 @@ class Reader {
     }
 
     fullScreenToggle() {
-        this.fullScreenActive = !this.fullScreenActive;
-        if (this.fullScreenActive) {
+        if (!this.$q.fullscreen.isActive) {
             this.$q.fullscreen.request();
         } else {
             this.$q.fullscreen.exit();

@@ -1137,7 +1137,22 @@ class TextPage {
                     //движение вправо
                     this.doScrollingSpeedUp();
                 } else if (Math.abs(dy) < touchDelta && Math.abs(dx) < touchDelta) {
-                    this.doToolBarToggle(event);
+                    if (this.clickAction === 'tb' || this.clickAction === 'fs') {
+                        this.clickAction = 'fs';
+                        return;
+                    }
+
+                    (async() => {
+                        this.clickAction = 'tb';
+                        let i = 20;
+                        while (i-- > 0 && this.clickAction === 'tb')
+                            await utils.sleep(10);
+                        if (this.clickAction === 'tb')
+                            this.doToolBarToggle();
+                        else
+                            this.doFullScreenToggle();
+                        this.clickAction = '';
+                    })();
                 }
 
                 this.startTouch = null;
