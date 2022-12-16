@@ -81,9 +81,6 @@ const componentOptions = {
         settings: function() {
             this.debouncedLoadSettings();
         },
-        toggleLayout: function() {
-            this.updateLayout();
-        },
         inAnimation: function() {
             this.updateLayout();
         },
@@ -92,7 +89,6 @@ const componentOptions = {
 class TextPage {
     _options = componentOptions;
 
-    toggleLayout = false;
     showStatusBar = false;
     clickControl = true;
 
@@ -130,10 +126,6 @@ class TextPage {
             this.startClickRepeat(x, y);
         }, 800);
 
-        this.debouncedPrepareNextPage = _.debounce(() => {
-            this.prepareNextPage();
-        }, 100);
-
         this.debouncedDrawStatusBar = _.throttle(() => {
             this.drawStatusBar();
         }, 60);
@@ -147,17 +139,11 @@ class TextPage {
         }, 50);
 
         this.debouncedUpdatePage = _.debounce(async(lines) => {
-            if (!this.pageChangeAnimation)
-                this.toggleLayout = !this.toggleLayout;
-            else {
+            if (this.pageChangeAnimation) {
                 this.page2 = this.page1;
-                this.toggleLayout = true;
             }
 
-            if (this.toggleLayout)
-                this.page1 = this.drawHelper.drawPage(lines);
-            else
-                this.page2 = this.drawHelper.drawPage(lines);
+            this.page1 = this.drawHelper.drawPage(lines);
 
             await this.doPageAnimation();
         }, 10);
@@ -430,7 +416,6 @@ class TextPage {
     showBook() {
         this.$refs.main.focus();
 
-        this.toggleLayout = false;
         this.updateLayout();
         this.book = null;
         this.meta = null;
@@ -488,12 +473,9 @@ class TextPage {
         if (this.inAnimation) {
             this.$refs.scrollBox1.style.visibility = 'visible';
             this.$refs.scrollBox2.style.visibility = 'visible';
-        } else if (this.toggleLayout) {
+        } else {
             this.$refs.scrollBox1.style.visibility = 'visible';
             this.$refs.scrollBox2.style.visibility = 'hidden';
-        } else {
-            this.$refs.scrollBox1.style.visibility = 'hidden';
-            this.$refs.scrollBox2.style.visibility = 'visible';
         }
     }
 
@@ -594,12 +576,6 @@ class TextPage {
 
         const transitionFinish = this.generateWaitingFunc('resolveTransition1Finish', 'stopScrolling');
 
-        if (!this.toggleLayout)
-            this.page1 = this.page2;
-        this.toggleLayout = true;
-        await this.$nextTick();
-        await utils.sleep(50);
-
         this.cachedPos = -1;
         this.draw();
 
@@ -683,21 +659,11 @@ class TextPage {
             return;
         }
 
-        //fast draw prepared
-        if (!this.pageChangeAnimation && this.pageChangeDirectionDown && this.pagePrepared && this.bookPos == this.bookPosPrepared) {
-            this.toggleLayout = !this.toggleLayout;
-            this.linesDown = this.linesDownNext;
-            this.linesUp = this.linesUpNext;
-        } else {//normal debounced draw
-            const lines = this.getLines(this.bookPos);
-            this.linesDown = lines.linesDown;
-            this.linesUp = lines.linesUp;
-            this.debouncedUpdatePage(lines.linesDown);
-        }
+        const lines = this.getLines(this.bookPos);
+        this.linesDown = lines.linesDown;
+        this.linesUp = lines.linesUp;
+        this.debouncedUpdatePage(lines.linesDown);
 
-        this.pagePrepared = false;
-        if (!this.pageChangeAnimation)
-            this.debouncedPrepareNextPage();
         this.debouncedDrawStatusBar();
         this.debouncedDrawPageDividerAndOrnament();
 
@@ -909,30 +875,6 @@ class TextPage {
             }
             this.timeRefreshing = false;
             this.refreshTime();
-        }
-    }
-
-    prepareNextPage() {
-        // подготовка следующей страницы заранее        
-        if (!this.book || !this.parsed.textLength || !this.linesDown || this.pageLineCount < 1)
-            return;
-        
-        let i = this.pageLineCount;
-        if (this.keepLastToFirst)
-            i--;
-        if (i >= 0 && this.linesDown.length > i) {
-            this.bookPosPrepared = this.linesDown[i].begin;
-            
-            const lines = this.getLines(this.bookPosPrepared);
-            this.linesDownNext = lines.linesDown;
-            this.linesUpNext =  lines.linesUp;
-
-            if (this.toggleLayout)
-                this.page2 = this.drawHelper.drawPage(lines.linesDown);//наоборот
-            else
-                this.page1 = this.drawHelper.drawPage(lines.linesDown);
-
-            this.pagePrepared = true;
         }
     }
 
