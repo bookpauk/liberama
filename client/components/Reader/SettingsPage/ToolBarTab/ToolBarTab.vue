@@ -8,7 +8,7 @@
             <div class="sets-label label"></div>
             <q-checkbox v-model="form.toolBarMultiLine" size="xs" label="Многострочная панель">
                 <q-tooltip :delay="1000" anchor="top middle" self="bottom middle" content-style="font-size: 80%">
-                    Размещать кнопки на панели в несколько строк, если они не помещаются в одну строку
+                    Размещать кнопки на панели в несколько рядов, если они не помещаются в одну строку
                 </q-tooltip>
             </q-checkbox>
         </div>
