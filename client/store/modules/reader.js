@@ -186,6 +186,7 @@ const settingDefaults = {
     fontShifts: {},
     showToolButton: {},
     toolBarHideOnScroll: false,
+    toolBarMultiLine: true,
     userHotKeys: {},
     userWallpapers: [],
 
