@@ -147,7 +147,7 @@ class JembaReaderStorage {
         try {
             const sorted = [];
             for (const [id, obj] of this.cacheMap)
-                sorted.push(Object.assign({id}, obj));
+                sorted.push({id, time: obj.time});
 
             sorted.sort((a, b) => b.time - a.time);
 
