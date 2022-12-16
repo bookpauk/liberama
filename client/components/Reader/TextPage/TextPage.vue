@@ -1080,21 +1080,21 @@ class TextPage {
                     //движение вправо
                     this.doScrollingSpeedUp();
                 } else if (Math.abs(dy) < touchDelta && Math.abs(dx) < touchDelta) {
-                    if (this.clickAction === 'tb' || this.clickAction === 'fs') {
-                        this.clickAction = 'fs';
+                    if (this.touchMode) {
+                        this.touchMode = 2;
                         return;
                     }
 
                     (async() => {
-                        this.clickAction = 'tb';
+                        this.touchMode = 1;
                         let i = 20;
-                        while (i-- > 0 && this.clickAction === 'tb')
+                        while (i-- > 0 && this.touchMode === 1)
                             await utils.sleep(10);
-                        if (this.clickAction === 'tb')
+                        if (this.touchMode === 1)
                             this.doToolBarToggle();
                         else
                             this.doFullScreenToggle();
-                        this.clickAction = '';
+                        this.touchMode = 0;
                     })();
                 }
             }
