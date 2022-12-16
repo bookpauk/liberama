@@ -1064,6 +1064,7 @@ class TextPage {
             if (this.startTouch) {
                 const dy = this.startTouch.y - y;
                 const dx = this.startTouch.x - x;
+                this.startTouch = null;
                 const moveDelta = 30;
                 const touchDelta = 15;
                 if (dy > 0 && Math.abs(dy) >= moveDelta && Math.abs(dy) > Math.abs(dx)) {
@@ -1096,8 +1097,6 @@ class TextPage {
                         this.clickAction = '';
                     })();
                 }
-
-                this.startTouch = null;
             }
         }
     }
