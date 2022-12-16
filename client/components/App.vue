@@ -254,8 +254,8 @@ body, html, #app {
     font: normal 12pt ReaderDefault;
 }
 
-.notify-margin {
-    margin-top: 55px;
+.q-notifications__list--top {
+    top: 55px !important;
 }
 
 .dborder {
