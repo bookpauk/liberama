@@ -582,16 +582,19 @@ class TextPage {
         const page = this.$refs.scrollingPage1;
         let i = 0;
         while (!this.stopScrolling) {
-                page.style.transition = `${this.scrollingDelay}ms ${this.scrollingType}`;
-                page.style.transform = `translateY(-${this.lineHeight}px)`;
-
                 if (i > 0) {
                     this.doDown();
+                    await utils.sleep(1);
+                    await this.$nextTick();
                     if (this.linesDown.length <= this.pageLineCount + 1) {
                         this.stopScrolling = true;
                     }
                 }
+
+                page.style.transition = `${this.scrollingDelay}ms ${this.scrollingType}`;
+                page.style.transform = `translateY(-${this.lineHeight}px)`;
                 await transitionFinish(this.scrollingDelay);
+
                 page.style.transition = '';
                 page.style.transform = 'none';
                 page.offsetHeight;
