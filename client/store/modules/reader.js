@@ -1,6 +1,10 @@
 import * as utils from '../../share/utils';
 import googleFonts from './fonts/fonts.json';
 
+const minuteMs = 60*1000;//количество ms в минуте
+const hourMs = 60*minuteMs;//количество ms в часе
+const dayMs = 24*hourMs;//количество ms в сутках
+
 const readerActions = {
     'loader': 'На страницу загрузки',
     'loadFile': 'Загрузить файл с диска',
@@ -280,7 +284,7 @@ const state = {
     profilesRev: 0,
     allowProfilesSave: false,//подстраховка для разработки
     whatsNewContentHash: '',
-    donationRemindDate: '',
+    donationNextPopup: Date.now() + dayMs*30,
     currentProfile: '',
     settings: Object.assign({}, settingDefaults),
     settingsRev: {},
@@ -320,8 +324,8 @@ const mutations = {
     setWhatsNewContentHash(state, value) {
         state.whatsNewContentHash = value;
     },
-    setDonationRemindDate(state, value) {
-        state.donationRemindDate = value;
+    setDonationNextPopup(state, value) {
+        state.donationNextPopup = value;
     },
     setCurrentProfile(state, value) {
         state.currentProfile = value;
@@ -347,6 +351,10 @@ const mutations = {
 };
 
 export default {
+    minuteMs,
+    hourMs,
+    dayMs,
+
     readerActions,
     toolButtons,
     hotKeys,
