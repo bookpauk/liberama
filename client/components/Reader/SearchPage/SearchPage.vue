@@ -20,10 +20,10 @@
             </div>
             <q-btn-group v-show="!initStep" class="button-group row no-wrap">
                 <q-btn class="button" dense stretch @click="showNext">
-                    <q-icon style="top: -6px" name="la la-angle-down" dense size="22px" />
+                    <q-icon style="top: -2px" name="la la-angle-down" dense size="22px" />
                 </q-btn>
                 <q-btn class="button" dense stretch @click="showPrev">
-                    <q-icon style="top: -4px" class="icon" name="la la-angle-up" dense size="22px" />
+                    <q-icon name="la la-angle-up" dense size="22px" />
                 </q-btn>
             </q-btn-group>
         </div>
@@ -108,8 +108,13 @@ class SearchPage {
 
         this.header = 'Поиск в тексте';
         await this.$nextTick();
-        this.$refs.input.focus();
+        this.focusInput();
         this.$refs.input.select();
+    }
+
+    focusInput() {
+        if (!this.$root.isMobileDevice)
+            this.$refs.input.focus();
     }
 
     get foundText() {
@@ -149,7 +154,8 @@ class SearchPage {
         } else {
             this.$emit('stop-text-search');
         }
-        this.$refs.input.focus();
+
+        this.focusInput();
     }
 
     showPrev() {
@@ -165,7 +171,8 @@ class SearchPage {
         } else {
             this.$emit('stop-text-search');
         }
-        this.$refs.input.focus();
+
+        this.focusInput();
     }
 
     close() {
