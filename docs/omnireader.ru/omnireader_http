@@ -1,6 +1,6 @@
 server {
   listen 80;
-  server_name omnireader.ru;
+  server_name omnireader.ru b.omnireader.ru;
   set $liberama http://127.0.0.1:44081;
 
   client_max_body_size 50m;
