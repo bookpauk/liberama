@@ -31,14 +31,11 @@ class LibsPage {
     }
 
     async init() {
-        //подождем this.mode
-        let i = 0;
-        while(!this.mode && i < 100) {
-            await utils.sleep(100);
-            i++;
-        }
+        if (!this.mode)
+            return;
 
-        if (!this.libs || (this.mode = 'omnireader' && this.libs.mode !== this.mode)) {
+        //TODO: убрать второе условие в 24г
+        if (!this.libs || (this.mode === 'omnireader' && this.libs.mode !== this.mode)) {
             const defaults = rstore.getLibsDefaults(this.mode);
             this.commit('reader/setLibs', defaults);
         }
