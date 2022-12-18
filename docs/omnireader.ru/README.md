@@ -3,7 +3,7 @@
 ### git, clone
 ```
 cd ~
-sudo apt install ssh git
+sudo apt install ssh git zip
 git clone https://github.com/bookpauk/liberama
 ```
 
