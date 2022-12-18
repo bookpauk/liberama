@@ -8,7 +8,7 @@ import vueComponent from '../../vueComponent.js';
 
 import Window from '../../share/Window.vue';
 import * as utils from '../../../share/utils';
-//import rstore from '../../../store/modules/reader';
+import rstore from '../../../store/modules/reader';
 import _ from 'lodash';
 
 const componentOptions = {
@@ -28,12 +28,17 @@ class LibsPage {
         this.popupWindow = null;
         this.commit = this.$store.commit;
         this.messageListener = null;
-        //this.commit('reader/setLibs', rstore.libsDefaults);
     }
 
-    init() {
-        if (this.mode != 'liberama.top')
+    async init() {
+        if (!this.mode)
             return;
+
+        //TODO: убрать второе условие в 24г
+        if (!this.libs || (this.mode === 'omnireader' && this.libs.mode !== this.mode)) {
+            const defaults = rstore.getLibsDefaults(this.mode);
+            this.commit('reader/setLibs', defaults);
+        }
 
         this.childReady = false;
         const subdomain = (window.location.protocol != 'http:' ? 'b.' : '');

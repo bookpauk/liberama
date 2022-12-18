@@ -49,6 +49,7 @@ class ServerStorage {
         this.keyInited = false;
         this.commit = this.$store.commit;
         this.prevServerStorageKey = null;
+        this.identity = utils.randomHexString(20);
         this.lock = new LockQueue(100);
 
         this.$root.generateNewServerStorageKey = () => {this.generateNewServerStorageKey()};
@@ -202,6 +203,10 @@ class ServerStorage {
 
     get libsRev() {
         return this.$store.state.reader.libsRev;
+    }
+
+    get offlineModeActive() {
+        return this.$store.state.reader.offlineModeActive;
     }
 
     checkCurrentProfile() {
@@ -643,6 +648,8 @@ class ServerStorage {
                     await this.setCachedRecentPatch(newRecentPatch);
                 if (needSaveRecentMod && newRecentMod.rev)
                     await this.setCachedRecentMod(newRecentMod);
+            } else {
+                this.prevItemKey = null;
             }
         } finally {
             this.lock.ret();
@@ -665,7 +672,7 @@ class ServerStorage {
     }
 
     async storageApi(action, items, force) {
-        const request = {action, items};
+        const request = {action, identity: this.identity, items};
         if (force)
             request.force = true;
         const encodedRequest = await this.encodeStorageItems(request);

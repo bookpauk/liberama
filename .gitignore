@@ -1,5 +1,5 @@
 /node_modules
-/server/data
-/server/public
-/server/ipfs
+/server/.liberama*
 /dist
+dev*.sh
+

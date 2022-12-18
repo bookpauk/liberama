@@ -1,6 +1,10 @@
 import * as utils from '../../share/utils';
 import googleFonts from './fonts/fonts.json';
 
+const minuteMs = 60*1000;//количество ms в минуте
+const hourMs = 60*minuteMs;//количество ms в часе
+const dayMs = 24*hourMs;//количество ms в сутках
+
 const readerActions = {
     'loader': 'На страницу загрузки',
     'loadFile': 'Загрузить файл с диска',
@@ -44,17 +48,17 @@ const toolButtons = [
     {name: 'undoAction',  show: true},
     {name: 'redoAction',  show: true},
     {name: 'fullScreen',  show: true},
-    {name: 'scrolling',   show: false},
+    {name: 'scrolling',   show: true},
     {name: 'setPosition', show: true},
     {name: 'search',      show: true},
-    {name: 'copyText',    show: false},
+    {name: 'copyText',    show: true},
     {name: 'convOptions', show: true},
     {name: 'refresh',     show: true},
     {name: 'contents',    show: true},
     {name: 'libs',        show: true},
     {name: 'recentBooks', show: true},
-    {name: 'clickControl', show: false},
-    {name: 'offlineMode', show: false},
+    {name: 'clickControl', show: true},
+    {name: 'offlineMode', show: true},
 ];
 
 //readerActions[name]
@@ -186,6 +190,7 @@ const settingDefaults = {
     fontShifts: {},
     showToolButton: {},
     toolBarHideOnScroll: false,
+    toolBarMultiLine: true,
     userHotKeys: {},
     userWallpapers: [],
 
@@ -198,10 +203,6 @@ const settingDefaults = {
     bucSetOnNew: true, // автоматически включать проверку обновлений для вновь загружаемых файлов
     bucCancelEnabled: true, // вкл/выкл отмену проверки книг через bucCancelDays
     bucCancelDays: 90, // количество дней, через которое отменяется проверка книги, при условии отсутствия обновлений за это время
-
-    //для SettingsPage
-    needUpdateSettingsView: 0,
-
 };
 
 for (const font of fonts)
@@ -227,30 +228,52 @@ function addDefaultsToSettings(settings) {
     return false;
 }
 
-const libsDefaults = {
-    startLink: 'http://flibusta.is',
-    comment: 'Флибуста | Книжное братство',
-    closeAfterSubmit: false,
-    openInFrameOnEnter: false,
-    openInFrameOnAdd: false,
-    groups: [
-        {r: 'http://flibusta.is', s: 'http://flibusta.is', list: [
-            {l: 'http://flibusta.is', c: 'Флибуста | Книжное братство'},
-        ]},
-        {r: 'http://fantasy-worlds.org', s: 'http://fantasy-worlds.org', list: [
-            {l: 'http://fantasy-worlds.org', c: 'Миры Фэнтези'},
-        ]},
-        {r: 'http://samlib.ru', s: 'http://samlib.ru', list: [
-            {l: 'http://samlib.ru', c: 'Журнал "Самиздат"'},
-        ]},
-        {r: 'http://lib.ru', s: 'http://lib.ru', list: [
-            {l: 'http://lib.ru', c: 'Библиотека Максима Мошкова'},
-        ]},
-        {r: 'https://aldebaran.ru', s: 'https://aldebaran.ru', list: [
-            {l: 'https://aldebaran.ru', c: 'АЛЬДЕБАРАН | Электронная библиотека книг'},
-        ]},
-    ]
-};
+function getLibsDefaults(mode = 'reader') {
+    const result = {
+        startLink: '',
+        comment: '',
+        closeAfterSubmit: false,
+        openInFrameOnEnter: false,
+        openInFrameOnAdd: false,
+        helpShowed: false,
+        mode,
+        groups: [
+            {r: 'http://samlib.ru', s: 'http://samlib.ru', list: [
+                {l: 'http://samlib.ru', c: 'Журнал "Самиздат"'},
+            ]},
+            {r: 'http://lib.ru', s: 'http://lib.ru', list: [
+                {l: 'http://lib.ru', c: 'Библиотека Максима Мошкова'},
+            ]},
+            {r: 'https://aldebaran.ru', s: 'https://aldebaran.ru', list: [
+                {l: 'https://aldebaran.ru', c: 'АЛЬДЕБАРАН | Электронная библиотека книг'},
+            ]},
+        ],
+    };
+
+    if (mode === 'liberama') {
+        result.groups.unshift(
+            {r: 'http://fantasy-worlds.org', s: 'http://fantasy-worlds.org', list: [
+                {l: 'http://fantasy-worlds.org', c: 'Миры Фэнтези'},
+            ]}
+        );
+        result.groups.unshift(
+            {r: 'http://flibusta.is', s: 'http://flibusta.is', list: [
+                {l: 'http://flibusta.is', c: 'Флибуста | Книжное братство'},
+            ]}
+        );
+    } else if (mode === 'omnireader') {
+        result.groups.unshift(
+            {r: 'https://lib.omnireader.ru', s: 'https://lib.omnireader.ru', list: [
+                {l: 'https://lib.omnireader.ru', c: 'Общественное достояние'},
+            ]}
+        );
+    }
+
+    result.startLink = result.groups[0].r;
+    result.comment = result.groups[0].c;
+
+    return result;
+}
 
 // initial state
 const state = {
@@ -262,11 +285,11 @@ const state = {
     profilesRev: 0,
     allowProfilesSave: false,//подстраховка для разработки
     whatsNewContentHash: '',
-    donationRemindDate: '',
+    donationNextPopup: Date.now() + dayMs*30,
     currentProfile: '',
     settings: Object.assign({}, settingDefaults),
     settingsRev: {},
-    libs: Object.assign({}, libsDefaults),
+    libs: false,
     libsRev: 0,
 };
 
@@ -302,8 +325,8 @@ const mutations = {
     setWhatsNewContentHash(state, value) {
         state.whatsNewContentHash = value;
     },
-    setDonationRemindDate(state, value) {
-        state.donationRemindDate = value;
+    setDonationNextPopup(state, value) {
+        state.donationNextPopup = value;
     },
     setCurrentProfile(state, value) {
         state.currentProfile = value;
@@ -329,6 +352,10 @@ const mutations = {
 };
 
 export default {
+    minuteMs,
+    hourMs,
+    dayMs,
+
     readerActions,
     toolButtons,
     hotKeys,
@@ -336,7 +363,7 @@ export default {
     webFonts,
     settingDefaults,
     addDefaultsToSettings,
-    libsDefaults,
+    getLibsDefaults,
 
     namespaced: true,
     state,

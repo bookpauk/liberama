@@ -48,8 +48,12 @@ class BaseLog {
         this.outputBufferLength = 0;
         this.outputBuffer = [];
 
-        await this.flushImpl(this.data)
-            .catch(e => { console.error(`Logger error: ${e}`); ayncExit.exit(1); } );
+        try {
+            await this.flushImpl(this.data);
+        } catch (e) {
+            console.error(`Logger error: ${e}`);
+            ayncExit.exit(1);
+        }
         this.flushing = false;
     }
 
@@ -112,10 +116,14 @@ class FileLog extends BaseLog {
         if (this.closed)
             return;
         await super.close();
+
         if (this.fd) {
+            while (this.flushing)
+                await sleep(1);
             await fs.close(this.fd);
             this.fd = null;
         }
+
         if (this.rcid)
             clearTimeout(this.rcid);
     }
@@ -151,15 +159,21 @@ class FileLog extends BaseLog {
         if (this.closed)
             return;
 
-        if (!this.rcid) {
-            await this.doFileRotationIfNeeded();
-            this.rcid = setTimeout(() => {
-                this.rcid = 0;
-            }, LOG_ROTATE_FILE_CHECK_INTERVAL);
-        }
+        this.flushing = true;
+        try {
+            if (!this.rcid) {
+                await this.doFileRotationIfNeeded();
+                this.rcid = setTimeout(() => {
+                    this.rcid = 0;
+                }, LOG_ROTATE_FILE_CHECK_INTERVAL);
+            }
 
-        if (this.fd)
-            await fs.write(this.fd, Buffer.from(data.join('')));
+            if (this.fd) {
+                await fs.write(this.fd, Buffer.from(data.join('')));
+            }
+        } finally {
+            this.flushing = false;
+        }
     }
 }
 

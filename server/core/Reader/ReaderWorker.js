@@ -29,9 +29,6 @@ class ReaderWorker {
             this.config.tempDownloadDir = `${config.tempDir}/download`;
             fs.ensureDirSync(this.config.tempDownloadDir);
 
-            this.config.tempPublicDir = `${config.publicDir}/tmp`;
-            fs.ensureDirSync(this.config.tempPublicDir);
-
             this.workerState = new WorkerState();
             this.down = new FileDownloader(config.maxUploadFileSize);
             this.decomp = new FileDecompressor(3*config.maxUploadFileSize);
@@ -55,7 +52,7 @@ class ReaderWorker {
                     moveToRemote: true,
                 },
                 {
-                    dir: this.config.uploadDir,
+                    dir: this.config.uploadPublicDir,
                     remoteDir: '/upload',
                     maxSize: this.config.maxUploadPublicDirSize,
                     moveToRemote: true,
@@ -109,7 +106,7 @@ class ReaderWorker {
             let downloadSize = -1;
             //download or use uploaded
             if (url.indexOf('disk://') != 0) {//download
-                const downdata = await this.down.load(url, (progress) => {
+                const downdata = await this.down.load(url, {}, (progress) => {
                     wState.set({progress});
                 }, q.abort);
 
@@ -119,7 +116,7 @@ class ReaderWorker {
                 await fs.writeFile(downloadedFilename, downdata);
             } else {//uploaded file
                 const fileHash = url.substr(7);
-                downloadedFilename = `${this.config.uploadDir}/${fileHash}`;
+                downloadedFilename = `${this.config.uploadPublicDir}/${fileHash}`;
                 if (!await fs.pathExists(downloadedFilename)) {
                     //если удалено из upload, попробуем восстановить из удаленного хранилища
                     try {
@@ -227,7 +224,7 @@ class ReaderWorker {
 
     async saveFile(file) {
         const hash = await utils.getFileHash(file.path, 'sha256', 'hex');
-        const outFilename = `${this.config.uploadDir}/${hash}`;
+        const outFilename = `${this.config.uploadPublicDir}/${hash}`;
 
         if (!await fs.pathExists(outFilename)) {
             await fs.move(file.path, outFilename);
@@ -242,7 +239,7 @@ class ReaderWorker {
 
     async saveFileBuf(buf) {
         const hash = await utils.getBufHash(buf, 'sha256', 'hex');
-        const outFilename = `${this.config.uploadDir}/${hash}`;
+        const outFilename = `${this.config.uploadPublicDir}/${hash}`;
 
         if (!await fs.pathExists(outFilename)) {
             await fs.writeFile(outFilename, buf);
@@ -255,7 +252,7 @@ class ReaderWorker {
     }
 
     async uploadFileTouch(url) {
-        const outFilename = `${this.config.uploadDir}/${url.replace('disk://', '')}`;
+        const outFilename = `${this.config.uploadPublicDir}/${url.replace('disk://', '')}`;
 
         await utils.touchFile(outFilename);
 

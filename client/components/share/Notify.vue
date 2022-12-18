@@ -27,7 +27,6 @@ class Notify {
             icon,
             actions: [{icon: 'la la-times notify-button-icon', color: 'black'}],
             html: true,
-            classes: 'notify-margin',
 
             message: 
                 `<div style="max-width: 350px">

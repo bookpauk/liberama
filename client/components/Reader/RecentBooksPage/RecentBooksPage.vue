@@ -367,10 +367,10 @@ class RecentBooksPage {
 
                 let d = new Date();
                 d.setTime(book.touchTime);
-                const touchTime = utils.formatDate(d);
+                const touchTime = utils.dateFormat(d, 'DD.MM.YYYY HH:mm');
                 const loadTimeRaw = (book.loadTime ? book.loadTime : 0);//book.addTime);
                 d.setTime(loadTimeRaw);
-                const loadTime = utils.formatDate(d);
+                const loadTime = utils.dateFormat(d, 'DD.MM.YYYY HH:mm');
 
                 let readPart = 0;
                 let perc = '';

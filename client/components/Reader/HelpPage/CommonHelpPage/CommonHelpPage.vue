@@ -24,7 +24,7 @@
         </p>
         <p>Поддерживаемые форматы: <b>fb2, fb2.zip, html, txt</b> и другие.</p>
 
-        <div v-show="mode == 'omnireader' || mode == 'liberama.top'">
+        <div v-show="mode == 'omnireader' || mode == 'liberama'">
             <p>
                 Вы можете добавить в свой браузер закладку, указав в ее свойствах вместо адреса следующий код:
                 <br><strong>{{ bookmarkText }}</strong>

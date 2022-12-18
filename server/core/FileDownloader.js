@@ -9,11 +9,12 @@ class FileDownloader {
         this.limitDownloadSize = limitDownloadSize;
     }
 
-    async load(url, callback, abort) {
+    async load(url, opts, callback, abort) {
         let errMes = '';
 
-        const options = {
+        let options = {
             headers: {
+                'accept-encoding': 'gzip, compress, deflate',
                 'user-agent': userAgent,
                 timeout: 300*1000,
             },
@@ -22,6 +23,8 @@ class FileDownloader {
             }),
             responseType: 'stream',
         };
+        if (opts)
+            options = Object.assign({}, opts, options);
 
         try {
             const res = await axios.get(url, options);

@@ -110,7 +110,7 @@
 
             <div ref="frameBox" class="col fit" style="position: relative;">
                 <div ref="frameWrap" class="overflow-hidden">
-                    <iframe v-if="frameVisible" ref="frame" :src="frameSrc" frameborder="0"></iframe>
+                    <iframe v-if="frameVisible" ref="frame" :src="frameSrc" frameborder="0" allow="clipboard-read; clipboard-write"></iframe>
                 </div>
                 <div v-show="transparentLayoutVisible" ref="transparentLayout" class="fit transparent-layout" @click="transparentLayoutClick"></div>
             </div>
@@ -304,6 +304,10 @@ class ExternalLibs {
     openInFrameOnAdd = false;
     frameScale = 1;
 
+    inpxReady = false;
+    inpxTitle = '';
+    inpxUrl = '';
+
     created() {
         this.oldStartLink = '';
         this.justOpened = true;
@@ -321,8 +325,6 @@ class ExternalLibs {
         this.debouncedGoToLink = _.debounce((link) => {
             this.goToLink(link);
         }, 100, {'maxWait':200});
-        //this.commit = this.$store.commit;
-        //this.commit('reader/setLibs', rstore.libsDefaults);
     }
 
     mounted() {
@@ -334,10 +336,7 @@ class ExternalLibs {
                 i++;
             }
 
-            if (this.mode != 'liberama.top') {
-                this.$router.replace('/404');
-                return;
-            }
+            this.libsDefaults = rstore.getLibsDefaults(this.mode);
 
             this.$refs.window.init();
 
@@ -348,17 +347,28 @@ class ExternalLibs {
             const openerOrigin2 = `https://${openerHost}`;
 
             window.addEventListener('message', (event) => {
+                //from inpx-web
+                if (_.isObject(event.data) && event.data.from === 'inpx-web') {
+                    //console.log(event);
+
+                    this.inpxOrigin = event.origin;
+
+                    this.recvInpxMessage(event.data);
+                    return;
+                }
+
+                //from parent
                 if (event.origin !== openerOrigin1 && event.origin !== openerOrigin2)
                     return;
+
                 if (!_.isObject(event.data) || event.data.from != 'LibsPage')
                     return;
                 if (event.origin == openerOrigin1)
                     this.opener = window.opener;
                 else
                     this.opener = event.source;
-                this.openerOrigin = event.origin;
 
-                //console.log(event);
+                this.openerOrigin = event.origin;
 
                 this.recvMessage(event.data);
             });
@@ -389,7 +399,8 @@ class ExternalLibs {
             }
         } else if (d.type == 'libs') {
             this.ready = true;
-            this.libs = _.cloneDeep(d.data);
+            if (d.data)
+                this.libs = _.cloneDeep(d.data);
         } else if (d.type == 'notify') {
             this.$root.notify.success(d.data, '', {position: 'bottom-right'});
         }
@@ -401,6 +412,30 @@ class ExternalLibs {
             if (this.opener && this.openerOrigin)
                 this.opener.postMessage(Object.assign({}, {from: 'ExternalLibs'}, d), this.openerOrigin);
         })();
+    }
+
+    recvInpxMessage(d) {
+        if (d.type == 'mes') {
+            switch(d.data) {
+                case 'hello-from-inpx-web':
+                    this.sendInpxMessage({type: 'mes', data: 'ready'});
+                    break;
+                case 'ready':
+                    this.inpxReady = true;
+                    break;
+            }
+        } else if (d.type == 'submitUrl') {
+            this.submitUrl(d.data);
+        } else if (d.type == 'titleChange') {
+            this.inpxTitle = d.data;
+        } else if (d.type == 'urlChange') {
+            this.inpxUrl = d.data;
+        }
+    }
+
+    sendInpxMessage(d) {
+        if (this.$refs.frame && this.inpxOrigin)
+            this.$refs.frame.contentWindow.postMessage(Object.assign({}, {from: 'ExternalLibs'}, d), this.inpxOrigin);
     }
 
     async checkOpener() {
@@ -461,7 +496,10 @@ class ExternalLibs {
     get header() {
         let result = (this.ready ? 'Сетевая библиотека' : 'Загрузка...');
         if (this.ready && this.selectedLink) {
-            result += ` | ${(this.libs.comment ? this.libs.comment + ' ': '') + lu.removeProtocol(this.libs.startLink)}`;
+            let title = `${(this.libs.comment ? this.libs.comment + ' ': '') + lu.removeProtocol(this.libs.startLink)}`;
+            if (this.inpxReady && this.inpxTitle)
+                title = `${this.inpxTitle} ${lu.removeProtocol(this.inpxUrl)}`;
+            result += ` | ${title}`;
         }
         this.$root.setAppTitle(result);
         return result;
@@ -532,7 +570,7 @@ class ExternalLibs {
     get defaultRootLinkOptions() {
         let result = [];
 
-        rstore.libsDefaults.groups.forEach(group => {
+        this.libsDefaults.groups.forEach(group => {
             result.push({label: lu.removeProtocol(group.r), value: group.r});
         });
 
@@ -561,6 +599,11 @@ class ExternalLibs {
     }
 
     goToLink(link) {
+        this.inpxReady = false;
+        this.inpxTitle = '';
+        this.inpxUrl = '';
+        this.inpxOrigin = false;
+
         if (!this.ready || !link)
             return;
 
@@ -576,6 +619,7 @@ class ExternalLibs {
             this.frameVisible = true;
             this.$nextTick(() => {
                 if (this.$refs.frame) {
+                    this.$refs.frame.contentWindow.location.reload(true);
                     this.$refs.frame.contentWindow.focus();
                     this.frameResize();
                 }
@@ -648,13 +692,17 @@ class ExternalLibs {
         this.updateStartLink(true);
     }
 
-    submitUrl() {
-        if (this.bookUrl) {
+    submitUrl(url) {
+        if (!url) {
+            url = this.bookUrl;
+            this.bookUrl = '';
+        }
+
+        if (url) {
             this.sendMessage({type: 'submitUrl', data: {
-                url: this.bookUrl,
+                url,
                 force: true
             }});
-            this.bookUrl = '';
             if (this.closeAfterSubmit)
                 this.close();
         }
@@ -668,6 +716,12 @@ class ExternalLibs {
         } else {
             this.bookmarkLink = this.bookUrl;
             this.bookmarkDesc = '';
+
+            if (!this.bookmarkLink && this.inpxReady && this.inpxUrl) {
+                this.bookmarkLink = this.inpxUrl;
+                if (this.inpxTitle)
+                    this.bookmarkDesc = this.inpxTitle;
+            }
         }
 
         this.addBookmarkMode = mode;
@@ -679,10 +733,10 @@ class ExternalLibs {
     }
 
     updateBookmarkLink() {
-        const index = lu.getSafeRootIndexByUrl(rstore.libsDefaults.groups, this.defaultRootLink);
+        const index = lu.getSafeRootIndexByUrl(this.libsDefaults.groups, this.defaultRootLink);
         if (index >= 0) {
-            this.bookmarkLink = rstore.libsDefaults.groups[index].s;
-            this.bookmarkDesc = this.getCommentByLink(rstore.libsDefaults.groups[index].list, this.bookmarkLink);
+            this.bookmarkLink = this.libsDefaults.groups[index].s;
+            this.bookmarkDesc = this.getCommentByLink(this.libsDefaults.groups[index].list, this.bookmarkLink);
         } else {
             this.bookmarkLink = '';
             this.bookmarkDesc = '';
@@ -837,20 +891,22 @@ class ExternalLibs {
 <p>Окно 'Сетевая библиотека' позволяет открывать ссылки в читалке без переключения между окнами,
 что особенно актуально для мобильных устройств. Имеется возможность управлять закладками
 на понравившиеся ресурсы, книги или страницы авторов. Открытие ссылок и навигация происходят во фрейме, но,
-к сожалению, в нем открываются не все страницы.</p>
+к сожалению, в нем открываются не все страницы.</p>` + 
 
-<p>Доступ к сайтам <span style="color: blue">http://flibusta.is</span> и <span style="color: blue">http://fantasy-worlds.org</span> работает через прокси.
+(this.mode === 'liberama' ?
+`<p>Доступ к сайтам <span style="color: blue">http://flibusta.is</span> и <span style="color: blue">http://fantasy-worlds.org</span> работает через прокси.
 
 <br><span style="color: red"><b>ПРЕДУПРЕЖДЕНИЕ!</b></span>
 Доступ предназначен только для просмотра и скачивания книг. Авторизоваться на этих сайтах
 из фрейма категорически не рекомендуется, т.к. ваше подключение не защищено и данные могут попасть 
 к третьим лицам.
 </p>
+`
+: '') + 
 
-<p>Из-за проблем с безопасностью, навигация 'вперед-назад' во фрейме осуществляется с помощью контекстного меню правой кнопкой мыши.
+`<p>Из-за проблем с безопасностью, навигация 'вперед-назад' во фрейме осуществляется с помощью контекстного меню правой кнопкой мыши.
 На мобильных устройствах для этого служит системная клавиша 'Назад (стрелка влево)' и опция 'Вперед (стрелка вправо)' в меню браузера. 
 </p>
-
 <p>Приятного пользования ;-)
 </p>
             `, 'Справка', {iconName: 'la la-info-circle'});

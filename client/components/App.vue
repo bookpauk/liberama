@@ -39,16 +39,6 @@ class App {
     _options = componentOptions;
     showPage = false;
 
-    itemRuText = {
-        '/cardindex': 'Картотека',
-        '/reader': 'Читалка',
-        '/forum': 'Форум-чат',
-        '/income': 'Поступления',
-        '/sources': 'Источники',
-        '/settings': 'Параметры',
-        '/help': 'Справка',
-    };
-
     created() {
         this.commit = this.$store.commit;
         this.state = this.$store.state;
@@ -130,7 +120,7 @@ class App {
 
         this.setAppTitle();
         (async() => {
-            //загрузим конфиг сревера
+            //загрузим конфиг сервера
             try {
                 const config = await miscApi.loadConfig();
                 this.commit('config/setConfig', config);
@@ -197,12 +187,12 @@ class App {
 
     setAppTitle(title) {
         if (!title) {
-            if (this.mode == 'liberama.top') {
+            if (this.mode == 'liberama') {
                 document.title = `Liberama Reader - всегда с вами`;
             } else if (this.mode == 'omnireader') {
                 document.title = `Omni Reader - всегда с вами`;
             } else if (this.config && this.mode !== null) {
-                document.title = `${this.config.name} - ${this.itemRuText[this.rootRoute]}`;
+                document.title = `Универсальная читалка книг и ресурсов интернета`;
             }
         } else {
             document.title = title;
@@ -217,19 +207,12 @@ class App {
         return this.$store.state.config.mode;
     }
 
-    get showAsideBar() {
-        return (this.mode !== null && this.mode != 'reader' && this.mode != 'omnireader' && this.mode != 'liberama.top');
-    }
-
-    set showAsideBar(value) {
-    }
-
     get isReaderActive() {
         return (this.rootRoute == '/reader' || this.rootRoute == '/external-libs');
     }
 
     redirectIfNeeded() {
-        if ((this.mode == 'reader' || this.mode == 'omnireader' || this.mode == 'liberama.top')) {
+        if ((this.mode == 'reader' || this.mode == 'omnireader' || this.mode == 'liberama')) {
             const search = window.location.search.substr(1);
 
             //распознавание параметра url вида "?url=<link>" и редирект при необходимости
@@ -271,8 +254,8 @@ body, html, #app {
     font: normal 12pt ReaderDefault;
 }
 
-.notify-margin {
-    margin-top: 55px;
+.q-notifications__list--top {
+    top: 55px !important;
 }
 
 .dborder {

@@ -20,11 +20,11 @@
 
         <q-dialog ref="dialog2" v-model="donationVisible" style="z-index: 100" no-route-dismiss no-esc-dismiss no-backdrop-dismiss>
             <div class="column bg-white no-wrap q-pa-md">
-                <div class="row justify-center q-mb-md" style="font-size: 110%">
+                <div class="row justify-center q-mb-md">
                     Здравствуйте, дорогие читатели!
                 </div>
 
-                <div class="q-mx-md column" style="word-break: normal">
+                <div class="q-mx-md column" style="font-size: 90%; word-break: normal">
                     <div>
                         Вот уже много лет мы все вместе пользуемся нашей любимой читалкой.<br><br>
 
@@ -43,19 +43,31 @@
                         Однако на оплату хостинга читалки и сервера обновлений автор тратит свои 
                         собственные средства, а также тратит свое время и силы на улучшение проекта.
                         <br><br>
-                        Поддержим же материально наш ресурс, чтобы и дальше спокойно существовать и развиваться:
+                        Давайте поддержим наш ресурс, чтобы и дальше спокойно существовать и развиваться:
                     </div>
 
-                    <q-btn style="margin: 10px 50px 10px 50px" color="green-8" size="14px" no-caps @click="makeDonation">
+                    <q-btn style="margin: 10px 20px 10px 20px" color="green-8" no-caps @click="makeDonation">
                         <q-icon class="q-mr-xs" name="la la-donate" size="24px" />
                         Поддержать проект
                     </q-btn>
 
-                    <q-btn style="margin: 0 50px 20px 50px" size="14px" no-caps @click="donationDialogRemind">
-                        Напомнить в следующем месяце
-                    </q-btn>
+                    <div class="row justify-center q-mt-sm">
+                        Напомнить снова через:
+                    </div>
 
-                    <div class="row justify-center">
+                    <div class="row justify-between" style="margin: 0 20px 10px 20px">
+                        <q-btn style="width: 140px; margin-top: 5px" no-caps @click="donationDialogRemindLater(30)">
+                            1 месяц
+                        </q-btn>
+                        <q-btn style="width: 140px; margin-top: 5px" no-caps @click="donationDialogRemindLater(60)">
+                            2 месяца
+                        </q-btn>
+                        <q-btn style="width: 140px; margin-top: 5px" no-caps @click="donationDialogRemindLater(90)">
+                            3 месяца
+                        </q-btn>
+                    </div>
+
+                    <div class="row justify-center q-mt-md">
                         <div class="q-px-sm clickable" style="font-size: 80%" @click="openDonate">
                             Помочь проекту можно в любое время
                         </div>
@@ -71,12 +83,7 @@
             </template>
 
             <div style="word-break: normal">
-                Если вы хотите найти определенную книгу и открыть в читалке, добро пожаловать в
-                раздел "Сетевая библиотека" (кнопка <q-icon name="la la-sitemap" size="32px" />) на сайте
-                <a href="https://liberama.top" target="_blank">liberama.top</a>
-
-                <br><br>
-                Если же вы пытаетесь вставить текст в читалку из буфера обмена, пожалуйста воспользуйтесь кнопкой
+                Если вы пытаетесь вставить текст в читалку из буфера обмена, пожалуйста воспользуйтесь кнопкой
                 <q-btn no-caps dense class="q-px-sm" color="primary" size="13px" @click="loadBufferClick">
                     <q-icon class="q-mr-xs" name="la la-comment" size="24px" />
                     Из буфера обмена
@@ -94,6 +101,7 @@ import vueComponent from '../../vueComponent.js';
 import Dialog from '../../share/Dialog.vue';
 import * as utils from '../../../share/utils';
 import {versionHistory} from '../versionHistory';
+import rstore from '../../../store/modules/reader';
 
 const componentOptions = {
     components: {
@@ -135,7 +143,7 @@ class ReaderDialogs {
     async showWhatsNew() {
         const whatsNew = versionHistory[0];
         if (this.showWhatsNewDialog &&
-            whatsNew.showUntil >= utils.formatDate(new Date(), 'coDate') &&
+            whatsNew.showUntil >= utils.dateFormat(new Date(), 'YYYY-MM-DD') &&
             this.whatsNewHeader != this.whatsNewContentHash) {
             await utils.sleep(2000);
             this.whatsNewContent = 'Версия ' + this.whatsNewHeader + whatsNew.content;
@@ -144,9 +152,7 @@ class ReaderDialogs {
     }
 
     async showDonation() {
-        const today = utils.formatDate(new Date(), 'coMonth');
-
-        if ((this.mode == 'omnireader' || this.mode == 'liberama.top') && this.showDonationDialog && this.donationRemindDate != today) {
+        if ((this.mode == 'omnireader' || this.mode == 'liberama') && this.showDonationDialog && this.donationNextPopup <= Date.now()) {
             await utils.sleep(3000);
             this.donationVisible = true;
         }
@@ -161,14 +167,15 @@ class ReaderDialogs {
         this.urlHelpVisible = false;
     }
 
-    donationDialogRemind() {
+    donationDialogRemindLater(remindAfter = 30) {
         this.donationVisible = false;
-        this.commit('reader/setDonationRemindDate', utils.formatDate(new Date(), 'coMonth'));
+
+        this.commit('reader/setDonationNextPopup', Date.now() + rstore.dayMs*remindAfter);
     }
 
     makeDonation() {
         utils.makeDonation();
-        this.donationDialogRemind();
+        this.donationDialogRemindLater();
     }
 
     openDonate() {
@@ -209,8 +216,8 @@ class ReaderDialogs {
         return this.$store.state.reader.whatsNewContentHash;
     }
 
-    get donationRemindDate() {
-        return this.$store.state.reader.donationRemindDate;
+    get donationNextPopup() {
+        return this.$store.state.reader.donationNextPopup;
     }
 
     keyHook() {

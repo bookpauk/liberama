@@ -1,6 +1,6 @@
 <template>
     <div ref="main" class="column no-wrap" style="min-height: 500px">
-        <div v-if="mode != 'liberama.top'" class="relative-position">
+        <div v-if="mode != 'liberama'" class="relative-position">
             <GithubCorner url="https://github.com/bookpauk/liberama" corner-color="#1B695F" git-color="#EBE2C9"></GithubCorner>
         </div>
         <div class="col column justify-center items-center no-wrap overflow-hidden" style="min-height: 230px">
@@ -55,7 +55,6 @@
         </div>
 
         <div class="col column justify-end items-center no-wrap overflow-hidden">
-            <span v-if="mode == 'omnireader'" class="bottom-span clickable" @click="findBook">Найти книгу</span>
             <span class="bottom-span clickable" @click="openHelp">Справка</span>
             <span class="bottom-span clickable" @click="openDonate">Помочь проекту</span>
 
@@ -64,18 +63,6 @@
         </div>
 
         <PasteTextPage v-if="pasteTextActive" ref="pasteTextPage" @paste-text-toggle="pasteTextToggle" @load-buffer="loadBuffer"></PasteTextPage>
-
-        <Dialog ref="dialog1" v-model="findBookVisible">
-            <template #header>
-                Подсказка ;-)
-            </template>
-
-            <div style="word-break: normal">
-                Если вы хотите найти определенную книгу, добро пожаловать в
-                раздел "Сетевая библиотека" (кнопка <q-icon name="la la-sitemap" size="32px" />) на сайте читалки
-                <a href="https://liberama.top" target="_blank">liberama.top</a>
-            </div>
-        </Dialog>
     </div>
 </template>
 
@@ -103,7 +90,6 @@ class LoaderPage {
     bookUrl = null;
     loadPercent = 0;
     pasteTextActive = false;
-    findBookVisible = false;
 
     created() {
         this.commit = this.$store.commit;
@@ -122,7 +108,7 @@ class LoaderPage {
     get title() {
         if (this.mode == 'omnireader')
             return 'Omni Reader - браузерная онлайн-читалка.';
-        if (this.mode == 'liberama.top')
+        if (this.mode == 'liberama')
             return 'Liberama Reader - браузерная онлайн-читалка.';
         return 'Универсальная читалка книг и ресурсов интернета.';
 
@@ -193,10 +179,6 @@ class LoaderPage {
         this.$emit('do-action', {action: 'donate'});
     }
     
-    findBook() {
-        this.findBookVisible = true;
-    }
-
     openComments() {
         window.open('http://samlib.ru/comment/b/bookpauk/bookpauk_reader', '_blank');
     }
@@ -213,9 +195,6 @@ class LoaderPage {
     }
 
     keyHook(event) {
-        if (this.$refs.dialog1.active)
-            return true;
-
         if (this.pasteTextActive) {
             return this.$refs.pasteTextPage.keyHook(event);
         }

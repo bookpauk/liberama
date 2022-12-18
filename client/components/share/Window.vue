@@ -10,7 +10,9 @@
                     @touchend.stop="onTouchEnd"
                     @touchmove.stop="onTouchMove"
                 >
-                    <span class="header-text col"><slot name="header"></slot></span>
+                    <div class="header-text col" style="width: 0">
+                        <slot name="header"></slot>
+                    </div>
                     <slot name="buttons"></slot>
                     <span class="close-button row justify-center items-center" @mousedown.stop @click="close"><q-icon name="la la-times" size="16px" /></span>
                 </div>
