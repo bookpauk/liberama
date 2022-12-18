@@ -236,6 +236,7 @@ function getLibsDefaults(mode = 'reader') {
         openInFrameOnEnter: false,
         openInFrameOnAdd: false,
         helpShowed: false,
+        mode,
         groups: [
             {r: 'http://samlib.ru', s: 'http://samlib.ru', list: [
                 {l: 'http://samlib.ru', c: 'Журнал "Самиздат"'},

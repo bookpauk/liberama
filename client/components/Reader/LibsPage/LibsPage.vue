@@ -38,7 +38,7 @@ class LibsPage {
             i++;
         }
 
-        if (!this.libs) {
+        if (!this.libs || (this.mode = 'omnireader' && this.libs.mode !== this.mode)) {
             const defaults = rstore.getLibsDefaults(this.mode);
             this.commit('reader/setLibs', defaults);
         }
