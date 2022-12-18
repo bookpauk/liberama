@@ -8,7 +8,7 @@ export const versionHistory = [
 <ul>
     <li>на мобильных устройствах переход в полноэкранный режим теперь возможен через двойной тап по центру</li>
     <li>добавлено окно "Сетевая библиотека" для omnireader.ru</li>
-    <li>улучшение работы синхронизации с сервером при плохом качестве связи</li>
+    <li>улучшена работа синхронизации с сервером при плохом качестве связи</li>
     <li>добавлена сборка релизов читалки: <a href="https://github.com/bookpauk/liberama/releases" target="_blank">https://github.com/bookpauk/liberama/releases</a></li>
 </ul>
 
