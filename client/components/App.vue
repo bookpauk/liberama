@@ -207,26 +207,15 @@ class App {
         return this.$store.state.config.mode;
     }
 
-    get isReaderActive() {
-        return (this.rootRoute == '/reader' || this.rootRoute == '/external-libs');
-    }
-
     redirectIfNeeded() {
-        if ((this.mode == 'reader' || this.mode == 'omnireader' || this.mode == 'liberama')) {
-            const search = window.location.search.substr(1);
+        const search = window.location.search.substr(1);
 
-            //распознавание параметра url вида "?url=<link>" и редирект при необходимости
-            if (!this.isReaderActive) {
-                const s = search.split('url=');
-                const url = s[1] || '';
-                const q = utils.parseQuery(s[0] || '');
-                if (url) {
-                    q.url = url;
-                }
-
-                window.history.replaceState({}, '', '/');
-                this.$router.replace({ path: '/reader', query: q });
-            }
+        //распознавание параметра url вида "?url=<link>" и редирект при необходимости
+        const s = search.split('url=');
+        const url = s[1] || '';
+        if (url) {
+            window.history.replaceState({}, '', '/');
+            this.$router.replace({ path: '/reader', query: {url} });
         }
     }
 }
