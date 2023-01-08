@@ -8,6 +8,13 @@
         <div class="sets-item row">
             <div class="sets-label label"></div>
             <div class="col row">
+                <q-checkbox v-model="form.nightMode" size="xs" label="Ночной режим" />
+            </div>
+        </div>
+
+        <div class="sets-item row">
+            <div class="sets-label label"></div>
+            <div class="col row">
                 <q-checkbox v-model="form.dualPageMode" size="xs" label="Двухстраничный режим" />
             </div>
         </div>

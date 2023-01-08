@@ -157,6 +157,10 @@ const settingDefaults = {
     statusBarColorAlpha: 0.4,
     statusBarClickOpen: true,
 
+    nightMode: false, //ночной режим
+    dayColorSets: {},
+    nightColorSets: {},
+
     scrollingDelay: 3000,// замедление, ms
     scrollingType: 'ease-in-out', //linear, ease, ease-in, ease-out, ease-in-out
 
@@ -218,6 +222,8 @@ const diffExclude = [];
 for (const hotKey of hotKeys)
     diffExclude.push(`userHotKeys/${hotKey.name}`);
 diffExclude.push('userWallpapers');
+diffExclude.push('dayColorSets');
+diffExclude.push('nightColorSets');
 
 function addDefaultsToSettings(settings) {
     const diff = utils.getObjDiff(settings, settingDefaults, {exclude: diffExclude});
@@ -226,6 +232,33 @@ function addDefaultsToSettings(settings) {
     }
 
     return false;
+}
+
+const colorSetsList = [
+    'textColor',
+    'backgroundColor',
+    'wallpaper',
+    'statusBarColorAsText',
+    'statusBarColor',
+    'statusBarColorAlpha',
+    'dualDivColorAsText',
+    'dualDivColor',
+    'dualDivColorAlpha',
+];
+
+function saveColorSets(nightMode, settings) {
+    const target = (nightMode ? settings.nightColorSets : settings.dayColorSets);
+    for (const prop of colorSetsList) {
+        target[prop] = settings[prop];
+    }
+}
+
+function restoreColorSets(nightMode, settings) {
+    const source = (nightMode ? settings.nightColorSets : settings.dayColorSets);
+    for (const prop of colorSetsList) {
+        if (utils.hasProp(source, prop))
+            settings[prop] = source[prop];
+    }
 }
 
 function getLibsDefaults(mode = 'reader') {
@@ -333,12 +366,14 @@ const mutations = {
     },
     setSettings(state, value) {
         const newSettings = Object.assign({}, state.settings, value);
-        const added = addDefaultsToSettings(newSettings);
-        if (added) {
-            state.settings = added;
-        } else {
-            state.settings = newSettings;
+        //переключение режима день-ночь
+        const prevNightMode = state.settings.nightMode;
+        if (utils.hasProp(value, 'nightMode') && prevNightMode != value.nightMode) {
+            saveColorSets(prevNightMode, newSettings);
+            restoreColorSets(newSettings.nightMode, newSettings);
         }
+
+        state.settings = newSettings;
     },
     setSettingsRev(state, value) {
         state.settingsRev = Object.assign({}, state.settingsRev, value);
