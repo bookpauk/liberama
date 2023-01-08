@@ -20,7 +20,6 @@ import StdDialog from './share/StdDialog.vue';
 import sanitizeHtml from 'sanitize-html';
 
 import miscApi from '../api/misc';
-import * as utils from '../share/utils';
 
 const componentOptions = {
     components: {
@@ -143,38 +142,6 @@ class App {
             await this.$router.isReady();
             this.redirectIfNeeded();
         })();
-    }
-
-    toggleCollapse() {
-        this.commit('uistate/setAsideBarCollapse', !this.uistate.asideBarCollapse);
-        this.$root.eventHook('resize');
-    }
-
-    get isCollapse() {
-        return this.uistate.asideBarCollapse;
-    }
-
-    get asideWidth() {
-        if (this.uistate.asideBarCollapse) {
-            return 64;
-        } else {
-            return 170;
-        }
-    }
-
-    get buttonCollapseIcon() {
-        if (this.uistate.asideBarCollapse) {
-            return 'el-icon-d-arrow-right';
-        } else {
-            return 'el-icon-d-arrow-left';
-        }
-    }
-
-    get appName() {
-        if (this.isCollapse)
-            return '<br><br>';
-        else
-            return `${this.config.name} <br>v${this.config.version}`;
     }
 
     get apiError() {
