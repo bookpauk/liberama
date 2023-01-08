@@ -1,3 +1,4 @@
+import _ from 'lodash';
 import * as utils from '../../share/utils';
 import googleFonts from './fonts/fonts.json';
 
@@ -21,6 +22,7 @@ const readerActions = {
     'copyText': 'Скопировать текст со страницы',
     'convOptions': 'Настроить конвертирование',
     'refresh': 'Принудительно обновить книгу',
+    'nightMode': 'Ночной режим',
     'clickControl': 'Управление кликом',
     'offlineMode': 'Автономный режим (без интернета)',
     'contents': 'Оглавление/закладки',
@@ -57,6 +59,7 @@ const toolButtons = [
     {name: 'contents',    show: true},
     {name: 'libs',        show: true},
     {name: 'recentBooks', show: true},
+    {name: 'nightMode',   show: true},
     {name: 'clickControl', show: true},
     {name: 'offlineMode', show: true},
 ];
@@ -80,6 +83,7 @@ const hotKeys = [
     {name: 'contents', codes: ['C']},
     {name: 'libs', codes: ['L']},
     {name: 'recentBooks', codes: ['X']},
+    {name: 'nightMode',   codes: ['Equal']},
     {name: 'clickControl', codes: ['Ctrl+B']},
     {name: 'offlineMode', codes: ['O']},
 
@@ -320,7 +324,7 @@ const state = {
     whatsNewContentHash: '',
     donationNextPopup: Date.now() + dayMs*30,
     currentProfile: '',
-    settings: Object.assign({}, settingDefaults),
+    settings: _.cloneDeep(settingDefaults),
     settingsRev: {},
     libs: false,
     libsRev: 0,
@@ -365,13 +369,29 @@ const mutations = {
         state.currentProfile = value;
     },
     setSettings(state, value) {
-        const newSettings = Object.assign({}, state.settings, value);
+        let newSettings = Object.assign({}, state.settings, value);
+
+        //при смене профиля подгружаются старые настройки, могут отсутствовать атрибуты
+        //поэтому:
+        const added = addDefaultsToSettings(newSettings);
+        if (added)
+            newSettings = added;
+
+        state.settings = newSettings;
+    },
+    nightModeToggle(state) {
         //переключение режима день-ночь
-        const prevNightMode = state.settings.nightMode;
-        if (utils.hasProp(value, 'nightMode') && prevNightMode != value.nightMode) {
-            saveColorSets(prevNightMode, newSettings);
-            restoreColorSets(newSettings.nightMode, newSettings);
+        const newSettings = Object.assign({}, state.settings);
+
+        saveColorSets(newSettings.nightMode, newSettings);
+        newSettings.nightMode = !newSettings.nightMode;
+
+        if (newSettings.nightMode && !utils.hasProp(newSettings.nightColorSets, 'textColor')) {
+            // Ночной режим активирован впервые. Цвета заданы по умолчанию.
+            newSettings.nightColorSets = {textColor: '#778a9e', backgroundColor: '#363131'};
         }
+
+        restoreColorSets(newSettings.nightMode, newSettings);
 
         state.settings = newSettings;
     },

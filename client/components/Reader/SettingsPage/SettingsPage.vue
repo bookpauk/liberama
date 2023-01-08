@@ -35,7 +35,7 @@
                 <!-- Профили --------------------------------------------------------------------->
                 <ProfilesTab v-if="selectedTab == 'profiles'" :form="form" />
                 <!-- Вид ------------------------------------------------------------------------->                    
-                <ViewTab v-if="selectedTab == 'view'" :form="form" />
+                <ViewTab v-if="selectedTab == 'view'" :form="form" @tab-event="tabEvent" />
                 <!-- Кнопки ---------------------------------------------------------------------->
                 <ToolBarTab v-if="selectedTab == 'toolbar'" :form="form" />
                 <!-- Управление ------------------------------------------------------------------>
@@ -178,6 +178,7 @@ class SettingsPage {
 
         switch (event.action) {
             case 'set-defaults': this.setDefaults(); break;
+            case 'night-mode': this.$emit('do-action', {action: 'nightMode'}); break;
         }
     }
 

@@ -8,7 +8,7 @@
         <div class="sets-item row">
             <div class="sets-label label"></div>
             <div class="col row">
-                <q-checkbox v-model="form.nightMode" size="xs" label="Ночной режим" />
+                <q-checkbox v-model="nightMode" size="xs" label="Ночной режим" @update:modelValue="nightModeToggle" />
             </div>
         </div>
 
@@ -192,6 +192,7 @@ class Mode {
 
     isFormChanged = false;
     dualDivColorFiltered = '';
+    nightMode = false;
 
     created() {
         this.formChanged();//no await
@@ -209,10 +210,16 @@ class Mode {
                 && (this.form.pageChangeAnimation == 'flip' || this.form.pageChangeAnimation == 'rightShift')
                 )
                 this.form.pageChangeAnimation = '';
+
+            this.nightMode = this.form.nightMode;
         } finally {
             await this.$nextTick();
             this.isFormChanged = false;
         }
+    }
+
+    nightModeToggle() {
+        this.$emit('tab-event', {action: 'night-mode'});
     }
 }
 

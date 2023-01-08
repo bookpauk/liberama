@@ -19,7 +19,7 @@
         <div class="q-mb-sm" />
 
         <div class="col sets-tab-panel">
-            <Mode v-if="selectedTab == 'mode'" :form="form" />
+            <Mode v-if="selectedTab == 'mode'" :form="form" @tab-event="tabEvent" />
             <Color v-if="selectedTab == 'color'" :form="form" />
             <Font v-if="selectedTab == 'font'" :form="form" />
             <Text v-if="selectedTab == 'text'" :form="form" />
@@ -61,6 +61,14 @@ class ViewTab {
     mounted() {
     }
 
+    tabEvent(event) {
+        if (!event || !event.action)
+            return;
+
+        switch (event.action) {
+            case 'night-mode': this.$emit('tab-event', {action: 'night-mode'}); break;
+        }
+    }
 }
 
 export default vueComponent(ViewTab);
