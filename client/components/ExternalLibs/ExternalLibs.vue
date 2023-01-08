@@ -494,13 +494,19 @@ class ExternalLibs {
     }
 
     get header() {
-        let result = (this.ready ? 'Сетевая библиотека' : 'Загрузка...');
+        let result = [this.ready ? 'Сетевая библиотека' : 'Загрузка...'];
         if (this.ready && this.selectedLink) {
-            let title = `${(this.libs.comment ? this.libs.comment + ' ': '') + lu.removeProtocol(this.libs.startLink)}`;
-            if (this.inpxReady && this.inpxTitle)
-                title = `${this.inpxTitle} ${lu.removeProtocol(this.inpxUrl)}`;
-            result += ` | ${title}`;
+
+            if (this.inpxReady && this.inpxTitle) {
+                result.push(this.inpxTitle);
+                result.push(lu.removeProtocol(this.inpxUrl));
+            } else {
+                result.push(this.libs.comment);
+                result.push(lu.removeProtocol(this.libs.startLink));
+            }
         }
+
+        result = result.filter(s => s).join(' | ');
         this.$root.setAppTitle(result);
         return result;
     }
