@@ -44,6 +44,25 @@ class App {
         this.uistate = this.$store.state.uistate;
         this.config = this.$store.state.config;
 
+        //dark mode
+        let darkMode = null;
+        this.$root.setDarkMode = (value) => {
+            if (darkMode !== value) {
+                const vars = ['--app-bg-color', '--app-text-color'];
+
+                let root = document.querySelector(':root');
+                let cs = getComputedStyle(root);
+
+                let mode = (value ? '-dark' : '-light');
+                for (const v of vars) {
+                    const propValue = cs.getPropertyValue(`${v}${mode}`);
+                    root.style.setProperty(v, propValue);
+                }
+
+                darkMode = value;
+            }
+        };
+
         //root route
         let cachedRoute = '';
         let cachedPath = '';
@@ -55,7 +74,7 @@ class App {
 
             }
             return cachedRoute;
-        }
+        };
 
         this.$router.beforeEach((to, from, next) => {
             //распознавание хоста, если присутствует домен 3-уровня "b.", то разрешена только определенная страница
@@ -192,22 +211,30 @@ export default vueComponent(App);
 </script>
 
 <style scoped>
-.app-name {
-    margin-left: 10px;
-    margin-top: 10px;
-    text-align: center;
-    line-height: 140%;
-    font-weight: bold;
-}
 </style>
 
 <style>
+:root {
+    /* current */
+    --app-bg-color: #fff;
+    --app-text-color: #000;
+
+    /* light */
+    --app-bg-color-light: #ebe2c9;
+    --app-text-color-light: #000;
+
+    /* dark */
+    --app-bg-color-dark: #222;
+    --app-text-color-dark: #bbb;
+}
+
 body, html, #app {    
     margin: 0;
     padding: 0;
     width: 100%;
     height: 100%;
     font: normal 12pt ReaderDefault;
+    background-color: #333;
 }
 
 .q-notifications__list--top {
