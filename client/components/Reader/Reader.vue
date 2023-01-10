@@ -142,7 +142,7 @@
             </div>
         </div>
 
-        <div class="main col row relative-position">
+        <div class="col row relative-position main" :class="{dark}">
             <keep-alive>
                 <component 
                     :is="activePage"
@@ -470,7 +470,11 @@ class Reader {
         this.allowUrlParamBookPos = settings.allowUrlParamBookPos;
         this.copyFullText = settings.copyFullText;
         this.showClickMapPage = settings.showClickMapPage;
+
+        //dark mode
         this.nightModeActive = settings.nightMode;
+        this.$q.dark.set(this.nightModeActive);
+
         this.clickControlActive = settings.clickControl;
         this.blinkCachedLoad = settings.blinkCachedLoad;
         this.showToolButton = settings.showToolButton;
@@ -826,6 +830,10 @@ class Reader {
 
     get settings() {
         return this.$store.state.reader.settings;
+    }
+
+    get dark() {
+        return this.$store.state.reader.settings.nightMode;
     }
 
     addAction(pos) {
@@ -1694,6 +1702,11 @@ export default vueComponent(Reader);
 .main {
     background-color: #EBE2C9;
     color: #000;
+}
+
+.dark {
+    background-color: #222;
+    color: #ddd;
 }
 
 .tool-button {
