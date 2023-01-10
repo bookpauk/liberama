@@ -162,7 +162,7 @@ class LoaderPage {
 
     loadBuffer(opts) {
         if (opts.buffer.length) {
-            const file = new File([opts.buffer], 'dummyName-PasteFromClipboard');
+            const file = new File([opts.buffer], `paste_from_clipboard_#${utils.randomHexString(10)}`);
             this.$emit('load-file', {file});
         }
     }
