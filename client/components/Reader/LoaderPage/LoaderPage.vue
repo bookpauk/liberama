@@ -14,7 +14,7 @@
         <div class="col-auto column justify-start items-center no-wrap overflow-hidden">
             <q-input
                 ref="input" v-model="bookUrl" class="full-width q-px-sm" style="max-width: 700px" 
-                outlined dense :bg-color="dark ? 'grey-9' : 'white'" placeholder="Ссылка на книгу или веб-страницу" @keydown="onInputKeydown"
+                outlined dense bg-color="input" placeholder="Ссылка на книгу или веб-страницу" @keydown="onInputKeydown"
             >
                 <template #append>
                     <q-btn rounded flat style="width: 40px" icon="la la-check" @click="submitUrl" />
@@ -29,13 +29,13 @@
             />
 
             <div class="q-my-sm"></div>
-            <q-btn no-caps dense class="q-px-sm" :color="dark ? 'teal-9' : 'primary'" size="13px" @click="loadFileClick">
+            <q-btn no-caps dense class="q-px-sm" size="13px" @click="loadFileClick">
                 <q-icon class="q-mr-xs" name="la la-caret-square-up" size="24px" />
                 Загрузить файл с диска
             </q-btn>
             
             <div class="q-my-sm"></div>
-            <q-btn no-caps dense class="q-px-sm" :color="dark ? 'teal-9' : 'primary'" size="13px" @click="loadBufferClick">
+            <q-btn no-caps dense class="q-px-sm" size="13px" @click="loadBufferClick">
                 <q-icon class="q-mr-xs" name="la la-comment" size="24px" />
                 Из буфера обмена
             </q-btn>
@@ -50,13 +50,13 @@
                 </div>
             </div>
             <div class="q-my-sm"></div-->
-            <span v-if="mode == 'omnireader'" class="bottom-span clickable" :class="{'clickable-dark': dark}" @click="openComments">Отзывы о читалке</span>
-            <span v-if="mode == 'omnireader'" class="bottom-span clickable" :class="{'clickable-dark': dark}" @click="openOldVersion">Старая версия</span>
+            <span v-if="mode == 'omnireader'" class="bottom-span clickable" @click="openComments">Отзывы о читалке</span>
+            <span v-if="mode == 'omnireader'" class="bottom-span clickable" @click="openOldVersion">Старая версия</span>
         </div>
 
         <div class="col column justify-end items-center no-wrap overflow-hidden">
-            <span class="bottom-span clickable" :class="{'clickable-dark': dark}" @click="openHelp">Справка</span>
-            <span class="bottom-span clickable" :class="{'clickable-dark': dark}" @click="openDonate">Помочь проекту</span>
+            <span class="bottom-span clickable" @click="openHelp">Справка</span>
+            <span class="bottom-span clickable" @click="openDonate">Помочь проекту</span>
 
             <span v-if="version == clientVersion" class="bottom-span">v{{ version }}</span>
             <span v-else class="bottom-span">Версия сервера {{ version }}, версия клиента {{ clientVersion }}, необходимо обновить страницу</span>
@@ -132,10 +132,6 @@ class LoaderPage {
 
     get clientVersion() {
         return versionHistory[0].version;
-    }
-
-    get dark() {
-        return this.$store.state.reader.settings.nightMode;
     }
 
     submitUrl() {
@@ -220,14 +216,10 @@ export default vueComponent(LoaderPage);
     line-height: 160%;
 }
 
-.clickable, .clickable-dark {
+.clickable {
     color: blue;
     text-decoration: underline;
     cursor: pointer;
-}
-
-.clickable-dark {
-    color: #aaf;
 }
 
 .bottom-span {

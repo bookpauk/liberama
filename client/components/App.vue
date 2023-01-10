@@ -48,7 +48,7 @@ class App {
         let darkMode = null;
         this.$root.setDarkMode = (value) => {
             if (darkMode !== value) {
-                const vars = ['--app-bg-color', '--app-text-color'];
+                const vars = ['--app-bg-color', '--app-text-color', '--bg-input-color'];
 
                 let root = document.querySelector(':root');
                 let cs = getComputedStyle(root);
@@ -218,14 +218,21 @@ export default vueComponent(App);
     /* current */
     --app-bg-color: #fff;
     --app-text-color: #000;
+    --bg-input-color: #fff;
 
     /* light */
     --app-bg-color-light: #ebe2c9;
     --app-text-color-light: #000;
+    --bg-input-color-light: #fff;
 
     /* dark */
     --app-bg-color-dark: #222;
     --app-text-color-dark: #bbb;
+    --bg-input-color-dark: #333;
+}
+
+.bg-input {
+    background-color: var(--bg-input-color);
 }
 
 body, html, #app {    
