@@ -2,12 +2,12 @@
     <div class="fit column">
         <q-tabs
             v-model="selectedTab"
-            active-color="black"
-            active-bg-color="white"
-            indicator-color="white"
+            active-color="app"
+            active-bg-color="app"
+            indicator-color="bg-app"
             dense
             no-caps
-            class="no-mp bg-grey-4 text-grey-7"
+            class="no-mp bg-menu-2 text-menu"
         >
             <q-tab name="mode" label="Режим" />
             <q-tab name="color" label="Цвет" />
@@ -19,7 +19,7 @@
         <div class="q-mb-sm" />
 
         <div class="col sets-tab-panel">
-            <Mode v-if="selectedTab == 'mode'" :form="form" />
+            <Mode v-if="selectedTab == 'mode'" :form="form" @tab-event="tabEvent" />
             <Color v-if="selectedTab == 'color'" :form="form" />
             <Font v-if="selectedTab == 'font'" :form="form" />
             <Text v-if="selectedTab == 'text'" :form="form" />
@@ -61,6 +61,14 @@ class ViewTab {
     mounted() {
     }
 
+    tabEvent(event) {
+        if (!event || !event.action)
+            return;
+
+        switch (event.action) {
+            case 'night-mode': this.$emit('tab-event', {action: 'night-mode'}); break;
+        }
+    }
 }
 
 export default vueComponent(ViewTab);

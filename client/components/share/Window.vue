@@ -148,14 +148,14 @@ export default vueComponent(Window);
 
 .window {
     margin: 10px;
-    background-color: #ffffff;
-    border: 3px double black;
+    background-color: var(--bg-app-color);
+    border: 3px double var(--text-app-color);
     border-radius: 4px;
     box-shadow: 3px 3px 5px black;
 }
 
 .header {
-    background: linear-gradient(to bottom right, #007000, #59B04F);
+    background: linear-gradient(to bottom right, var(--bg-header-color1), var(--bg-header-color2));
     align-items: center;
     height: 30px;
 }

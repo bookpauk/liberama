@@ -71,7 +71,7 @@
                     Качество
                 </div>
                 <div class="col row">
-                    <NumInput v-model="form.pdfQuality" class="col-5" :min="10" :max="100">
+                    <NumInput v-model="form.pdfQuality" bg-color="input" class="col-5" :min="10" :max="100">
                         <q-tooltip :delay="1000" anchor="top middle" self="bottom middle" content-style="font-size: 80%">
                             Качество конвертирования Pdf в Fb2. Чем значение выше, тем больше<br>
                             размер итогового файла. Если сервер отказывается конвертировать<br>
@@ -93,7 +93,7 @@
                     Качество
                 </div>
                 <div class="col row">
-                    <NumInput v-model="form.djvuQuality" class="col-5" :min="10" :max="100">
+                    <NumInput v-model="form.djvuQuality" bg-color="input" class="col-5" :min="10" :max="100">
                         <q-tooltip :delay="1000" anchor="top middle" self="bottom middle" content-style="font-size: 80%">
                             Качество конвертирования Djvu в Fb2. Чем значение выше, тем больше<br>
                             размер итогового файла. Если сервер отказывается конвертировать<br>

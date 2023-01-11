@@ -14,7 +14,7 @@
         <div class="col-auto column justify-start items-center no-wrap overflow-hidden">
             <q-input
                 ref="input" v-model="bookUrl" class="full-width q-px-sm" style="max-width: 700px" 
-                outlined dense bg-color="white" placeholder="Ссылка на книгу или веб-страницу" @keydown="onInputKeydown"
+                outlined dense bg-color="input" placeholder="Ссылка на книгу или веб-страницу" @keydown="onInputKeydown"
             >
                 <template #append>
                     <q-btn rounded flat style="width: 40px" icon="la la-check" @click="submitUrl" />
@@ -29,13 +29,13 @@
             />
 
             <div class="q-my-sm"></div>
-            <q-btn no-caps dense class="q-px-sm" color="primary" size="13px" @click="loadFileClick">
+            <q-btn no-caps dense class="q-px-sm" color="btn1" size="13px" @click="loadFileClick">
                 <q-icon class="q-mr-xs" name="la la-caret-square-up" size="24px" />
                 Загрузить файл с диска
             </q-btn>
             
             <div class="q-my-sm"></div>
-            <q-btn no-caps dense class="q-px-sm" color="primary" size="13px" @click="loadBufferClick">
+            <q-btn no-caps dense class="q-px-sm" color="btn1" size="13px" @click="loadBufferClick">
                 <q-icon class="q-mr-xs" name="la la-comment" size="24px" />
                 Из буфера обмена
             </q-btn>
@@ -158,7 +158,7 @@ class LoaderPage {
 
     loadBuffer(opts) {
         if (opts.buffer.length) {
-            const file = new File([opts.buffer], 'dummyName-PasteFromClipboard');
+            const file = new File([opts.buffer], `paste_from_clipboard_#${utils.randomHexString(10)}`);
             this.$emit('load-file', {file});
         }
     }
@@ -217,7 +217,7 @@ export default vueComponent(LoaderPage);
 }
 
 .clickable {
-    color: blue;
+    color: var(--text-anchor-color);
     text-decoration: underline;
     cursor: pointer;
 }

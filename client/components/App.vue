@@ -20,7 +20,6 @@ import StdDialog from './share/StdDialog.vue';
 import sanitizeHtml from 'sanitize-html';
 
 import miscApi from '../api/misc';
-import * as utils from '../share/utils';
 
 const componentOptions = {
     components: {
@@ -31,7 +30,10 @@ const componentOptions = {
         mode: function() {
             this.setAppTitle();
             this.redirectIfNeeded();
-        }
+        },
+        nightMode() {
+            this.setNightMode();
+        },
     },
 
 };
@@ -45,6 +47,34 @@ class App {
         this.uistate = this.$store.state.uistate;
         this.config = this.$store.state.config;
 
+        //dark mode
+        let darkMode = null;
+        this.$root.setDarkMode = (value) => {
+            if (darkMode !== value) {
+                const vars = [
+                    '--bg-app-color', '--text-app-color', '--bg-dialog-color', '--text-anchor-color',
+                    '--bg-loader-color', '--bg-input-color', '--bg-btn-color1', '--bg-btn-color2',
+                    '--bg-header-color1', '--bg-header-color2', '--bg-header-color3',
+                    '--bg-menu-color1', '--bg-menu-color2', '--text-menu-color', '--text-ubtn-color',
+                    '--text-tb-normal', '--bg-tb-normal', '--bg-tb-hover',
+                    '--text-tb-active', '--bg-tb-active', '--bg-tb-active-hover',
+                    '--text-tb-disabled', '--bg-tb-disabled',
+                    '--bg-selected-item-color1', '--bg-selected-item-color2',
+                ];
+
+                let root = document.querySelector(':root');
+                let cs = getComputedStyle(root);
+
+                let mode = (value ? '-dark' : '-light');
+                for (const v of vars) {
+                    const propValue = cs.getPropertyValue(`${v}${mode}`);
+                    root.style.setProperty(v, propValue);
+                }
+
+                darkMode = value;
+            }
+        };
+
         //root route
         let cachedRoute = '';
         let cachedPath = '';
@@ -56,7 +86,7 @@ class App {
 
             }
             return cachedRoute;
-        }
+        };
 
         this.$router.beforeEach((to, from, next) => {
             //распознавание хоста, если присутствует домен 3-уровня "b.", то разрешена только определенная страница
@@ -112,6 +142,8 @@ class App {
         window.addEventListener('resize', (event) => {
             this.$root.eventHook('resize', event);
         });
+
+        this.setNightMode();
     }
 
     mounted() {
@@ -145,44 +177,21 @@ class App {
         })();
     }
 
-    toggleCollapse() {
-        this.commit('uistate/setAsideBarCollapse', !this.uistate.asideBarCollapse);
-        this.$root.eventHook('resize');
-    }
-
-    get isCollapse() {
-        return this.uistate.asideBarCollapse;
-    }
-
-    get asideWidth() {
-        if (this.uistate.asideBarCollapse) {
-            return 64;
-        } else {
-            return 170;
-        }
-    }
-
-    get buttonCollapseIcon() {
-        if (this.uistate.asideBarCollapse) {
-            return 'el-icon-d-arrow-right';
-        } else {
-            return 'el-icon-d-arrow-left';
-        }
-    }
-
-    get appName() {
-        if (this.isCollapse)
-            return '<br><br>';
-        else
-            return `${this.config.name} <br>v${this.config.version}`;
-    }
-
     get apiError() {
         return this.state.apiError;
     }
 
     get rootRoute() {
         return this.$root.getRootRoute();
+    }
+
+    get nightMode() {
+        return this.$store.state.reader.settings.nightMode;
+    }
+
+    setNightMode() {
+        this.$root.setDarkMode(this.nightMode);
+        this.$q.dark.set(this.nightMode);
     }
 
     setAppTitle(title) {
@@ -207,26 +216,15 @@ class App {
         return this.$store.state.config.mode;
     }
 
-    get isReaderActive() {
-        return (this.rootRoute == '/reader' || this.rootRoute == '/external-libs');
-    }
-
     redirectIfNeeded() {
-        if ((this.mode == 'reader' || this.mode == 'omnireader' || this.mode == 'liberama')) {
-            const search = window.location.search.substr(1);
+        const search = window.location.search.substr(1);
 
-            //распознавание параметра url вида "?url=<link>" и редирект при необходимости
-            if (!this.isReaderActive) {
-                const s = search.split('url=');
-                const url = s[1] || '';
-                const q = utils.parseQuery(s[0] || '');
-                if (url) {
-                    q.url = url;
-                }
-
-                window.history.replaceState({}, '', '/');
-                this.$router.replace({ path: '/reader', query: q });
-            }
+        //распознавание параметра url вида "?url=<link>" и редирект при необходимости
+        const s = search.split('url=');
+        const url = s[1] || '';
+        if (url) {
+            window.history.replaceState({}, '', '/');
+            this.$router.replace({ path: '/reader', query: {url} });
         }
     }
 }
@@ -236,22 +234,151 @@ export default vueComponent(App);
 </script>
 
 <style scoped>
-.app-name {
-    margin-left: 10px;
-    margin-top: 10px;
-    text-align: center;
-    line-height: 140%;
-    font-weight: bold;
-}
 </style>
 
 <style>
+/* color schemes */
+:root {
+    /* current */
+    --bg-app-color: #fff;
+    --text-app-color: #000;
+    --bg-dialog-color: #fff;
+    --text-anchor-color: #00f;
+    --bg-loader-color: #ebe2c9;
+    --bg-input-color: #eee;
+    --bg-btn-color1: #1976d2;
+    --bg-btn-color2: #eee;
+    --bg-header-color1: #007000;
+    --bg-header-color2: #59b04f;
+    --bg-header-color3: #bbdefb;
+    --bg-menu-color1: #eee;
+    --bg-menu-color2: #e0e0e0;
+    --text-menu-color: #757575;
+    --text-ubtn-color: #bbb;
+
+    --text-tb-normal: #3e843e;
+    --bg-tb-normal: #e6edf4;
+    --bg-tb-hover: #fff;
+    --text-tb-active: #fff;
+    --bg-tb-active: #8ab45f;
+    --bg-tb-active-hover: #81c581;
+    --text-tb-disabled: #d3d3d3;
+    --bg-tb-disabled: #808080;
+
+    --bg-selected-item-color1: #b0f0b0;
+    --bg-selected-item-color2: #d0f5d0;
+
+    /* light */
+    --bg-app-color-light: #fff;
+    --text-app-color-light: #000;
+    --bg-dialog-color-light: #fff;
+    --text-anchor-color-light: #00f;
+    --bg-loader-color-light: #ebe2c9;
+    --bg-input-color-light: #eee;
+    --bg-btn-color1-light: #1976d2;
+    --bg-btn-color2-light: #eee;
+    --bg-header-color1-light: #007000;
+    --bg-header-color2-light: #59b04f;
+    --bg-header-color3-light: #bbdefb;
+    --bg-menu-color1-light: #eee;
+    --bg-menu-color2-light: #e0e0e0;
+    --text-menu-color-light: #757575;
+    --text-ubtn-color-light: #bbb;
+
+    --text-tb-normal-light: #3e843e;
+    --bg-tb-normal-light: #e6edf4;
+    --bg-tb-hover-light: #fff;
+    --text-tb-active-light: #fff;
+    --bg-tb-active-light: #8ab45f;
+    --bg-tb-active-hover-light: #81c581;
+    --text-tb-disabled-light: #d3d3d3;
+    --bg-tb-disabled-light: #808080;
+
+    --bg-selected-item-color1-light: #b0f0b0;
+    --bg-selected-item-color2-light: #d0f5d0;
+
+    /* dark */
+    --bg-app-color-dark: #222;
+    --text-app-color-dark: #ccc;
+    --bg-dialog-color-dark: #444;
+    --text-anchor-color-dark: #09f;
+    --bg-loader-color-dark: #222;
+    --bg-input-color-dark: #333;
+    --bg-btn-color1-dark: #00695c;
+    --bg-btn-color2-dark: #333;
+    --bg-header-color1-dark: #004000;
+    --bg-header-color2-dark: #29901f;
+    --bg-header-color3-dark: #335673;
+    --bg-menu-color1-dark: #333;
+    --bg-menu-color2-dark: #424242;
+    --text-menu-color-dark: #858585;
+    --text-ubtn-color-dark: #555;
+    
+    --text-tb-normal-dark: #3e843e;
+    --bg-tb-normal-dark: #ddd;
+    --bg-tb-hover-dark: #ccc;
+    --text-tb-active-dark: #ddd;
+    --bg-tb-active-dark: #7aa44f;
+    --bg-tb-active-hover-dark: #71b571;
+    --text-tb-disabled-dark: #d3d3d3;
+    --bg-tb-disabled-dark: #808080;
+
+    --bg-selected-item-color1-dark: #605020;
+    --bg-selected-item-color2-dark: #403010;
+}
+
+a {
+    color: var(--text-anchor-color);
+}
+
+.bg-app, .text-bg-app {
+    background-color: var(--bg-app-color);
+}
+
+.text-app {
+    color: var(--text-app-color);
+}
+
+.bg-dialog {
+    background-color: var(--bg-dialog-color);
+}
+
+.bg-input {
+    background-color: var(--bg-input-color);
+}
+
+.bg-btn1 {
+    background-color: var(--bg-btn-color1);
+}
+
+.bg-btn2 {
+    background-color: var(--bg-btn-color2);
+}
+
+.bg-menu-1 {
+    background-color: var(--bg-menu-color1);
+}
+
+.bg-menu-2 {
+    background-color: var(--bg-menu-color2);
+}
+
+.text-menu {
+    color: var(--text-menu-color);
+}
+
+.bg-header-3 {
+    background-color: var(--bg-header-color3);
+}
+
+/* main section */
 body, html, #app {    
     margin: 0;
     padding: 0;
     width: 100%;
     height: 100%;
     font: normal 12pt ReaderDefault;
+    background-color: #333;
 }
 
 .q-notifications__list--top {

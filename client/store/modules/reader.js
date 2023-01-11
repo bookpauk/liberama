@@ -1,3 +1,4 @@
+import _ from 'lodash';
 import * as utils from '../../share/utils';
 import googleFonts from './fonts/fonts.json';
 
@@ -21,6 +22,7 @@ const readerActions = {
     'copyText': 'Скопировать текст со страницы',
     'convOptions': 'Настроить конвертирование',
     'refresh': 'Принудительно обновить книгу',
+    'nightMode': 'Ночной режим',
     'clickControl': 'Управление кликом',
     'offlineMode': 'Автономный режим (без интернета)',
     'contents': 'Оглавление/закладки',
@@ -57,6 +59,7 @@ const toolButtons = [
     {name: 'contents',    show: true},
     {name: 'libs',        show: true},
     {name: 'recentBooks', show: true},
+    {name: 'nightMode',   show: true},
     {name: 'clickControl', show: true},
     {name: 'offlineMode', show: true},
 ];
@@ -80,6 +83,7 @@ const hotKeys = [
     {name: 'contents', codes: ['C']},
     {name: 'libs', codes: ['L']},
     {name: 'recentBooks', codes: ['X']},
+    {name: 'nightMode',   codes: ['Equal']},
     {name: 'clickControl', codes: ['Ctrl+B']},
     {name: 'offlineMode', codes: ['O']},
 
@@ -157,6 +161,10 @@ const settingDefaults = {
     statusBarColorAlpha: 0.4,
     statusBarClickOpen: true,
 
+    nightMode: false, //ночной режим
+    dayColorSets: {},
+    nightColorSets: {},
+
     scrollingDelay: 3000,// замедление, ms
     scrollingType: 'ease-in-out', //linear, ease, ease-in, ease-out, ease-in-out
 
@@ -164,7 +172,6 @@ const settingDefaults = {
     pageChangeAnimationSpeed: 80, //0-100%
 
     allowUrlParamBookPos: false,
-    lazyParseEnabled: false,
     copyFullText: false,
     showClickMapPage: true,
     clickControl: true,
@@ -218,6 +225,8 @@ const diffExclude = [];
 for (const hotKey of hotKeys)
     diffExclude.push(`userHotKeys/${hotKey.name}`);
 diffExclude.push('userWallpapers');
+diffExclude.push('dayColorSets');
+diffExclude.push('nightColorSets');
 
 function addDefaultsToSettings(settings) {
     const diff = utils.getObjDiff(settings, settingDefaults, {exclude: diffExclude});
@@ -226,6 +235,33 @@ function addDefaultsToSettings(settings) {
     }
 
     return false;
+}
+
+const colorSetsList = [
+    'textColor',
+    'backgroundColor',
+    'wallpaper',
+    'statusBarColorAsText',
+    'statusBarColor',
+    'statusBarColorAlpha',
+    'dualDivColorAsText',
+    'dualDivColor',
+    'dualDivColorAlpha',
+];
+
+function saveColorSets(nightMode, settings) {
+    const target = (nightMode ? settings.nightColorSets : settings.dayColorSets);
+    for (const prop of colorSetsList) {
+        target[prop] = settings[prop];
+    }
+}
+
+function restoreColorSets(nightMode, settings) {
+    const source = (nightMode ? settings.nightColorSets : settings.dayColorSets);
+    for (const prop of colorSetsList) {
+        if (utils.hasProp(source, prop))
+            settings[prop] = source[prop];
+    }
 }
 
 function getLibsDefaults(mode = 'reader') {
@@ -287,7 +323,7 @@ const state = {
     whatsNewContentHash: '',
     donationNextPopup: Date.now() + dayMs*30,
     currentProfile: '',
-    settings: Object.assign({}, settingDefaults),
+    settings: _.cloneDeep(settingDefaults),
     settingsRev: {},
     libs: false,
     libsRev: 0,
@@ -332,13 +368,31 @@ const mutations = {
         state.currentProfile = value;
     },
     setSettings(state, value) {
-        const newSettings = Object.assign({}, state.settings, value);
+        let newSettings = Object.assign({}, state.settings, value);
+
+        //при смене профиля подгружаются старые настройки, могут отсутствовать атрибуты
+        //поэтому:
         const added = addDefaultsToSettings(newSettings);
-        if (added) {
-            state.settings = added;
-        } else {
-            state.settings = newSettings;
+        if (added)
+            newSettings = added;
+
+        state.settings = newSettings;
+    },
+    nightModeToggle(state) {
+        //переключение режима день-ночь
+        const newSettings = Object.assign({}, state.settings);
+
+        saveColorSets(newSettings.nightMode, newSettings);
+        newSettings.nightMode = !newSettings.nightMode;
+
+        if (newSettings.nightMode && !utils.hasProp(newSettings.nightColorSets, 'textColor')) {
+            // Ночной режим активирован впервые. Цвета заданы по умолчанию.
+            newSettings.nightColorSets = {textColor: '#778a9e', backgroundColor: '#363131'};
         }
+
+        restoreColorSets(newSettings.nightMode, newSettings);
+
+        state.settings = newSettings;
     },
     setSettingsRev(state, value) {
         state.settingsRev = Object.assign({}, state.settingsRev, value);

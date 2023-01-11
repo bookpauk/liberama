@@ -8,9 +8,11 @@
             </span>
         </template>
 
-        <q-input v-model="bookTitle" class="q-px-sm" dense borderless placeholder="Введите название текста" />
-        <hr />
-        <textarea ref="textArea" class="text" @paste="calcTitle"></textarea>
+        <div class="fit column main">
+            <q-input v-model="bookTitle" class="q-px-sm" dense borderless placeholder="Введите название текста" />
+            <hr />
+            <textarea ref="textArea" class="main text" @paste="calcTitle"></textarea>
+        </div>
     </Window>
 </template>
 
@@ -37,6 +39,10 @@ class PasteTextPage {
 
     mounted() {
         this.$refs.textArea.focus();
+    }
+
+    get dark() {
+        return this.$store.state.reader.settings.nightMode;
     }
 
     getNonEmptyLine3words(text, count) {
@@ -113,6 +119,11 @@ export default vueComponent(PasteTextPage);
 
 .text:focus {
     outline: none;
+}
+
+.main {
+    color: var(--text-app-color);
+    background-color: var(--bg-app-color);
 }
 
 hr {

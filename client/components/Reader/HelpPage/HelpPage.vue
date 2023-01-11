@@ -1,20 +1,20 @@
 <template>
-    <Window @close="close" style="z-index: 200">
+    <Window style="z-index: 200" @close="close">
         <template #header>
             Справка
         </template>
 
         <div class="col column" style="min-width: 600px">
-            <div class="bg-grey-3 row">
+            <div class="bg-menu-1 row">
                 <q-tabs
                     v-model="selectedTab"
-                    active-color="black"
-                    active-bg-color="white"
-                    indicator-color="white"
+                    active-color="app"
+                    active-bg-color="app"
+                    indicator-color="bg-app"
                     dense
                     no-caps
                     inline-label
-                    class="bg-grey-4 text-grey-7"
+                    class="bg-menu-2 text-menu"
                 >
                     <q-tab v-for="btn in buttons" :key="btn.value" :name="btn.value" :label="btn.label" />
                 </q-tabs>

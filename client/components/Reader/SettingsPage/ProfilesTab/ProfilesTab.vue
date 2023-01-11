@@ -30,6 +30,7 @@
                     <q-select
                         v-model="currentProfile" :options="currentProfileOptions"
                         style="width: 275px"
+                        bg-color="input"
                         dropdown-icon="la la-angle-down la-sm"
                         outlined dense emit-value map-options display-value-sanitize options-sanitize
                     />
@@ -37,13 +38,13 @@
             </div>
             <div class="sets-item row">
                 <div class="sets-label label"></div>
-                <q-btn class="sets-button" dense no-caps @click="addProfile">
+                <q-btn class="sets-button" color="btn2" text-color="app" dense no-caps @click="addProfile">
                     Добавить
                 </q-btn>
-                <q-btn class="sets-button" dense no-caps @click="delProfile">
+                <q-btn class="sets-button" color="btn2" text-color="app" dense no-caps @click="delProfile">
                     Удалить
                 </q-btn>
-                <q-btn class="sets-button" dense no-caps @click="delAllProfiles">
+                <q-btn class="sets-button" color="btn2" text-color="app" dense no-caps @click="delAllProfiles">
                     Удалить все
                 </q-btn>
             </div>
@@ -63,7 +64,7 @@
 
             <div class="sets-item row">
                 <div class="sets-label label"></div>
-                <q-btn class="sets-button" style="width: 250px" dense no-caps @click="showServerStorageKey">
+                <q-btn class="sets-button" color="btn2" text-color="app" style="width: 250px" dense no-caps @click="showServerStorageKey">
                     <span v-show="serverStorageKeyVisible">Скрыть</span>
                     <span v-show="!serverStorageKeyVisible">Показать</span>
                     &nbsp;ключ доступа
@@ -104,13 +105,13 @@
 
             <div class="sets-item row">
                 <div class="sets-label label"></div>
-                <q-btn class="sets-button" style="width: 250px" dense no-caps @click="enterServerStorageKey">
+                <q-btn class="sets-button" color="btn2" text-color="app" style="width: 250px" dense no-caps @click="enterServerStorageKey">
                     Ввести ключ доступа
                 </q-btn>
             </div>
             <div class="sets-item row">
                 <div class="sets-label label"></div>
-                <q-btn class="sets-button" style="width: 250px" dense no-caps @click="generateServerStorageKey">
+                <q-btn class="sets-button" color="btn2" text-color="app" style="width: 250px" dense no-caps @click="generateServerStorageKey">
                     Сгенерировать новый ключ
                 </q-btn>
             </div>
@@ -357,6 +358,6 @@ export default vueComponent(ProfilesTab);
     margin-left: 5px;
     cursor: pointer;
     font-size: 120%;
-    color: blue;
+    color: var(--text-anchor-color);
 }
 </style>
