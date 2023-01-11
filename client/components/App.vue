@@ -315,8 +315,8 @@ export default vueComponent(App);
     --text-ubtn-color-dark: #555;
     
     --text-tb-normal-dark: #3e843e;
-    --bg-tb-normal-dark: #c6cde4;
-    --bg-tb-hover-dark: #ddd;
+    --bg-tb-normal-dark: #ddd;
+    --bg-tb-hover-dark: #ccc;
     --text-tb-active-dark: #ddd;
     --bg-tb-active-dark: #7aa44f;
     --bg-tb-active-hover-dark: #71b571;
