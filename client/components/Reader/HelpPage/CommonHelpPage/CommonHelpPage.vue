@@ -88,6 +88,6 @@ export default vueComponent(CommonHelpPage);
     margin-left: 10px;
     cursor: pointer;
     font-size: 120%;
-    color: blue;
+    color: var(--text-anchor-color);
 }
 </style>

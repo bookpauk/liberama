@@ -50,8 +50,9 @@ class App {
             if (darkMode !== value) {
                 const vars = [
                     '--bg-app-color', '--text-app-color', '--text-anchor-color',
-                    '--bg-loader-color', '--bg-input-color', '--bg-btn1-color',
-                    '--bg-header1-color', '--bg-header2-color',
+                    '--bg-loader-color', '--bg-input-color', '--bg-btn-color1',
+                    '--bg-header-color1', '--bg-header-color2', '--bg-header-color3',
+                    '--bg-menu-color1', '--bg-menu-color2', '--text-menu-color',
                 ];
 
                 let root = document.querySelector(':root');
@@ -226,9 +227,13 @@ export default vueComponent(App);
     --text-anchor-color: #00f;
     --bg-loader-color: #ebe2c9;
     --bg-input-color: #fff;
-    --bg-btn1-color: #1976d2;/* primary */
-    --bg-header1-color: #007000;
-    --bg-header2-color: #59B04F;
+    --bg-btn-color1: #1976d2;/* primary */
+    --bg-header-color1: #007000;
+    --bg-header-color2: #59b04f;
+    --bg-header-color3: #bbdefb;
+    --bg-menu-color1: #eee;
+    --bg-menu-color2: #e0e0e0;
+    --text-menu-color: #757575;
 
     /* light */
     --bg-app-color-light: #fff;
@@ -236,9 +241,13 @@ export default vueComponent(App);
     --text-anchor-color-light: #00f;
     --bg-loader-color-light: #ebe2c9;
     --bg-input-color-light: #fff;
-    --bg-btn1-color-light: #1976d2;/* primary */
-    --bg-header1-color-light: #007000;
-    --bg-header2-color-light: #59B04F;
+    --bg-btn-color1-light: #1976d2;/* primary */
+    --bg-header-color1-light: #007000;
+    --bg-header-color2-light: #59b04f;
+    --bg-header-color3-light: #bbdefb;
+    --bg-menu-color1-light: #eee;
+    --bg-menu-color2-light: #e0e0e0;
+    --text-menu-color-light: #757575;
 
     /* dark */
     --bg-app-color-dark: #222;
@@ -246,9 +255,13 @@ export default vueComponent(App);
     --text-anchor-color-dark: #09f;
     --bg-loader-color-dark: #222;
     --bg-input-color-dark: #333;
-    --bg-btn1-color-dark: #00695c;/* teal-9 */
-    --bg-header1-color-dark: #004000;
-    --bg-header2-color-dark: #29901F;
+    --bg-btn-color1-dark: #00695c;/* teal-9 */
+    --bg-header-color1-dark: #004000;
+    --bg-header-color2-dark: #29901f;
+    --bg-header-color3-dark: #335673;
+    --bg-menu-color1-dark: #333;
+    --bg-menu-color2-dark: #424242;
+    --text-menu-color-dark: #858585;
     
 }
 
@@ -256,12 +269,36 @@ a {
     color: var(--text-anchor-color);
 }
 
+.bg-app, .text-bg-app {
+    background-color: var(--bg-app-color);
+}
+
+.text-app {
+    color: var(--text-app-color);
+}
+
 .bg-input {
     background-color: var(--bg-input-color);
 }
 
 .bg-btn1 {
-    background-color: var(--bg-btn1-color);
+    background-color: var(--bg-btn-color1);
+}
+
+.bg-menu-1 {
+    background-color: var(--bg-menu-color1);
+}
+
+.bg-menu-2 {
+    background-color: var(--bg-menu-color2);
+}
+
+.text-menu {
+    color: var(--text-menu-color);
+}
+
+.bg-header-3 {
+    background-color: var(--bg-header-color3);
 }
 
 /* main section */

@@ -2,10 +2,10 @@
     <div class="table col column no-wrap">
         <!-- header -->
         <div class="table-row row">
-            <div class="desc q-pa-sm bg-blue-2">
+            <div class="desc q-pa-sm bg-header-3">
                 Команда
             </div>
-            <div class="hotKeys col q-pa-sm bg-blue-2 row no-wrap">
+            <div class="hotKeys col q-pa-sm bg-header-3 row no-wrap">
                 <div style="width: 80px">
                     Сочетание клавиш
                 </div>
@@ -14,7 +14,7 @@
                     v-model="search"
                     class="q-ml-sm col"
                     outlined dense
-                    bg-color="grey-4"
+                    bg-color="input"
                     placeholder="Найти"                    
                     @click.stop
                 />
@@ -234,11 +234,11 @@ export default vueComponent(UserHotKeys);
 }
 
 .table-row:nth-child(even) {
-    background-color: #f7f7f7;
+    background-color: var(--bg-menu-color1);
 }
 
 .table-row:hover {
-    background-color: #f0f0f0;
+    background-color: var(--bg-menu-color2);
 }
 
 .desc {

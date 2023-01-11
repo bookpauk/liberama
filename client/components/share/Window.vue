@@ -155,7 +155,7 @@ export default vueComponent(Window);
 }
 
 .header {
-    background: linear-gradient(to bottom right, var(--bg-header1-color), var(--bg-header2-color));
+    background: linear-gradient(to bottom right, var(--bg-header-color1), var(--bg-header-color2));
     align-items: center;
     height: 30px;
 }
