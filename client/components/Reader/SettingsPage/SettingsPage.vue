@@ -9,14 +9,14 @@
                 <q-tabs
                     ref="tabs"
                     v-model="selectedTab"
-                    class="bg-grey-3 text-grey-9"
+                    class="bg-menu-1 text-menu"
                     style="max-width: 130px"
                     
                     left-icon="la la-caret-up"
                     right-icon="la la-caret-down"
                     active-color="white"
                     active-bg-color="primary"
-                    indicator-color="black"
+                    indicator-color="bg-app"
                     vertical
                     no-caps
                     stretch

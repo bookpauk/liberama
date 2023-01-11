@@ -2,12 +2,12 @@
     <div class="fit column">
         <q-tabs
             v-model="selectedTab"
-            active-color="black"
-            active-bg-color="white"
-            indicator-color="white"
+            active-color="app"
+            active-bg-color="app"
+            indicator-color="bg-app"
             dense
             no-caps
-            class="no-mp bg-grey-4 text-grey-7"
+            class="no-mp bg-menu-2 text-menu"
         >
             <q-tab name="mode" label="Режим" />
             <q-tab name="color" label="Цвет" />

@@ -1,14 +1,14 @@
 <template>
     <div class="fit column">
-        <div class="bg-grey-3 row">
+        <div class="bg-menu-1 row">
             <q-tabs
                 v-model="selectedTab"
-                active-color="black"
-                active-bg-color="white"
-                indicator-color="white"
+                active-color="app"
+                active-bg-color="app"
+                indicator-color="bg-app"
                 dense
                 no-caps
-                class="bg-grey-4 text-grey-7"
+                class="bg-menu-2 text-menu"
             >
                 <q-tab name="mouse" label="Мышь/тачскрин" />
                 <q-tab name="keyboard" label="Клавиатура" />
