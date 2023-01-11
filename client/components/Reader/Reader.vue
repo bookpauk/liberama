@@ -473,8 +473,6 @@ class Reader {
 
         //dark mode
         this.nightModeActive = settings.nightMode;
-        this.$root.setDarkMode(this.nightModeActive);
-        this.$q.dark.set(this.nightModeActive);
 
         this.clickControlActive = settings.clickControl;
         this.blinkCachedLoad = settings.blinkCachedLoad;

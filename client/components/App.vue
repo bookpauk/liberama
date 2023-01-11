@@ -30,7 +30,10 @@ const componentOptions = {
         mode: function() {
             this.setAppTitle();
             this.redirectIfNeeded();
-        }
+        },
+        nightMode() {
+            this.setNightMode();
+        },
     },
 
 };
@@ -138,6 +141,8 @@ class App {
         window.addEventListener('resize', (event) => {
             this.$root.eventHook('resize', event);
         });
+
+        this.setNightMode();
     }
 
     mounted() {
@@ -177,6 +182,15 @@ class App {
 
     get rootRoute() {
         return this.$root.getRootRoute();
+    }
+
+    get nightMode() {
+        return this.$store.state.reader.settings.nightMode;
+    }
+
+    setNightMode() {
+        this.$root.setDarkMode(this.nightMode);
+        this.$q.dark.set(this.nightMode);
     }
 
     setAppTitle(title) {
@@ -229,7 +243,7 @@ export default vueComponent(App);
     --text-app-color: #000;
     --text-anchor-color: #00f;
     --bg-loader-color: #ebe2c9;
-    --bg-input-color: #fff;
+    --bg-input-color: #eee;
     --bg-btn-color1: #1976d2;/* primary */
     --bg-header-color1: #007000;
     --bg-header-color2: #59b04f;
@@ -252,7 +266,7 @@ export default vueComponent(App);
     --text-app-color-light: #000;
     --text-anchor-color-light: #00f;
     --bg-loader-color-light: #ebe2c9;
-    --bg-input-color-light: #fff;
+    --bg-input-color-light: #eee;
     --bg-btn-color1-light: #1976d2;/* primary */
     --bg-header-color1-light: #007000;
     --bg-header-color2-light: #59b04f;
