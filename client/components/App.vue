@@ -53,7 +53,7 @@ class App {
             if (darkMode !== value) {
                 const vars = [
                     '--bg-app-color', '--text-app-color', '--text-anchor-color',
-                    '--bg-loader-color', '--bg-input-color', '--bg-btn-color1',
+                    '--bg-loader-color', '--bg-input-color', '--bg-btn-color1', '--bg-btn-color2',
                     '--bg-header-color1', '--bg-header-color2', '--bg-header-color3',
                     '--bg-menu-color1', '--bg-menu-color2', '--text-menu-color',
                     '--text-tb-normal', '--bg-tb-normal', '--bg-tb-hover',
@@ -245,7 +245,8 @@ export default vueComponent(App);
     --text-anchor-color: #00f;
     --bg-loader-color: #ebe2c9;
     --bg-input-color: #eee;
-    --bg-btn-color1: #1976d2;/* primary */
+    --bg-btn-color1: #1976d2;
+    --bg-btn-color2: #eee;
     --bg-header-color1: #007000;
     --bg-header-color2: #59b04f;
     --bg-header-color3: #bbdefb;
@@ -271,7 +272,8 @@ export default vueComponent(App);
     --text-anchor-color-light: #00f;
     --bg-loader-color-light: #ebe2c9;
     --bg-input-color-light: #eee;
-    --bg-btn-color1-light: #1976d2;/* primary */
+    --bg-btn-color1-light: #1976d2;
+    --bg-btn-color2-light: #eee;
     --bg-header-color1-light: #007000;
     --bg-header-color2-light: #59b04f;
     --bg-header-color3-light: #bbdefb;
@@ -297,7 +299,8 @@ export default vueComponent(App);
     --text-anchor-color-dark: #09f;
     --bg-loader-color-dark: #222;
     --bg-input-color-dark: #333;
-    --bg-btn-color1-dark: #00695c;/* teal-9 */
+    --bg-btn-color1-dark: #00695c;
+    --bg-btn-color2-dark: #333;
     --bg-header-color1-dark: #004000;
     --bg-header-color2-dark: #29901f;
     --bg-header-color3-dark: #335673;
@@ -314,8 +317,8 @@ export default vueComponent(App);
     --text-tb-disabled-dark: #d3d3d3;
     --bg-tb-disabled-dark: #808080;
 
-    --bg-selected-item-color1-dark: #406040;
-    --bg-selected-item-color2-dark: #304530;
+    --bg-selected-item-color1-dark: #605020;
+    --bg-selected-item-color2-dark: #403010;
 }
 
 a {
@@ -336,6 +339,10 @@ a {
 
 .bg-btn1 {
     background-color: var(--bg-btn-color1);
+}
+
+.bg-btn2 {
+    background-color: var(--bg-btn-color2);
 }
 
 .bg-menu-1 {
