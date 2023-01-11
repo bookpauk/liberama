@@ -52,7 +52,7 @@ class App {
         this.$root.setDarkMode = (value) => {
             if (darkMode !== value) {
                 const vars = [
-                    '--bg-app-color', '--text-app-color', '--text-anchor-color',
+                    '--bg-app-color', '--text-app-color', '--bg-dialog-color', '--text-anchor-color',
                     '--bg-loader-color', '--bg-input-color', '--bg-btn-color1', '--bg-btn-color2',
                     '--bg-header-color1', '--bg-header-color2', '--bg-header-color3',
                     '--bg-menu-color1', '--bg-menu-color2', '--text-menu-color',
@@ -242,6 +242,7 @@ export default vueComponent(App);
     /* current */
     --bg-app-color: #fff;
     --text-app-color: #000;
+    --bg-dialog-color: #fff;
     --text-anchor-color: #00f;
     --bg-loader-color: #ebe2c9;
     --bg-input-color: #eee;
@@ -269,6 +270,7 @@ export default vueComponent(App);
     /* light */
     --bg-app-color-light: #fff;
     --text-app-color-light: #000;
+    --bg-dialog-color-light: #fff;
     --text-anchor-color-light: #00f;
     --bg-loader-color-light: #ebe2c9;
     --bg-input-color-light: #eee;
@@ -296,6 +298,7 @@ export default vueComponent(App);
     /* dark */
     --bg-app-color-dark: #222;
     --text-app-color-dark: #ccc;
+    --bg-dialog-color-dark: #444;
     --text-anchor-color-dark: #09f;
     --bg-loader-color-dark: #222;
     --bg-input-color-dark: #333;
@@ -331,6 +334,10 @@ a {
 
 .text-app {
     color: var(--text-app-color);
+}
+
+.bg-dialog {
+    background-color: var(--bg-dialog-color);
 }
 
 .bg-input {

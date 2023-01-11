@@ -12,14 +12,14 @@
             <span class="clickable" style="font-size: 13px" @click="openVersionHistory">Посмотреть историю версий</span>
 
             <template #footer>
-                <q-btn class="q-px-md" dense no-caps @click="whatsNewDisable">
+                <q-btn class="q-px-md" color="btn2" text-color="app" dense no-caps @click="whatsNewDisable">
                     Больше не показывать
                 </q-btn>
             </template>
         </Dialog>
 
         <q-dialog ref="dialog2" v-model="donationVisible" style="z-index: 100" no-route-dismiss no-esc-dismiss no-backdrop-dismiss>
-            <div class="column bg-white no-wrap q-pa-md">
+            <div class="column bg-dialog no-wrap q-pa-md">
                 <div class="row justify-center q-mb-md">
                     Здравствуйте, дорогие читатели!
                 </div>
@@ -84,7 +84,7 @@
 
             <div style="word-break: normal">
                 Если вы пытаетесь вставить текст в читалку из буфера обмена, пожалуйста воспользуйтесь кнопкой
-                <q-btn no-caps dense class="q-px-sm" color="primary" size="13px" @click="loadBufferClick">
+                <q-btn no-caps dense class="q-px-sm" color="btn1" size="13px" @click="loadBufferClick">
                     <q-icon class="q-mr-xs" name="la la-comment" size="24px" />
                     Из буфера обмена
                 </q-btn>
@@ -233,7 +233,7 @@ export default vueComponent(ReaderDialogs);
 
 <style scoped>
 .clickable {
-    color: blue;
+    color: var(--text-anchor-color);
     text-decoration: underline;
     cursor: pointer;
 }

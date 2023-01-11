@@ -1,6 +1,6 @@
 <template>
     <q-dialog v-model="active" no-route-dismiss @show="onShow" @hide="onHide">
-        <div class="column bg-white no-wrap">
+        <div class="column bg-dialog no-wrap">
             <div class="header row">
                 <div class="caption col row items-center q-ml-md">
                     <slot name="header"></slot>

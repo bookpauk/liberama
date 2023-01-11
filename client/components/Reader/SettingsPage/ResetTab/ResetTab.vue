@@ -1,7 +1,7 @@
 <template>
     <div class="fit sets-tab-panel">
         <div class="sets-item row">
-            <q-btn class="col q-ma-sm" dense no-caps @click="setDefaults">
+            <q-btn class="col q-ma-sm" color="btn2" text-color="app" dense no-caps @click="setDefaults">
                 Установить по умолчанию
             </q-btn>
         </div>
