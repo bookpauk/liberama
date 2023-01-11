@@ -312,6 +312,7 @@ class ExternalLibs {
     inpxUrl = '';
 
     created() {
+        this.commit = this.$store.commit;
         this.oldStartLink = '';
         this.justOpened = true;
         this.$root.addEventHook('key', this.keyHook);
@@ -404,6 +405,8 @@ class ExternalLibs {
             this.ready = true;
             if (d.data)
                 this.libs = _.cloneDeep(d.data);
+            if (d.sets)
+                this.updateSets(d.sets);
         } else if (d.type == 'notify') {
             this.$root.notify.success(d.data, '', {position: 'bottom-right'});
         }
@@ -446,6 +449,11 @@ class ExternalLibs {
             await this.$root.stdDialog.alert('Потеряна связь с читалкой. Окно будет закрыто', 'Ошибка');
             window.close();
         }
+    }
+
+    updateSets(sets) {
+        if (sets.nightMode !== this.nightMode)
+            this.commit('reader/nightModeToggle');
     }
 
     commitLibs(libs) {
@@ -494,6 +502,10 @@ class ExternalLibs {
 
     get mode() {
         return this.$store.state.config.mode;
+    }
+
+    get nightMode() {
+        return this.$store.state.reader.settings.nightMode;
     }
 
     get header() {
