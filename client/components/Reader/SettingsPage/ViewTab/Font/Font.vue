@@ -11,14 +11,14 @@
             </div>
             <div class="col row">
                 <q-select
-                    v-model="form.fontName" class="col-left" :options="fontsOptions" :disable="form.webFontName != ''"
+                    v-model="form.fontName" class="col-left" bg-color="input" :options="fontsOptions" :disable="form.webFontName != ''"
                     dropdown-icon="la la-angle-down la-sm"
                     outlined dense emit-value map-options
                 />
 
                 <div class="q-px-sm" />
                 <q-select
-                    v-model="form.webFontName" class="col" :options="webFontsOptions"
+                    v-model="form.webFontName" class="col" bg-color="input" :options="webFontsOptions"
                     dropdown-icon="la la-angle-down la-sm"
                     outlined dense emit-value map-options
                 >
@@ -36,7 +36,7 @@
                 Размер
             </div>
             <div class="col row">
-                <NumInput v-model="form.fontSize" class="col-left" :min="5" :max="200" />
+                <NumInput v-model="form.fontSize" bg-color="input" class="col-left" :min="5" :max="200" />
 
                 <div class="col q-pt-xs text-right">
                     <a href="https://fonts.google.com/?subset=cyrillic" target="_blank">Примеры</a>
@@ -49,7 +49,7 @@
                 Сдвиг
             </div>
             <div class="col row">
-                <NumInput v-model="vertShift" class="col-left" :min="-100" :max="100">
+                <NumInput v-model="vertShift" bg-color="input" class="col-left" :min="-100" :max="100">
                     <q-tooltip :delay="1000" anchor="top middle" self="bottom middle" content-style="font-size: 80%">
                         Сдвиг шрифта по вертикали в процентах от размера.<br>
                         Отрицательное значение сдвигает вверх, положительное -<br>

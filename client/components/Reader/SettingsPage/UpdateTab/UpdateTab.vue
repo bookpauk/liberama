@@ -37,7 +37,7 @@
                 Разница размеров
             </div>
             <div class="col row">
-                <NumInput v-model="form.bucSizeDiff" style="width: 200px" />
+                <NumInput v-model="form.bucSizeDiff" bg-color="input" style="width: 200px" />
 
                 <q-tooltip :delay="1000" anchor="top middle" self="bottom middle" content-style="font-size: 80%">
                     Уведомлять о наличии обновления книги в списке загруженных<br>
@@ -73,7 +73,7 @@
             <div class="sets-label label"></div>
             <div class="col-4"></div>
             <div class="col row">
-                <NumInput v-model="form.bucCancelDays" :min="1" :max="10000" />
+                <NumInput v-model="form.bucCancelDays" bg-color="input" :min="1" :max="10000" />
 
                 <q-tooltip :delay="1000" anchor="top middle" self="bottom middle" content-style="font-size: 80%">
                     Снимать флаг проверки с книги, если не было<br>

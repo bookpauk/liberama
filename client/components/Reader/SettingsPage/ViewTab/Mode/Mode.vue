@@ -27,13 +27,13 @@
                 Отступ границ
             </div>
             <div class="col row">
-                <NumInput v-model="form.indentLR" class="col-left" :min="0" :max="2000">
+                <NumInput v-model="form.indentLR" bg-color="input" class="col-left" :min="0" :max="2000">
                     <q-tooltip :delay="1000" anchor="top middle" self="bottom middle" content-style="font-size: 80%">
                         Слева/справа от края экрана
                     </q-tooltip>
                 </NumInput>
                 <div class="q-px-sm" />
-                <NumInput v-model="form.indentTB" class="col" :min="0" :max="2000">
+                <NumInput v-model="form.indentTB" bg-color="input" class="col" :min="0" :max="2000">
                     <q-tooltip :delay="1000" anchor="top middle" self="bottom middle" content-style="font-size: 80%">
                         Сверху/снизу от края экрана
                     </q-tooltip>
@@ -46,7 +46,7 @@
                 Отступ внутри
             </div>
             <div class="col row">
-                <NumInput v-model="form.dualIndentLR" class="col-left" :min="0" :max="2000">
+                <NumInput v-model="form.dualIndentLR" bg-color="input" class="col-left" :min="0" :max="2000">
                     <q-tooltip :delay="1000" anchor="top middle" self="bottom middle" content-style="font-size: 80%">
                         Слева/справа внутри страницы
                     </q-tooltip>
@@ -67,6 +67,7 @@
                     <q-input 
                         v-model="dualDivColorFiltered"
                         class="col-left no-mp"
+                        bg-color="input" 
                         outlined dense
                         :rules="['hexColor']"
                         style="max-width: 150px"
@@ -96,7 +97,7 @@
                     Прозрачность
                 </div>
                 <div class="col row">
-                    <NumInput v-model="form.dualDivColorAlpha" class="col-left" :min="0" :max="1" :digits="2" :step="0.1" />
+                    <NumInput v-model="form.dualDivColorAlpha" bg-color="input" class="col-left" :min="0" :max="1" :digits="2" :step="0.1" />
                 </div>
             </div>
 
@@ -105,7 +106,7 @@
                     Ширина (px)
                 </div>
                 <div class="col row">
-                    <NumInput v-model="form.dualDivWidth" class="col-left" :min="0" :max="100">
+                    <NumInput v-model="form.dualDivWidth" bg-color="input" class="col-left" :min="0" :max="100">
                         <q-tooltip :delay="1000" anchor="top middle" self="bottom middle" content-style="font-size: 80%">
                             Ширина разделителя
                         </q-tooltip>
@@ -118,7 +119,7 @@
                     Высота (%)
                 </div>
                 <div class="col row">
-                    <NumInput v-model="form.dualDivHeight" class="col-left" :min="0" :max="100">
+                    <NumInput v-model="form.dualDivHeight" bg-color="input" class="col-left" :min="0" :max="100">
                         <q-tooltip :delay="1000" anchor="top middle" self="bottom middle" content-style="font-size: 80%">
                             Высота разделителя
                         </q-tooltip>
@@ -131,13 +132,13 @@
                     Пунктир
                 </div>
                 <div class="col row">
-                    <NumInput v-model="form.dualDivStrokeFill" class="col-left" :min="0" :max="2000">
+                    <NumInput v-model="form.dualDivStrokeFill" bg-color="input" class="col-left" :min="0" :max="2000">
                         <q-tooltip :delay="1000" anchor="top middle" self="bottom middle" content-style="font-size: 80%">
                             Заполнение пунктира
                         </q-tooltip>
                     </NumInput>
                     <div class="q-px-sm" />
-                    <NumInput v-model="form.dualDivStrokeGap" class="col" :min="0" :max="2000">
+                    <NumInput v-model="form.dualDivStrokeGap" bg-color="input" class="col" :min="0" :max="2000">
                         <q-tooltip :delay="1000" anchor="top middle" self="bottom middle" content-style="font-size: 80%">
                             Промежуток пунктира
                         </q-tooltip>
@@ -150,7 +151,7 @@
                     Ширина тени
                 </div>
                 <div class="col row">
-                    <NumInput v-model="form.dualDivShadowWidth" class="col-left" :min="0" :max="100" />
+                    <NumInput v-model="form.dualDivShadowWidth" bg-color="input" class="col-left" :min="0" :max="100" />
                 </div>
             </div>
         </div>
