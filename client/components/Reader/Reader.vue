@@ -1697,8 +1697,8 @@ export default vueComponent(Reader);
 }
 
 .main {
-    background-color: var(--app-bg-color);
-    color: var(--app-text-color);
+    background-color: var(--bg-app-color);
+    color: var(--text-app-color);
 }
 
 .tool-button {

@@ -29,13 +29,13 @@
             />
 
             <div class="q-my-sm"></div>
-            <q-btn no-caps dense class="q-px-sm" size="13px" @click="loadFileClick">
+            <q-btn no-caps dense class="q-px-sm" color="btn1" size="13px" @click="loadFileClick">
                 <q-icon class="q-mr-xs" name="la la-caret-square-up" size="24px" />
                 Загрузить файл с диска
             </q-btn>
             
             <div class="q-my-sm"></div>
-            <q-btn no-caps dense class="q-px-sm" size="13px" @click="loadBufferClick">
+            <q-btn no-caps dense class="q-px-sm" color="btn1" size="13px" @click="loadBufferClick">
                 <q-icon class="q-mr-xs" name="la la-comment" size="24px" />
                 Из буфера обмена
             </q-btn>
@@ -217,7 +217,7 @@ export default vueComponent(LoaderPage);
 }
 
 .clickable {
-    color: blue;
+    color: var(--text-anchor-color);
     text-decoration: underline;
     cursor: pointer;
 }

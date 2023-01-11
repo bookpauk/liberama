@@ -48,7 +48,10 @@ class App {
         let darkMode = null;
         this.$root.setDarkMode = (value) => {
             if (darkMode !== value) {
-                const vars = ['--app-bg-color', '--app-text-color', '--bg-input-color'];
+                const vars = [
+                    '--bg-app-color', '--text-app-color', '--text-anchor-color',
+                    '--bg-input-color', '--bg-btn1-color'
+                ];
 
                 let root = document.querySelector(':root');
                 let cs = getComputedStyle(root);
@@ -214,27 +217,44 @@ export default vueComponent(App);
 </style>
 
 <style>
+/* color schemes */
 :root {
     /* current */
-    --app-bg-color: #fff;
-    --app-text-color: #000;
+    --bg-app-color: #fff;
+    --text-app-color: #000;
+    --text-anchor-color: #00f;
     --bg-input-color: #fff;
+    --bg-btn1-color: #1976d2;/* primary */
 
     /* light */
-    --app-bg-color-light: #ebe2c9;
-    --app-text-color-light: #000;
+    --bg-app-color-light: #ebe2c9;
+    --text-app-color-light: #000;
+    --text-anchor-color-light: #00f;
     --bg-input-color-light: #fff;
+    --bg-btn1-color-light: #1976d2;/* primary */
 
     /* dark */
-    --app-bg-color-dark: #222;
-    --app-text-color-dark: #bbb;
+    --bg-app-color-dark: #222;
+    --text-app-color-dark: #bbb;
+    --text-anchor-color-dark: #09f;
     --bg-input-color-dark: #333;
+    --bg-btn1-color-dark: #00695c;/* teal-9 */
+    
+}
+
+a {
+    color: var(--text-anchor-color);
 }
 
 .bg-input {
     background-color: var(--bg-input-color);
 }
 
+.bg-btn1 {
+    background-color: var(--bg-btn1-color);
+}
+
+/* main section */
 body, html, #app {    
     margin: 0;
     padding: 0;
