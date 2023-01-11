@@ -539,6 +539,7 @@ export default vueComponent(ContentsPage);
 
 .image-thumb {
     height: 50px;
+    background-color: white;
 }
 
 .loading-img-icon {
