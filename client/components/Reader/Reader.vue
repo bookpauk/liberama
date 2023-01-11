@@ -1704,8 +1704,8 @@ export default vueComponent(Reader);
 .tool-button {
     margin: 0px 2px 7px 2px;
     padding: 0;
-    color: #3E843E;
-    background-color: #E6EDF4;
+    color: var(--text-tb-normal);
+    background-color: var(--bg-tb-normal);
     min-height: 38px;
     min-width: 38px;
     height: 38px;
@@ -1717,34 +1717,33 @@ export default vueComponent(Reader);
 }
 
 .tool-button:hover {
-    background-color: white;
+    background-color: var(--bg-tb-hover);
     cursor: pointer;
 }
 
 .tool-button-active {
     box-shadow: 0 0 0;
-    color: white;
-    background-color: #8AB45F;
+    color: var(--text-tb-active);
+    background-color: var(--bg-tb-active);
     position: relative;
     top: 1px;
     left: 1px;
 }
 
 .tool-button-active:hover {
-    color: white;
-    background-color: #81C581;
+    background-color: var(--bg-tb-active-hover);
     cursor: pointer;
 }
 
 .tool-button-disabled {
-    color: lightgray;
-    background-color: gray;
+    color: var(--text-tb-disabled);
+    background-color: var(--bg-tb-disabled);
     cursor: default;
 }
 
 .tool-button-disabled:hover {
-    color: lightgray;
-    background-color: gray;
+    color: var(--text-tb-disabled);
+    background-color: var(--bg-tb-disabled);
     cursor: default;
 }
 

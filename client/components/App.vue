@@ -53,6 +53,9 @@ class App {
                     '--bg-loader-color', '--bg-input-color', '--bg-btn-color1',
                     '--bg-header-color1', '--bg-header-color2', '--bg-header-color3',
                     '--bg-menu-color1', '--bg-menu-color2', '--text-menu-color',
+                    '--text-tb-normal', '--bg-tb-normal', '--bg-tb-hover',
+                    '--text-tb-active', '--bg-tb-active', '--bg-tb-active-hover',
+                    '--text-tb-disabled', '--bg-tb-disabled',
                 ];
 
                 let root = document.querySelector(':root');
@@ -235,6 +238,15 @@ export default vueComponent(App);
     --bg-menu-color2: #e0e0e0;
     --text-menu-color: #757575;
 
+    --text-tb-normal: #3e843e;
+    --bg-tb-normal: #e6edf4;
+    --bg-tb-hover: #fff;
+    --text-tb-active: #fff;
+    --bg-tb-active: #8ab45f;
+    --bg-tb-active-hover: #81c581;
+    --text-tb-disabled: #d3d3d3;
+    --bg-tb-disabled: #808080;
+
     /* light */
     --bg-app-color-light: #fff;
     --text-app-color-light: #000;
@@ -248,6 +260,15 @@ export default vueComponent(App);
     --bg-menu-color1-light: #eee;
     --bg-menu-color2-light: #e0e0e0;
     --text-menu-color-light: #757575;
+
+    --text-tb-normal-light: #3e843e;
+    --bg-tb-normal-light: #e6edf4;
+    --bg-tb-hover-light: #fff;
+    --text-tb-active-light: #fff;
+    --bg-tb-active-light: #8ab45f;
+    --bg-tb-active-hover-light: #81c581;
+    --text-tb-disabled-light: #d3d3d3;
+    --bg-tb-disabled-light: #808080;
 
     /* dark */
     --bg-app-color-dark: #222;
@@ -263,6 +284,14 @@ export default vueComponent(App);
     --bg-menu-color2-dark: #424242;
     --text-menu-color-dark: #858585;
     
+    --text-tb-normal-dark: #3e843e;
+    --bg-tb-normal-dark: #c6cde4;
+    --bg-tb-hover-dark: #ddd;
+    --text-tb-active-dark: #ddd;
+    --bg-tb-active-dark: #7aa44f;
+    --bg-tb-active-hover-dark: #71b571;
+    --text-tb-disabled-dark: #d3d3d3;
+    --bg-tb-disabled-dark: #808080;
 }
 
 a {
