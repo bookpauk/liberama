@@ -55,7 +55,7 @@ class App {
                     '--bg-app-color', '--text-app-color', '--bg-dialog-color', '--text-anchor-color',
                     '--bg-loader-color', '--bg-input-color', '--bg-btn-color1', '--bg-btn-color2',
                     '--bg-header-color1', '--bg-header-color2', '--bg-header-color3',
-                    '--bg-menu-color1', '--bg-menu-color2', '--text-menu-color',
+                    '--bg-menu-color1', '--bg-menu-color2', '--text-menu-color', '--text-ubtn-color',
                     '--text-tb-normal', '--bg-tb-normal', '--bg-tb-hover',
                     '--text-tb-active', '--bg-tb-active', '--bg-tb-active-hover',
                     '--text-tb-disabled', '--bg-tb-disabled',
@@ -254,6 +254,7 @@ export default vueComponent(App);
     --bg-menu-color1: #eee;
     --bg-menu-color2: #e0e0e0;
     --text-menu-color: #757575;
+    --text-ubtn-color: #bbb;
 
     --text-tb-normal: #3e843e;
     --bg-tb-normal: #e6edf4;
@@ -282,6 +283,7 @@ export default vueComponent(App);
     --bg-menu-color1-light: #eee;
     --bg-menu-color2-light: #e0e0e0;
     --text-menu-color-light: #757575;
+    --text-ubtn-color-light: #bbb;
 
     --text-tb-normal-light: #3e843e;
     --bg-tb-normal-light: #e6edf4;
@@ -310,6 +312,7 @@ export default vueComponent(App);
     --bg-menu-color1-dark: #333;
     --bg-menu-color2-dark: #424242;
     --text-menu-color-dark: #858585;
+    --text-ubtn-color-dark: #555;
     
     --text-tb-normal-dark: #3e843e;
     --bg-tb-normal-dark: #c6cde4;

@@ -4,9 +4,9 @@
         outlined dense
         input-style="text-align: center"
         class="no-mp"
-        :class="(error ? 'error' : '')"
         :disable="disable"
         :mask="mask"
+        :error="error"
     >
         <slot></slot>
         <template #prepend>
@@ -236,23 +236,16 @@ export default vueComponent(NumInput);
     border-radius: 15px;
     width: 30px;
     height: 30px;
-    color: #bbb;
+    color: var(--text-ubtn-color);
     cursor: pointer;
 }
 
 .button:hover {
-    color: #616161;
-    background-color: #efebe9;
-}
-
-.error {
-    background-color: #ffabab;
-    border-radius: 3px;
+    filter: invert(100%);
 }
 
 .disable, .disable:hover {
     cursor: not-allowed;
-    color: #bbb;
-    background-color: white;
+    filter: invert(0%);
 }
 </style>
