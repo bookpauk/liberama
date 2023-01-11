@@ -29,6 +29,7 @@
                     ref="rootLink"
                     v-model="rootLink"
                     class="q-mr-sm"
+                    bg-color="input" 
                     :options="rootLinkOptions"
                     style="width: 230px"
                     dropdown-icon="la la-angle-down la-sm"
@@ -58,6 +59,7 @@
                     ref="selectedLink"
                     v-model="selectedLink"
                     class="q-mr-sm"
+                    bg-color="input" 
                     :options="selectedLinkOptions"
                     style="width: 50px"
                     dropdown-icon="la la-angle-down la-sm"
@@ -73,8 +75,8 @@
                     ref="input"
                     v-model="bookUrl"
                     class="col q-mr-sm"
+                    bg-color="input" 
                     outlined dense
-                    bg-color="white"
                     placeholder="Скопируйте сюда ссылку на книгу и нажмите 'Открыть'"
                     @focus="selectAllOnFocus" @keydown="bookUrlKeyDown"
                 >
@@ -108,7 +110,7 @@
             </div>
             <div class="separator"></div>
 
-            <div ref="frameBox" class="col fit" style="position: relative;">
+            <div ref="frameBox" class="col fit" style="position: relative; background-color: white">
                 <div ref="frameWrap" class="overflow-hidden">
                     <iframe v-if="frameVisible" ref="frame" :src="frameSrc" frameborder="0" allow="clipboard-read; clipboard-write"></iframe>
                 </div>
@@ -133,8 +135,8 @@
                         ref="bookmarkLink"
                         v-model="bookmarkLink"
                         class="col q-mr-sm"
+                        bg-color="input" 
                         outlined dense
-                        bg-color="white"
                         placeholder="Ссылка для закладки" maxlength="2000" @focus="selectAllOnFocus" @keydown="bookmarkLinkKeyDown"
                     >
                     </q-input>
@@ -143,6 +145,7 @@
                         ref="defaultRootLink"
                         v-model="defaultRootLink"
                         class="q-mr-sm"
+                        bg-color="input" 
                         :options="defaultRootLinkOptions"
                         style="width: 50px"
                         dropdown-icon="la la-angle-down la-sm"
@@ -159,8 +162,8 @@
                         ref="bookmarkDesc"
                         v-model="bookmarkDesc"
                         class="col q-mr-sm"
+                        bg-color="input" 
                         outlined dense
-                        bg-color="white"
                         placeholder="Описание" style="width: 400px" maxlength="100" @focus="selectAllOnFocus" @keydown="bookmarkDescKeyDown"
                     >
                     </q-input>
