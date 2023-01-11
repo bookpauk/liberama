@@ -50,7 +50,8 @@ class App {
             if (darkMode !== value) {
                 const vars = [
                     '--bg-app-color', '--text-app-color', '--text-anchor-color',
-                    '--bg-input-color', '--bg-btn1-color'
+                    '--bg-loader-color', '--bg-input-color', '--bg-btn1-color',
+                    '--bg-header1-color', '--bg-header2-color',
                 ];
 
                 let root = document.querySelector(':root');
@@ -223,22 +224,31 @@ export default vueComponent(App);
     --bg-app-color: #fff;
     --text-app-color: #000;
     --text-anchor-color: #00f;
+    --bg-loader-color: #ebe2c9;
     --bg-input-color: #fff;
     --bg-btn1-color: #1976d2;/* primary */
+    --bg-header1-color: #007000;
+    --bg-header2-color: #59B04F;
 
     /* light */
-    --bg-app-color-light: #ebe2c9;
+    --bg-app-color-light: #fff;
     --text-app-color-light: #000;
     --text-anchor-color-light: #00f;
+    --bg-loader-color-light: #ebe2c9;
     --bg-input-color-light: #fff;
     --bg-btn1-color-light: #1976d2;/* primary */
+    --bg-header1-color-light: #007000;
+    --bg-header2-color-light: #59B04F;
 
     /* dark */
     --bg-app-color-dark: #222;
-    --text-app-color-dark: #bbb;
+    --text-app-color-dark: #ccc;
     --text-anchor-color-dark: #09f;
+    --bg-loader-color-dark: #222;
     --bg-input-color-dark: #333;
     --bg-btn1-color-dark: #00695c;/* teal-9 */
+    --bg-header1-color-dark: #004000;
+    --bg-header2-color-dark: #29901F;
     
 }
 

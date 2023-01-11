@@ -1697,7 +1697,7 @@ export default vueComponent(Reader);
 }
 
 .main {
-    background-color: var(--bg-app-color);
+    background-color: var(--bg-loader-color);
     color: var(--text-app-color);
 }
 

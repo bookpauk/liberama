@@ -8,10 +8,10 @@
             </span>
         </template>
 
-        <div class="fit column" :class="{dark}">
+        <div class="fit column main">
             <q-input v-model="bookTitle" class="q-px-sm" dense borderless placeholder="Введите название текста" />
             <hr />
-            <textarea ref="textArea" class="text" :class="{dark}" @paste="calcTitle"></textarea>
+            <textarea ref="textArea" class="main text" @paste="calcTitle"></textarea>
         </div>
     </Window>
 </template>
@@ -121,9 +121,9 @@ export default vueComponent(PasteTextPage);
     outline: none;
 }
 
-.dark {
-    color: white;
-    background-color: #333;
+.main {
+    color: var(--text-app-color);
+    background-color: var(--bg-app-color);
 }
 
 hr {
