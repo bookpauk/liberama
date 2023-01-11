@@ -470,10 +470,7 @@ class Reader {
         this.allowUrlParamBookPos = settings.allowUrlParamBookPos;
         this.copyFullText = settings.copyFullText;
         this.showClickMapPage = settings.showClickMapPage;
-
-        //dark mode
         this.nightModeActive = settings.nightMode;
-
         this.clickControlActive = settings.clickControl;
         this.blinkCachedLoad = settings.blinkCachedLoad;
         this.showToolButton = settings.showToolButton;

@@ -4,20 +4,20 @@
             Оглавление/закладки
         </template>
 
-        <div class="bg-grey-3 row">
+        <div class="bg-menu-1 row">
             <q-tabs
                 v-model="selectedTab"
-                active-color="black"
-                active-bg-color="white"
-                indicator-color="white"
+                active-color="app"
+                active-bg-color="app"
+                indicator-color="bg-app"
                 dense
                 no-caps
                 inline-label
-                class="no-mp bg-grey-4 text-grey-7"
+                class="no-mp bg-menu-2 text-menu"
             >
                 <q-tab name="contents" icon="la la-list" label="Оглавление" />
                 <q-tab name="images" icon="la la-image" label="Изображения" />
-                <q-tab name="bookmarks" icon="la la-bookmark" label="Закладки" />
+                <!--q-tab name="bookmarks" icon="la la-bookmark" label="Закладки" /-->
             </q-tabs>
         </div>
 
@@ -80,13 +80,13 @@
                                 <div class="image-num">
                                     {{ item.num }}
                                 </div>
-                                <div v-show="item.type == 'image/jpeg'" class="image-type it-jpg-color row justify-center">
+                                <div v-show="item.type == 'image/jpeg'" class="image-type text-black it-jpg-color row justify-center">
                                     JPG
                                 </div>
-                                <div v-show="item.type == 'image/png'" class="image-type it-png-color row justify-center">
+                                <div v-show="item.type == 'image/png'" class="image-type text-black it-png-color row justify-center">
                                     PNG
                                 </div>
-                                <div v-show="!item.local" class="image-type it-net-color row justify-center">
+                                <div v-show="!item.local" class="image-type text-black it-net-color row justify-center">
                                     INET
                                 </div>
                             </div>
@@ -250,7 +250,7 @@ class ContentsPage {
             const bin = parsed.binary[image.id];
             const type = (bin ? bin.type : '');
             
-            const label = (image.alt ? image.alt : '<span style="font-size: 90%; color: #dddddd"><i>Без названия</i></span>');
+            const label = (image.alt ? image.alt : '<span style="font-size: 90%; color: var(--bg-menu-color2)"><i>Без названия</i></span>');
             const indentStyle = getIndentStyle(1);
             const labelStyle = getLabelStyle(1);
 
@@ -466,27 +466,31 @@ export default vueComponent(ContentsPage);
 }
 
 .item, .subitem, .item-book-pos, .subitem-book-pos {
-    border-bottom: 1px solid #e0e0e0;
+    border-bottom: 1px solid var(--bg-menu-color2);
 }
 
 .item:hover, .subitem:hover {
-    background-color: #f0f0f0;
+    background-color: var(--bg-menu-color2);
 }
 
 .item-book-pos {
-    background-color: #b0f0b0;
+    opacity: 1;
+    background-color: var(--bg-selected-item-color1);
 }
 
 .subitem-book-pos {
-    background-color: #d0f5d0;
+    opacity: 1;
+    background-color: var(--bg-selected-item-color2);
 }
 
 .item-book-pos:hover {
-    background-color: #b0e0b0;
+    opacity: 0.8;
+    transition: opacity 0.2s linear;
 }
 
 .subitem-book-pos:hover {
-    background-color: #d0f0d0;
+    opacity: 0.8;
+    transition: opacity 0.2s linear;
 }
 
 .expand-button, .no-expand-button {

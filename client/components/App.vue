@@ -59,6 +59,7 @@ class App {
                     '--text-tb-normal', '--bg-tb-normal', '--bg-tb-hover',
                     '--text-tb-active', '--bg-tb-active', '--bg-tb-active-hover',
                     '--text-tb-disabled', '--bg-tb-disabled',
+                    '--bg-selected-item-color1', '--bg-selected-item-color2',
                 ];
 
                 let root = document.querySelector(':root');
@@ -261,6 +262,9 @@ export default vueComponent(App);
     --text-tb-disabled: #d3d3d3;
     --bg-tb-disabled: #808080;
 
+    --bg-selected-item-color1: #b0f0b0;
+    --bg-selected-item-color2: #d0f5d0;
+
     /* light */
     --bg-app-color-light: #fff;
     --text-app-color-light: #000;
@@ -284,6 +288,9 @@ export default vueComponent(App);
     --text-tb-disabled-light: #d3d3d3;
     --bg-tb-disabled-light: #808080;
 
+    --bg-selected-item-color1-light: #b0f0b0;
+    --bg-selected-item-color2-light: #d0f5d0;
+
     /* dark */
     --bg-app-color-dark: #222;
     --text-app-color-dark: #ccc;
@@ -306,6 +313,9 @@ export default vueComponent(App);
     --bg-tb-active-hover-dark: #71b571;
     --text-tb-disabled-dark: #d3d3d3;
     --bg-tb-disabled-dark: #808080;
+
+    --bg-selected-item-color1-dark: #406040;
+    --bg-selected-item-color2-dark: #304530;
 }
 
 a {
