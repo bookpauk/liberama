@@ -172,7 +172,6 @@ const settingDefaults = {
     pageChangeAnimationSpeed: 80, //0-100%
 
     allowUrlParamBookPos: false,
-    lazyParseEnabled: false,
     copyFullText: false,
     showClickMapPage: true,
     clickControl: true,
