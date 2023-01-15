@@ -13,6 +13,7 @@
                 <q-input
                     v-model="textColorFiltered"
                     class="col-left no-mp"
+                    bg-color="input" 
                     outlined dense
                     
                     :rules="['hexColor']"
@@ -43,6 +44,7 @@
                 <q-input 
                     v-model="bgColorFiltered"
                     class="col-left no-mp"
+                    bg-color="input" 
                     outlined dense
                     
                     :rules="['hexColor']"
@@ -71,6 +73,7 @@
                     v-model="form.wallpaper"
                     class="col-left no-mp"
                     :options="wallpaperOptions"
+                    bg-color="input" 
                     dropdown-icon="la la-angle-down la-sm"
                     outlined dense emit-value map-options
                 >

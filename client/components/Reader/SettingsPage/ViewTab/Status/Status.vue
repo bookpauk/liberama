@@ -23,6 +23,7 @@
                 <q-input
                     v-model="statusBarColorFiltered"
                     class="col-left no-mp"
+                    bg-color="input" 
                     outlined dense
                     :rules="['hexColor']"
                     style="max-width: 150px"
@@ -52,7 +53,7 @@
                 Прозрачность
             </div>
             <div class="col row">
-                <NumInput v-model="form.statusBarColorAlpha" class="col-left" :min="0" :max="1" :digits="2" :step="0.1" />
+                <NumInput v-model="form.statusBarColorAlpha" bg-color="input" class="col-left" :min="0" :max="1" :digits="2" :step="0.1" />
             </div>
         </div>
 
@@ -61,7 +62,7 @@
                 Высота
             </div>
             <div class="col row">
-                <NumInput v-model="form.statusBarHeight" class="col-left" :min="5" :max="100" />
+                <NumInput v-model="form.statusBarHeight" bg-color="input" class="col-left" :min="5" :max="100" />
             </div>
         </div>
 

@@ -3,7 +3,6 @@ import { createStore } from 'vuex';
 import VuexPersistence from 'vuex-persist';
 
 import root from './root.js';
-import uistate from './modules/uistate';
 import config from './modules/config';
 import reader from './modules/reader';
 
@@ -13,7 +12,6 @@ const vuexLocal = new VuexPersistence();
 
 export default createStore(Object.assign({}, root, {
     modules: {
-        uistate,
         config,
         reader,
     },

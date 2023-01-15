@@ -433,10 +433,6 @@ class TextPage {
         if (this.lastBook) {
             (async() => {
                 try {
-                    //подождем ленивый парсинг
-                    this.stopLazyParse = true;
-                    while (this.doingLazyParse) await utils.sleep(10);
-
                     const isParsed = await bookManager.hasBookParsed(this.lastBook);
                     if (!isParsed) {
                         return;
@@ -460,8 +456,6 @@ class TextPage {
                     await this.calcPropsAndLoadFonts();
 
                     this.refreshTime();
-                    if (this.lazyParseEnabled)
-                        this.lazyParsePara();
                 } catch (e) {
                     this.$root.stdDialog.alert(e.message, 'Ошибка', {color: 'negative'});
                 }
@@ -836,36 +830,6 @@ class TextPage {
             this.statusBarMessage = ' ';
         }
         this.drawStatusBar();
-    }
-
-    async lazyParsePara() {
-        if (!this.parsed || this.doingLazyParse)
-            return;
-        this.doingLazyParse = true;
-        let j = 0;
-        let k = 0;
-        let prevPerc = 0;
-        this.stopLazyParse = false;
-        for (let i = 0; i < this.parsed.para.length; i++) {
-            j++;
-            if (j > 1) {
-                await utils.sleep(1);
-                j = 0;
-            }
-            if (this.stopLazyParse)
-                break;
-            this.parsed.parsePara(i);
-            k++;
-            if (k > 100) {
-                let perc = Math.round(i/this.parsed.para.length*100);
-                if (perc != prevPerc)
-                    this.drawStatusBar(`Обработка текста ${perc}%`);
-                prevPerc = perc;
-                k = 0;
-            }
-        }
-        this.drawStatusBar();
-        this.doingLazyParse = false;
     }
 
     async refreshTime() {

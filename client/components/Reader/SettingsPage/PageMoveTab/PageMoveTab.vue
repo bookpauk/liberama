@@ -10,7 +10,7 @@
                 Тип
             </div>
             <q-select
-                v-model="form.pageChangeAnimation" class="col-left" :options="pageChangeAnimationOptions"
+                v-model="form.pageChangeAnimation" bg-color="input" class="col-left" :options="pageChangeAnimationOptions"
                 dropdown-icon="la la-angle-down la-sm"
                 outlined dense emit-value map-options
             />
@@ -20,7 +20,7 @@
             <div class="sets-label label">
                 Скорость
             </div>
-            <NumInput v-model="form.pageChangeAnimationSpeed" class="col-left" :min="0" :max="100" :disable="form.pageChangeAnimation == ''" />
+            <NumInput v-model="form.pageChangeAnimationSpeed" bg-color="input" class="col-left" :min="0" :max="100" :disable="form.pageChangeAnimation == ''" />
         </div>
 
         <!---------------------------------------------->

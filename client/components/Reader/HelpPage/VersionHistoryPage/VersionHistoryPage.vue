@@ -72,7 +72,7 @@ p {
 }
 
 .clickable {
-    color: blue;
+    color: var(--text-anchor-color);
     text-decoration: underline;
     cursor: pointer;
 }

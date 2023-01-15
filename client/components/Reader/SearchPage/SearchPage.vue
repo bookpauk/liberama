@@ -11,6 +11,7 @@
                 <q-input
                     ref="input" v-model="needle"
                     class="col" outlined dense
+                    bg-color="input"
                     placeholder="Найти"
                     @keydown="inputKeyDown"         
                 />

@@ -80,7 +80,7 @@ export default vueComponent(SetPositionPage);
 .slider {
     margin: 0 20px 0 20px;
     height: 35px;
-    background-color: #efefef;
+    background-color: var(--bg-input-color);
     border-radius: 15px;
 }
 </style>

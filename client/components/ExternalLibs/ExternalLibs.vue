@@ -29,6 +29,7 @@
                     ref="rootLink"
                     v-model="rootLink"
                     class="q-mr-sm"
+                    bg-color="input" 
                     :options="rootLinkOptions"
                     style="width: 230px"
                     dropdown-icon="la la-angle-down la-sm"
@@ -58,6 +59,7 @@
                     ref="selectedLink"
                     v-model="selectedLink"
                     class="q-mr-sm"
+                    bg-color="input" 
                     :options="selectedLinkOptions"
                     style="width: 50px"
                     dropdown-icon="la la-angle-down la-sm"
@@ -73,8 +75,8 @@
                     ref="input"
                     v-model="bookUrl"
                     class="col q-mr-sm"
+                    bg-color="input" 
                     outlined dense
-                    bg-color="white"
                     placeholder="Скопируйте сюда ссылку на книгу и нажмите 'Открыть'"
                     @focus="selectAllOnFocus" @keydown="bookUrlKeyDown"
                 >
@@ -108,7 +110,7 @@
             </div>
             <div class="separator"></div>
 
-            <div ref="frameBox" class="col fit" style="position: relative;">
+            <div ref="frameBox" class="col fit" style="position: relative; background-color: white">
                 <div ref="frameWrap" class="overflow-hidden">
                     <iframe v-if="frameVisible" ref="frame" :src="frameSrc" frameborder="0" allow="clipboard-read; clipboard-write"></iframe>
                 </div>
@@ -133,8 +135,8 @@
                         ref="bookmarkLink"
                         v-model="bookmarkLink"
                         class="col q-mr-sm"
+                        bg-color="input" 
                         outlined dense
-                        bg-color="white"
                         placeholder="Ссылка для закладки" maxlength="2000" @focus="selectAllOnFocus" @keydown="bookmarkLinkKeyDown"
                     >
                     </q-input>
@@ -143,6 +145,7 @@
                         ref="defaultRootLink"
                         v-model="defaultRootLink"
                         class="q-mr-sm"
+                        bg-color="input" 
                         :options="defaultRootLinkOptions"
                         style="width: 50px"
                         dropdown-icon="la la-angle-down la-sm"
@@ -159,8 +162,8 @@
                         ref="bookmarkDesc"
                         v-model="bookmarkDesc"
                         class="col q-mr-sm"
+                        bg-color="input" 
                         outlined dense
-                        bg-color="white"
                         placeholder="Описание" style="width: 400px" maxlength="100" @focus="selectAllOnFocus" @keydown="bookmarkDescKeyDown"
                     >
                     </q-input>
@@ -309,6 +312,7 @@ class ExternalLibs {
     inpxUrl = '';
 
     created() {
+        this.commit = this.$store.commit;
         this.oldStartLink = '';
         this.justOpened = true;
         this.$root.addEventHook('key', this.keyHook);
@@ -401,6 +405,8 @@ class ExternalLibs {
             this.ready = true;
             if (d.data)
                 this.libs = _.cloneDeep(d.data);
+            if (d.sets)
+                this.updateSets(d.sets);
         } else if (d.type == 'notify') {
             this.$root.notify.success(d.data, '', {position: 'bottom-right'});
         }
@@ -443,6 +449,11 @@ class ExternalLibs {
             await this.$root.stdDialog.alert('Потеряна связь с читалкой. Окно будет закрыто', 'Ошибка');
             window.close();
         }
+    }
+
+    updateSets(sets) {
+        if (sets.nightMode !== this.nightMode)
+            this.commit('reader/nightModeToggle');
     }
 
     commitLibs(libs) {
@@ -493,14 +504,24 @@ class ExternalLibs {
         return this.$store.state.config.mode;
     }
 
+    get nightMode() {
+        return this.$store.state.reader.settings.nightMode;
+    }
+
     get header() {
-        let result = (this.ready ? 'Сетевая библиотека' : 'Загрузка...');
+        let result = [this.ready ? 'Сетевая библиотека' : 'Загрузка...'];
         if (this.ready && this.selectedLink) {
-            let title = `${(this.libs.comment ? this.libs.comment + ' ': '') + lu.removeProtocol(this.libs.startLink)}`;
-            if (this.inpxReady && this.inpxTitle)
-                title = `${this.inpxTitle} ${lu.removeProtocol(this.inpxUrl)}`;
-            result += ` | ${title}`;
+
+            if (this.inpxReady && this.inpxTitle) {
+                result.push(this.inpxTitle);
+                result.push(lu.removeProtocol(this.inpxUrl));
+            } else {
+                result.push(this.libs.comment);
+                result.push(lu.removeProtocol(this.libs.startLink));
+            }
         }
+
+        result = result.filter(s => s).join(' | ');
         this.$root.setAppTitle(result);
         return result;
     }

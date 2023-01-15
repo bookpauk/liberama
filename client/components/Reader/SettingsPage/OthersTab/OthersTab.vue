@@ -72,20 +72,6 @@
 
         <div class="sets-item row">
             <div class="sets-label label">
-                Обработка
-            </div>
-            <q-checkbox v-model="form.lazyParseEnabled" size="xs" label="Предварительная подготовка текста">
-                <q-tooltip :delay="1000" anchor="top middle" self="bottom middle" content-style="font-size: 80%">
-                    Включение этой опции позволяет делать предварительную<br>
-                    подготовку всего текста в ленивом режиме сразу после<br>
-                    загрузки книги. Это может повысить отзывчивость читалки,<br>
-                    но нагружает процессор каждый раз при открытии книги.
-                </q-tooltip>
-            </q-checkbox>
-        </div>
-
-        <div class="sets-item row">
-            <div class="sets-label label">
                 Парам. в URL
             </div>
             <q-checkbox v-model="form.allowUrlParamBookPos" size="xs">

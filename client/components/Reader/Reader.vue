@@ -115,6 +115,12 @@
 
                 <div class="col"></div>
 
+                <button v-show="showToolButton['nightMode']" ref="nightMode" v-ripple class="tool-button" :class="buttonActiveClass('nightMode')" @click="buttonClick('nightMode')">
+                    <q-icon name="la la-moon" size="32px" />
+                    <q-tooltip :delay="1500" anchor="bottom middle" content-style="font-size: 80%">
+                        {{ rstore.readerActions['nightMode'] }}
+                    </q-tooltip>
+                </button>
                 <button v-show="showToolButton['clickControl']" ref="clickControl" v-ripple class="tool-button" :class="buttonActiveClass('clickControl')" @click="buttonClick('clickControl')">
                     <q-icon name="la la-mouse" size="32px" />
                     <q-tooltip :delay="1500" anchor="bottom middle" content-style="font-size: 80%">
@@ -136,7 +142,7 @@
             </div>
         </div>
 
-        <div class="main col row relative-position">
+        <div class="col row relative-position main">
             <keep-alive>
                 <component 
                     :is="activePage"
@@ -290,6 +296,8 @@ class Reader {
     contentsActive = false;    
     libsActive = false;
     recentBooksActive = false;
+    
+    nightModeActive = false;
     clickControlActive = false;
     settingsActive = false;
 
@@ -462,8 +470,8 @@ class Reader {
         this.allowUrlParamBookPos = settings.allowUrlParamBookPos;
         this.copyFullText = settings.copyFullText;
         this.showClickMapPage = settings.showClickMapPage;
-        this.clickControl = settings.clickControl;
-        this.clickControlActive = this.clickControl;
+        this.nightModeActive = settings.nightMode;
+        this.clickControlActive = settings.clickControl;
         this.blinkCachedLoad = settings.blinkCachedLoad;
         this.showToolButton = settings.showToolButton;
         this.toolBarHideOnScroll = settings.toolBarHideOnScroll;
@@ -1014,10 +1022,16 @@ class Reader {
         }
     }
 
+    nightModeToggle() {
+        if (!this.nightModeActive && !utils.hasProp(this.settings.nightColorSets, 'textColor')) {
+            this.$root.notify.warning(`Ночной режим активирован впервые. Цвета заданы по умолчанию.`);
+        }
+
+        this.commit('reader/nightModeToggle');
+    }
+
     clickControlToggle() {
-        const newSettings = _.cloneDeep(this.settings);
-        newSettings.clickControl = !this.clickControl;
-        this.commit('reader/setSettings', newSettings);
+        this.commit('reader/setSettings', {clickControl: !this.clickControlActive});
     }
 
     offlineModeToggle() {
@@ -1119,6 +1133,7 @@ class Reader {
             case 'contents':
             case 'libs':
             case 'recentBooks':
+            case 'nightMode':
             case 'clickControl':
             case 'offlineMode':
             case 'settings':
@@ -1167,7 +1182,7 @@ class Reader {
     }
 
     async activateClickMapPage() {
-        if (this.clickControl && this.showClickMapPage && !this.clickMapActive) {
+        if (this.clickControlActive && this.showClickMapPage && !this.clickMapActive) {
             this.clickMapActive = true;
             await this.$refs.clickMapPage.slowDisappear();
             this.clickMapActive = false;
@@ -1525,6 +1540,9 @@ class Reader {
             case 'recentBooks':
                 this.recentBooksToggle();
                 break;
+            case 'nightMode':
+                this.nightModeToggle();
+                break;
             case 'clickControl':
                 this.clickControlToggle();
                 break;
@@ -1674,15 +1692,15 @@ export default vueComponent(Reader);
 }
 
 .main {
-    background-color: #EBE2C9;
-    color: #000;
+    background-color: var(--bg-loader-color);
+    color: var(--text-app-color);
 }
 
 .tool-button {
     margin: 0px 2px 7px 2px;
     padding: 0;
-    color: #3E843E;
-    background-color: #E6EDF4;
+    color: var(--text-tb-normal);
+    background-color: var(--bg-tb-normal);
     min-height: 38px;
     min-width: 38px;
     height: 38px;
@@ -1694,34 +1712,33 @@ export default vueComponent(Reader);
 }
 
 .tool-button:hover {
-    background-color: white;
+    background-color: var(--bg-tb-hover);
     cursor: pointer;
 }
 
 .tool-button-active {
     box-shadow: 0 0 0;
-    color: white;
-    background-color: #8AB45F;
+    color: var(--text-tb-active);
+    background-color: var(--bg-tb-active);
     position: relative;
     top: 1px;
     left: 1px;
 }
 
 .tool-button-active:hover {
-    color: white;
-    background-color: #81C581;
+    background-color: var(--bg-tb-active-hover);
     cursor: pointer;
 }
 
 .tool-button-disabled {
-    color: lightgray;
-    background-color: gray;
+    color: var(--text-tb-disabled);
+    background-color: var(--bg-tb-disabled);
     cursor: default;
 }
 
 .tool-button-disabled:hover {
-    color: lightgray;
-    background-color: gray;
+    color: var(--text-tb-disabled);
+    background-color: var(--bg-tb-disabled);
     cursor: default;
 }
 

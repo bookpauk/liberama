@@ -36,29 +36,29 @@
         <a ref="download" style="display: none;" target="_blank"></a>
 
         <div id="vs-container" ref="vsContainer" class="recent-books-scroll col">
-            <div ref="header" class="scroll-header row bg-blue-2">
-                <q-btn class="tool-button" round @click="showSameBookClick">
+            <div ref="header" class="scroll-header row bg-header-3">
+                <q-btn class="tool-button" color="btn2" round @click="showSameBookClick">
                     <q-icon name="la la-caret-right" class="icon" :class="{'expanded-icon': showSameBook}" color="green-8" size="24px" />
                     <q-tooltip :delay="1500" anchor="bottom middle" content-style="font-size: 80%">
                         Показать/скрыть версии книг
                     </q-tooltip>
                 </q-btn>
 
-                <q-btn class="tool-button" round @click="scrollToBegin">
+                <q-btn class="tool-button" color="btn2" round @click="scrollToBegin">
                     <q-icon name="la la-arrow-up" color="green-8" size="24px" />
                     <q-tooltip :delay="1500" anchor="bottom middle" content-style="font-size: 80%">
                         В начало списка
                     </q-tooltip>
                 </q-btn>
 
-                <q-btn class="tool-button" round @click="scrollToEnd">
+                <q-btn class="tool-button" color="btn2" round @click="scrollToEnd">
                     <q-icon name="la la-arrow-down" color="green-8" size="24px" />
                     <q-tooltip :delay="1500" anchor="bottom middle" content-style="font-size: 80%">
                         В конец списка
                     </q-tooltip>
                 </q-btn>
 
-                <q-btn class="tool-button" round @click="scrollToActiveBook">
+                <q-btn class="tool-button" color="btn2" round @click="scrollToActiveBook">
                     <q-icon name="la la-location-arrow" color="green-8" size="24px" />
                     <q-tooltip :delay="1500" anchor="bottom middle" content-style="font-size: 80%">
                         На текущую книгу
@@ -71,7 +71,7 @@
                     class="q-ml-sm q-mt-xs"
                     outlined dense
                     style="width: 185px"
-                    bg-color="white"
+                    bg-color="input"
                     placeholder="Найти"
                     @click.stop
                 >
@@ -86,7 +86,7 @@
                     class="q-ml-sm q-mt-xs"
                     :options="sortMethodOptions"
                     style="width: 180px"
-                    bg-color="white"
+                    bg-color="input"
                     dropdown-icon="la la-angle-down la-sm"
                     outlined dense emit-value map-options display-value-sanitize options-sanitize
                     options-html display-value-html
@@ -140,7 +140,7 @@
                             class="col" style="border: 1px solid #cccccc; border-bottom: 0; padding: 4px; line-height: 140%;"
                             :style="{ 'width': (380 - 40*(+item.inGroup)) + 'px' }"
                         >
-                            <div class="text-green-10" style="font-size: 80%">
+                            <div :class="dark ? 'text-lime-4' : 'text-green-10'" style="font-size: 80%">
                                 {{ item.desc.author }}
                             </div>
                             <div style="font-size: 75%">
@@ -347,6 +347,10 @@ class RecentBooksPage {
 
     get bothBucEnabled() {
         return this.$store.state.config.bucEnabled && this.bucEnabled;
+    }
+
+    get dark() {
+        return this.$store.state.reader.settings.nightMode;
     }
 
     async updateTableData() {
@@ -847,7 +851,7 @@ export default vueComponent(RecentBooksPage);
     position: sticky;
     z-index: 1;
     top: 0;
-    border-bottom: 2px solid #aaaaaa;
+    border-bottom: 2px solid var(--bg-menu-color2);
     padding-left: 5px;
 }
 
@@ -870,15 +874,15 @@ export default vueComponent(RecentBooksPage);
 }
 
 .even {
-    background-color: #f2f2f2;
+    background-color: var(--bg-menu-color1);
 }
 
 .active-book {
-    background-color: #b0f0b0 !important;
+    background-color: var(--bg-selected-item-color1) !important;
 }
 
 .active-parent-book {
-    background-color: #ffbbbb !important;
+    background-color: var(--bg-selected-item-color2) !important;
 }
 
 .icon {
@@ -895,7 +899,6 @@ export default vueComponent(RecentBooksPage);
     min-height: 30px;
     height: 30px;
     margin: 10px 6px 0px 3px;
-    background-color: white;
 }
 
 .row-info-bottom {

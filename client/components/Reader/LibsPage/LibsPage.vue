@@ -119,8 +119,12 @@ class LibsPage {
         return this.$store.state.reader.libs;
     }
 
+    get nightMode() {
+        return this.$store.state.reader.settings.nightMode;
+    }
+
     sendLibs() {
-        this.sendMessage({type: 'libs', data: _.cloneDeep(this.libs)});
+        this.sendMessage({type: 'libs', data: _.cloneDeep(this.libs), sets: {nightMode: this.nightMode}});
     }
 
     close() {

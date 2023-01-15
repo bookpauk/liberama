@@ -59,7 +59,7 @@ class CommonHelpPage {
     }
 
     get bookmarkText() {
-        return `javascript:location.href='https://${window.location.host}/?url='+location.href;`
+        return `javascript:location.href='${window.location.protocol}//${window.location.host}/#/reader?url='+location.href;`
     }
 
     async copyText(text, mes) {
@@ -88,6 +88,6 @@ export default vueComponent(CommonHelpPage);
     margin-left: 10px;
     cursor: pointer;
     font-size: 120%;
-    color: blue;
+    color: var(--text-anchor-color);
 }
 </style>

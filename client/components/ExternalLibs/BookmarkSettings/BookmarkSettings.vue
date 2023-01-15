@@ -5,13 +5,13 @@
         </template>
 
         <div class="col column fit">
-            <div class="row items-center top-panel bg-grey-3">
+            <div class="row items-center top-panel bg-menu-2">
                 <q-btn :disabled="!selected" class="q-mr-md" round dense color="blue" icon="la la-check" size="16px" @click.stop="openSelected">
                     <q-tooltip :delay="1500" anchor="bottom middle" content-style="font-size: 80%">
                         Открыть выбранную закладку
                     </q-tooltip>
                 </q-btn>
-                <q-input ref="search" v-model="search" class="col" outlined dense bg-color="white" placeholder="Найти">
+                <q-input ref="search" v-model="search" bg-color="input" class="col" outlined dense placeholder="Найти">
                     <template #append>
                         <q-icon v-if="search !== ''" name="la la-times" class="cursor-pointer" @click="resetSearch" />
                     </template>
@@ -19,7 +19,7 @@
             </div>
 
             <div class="col row">
-                <div class="left-panel column items-center no-wrap bg-grey-3">
+                <div class="left-panel column items-center no-wrap bg-menu-1">
                     <q-btn class="q-my-sm" round dense color="blue" icon="la la-plus" size="14px" @click.stop="addBookmark">
                         <q-tooltip :delay="1500" anchor="bottom middle" content-style="font-size: 80%">
                             Добавить закладку
@@ -62,6 +62,7 @@
                         v-model:ticked="ticked"
                         v-model:expanded="expanded"
                         class="q-my-xs"
+                        color="input" 
                         :nodes="nodes"
                         node-key="key"
                         tick-strategy="leaf"

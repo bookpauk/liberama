@@ -1,5 +1,19 @@
 export const versionHistory = [
 {
+    version: '1.1.1',
+    releaseDate: '2023-01-11',
+    showUntil: '2023-01-15',
+    content:
+`
+<ul>
+    <li>добавлена опция "Ночной режим" и кнопка на панель</li>
+    <li>исправление багов</li>
+</ul>
+
+`
+},
+
+{
     version: '1.0.0',
     releaseDate: '2022-12-18',
     showUntil: '2022-12-25',

@@ -10,7 +10,7 @@
                 Интервал
             </div>
             <div class="col row">
-                <NumInput v-model="form.lineInterval" class="col-left" :min="0" :max="200" />
+                <NumInput v-model="form.lineInterval" bg-color="input" class="col-left" :min="0" :max="200" />
             </div>
         </div>
 
@@ -19,7 +19,7 @@
                 Параграф
             </div>
             <div class="col row">
-                <NumInput v-model="form.p" class="col-left" :min="0" :max="2000" />
+                <NumInput v-model="form.p" bg-color="input" class="col-left" :min="0" :max="2000" />
             </div>
         </div>
 
@@ -28,7 +28,7 @@
                 Сдвиг
             </div>
             <div class="col row">
-                <NumInput v-model="form.textVertShift" class="col-left" :min="-100" :max="100">
+                <NumInput v-model="form.textVertShift" bg-color="input" class="col-left" :min="-100" :max="100">
                     <q-tooltip :delay="1000" anchor="top middle" self="bottom middle" content-style="font-size: 80%">
                         Сдвиг текста по вертикали в процентах от размера шрифта.<br>
                         Отрицательное значение сдвигает вверх, положительное -<br>
@@ -43,7 +43,7 @@
                 Скроллинг
             </div>
             <div class="col row">
-                <NumInput v-model="form.scrollingDelay" class="col-left" :min="1" :max="10000">
+                <NumInput v-model="form.scrollingDelay" bg-color="input" class="col-left" :min="1" :max="10000">
                     <q-tooltip :delay="1000" anchor="top middle" self="bottom middle" content-style="font-size: 80%">
                         Замедление скроллинга в миллисекундах.<br>
                         Определяет время, за которое текст<br>
@@ -53,7 +53,7 @@
 
                 <div class="q-px-sm" />
                 <q-select
-                    v-model="form.scrollingType" class="col" :options="['linear', 'ease', 'ease-in', 'ease-out', 'ease-in-out']"
+                    v-model="form.scrollingType" bg-color="input" class="col" :options="['linear', 'ease', 'ease-in', 'ease-out', 'ease-in-out']"
                     dropdown-icon="la la-angle-down la-sm"
                     outlined dense emit-value map-options
                 >
@@ -81,7 +81,7 @@
                 Компактность
             </div>
             <div class="q-px-sm" />
-            <NumInput v-model="form.compactTextPerc" class="col" :min="0" :max="100">
+            <NumInput v-model="form.compactTextPerc" bg-color="input" class="col" :min="0" :max="100">
                 <q-tooltip :delay="1000" anchor="top middle" self="bottom middle" content-style="font-size: 80%">
                     Степень компактности текста в процентах.<br>
                     Чем больше компактность, тем хуже выравнивание<br>
@@ -105,7 +105,7 @@
                 Добавлять пустые
             </div>
             <div class="q-px-sm" />
-            <NumInput v-model="form.addEmptyParagraphs" class="col" :min="0" :max="2" />
+            <NumInput v-model="form.addEmptyParagraphs" bg-color="input" class="col" :min="0" :max="2" />
         </div>
 
         <div class="sets-item row">
@@ -135,7 +135,7 @@
                 Высота не более
             </div>
             <div class="q-px-sm" />
-            <NumInput v-model="form.imageHeightLines" class="col" :min="1" :max="100" :disable="!form.showImages">
+            <NumInput v-model="form.imageHeightLines" bg-color="input" class="col" :min="1" :max="100" :disable="!form.showImages">
                 <q-tooltip :delay="1000" anchor="top middle" self="bottom middle" content-style="font-size: 80%">
                     Определяет высоту изображения количеством строк.<br>
                     В случае превышения высоты, изображение будет<br>
