@@ -8,12 +8,12 @@ git clone https://github.com/bookpauk/liberama.git
 ```
 2. Собираем образ контейнера
 ```bash
-docker build -t liberama:1.0.0 .
+docker build -t liberama:1.1.1 .
 ```
 ## Запуск
 Для корректной работы **Liberama** после перезапуска контейнера необходимо при запуске отобразить папки с базой данных и загруженными файлами на папки хоста, например:
 ```bash
-docker run -d -p 127.0.0.1:8090:80 -v /path/to/upload/files:/app/public-files -v /path/to/db:/app/db liberama:1.0.0
+docker run -d -p 127.0.0.1:8090:80 -v /path/to/upload/files:/app/public-files -v /path/to/db:/app/db liberama:1.1.1
 ```
 ## Настройка nginx
 ```conf
