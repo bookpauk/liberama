@@ -101,7 +101,7 @@
                     </template>
                 </q-input>
 
-                <q-btn :disabled="!bookUrl" color="green-7" no-caps size="14px" @click="submitUrl">
+                <q-btn :disabled="!bookUrl" color="green-7" no-caps size="14px" @click="submitUrl()">
                     Открыть
                     <q-tooltip :delay="1500" anchor="bottom middle" content-style="font-size: 80%">
                         Открыть в читалке
