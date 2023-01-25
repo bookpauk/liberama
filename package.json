@@ -65,7 +65,7 @@
     "fs-extra": "^10.1.0",
     "he": "^1.2.0",
     "iconv-lite": "^0.6.3",
-    "jembadb": "^5.1.5",
+    "jembadb": "^5.1.7",
     "localforage": "^1.10.0",
     "lodash": "^4.17.21",
     "minimist": "^1.2.7",

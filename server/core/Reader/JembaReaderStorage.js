@@ -24,6 +24,7 @@ class JembaReaderStorage {
 
     getCache(id) {
         const obj = this.cacheMap.get(id);
+        //обновляем время доступа и при чтении тоже
         if (obj)
             obj.time = Date.now();
         return obj;
@@ -118,6 +119,7 @@ class JembaReaderStorage {
             //identity необходимо для работы при нестабильной связи,
             //одному и тому же клиенту разрешается перезаписывать данные при расхождении на 0 или 1 ревизию
             const obj = this.getCache(id) || {};
+            const oldIdentity = obj.identity;
             const sameClient = (identity && obj.identity === identity);
             if (identity && obj.identity !== identity) {
                 obj.identity = identity;
@@ -126,8 +128,12 @@ class JembaReaderStorage {
 
             const revDiff = items[id].rev - check.items[id].rev;
             const allowUpdate = force || revDiff === 1 || (sameClient && (revDiff === 0 || revDiff === 1));
-            if (!allowUpdate)
+
+            if (!allowUpdate) {
+                log(LM_ERR, `JembaReaderStorage-Reject: revDiff: ${revDiff}, sameClient: ${sameClient}, oldIdentity: ${oldIdentity}, identity: ${identity}`);
+
                 return {state: 'reject', items: check.items};
+            }
         }
 
         const db = this.db;
