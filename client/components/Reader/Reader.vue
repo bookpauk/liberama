@@ -560,8 +560,8 @@ class Reader {
         try {
             if (!this.taskList) {
                 const taskArr = [
-                    ['checkNewVersionAvailable', 60], //проверки обновлений читалки, каждый час
-                    ['checkBuc', 70], //проверки обновлений книг, каждые 70 минут
+                    [this.checkNewVersionAvailable, 60], //проверки обновлений читалки, каждый час
+                    [this.checkBuc, 70], //проверки обновлений книг, каждые 70 минут
                 ];
 
                 this.taskList = [];
@@ -574,8 +574,8 @@ class Reader {
             for (const task of this.taskList) {
                 if (Date.now() - task.lastRunTime >= task.period*60*1000) {
                     try {
-                        //console.log('task run', task.method);
-                        await this[task.method]();
+                        //console.log('task run', task.method.name);
+                        await task.method();
                     } catch (e) {
                         console.error(e);
                     }
