@@ -325,7 +325,7 @@ const state = {
     currentProfile: '',
     settings: _.cloneDeep(settingDefaults),
     settingsRev: {},
-    libs: false,
+    libs: {},
     libsRev: 0,
 };
 
