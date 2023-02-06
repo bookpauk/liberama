@@ -438,61 +438,63 @@ export default class BookParser {
         };
 
         const onEndNode = (elemName) => {// eslint-disable-line no-unused-vars
-            if (tag == elemName) {
-                if (tag == 'binary') {
-                    binaryId = '';
-                }
-            
-                if (path.indexOf('/fictionbook/body') == 0) {
-                    if (tag == 'title') {
-                        isFirstTitlePara = false;
-                        bold = false;
-                        center = false;
-                        inTitle = false;
-                    }
+            tag = elemName;
 
-                    if (tag == 'section') {
-                        sectionLevel--;
-                    }
-
-                    if (tag == 'emphasis' || tag == 'strong' || tag == 'sup' || tag == 'sub') {
-                        growParagraph(`</${tag}>`, 0);
-                    }
-
-                    if (tag == 'p') {
-                        inPara = false;
-                    }
-
-                    if (tag == 'subtitle') {
-                        isFirstTitlePara = false;
-                        bold = false;
-                        center = false;
-                        inSubtitle = false;
-                    }
-
-                    if (tag == 'epigraph' || tag == 'annotation') {
-                        italic = false;
-                        space -= 1;
-                        newParagraph();
-                    }
-
-                    if (tag == 'stanza') {
-                        newParagraph();
-                    }
-
-                    if (tag == 'text-author') {
-                        bold = false;
-                        space -= 1;
-                    }
+            if (tag == 'binary') {
+                binaryId = '';
+            }
+        
+            if (path.indexOf('/fictionbook/body') == 0) {
+                if (tag == 'title') {
+                    isFirstTitlePara = false;
+                    bold = false;
+                    center = false;
+                    inTitle = false;
                 }
 
-                path = path.substr(0, path.length - tag.length - 1);
-                let i = path.lastIndexOf('/');
-                if (i >= 0) {
-                    tag = path.substr(i + 1);
-                } else {
+                if (tag == 'section') {
+                    sectionLevel--;
+                }
+
+                if (tag == 'emphasis' || tag == 'strong' || tag == 'sup' || tag == 'sub') {
+                    growParagraph(`</${tag}>`, 0);
+                }
+
+                if (tag == 'p') {
+                    inPara = false;
+                }
+
+                if (tag == 'subtitle') {
+                    isFirstTitlePara = false;
+                    bold = false;
+                    center = false;
+                    inSubtitle = false;
+                }
+
+                if (tag == 'epigraph' || tag == 'annotation') {
+                    italic = false;
+                    space -= 1;
+                    newParagraph();
+                }
+
+                if (tag == 'stanza') {
+                    newParagraph();
+                }
+
+                if (tag == 'text-author') {
+                    bold = false;
+                    space -= 1;
+                }
+            }
+
+            let i = path.lastIndexOf(tag);
+            if (i >= 0) {
+                path = path.substring(0, i - 1);
+                i = path.lastIndexOf('/');
+                if (i >= 0)
+                    tag = path.substring(i + 1);
+                else
                     tag = path;
-                }
             }
         };
 

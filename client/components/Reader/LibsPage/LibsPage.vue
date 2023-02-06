@@ -34,8 +34,8 @@ class LibsPage {
         if (!this.mode)
             return;
 
-        //TODO: убрать второе условие в 24г
-        if (!this.libs || (this.mode === 'omnireader' && this.libs.mode !== this.mode)) {
+        //TODO: убрать условие с mode в 24г
+        if (!this.libs || !this.libs.groups || (this.mode === 'omnireader' && this.libs.mode !== this.mode)) {
             const defaults = rstore.getLibsDefaults(this.mode);
             this.commit('reader/setLibs', defaults);
         }

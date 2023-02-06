@@ -22,10 +22,12 @@ const ssCacheStore = localForage.createInstance({
 const componentOptions = {
     watch: {
         serverSyncEnabled: function() {
-            this.serverSyncEnabledChanged();
+            if (this.inited)
+                this.serverSyncEnabledChanged();
         },
         serverStorageKey: function() {
-            this.serverStorageKeyChanged(true);
+            if (this.inited)
+                this.serverStorageKeyChanged(true);
         },
         settings: function() {
             this.debouncedSaveSettings();
@@ -85,6 +87,13 @@ class ServerStorage {
             if (!this.cachedRecentMod)
                 await this.cleanCachedRecent('cachedRecentMod');
 
+            //подстраховка хранения ключа, восстановим из IndexedDB при проблемах в localStorage
+            if (!this.serverStorageKey) {
+                const key = await ssCacheStore.getItem('storageKey');
+                if (key)
+                    this.commit('reader/setServerStorageKey', key);
+            }
+
             if (!this.serverStorageKey) {
                 //генерируем новый ключ
                 await this.generateNewServerStorageKey();
@@ -123,6 +132,7 @@ class ServerStorage {
     async generateNewServerStorageKey() {
         const key = utils.toBase58(utils.randomArray(32));
         this.commit('reader/setServerStorageKey', key);
+        //дождемся serverStorageKeyChanged, событие по watch не работает при this.inited == false
         await this.serverStorageKeyChanged(true);
     }
 
@@ -141,6 +151,10 @@ class ServerStorage {
     async serverStorageKeyChanged(force) {
         if (this.prevServerStorageKey != this.serverStorageKey) {
             this.prevServerStorageKey = this.serverStorageKey;
+
+            //сохраним ключ также в IndexedDB, чтобы была возможность восстановить при проблемах с localStorage
+            await ssCacheStore.setItem('storageKey', this.serverStorageKey);
+
             this.hashedStorageKey = utils.toBase58(cryptoUtils.sha256(this.serverStorageKey));
             this.keyInited = true;
 

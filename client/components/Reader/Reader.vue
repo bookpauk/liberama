@@ -393,6 +393,9 @@ class Reader {
                 this.recentItemKeys = [];
                 //сохранение в удаленном хранилище
                 await this.$refs.serverStorage.saveRecent(itemKeys);
+
+                //periodicTasks
+                this.periodicTasks();//no await
             } catch (e) {
                 if (!this.offlineModeActive)
                     this.$root.notify.error(e.message);
@@ -442,26 +445,15 @@ class Reader {
             this.$refs.recentBooksPage.init();
         })();
 
-        //проверки обновлений читалки
+        //единственный запуск periodicTasks при инициализации
+        //дальнейшие запуски periodicTasks выполняются из debouncedSaveRecent
+        //т.е. только по действию пользователя
         (async() => {
+            await utils.sleep(15*1000);
             this.isFirstNeedUpdateNotify = true;
-            //вечный цикл, запрашиваем периодически конфиг для проверки выхода новой версии читалки
-            while (1) {// eslint-disable-line no-constant-condition
-                await this.checkNewVersionAvailable();
-                await utils.sleep(60*60*1000); //каждый час
-            }
-            //дальше хода нет
-        })();
 
-        //проверки обновлений книг
-        (async() => {
-            await utils.sleep(15*1000); //подождем неск. секунд перед первым запросом
-            //вечный цикл, запрашиваем периодически обновления
-            while (1) {// eslint-disable-line no-constant-condition
-                await this.checkBuc();
-                await utils.sleep(70*60*1000); //каждые 70 минут
-            }
-            //дальше хода нет
+            this.allowPeriodicTasks = true;
+            this.periodicTasks();//no await
         })();
     }
 
@@ -560,26 +552,56 @@ class Reader {
         }
     }
 
-    async checkNewVersionAvailable() {
-        if (!this.checkingNewVersion && this.showNeedUpdateNotify) {
-            this.checkingNewVersion = true;
-            try {
-                await utils.sleep(15*1000); //подождем 15 секунд, чтобы прогрузился ServiceWorker при выходе новой версии
-                const config = await miscApi.loadConfig();
-                this.commit('config/setConfig', config);
+    async periodicTasks() {
+        if (!this.allowPeriodicTasks || this.doingPeriodicTasks)
+            return;
 
-                let againMes = '';
-                if (this.isFirstNeedUpdateNotify) {
-                    againMes = ' еще один раз';
+        this.doingPeriodicTasks = true;
+        try {
+            if (!this.taskList) {
+                const taskArr = [
+                    [this.checkNewVersionAvailable, 60], //проверки обновлений читалки, каждый час
+                    [this.checkBuc, 70], //проверки обновлений книг, каждые 70 минут
+                ];
+
+                this.taskList = [];
+                for (const task of taskArr) {
+                    const [method, period] = task;
+                    this.taskList.push({method, period, lastRunTime: 0});
                 }
+            }
 
-                if (this.version != this.clientVersion)
-                    this.$root.notify.info(`Вышла новая версия (v${this.version}) читалки.<br>Пожалуйста, обновите страницу${againMes}.`, 'Обновление');
-            } catch(e) {
-                console.error(e);
-            } finally {
-                this.checkingNewVersion = false;
-            }        
+            for (const task of this.taskList) {
+                if (Date.now() - task.lastRunTime >= task.period*60*1000) {
+                    try {
+                        //console.log('task run', task.method.name);
+                        await task.method();
+                    } catch (e) {
+                        console.error(e);
+                    }
+                    task.lastRunTime = Date.now();
+                }
+            }
+        } catch (e) {
+            console.error(e);
+        } finally {
+            this.doingPeriodicTasks = false;
+        }
+    }
+
+    async checkNewVersionAvailable() {
+        if (this.showNeedUpdateNotify) {
+            const config = await miscApi.loadConfig();
+            this.commit('config/setConfig', config);
+
+            let againMes = '';
+            if (this.isFirstNeedUpdateNotify) {
+                againMes = ' еще один раз';
+            }
+
+            if (this.version != this.clientVersion)
+                this.$root.notify.info(`Вышла новая версия (v${this.version}) читалки.<br>Пожалуйста, обновите страницу${againMes}.`, 'Обновление');
+
             this.isFirstNeedUpdateNotify = false;
         }
     }
@@ -588,82 +610,78 @@ class Reader {
         if (!this.bothBucEnabled)
             return;
 
-        try {
-            const sorted = bookManager.getSortedRecent();
+        const sorted = bookManager.getSortedRecent();
 
-            //выберем все кандидиаты на обновление
-            const updateUrls = new Set();
-            for (const book of sorted) {
-                if (!book.deleted && book.checkBuc && book.url && book.url.indexOf('disk://') !== 0)
-                    updateUrls.add(book.url);
+        //выберем все кандидиаты на обновление
+        const updateUrls = new Set();
+        for (const book of sorted) {
+            if (!book.deleted && book.checkBuc && book.url && book.url.indexOf('disk://') !== 0)
+                updateUrls.add(book.url);
+        }
+
+        //теперь по кусочкам запросим сервер
+        const arr = Array.from(updateUrls);
+        const bucSize = {};
+        const chunkSize = 100;
+        for (let i = 0; i < arr.length; i += chunkSize) {
+            const chunk = arr.slice(i, i + chunkSize);
+
+            const data = await readerApi.checkBuc(chunk);
+
+            for (const item of data) {
+                bucSize[item.id] = item.size;
             }
 
-            //теперь по кусочкам запросим сервер
-            const arr = Array.from(updateUrls);
-            const bucSize = {};
-            const chunkSize = 100;
-            for (let i = 0; i < arr.length; i += chunkSize) {
-                const chunk = arr.slice(i, i + chunkSize);
+            await utils.sleep(1000);//чтобы не ддосить сервер
+        }
 
-                const data = await readerApi.checkBuc(chunk);
-
-                for (const item of data) {
-                    bucSize[item.id] = item.size;
-                }
-
-                await utils.sleep(1000);//чтобы не ддосить сервер
+        const checkSetTime = {};
+        //проставим новые размеры у книг
+        for (const book of sorted) {
+            if (book.deleted)
+                continue;
+            
+            //размер 0 считаем отсутствующим
+            if (book.url && bucSize[book.url] && bucSize[book.url] !== book.bucSize) {
+                book.bucSize = bucSize[book.url];
+                await bookManager.recentSetItem(book);
             }
 
-            const checkSetTime = {};
-            //проставим новые размеры у книг
-            for (const book of sorted) {
-                if (book.deleted)
-                    continue;
-                
-                //размер 0 считаем отсутствующим
-                if (book.url && bucSize[book.url] && bucSize[book.url] !== book.bucSize) {
-                    book.bucSize = bucSize[book.url];
-                    await bookManager.recentSetItem(book);
-                }
+            //подготовка к следующему шагу, ищем книгу по url с максимальной датой установки checkBucTime/loadTime
+            //от этой даты будем потом отсчитывать bucCancelDays
+            if (updateUrls.has(book.url)) {
+                let rec = checkSetTime[book.url] || {time: 0, loadTime: 0};
 
-                //подготовка к следующему шагу, ищем книгу по url с максимальной датой установки checkBucTime/loadTime
-                //от этой даты будем потом отсчитывать bucCancelDays
-                if (updateUrls.has(book.url)) {
-                    let rec = checkSetTime[book.url] || {time: 0, loadTime: 0};
+                const time = (book.checkBucTime ? book.checkBucTime : (rec.loadTime || 0));
+                if (time > rec.time || (time == rec.time && (book.loadTime > rec.loadTime)))
+                    rec = {time, loadTime: book.loadTime, key: book.key};
 
-                    const time = (book.checkBucTime ? book.checkBucTime : (rec.loadTime || 0));
-                    if (time > rec.time || (time == rec.time && (book.loadTime > rec.loadTime)))
-                        rec = {time, loadTime: book.loadTime, key: book.key};
-
-                    checkSetTime[book.url] = rec;
-                }
+                checkSetTime[book.url] = rec;
             }
+        }
 
-            //bucCancelEnabled и bucCancelDays
-            //снимем флаг checkBuc у необновлявшихся bucCancelDays
-            if (this.bucCancelEnabled) {
-                for (const rec of Object.values(checkSetTime)) {
-                    if (rec.time && Date.now() - rec.time > this.bucCancelDays*24*3600*1000) {
-                        const book = await bookManager.getRecentBook({key: rec.key});
-                        const needBookUpdate = 
-                            book.checkBuc
-                            && book.bucSize
-                            && utils.hasProp(book, 'downloadSize')
-                            && book.bucSize !== book.downloadSize
-                            && (book.bucSize - book.downloadSize >= this.bucSizeDiff)
-                        ;
+        //bucCancelEnabled и bucCancelDays
+        //снимем флаг checkBuc у необновлявшихся bucCancelDays
+        if (this.bucCancelEnabled) {
+            for (const rec of Object.values(checkSetTime)) {
+                if (rec.time && Date.now() - rec.time > this.bucCancelDays*24*3600*1000) {
+                    const book = await bookManager.getRecentBook({key: rec.key});
+                    const needBookUpdate = 
+                        book.checkBuc
+                        && book.bucSize
+                        && utils.hasProp(book, 'downloadSize')
+                        && book.bucSize !== book.downloadSize
+                        && (book.bucSize - book.downloadSize >= this.bucSizeDiff)
+                    ;
 
-                        if (book && !needBookUpdate) {
-                            await bookManager.setCheckBuc(book, undefined);//!!!
-                        }
+                    if (book && !needBookUpdate) {
+                        await bookManager.setCheckBuc(book, undefined);//!!!
                     }
                 }
             }
-
-            await this.$refs.recentBooksPage.updateTableData();
-        } catch (e) {
-            console.error(e);
         }
+
+        await this.$refs.recentBooksPage.updateTableData();
     }
 
     updateCountChanged(event) {
@@ -1409,8 +1427,6 @@ class Reader {
             if (!this.showHelpOnErrorIfNeeded(url)) {
                 this.$root.stdDialog.alert(e.message, 'Ошибка', {color: 'negative'});
             }
-        } finally {
-            this.checkNewVersionAvailable();
         }
     }
 
