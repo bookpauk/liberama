@@ -201,7 +201,7 @@
 
                         <div
                             class="del-button self-end row justify-center items-center clickable"
-                            @click="handleDel(item.key)"
+                            @click="handleDel(item)"
                         >
                             <q-icon class="la la-times" size="12px" />
                             <q-tooltip :delay="1500" anchor="bottom middle" content-style="font-size: 80%">
@@ -212,7 +212,7 @@
                         <div
                             v-show="showArchive"
                             class="restore-button self-start row justify-center items-center clickable"
-                            @click="handleRestore(item.key)"
+                            @click="handleRestore(item)"
                         >
                             <q-icon class="la la-arrow-left" size="14px" />
                             <q-tooltip :delay="1500" anchor="bottom middle" content-style="font-size: 80%">
@@ -593,21 +593,46 @@ class RecentBooksPage {
         }
     }
 
-    async handleDel(key) {
-        if (!this.showArchive) {
-            await bookManager.delRecentBook({key});
-            this.$root.notify.info('Перенесено в архив');
+    async handleDel(item) {
+        if (item.group) {
+            const keys = [{key: item.key}];
+            for (const book of item.group)
+                keys.push({key: book.key});
+
+            if (!this.showArchive) {
+                await bookManager.delRecentBooks(keys);
+                this.$root.notify.info(`Группа книг (всего ${keys.length}) перенесена в архив`);
+            } else {
+                if (await this.$root.stdDialog.confirm(`Подтвердите удаление группы книг (всего ${keys.length}) из архива:`, ' ')) {
+                    await bookManager.delRecentBooks(keys, 2);
+                    this.$root.notify.info('Группа книг удалена безвозвратно');
+                }
+            }
         } else {
-            if (await this.$root.stdDialog.confirm('Подтвердите удаление из архива:', ' ')) {
-                await bookManager.delRecentBook({key}, 2);
-                this.$root.notify.info('Удалено безвозвратно');
+            if (!this.showArchive) {
+                await bookManager.delRecentBooks([{key: item.key}]);
+                this.$root.notify.info('Книга перенесена в архив');
+            } else {
+                if (await this.$root.stdDialog.confirm('Подтвердите удаление книги из архива:', ' ')) {
+                    await bookManager.delRecentBooks([{key: item.key}], 2);
+                    this.$root.notify.info('Книга удалено безвозвратно');
+                }
             }
         }
     }
 
-    async handleRestore(key) {
-        await bookManager.restoreRecentBook({key});
-        this.$root.notify.info('Восстановлено из архива');
+    async handleRestore(item) {
+        if (item.group) {
+            const keys = [{key: item.key}];
+            for (const book of item.group)
+                keys.push({key: book.key});
+
+            await bookManager.restoreRecentBooks(keys);
+            this.$root.notify.info(`Группа книг (всего ${keys.length}) восстановлена из архива`);
+        } else {
+            await bookManager.restoreRecentBooks([{key: item.key}]);
+            this.$root.notify.info('Книга восстановлена из архива');
+        }
     }
 
     async loadBook(item, force = false) {

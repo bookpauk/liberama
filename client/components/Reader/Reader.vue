@@ -1379,6 +1379,7 @@ class Reader {
                 found = (found ? _.cloneDeep(found) : found);
 
                 if (found) {
+                    //если такой файл уже не загружен (path не совпадают)
                     if (wasOpened.sameBookKey != found.sameBookKey) {
                         //спрашиваем, надо ли объединить файлы
                         const askResult = bookManager.keysEqual(found.path, addedBook.path) || 

@@ -467,7 +467,7 @@ class BookManager {
     async getRecentBook(value) {
         return this.recent[value.key];
     }
-
+/*
     async delRecentBook(value, delFlag = 1) {
         const item = this.recent[value.key];
         item.deleted = delFlag;
@@ -479,12 +479,36 @@ class BookManager {
         await this.recentSetItem(item);
         this.emit('recent-deleted', value.key);
     }
+*/
+    async delRecentBooks(values, delFlag = 1) {
+        for (const value of values) {
+            const item = this.recent[value.key];
+            item.deleted = delFlag;
 
+            if (this.recentLastKey == value.key) {
+                await this.recentSetLastKey(null);
+            }
+
+            await this.recentSetItem(item);
+        }
+        
+        this.emit('recent-deleted');
+    }
+/*
     async restoreRecentBook(value) {
         const item = this.recent[value.key];
         item.deleted = 0;
 
         await this.recentSetItem(item);
+    }
+*/
+    async restoreRecentBooks(values) {
+        for (const value of values) {
+            const item = this.recent[value.key];
+            item.deleted = 0;
+
+            await this.recentSetItem(item);
+        }
     }
 
     async setCheckBuc(value, checkBuc) {
