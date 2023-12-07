@@ -1,5 +1,18 @@
 export const versionHistory = [
 {
+    version: '1.2.0',
+    releaseDate: '2023-12-??',
+    showUntil: '2023-12-??',
+    content:
+`
+<ul>
+    <li>в списке загруженных, книга в архив (из архива) переносится теперь со всей группой своих версий</li>
+</ul>
+
+`
+},
+
+{
     version: '1.1.3',
     releaseDate: '2023-02-06',
     showUntil: '2023-02-05',
