@@ -14,6 +14,7 @@ const propsToSave = [
     'remoteStorage',
     'bucEnabled',
     'bucServer',
+    'networkLibraryLink',
 ];
 
 let instance = null;

@@ -4,7 +4,7 @@ class Misc {
     async loadConfig() {
 
         const query = {params: [
-            'name', 'version', 'mode', 'maxUploadFileSize', 'useExternalBookConverter', 'acceptFileExt', 'bucEnabled', 'branch',
+            'name', 'version', 'mode', 'maxUploadFileSize', 'useExternalBookConverter', 'acceptFileExt', 'bucEnabled', 'branch', 'networkLibraryLink',
         ]};
 
         const config = await wsc.message(await wsc.send(Object.assign({action: 'get-config'}, query)));
