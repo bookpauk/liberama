@@ -1032,6 +1032,11 @@ class Reader {
     }
 
     libsToogle() {
+        if (this.config.networkLibraryLink) {
+            window.open(this.config.networkLibraryLink, '_blank');
+            return;
+        }
+
         this.libsActive = !this.libsActive;
         if (this.libsActive) {
             this.$refs.libsPage.init();//no await
