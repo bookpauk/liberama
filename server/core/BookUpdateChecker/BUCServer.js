@@ -27,8 +27,8 @@ class BUCServer {
 
                 this.cleanQueryInterval = 300*dayMs;//интервал очистки устаревших
                 this.oldQueryInterval = 14*dayMs;//интервал устаревания запроса на обновление
-                this.checkingInterval = 5*hourMs;//интервал проверки обновления одного и того же файла
-                this.sameHostCheckInterval = 1000;//интервал проверки файла на том же сайте, не менее
+                this.checkingInterval = 1*dayMs;//интервал проверки обновления одного и того же файла
+                this.sameHostCheckInterval = 10*1000;//интервал проверки файла на том же сайте, не менее
             } else {
                 this.maxCheckQueueLength = 10;//максимальная длина checkQueue
                 this.fillCheckQueuePeriod = 10*1000;//период пополнения очереди
@@ -262,7 +262,7 @@ class BUCServer {
                         let unchanged = true;
                         let hash = '';
 
-                        const headers = await this.down.head(row.id);
+                        const headers = await this.down.head(row.id, {timeout: 10*1000});
 
                         const etag = headers['etag'] || '';
                         const modTime = headers['last-modified'] || '';
@@ -276,7 +276,7 @@ class BUCServer {
                             && (!size || !row.size || (size !== row.size))
                             ) {
 
-                            const downdata = await this.down.load(row.id);
+                            const downdata = await this.down.load(row.id, {timeout: 10*1000});
 
                             size = downdata.length;
                             hash = await utils.getBufHash(downdata, 'sha256', 'hex');
@@ -327,7 +327,7 @@ class BUCServer {
                 log(LM_ERR, e.stack);
             }
 
-            await utils.sleep(10);
+            await utils.sleep(100);
         }
     }
 
