@@ -317,11 +317,12 @@ class BUCServer {
                         log(LM_ERR, `error ${row.id} > ${e.stack ? e.stack : e.message}`);
                     } finally {
                         (async() => {
-                            const sameHostCheckInterval = this.shciForHost[url.hostname] || this.sameHostCheckInterval;
+                            let sameHostCheckInterval = this.shciForHost[url.hostname] || this.sameHostCheckInterval;
+                            sameHostCheckInterval = Math.round((Math.random() - 0.5)*(sameHostCheckInterval*0.2) + sameHostCheckInterval);
 
                             log(`delay ${sameHostCheckInterval}ms for host '${url.hostname}'`);
                             await utils.sleep(sameHostCheckInterval);
-                            
+
                             this.hostChecking[url.hostname] = false;
                         })();
                     }
