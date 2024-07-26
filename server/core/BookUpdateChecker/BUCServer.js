@@ -51,6 +51,7 @@ class BUCServer {
             
             this.checkQueue = [];
             this.hostChecking = {};
+            this.shciForHost = this.config.shciForHost || {};//sameHostCheckInterval for host
 
             this.main(); //no await
 
@@ -316,7 +317,11 @@ class BUCServer {
                         log(LM_ERR, `error ${row.id} > ${e.stack ? e.stack : e.message}`);
                     } finally {
                         (async() => {
-                            await utils.sleep(this.sameHostCheckInterval);
+                            const sameHostCheckInterval = this.shciForHost[url.hostname] || this.sameHostCheckInterval;
+
+                            log(`delay ${sameHostCheckInterval}ms for host '${url.hostname}'`);
+                            await utils.sleep(sameHostCheckInterval);
+                            
                             this.hostChecking[url.hostname] = false;
                         })();
                     }

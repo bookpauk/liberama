@@ -56,6 +56,9 @@ module.exports = {
             ip: '0.0.0.0',
             port: '33443',
             accessToken: '',
+            shciForHost: {
+                'samlib.ru': 300000
+            },
         }*/
     ],
 
