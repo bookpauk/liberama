@@ -48,7 +48,7 @@
 
             <template #footer>
                 <div class="row col">
-                    <q-btn class="q-px-md q-mr-sm" color="btn2" text-color="app" dense no-caps @click="goToNotes">
+                    <q-btn class="q-px-md q-mr-md" color="btn2" text-color="app" dense no-caps @click="goToNotes">
                         В примечаниях
                     </q-btn>
                 </div>
