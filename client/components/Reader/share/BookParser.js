@@ -86,17 +86,23 @@ export default class BookParser {
         let binaryType = '';
         let dimPromises = [];
         this.coverPageId = '';
+        this.images = [];
+        let imageNum = 0;
+
+        //примечания
+        this.notes = {};
+        let inNote = false;
+        let noteId = '';
+        let inNotesBody = false;
 
         //оглавление
         this.contents = [];
-        this.images = [];
         let curTitle = {paraIndex: -1, title: '', subtitles: []};
         let curSubtitle = {paraIndex: -1, title: ''};
         let inTitle = false;
         let inSubtitle = false;
         let sectionLevel = 0;
         let bodyIndex = 0;
-        let imageNum = 0;
 
         let paraIndex = -1;
         let paraOffset = 0;
@@ -289,7 +295,7 @@ export default class BookParser {
                 if (attrs.href && attrs.href.value) {
                     const href = attrs.href.value;
                     const alt = (attrs.alt && attrs.alt.value ? attrs.alt.value : '');
-                    const {id, local} = this.imageHrefToId(href);
+                    const {id, local} = this.hrefToId(href);
                     if (local) {//local
                         imageNum++;
 
@@ -322,6 +328,23 @@ export default class BookParser {
                 }
             }
 
+            if (tag == 'a') {
+                let attrs = sax.getAttrsSync(tail);
+                if (attrs.href && attrs.href.value && attrs.type && attrs.type.value === 'note') {//note
+                    const href = attrs.href.value;
+                    const {id, local} = this.hrefToId(href);
+
+                    if (local) {
+                        inNote = true;
+                        growParagraph(`<note href="${id}" orig="1">`, 0);
+
+                        if (!this.notes[id]) {
+                            this.notes[id] = {id, linkParaIndex: paraIndex};
+                        }
+                    }
+                }
+            }
+
             if (path == '/fictionbook/description/title-info/author') {
                 if (!fb2.author)
                     fb2.author = [];
@@ -350,6 +373,11 @@ export default class BookParser {
 
             if (path.indexOf('/fictionbook/body') == 0) {
                 if (tag == 'body') {
+                    let attrs = sax.getAttrsSync(tail);
+                    if (attrs.name && attrs.name.value === 'notes') {//notes
+                        inNotesBody = true;
+                    }
+
                     if (isFirstBody && fb2.annotation) {
                         const ann = fb2.annotation.split('<p>').filter(v => v).map(v => utils.removeHtmlTags(v));
                         ann.forEach(a => {
@@ -389,6 +417,23 @@ export default class BookParser {
                         newParagraph();
                     isFirstSection = false;
                     sectionLevel++;
+
+                    if (inNotesBody) {
+                        let attrs = sax.getAttrsSync(tail);
+                        if (attrs.id && attrs.id.value) {//notes
+                            const id = attrs.id.value;
+                            let note = this.notes[id];
+                            if (!note) {
+                                note = {id};
+                                this.notes[id] = note;
+                            }
+
+                            note.noteParaIndex = paraIndex;
+                            note.para = [];
+                            noteId = id;
+                        }
+
+                    }
                 }
 
                 if (tag == 'emphasis' || tag == 'strong' || tag == 'sup' || tag == 'sub') {
@@ -401,6 +446,14 @@ export default class BookParser {
                     if (tag == 'p') {
                         inPara = true;
                         isFirstTitlePara = false;
+
+                        if (inNotesBody && noteId) {
+                            if (!inTitle) {
+                                this.notes[noteId].para.push('');
+                            } else {
+                                growParagraph(`<note href="${noteId}">`, 0);
+                            }
+                        }
                     }
                 }
 
@@ -440,11 +493,20 @@ export default class BookParser {
         const onEndNode = (elemName) => {// eslint-disable-line no-unused-vars
             tag = elemName;
 
+            if (tag == 'a' && inNote) {
+                growParagraph('</note>', 0);
+                inNote = false;
+            }
+
             if (tag == 'binary') {
                 binaryId = '';
             }
         
             if (path.indexOf('/fictionbook/body') == 0) {
+                if (tag == 'body') {
+                    inNotesBody = false;
+                }
+
                 if (tag == 'title') {
                     isFirstTitlePara = false;
                     bold = false;
@@ -462,6 +524,10 @@ export default class BookParser {
 
                 if (tag == 'p') {
                     inPara = false;
+
+                    if (inTitle && inNotesBody && noteId) {
+                        growParagraph('</note>', 0);
+                    }
                 }
 
                 if (tag == 'subtitle') {
@@ -570,6 +636,12 @@ export default class BookParser {
                     growParagraph(`${tOpen}${text}${tClose}`, text.length, text);
                 else
                     growParagraph(' ', 1);
+
+                if (!inTitle && inPara && inNotesBody && noteId) {
+                    const p = this.notes[noteId].para;
+                    if (p.length)
+                        p[p.length - 1] = p[p.length - 1] + text;
+                }
             }
         };
 
@@ -602,7 +674,7 @@ export default class BookParser {
         return {fb2};
     }
 
-    imageHrefToId(id) {
+    hrefToId(id) {
         let local = false;
         if (id[0] == '#') {
             id = id.substr(1);
@@ -635,7 +707,7 @@ export default class BookParser {
 
     splitToStyle(s) {
         let result = [];/*array of {
-            style: {bold: Boolean, italic: Boolean, sup: Boolean, sub: Boolean, center: Boolean, space: Number},
+            style: {bold: Boolean, italic: Boolean, sup: Boolean, sub: Boolean, center: Boolean, space: Number, note: Object},
             image: {local: Boolean, inline: Boolean, id: String},
             text: String,
         }*/
@@ -686,7 +758,7 @@ export default class BookParser {
                 case 'image': {
                     let attrs = sax.getAttrsSync(tail);
                     if (attrs.href && attrs.href.value) {
-                        image = this.imageHrefToId(attrs.href.value);
+                        image = this.hrefToId(attrs.href.value);
                         image.inline = false;
                         image.num = (attrs.num && attrs.num.value ? attrs.num.value : 0);
                     }
@@ -695,7 +767,7 @@ export default class BookParser {
                 case 'image-inline': {
                     let attrs = sax.getAttrsSync(tail);
                     if (attrs.href && attrs.href.value) {
-                        const img = this.imageHrefToId(attrs.href.value);
+                        const img = this.hrefToId(attrs.href.value);
                         img.inline = true;
                         img.num = (attrs.num && attrs.num.value ? attrs.num.value : 0);
                         result.push({
@@ -703,6 +775,13 @@ export default class BookParser {
                             image: img,
                             text: ''
                         });
+                    }
+                    break;
+                }
+                case 'note': {
+                    let attrs = sax.getAttrsSync(tail);
+                    if (attrs.href && attrs.href.value) {
+                        style.note = {id: attrs.href.value, orig: attrs.orig?.value};
                     }
                     break;
                 }
@@ -733,6 +812,9 @@ export default class BookParser {
                     image = {};
                     break;
                 case 'image-inline':
+                    break;
+                case 'note':
+                    style.note = false;
                     break;
             }
         };
