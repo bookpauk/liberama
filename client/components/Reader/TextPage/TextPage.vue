@@ -1271,8 +1271,14 @@ class TextPage {
         if (note) {
             if (orig) {//show dialog
                 this.noteId = noteId;
-                const pad = (note.para.length > 1 ? 20 : 0);
-                this.noteHtml = note.para.map(p => `<p style="margin: 0; padding-left: ${pad}px">${p}</p>`).join('');
+                this.noteHtml = note.xml
+                    .replace(/<p>/g, '<p class="note-para">')
+                    .replace(/<stanza>/g, '<br>').replace(/<\/stanza>/g, '')
+                    .replace(/<v>/g, '<p class="note-para">').replace(/<\/v>/g, '</p>')
+                    .replace(/<emphasis>/g, '<em>').replace(/<\/emphasis>/g, '</em>')
+                    .replace(/<text-author>/g, '<br>').replace(/<\/text-author>/g, '')
+                ;
+
                 this.noteDialogVisible = true;
             } else {//go to orig
                 this.goToOrigNote(noteId);
@@ -1334,4 +1340,11 @@ export default vueComponent(TextPage);
     background-color: rgba(0,0,0,0);
 }
 
+</style>
+<style>
+.note-para {
+    margin: 0;
+    padding: 0;
+    text-indent: 20px;
+}
 </style>

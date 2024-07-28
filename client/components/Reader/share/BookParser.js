@@ -94,6 +94,7 @@ export default class BookParser {
         let inNote = false;
         let noteId = '';
         let inNotesBody = false;
+        const noteTags = new Set(['p', 'poem', 'stanza', 'v', 'text-author', 'emphasis']);
 
         //оглавление
         this.contents = [];
@@ -429,7 +430,7 @@ export default class BookParser {
                             }
 
                             note.noteParaIndex = paraIndex;
-                            note.para = [];
+                            note.xml = '';
                             noteId = id;
                         }
 
@@ -447,12 +448,8 @@ export default class BookParser {
                         inPara = true;
                         isFirstTitlePara = false;
 
-                        if (inNotesBody && noteId) {
-                            if (!inTitle) {
-                                this.notes[noteId].para.push('');
-                            } else {
-                                growParagraph(`<note href="${noteId}">`, 0);
-                            }
+                        if (inTitle && inNotesBody && noteId) {
+                            growParagraph(`<note href="${noteId}">`, 0);
                         }
                     }
                 }
@@ -486,6 +483,10 @@ export default class BookParser {
                     newParagraph();
                     bold = true;
                     space += 1;
+                }
+
+                if (!inTitle && inNotesBody && noteId && noteTags.has(tag)) {
+                    this.notes[noteId].xml += `<${tag}>`;
                 }
             }
         };
@@ -550,6 +551,10 @@ export default class BookParser {
                 if (tag == 'text-author') {
                     bold = false;
                     space -= 1;
+                }
+
+                if (!inTitle && inNotesBody && noteId && noteTags.has(tag)) {
+                    this.notes[noteId].xml += `</${tag}>`;
                 }
             }
 
@@ -637,10 +642,8 @@ export default class BookParser {
                 else
                     growParagraph(' ', 1);
 
-                if (!inTitle && inPara && inNotesBody && noteId) {
-                    const p = this.notes[noteId].para;
-                    if (p.length)
-                        p[p.length - 1] = p[p.length - 1] + text;
+                if (!inTitle && inNotesBody && noteId) {
+                    this.notes[noteId].xml += text;
                 }
             }
         };
