@@ -953,6 +953,22 @@ class TextPage {
         }
     }
 
+    doPara(paraIndex) {
+        const para = this.parsed.para[paraIndex];
+
+        if (para && this.pageLineCount > 0) {
+            const lines = this.parsed.getLines(para.offset, this.pageLineCount);
+
+            if (lines.length >= this.pageLineCount) {
+                this.currentAnimation = this.pageChangeAnimation;
+                this.pageChangeDirectionDown = true;
+                this.userBookPosChange = true;
+                this.bookPos = lines[0].begin;
+            } else 
+                this.doEnd();
+        }
+    }
+
     doToolBarToggle(event) {
         this.$emit('do-action', {action: 'switchToolbar', event});
     }
@@ -1267,25 +1283,15 @@ class TextPage {
     goToNotes() {
         const note = this.parsed.notes[this.noteId];
         if (note && note.noteParaIndex >= 0) {
-
-            const para = this.parsed.parsePara(note.noteParaIndex);
-
-            this.userBookPosChange = true;
-            this.bookPos = para.lines[0].begin;
-
+            this.doPara(note.noteParaIndex);
             this.noteDialogVisible = false;
         }
     }
 
     goToOrigNote(noteId) {
         const note = this.parsed.notes[noteId];
-        if (note && note.noteParaIndex >= 0) {
-
-            const para = this.parsed.parsePara(note.linkParaIndex);
-
-            this.userBookPosChange = true;
-            this.bookPos = para.lines[0].begin;
-
+        if (note && note.linkParaIndex >= 0) {
+            this.doPara(note.linkParaIndex);
             this.noteDialogVisible = false;
         }
     }
