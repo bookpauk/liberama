@@ -2,7 +2,7 @@ const https = require('https');
 const axios = require('axios');
 const utils = require('./utils');
 
-const userAgent = 'Mozilla/5.0 (X11; HasCodingOs 1.0; Linux x64) AppleWebKit/637.36 (KHTML, like Gecko) Chrome/70.0.3112.101 Safari/637.36 HasBrowser/5.0';
+const userAgent = 'Mozilla/5.0 (X11; Linux x86_64; rv:109.0) Gecko/20100101 Firefox/113.0';
 
 class FileDownloader {
     constructor(limitDownloadSize = 0) {
@@ -16,7 +16,6 @@ class FileDownloader {
             headers: {
                 'accept-encoding': 'gzip, compress, deflate',
                 'user-agent': userAgent,
-                timeout: 300*1000,
             },
             httpsAgent: new https.Agent({
                 rejectUnauthorized: false // решение проблемы 'unable to verify the first certificate' для некоторых сайтов с валидным сертификатом
@@ -25,6 +24,9 @@ class FileDownloader {
         };
         if (opts)
             options = Object.assign({}, opts, options);
+
+        if (!options.timeout)
+            options.timeout = 300*1000;//5 min
 
         try {
             const res = await axios.get(url, options);
@@ -77,8 +79,8 @@ class FileDownloader {
         const options = {
             headers: {
                 'user-agent': userAgent,
-                timeout: 10*1000,
             },
+            timeout: 10*1000,
         };
 
         const res = await axios.head(url, options);

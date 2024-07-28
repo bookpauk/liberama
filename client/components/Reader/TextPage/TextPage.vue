@@ -4,12 +4,12 @@
             <div class="absolute" v-html="background"></div>
             <div class="absolute" v-html="pageDivider"></div>
         </div>
-        <div ref="scrollBox1" class="layout over-hidden" @wheel.prevent.stop="onMouseWheel">
+        <div ref="scrollBox1" class="scroll-box layout over-hidden" @wheel.prevent.stop="onMouseWheel">
             <div ref="scrollingPage1" class="layout over-hidden" @transitionend="onPage1TransitionEnd" @animationend="onPage1AnimationEnd">
                 <div @copy.prevent="copyText" v-html="page1"></div>
             </div>
         </div>
-        <div ref="scrollBox2" class="layout over-hidden" @wheel.prevent.stop="onMouseWheel">
+        <div ref="scrollBox2" class="scroll-box layout over-hidden" @wheel.prevent.stop="onMouseWheel">
             <div ref="scrollingPage2" class="layout over-hidden" @transitionend="onPage2TransitionEnd" @animationend="onPage2AnimationEnd">
                 <div @copy.prevent="copyText" v-html="page2"></div>
             </div>
@@ -24,14 +24,9 @@
             @wheel.prevent.stop="onMouseWheel"
             @touchstart.stop="onTouchStart" @touchend.stop="onTouchEnd" @touchmove.stop="onTouchMove" @touchcancel.prevent.stop="onTouchCancel"            
         >
-            <div
-                v-show="showStatusBar && statusBarClickOpen" @mousedown.prevent.stop @touchstart.stop
-                @click.prevent.stop="onStatusBarClick"
-                v-html="statusBarClickable"
-            ></div>
         </div>
         <div
-            v-show="!clickControl && showStatusBar && statusBarClickOpen" class="layout" 
+            v-show="showStatusBar && statusBarClickOpen" class="layout" 
             @mousedown.prevent.stop @touchstart.stop
             @click.prevent.stop="onStatusBarClick"
             v-html="statusBarClickable"
@@ -40,6 +35,29 @@
         <!-- невидимым делать нельзя (display: none), вовремя не подгружаютя шрифты -->
         <canvas ref="offscreenCanvas" class="layout" style="visibility: hidden"></canvas>
         <div ref="measureWidth" style="position: absolute; visibility: hidden"></div>
+
+        <!-- Примечание -->
+        <Dialog ref="dialog1" v-model="noteDialogVisible">
+            <!--template #header>
+                Примечание
+            </template-->
+
+            <div class="column col" style="line-height: 20px; max-width: 400px; max-height: 200px; overflow-x: hidden; overflow-y: auto">
+                <div v-html="noteHtml"></div>
+            </div>
+
+            <template #footer>
+                <div class="row col">
+                    <q-btn class="q-px-md q-mr-md" color="btn2" text-color="app" dense no-caps @click="goToNotes">
+                        В примечаниях
+                    </q-btn>
+                </div>
+
+                <q-btn class="q-px-md" color="btn2" text-color="app" dense no-caps @click="noteDialogVisible = false">
+                    OK
+                </q-btn>
+            </template>
+        </Dialog>
     </div>
 </template>
 
@@ -51,6 +69,7 @@ import {loadCSS} from 'fg-loadcss';
 import _ from 'lodash';
 import he from 'he';
 
+import Dialog from '../../share/Dialog.vue';
 import './TextPage.css';
 
 import * as utils from '../../../share/utils';
@@ -62,7 +81,19 @@ import {clickMap} from '../share/clickMap';
 
 const minLayoutWidth = 100;
 
+//обработчик кликов по примечаниям, см. DrawHelper
+//коряво, но иначе придется сильно усложнять рендеринг страниц (через Vue)
+window.onNoteClickLiberama = (noteId, orig) => {
+    const textPage = window.textPageLiberama;
+    if (textPage) {
+        textPage.showNote(noteId, orig);
+    }
+}
+
 const componentOptions = {
+    components: {
+        Dialog
+    },
     watch: {
         bookPos: function() {
             this.$emit('book-pos-changed', {bookPos: this.bookPos, bookPosSeen: this.bookPosSeen});
@@ -90,6 +121,7 @@ class TextPage {
     _options = componentOptions;
 
     showStatusBar = false;
+    statusBarClickOpen = false;
     clickControl = true;
 
     background = null;
@@ -113,6 +145,10 @@ class TextPage {
     inAnimation = false;
 
     meta = null;
+
+    noteDialogVisible = false;
+    noteId = '';
+    noteHtml = '';
 
     created() {
         this.drawHelper = new DrawHelper();
@@ -153,6 +189,8 @@ class TextPage {
             await utils.sleep(200);
             this.$nextTick(this.onResize);
         });
+
+        window.textPageLiberama = this;
     }
 
     mounted() {
@@ -297,6 +335,8 @@ class TextPage {
             top += this.statusBarHeight*(this.statusBarTop ? 1 : 0);
         let page1 = this.$refs.scrollBox1.style;
         let page2 = this.$refs.scrollBox2.style;
+
+        page1.pointerEvents = page2.pointerEvents = (this.clickControl ? 'none' : 'auto'); 
         
         page1.perspective = page2.perspective = '3072px';
 
@@ -913,6 +953,22 @@ class TextPage {
         }
     }
 
+    doPara(paraIndex) {
+        const para = this.parsed.para[paraIndex];
+
+        if (para && this.pageLineCount > 0) {
+            const lines = this.parsed.getLines(para.offset, this.pageLineCount);
+
+            if (lines.length >= this.pageLineCount) {
+                this.currentAnimation = this.pageChangeAnimation;
+                this.pageChangeDirectionDown = true;
+                this.userBookPosChange = true;
+                this.bookPos = lines[0].begin;
+            } else 
+                this.doEnd();
+        }
+    }
+
     doToolBarToggle(event) {
         this.$emit('do-action', {action: 'switchToolbar', event});
     }
@@ -1209,6 +1265,36 @@ class TextPage {
 
         event.clipboardData.setData('text/plain', filtered);
     }
+
+    showNote(noteId, orig) {
+        const note = this.parsed.notes[noteId];
+        if (note) {
+            if (orig) {//show dialog
+                this.noteId = noteId;
+                const pad = (note.para.length > 1 ? 20 : 0);
+                this.noteHtml = note.para.map(p => `<p style="margin: 0; padding-left: ${pad}px">${p}</p>`).join('');
+                this.noteDialogVisible = true;
+            } else {//go to orig
+                this.goToOrigNote(noteId);
+            }
+        }
+    }
+
+    goToNotes() {
+        const note = this.parsed.notes[this.noteId];
+        if (note && note.noteParaIndex >= 0) {
+            this.doPara(note.noteParaIndex);
+            this.noteDialogVisible = false;
+        }
+    }
+
+    goToOrigNote(noteId) {
+        const note = this.parsed.notes[noteId];
+        if (note && note.linkParaIndex >= 0) {
+            this.doPara(note.linkParaIndex);
+            this.noteDialogVisible = false;
+        }
+    }
 }
 
 export default vueComponent(TextPage);
@@ -1244,7 +1330,7 @@ export default vueComponent(TextPage);
 }
 
 .events {
-    z-index: 20;
+    z-index: 9;
     background-color: rgba(0,0,0,0);
 }
 

@@ -1,4 +1,5 @@
 require('tls').DEFAULT_MIN_VERSION = 'TLSv1';
+process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
 
 const fs = require('fs-extra');
 const express = require('express');
