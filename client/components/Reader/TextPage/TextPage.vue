@@ -1274,7 +1274,7 @@ class TextPage {
                 this.noteHtml = note.xml
                     .replace(/<p>/g, '<p class="note-para">')
                     .replace(/<stanza>/g, '<br>').replace(/<\/stanza>/g, '')
-                    .replace(/<v>/g, '<p class="note-para">').replace(/<\/v>/g, '</p>')
+                    .replace(/<v>/g, '<p style="margin: 0">').replace(/<\/v>/g, '</p>')
                     .replace(/<emphasis>/g, '<em>').replace(/<\/emphasis>/g, '</em>')
                     .replace(/<text-author>/g, '<br>').replace(/<\/text-author>/g, '')
                 ;
@@ -1345,6 +1345,6 @@ export default vueComponent(TextPage);
 .note-para {
     margin: 0;
     padding: 0;
-    text-indent: 20px;
+    margin-bottom: 10px;
 }
 </style>
