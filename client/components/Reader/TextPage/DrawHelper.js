@@ -72,7 +72,7 @@ export default class DrawHelper {
 
                 tOpen += `<span style="position: relative;">` +
                     `<span style="position: absolute; background-color: ${this.textColor}; opacity: 0.1; cursor: pointer; pointer-events: auto; ` +
-                    `height: ${this.fontSize + pad*2}px; padding: ${pad}px; left: -${(btnW - w)/2}px; top: -${pad + d}px; width: ${btnW}px; border-radius: ${this.fontSize}px;" ` +
+                    `height: ${this.fontSize + pad*2}px; padding: ${pad}px; left: -${(btnW - w)/2 - pad*0.05}px; top: -${pad + d}px; width: ${btnW}px; border-radius: ${this.fontSize}px;" ` +
                     `onclick="onNoteClickLiberama('${part.style.note.id}', ${part.style.note.orig ? 1 : 0})"><span style="visibility: hidden;" class="dborder">${text}</span></span>`;
             }
             let tClose = '';
