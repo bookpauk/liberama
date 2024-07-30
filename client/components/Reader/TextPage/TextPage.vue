@@ -49,7 +49,7 @@
             <template #footer>
                 <div class="row col">
                     <q-btn class="q-px-md q-mr-md" color="btn2" text-color="app" dense no-caps @click="goToNotes">
-                        В примечаниях
+                        В примечания
                     </q-btn>
                 </div>
 
