@@ -38,9 +38,9 @@
 
         <!-- Примечание -->
         <Dialog ref="dialog1" v-model="noteDialogVisible">
-            <!--template #header>
-                Примечание
-            </template-->
+            <template #header>
+                {{ noteTitle }}
+            </template>
 
             <div class="column col" style="line-height: 20px; max-width: 400px; max-height: 200px; overflow-x: hidden; overflow-y: auto">
                 <div v-html="noteHtml"></div>
@@ -148,6 +148,7 @@ class TextPage {
 
     noteDialogVisible = false;
     noteId = '';
+    noteTitle = '';
     noteHtml = '';
 
     created() {
@@ -1271,6 +1272,7 @@ class TextPage {
         if (note) {
             if (orig) {//show dialog
                 this.noteId = noteId;
+                this.noteTitle = `[${note.title?.trim()}]`;
                 this.noteHtml = note.xml
                     .replace(/<p>/g, '<p class="note-para">')
                     .replace(/<stanza>/g, '<br>').replace(/<\/stanza>/g, '')
