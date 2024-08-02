@@ -21,6 +21,7 @@
             v-show="clickControl" ref="layoutEvents" class="layout events" 
             oncontextmenu="return false;"
             @mousedown.prevent.stop="onMouseDown" @mouseup.prevent.stop="onMouseUp"
+            @mouseover.prevent.stop="onMouseEvent" @mouseout.prevent.stop="onMouseEvent" @mousemove.prevent.stop="onMouseEvent"
             @wheel.prevent.stop="onMouseWheel"
             @touchstart.stop="onTouchStart" @touchend.stop="onTouchEnd" @touchmove.stop="onTouchMove" @touchcancel.prevent.stop="onTouchCancel"            
         >
@@ -1073,6 +1074,7 @@ class TextPage {
         if (this.startTouch) {
             event.preventDefault();
         }
+        this.endClickRepeat();
     }
 
     onTouchEnd(event) {
@@ -1157,11 +1159,20 @@ class TextPage {
     onMouseWheel(event) {
         if (this.$root.isMobileDevice)
             return;
+
+        this.endClickRepeat();
+        
         if (event.deltaY > 0) {
             this.doDown();
         } else if (event.deltaY < 0) {
             this.doUp();
         }
+    }
+
+    onMouseEvent() {
+        if (this.$root.isMobileDevice)
+            return;
+        this.endClickRepeat();
     }
 
     onStatusBarClick() {
