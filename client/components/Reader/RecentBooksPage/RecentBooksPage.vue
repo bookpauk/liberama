@@ -594,7 +594,7 @@ class RecentBooksPage {
     }
 
     async handleDel(item) {
-        if (item.group) {
+        if (item.group?.length) {
             const keys = [{key: item.key}];
             for (const book of item.group)
                 keys.push({key: book.key});
@@ -615,14 +615,14 @@ class RecentBooksPage {
             } else {
                 if (await this.$root.stdDialog.confirm('Подтвердите удаление книги из архива:', ' ')) {
                     await bookManager.delRecentBooks([{key: item.key}], 2);
-                    this.$root.notify.info('Книга удалено безвозвратно');
+                    this.$root.notify.info('Книга удалена безвозвратно');
                 }
             }
         }
     }
 
     async handleRestore(item) {
-        if (item.group) {
+        if (item.group?.length) {
             const keys = [{key: item.key}];
             for (const book of item.group)
                 keys.push({key: book.key});
@@ -637,7 +637,7 @@ class RecentBooksPage {
 
     async loadBook(item, force = false) {
         if (item.deleted)
-            await this.handleRestore(item.key);
+            await this.handleRestore(item);
 
         this.$emit('load-book', {url: item.url, path: item.path, force});
         this.close();

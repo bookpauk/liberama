@@ -21,6 +21,7 @@
             v-show="clickControl" ref="layoutEvents" class="layout events" 
             oncontextmenu="return false;"
             @mousedown.prevent.stop="onMouseDown" @mouseup.prevent.stop="onMouseUp"
+            @mouseover.prevent.stop="onMouseEvent" @mouseout.prevent.stop="onMouseEvent" @mousemove.prevent.stop="onMouseEvent"
             @wheel.prevent.stop="onMouseWheel"
             @touchstart.stop="onTouchStart" @touchend.stop="onTouchEnd" @touchmove.stop="onTouchMove" @touchcancel.prevent.stop="onTouchCancel"            
         >
@@ -38,9 +39,9 @@
 
         <!-- Примечание -->
         <Dialog ref="dialog1" v-model="noteDialogVisible">
-            <!--template #header>
-                Примечание
-            </template-->
+            <template #header>
+                {{ noteTitle }}
+            </template>
 
             <div class="column col" style="line-height: 20px; max-width: 400px; max-height: 200px; overflow-x: hidden; overflow-y: auto">
                 <div v-html="noteHtml"></div>
@@ -49,7 +50,7 @@
             <template #footer>
                 <div class="row col">
                     <q-btn class="q-px-md q-mr-md" color="btn2" text-color="app" dense no-caps @click="goToNotes">
-                        В примечаниях
+                        В примечания
                     </q-btn>
                 </div>
 
@@ -148,6 +149,7 @@ class TextPage {
 
     noteDialogVisible = false;
     noteId = '';
+    noteTitle = '';
     noteHtml = '';
 
     created() {
@@ -1072,6 +1074,7 @@ class TextPage {
         if (this.startTouch) {
             event.preventDefault();
         }
+        this.endClickRepeat();
     }
 
     onTouchEnd(event) {
@@ -1156,11 +1159,20 @@ class TextPage {
     onMouseWheel(event) {
         if (this.$root.isMobileDevice)
             return;
+
+        this.endClickRepeat();
+        
         if (event.deltaY > 0) {
             this.doDown();
         } else if (event.deltaY < 0) {
             this.doUp();
         }
+    }
+
+    onMouseEvent() {
+        if (this.$root.isMobileDevice)
+            return;
+        this.endClickRepeat();
     }
 
     onStatusBarClick() {
@@ -1271,6 +1283,7 @@ class TextPage {
         if (note) {
             if (orig) {//show dialog
                 this.noteId = noteId;
+                this.noteTitle = `[${note.title?.trim()}]`;
                 this.noteHtml = note.xml
                     .replace(/<p>/g, '<p class="note-para">')
                     .replace(/<stanza>/g, '<br>').replace(/<\/stanza>/g, '')

@@ -402,17 +402,6 @@ export default class BookParser {
                     bodyIndex++;
                 }
 
-                if (tag == 'title') {
-                    newParagraph();
-                    isFirstTitlePara = true;
-                    bold = true;
-                    center = true;
-
-                    inTitle = true;
-                    curTitle = {paraIndex, title: '', inset: sectionLevel, bodyIndex, subtitles: []};
-                    this.contents.push(curTitle);
-                }
-
                 if (tag == 'section') {
                     if (!isFirstSection)
                         newParagraph();
@@ -431,10 +420,22 @@ export default class BookParser {
 
                             note.noteParaIndex = paraIndex;
                             note.xml = '';
+                            note.title = '';
                             noteId = id;
                         }
 
                     }
+                }
+
+                if (tag == 'title') {
+                    newParagraph();
+                    isFirstTitlePara = true;
+                    bold = true;
+                    center = true;
+
+                    inTitle = true;
+                    curTitle = {paraIndex, title: '', inset: sectionLevel, bodyIndex, subtitles: []};
+                    this.contents.push(curTitle);
                 }
 
                 if (tag == 'emphasis' || tag == 'strong' || tag == 'sup' || tag == 'sub') {
@@ -642,8 +643,12 @@ export default class BookParser {
                 else
                     growParagraph(' ', 1);
 
-                if (!inTitle && inNotesBody && noteId) {
-                    this.notes[noteId].xml += text;
+                if (inNotesBody && noteId) {
+                    if (inTitle) {
+                        this.notes[noteId].title += text;
+                    } else {
+                        this.notes[noteId].xml += text;
+                    }
                 }
             }
         };

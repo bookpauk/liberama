@@ -14,6 +14,11 @@ export default class DrawHelper {
         return this.context.measureText(text).width;
     }
 
+    measureTextMetrics(text, style) {// eslint-disable-line no-unused-vars
+        this.context.font = this.fontByStyle(style);
+        return this.context.measureText(text);
+    }
+
     measureTextFont(text, font) {// eslint-disable-line no-unused-vars
         this.context.font = font;
         return this.context.measureText(text).width;
@@ -39,7 +44,6 @@ export default class DrawHelper {
         let center = false;
         let space = 0;
         let j = 0;
-        const pad = this.fontSize/2;
         //формируем строку
         for (const part of line.parts) {
             let tOpen = '';
@@ -47,10 +51,20 @@ export default class DrawHelper {
             tOpen += (part.style.italic ? '<i>' : '');
             tOpen += (part.style.sup ? '<span style="vertical-align: baseline; position: relative; line-height: 0; top: -0.3em">' : '');
             tOpen += (part.style.sub ? '<span style="vertical-align: baseline; position: relative; line-height: 0; top: 0.3em">' : '');
-            tOpen += (part.style.note ? `<span style="position: relative;">` +
-                `<span style="position: absolute; background-color: ${this.textColor}; opacity: 0.1; cursor: pointer; pointer-events: auto; ` +
-                `height: ${this.fontSize + pad*2}px; padding: ${pad}px; left: -${pad}px; top: -${pad*0.9}px; border-radius: ${this.fontSize}px;" ` +
-                `onclick="onNoteClickLiberama('${part.style.note.id}', ${part.style.note.orig ? 1 : 0})"><span style="visibility: hidden;">__TEXT</span></span>` : '');
+            if (part.style.note) {
+                const t = part.text;
+                const m = this.measureTextMetrics(t, part.style);
+                const d = this.fontSize - 1.1*m.fontBoundingBoxAscent;
+                const w = m.width;
+                const size = (this.fontSize > 18 ?  this.fontSize : 18);
+                const pad = size/2;
+                const btnW = (w >= size ? w : size) + pad*2;
+
+                tOpen += `<span style="position: relative;">` +
+                    `<span style="position: absolute; background-color: ${this.textColor}; opacity: 0.1; cursor: pointer; pointer-events: auto; ` +
+                    `height: ${this.fontSize + pad*2}px; padding: ${pad}px; left: -${(btnW - w)/2 - pad*0.05}px; top: -${pad + d}px; width: ${btnW}px; border-radius: ${size}px;" ` +
+                    `onclick="onNoteClickLiberama('${part.style.note.id}', ${part.style.note.orig ? 1 : 0})"><span style="visibility: hidden;" class="dborder">${t}</span></span>`;
+            }
             let tClose = '';
             tClose += (part.style.note ? '</span>' : '');
             tClose += (part.style.sub ? '</span>' : '');
@@ -69,9 +83,6 @@ export default class DrawHelper {
 
             if (text && text.trim() == '')
                 text = `<span style="white-space: pre">${text}</span>`;
-
-            if (part.style.note)
-                tOpen = tOpen.replace('__TEXT', text);
 
             lineText += `${tOpen}${text}${tClose}`;
 
