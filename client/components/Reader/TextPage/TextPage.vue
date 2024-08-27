@@ -14,7 +14,7 @@
                 <div @copy.prevent="copyText" v-html="page2"></div>
             </div>
         </div>
-        <div v-show="showStatusBar" ref="statusBar" class="layout">
+        <div v-show="showStatusBar" ref="statusBar" class="layout" :class="{'no-events': clickControl}">
             <div v-html="statusBar"></div>
         </div>
         <div
@@ -1353,6 +1353,9 @@ export default vueComponent(TextPage);
     background-color: rgba(0,0,0,0);
 }
 
+.no-events {
+    pointer-events: none;
+}
 </style>
 <style>
 .note-para {
