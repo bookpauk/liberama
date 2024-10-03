@@ -416,7 +416,7 @@ class Reader {
             await wallpaperStorage.init();
             await coversStorage.init();
             
-            await bookManager.init(this.settings, this.restricted);
+            await bookManager.init(this.settings);
             bookManager.addEventListener(this.bookManagerEvent);
 
             if (this.$root.getRootRoute() == '/reader') {
@@ -1267,6 +1267,19 @@ class Reader {
         return result;
     }
 
+    isUrlAllowed(url) {
+        const restrictedSites = this.restricted?.sites;
+        if (restrictedSites) {
+            url = url.toLowerCase();
+            for (const site of restrictedSites) {
+                if (url.indexOf(site) === 0)
+                    return false;
+            }
+        }
+
+        return true;
+    }
+
     async _loadBook(opts) {
         if (!opts || !opts.url) {
             this.mostRecentBook();
@@ -1276,6 +1289,11 @@ class Reader {
         this.closeAllWindows();
 
         let url = encodeURI(decodeURI(opts.url));
+
+        if (!this.isUrlAllowed(url)) {
+            this.$root.stdDialog.alert('Книга не загружена, причина: нарушение авторских прав.<br>Приносим извинения за неудобство.', '', {color: 'negative'});
+            return;
+        }
 
         if ((url.indexOf('http://') != 0) && (url.indexOf('https://') != 0) &&
             (url.indexOf('disk://') != 0))
