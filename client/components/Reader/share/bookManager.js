@@ -3,6 +3,7 @@ import path from 'path-browserify';
 import _ from 'lodash';
 
 import BookParser from './BookParser';
+import bmHelper from './bmHelper';
 import readerApi from '../../../api/reader';
 import coversStorage from './coversStorage';
 import * as utils from '../../../share/utils';
@@ -26,9 +27,10 @@ const bmRecentStoreNew = localForage.createInstance({
 });
 
 class BookManager {
-    async init(settings) {
+    async init(settings, restricted) {
         this.loaded = false;
         this.settings = settings;
+        this.restricted = restricted;
 
         this.eventListeners = [];
         this.books = {};
@@ -232,6 +234,18 @@ class BookManager {
         return inflator.result;
     }
 
+    isUrlAllowed(url) {
+        const restrictedSites = this.restricted?.sites;
+        if (restrictedSites) {
+            for (const site of restrictedSites) {
+                if (url.indexOf(site) === 0)
+                    return false;
+            }
+        }
+
+        return true;
+    }
+
     async addBook(newBook, callback) {        
         let meta = {url: newBook.url, path: newBook.path};
 
@@ -348,6 +362,10 @@ class BookManager {
     }
 
     async parseBook(meta, data, callback) {
+        if (!this.isUrlAllowed(meta.url)) {
+            data = bmHelper.restrictedData;
+        }
+
         const parsed = new BookParser(this.settings);
 
         const parsedMeta = await parsed.parse(data, callback);

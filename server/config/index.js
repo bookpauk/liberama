@@ -56,6 +56,7 @@ class ConfigManager {
 
         await fs.ensureDir(config.dataDir);
         this._userConfigFile = `${config.dataDir}/config.json`;
+        this._restrictedFile = `${config.dataDir}/restricted.json`;
         this._config = config;
 
         this.inited = true;
@@ -73,6 +74,10 @@ class ConfigManager {
 
     get userConfigFile() {
         return this._userConfigFile;
+    }
+
+    get restrictedFile() {
+        return this._restrictedFile;
     }
 
     set userConfigFile(value) {
@@ -99,6 +104,12 @@ class ConfigManager {
                     }
             } else {
                 await this.save();
+            }
+
+            if (await fs.pathExists(this.restrictedFile)) {
+                const data = JSON.parse(await fs.readFile(this.restrictedFile, 'utf8'));
+
+                this.config = {restricted: data};
             }
         } catch(e) {
             throw new Error(`Error while loading "${this.userConfigFile}": ${e.message}`);
