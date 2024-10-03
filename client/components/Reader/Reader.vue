@@ -416,7 +416,7 @@ class Reader {
             await wallpaperStorage.init();
             await coversStorage.init();
             
-            await bookManager.init(this.settings);
+            await bookManager.init(this.settings, this.restricted);
             bookManager.addEventListener(this.bookManagerEvent);
 
             if (this.$root.getRootRoute() == '/reader') {
@@ -768,6 +768,10 @@ class Reader {
 
     get bothBucEnabled() {
         return this.$store.state.config.bucEnabled && this.bucEnabled;
+    }
+
+    get restricted() {
+        return this.$store.state.config.restricted;
     }
 
     get routeParamUrl() {
