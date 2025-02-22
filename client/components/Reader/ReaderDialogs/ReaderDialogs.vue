@@ -131,7 +131,7 @@ class ReaderDialogs {
 
     async init() {
         await this.showWhatsNew();
-        await this.showDonation();
+        //await this.showDonation();
     }
 
     loadSettings() {
