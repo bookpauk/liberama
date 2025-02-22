@@ -51,7 +51,7 @@ const tabs = [
     ['MouseHelpPage', 'Мышь/тачскрин'],
     ['HotkeysHelpPage', 'Клавиатура'],
     ['VersionHistoryPage', 'История версий'],
-    ['DonateHelpPage', 'Помочь проекту'],
+    //['DonateHelpPage', 'Помочь проекту'],
 ];
 
 const componentOptions = {

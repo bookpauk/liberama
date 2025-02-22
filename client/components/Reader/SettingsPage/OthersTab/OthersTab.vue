@@ -53,7 +53,7 @@
             </q-checkbox>
         </div>
 
-        <div class="sets-item row">
+        <!--div class="sets-item row">
             <div class="sets-label label">
                 Уведомление
             </div>
@@ -63,7 +63,7 @@
                     Показывать диалог для сбора пожертвований
                 </q-tooltip>
             </q-checkbox>
-        </div>
+        </div-->
 
         <!---------------------------------------------->
         <div class="sets-part-header">
