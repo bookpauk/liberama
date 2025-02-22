@@ -1,5 +1,19 @@
 export const versionHistory = [
 {
+    version: '1.2.7',
+    releaseDate: '2025-02-22',
+    showUntil: '2025-02-21',
+    content:
+`
+<ul>
+    <li>отключена форма для сбора донатов</li>
+    <li>мелкие оптимизации</li>
+</ul>
+
+`
+},
+
+{
     version: '1.2.6',
     releaseDate: '2024-10-03',
     showUntil: '2024-10-02',
