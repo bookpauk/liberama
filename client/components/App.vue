@@ -154,8 +154,11 @@ class App {
         (async() => {
             //загрузим конфиг сервера
             try {
-                const config = await miscApi.loadConfig();
-                this.commit('config/setConfig', config);
+                const config = await miscApi.loadConfig(this.config._configHash);
+
+                if (!config._useCached)
+                    this.commit('config/setConfig', config);
+
                 this.showPage = true;
             } catch(e) {
                 //проверим, не получен ли конфиг ранее

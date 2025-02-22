@@ -20,6 +20,8 @@ class WebSocketController {
         this.readerWorker = new ReaderWorker(config);
         this.workerState = new WorkerState();
 
+        this.configHash = '';
+
         if (config.bucEnabled) {
             this.bucClient = new BUCClient(config);
         }
@@ -119,8 +121,22 @@ class WebSocketController {
     async getConfig(req, ws) {
         if (Array.isArray(req.params)) {
             const paramsSet = new Set(req.params);
+            const _configHash = req._configHash;
 
-            this.send(_.pick(this.config, this.config.webConfigParams.filter(x => paramsSet.has(x))), req, ws);
+            let response = {_useCached: true};
+
+            //оптимизация, чтобы не отдавал большой конфиг каждый раз при обновлении страницы
+            if (!_configHash || _configHash !== this.configHash) {
+                if (!this.configHash) {
+                    const webConfig = _.pick(this.config, this.config.webConfigParams);
+                    this.configHash = await utils.getBufHash(Buffer.from(JSON.stringify(webConfig)), 'sha256', 'hex');
+                }
+
+                response = _.pick(this.config, this.config.webConfigParams.filter(x => paramsSet.has(x)));
+                response._configHash = this.configHash;
+            }
+
+            this.send(response, req, ws);
         } else {
             throw new Error('params is not an array');
         }

@@ -1,4 +1,3 @@
-import miscApi from '../../api/misc';
 // initial state
 const state = {
     name: null,
