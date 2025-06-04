@@ -1,5 +1,18 @@
 export const versionHistory = [
 {
+    version: '1.2.8',
+    releaseDate: '2025-06-04',
+    showUntil: '2025-06-03',
+    content:
+`
+<ul>
+    <li>исправление багов</li>
+</ul>
+
+`
+},
+
+{
     version: '1.2.7',
     releaseDate: '2025-02-22',
     showUntil: '2025-02-21',
