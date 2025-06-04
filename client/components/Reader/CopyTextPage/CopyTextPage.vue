@@ -52,18 +52,21 @@ class CopyTextPage {
             from = (from < 0 ? 0 : from);
             to = paraIndex + 100;
             to = (to > parsed.para.length ? parsed.para.length : to);
-            cut = '<p>..... Текст вырезан. Если хотите скопировать больше, поставьте в настройках галочку "Загружать весь текст"';
+            cut = '<dd>..... Текст вырезан. Если хотите скопировать больше, поставьте в настройках галочку "Загружать весь текст"';
         }
 
         if (from > 0)
             text += cut;
         for (let i = from; i < to; i++) {
             const p = parsed.para[i];
+            if (p.addIndex > 0)
+                continue;
+
             const parts = parsed.splitToStyle(p.text);
             if (this.stopInit)
                 return;
 
-            text += `<p id="p${i}" class="copyPara">`;
+            text += `<dd id="p${i}" class="copyPara">&nbsp;&nbsp;`;
             for (const part of parts)
                 text += part.text;
 
