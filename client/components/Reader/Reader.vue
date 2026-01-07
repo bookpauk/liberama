@@ -383,11 +383,6 @@ class Reader {
 
         this.recentItemKeys = [];
         this.debouncedSaveRecent = _.debounce(async() => {
-            let timer = setTimeout(() => {
-                if (!this.offlineModeActive)
-                    this.$root.notify.error('Таймаут соединения');
-            }, 10000);
-
             try {
                 const itemKeys = this.recentItemKeys;
                 this.recentItemKeys = [];
@@ -399,8 +394,6 @@ class Reader {
             } catch (e) {
                 if (!this.offlineModeActive)
                     this.$root.notify.error(e.message);
-            } finally {
-                clearTimeout(timer);
             }
         }, 500, {maxWait: 1000});
 

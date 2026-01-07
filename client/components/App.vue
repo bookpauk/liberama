@@ -42,6 +42,12 @@ class App {
     showPage = false;
 
     created() {
+        const loader = document.getElementById('start-loader');
+        loader.style.display = 'none';
+
+        const app = document.getElementById('app');
+        app.style.display = 'block';
+
         this.commit = this.$store.commit;
         this.state = this.$store.state;
         this.uistate = this.$store.state.uistate;

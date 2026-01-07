@@ -38,12 +38,12 @@ class WebSocketConnection {
                 if (isError) {
                     listener.onError(mes);
                     emitted = true;
-                } else {
-                    if ( (listener.requestId && mes.requestId && listener.requestId === mes.requestId) ||
-                        (!listener.requestId && !mes.requestId) ) {
-                        listener.onMessage(mes);
-                        emitted = true;
-                    }
+                } else if (
+                    (listener.requestId && mes.requestId && listener.requestId === mes.requestId)
+                    || (!listener.requestId && !mes.requestId)
+                    ) {
+                    listener.onMessage(mes);
+                    emitted = true;
                 }
 
                 if (!emitted)
@@ -144,12 +144,12 @@ class WebSocketConnection {
     }
 
     //timeout в секундах (проверка каждый cleanPeriod интервал)
-    message(requestId, timeoutSecs = 4) {
+    messageRaw(requestId, listenerTimeoutSecs = 4) {
         return new Promise((resolve, reject) => {
             this.listeners.push({
                 regTime: Date.now(),
                 requestId,
-                timeout: timeoutSecs*1000,
+                timeout: listenerTimeoutSecs*1000,
                 onMessage: (mes) => {
                     resolve(mes);
                 },
@@ -162,7 +162,34 @@ class WebSocketConnection {
         });
     }
 
-    async send(req, timeoutSecs = 4) {
+    //пинги идут каждые pingPeriodSec секунд
+    async message(requestId, messageTimeoutSecs = 5*60) {
+        const pingPeriodSec = 5;
+        const needPing = !!requestId;
+
+        while (1) {//eslint-disable-line
+            if (needPing) {
+                (async() => {
+                    await utils.sleep(pingPeriodSec*1000);
+                    this.ws.send(JSON.stringify({requestId, action: '_ping'}));
+                })();
+            }
+
+            const resp = await this.messageRaw(requestId, 2*pingPeriodSec);
+            if (needPing && resp._pong) {//если pong
+                messageTimeoutSecs -= pingPeriodSec;
+                if (messageTimeoutSecs < 0)
+                    throw new Error('Таймаут ожидания ответа от сервера');
+
+                //console.log('pong');
+            } else {
+                return resp;
+            }
+
+        }
+    }
+
+    async send(req, listenerTimeoutSecs = 10) {
         await this._open();
         if (this.isOpen) {
             this.requestId = (this.requestId < 1000000 ? this.requestId + 1 : 1);
@@ -172,7 +199,7 @@ class WebSocketConnection {
 
             let resp = {};
             try {
-                resp = await this.message(requestId, timeoutSecs);
+                resp = await this.messageRaw(requestId, listenerTimeoutSecs);
             } catch(e) {
                 this.terminate();
                 throw new Error('WebSocket не отвечает');
