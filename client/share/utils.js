@@ -396,10 +396,6 @@ export function resizeImage(dataUrl, toWidth, toHeight, quality = 0.9) {
     })().catch(reject); });
 }
 
-export function makeDonation() {
-    window.open('https://donatty.com/liberama', '_blank');
-}
-
 export function dateFormat(date, format = 'DD.MM.YYYY') {
     return dayjs(date).format(format);
 }

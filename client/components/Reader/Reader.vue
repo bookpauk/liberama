@@ -174,7 +174,7 @@
             <ContentsPage v-show="contentsActive" ref="contentsPage" :book-pos="bookPos" :is-visible="contentsActive" @do-action="doAction" @book-pos-changed="bookPosChanged"></ContentsPage>
 
             <ServerStorage v-show="hidden" ref="serverStorage"></ServerStorage>
-            <ReaderDialogs ref="dialogs" @donate-toggle="donateToggle" @version-history-toggle="versionHistoryToggle" @load-buffer-toggle="loadBufferToggle"></ReaderDialogs>
+            <ReaderDialogs ref="dialogs" @do-action="doAction" @version-history-toggle="versionHistoryToggle" @load-buffer-toggle="loadBufferToggle"></ReaderDialogs>
         </div>
     </div>
 </template>
@@ -707,10 +707,7 @@ class Reader {
 
         if (q['donate']) {
             this.$router.replace(`/reader`);
-            this.helpToggle();
-            this.$nextTick(() => {
-                this.$refs.helpPage.activateDonateHelpPage();
-            });
+            this.donateToggle();
         }
     }
 
