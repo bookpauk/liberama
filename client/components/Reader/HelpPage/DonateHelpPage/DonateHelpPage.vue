@@ -5,7 +5,7 @@
                 Здесь вы можете пожертвовать на развитие проекта:
             </div>
 
-            <div class="row items-center address">
+            <div class="row items-center address no-wrap">
                 <img class="logo" src="./assets/donate.svg">
                 <div class="para">
                     <q-btn color="green-8" size="14px" style="width: 200px" dense no-caps @click="donateFiat">
@@ -16,7 +16,7 @@
                 <span class="q-ml-xs text-grey-8">(банковские карты, СБП)</span>
             </div>
 
-            <div class="row items-center address">
+            <div class="row items-center address no-wrap">
                 <img class="logo" src="./assets/bitcoin.svg">
                 <div class="para">
                     <q-btn color="orange-8" size="14px" style="width: 200px" dense no-caps @click="donateCrypto">
@@ -31,7 +31,7 @@
                 Или перевести напрямую автору:
             </div>
 
-            <div class="row items-center address">
+            <div class="row items-center address no-wrap">
                 <img class="logo" src="./assets/iomoney.svg">
                 <div class="para">
                     <q-btn color="deep-purple-13" size="14px" style="width: 200px" dense no-caps @click="donateYooMoney">
