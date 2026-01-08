@@ -37,7 +37,7 @@
       }
     </style>
 
-    <script src="/sw-register.js"></script>
+    <script src="<%= htmlWebpackPlugin.options.serviceWorker %>"></script>
   </head>
   <body>
     <div id="start-loader" style="visibility: hidden">

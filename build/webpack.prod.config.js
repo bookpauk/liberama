@@ -51,7 +51,8 @@ module.exports = merge(baseWpConfig, {
         }),
         new HtmlWebpackPlugin({
             template: `${clientDir}/index.html.template`,
-            filename: `${publicDir}/index.html`
+            filename: `${publicDir}/index.html`,
+            serviceWorker: `${baseWpConfig.output.publicPath}sw-register.js`,
         }),
         new CopyWebpackPlugin({patterns: 
             [{context: `${clientDir}/assets`, from: `${clientDir}/assets/*`, to: `${publicDir}/` }]

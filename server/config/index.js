@@ -10,6 +10,7 @@ const propsToSave = [
     'maxUploadPublicDirSize',
     'useExternalBookConverter',
     
+    'root',
     'servers',
     'remoteStorage',
     'bucEnabled',

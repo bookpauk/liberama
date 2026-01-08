@@ -2,6 +2,8 @@ const path = require('path');
 const DefinePlugin = require('webpack').DefinePlugin;
 const { VueLoaderPlugin } = require('vue-loader');
 
+const appdir = require('./appdir');
+
 const clientDir = path.resolve(__dirname, '../client');
 
 module.exports = {
@@ -13,7 +15,7 @@ module.exports = {
     },
     entry: [`${clientDir}/main.js`],
     output: {
-        publicPath: '/app/',
+        publicPath: `/${appdir}/`,
         clean: true
     },
 

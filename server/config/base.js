@@ -19,7 +19,7 @@ module.exports = {
     useExternalBookConverter: false,
     acceptFileExt: '.fb2, .fb3, .html, .txt, .zip, .bz2, .gz, .rar, .epub, .mobi, .rtf, .doc, .docx, .pdf, .djvu, .jpg, .jpeg, .png',
     restricted: {},
-    webConfigParams: ['name', 'version', 'mode', 'maxUploadFileSize', 'useExternalBookConverter',
+    webConfigParams: ['name', 'version', 'mode', 'rootPathStatic', 'maxUploadFileSize', 'useExternalBookConverter',
         'acceptFileExt', 'bucEnabled', 'branch', 'networkLibraryLink', 'restricted', 'donation'],
 
     jembaDb: [
@@ -43,6 +43,7 @@ module.exports = {
         },
     ],
 
+    root: '',
     servers: [
         {
             serverName: '1',

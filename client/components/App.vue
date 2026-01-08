@@ -51,7 +51,6 @@ class App {
         this.commit = this.$store.commit;
         this.state = this.$store.state;
         this.uistate = this.$store.state.uistate;
-        this.config = this.$store.state.config;
 
         //dark mode
         let darkMode = null;
@@ -165,6 +164,9 @@ class App {
                 if (!config._useCached)
                     this.commit('config/setConfig', config);
 
+                //костыль для readerApi
+                window.rootPathStatic = this.config.rootPathStatic || '';
+
                 this.showPage = true;
             } catch(e) {
                 //проверим, не получен ли конфиг ранее
@@ -184,6 +186,10 @@ class App {
             await this.$router.isReady();
             this.redirectIfNeeded();
         })();
+    }
+
+    get config() {
+        return this.$store.state.config;
     }
 
     get apiError() {

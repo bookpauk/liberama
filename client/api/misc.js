@@ -5,7 +5,7 @@ class Misc {
 
         const query = {
             params: [
-                'name', 'version', 'mode', 'maxUploadFileSize', 'useExternalBookConverter',
+                'name', 'version', 'mode', 'rootPathStatic', 'maxUploadFileSize', 'useExternalBookConverter',
                 'acceptFileExt', 'bucEnabled', 'branch', 'networkLibraryLink', 'restricted', 'donation'
             ],
             _configHash,
