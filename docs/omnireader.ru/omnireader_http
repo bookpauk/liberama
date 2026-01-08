@@ -27,6 +27,7 @@ server {
   }
 
   location /tmp {
+    gzip off;
     root /home/liberama/.liberama/public-files;
 
     types { } default_type "application/xml; charset=utf-8";

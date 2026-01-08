@@ -33,6 +33,7 @@ server {
   }
 
   location /tmp {
+    gzip off;
     root /home/beta.liberama/.liberama/public-files;
 
     types { } default_type "application/xml; charset=utf-8";
@@ -92,6 +93,7 @@ server {
   }
 
   location /tmp {
+    gzip off;
     root /home/beta.liberama/.liberama/public-files;
 
     types { } default_type "application/xml; charset=utf-8";
