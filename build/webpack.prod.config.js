@@ -4,10 +4,10 @@ const path = require('path');
 
 const { merge } = require('webpack-merge');
 const baseWpConfig = require('./webpack.base.config');
+
 const TerserPlugin = require('terser-webpack-plugin');
 const CssMinimizerWebpackPlugin = require('css-minimizer-webpack-plugin');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
-//const { CleanWebpackPlugin } = require('clean-webpack-plugin');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const CopyWebpackPlugin = require('copy-webpack-plugin');
 const {GenerateSW} = require('workbox-webpack-plugin');
@@ -55,7 +55,6 @@ module.exports = merge(baseWpConfig, {
             navigateFallbackDenylist: [new RegExp('^/api'), new RegExp('^/ws'), new RegExp('^/tmp'),],
             skipWaiting: true,
         }),
-        //new CleanWebpackPlugin({ cleanOnceBeforeBuildPatterns: [`${publicDir}/**`] }),
         new MiniCssExtractPlugin({
             filename: "[name].[contenthash].css"
         }),
