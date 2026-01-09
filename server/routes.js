@@ -134,6 +134,9 @@ function initStatic(app, config) {
     );
 
     if (config.rootPathStatic) {
+        //для правильной замены строк вида `${webAppDir}` нужна будет rootPathStatic без начального слеша
+        const rootPathStaticWithoutSlash = config.rootPathStatic.substring(1);
+
         //подмена rootPath в файлах статики WebApp при необходимости
         //костыльно...
         app.use(config.rootPathStatic, async(req, res, next) => {
@@ -150,8 +153,8 @@ function initStatic(app, config) {
 
                     if (!await fs.pathExists(flagFile) && await fs.pathExists(reqFile)) {
                         const content = await fs.readFile(reqFile, 'utf8');
-                        const re = new RegExp(`/${webAppDir}`, 'g');
-                        await fs.writeFile(reqFile, content.replace(re, `${config.rootPathStatic}/${webAppDir}`));
+                        const re = new RegExp(webAppDir, 'g');
+                        await fs.writeFile(reqFile, content.replace(re, `${rootPathStaticWithoutSlash}/${webAppDir}`));
                         await fs.writeFile(flagFile, '');
                     }
                 }
