@@ -6,8 +6,7 @@ import webAppDir from '../build/appdir';
             const registrations = await navigator.serviceWorker.getRegistrations();
 
             for (const registration of registrations) {
-console.log(registration.active.scriptURL);
-                if (registration.active.scriptURL.startsWith('/service-worker.js'))
+                if (!registration.active.scriptURL.endsWith(`/${webAppDir}/service-worker.js`))
                     await registration.unregister();
             }
         } catch (e) {
