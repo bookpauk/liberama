@@ -1,3 +1,4 @@
+const fs = require('fs-extra');
 const path = require('path');
 //const webpack = require('webpack');
 
@@ -13,6 +14,8 @@ const {GenerateSW} = require('workbox-webpack-plugin');
 
 const publicDir = path.resolve(__dirname, '../dist/tmp/public');
 const clientDir = path.resolve(__dirname, '../client');
+
+fs.emptyDirSync(publicDir);
 
 module.exports = merge(baseWpConfig, {
     mode: 'production',
@@ -45,6 +48,13 @@ module.exports = merge(baseWpConfig, {
         ]
     },
     plugins: [
+        new GenerateSW({
+            cacheId: 'liberama',
+            //swDest: `${publicDir}/service-worker.js`,
+            navigateFallback: '/index.html',
+            navigateFallbackDenylist: [new RegExp('^/api'), new RegExp('^/ws'), new RegExp('^/tmp'),],
+            skipWaiting: true,
+        }),
         //new CleanWebpackPlugin({ cleanOnceBeforeBuildPatterns: [`${publicDir}/**`] }),
         new MiniCssExtractPlugin({
             filename: "[name].[contenthash].css"
@@ -52,17 +62,9 @@ module.exports = merge(baseWpConfig, {
         new HtmlWebpackPlugin({
             template: `${clientDir}/index.html.template`,
             filename: `${publicDir}/index.html`,
-            serviceWorker: `${baseWpConfig.output.publicPath}sw-register.js`,
         }),
         new CopyWebpackPlugin({patterns: 
             [{context: `${clientDir}/assets`, from: `${clientDir}/assets/*`, to: `${publicDir}/` }]
         }),
-        new GenerateSW({
-            cacheId: 'liberama',
-            swDest: `${publicDir}/service-worker.js`,
-            navigateFallback: '/index.html',
-            navigateFallbackDenylist: [new RegExp('^/api'), new RegExp('^/ws'), new RegExp('^/tmp'),],
-            skipWaiting: true,
-        }),        
     ]
 });

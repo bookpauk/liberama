@@ -36,8 +36,6 @@
         }
       }
     </style>
-
-    <script src="<%= htmlWebpackPlugin.options.serviceWorker %>"></script>
   </head>
   <body>
     <div id="start-loader" style="visibility: hidden">

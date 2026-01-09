@@ -5,7 +5,9 @@ const pckg = require('../package.json');
 const { merge } = require('webpack-merge');
 const baseWpConfig = require('./webpack.base.config');
 
-baseWpConfig.entry.unshift('webpack-hot-middleware/client');
+baseWpConfig.entry.main.unshift('webpack-hot-middleware/client');
+delete baseWpConfig.entry.sw;
+
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const CopyWebpackPlugin = require('copy-webpack-plugin');
 
@@ -38,7 +40,6 @@ module.exports = merge(baseWpConfig, {
         new HtmlWebpackPlugin({
             template: `${clientDir}/index.html.template`,
             filename: `${publicDir}/index.html`,
-            serviceWorker: `${baseWpConfig.output.publicPath}sw-register.js`,
         }),
         new CopyWebpackPlugin({patterns: [{context: `${clientDir}/assets`, from: `${clientDir}/assets/*`, to: `${publicDir}/`}]})
     ]

@@ -13,7 +13,10 @@ module.exports = {
             //vue: '@vue/compat'
         }
     },
-    entry: [`${clientDir}/main.js`],
+    entry: {
+        main: [`${clientDir}/main.js`],
+        sw: `${clientDir}/sw-register.js`,
+    },
     output: {
         publicPath: `/${appdir}/`,
         clean: true
