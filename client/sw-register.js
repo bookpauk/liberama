@@ -3,7 +3,7 @@ import webAppDir from '../build/appdir';
 (async() => {
     if('serviceWorker' in navigator) {
         try {
-            const registrations = navigator.serviceWorker.getRegistrations();
+            const registrations = await navigator.serviceWorker.getRegistrations();
 
             for (const registration of registrations) {
 console.log(registration.active.scriptURL);
