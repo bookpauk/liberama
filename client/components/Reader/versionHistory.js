@@ -1,6 +1,6 @@
 export const versionHistory = [
 {
-    version: '1.3.0',
+    version: '1.3.1',
     releaseDate: '2026-01-09',
     showUntil: '2026-01-16',
     content:
@@ -11,6 +11,7 @@ export const versionHistory = [
     </li>
     <li>улучшена работа приложения в условиях низкоскоростного интернета</li>
     <li>добавлена расширенная форма для сбора донатов</li>
+    <li>исправление багов</li>
 </ul>
 
 `
