@@ -3,8 +3,13 @@ import webAppDir from '../build/appdir';
 (async() => {
     if('serviceWorker' in navigator) {
         try {
-            const registration = await navigator.serviceWorker.register(`/service-worker.js`);
-            await registration.unregister();
+            const registrations = navigator.serviceWorker.getRegistrations();
+
+            for (const registration of registrations) {
+console.log(registration.active.scriptURL);
+                if (registration.active.scriptURL.startsWith('/service-worker.js'))
+                    await registration.unregister();
+            }
         } catch (e) {
             console.error(`Deregistration failed with ${e}`);
         }
