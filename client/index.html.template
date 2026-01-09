@@ -36,6 +36,8 @@
         }
       }
     </style>
+
+    <script src="./sw.js">
   </head>
   <body>
     <div id="start-loader" style="visibility: hidden">

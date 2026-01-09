@@ -5,8 +5,7 @@ const pckg = require('../package.json');
 const { merge } = require('webpack-merge');
 const baseWpConfig = require('./webpack.base.config');
 
-baseWpConfig.entry.main.unshift('webpack-hot-middleware/client');
-delete baseWpConfig.entry.sw;
+baseWpConfig.entry.unshift('webpack-hot-middleware/client');
 
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const CopyWebpackPlugin = require('copy-webpack-plugin');
