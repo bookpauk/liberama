@@ -11,6 +11,6 @@
             console.error(`Deregistration failed with ${e}`);
         }
 
-        navigator.serviceWorker.register(`sw.js`);
+        navigator.serviceWorker.register(`./sw.js`);
     }
 })();
