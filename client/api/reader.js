@@ -168,7 +168,7 @@ class Reader {
 
         let response;
         try {
-            await axios.head(url.replace('disk://', '/upload/'), {headers: {'Cache-Control': 'no-cache'}});
+            await axios.head(url.replace('disk://', `${window.rootPathStatic}/upload/`), {headers: {'Cache-Control': 'no-cache'}});
             response = await wsc.message(await wsc.send({action: 'upload-file-touch', url}));
         } catch (e) {
             response = await wsc.message(await wsc.send({action: 'upload-file-buf', buf}));
@@ -181,7 +181,7 @@ class Reader {
     }
 
     async getUploadedFileBuf(url) {
-        url = url.replace('disk://', '/upload/');
+        url = url.replace('disk://', `${window.rootPathStatic}/upload/`);
         return (await axios.get(url)).data;
     }
 

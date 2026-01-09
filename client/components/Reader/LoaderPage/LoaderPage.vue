@@ -56,7 +56,7 @@
 
         <div class="col column justify-end items-center no-wrap overflow-hidden">
             <span class="bottom-span clickable" @click="openHelp">Справка</span>
-            <span class="bottom-span clickable" @click="openDonate">Помочь проекту</span>
+            <span v-if="!!donation" class="bottom-span clickable" @click="openDonate">Помочь проекту</span>
 
             <span v-if="version == clientVersion" class="bottom-span">v{{ version }}</span>
             <span v-else class="bottom-span">Версия сервера {{ version }}, версия клиента {{ clientVersion }}, необходимо обновить страницу</span>
@@ -128,6 +128,10 @@ class LoaderPage {
 
     get isExternalConverter() {
         return this.$store.state.config.useExternalBookConverter;
+    }
+
+    get donation() {
+        return this.$store.state.config.donation;
     }
 
     get clientVersion() {

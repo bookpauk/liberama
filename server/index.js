@@ -56,7 +56,7 @@ async function init() {
     config.tempPublicDir = `${config.publicFilesDir}/tmp`;
     config.uploadPublicDir = `${config.publicFilesDir}/upload`;
 
-    config.rootPathStatic = '';
+    config.rootPathStatic = config.root || '';
 
     configManager.config = config;///!!!
 
@@ -138,7 +138,8 @@ async function main() {
             }
 
             server.listen(serverConfig.port, serverConfig.ip, function() {
-                log(`Server "${serverConfig.serverName}" is ready on ${(serverConfig.isHttps ? 'https://' : 'http://')}${serverConfig.ip}:${serverConfig.port}, mode: ${serverConfig.mode}`);
+                log(`Server "${serverConfig.serverName}" is ready on ` +
+                    `${(serverConfig.isHttps ? 'https://' : 'http://')}${serverConfig.ip}:${serverConfig.port}${config.rootPathStatic}, mode: ${serverConfig.mode}`);
             });
         }
     }

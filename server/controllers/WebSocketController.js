@@ -65,12 +65,15 @@ class WebSocketController {
 
             ws.lastActivity = Date.now();
             
-            //pong for WebSocketConnection
-            this.send({_rok: 1}, req, ws);
+            //rok for WebSocketConnection.send
+            if (req.action !== '_ping')
+                this.send({_rok: 1}, req, ws);
 
             switch (req.action) {
                 case 'test':
                     await this.test(req, ws); break;
+                case '_ping':
+                    await this.pong(req, ws); break;
                 case 'get-config':
                     await this.getConfig(req, ws); break;
                 case 'load-book':
@@ -116,6 +119,10 @@ class WebSocketController {
     //Actions ------------------------------------------------------------------
     async test(req, ws) {
         this.send({message: 'Liberama project is awesome'}, req, ws);
+    }
+
+    async pong(req, ws) {
+        this.send({_pong: true}, req, ws);
     }
 
     async getConfig(req, ws) {

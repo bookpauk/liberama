@@ -174,7 +174,7 @@
             <ContentsPage v-show="contentsActive" ref="contentsPage" :book-pos="bookPos" :is-visible="contentsActive" @do-action="doAction" @book-pos-changed="bookPosChanged"></ContentsPage>
 
             <ServerStorage v-show="hidden" ref="serverStorage"></ServerStorage>
-            <ReaderDialogs ref="dialogs" @donate-toggle="donateToggle" @version-history-toggle="versionHistoryToggle" @load-buffer-toggle="loadBufferToggle"></ReaderDialogs>
+            <ReaderDialogs ref="dialogs" @do-action="doAction" @version-history-toggle="versionHistoryToggle" @load-buffer-toggle="loadBufferToggle"></ReaderDialogs>
         </div>
     </div>
 </template>
@@ -383,11 +383,6 @@ class Reader {
 
         this.recentItemKeys = [];
         this.debouncedSaveRecent = _.debounce(async() => {
-            let timer = setTimeout(() => {
-                if (!this.offlineModeActive)
-                    this.$root.notify.error('Таймаут соединения');
-            }, 10000);
-
             try {
                 const itemKeys = this.recentItemKeys;
                 this.recentItemKeys = [];
@@ -399,8 +394,6 @@ class Reader {
             } catch (e) {
                 if (!this.offlineModeActive)
                     this.$root.notify.error(e.message);
-            } finally {
-                clearTimeout(timer);
             }
         }, 500, {maxWait: 1000});
 
@@ -707,10 +700,7 @@ class Reader {
 
         if (q['donate']) {
             this.$router.replace(`/reader`);
-            this.helpToggle();
-            this.$nextTick(() => {
-                this.$refs.helpPage.activateDonateHelpPage();
-            });
+            this.donateToggle();
         }
     }
 

@@ -1,10 +1,12 @@
 const fs = require('fs-extra');
+const path = require('path');
 
 const express = require('express');
 const multer = require('multer');
 
 const ReaderWorker = require('./core/Reader/ReaderWorker');//singleton
 const log = new (require('./core/AppLogger'))().log;//singleton
+const webAppDir = require('../build/appdir');
 
 const {
     ReaderController,
@@ -84,7 +86,7 @@ function initStatic(app, config) {
     const readerWorker = new ReaderWorker(config);
 
     //восстановление файлов в /tmp и /upload из webdav-storage, при необходимости
-    app.use('/tmp',
+    app.use(`${config.rootPathStatic}/tmp`,
         async(req, res, next) => {
             if (req.method !== 'GET' && req.method !== 'HEAD') {
                 return next();
@@ -110,7 +112,7 @@ function initStatic(app, config) {
         })
     );
 
-    app.use('/upload',
+    app.use(`${config.rootPathStatic}/upload`,
         async(req, res, next) => {
             if (req.method !== 'GET' && req.method !== 'HEAD') {
                 return next();
@@ -131,7 +133,40 @@ function initStatic(app, config) {
         express.static(config.uploadPublicDir)
     );
 
-    app.use(express.static(config.publicDir));
+    if (config.rootPathStatic) {
+        //для правильной замены строк вида `${webAppDir}` нужна будет rootPathStatic без начального слеша
+        const rootPathStaticWithoutSlash = config.rootPathStatic.substring(1);
+
+        //подмена rootPath в файлах статики WebApp при необходимости
+        //костыльно...
+        app.use(config.rootPathStatic, async(req, res, next) => {
+            if (req.method !== 'GET' && req.method !== 'HEAD') {
+                return next();
+            }
+
+            try {
+                const reqPath = (req.path == '/' ? '/index.html' : req.path);
+                const ext = path.extname(reqPath);
+                if (ext == '.html' || ext == '.js' || ext == '.css') {
+                    const reqFile = `${config.publicDir}${reqPath}`;
+                    const flagFile = `${reqFile}.replaced`;
+
+                    if (!await fs.pathExists(flagFile) && await fs.pathExists(reqFile)) {
+                        const content = await fs.readFile(reqFile, 'utf8');
+                        const re = new RegExp(webAppDir, 'g');
+                        await fs.writeFile(reqFile, content.replace(re, `${rootPathStaticWithoutSlash}/${webAppDir}`));
+                        await fs.writeFile(flagFile, '');
+                    }
+                }
+            } catch(e) {
+                log(LM_ERR, e.message);
+            }
+
+            return next();
+        });
+    }
+
+    app.use(config.rootPathStatic, express.static(config.publicDir));
 }
 
 module.exports = {

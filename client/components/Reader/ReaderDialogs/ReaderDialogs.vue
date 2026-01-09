@@ -37,16 +37,14 @@
                             <li>нет никакой регистрации и монетизации</li>
                             <li>нет сбора персональных данных</li>
                             <li>открытый исходный код</li>
-                            <li>проект постепенно улучшается, по мере возможности</li>
                         </ul>
 
-                        Однако на оплату хостинга читалки и сервера обновлений автор тратит свои 
-                        собственные средства, а также тратит свое время и силы на улучшение проекта.
+                        Однако для оплаты хостинга читалки и сервера обновлений периодически требуются некоторые средства.
                         <br><br>
-                        Давайте поддержим наш ресурс, чтобы и дальше спокойно существовать и развиваться:
+                        Давайте поддержим наш ресурс, чтобы и дальше спокойно существовать:
                     </div>
 
-                    <q-btn style="margin: 10px 20px 10px 20px" color="green-8" no-caps @click="makeDonation">
+                    <q-btn style="margin: 10px 20px 10px 20px" color="green-8" no-caps @click="openDonate">
                         <q-icon class="q-mr-xs" name="la la-donate" size="24px" />
                         Поддержать проект
                     </q-btn>
@@ -67,11 +65,11 @@
                         </q-btn>
                     </div>
 
-                    <div class="row justify-center q-mt-md">
+                    <!--div class="row justify-center q-mt-md">
                         <div class="q-px-sm clickable" style="font-size: 80%" @click="openDonate">
                             Помочь проекту можно в любое время
                         </div>
-                    </div>
+                    </div-->
                 </div>
             </div>
         </q-dialog>
@@ -131,13 +129,17 @@ class ReaderDialogs {
 
     async init() {
         await this.showWhatsNew();
-        //await this.showDonation();
+        await this.showDonation();
+    }
+
+    get donation() {
+        return this.$store.state.config.donation;
     }
 
     loadSettings() {
         const settings = this.settings;
         this.showWhatsNewDialog = settings.showWhatsNewDialog;
-        this.showDonationDialog = settings.showDonationDialog;
+        this.showDonationDialog = true;
     }
 
     async showWhatsNew() {
@@ -152,7 +154,7 @@ class ReaderDialogs {
     }
 
     async showDonation() {
-        if ((this.mode == 'omnireader' || this.mode == 'liberama') && this.showDonationDialog && this.donationNextPopup <= Date.now()) {
+        if (!!this.donation && (this.mode == 'omnireader' || this.mode == 'liberama') && this.showDonationDialog && this.donationNextPopup <= Date.now()) {
             await utils.sleep(3000);
             this.donationVisible = true;
         }
@@ -173,13 +175,9 @@ class ReaderDialogs {
         this.commit('reader/setDonationNextPopup', Date.now() + rstore.dayMs*remindAfter);
     }
 
-    makeDonation() {
-        utils.makeDonation();
-        this.donationDialogRemindLater();
-    }
-
     openDonate() {
-        this.$emit('donate-toggle');
+        this.$emit('do-action', {action: 'donate'});
+        this.donationDialogRemindLater();
     }
 
     async copyLink(link) {

@@ -2,6 +2,8 @@ const path = require('path');
 const DefinePlugin = require('webpack').DefinePlugin;
 const { VueLoaderPlugin } = require('vue-loader');
 
+const appdir = require('./appdir');
+
 const clientDir = path.resolve(__dirname, '../client');
 
 module.exports = {
@@ -11,9 +13,12 @@ module.exports = {
             //vue: '@vue/compat'
         }
     },
-    entry: [`${clientDir}/main.js`],
+    entry: {
+        main: [`${clientDir}/main.js`],
+        sw: `${clientDir}/sw-register.js`,
+    },
     output: {
-        publicPath: '/app/',
+        publicPath: `/${appdir}/`,
         clean: true
     },
 
@@ -42,7 +47,7 @@ module.exports = {
                 }
             },
             {
-                test: /\.(gif|png)$/,
+                test: /\.(gif|png|svg)$/,
                 type: 'asset/inline',
             },
             {

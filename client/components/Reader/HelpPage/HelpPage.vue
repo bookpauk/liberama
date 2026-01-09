@@ -30,6 +30,7 @@
 <script>
 //-----------------------------------------------------------------------------
 import vueComponent from '../../vueComponent.js';
+import _ from 'lodash';
 
 import Window from '../../share/Window.vue';
 import CommonHelpPage from './CommonHelpPage/CommonHelpPage.vue';
@@ -46,12 +47,11 @@ const pages = {
     'DonateHelpPage': DonateHelpPage,
 };
 
-const tabs = [
+const basicTabs = [
     ['CommonHelpPage', 'Общее'],
     ['MouseHelpPage', 'Мышь/тачскрин'],
     ['HotkeysHelpPage', 'Клавиатура'],
     ['VersionHistoryPage', 'История версий'],
-    //['DonateHelpPage', 'Помочь проекту'],
 ];
 
 const componentOptions = {
@@ -62,8 +62,18 @@ class HelpPage {
 
     selectedTab = 'CommonHelpPage';
 
+    created() {
+        this.tabs = _.cloneDeep(basicTabs);
+        if (this.donation)
+            this.tabs.push(['DonateHelpPage', 'Помочь проекту']);
+    }
+
     close() {
         this.$emit('do-action', {action: 'help'});
+    }
+
+    get donation() {
+        return this.$store.state.config.donation;
     }
 
     get activePage() {
@@ -74,13 +84,14 @@ class HelpPage {
 
     get buttons() {
         let result = [];
-        for (const tab of tabs)
+        for (const tab of this.tabs)
             result.push({label: tab[1], value: tab[0]});
         return result;
     }
 
     activateDonateHelpPage() {
-        this.selectedTab = 'DonateHelpPage';
+        if (this.donation)
+            this.selectedTab = 'DonateHelpPage';
     }
 
     activateVersionHistoryHelpPage() {

@@ -168,7 +168,7 @@ class ReaderWorker {
             //finish
             const finishFilename = path.basename(compFilename);
 
-            const result = {path: `/tmp/${finishFilename}`, size: stat.size};
+            const result = {path: `${this.config.rootPathStatic}/tmp/${finishFilename}`, size: stat.size};
             if (downloadSize >= 0)
                 result.downloadSize = downloadSize;
 
