@@ -154,9 +154,6 @@ class ReaderDialogs {
     }
 
     async showDonation() {
-console.log(!!this.donation);
-console.log(this.mode == 'omnireader' || this.mode == 'liberama');
-console.log(this.donationNextPopup <= Date.now());
         if (!!this.donation && (this.mode == 'omnireader' || this.mode == 'liberama') && this.showDonationDialog && this.donationNextPopup <= Date.now()) {
             await utils.sleep(3000);
             this.donationVisible = true;
