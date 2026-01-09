@@ -48,13 +48,6 @@ module.exports = merge(baseWpConfig, {
         ]
     },
     plugins: [
-        new GenerateSW({
-            cacheId: 'liberama',
-            //swDest: `${publicDir}/service-worker.js`,
-            navigateFallback: '/index.html',
-            navigateFallbackDenylist: [new RegExp('^/api'), new RegExp('^/ws'), new RegExp('^/tmp'),],
-            skipWaiting: true,
-        }),
         new MiniCssExtractPlugin({
             filename: "[name].[contenthash].css"
         }),
@@ -64,6 +57,13 @@ module.exports = merge(baseWpConfig, {
         }),
         new CopyWebpackPlugin({patterns: 
             [{context: `${clientDir}/assets`, from: `${clientDir}/assets/*`, to: `${publicDir}/` }]
+        }),
+        new GenerateSW({
+            cacheId: 'liberama',
+            //swDest: `${publicDir}/service-worker.js`,
+            navigateFallback: '/index.html',
+            navigateFallbackDenylist: [new RegExp('^/api'), new RegExp('^/ws'), new RegExp('^/tmp'),],
+            skipWaiting: true,
         }),
     ]
 });
