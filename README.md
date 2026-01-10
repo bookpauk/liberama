@@ -109,6 +109,11 @@ Options:
             // Хост, порт сервера
             "ip": "0.0.0.0",
             "port": "44080"
+
+            //использовать протокол https
+            isHttps: true,
+            //использовать для https файлы server.key и server.crt из рабочей директории
+            keysFile: 'server',
         }
     ],
 
