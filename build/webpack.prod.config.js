@@ -60,7 +60,7 @@ module.exports = merge(baseWpConfig, {
         }),
         new GenerateSW({
             cacheId: 'liberama',
-            swDest: `${publicDir}/sw.js`,
+            swDest: `${publicDir}/service-worker.js`,
             navigateFallback: '/index.html',
             navigateFallbackDenylist: [new RegExp('^/api'), new RegExp('^/ws'), new RegExp('^/tmp'),],
             skipWaiting: true,
