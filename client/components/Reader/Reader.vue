@@ -583,19 +583,25 @@ class Reader {
     }
 
     async checkNewVersionAvailable() {
-        if (this.showNeedUpdateNotify) {
-            const config = await miscApi.loadConfig();
-            this.commit('config/setConfig', config);
+        const config = await miscApi.loadConfig();
+        this.commit('config/setConfig', config);
 
-            let againMes = '';
-            if (this.isFirstNeedUpdateNotify) {
-                againMes = ' еще один раз';
+        if (this.version != this.clientVersion) {
+
+            // Разрегистрируем свои SW, чтобы нормально обновиться вместе с (новым) SW
+            if (window.unregisterLiberamaSW)
+                await window.unregisterLiberamaSW();
+
+            if (this.showNeedUpdateNotify) {
+                let againMes = '';
+                if (this.isFirstNeedUpdateNotify) {
+                    againMes = ' еще один раз';
+                }
+
+                    this.$root.notify.info(`Вышла новая версия (v${this.version}) читалки.<br>Пожалуйста, обновите страницу${againMes}.`, 'Обновление');
+
+                this.isFirstNeedUpdateNotify = false;
             }
-
-            if (this.version != this.clientVersion)
-                this.$root.notify.info(`Вышла новая версия (v${this.version}) читалки.<br>Пожалуйста, обновите страницу${againMes}.`, 'Обновление');
-
-            this.isFirstNeedUpdateNotify = false;
         }
     }
 
