@@ -599,10 +599,10 @@ class Reader {
                 }
 
                 this.$root.notify.info(`Вышла новая версия (v${this.version}) читалки.<br>Пожалуйста, обновите страницу${againMes}.`, 'Обновление');
-
-                this.isFirstNeedUpdateNotify = false;
             }
         }
+
+        this.isFirstNeedUpdateNotify = false;
     }
 
     async checkBuc() {
