@@ -292,11 +292,6 @@ function getLibsDefaults(mode = 'reader') {
                 {l: 'http://fantasy-worlds.org', c: 'Миры Фэнтези'},
             ]}
         );
-        result.groups.unshift(
-            {r: 'http://flibusta.is', s: 'http://flibusta.is', list: [
-                {l: 'http://flibusta.is', c: 'Флибуста | Книжное братство'},
-            ]}
-        );
     } else if (mode === 'omnireader') {
         result.groups.unshift(
             {r: 'https://lib.omnireader.ru', s: 'https://lib.omnireader.ru', list: [
