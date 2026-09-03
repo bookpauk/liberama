@@ -1,11 +1,10 @@
 const oldSW = [//и старые и текущий SW должны быть здесь
-    'sw.js', //убрать после 2026-04-01
-    'service-worker.js', //убрать после 2026-04-01
+    'sw.js', //убрать после 2027-01-01
+    'service-worker.js', //убрать после 2027-01-01
+    'sw-liberama.js',
 ];
 
-// 2026-02-01 переименовать в уникальное имя (напр. sw-liberama-1.js), чтобы не было конфликтов при встраивании через reverse proxy
-// не забыть добавить в oldSW
-const currentSW = `service-worker.js`;
+const currentSW = `sw-liberama.js`;
 
 // функция используется также в Reader.checkNewVersionAvailable
 window.unregisterLiberamaSW = async() => {

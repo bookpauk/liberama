@@ -1,5 +1,18 @@
 export const versionHistory = [
 {
+    version: '1.3.3',
+    releaseDate: '2026-09-03',
+    showUntil: '2026-09-02',
+    content:
+`
+<ul>
+    <li>поправки в связи с окончательным переездом на liberama.top</li>
+</ul>
+
+`
+},
+
+{
     version: '1.3.2',
     releaseDate: '2026-01-10',
     showUntil: '2026-01-16',

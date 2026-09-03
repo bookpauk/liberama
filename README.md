@@ -2,7 +2,7 @@
 
 Браузерная онлайн-читалка книг.
 
-Выглядит соледующим образом: <img src="https://omnireader.ru/favicon.ico" width="14px"/>[OmniReader](https://omnireader.ru)
+Выглядит следующим образом: <img src="https://liberama.top/favicon.ico" width="14px"/>[Liberama Reader](https://liberama.top)
 
 ![](docs/assets/face.jpg)
 ![](docs/assets/reader.jpg)

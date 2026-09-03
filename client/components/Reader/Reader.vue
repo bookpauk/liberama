@@ -598,11 +598,11 @@ class Reader {
                     againMes = ' еще один раз';
                 }
 
-                    this.$root.notify.info(`Вышла новая версия (v${this.version}) читалки.<br>Пожалуйста, обновите страницу${againMes}.`, 'Обновление');
-
-                this.isFirstNeedUpdateNotify = false;
+                this.$root.notify.info(`Вышла новая версия (v${this.version}) читалки.<br>Пожалуйста, обновите страницу${againMes}.`, 'Обновление');
             }
         }
+
+        this.isFirstNeedUpdateNotify = false;
     }
 
     async checkBuc() {
